@@ -34,7 +34,7 @@ def main() -> None:
     host = os.getenv("HOST", settings.HOST)
 
     if transport in ("sse", "http"):
-        mcp.run(transport="sse", host=host, port=port)
+        mcp.run(transport="sse")
     else:
         mcp.run(transport="stdio")
 

@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir poetry
 COPY pyproject.toml README.md ./
 RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --no-root
 
+COPY mcp_server ./mcp_server
 COPY pipelines ./pipelines
 COPY data ./data
 
