@@ -1,0 +1,33 @@
+name: Semantic Evals & Non-Regression
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Tous les jours à 2h du matin
+  workflow_dispatch:
+
+jobs:
+  run-evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Ingest KB locally for tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: poetry run ingest --kb-dir data/kb --db-path data/kuzu_db
+
+      - name: Run DeepEval Semantic Tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: poetry run deepeval test run tests/evals/deepeval/test_semantic_regression.py

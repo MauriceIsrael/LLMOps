@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "llmops-graphrag-mcp"
+version = "0.1.0"
+description = "Plateforme LLMOps Neuro-Symbolique d'Architecture (GraphRAG + Kùzu DB + FastMCP + DeepEval)"
+authors = ["LLMOps Team <admin@llmops.local>"]
+readme = "README.md"
+packages = [
+    { include = "mcp_server" },
+    { include = "pipelines" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastmcp = "^0.4.1"
+kuzu = ">=0.6.0"
+llama-index-core = "^0.11.0"
+llama-index-llms-openai = "^0.2.0"
+llama-index-embeddings-openai = "^0.2.0"
+llama-index-graph-stores-kuzu = "^0.3.0"
+pydantic = "^2.7.0"
+pydantic-settings = "^2.2.0"
+python-dotenv = "^1.0.1"
+typer = "^0.12.0"
+rich = "^13.7.0"
+pyyaml = "^6.0.1"
+deepeval = ">=1.4.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+ruff = "^0.4.0"
+mypy = "^1.9.0"
+
+[tool.poetry.scripts]
+ingest = "pipelines.cli:main"
+
+mcp-server = "mcp_server.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+asyncio_mode = "auto"

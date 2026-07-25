@@ -1,0 +1,31 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments & Poetry
+.venv/
+env/
+venv/
+ENV/
+
+# Kùzu DB & local storage
+data/kuzu_db/
+*.kuzu
+
+# DeepEval / Promptfoo caches
+.deepeval/
+.promptfoo/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/

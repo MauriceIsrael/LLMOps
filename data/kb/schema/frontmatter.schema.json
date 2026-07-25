@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Architecture knowledge asset front matter",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "type",
+    "status",
+    "confidence",
+    "phase",
+    "domain",
+    "owner",
+    "last_reviewed"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^(P-\\d{3}|ADR-\\d{4}|PAT-\\d{3}|QST-[a-z0-9-]+|EST-[a-z0-9-]+|RSK-[a-z0-9-]+|TPL-[a-z0-9-]+)$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5
+    },
+    "type": {
+      "enum": [
+        "principle",
+        "decision",
+        "pattern",
+        "questionnaire",
+        "estimate",
+        "risk-register",
+        "template",
+        "project"
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "active",
+        "superseded",
+        "deprecated",
+        "proposed"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "verified",
+        "vendor-stated",
+        "assumed"
+      ]
+    },
+    "phase": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "BID",
+          "BUILD",
+          "RUN"
+        ]
+      },
+      "minItems": 1
+    },
+    "domain": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "network-automation",
+          "observability",
+          "cloud-platform",
+          "service-management",
+          "ai-assistance",
+          "security",
+          "mobile-core",
+          "mcx",
+          "transport",
+          "delivery"
+        ]
+      },
+      "minItems": 1
+    },
+    "owner": {
+      "type": "string"
+    },
+    "last_reviewed": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "supersedes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "superseded_by": {
+      "type": "string"
+    },
+    "related": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "applicability": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "qa_001",
+    "input": "Pourquoi l'architecture évite-t-elle de chunker les documents d'architecture pour du RAG classique ?",
+    "expected_output": "Le chunker d'un dossier de conception détruit la structure donnant du sens au contenu, comme séparer un principe de sa clause de vérification ou une décision de ses alternatives rejetées.",
+    "context": ["SPEC.md"]
+  },
+  {
+    "id": "qa_002",
+    "input": "Quels sont les outils obligatoires exposés par le serveur MCP d'architecture ?",
+    "expected_output": "list_assets, get_asset, search_assets, get_principles_for, get_decision_trail, list_open_questions, get_estimate, get_risks_for, render_view, draft_asset.",
+    "context": ["SPEC.md"]
+  }
+]

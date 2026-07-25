@@ -1,0 +1,122 @@
+id: QST-service-management
+title: Service management platform — integration framing
+type: questionnaire
+status: active
+confidence: verified
+phase: [BID, BUILD]
+domain: [service-management]
+owner: core-owner-architecture
+last_reviewed: 2026-07-25
+intro: >-
+  Framing questionnaire for the ITSM, order management and inventory products. Determines integration scope and mastership arbitration.
+groups:
+  - name: scope
+    questions:
+      - ref: SER-01
+        question: >-
+          Which product releases are contracted, which are already in production at the customer, and what is the upgrade cadence?
+        why_it_matters: >-
+          Capability varies materially by release; assumptions here are a classic source of overrun.
+        if_negative: >-
+          Re-scope the integration against the actual release.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: SER-02
+        question: >-
+          Is an event management entitlement present or planned, and if so where should correlation live?
+        why_it_matters: >-
+          Two correlation engines produce two versions of the truth during an incident.
+        if_negative: >-
+          Decide one engine explicitly and make the other a forwarder.
+        answer: null
+        answered_on: null
+        source: null
+  - name: inventory
+    questions:
+      - ref: SER-03
+        question: >-
+          Which resource classes does the inventory product model out of the box, and can it hold clusters, applications and vendor-managed nodes?
+        why_it_matters: >-
+          Determines whether it can be the master for the service and resource model.
+        if_negative: >-
+          Keep the network source of truth as master for a longer period.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: SER-04
+        question: >-
+          Which integration patterns are supported for feeding inventory from an external source of truth, and at which frequency?
+        why_it_matters: >-
+          Drives the synchronization design and its latency.
+        if_negative: >-
+          Synchronization becomes batch and stale; adjust expectations on the configuration database.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: SER-05
+        question: >-
+          For each shared attribute, which system is the writer, and is the proposed arbitration acceptable to the platform owner?
+        why_it_matters: >-
+          This is the single most contested point of the integration.
+        if_negative: >-
+          Escalate before build; an unresolved arbitration guarantees rework.
+        answer: null
+        answered_on: null
+        source: null
+  - name: orders
+    questions:
+      - ref: SER-06
+        question: >-
+          How does order management issue fulfilment tasks to an external execution system, and which callback model is expected?
+        why_it_matters: >-
+          Defines the contract between the platform and the automation chain.
+        if_negative: >-
+          Custom integration; add development effort.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: SER-07
+        question: >-
+          Can an approved change release an external automation job through the API, including for emergency changes at night?
+        why_it_matters: >-
+          Determines whether approval can live in the customer's own governance.
+        if_negative: >-
+          Approval stays in the orchestration platform; acceptable but less auditable for the customer.
+        answer: null
+        answered_on: null
+        source: null
+  - name: boundary
+    questions:
+      - ref: SER-08
+        question: >-
+          Which network discovery and activation capabilities exist in the contracted releases, and does the customer intend to use them?
+        why_it_matters: >-
+          Overlaps the automation chain and reproduces the dual-master problem if left implicit.
+        if_negative: >-
+          Agree a boundary in writing before integration starts.
+        answer: null
+        answered_on: null
+        source: null
+  - name: sim
+    questions:
+      - ref: SER-09
+        question: >-
+          Which SIM and eSIM lifecycle capabilities are available out of the box, and which require configuration or a partner application?
+        why_it_matters: >-
+          Out-of-the-box claims in this area are routinely overstated.
+        if_negative: >-
+          Budget the integration with the provisioning platform explicitly.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: SER-10
+        question: >-
+          Which remote provisioning platform is planned, and which system masters profile state?
+        why_it_matters: >-
+          Avoids a second mastership dispute on subscriber data.
+        if_negative: >-
+          Define it before the ordering workflow is designed.
+        answer: null
+        answered_on: null
+        source: null

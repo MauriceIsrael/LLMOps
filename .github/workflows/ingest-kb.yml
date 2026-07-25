@@ -1,0 +1,35 @@
+name: KB Ingestion & Graph Update
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'data/kb/**'
+
+jobs:
+  update-graph-db:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Run KB Ingestion Pipeline
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: poetry run ingest --kb-dir data/kb --db-path data/kuzu_db
+
+      - name: Upload Kùzu DB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kuzu-db-artifact
+          path: data/kuzu_db

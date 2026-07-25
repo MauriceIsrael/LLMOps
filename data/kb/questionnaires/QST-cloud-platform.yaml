@@ -1,0 +1,120 @@
+id: QST-cloud-platform
+title: Container platform, observability and assistant — framing
+type: questionnaire
+status: active
+confidence: verified
+phase: [BID, BUILD]
+domain: [cloud-platform, observability, ai-assistance]
+owner: core-owner-architecture
+last_reviewed: 2026-07-25
+intro: >-
+  Framing questionnaire for the container platform vendor, its observability product and the optional assistant layer.
+groups:
+  - name: entitlements
+    questions:
+      - ref: CLO-01
+        question: >-
+          Which subscriptions are contracted for the platform, the observability product and the assistant components?
+        why_it_matters: >-
+          Determines whether the split observability design is free or adds a licence line.
+        if_negative: >-
+          Reconsider the split; a single analytics platform with index separation may be preferable.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: CLO-02
+        question: >-
+          Is the assistant supported independently of the observability product, and is a reference architecture a condition of support?
+        why_it_matters: >-
+          Avoids an implicit product dependency being discovered late.
+        if_negative: >-
+          Re-plan the assistant lot or accept the additional product.
+        answer: null
+        answered_on: null
+        source: null
+  - name: observability
+    questions:
+      - ref: CLO-03
+        question: >-
+          Which infrastructure signals are collected natively, and which require the collector already deployed for the service plane?
+        why_it_matters: >-
+          Prevents double instrumentation.
+        if_negative: >-
+          Rationalize collection before deployment; retro-fitting is expensive.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: CLO-04
+        question: >-
+          How are health and alert events exported towards an external system?
+        why_it_matters: >-
+          This is the bridge that keeps correlation single-engine.
+        if_negative: >-
+          The split fragments diagnosis; reconsider the two-plane design.
+        answer: null
+        answered_on: null
+        source: null
+  - name: inference
+    questions:
+      - ref: CLO-05
+        question: >-
+          Which models are validated with the assistant, and which are usable on general-purpose processors with interactive latency?
+        why_it_matters: >-
+          This single answer determines whether the assistant is viable in production without acceleration hardware.
+        if_negative: >-
+          Keep the assistant to engineering phases and defer the production profile.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: CLO-06
+        question: >-
+          What are the memory and core recommendations per concurrent user?
+        why_it_matters: >-
+          Sizing of the inference node pool.
+        if_negative: >-
+          Under-sized pool; latency degrades sharply under concurrency.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: CLO-07
+        question: >-
+          What is the procedure for distributing images and model weights into a disconnected environment?
+        why_it_matters: >-
+          Air-gapped deployment is a hard requirement in accredited contexts.
+        if_negative: >-
+          The assistant cannot be deployed in the accredited zone.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: CLO-08
+        question: >-
+          Is tool-calling reliability characterized for smaller models?
+        why_it_matters: >-
+          A model that fabricates tool arguments produces confident wrong answers about system state.
+        if_negative: >-
+          Restrict to validated models and set operator expectations explicitly.
+        answer: null
+        answered_on: null
+        source: null
+  - name: agents
+    questions:
+      - ref: CLO-09
+        question: >-
+          Which authentication modes are supported for a custom context server, and how is user identity propagated?
+        why_it_matters: >-
+          Decides whether the assistant inherits user permissions or needs its own authorization layer.
+        if_negative: >-
+          Implement per-user authorization in the custom server and budget it.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: CLO-10
+        question: >-
+          Is deploying agent definitions and prompts through the GitOps engine a supported pattern?
+        why_it_matters: >-
+          Required to treat assistant configuration as code.
+        if_negative: >-
+          Manage prompts manually with a documented change process; weaker but workable.
+        answer: null
+        answered_on: null
+        source: null

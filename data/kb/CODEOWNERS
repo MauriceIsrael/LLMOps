@@ -1,0 +1,16 @@
+# Core assets require a core owner review. Replace the placeholders with GitHub handles.
+
+/principles/        @core-owner-architecture
+/decisions/         @core-owner-architecture
+/patterns/          @core-owner-architecture
+/questionnaires/    @core-owner-architecture
+/estimates/         @core-owner-delivery
+/risks/             @core-owner-delivery
+/views/             @core-owner-architecture
+/templates/         @core-owner-architecture
+/mcp/               @core-owner-automation
+/schema/            @maintainers
+/.github/           @maintainers
+
+# Engagement instances are owned by their engagement architect.
+/projects/          @engagement-architects

@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  ingestion-pipeline:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.pipeline
+    volumes:
+      - kuzu_data:/app/data/kuzu_db
+      - ../data/kb:/app/data/kb
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+  mcp-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.mcp
+    depends_on:
+      ingestion-pipeline:
+        condition: service_completed_successfully
+    ports:
+      - "8000:8000"
+    volumes:
+      - kuzu_data:/app/data/kuzu_db
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLMOPS_TRANSPORT=sse
+      - PORT=8000
+    restart: unless-stopped
+
+volumes:
+  kuzu_data:

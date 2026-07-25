@@ -1,0 +1,182 @@
+id: QST-core-ems
+title: Mobile core element manager — northbound capability audit
+type: questionnaire
+status: active
+confidence: verified
+phase: [BID, BUILD]
+domain: [mobile-core, network-automation]
+owner: core-owner-architecture
+last_reviewed: 2026-07-25
+intro: >-
+  Gating audit for any engagement where a vendor element manager owns core configuration. Run it in the framing work package, before scope is committed.
+groups:
+  - name: interfaces
+    questions:
+      - ref: COR-01
+        question: >-
+          Which northbound interfaces are enabled on the deployed version, in which forms, and which depend on separate licensing options?
+        why_it_matters: >-
+          Determines what can be automated at all, and whether a commercial discussion is needed.
+        if_negative: >-
+          Core automation scope shrinks to whatever remains; re-plan the passive loop work package.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-02
+        question: >-
+          Is API documentation accessible to the project and is a test environment available?
+        why_it_matters: >-
+          Without either, connector development is guesswork and cannot be estimated.
+        if_negative: >-
+          Add significant contingency to the connector development, or descope.
+        answer: null
+        answered_on: null
+        source: null
+  - name: configuration
+    questions:
+      - ref: COR-03
+        question: >-
+          Can the full configuration of a node be exported by API, at which granularity and in which format?
+        why_it_matters: >-
+          This is the backup capability for the domain.
+        if_negative: >-
+          No backup for the core; drift and compliance for that domain become impossible.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-04
+        question: >-
+          Can a pre-validated delta be imported or applied by API, with a preview and a cancellation mechanism?
+        why_it_matters: >-
+          This is the fallback plan capability.
+        if_negative: >-
+          Recovery on the core stays manual; the closed loop cannot cover it.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-05
+        question: >-
+          Can current configuration be read by API for comparison without a full export?
+        why_it_matters: >-
+          Determines how cheap drift detection can be.
+        if_negative: >-
+          Drift detection relies on full exports, with a cost and latency penalty.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-06
+        question: >-
+          How does the element manager handle synchronization when a change is applied through the interface?
+        why_it_matters: >-
+          Reveals the risk of unwanted resynchronization and of dual mastership.
+        if_negative: >-
+          Every automated change risks being reverted or flagged by the element manager.
+        answer: null
+        answered_on: null
+        source: null
+  - name: telemetry
+    questions:
+      - ref: COR-07
+        question: >-
+          Which alarm interface is available and how does one subscribe to real-time streams?
+        why_it_matters: >-
+          This is the trigger source for the closed loop on the core.
+        if_negative: >-
+          The core cannot participate in event-driven remediation.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-08
+        question: >-
+          Do alarms carry stable identifiers usable for automatic mapping to actions?
+        why_it_matters: >-
+          Without stable identifiers, rule mapping is fragile and will break on upgrade.
+        if_negative: >-
+          Mapping must be maintained manually and re-tested at every release.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-09
+        question: >-
+          Can alarm history be queried by API?
+        why_it_matters: >-
+          Required for the batch layer of shadow validation.
+        if_negative: >-
+          Rules can only be validated on live traffic, lengthening the observation window.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-10
+        question: >-
+          Is the health of the vendor platform itself readable through an interface, or only through its user interface?
+        why_it_matters: >-
+          Determines whether the infrastructure plane has a blind spot on the core.
+        if_negative: >-
+          Declare the gap explicitly and compensate with service-level indicators.
+        answer: null
+        answered_on: null
+        source: null
+  - name: boundary
+    questions:
+      - ref: COR-11
+        question: >-
+          Is it permitted and supported to install any third-party agent or collector on the vendor infrastructure?
+        why_it_matters: >-
+          Decides whether observability of that domain is agent-based or interface-based.
+        if_negative: >-
+          Interface-based collection only; plan the gap and the polling load.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-12
+        question: >-
+          Can a least-privilege service account be created, restricted to export, import, read and alarm subscription?
+        why_it_matters: >-
+          Least privilege on the most sensitive domain.
+        if_negative: >-
+          A broader account is used; compensating controls and monitoring are required.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-13
+        question: >-
+          Are interface calls logged on the vendor side?
+        why_it_matters: >-
+          Completes the audit trail for actions on the core.
+        if_negative: >-
+          The audit trail depends solely on the automation chain's own logs.
+        answer: null
+        answered_on: null
+        source: null
+  - name: support
+    questions:
+      - ref: COR-14
+        question: >-
+          Is use of the northbound interfaces by a third-party tool covered by standard support?
+        why_it_matters: >-
+          Protects the engagement from a supportability dispute during an incident.
+        if_negative: >-
+          Escalate commercially before build; do not proceed on an assumption.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-15
+        question: >-
+          Are there rate or load limits to respect?
+        why_it_matters: >-
+          Sizing of backup and drift cycles depends on it.
+        if_negative: >-
+          Backup cadence must be reduced, lengthening drift detection intervals.
+        answer: null
+        answered_on: null
+        source: null
+      - ref: COR-16
+        question: >-
+          Is a pre-production environment or a testbed slot available to validate playbooks and fallback plans?
+        why_it_matters: >-
+          Without it, recovery actions are first executed in production.
+        if_negative: >-
+          This is a hard blocker for the active loop on the core; raise as a risk immediately.
+        answer: null
+        answered_on: null
+        source: null

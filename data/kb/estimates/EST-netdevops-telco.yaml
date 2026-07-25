@@ -1,0 +1,79 @@
+id: EST-netdevops-telco
+title: Effort model — network automation chain for a mission-critical telecom system
+type: estimate
+status: active
+confidence: assumed
+phase: [BID]
+domain: [delivery, network-automation]
+owner: core-owner-delivery
+last_reviewed: 2026-07-25
+unit: man-days
+basis: >-
+  Integration effort only. Excludes hosting infrastructure, platform builds and
+  vendor product installation. Assumes engineers comfortable with Python,
+  Ansible and Kubernetes but new to the specific products.
+confidence_note: >-
+  Ranges are derived from one engagement's design phase and have NOT yet been
+  confirmed by actuals. Treat as an order of magnitude until the first harvest
+  records real figures in `actuals`.
+
+work_packages:
+  - id: WP0
+    name: Framing and audits
+    low: 12
+    high: 18
+    exit: Scope decision on vendor and service management capabilities
+    notes: Gating. The core element manager audit determines WP2 scope.
+  - id: WP1
+    name: Foundation
+    low: 22
+    high: 34
+    exit: Management cluster in service, source of truth populated
+  - id: WP2
+    name: Passive loop (backup, drift, compliance)
+    low: 28
+    high: 48
+    exit: Backups, drift and compliance across all domains
+  - id: WP3
+    name: Active loop and service management integration
+    low: 24
+    high: 40
+    exit: Restore and fallback plans on approval; orders and incidents integrated
+  - id: WP4
+    name: Supervised closed loop and shadow pipeline
+    low: 26
+    high: 42
+    exit: First event classes promoted after measured shadow evidence
+  - id: WP5
+    name: Industrialization
+    low: 14
+    high: 24
+    exit: Break-glass drilled, operations trained, security review passed
+  - id: WP6
+    name: AI assistance (optional)
+    low: 16
+    high: 25
+    exit: Assistant in service, latency measured, production decision taken
+
+totals:
+  core: {low: 126, high: 206}
+  with_optional: {low: 142, high: 231}
+
+variance_drivers:
+  - driver: Vendor northbound interface capability
+    effect: Can halve or double WP2; audited in WP0 before commitment
+    weight: high
+  - driver: Quality of existing inventory data
+    effect: Routinely a factor of two on WP1 population
+    weight: high
+  - driver: Number of vendor families in the transport domain
+    effect: Each additional family adds templates and protocol quirks
+    weight: medium
+  - driver: Maturity of the customer's service management platform team
+    effect: Drives WP3 elapsed time more than effort
+    weight: medium
+  - driver: Availability of a vendor testbed slot
+    effect: Without it, active loop validation cannot proceed safely
+    weight: high
+
+actuals: []   # filled at each harvest: {engagement, wp, planned, actual, comment}

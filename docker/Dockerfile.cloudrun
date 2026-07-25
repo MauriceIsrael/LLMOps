@@ -1,0 +1,29 @@
+# Dockerfile optimisé pour le déploiement GCP Cloud Run
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Dépendances système
+RUN apt-get update && apt-get install -y --no-install-recommends curl build-essential && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir poetry
+
+# Installation des dépendances Python
+COPY pyproject.toml README.md ./
+RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --no-root
+
+# Copie du code source et des données
+COPY mcp_server ./mcp_server
+COPY pipelines ./pipelines
+COPY data ./data
+
+# Pré-ingestion de la base de connaissances si kuzu_db n'est pas déjà présente dans data/
+RUN poetry run ingest --kb-dir data/kb --db-path data/kuzu_db || true
+
+EXPOSE 8000
+
+# Par défaut, Cloud Run injecte $PORT (8080 par défaut sur GCP, ou 8000)
+ENV LLMOPS_TRANSPORT=sse
+ENV PORT=8000
+ENV HOST=0.0.0.0
+
+CMD ["poetry", "run", "mcp-server"]

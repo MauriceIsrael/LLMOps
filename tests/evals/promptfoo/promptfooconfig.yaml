@@ -1,0 +1,22 @@
+description: "Évaluation de non-régression sémantique des réponses du FastMCP"
+
+prompts:
+  - "Tu es un ingénieur d'architecture. En utilisant les outils FastMCP, réponds à : {{input}}"
+
+providers:
+  - id: openai:gpt-4o-mini
+
+tests:
+  - vars:
+      input: "Pourquoi l'architecture évite-t-elle de chunker les documents pour du RAG classique ?"
+    assert:
+      - type: contains
+        value: "détruit la structure"
+      - type: llm-rubric
+        value: "La réponse explique que le chunking détruit la structure et sépare un principe de sa clause de vérification."
+
+  - vars:
+      input: "Quel est l'outil MCP permettant de connaître l'historique d'une décision ?"
+    assert:
+      - type: contains
+        value: "get_decision_trail"

@@ -1,0 +1,84 @@
+id: RSK-netdevops-telco
+title: Risk register — network automation for mission-critical telecom
+type: risk-register
+status: active
+confidence: verified
+phase: [BID, BUILD, RUN]
+domain: [delivery, network-automation, observability, ai-assistance]
+owner: core-owner-delivery
+last_reviewed: 2026-07-25
+
+risks:
+  - id: R-01
+    risk: Vendor northbound capabilities insufficient for export, import or read
+    impact: Automatable scope on the core shrinks
+    likelihood: medium
+    mitigation: Audit in the framing work package as a gating decision; fall back to available capabilities
+    owner: engagement-architect
+    materialized_in: []
+  - id: R-02
+    risk: Platform health not machine-readable on vendor infrastructure
+    impact: Observability blind spot on the core platform
+    likelihood: medium
+    mitigation: Establish during the audit; declare the gap and compensate with service indicators
+    materialized_in: []
+  - id: R-03
+    risk: Unresolved mastership between inventory systems
+    impact: Circular synchronization, irreconcilable records, permanent reconciliation cost
+    likelihood: high
+    mitigation: Explicit arbitration validated with the platform owner during framing
+    materialized_in: []
+  - id: R-04
+    risk: Service management platform's own activation capability overlaps the chain
+    impact: Two activation engines, dual configuration master
+    likelihood: medium
+    mitigation: Written boundary agreed with the vendor before integration
+    materialized_in: []
+  - id: R-05
+    risk: Out-of-the-box SIM and eSIM coverage overestimated
+    impact: Unbudgeted integration with the provisioning platform
+    likelihood: high
+    mitigation: Verify against the purchased release; keep the flow out of the configuration chain
+    materialized_in: []
+  - id: R-06
+    risk: Poor quality of existing inventory data
+    impact: Effort overrun on source-of-truth population, commonly a factor of two
+    likelihood: high
+    mitigation: Data quality audit at the start of the foundation package; iterative import by perimeter
+    materialized_in: []
+  - id: R-07
+    risk: False positives in detection rules
+    impact: Loss of operator trust, unnecessary night-time solicitations
+    likelihood: high
+    mitigation: Systematic shadow mode with quantified exit criteria; history replay; storm protection
+    materialized_in: []
+  - id: R-08
+    risk: Fallback plans made stale by baseline evolution
+    impact: Failure at the moment of use
+    likelihood: high
+    mitigation: Versioned baseline binding, blocking validation check, periodic freshness report
+    materialized_in: []
+  - id: R-09
+    risk: Management platform unavailable during a major incident
+    impact: The recovery tooling is itself unavailable
+    likelihood: low
+    mitigation: Independent failure domain and drilled break-glass procedure
+    materialized_in: []
+  - id: R-10
+    risk: Inference latency unacceptable for first-line use
+    impact: Assistant unused in production, part of the optional lot wasted
+    likelihood: medium
+    mitigation: Measurement campaign before opening the production profile; hardware addition is a config change
+    materialized_in: []
+  - id: R-11
+    risk: Custom assistant interface bypasses per-user rights
+    impact: Operators obtain through chat what the dashboards deny them
+    likelihood: medium
+    mitigation: Per-user authorization implemented in the custom server and verified in the security review
+    materialized_in: []
+  - id: R-12
+    risk: Operator adoption fails
+    impact: Under-use of the chain, return to manual practice
+    likelihood: medium
+    mitigation: Simple buttons, training, operator involvement in designing forms and runbooks
+    materialized_in: []
