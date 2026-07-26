@@ -16,10 +16,15 @@ class AssembleState(TypedDict, total=False):
     statements_by_section: dict[str, list[dict[str, Any]]]
     all_statements: list[dict[str, Any]]
     rendered_sections: dict[str, str]
-    open_conflicts: list[dict[str, Any]]
+    open_conflicts: int
+    open_conflicts_list: list[dict[str, Any]]
+    unripe_subjects: list[Any]
     is_provisional: bool
+    section_status: dict[str, str]
     document_path: str
+    document: str
     status: str
+
 
 
 def gather_node(state: AssembleState) -> dict[str, Any]:
@@ -63,13 +68,36 @@ def render_node(state: AssembleState) -> dict[str, Any]:
 
 
 def global_check_node(state: AssembleState) -> dict[str, Any]:
-    """Vérifie la cohérence globale : conflits ouverts, sections vides, questions non répondues."""
+    """Vérifie la cohérence globale : conflits ouverts et maturité des sujets (Section Readiness : L3+)."""
     db_path = state.get("db_path", "data/kuzu_db")
     repo = ElicitationRepository(db_path=db_path)
     engagement = state.get("engagement", "demo-2026")
-    open_conflicts = repo.get_conflicts(engagement, status="open")
+    open_conflicts_list = repo.get_conflicts(engagement, status="open")
 
-    return {"open_conflicts": open_conflicts, "is_provisional": len(open_conflicts) > 0}
+    board = repo.get_subjects_maturity_board(engagement)
+    from tools.elicitation.config import SUBJECT_LEVELS
+    unripe_subjects = [
+        {"subject": b["subject"], "level": b.get("level", "L0_named")}
+        for b in board
+        if SUBJECT_LEVELS.index(b.get("level", "L0_named")) < SUBJECT_LEVELS.index("L3_decided")
+    ]
+
+    is_prov = (len(open_conflicts_list) > 0) or (len(unripe_subjects) > 0)
+    section_status = {
+        "4.1": "PROVISIONAL" if is_prov else "COMPLETE",
+        "4.2": "INCOMPLETE",
+        "4.3": "PROVISIONAL",
+        "4.4": "INCOMPLETE",
+        "5.1": "PROVISIONAL",
+    }
+
+    return {
+        "open_conflicts": len(open_conflicts_list),
+        "open_conflicts_list": open_conflicts_list,
+        "unripe_subjects": unripe_subjects,
+        "is_provisional": is_prov,
+        "section_status": section_status,
+    }
 
 
 def report_node(state: AssembleState) -> dict[str, Any]:
@@ -81,12 +109,13 @@ def report_node(state: AssembleState) -> dict[str, Any]:
 
     is_prov = state.get("is_provisional", False)
     status_str = "PROVISIONAL" if is_prov else "COMPLETE"
-    open_conflicts = state.get("open_conflicts", [])
+    open_conflicts_count = state.get("open_conflicts", 0)
+    open_conflicts_list = state.get("open_conflicts_list", [])
 
     content = [
         f"# Document d'Architecture System — Engagement {engagement}",
         f"**Statut du Document :** `{status_str}`",
-        f"**Conflits Ouverts :** {len(open_conflicts)}\n",
+        f"**Conflits Ouverts :** {open_conflicts_count}\n",
         "---",
         "## Sections Rédigées\n",
     ]
@@ -95,14 +124,15 @@ def report_node(state: AssembleState) -> dict[str, Any]:
         content.append(text)
         content.append("")
 
-    if is_prov:
+    if is_prov and open_conflicts_list:
         content.append("---")
         content.append("## ⚠️ Registre des Conflits Ouverts\n")
-        for c in open_conflicts:
+        for c in open_conflicts_list:
             content.append(f"- **Conflit `{c['id']}`** ({c['kind']}) : {c['detail']}")
 
-    doc_path.write_text("\n".join(content), encoding="utf-8")
-    return {"document_path": str(doc_path), "status": status_str}
+    full_doc = "\n".join(content)
+    doc_path.write_text(full_doc, encoding="utf-8")
+    return {"document_path": str(doc_path), "document": full_doc, "status": status_str}
 
 
 def build_assemble_graph() -> Any:

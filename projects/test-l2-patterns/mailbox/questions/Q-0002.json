@@ -1,0 +1,8 @@
+{
+  "id": "Q-0002",
+  "engagement": "test-l2-patterns",
+  "question": "Quelle est l'architecture de la section 5.1 (Architecture Calcul & Virtualisation) ?",
+  "why_it_matters": "La section 5.1 (Architecture Calcul & Virtualisation) ne contient aucun énoncé d'architecture.",
+  "expected_shape": "decision",
+  "routed_to": "mobile-core-architect"
+}

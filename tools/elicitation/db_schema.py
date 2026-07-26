@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-import kuzu
+from mcp_server.db.kuzu_client import KuzuClient
 
 
 class ElicitationSchemaInitializer:
@@ -10,9 +10,9 @@ class ElicitationSchemaInitializer:
 
     def __init__(self, db_path: str | Path = "data/kuzu_db") -> None:
         self.db_path = str(db_path)
-        Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
-        self.db = kuzu.Database(self.db_path)
-        self.conn = kuzu.Connection(self.db)
+        self.client = KuzuClient(db_path=self.db_path, read_only=False)
+        self.db = self.client.db
+        self.conn = self.client.conn
         self.init_schema()
 
     def init_schema(self) -> None:
@@ -31,10 +31,13 @@ class ElicitationSchemaInitializer:
                 CREATE NODE TABLE Subject (
                     name STRING,
                     definition STRING,
+                    level STRING,
+                    updated_at STRING,
                     PRIMARY KEY(name)
                 );
                 """
             )
+
 
         # 2. Table Statement
         if "Statement" not in table_names:
@@ -44,6 +47,7 @@ class ElicitationSchemaInitializer:
                     id STRING,
                     engagement STRING,
                     section STRING,
+                    subject STRING,
                     predicate STRING,
                     value STRING,
                     unit STRING,
@@ -57,6 +61,11 @@ class ElicitationSchemaInitializer:
                 );
                 """
             )
+        else:
+            try:
+                self.conn.execute("ALTER TABLE Statement ADD subject STRING DEFAULT '';")
+            except Exception:
+                pass
 
         # 3. Table Question
         if "Question" not in table_names:
@@ -87,14 +96,34 @@ class ElicitationSchemaInitializer:
                     kind STRING,
                     detail STRING,
                     status STRING,
+                    origin STRING,
                     resolution STRING,
                     arbitrated_by STRING,
                     PRIMARY KEY(id)
                 );
                 """
             )
+        else:
+            try:
+                self.conn.execute("ALTER TABLE Conflict ADD origin STRING DEFAULT 'declared';")
+            except Exception:
+                pass
 
-        # 5. Table Asset (si elle n'existe pas)
+        # 5. Table Uncertainty
+        if "Uncertainty" not in table_names:
+            self.conn.execute(
+                """
+                CREATE NODE TABLE Uncertainty (
+                    id STRING,
+                    engagement STRING,
+                    subject STRING,
+                    text STRING,
+                    PRIMARY KEY(id)
+                );
+                """
+            )
+
+        # 6. Table Asset (si elle n'existe pas)
         if "Asset" not in table_names:
             self.conn.execute(
                 """

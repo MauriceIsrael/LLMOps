@@ -2,6 +2,7 @@
 
 import hashlib
 from pathlib import Path
+from typing import Any
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -116,3 +117,20 @@ def render_arbitration_card(data: ArbitrationCardData) -> str:
         reason=data.reason,
         content_hash=sha,
     )
+
+
+def render_maturity_board(engagement: str, board_data: list[dict[str, Any]]) -> str:
+    """Rend le tableau de maturité (Maturity Board) de manière déterministe et idempotente."""
+    template = env.get_template("maturity_board.md.j2")
+    raw_content = template.render(
+        engagement=engagement,
+        board=board_data,
+        content_hash="000000",
+    )
+    sha = compute_sha(raw_content)
+    return template.render(
+        engagement=engagement,
+        board=board_data,
+        content_hash=sha,
+    )
+

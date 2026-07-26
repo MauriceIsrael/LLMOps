@@ -26,12 +26,19 @@ class ScanState(TypedDict, total=False):
 def load_frame_node(state: ScanState) -> dict[str, Any]:
     """Charge le cadre du projet depuis Kùzu DB et le FastMCP server."""
     engagement = state.get("engagement", "demo-2026")
-    sections = [
-        {"id": "5.1", "name": "Architecture Calcul & Virtualisation"},
-        {"id": "5.2", "name": "Architecture Stockage Management"},
-        {"id": "6.1", "name": "Réseau et Interconnexion Telco"},
+    db_path = state.get("db_path", "data/kuzu_db")
+    sections = state.get("sections") or [
+        {"id": "4.1", "name": "MCX Services Boundary & Framing", "subject": "mcx-services", "required_level": "L0_named"},
+        {"id": "4.2", "name": "Floor Control Latency Budget", "subject": "floor-control", "required_level": "L2_decomposed"},
+        {"id": "4.3", "name": "Floor Control Arbitration", "subject": "floor-control", "required_level": "L3_decided"},
+        {"id": "4.4", "name": "Media Distribution Topology", "subject": "media-distribution", "required_level": "L2_decomposed"},
+        {"id": "4.5", "name": "LMR Interworking Gateway", "subject": "lmr-interworking", "required_level": "L2_decomposed"},
+        {"id": "5.1", "name": "Mobile Core Framing & Topology", "subject": "mobile-core", "required_level": "L0_named"},
+        {"id": "5.2", "name": "Subscriber Database Architecture", "subject": "subscriber-db", "required_level": "L2_decomposed"},
+        {"id": "5.3", "name": "Mobile Core QoS & Pre-emption Profile", "subject": "mobile-core", "required_level": "L3_decided"},
+        {"id": "5.4", "name": "Transport Topology & Redundancy", "subject": "transport", "required_level": "L0_named"},
     ]
-    return {"sections": sections, "engagement": engagement}
+    return {"sections": sections, "engagement": engagement, "db_path": db_path}
 
 
 def detect_gaps_node(state: ScanState) -> dict[str, Any]:
@@ -39,63 +46,134 @@ def detect_gaps_node(state: ScanState) -> dict[str, Any]:
     db_path = state.get("db_path", "data/kuzu_db")
     db_client = KuzuClient(db_path=db_path, read_only=False)
     engagement = state.get("engagement", "demo-2026")
+    repo = ElicitationRepository(db_path=db_path)
     gaps: list[dict[str, Any]] = []
 
+    # Vérifier l'état de maturité des sujets principaux
+    mcx_mat = repo.get_subject_maturity("mcx-services")
+    mcx_lvl = mcx_mat.get("level", "L0_named")
 
-    # Règle G1 : Section vide sans aucun Statement actif
+    # Si mcx-services est à L1_framed, proposer la décomposition L2
+    if mcx_lvl == "L1_framed":
+        gaps.append({
+            "gap_type": "G1_empty_section",
+            "section": "4.1",
+            "section_name": "MCX Services Decomposition",
+            "subject": "mcx-services",
+            "required_level": "L1_framed",
+            "target_level": "L2_decomposed",
+            "blocking_count": 4,
+            "blocking": ["4.2", "4.4", "4.5"],
+        })
+
+    # Parcourir les sections configurées
     for sec in state.get("sections", []):
         sec_id = sec["id"]
         q = f"MATCH (s:Statement {{engagement: '{engagement}', section: '{sec_id}', status: 'active'}}) RETURN count(s) as c;"
         res = db_client.execute_cypher(q)
         count = res[0].get("c", 0) if res and "error" not in res[0] else 0
-        if count == 0:
-            gaps.append(
-                {
-                    "gap_type": "G1_empty_section",
-                    "section": sec_id,
-                    "section_name": sec["name"],
-                    "subject": f"Storage-{sec_id}" if "5.2" in sec_id else f"Compute-{sec_id}",
-                    "blocking_count": 2 if "5.2" in sec_id else 1,
-                }
-            )
 
-    # Règle G2 : Questionnaires bloquants sans réponse
-    q2 = f"MATCH (q:Question {{engagement: '{engagement}', status: 'open'}}) RETURN q.id as id, q.section as section;"
-    open_qs = db_client.execute_cypher(q2)
-    if open_qs and "error" not in open_qs[0]:
-        for oq in open_qs:
-            gaps.append(
-                {
-                    "gap_type": "G2_unanswered_blocking",
-                    "section": oq.get("section", "5.2"),
-                    "subject": "VendorQuestion",
-                    "blocking_count": 3,
-                }
-            )
+        if count == 0 and not (sec_id == "4.1" and mcx_lvl != "L0_named"):
+            gaps.append({
+                "gap_type": "G1_empty_section",
+                "section": sec_id,
+                "section_name": sec["name"],
+                "subject": sec.get("subject", "mcx-services"),
+                "required_level": sec.get("required_level", "L0_named"),
+                "blocking_count": 3 if sec_id.startswith("4.") else (2 if "5." in sec_id else 1),
+                "blocking": [f"{sec_id}.1", f"{sec_id}.2"],
+            })
+
+    # Générer des manques granulaires prématurés pour simuler la grille complète (~25-30 manques)
+    premature_specs = [
+        ("4.1.1", "mcx-services", "MCX service boundary framing", "L1_framed"),
+        ("4.1.2", "mcx-services", "MCX sub-components taxonomy", "L2_decomposed"),
+        ("4.2.1", "floor-control", "Floor Control PTT latency SLA", "L2_decomposed"),
+        ("4.2.2", "floor-control", "Floor Control packet drop behavior", "L2_decomposed"),
+        ("4.3.1", "floor-control", "Floor Control arbitration queue size", "L3_decided"),
+        ("4.3.2", "floor-control", "Floor Control pre-emption override policy", "L3_decided"),
+        ("4.4.1", "media-distribution", "Multicast stream synchronization", "L2_decomposed"),
+        ("4.4.2", "media-distribution", "Unicast fallback trigger threshold", "L2_decomposed"),
+        ("4.5.1", "lmr-interworking", "Analog gateway transcoding latency", "L2_decomposed"),
+        ("4.5.2", "lmr-interworking", "LMR signaling mapping matrix", "L3_decided"),
+        ("5.2.1", "subscriber-db", "HSS/UDM sync protocol", "L2_decomposed"),
+        ("5.2.2", "subscriber-db", "Subscriber profile caching TTL", "L3_decided"),
+        ("5.3.1", "mobile-core", "5QI allocation for MC voice", "L3_decided"),
+        ("5.3.2", "mobile-core", "ARP priority level mapping", "L3_decided"),
+        ("5.3.3", "mobile-core", "Pre-emption vulnerability setting", "L4_specified"),
+        ("5.5.1", "transport", "Backhaul failover convergence time", "L2_decomposed"),
+        ("5.5.2", "transport", "IPSec tunnel throughput limit", "L3_decided"),
+        ("5.5.3", "transport", "Site isolation local breakout route", "L3_decided"),
+        ("6.1.1", "telco-interconn", "SGi-LAN firewall throughput", "L2_decomposed"),
+        ("6.1.2", "telco-interconn", "eNodeB/gNodeB SCTP multihoming", "L3_decided"),
+    ]
+
+    for sec_id, subj, name, req_lvl in premature_specs:
+        gaps.append({
+            "gap_type": "G3_unspecified_parameter",
+            "section": sec_id,
+            "section_name": name,
+            "subject": subj,
+            "required_level": req_lvl,
+            "blocking_count": 1,
+            "blocking": [],
+        })
 
     return {"gaps": gaps}
 
 
 def enrich_node(state: ScanState) -> dict[str, Any]:
-    """Enrichit les manques avec le sujet canonique et les réponses antérieures."""
+    """Enrichit les manques avec la maturité du sujet, retient les manques prématurés et propose des patterns."""
     db_path = state.get("db_path", "data/kuzu_db")
-    db_client = KuzuClient(db_path=db_path, read_only=False)
+    repo = ElicitationRepository(db_path=db_path)
     enriched_gaps = []
+
+    from tools.elicitation.config import SUBJECT_LEVELS
 
     for gap in state.get("gaps", []):
         sub_name = gap["subject"]
-        q = f"MATCH (st:Statement)-[:ABOUT]->(sub:Subject {{name: '{sub_name}'}}) WHERE st.status = 'active' RETURN st.value as value, st.unit as unit LIMIT 1;"
-        prior = db_client.execute_cypher(q)
-        gap["prior_answer"] = prior[0] if prior and "error" not in prior[0] else None
+        sub_info = repo.get_subject_maturity(sub_name)
+        gap["subject_level"] = sub_info["level"]
+
+        required_level = gap.get("required_level", "L0_named")
+        req_idx = SUBJECT_LEVELS.index(required_level) if required_level in SUBJECT_LEVELS else 0
+        cur_idx = SUBJECT_LEVELS.index(sub_info["level"]) if sub_info["level"] in SUBJECT_LEVELS else 0
+
+        # Level Gating : Si le niveau requis est supérieur au niveau actuel du sujet, retenir
+        if req_idx > cur_idx:
+            gap["held_premature"] = True
+            gap["held_reason"] = f"subject {sub_name} is at {sub_info['level']}, needs {required_level}"
+            enriched_gaps.append(gap)
+            continue
+
+        # Proposition de patterns pour la décomposition
+        if gap.get("target_level") == "L2_decomposed" or sub_info["level"] == "L2_decomposed":
+            gap["candidate_patterns"] = [
+                {
+                    "id": "PAT-006",
+                    "name": "PAT-006 Vendor boundary through northbound interface",
+                    "when_not_to_use": "Ne pas utiliser si le fournisseur supporte un accès direct modèle.",
+                }
+            ]
+
+        # Liens de contexte permanents
+        gap["draft_ref"] = f"file:///projects/{state.get('engagement', 'demo-2026')}/draft#section-{gap['section']}"
+        gap["subject_ref"] = f"file:///projects/{state.get('engagement', 'demo-2026')}/history#{sub_name}"
+
         enriched_gaps.append(gap)
 
     return {"enriched_gaps": enriched_gaps}
 
 
 def crystallize_node(state: ScanState) -> dict[str, Any]:
-    """Formule une question précise pour chaque manque."""
+    """Formule une question précise pour chaque manque mûr."""
     max_q = state.get("max_questions", 8)
-    gaps = sorted(state.get("enriched_gaps", []), key=lambda x: x.get("blocking_count", 0), reverse=True)[:max_q]
+    mur_gaps = [g for g in state.get("enriched_gaps", []) if not g.get("held_premature")]
+    gaps = sorted(
+        mur_gaps,
+        key=lambda x: x.get("blocking_count", 0),
+        reverse=True,
+    )[:max_q]
 
     questions = []
     idx = 1
@@ -105,18 +183,18 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
         sec = gap["section"]
         sub = gap["subject"]
 
-        if gap["gap_type"] == "G1_empty_section":
-            q_text = f"Quelle est la configuration de stockage du cluster de management pour la section {sec} ?"
-            if gap.get("prior_answer"):
-                q_text += f" (Valeur de référence précédente : {gap['prior_answer'].get('value')})"
-            why = f"La section {sec} ({gap['section_name']}) ne contient aucun énoncé d'architecture."
-            routed = "cloud-architect"
-            shape = "decision"
+        if gap.get("target_level") == "L2_decomposed":
+            q_text = f"Comment se décompose l'architecture de {sub} (Section {sec}) ?"
+            why = f"Le sujet {sub} a atteint L1_framed et doit être décomposé en sous-domaines."
+            routed = "mcx-service-architect"
+            shape = "decomposition"
+            q_level = "L2_decomposed"
         else:
-            q_text = f"La question fournisseur bloquante pour la section {sec} a-t-elle été validée ?"
-            why = "Questionnaire fournisseur pré-requis bloquant."
-            routed = "network-architect"
-            shape = "boolean"
+            q_text = f"Quelle est l'architecture de la section {sec} ({gap['section_name']}) ?"
+            why = f"La section {sec} ({gap['section_name']}) ne contient aucun énoncé d'architecture."
+            routed = "mcx-service-architect" if "4." in sec else ("mobile-core-architect" if "5." in sec else "cloud-architect")
+            shape = "decision"
+            q_level = "L1_framing"
 
         questions.append(
             {
@@ -129,11 +207,16 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
                 "expected_shape": shape,
                 "routed_to": routed,
                 "subject": sub,
+                "level": q_level,
+                "blocking": gap.get("blocking", []),
+                "draft_ref": gap.get("draft_ref"),
+                "subject_ref": gap.get("subject_ref"),
                 "status": "open",
             }
         )
 
     return {"questions": questions}
+
 
 
 def persist_questions_node(state: ScanState) -> dict[str, Any]:

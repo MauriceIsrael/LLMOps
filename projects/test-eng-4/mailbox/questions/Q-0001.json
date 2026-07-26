@@ -1,7 +1,7 @@
 {
   "id": "Q-0001",
   "engagement": "test-eng-4",
-  "question": "Quelle est la configuration de stockage du cluster de management pour la section 5.2 ? (Valeur de référence précédente : SAN NVMe dual-controller)",
+  "question": "Quelle est l'architecture de la section 5.2 (Architecture Stockage Management) ? (Valeur de référence précédente : SAN NVMe dual-controller)",
   "why_it_matters": "La section 5.2 (Architecture Stockage Management) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
   "routed_to": "cloud-architect"

@@ -1,5 +1,7 @@
 """Configuration et vocabulaire contrôlé pour le prototype d'élicitation."""
 
+# Modèle de maturité des sujets (SPEC maturity.md)
+SUBJECT_LEVELS: list[str] = ["L0_named", "L1_framed", "L2_decomposed", "L3_decided", "L4_specified"]
 
 # Liste strictement contrôlée des prédicats autorisés dans le domaine
 ALLOWED_PREDICATES: set[str] = {
@@ -10,6 +12,7 @@ ALLOWED_PREDICATES: set[str] = {
     "is_excluded_because",
     "has_effort",
     "has_authority_level",
+    "decomposes_into",
 }
 
 # Formes de réponses attendues pour les questions
@@ -44,6 +47,7 @@ CONFIDENCE_LEVELS: set[str] = {
     "verified",
     "designed",
     "vendor-stated",
+    "stated-by-client",
     "assumed",
 }
 

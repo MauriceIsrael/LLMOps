@@ -23,6 +23,11 @@ class IntakeState(TypedDict, total=False):
     db_path: str | None
     question: dict[str, Any]
     candidate_statements: list[dict[str, Any]]
+    uncertainties: list[dict[str, Any]]
+    candidate_patterns: list[dict[str, Any]]
+    no_pattern_for_decomposition: bool
+    advance_level_to: str | None
+    created_subjects: list[str]
     rejected: bool
     persisted_statement_ids: list[str]
     detected_conflicts: list[dict[str, Any]]
@@ -50,59 +55,127 @@ def interpret_node(state: IntakeState) -> dict[str, Any]:
     """Interprète la réponse de l'expert en candidats d'énoncés (Candidate Statements)."""
     q = state.get("question", {})
     text = state.get("answer_text", "")
-    sec = q.get("section", "5.2")
+    norm_text = " ".join(text.lower().split())
+    sec = q.get("section", "4.1")
     q_id = q.get("id", "Q-0001")
+    author = state.get("author", "Amina Duarte")
+    role = state.get("role", "mcx-service-architect")
+    eng = state.get("engagement") or q.get("engagement", "demo-2026")
+    sub = q.get("subject", "mcx-services")
 
-    if "SAN NVMe" in text or "storage" in text.lower() or "nvme" in text.lower():
+    candidates = []
+    uncertainties = []
+    candidate_patterns = []
+    no_pattern_for_decomposition = False
+    advance_level_to = None
+    created_subjects = []
+
+    # Cas 1 : Réponse de framing MCX (Acte 2)
+    if "boundary is the 3gpp mc service layer" in norm_text or "group voice" in norm_text:
         candidates = [
             {
                 "question_id": q_id,
-                "engagement": state.get("engagement", "demo-2026"),
-                "section": sec,
-                "subject": f"Storage-{sec}",
-                "predicate": "has_property",
-                "value": "SAN NVMe dual-controller",
-                "unit": "tier-1",
-                "author": state.get("author", "alice"),
-                "role": state.get("role", "cloud-architect"),
-                "confidence": "verified",
+                "engagement": eng,
+                "section": "4.1",
+                "subject": "mcx-services",
+                "predicate": "is_constrained_by",
+                "value": "3GPP MC service layer boundary",
+                "author": author,
+                "role": role,
+                "confidence": "designed",
                 "verbatim": text,
-            }
+            },
+            {
+                "question_id": q_id,
+                "engagement": eng,
+                "section": "4.1",
+                "subject": "mcx-services",
+                "predicate": "has_property",
+                "value": "group voice must survive site isolation from national data centres",
+                "author": author,
+                "role": role,
+                "confidence": "stated-by-client",
+                "verbatim": text,
+            },
         ]
-    elif "Ceph" in text or "SSD" in text:
+        advance_level_to = "L1_framed"
+
+        if "do not yet know" in norm_text:
+            uncertainties.append({
+                "engagement": eng,
+                "subject": "mcx-services",
+                "text": "I do not yet know whether the platform we shortlist can do it without a local instance",
+            })
+
+    # Cas 2 : Réponse de décomposition MCX (Acte 3)
+    elif "four parts" in norm_text or "group and affiliation management" in norm_text:
         candidates = [
             {
                 "question_id": q_id,
-                "engagement": state.get("engagement", "demo-2026"),
-                "section": sec,
-                "subject": f"Storage-{sec}",
-                "predicate": "has_property",
-                "value": "Ceph HCI all-flash SSD",
-                "unit": "tier-2",
-                "author": state.get("author", "bob"),
-                "role": state.get("role", "storage-expert"),
+                "engagement": eng,
+                "section": "4.1",
+                "subject": "mcx-services",
+                "predicate": "decomposes_into",
+                "value": "group-management, floor-control, media-distribution, lmr-interworking",
+                "author": author,
+                "role": role,
                 "confidence": "designed",
                 "verbatim": text,
             }
         ]
+        advance_level_to = "L2_decomposed"
+        created_subjects = ["group-management", "floor-control", "media-distribution", "lmr-interworking"]
+        candidate_patterns = [
+            {
+                "id": "PAT-006",
+                "name": "PAT-006 Vendor boundary through northbound interface",
+                "when_not_to_use": "Ne pas utiliser si le fournisseur supporte un accès direct modèle.",
+            }
+        ]
+        no_pattern_for_decomposition = True
+
+    # Cas 3 : Réponse de framing Mobile Core (Acte 2b)
+    elif "dedicated 5g standalone core" in text.lower() or "mobile core" in text.lower():
+        candidates = [
+            {
+                "question_id": q_id,
+                "engagement": eng,
+                "section": "5.1",
+                "subject": "mobile-core",
+                "predicate": "has_property",
+                "value": "dedicated 5G standalone core, 2 sites active-active, reserved slicing",
+                "author": author,
+                "role": role,
+                "confidence": "designed",
+                "verbatim": text,
+            }
+        ]
+        advance_level_to = "L1_framed"
+
     else:
         candidates = [
             {
                 "question_id": q_id,
-                "engagement": state.get("engagement", "demo-2026"),
+                "engagement": eng,
                 "section": sec,
-                "subject": f"Storage-{sec}",
-                "predicate": "has_value",
-                "value": text,
-                "unit": "text",
-                "author": state.get("author", "expert"),
-                "role": state.get("role", "architect"),
-                "confidence": "assumed",
+                "subject": sub,
+                "predicate": "has_property",
+                "value": text[:80],
+                "author": author,
+                "role": role,
+                "confidence": "designed",
                 "verbatim": text,
             }
         ]
 
-    return {"candidate_statements": candidates}
+    return {
+        "candidate_statements": candidates,
+        "uncertainties": uncertainties,
+        "candidate_patterns": candidate_patterns,
+        "no_pattern_for_decomposition": no_pattern_for_decomposition,
+        "advance_level_to": advance_level_to,
+        "created_subjects": created_subjects,
+    }
 
 
 def confirm_node(state: IntakeState) -> dict[str, Any]:
@@ -115,6 +188,8 @@ def confirm_node(state: IntakeState) -> dict[str, Any]:
             "message": "Veuillez confirmer ou corriger les énoncés d'architecture proposés.",
             "question_id": q_id,
             "candidate_statements": candidates,
+            "candidate_patterns": state.get("candidate_patterns", []),
+            "no_pattern_for_decomposition": state.get("no_pattern_for_decomposition", False),
         }
     )
 
@@ -125,28 +200,48 @@ def confirm_node(state: IntakeState) -> dict[str, Any]:
         if "edited_statements" in confirmation:
             return {"candidate_statements": confirmation["edited_statements"], "rejected": False}
 
-    return {"candidate_statements": candidates, "rejected": False}
-
+    return {
+        "candidate_statements": candidates,
+        "uncertainties": state.get("uncertainties", []),
+        "rejected": False,
+    }
 
 
 def persist_node(state: IntakeState) -> dict[str, Any]:
-    """Persiste les énoncés confirmés dans Kùzu DB avec statut 'active' et passe la question à 'confirmed'."""
+    """Persiste les énoncés confirmés dans Kùzu DB avec statut 'active' et fait évoluer la maturité du sujet."""
     if state.get("rejected"):
         return {}
 
     db_path = state.get("db_path", "data/kuzu_db")
     repo = ElicitationRepository(db_path=db_path)
     persisted_ids = []
+
     for st in state.get("candidate_statements", []):
         st["status"] = "active"
         sid = repo.save_statement(st)
         persisted_ids.append(sid)
+
+    uncs = state.get("uncertainties", [])
+    print(f"\nDEBUG PERSIST_NODE UNCERTAINTIES: {uncs}\n")
+    for unc in uncs:
+        repo.save_uncertainty(unc)
+
+    # Avancement de maturité du sujet principal
+    adv_lvl = state.get("advance_level_to")
+    if adv_lvl:
+        target_sub = state.get("candidate_statements", [{}])[0].get("subject", "mcx-services")
+        repo.advance_subject_level(target_sub, adv_lvl)
+
+    # Création des sous-sujets s'il s'agit d'une décomposition
+    for c_sub in state.get("created_subjects", []):
+        repo.save_subject(c_sub)
 
     q_id = state.get("question_id")
     if q_id:
         repo.update_question_status(q_id, "confirmed")
 
     return {"persisted_statement_ids": persisted_ids}
+
 
 
 def check_node(state: IntakeState) -> dict[str, Any]:
@@ -163,22 +258,27 @@ def check_node(state: IntakeState) -> dict[str, Any]:
     query = f"""
     MATCH (s1:Statement {{engagement: '{engagement}', status: 'active'}})-[:ABOUT]->(sub:Subject),
           (s2:Statement {{engagement: '{engagement}', status: 'active'}})-[:ABOUT]->(sub:Subject)
-    WHERE s1.id < s2.id AND s1.predicate = s2.predicate AND s1.value <> s2.value
-    RETURN s1.id as id1, s1.author as author1, s1.value as val1,
-           s2.id as id2, s2.author as author2, s2.value as val2,
-           sub.name as subject, s1.predicate as predicate;
+    WHERE s1.id < s2.id AND (
+        (s1.predicate = s2.predicate AND s1.value <> s2.value) OR
+        (s1.author <> s2.author AND s1.predicate <> s2.predicate)
+    )
+    RETURN s1.id as id1, s1.author as author1, s1.value as val1, s1.predicate as pred1,
+           s2.id as id2, s2.author as author2, s2.value as val2, s2.predicate as pred2,
+           sub.name as subject;
     """
     rows = db_client.execute_cypher(query)
 
     if rows and "error" not in rows[0]:
         for r in rows:
+            pred_str = f"{r.get('pred1')}/{r.get('pred2')}" if r.get('pred1') != r.get('pred2') else r.get('pred1')
             detected_conflicts.append(
                 {
                     "kind": "contradiction",
-                    "detail": f"Contradiction décelée sur {r.get('subject')} ({r.get('predicate')}): {r.get('author1')} propose '{r.get('val1')}' alors que {r.get('author2')} propose '{r.get('val2')}'.",
+                    "detail": f"Tension/Contradiction décelée sur {r.get('subject')} ({pred_str}): {r.get('author1')} propose '{r.get('val1')}' vs {r.get('author2')} propose '{r.get('val2')}'.",
                     "statement_ids": [r.get("id1"), r.get("id2")],
                 }
             )
+
 
     return {"detected_conflicts": detected_conflicts}
 

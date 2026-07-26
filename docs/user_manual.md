@@ -53,28 +53,35 @@ poetry run visualize
 
 Le système d'élicitation (`elicit`) permet à une équipe d'architectes de compléter déterministement les dossiers d'architecture.
 
-### A. Mode CLI (Hors-ligne / Démo)
+### A. Mode CLI (Hors-ligne / Démo avec drapeau d'usurpation `--as`)
+
+Grâce au drapeau d'usurpation `--as <login>` (`--as alice`, `--as bob`, `--as charlie`), **une seule personne peut simuler l'interaction de 3 personnes** sans créer de comptes GitHub !
 
 ```bash
 # 1. Détecter les manques du projet et poser les questions dans la boîte aux lettres
 poetry run elicit scan --engagement demo-2026
 
-# 2. Un architecte (ex: Alice) répond
-poetry run elicit answer Q-0001 --author alice --role cloud-architect --text "SAN NVMe dual-controller tier-1"
+# 2. Réponse d'Alice (cloud-architect) via --as alice
+poetry run elicit answer Q-0001 --as alice --text "SAN NVMe dual-controller tier-1"
 
-# 3. Validation de la proposition d'extraction (interrupt) dans un nouveau processus
+# 3. Validation de la proposition d'extraction (interrupt)
 poetry run elicit confirm Q-0001 --accept
 
-# 4. Un 2ème architecte (Bob) propose une alternative -> Le système crée un conflit déterministe C-0001
-poetry run elicit answer Q-0001 --author bob --role storage-expert --text "Ceph HCI all-flash SSD"
+# 4. Réponse contradictoire de Bob (storage-expert) via --as bob -> Détection déterministe du conflit C-0001
+poetry run elicit answer Q-0001 --as bob --text "Ceph HCI all-flash SSD"
 poetry run elicit confirm Q-0001 --accept
 
-# 5. Charlie (Chief Architect) arbitre le conflit avec une raison d'architecture
-poetry run elicit arbitrate C-0001 --keep S-1785078837800 --reason "Homogénéité du stockage SAN" --by chief-architect
+# 5. Visualiser le Tableau de Maturité des Sujets (Maturity Board)
+poetry run elicit subjects --engagement demo-2026 --stall-days 7
 
-# 6. Assembler le document final (projects/demo-2026/document.md)
+# 6. Arbitrage par Charlie (chief-architect) via --as charlie
+poetry run elicit arbitrate C-0001 --keep S-0001 --reason "Homogénéité du stockage SAN" --as charlie
+
+# 7. Assembler le document final (projects/demo-2026/document.md)
 poetry run elicit assemble --engagement demo-2026
 ```
+
+
 
 ---
 

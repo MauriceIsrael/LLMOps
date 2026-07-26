@@ -1,0 +1,12 @@
+<!-- elicit:{{ engagement }}:maturity_board:board:sha={{ content_hash }} -->
+### 📊 Tableau de Maturité des Sujets d'Architecture (Maturity Board) — {{ engagement }}
+
+| Sujet Canonique | Niveau Atteint | Blocage / Question Ouverte | Assigné À | Délais au Niveau | Stagnation (> 7 j) | Sections Dépendantes |
+|---|---|---|---|---|---|---|
+{% for row in board %}
+| `{{ row.subject }}` | `{{ row.level }}` | {% if row.open_question_ref %}`{{ row.open_question_ref }}`{% else %}*Aucun*{% endif %} | {% if row.assigned_role %}`{{ row.assigned_role }}`{% else %}-{% endif %} | {{ row.days_at_level }} j | {% if row.is_stalled %}⚠️ **STAGNANT**{% else %}✅ Normal{% endif %} | {{ row.dependent_sections | join(', ') }} |
+{% endfor %}
+
+> 📌 **Règles de maturité :**
+> - **L0_named** (Nommé) → **L1_framed** (Cadré) → **L2_decomposed** (Décomposé - Patterns candidats proposés) → **L3_decided** (Mécanisme décidé) → **L4_specified** (Paramétré).
+> - **Section Readiness :** Une section de document ne passe en statut `COMPLETE` que si tous ses sujets dépendants ont atteint au moins le niveau `L3_decided`.

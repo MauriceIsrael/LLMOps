@@ -141,3 +141,21 @@ def test_file_and_github_render_identically(sample_question_data, tmp_path):
     gh_rendered = gh_adapter.render_body(sample_question_data)
 
     assert file_rendered == gh_rendered
+
+
+def test_impersonation_flag_resolves_author_and_role():
+    """Test le drapeau d'usurpation --as (ex: --as alice, --as bob, --as charlie)."""
+    from tools.elicitation.cli import resolve_impersonation
+
+    author_a, role_a = resolve_impersonation("alice", "default", "default-role")
+    assert author_a == "Alice"
+    assert role_a == "cloud-architect"
+
+    author_b, role_b = resolve_impersonation("bob", "default", "default-role")
+    assert author_b == "Bob"
+    assert role_b == "storage-expert"
+
+    author_c, role_c = resolve_impersonation("charlie", "default", "default-role")
+    assert author_c == "Charlie"
+    assert role_c == "chief-architect"
+

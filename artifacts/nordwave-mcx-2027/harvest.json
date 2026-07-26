@@ -1,0 +1,12 @@
+{
+  "engagement": "nordwave-mcx-2027",
+  "db_path": "artifacts/nordwave-mcx-2027/graph",
+  "by": "Sofia Lindqvist",
+  "promotion_candidates": [
+    {
+      "title": "MCX Service Layer Decomposition (4 sub-domains)",
+      "kind": "decomposition",
+      "why": "First occurrence of 3GPP MC service layer decomposition on mission-critical voice."
+    }
+  ]
+}
