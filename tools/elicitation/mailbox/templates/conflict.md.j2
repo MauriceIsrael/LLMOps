@@ -1,0 +1,23 @@
+<!-- elicit:{{ engagement }}:{{ conflict_id }}:conflict:sha={{ content_hash }} -->
+### ⚠️ Registre de Conflit d'Architecture — {{ conflict_id }}
+
+**Sujet & Prédicat Contestés :** `{{ subject }}` · `{{ predicate }}`
+**Détail :** {{ detail }}
+
+#### Énoncés en Concurrence (Les deux restent actuellement actifs) :
+{% for st in statements %}
+- **Énoncé `{{ st.id }}`** par {{ st.author }} (Rôle : `{{ st.role }}`) le {{ st.created_at }} :
+  - Valeur proposé : `{{ st.value }}` (Confiance : `{{ st.confidence }}`)
+  - *Verbatim :* "{{ st.verbatim }}"
+{% endfor %}
+
+{% if advisory %}
+> 💡 **Note Consultative de Cohérence (Non contraignante) :**
+> {{ advisory }}
+{% endif %}
+
+#### Instruction d'Arbitrage (Architecte en chef uniquement) :
+Exécutez la commande suivante en précisant obligatoirement la raison d'architecture :
+```
+/arbitrate keep <statement_id> --reason "Raison d'architecture expliquant la décision..."
+```

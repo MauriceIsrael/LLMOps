@@ -2,15 +2,22 @@
 
 import asyncio
 import os
+from contextlib import asynccontextmanager
+from typing import Any
+from urllib.parse import parse_qs, quote
+from uuid import uuid4
 
+import anyio
 import uvicorn
 from fastmcp import FastMCP
 from mcp.server.sse import SseServerTransport
+from sse_starlette.sse import EventSourceResponse
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse
 from starlette.routing import Route
+from starlette.types import Receive, Scope, Send
 
 from mcp_server.config import settings
 from mcp_server.tools.asset_tools import (
@@ -35,6 +42,64 @@ mcp.tool()(query_graph)
 mcp.tool()(get_graph_summary)
 
 
+class TokenPreservingSseServerTransport(SseServerTransport):
+    """Transport SSE qui préserve le jeton d'authentification dans l'URI de callback /messages."""
+
+    @asynccontextmanager
+    async def connect_sse(self, scope: Scope, receive: Receive, send: Send):
+        if scope["type"] != "http":
+            raise ValueError("connect_sse can only handle HTTP requests")
+
+        query_string = scope.get("query_string", b"").decode("utf-8")
+        query_params = parse_qs(query_string)
+        token_val = query_params.get("token", [None])[0]
+
+        read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
+        write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
+
+        session_id = uuid4()
+        self._read_stream_writers[session_id] = read_stream_writer
+
+        root_path = scope.get("root_path", "")
+        full_message_path = root_path.rstrip("/") + self._endpoint
+
+        client_post_uri = f"{quote(full_message_path)}?session_id={session_id.hex}"
+        if token_val:
+            client_post_uri += f"&token={quote(token_val)}"
+
+        sse_stream_writer, sse_stream_reader = anyio.create_memory_object_stream[dict[str, Any]](0)
+
+        async def sse_writer():
+            async with sse_stream_writer, write_stream_reader:
+                await sse_stream_writer.send({"event": "endpoint", "data": client_post_uri})
+                async for session_message in write_stream_reader:
+                    await sse_stream_writer.send(
+                        {
+                            "event": "message",
+                            "data": session_message.message.model_dump_json(by_alias=True, exclude_none=True),
+                        }
+                    )
+
+        try:
+            async with anyio.create_task_group() as tg:
+                async def response_wrapper(scope: Scope, receive: Receive, send: Send):
+                    await EventSourceResponse(content=sse_stream_reader, data_sender_callable=sse_writer)(
+                        scope, receive, send
+                    )
+                    await read_stream_writer.aclose()
+                    await write_stream_reader.aclose()
+                    await sse_stream_reader.aclose()
+
+                tg.start_soon(response_wrapper, scope, receive, send)
+                yield (read_stream, write_stream)
+        finally:
+            self._read_stream_writers.pop(session_id, None)
+
+
+# Transport SSE global avec préservation du token pour la compatibilité avec tous les clients MCP
+sse_transport = TokenPreservingSseServerTransport("/messages")
+
+
 class AuthMiddleware(BaseHTTPMiddleware):
     """Middleware pour sécuriser l'accès HTTP/SSE par jeton Bearer, Header ou Paramètre d'URL."""
 
@@ -46,6 +111,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         auth_header = request.headers.get("Authorization")
         query_token = request.query_params.get("token")
         header_token = request.headers.get("X-API-Key")
+        session_id = request.query_params.get("session_id")
 
         provided_token = None
         if auth_header and auth_header.startswith("Bearer "):
@@ -55,21 +121,26 @@ class AuthMiddleware(BaseHTTPMiddleware):
         elif query_token:
             provided_token = query_token.strip()
 
-        if provided_token != expected_token:
-            return JSONResponse(
-                {"error": "Unauthorized: Invalid or missing LLMOps authentication token"},
-                status_code=401,
-            )
+        # 1. Validation du jeton explicite
+        if provided_token == expected_token:
+            return await call_next(request)
 
-        return await call_next(request)
+        # 2. Validation de secours si session_id appartient à une session SSE active sur la même instance
+        if session_id and hasattr(sse_transport, "_read_stream_writers"):
+            if session_id in sse_transport._read_stream_writers:
+                return await call_next(request)
+
+        return JSONResponse(
+            {"error": "Unauthorized: Invalid or missing LLMOps authentication token"},
+            status_code=401,
+        )
 
 
 async def run_sse_authenticated(host: str, port: int) -> None:
     """Démarre le serveur SSE FastMCP enveloppé dans le middleware d'authentification."""
-    sse = SseServerTransport("/messages")
 
     async def handle_sse(request):
-        async with sse.connect_sse(
+        async with sse_transport.connect_sse(
             request.scope, request.receive, request._send
         ) as streams:
             await mcp._mcp_server.run(
@@ -79,13 +150,28 @@ async def run_sse_authenticated(host: str, port: int) -> None:
             )
 
     async def handle_messages(request):
-        await sse.handle_post_message(request.scope, request.receive, request._send)
+        await sse_transport.handle_post_message(
+            request.scope, request.receive, request._send
+        )
+
+    async def handle_visualize(request):
+        from pathlib import Path
+
+        from pipelines.visualization.graph_visualizer import GraphVisualizer
+
+        db_path = os.getenv("KUZU_DB_PATH", "data/kuzu_db")
+        viz = GraphVisualizer(db_path=db_path)
+        temp_html_path = viz.generate_html(output_path="/tmp/graph_explorer.html")
+        html_content = Path(temp_html_path).read_text(encoding="utf-8")
+        return HTMLResponse(content=html_content)
+
 
     starlette_app = Starlette(
         debug=settings.DEBUG,
         routes=[
             Route("/sse", endpoint=handle_sse),
             Route("/messages", endpoint=handle_messages, methods=["POST"]),
+            Route("/visualize", endpoint=handle_visualize, methods=["GET"]),
         ],
         middleware=[Middleware(AuthMiddleware)],
     )
@@ -114,5 +200,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

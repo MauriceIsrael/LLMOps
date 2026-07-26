@@ -1,0 +1,27 @@
+<!-- elicit:{{ engagement }}:{{ question_id }}:question:sha={{ content_hash }} -->
+### {{ question_text }}
+
+**Why this matters**
+{{ why_it_matters }} (Sections bloquées : `{{ section }}`)
+
+**Please use these terms**
+- Sujet canonique : `{{ frame.canonical_subject }}`
+{% if frame.glossary_terms %}- Termes du glossaire : {% for term in frame.glossary_terms %}`{{ term }}`{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
+
+**Expected**
+Forme attendue : {{ expected_shape }}
+
+{% if frame.prior_answer %}
+**Previously answered elsewhere**
+Référence dans l'engagement `{{ frame.prior_answer.engagement }}` : `{{ frame.prior_answer.value }}` (Confiance : `{{ frame.prior_answer.confidence }}`). Vous pouvez confirmer cette valeur ou vous en écarter.
+{% endif %}
+{% if frame.constrained_assets %}
+**Constrained by**
+{% for asset in frame.constrained_assets %}- [{{ asset }}](file:///data/kb/assets/{{ asset }}.md)
+{% endfor %}{% endif %}
+
+**How to answer**
+Copiez la commande suivante et répondez :
+```
+/answer {{ question_id }} --text "Votre réponse textuelle d'expert..."
+```

@@ -1,0 +1,8 @@
+{
+  "id": "Q-0002",
+  "engagement": "test-eng-3",
+  "question": "Quelle est la configuration de stockage du cluster de management pour la section 5.1 ?",
+  "why_it_matters": "La section 5.1 (Architecture Calcul & Virtualisation) ne contient aucun énoncé d'architecture.",
+  "expected_shape": "decision",
+  "routed_to": "cloud-architect"
+}

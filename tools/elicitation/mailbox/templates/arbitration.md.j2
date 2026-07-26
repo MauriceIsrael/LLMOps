@@ -1,0 +1,13 @@
+<!-- elicit:{{ engagement }}:{{ conflict_id }}:arbitration:sha={{ content_hash }} -->
+### ⚖️ Rapport d'Arbitrage — Conflit {{ conflict_id }}
+
+**Arbitré par :** `{{ arbitrated_by }}`
+
+#### Décision d'Architecture :
+- **Énoncé Conservé (Actif) :** `{{ kept_statement.id }}` (`{{ kept_statement.subject }}` · `{{ kept_statement.predicate }}` = `{{ kept_statement.value }}`) par {{ kept_statement.author }}.
+- **Énoncé Rendu Caduc (`superseded`) :** `{{ superseded_statement.id }}` (`{{ superseded_statement.subject }}` · `{{ superseded_statement.predicate }}` = `{{ superseded_statement.value }}`) par {{ superseded_statement.author }}.
+
+> 📌 **Note d'historique :** L'énoncé rendu caduc reste conservé dans l'historique d'architecture et constitue un candidat de promotion si l'expérience terrain le justifie ultérieurement.
+
+#### Rationale de la Décision :
+> "{{ reason }}"

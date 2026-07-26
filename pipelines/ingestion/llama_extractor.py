@@ -25,6 +25,12 @@ class ArchitectureGraphExtractor:
         confidence = parsed_doc["confidence"]
         last_reviewed = parsed_doc.get("last_reviewed", "")
 
+        phase_val = parsed_doc.get("phase", [])
+        phase_str = ",".join(phase_val) if isinstance(phase_val, list) else str(phase_val)
+
+        domain_val = parsed_doc.get("domain", [])
+        domain_str = ",".join(domain_val) if isinstance(domain_val, list) else str(domain_val)
+
         # Nœud Principal de l'Asset
         main_node = EntityNode(
             name=doc_id,
@@ -35,6 +41,8 @@ class ArchitectureGraphExtractor:
                 "type": doc_type,
                 "status": status,
                 "confidence": confidence,
+                "phase": phase_str,
+                "domain": domain_str,
                 "last_reviewed": last_reviewed,
                 "owner": parsed_doc.get("owner", ""),
                 "source_path": parsed_doc.get("source_path", ""),
@@ -42,10 +50,12 @@ class ArchitectureGraphExtractor:
         )
         nodes.append(main_node)
 
-        # Extraction des termes du Glossaire si le type est 'glossary'
-        if doc_type == "glossary" or "glossary" in parsed_doc.get("source_path", ""):
+        # Extraction des termes du Glossaire si le type est 'glossary' ou 'template' (glossary.md)
+        if doc_id == "TPL-glossary" or doc_type == "glossary" or "glossary" in parsed_doc.get("source_path", ""):
             sections = parsed_doc.get("sections", {})
             for term, def_text in sections.items():
+                if term == "Introduction":
+                    continue
                 term_node = EntityNode(
                     name=term,
                     label="GLOSSARY_TERM",

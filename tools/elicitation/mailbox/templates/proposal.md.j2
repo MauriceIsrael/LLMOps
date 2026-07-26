@@ -1,0 +1,20 @@
+<!-- elicit:{{ engagement }}:{{ question_id }}:proposal:sha={{ content_hash }} -->
+### 📝 Proposition d'Énoncés d'Architecture — Question {{ question_id }}
+
+> **Information :** Aucun énoncé n'est encore enregistré en base. Veuillez vérifier l'extraction ci-dessous.
+
+#### Énoncés Candidats Extraits :
+{% for st in statements %}
+- `{{ st.subject }}` · `{{ st.predicate }}` · `{{ st.value }}` (Confiance : `{{ st.confidence }}`{% if st.unit %}, Unité : {{ st.unit }}{% endif %})
+{% endfor %}
+
+#### Verbatim Exact de l'Expert :
+> "{{ verbatim }}"
+
+#### Commandes Disponibles :
+- **Confirmer et enregistrer :**
+  `/confirm {{ question_id }}`
+- **Corriger la proposition (YAML) :**
+  `/edit {{ question_id }}`
+- **Rejeter l'extraction :**
+  `/reject {{ question_id }} Mauvaise interprétation sémantique`

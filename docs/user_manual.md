@@ -1,6 +1,6 @@
-# 📗 Manuel Utilisateur — Platform LLMOps (GraphRAG + FastMCP)
+# 📗 Manuel Utilisateur — Plateforme LLMOps (GraphRAG + FastMCP + Élicitation)
 
-Ce manuel fournit toutes les instructions nécessaires pour installer, alimenter, faire tourner et tester la plateforme LLMOps neuro-symbolique.
+Ce manuel fournit toutes les instructions nécessaires pour installer, alimenter, utiliser, visualiser et partager la plateforme LLMOps neuro-symbolique et son système d'élicitation collaboratif.
 
 ---
 
@@ -10,20 +10,17 @@ Ce manuel fournit toutes les instructions nécessaires pour installer, alimenter
 - Linux / macOS / WSL2
 - Python `>= 3.11`
 - [Poetry](https://python-poetry.org/docs/#installation)
-- Docker & Docker Compose (Optionnel, pour l'exécution conteneurisée)
+- Docker & Docker Compose (Optionnel)
 
 ### Clé d'API LLM
-Le pipeline d'extraction LlamaIndex et les tests de non-régression sémantique (DeepEval) nécessitent une clé d'API OpenAI. Exposez-la dans votre environnement :
+Exposez votre clé OpenAI pour l'extraction LlamaIndex :
 ```bash
 export OPENAI_API_KEY="sk-..."
 ```
 
-### Installation du projet
+### Installation
 ```bash
-# Se placer dans le dossier du projet
 cd LLMOps
-
-# Installer l'ensemble des dépendances Python via Poetry
 poetry install
 ```
 
@@ -31,187 +28,61 @@ poetry install
 
 ## 🔄 2. Ingestion de la Base de Connaissances (GraphRAG)
 
-La base de connaissances se trouve dans le répertoire `data/kb/` (ADRs, Principes, Glossaire, Risques, etc.).
-
-Pour exécuter le pipeline d'ingestion qui parse les fichiers Markdown, extrait les entités et relations avec LlamaIndex, puis alimente Kùzu DB :
-
 ```bash
 poetry run ingest --kb-dir data/kb --db-path data/kuzu_db
 ```
-
-### Options de la CLI d'ingestion :
-- `--kb-dir PATH` : Chemin vers le répertoire source des documents Markdown (Par défaut: `data/kb`).
-- `--db-path PATH` : Chemin de la base de données intégrée Kùzu (Par défaut: `data/kuzu_db`).
-- `--force-rebuild` : Réinitialiser la base Kùzu avant l'ingestion.
+- Ingestion des fichiers Markdown (`.md`) et des spécifications YAML (`.yaml` / `.yml`).
+- Filtrage automatique des fichiers de prose sans `id` (`README.md`, `CONTRIBUTING.md`, etc.).
 
 ---
 
-## ⚡ 3. Démarrage du Serveur FastMCP
+## 🎨 3. Visualisation du Graphe & Plans de Connaissance
 
-### Mode 1 : Démarrage standard (STDIO)
-Pour lancer le serveur FastMCP directement en écoute sur les entrées/sorties standards (STDIO) :
+### Visualiseur Web local :
 ```bash
-poetry run mcp-server
+poetry run visualize
 ```
+*Ouvrez [docs/graph_explorer.html](file:///home/momo/Dev/LLMOps/docs/graph_explorer.html) dans votre navigateur.*
 
-### Mode 2 : FastMCP Dev Inspector (Interactif)
-Pour tester interactivement les outils FastMCP dans une interface web dédiée :
-```bash
-poetry run fastmcp dev mcp_server/main.py
-```
-Une fois lancée, ouvrez l'URL indiquée (ex: `http://localhost:5173`) pour exécuter et visualiser les appels aux outils (`list_assets`, `get_decision_trail`, `get_glossary_term`, etc.).
+### Visualiseur Web GCP Cloud Run en direct :
+👉 **`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`**
 
 ---
 
-## 🔌 4. Connexion aux Agents & IDEs
+## 🤖 4. Élicitation Collaborative (Chatbot Inversé)
 
-### Connexion à Claude Desktop / Cursor / Antigravity
-Ajoutez le serveur MCP dans votre fichier de configuration (ex: `claude_desktop_config.json` ou la configuration MCP d'Antigravity) :
+Le système d'élicitation (`elicit`) permet à une équipe d'architectes de compléter déterministement les dossiers d'architecture.
 
-```json
-{
-  "mcpServers": {
-    "llmops-architecture-kb": {
-      "command": "poetry",
-      "args": [
-        "run",
-        "mcp-server"
-      ],
-      "cwd": "/chemin/absolu/vers/LLMOps",
-      "env": {
-        "OPENAI_API_KEY": "sk-..."
-      }
-    }
-  }
-}
-```
-
----
-
-## 🤖 5. Guide d'Usage & Interaction avec l'Agent IA
-
-Une fois le serveur MCP connecté à votre IDE ou Agent, vous pouvez interroger directement l'assistant en langage naturel.
-
-### A. Exemples de Prompts Courants
-- **Lister les décisions d'architecture** :
-  > *"Peux-tu me lister les décisions d'architecture (ADR) présentes dans la base ?"*
-- **Consulter le contenu d'un artefact** :
-  > *"Affiche-moi le contenu complet de l'artefact ADR-0001."*
-- **Chaîne de décision & Antériorité (`SUPERSEDES`)** :
-  > *"Quel est l'historique et la chaîne de décision pour ADR-0001 ?"*
-- **Consulter le Glossaire ou le Graphe Kùzu** :
-  > *"Quelle est la définition du terme 'GraphRAG' ?"* ou *"Fais un résumé du graphe Kùzu DB."*
-
----
-
-### B. Régénération Automatique d'un Document HLA (High-Level Architecture)
-L'agent peut utiliser le template **`TPL-hla-section-map`** ([data/kb/templates/hla-section-map.md](file:///home/momo/Dev/LLMOps/data/kb/templates/hla-section-map.md)) pour régénérer la documentation HLA du système.
-
-- **Comment procéder** :
-  Demandez simplement dans le chat :
-  > *"À partir du template HLA section map et de la base Kùzu DB, génère le document HLA complet avec la matrice de traçabilité et les diagrammes Mermaid."*
-
-- **Distinction Socle Générique vs Instance Projet** :
-  - **Le Socle Générique (Global KB)** : Les ADRs, principes, patterns et risques sont extraits automatiquement de Kùzu DB.
-  - **L'Instance Projet (Contextuel)** : Les variables du projet (scope, questionnaires clients, deltas) sont lues depuis `projects/<nom_projet>/` ou demandées interactivement par l'agent.
-
----
-
-### C. Gestion des Schémas ("Views as Code" / Draw.io)
-Les schémas d'architecture ne sont pas dessinés manuellement : ils s'appuient sur le modèle **Views as Code**.
-- Les générateurs Python dans `data/kb/views/generators/` (ex: `gen_drawio_set.py`) émettent dynamiquement les fichiers **`.drawio`** et **`.svg`** lors de la création d'un livrable projet.
-- Dans le document Markdown HLA, l'agent génère les diagrammes au format **Mermaid.js** (pour affichage natif) et pointe vers les fichiers `.drawio` éditables émis pour le projet.
-
----
-
-### D. Contribution & Règle de Cristallisation ("Promotion Rule")
-Pour ajouter un nouveau contenu d'architecture :
-
-1. **La Règle de Promotion** (définie dans [CONTRIBUTING.md](file:///home/momo/Dev/LLMOps/data/kb/CONTRIBUTING.md)) :
-   - **1ère occurrence** → Le contenu est créé dans le projet spécifique (`projects/<nom_projet>/`).
-   - **2ème occurrence (multi-projets)** → Le contenu est **cristallisé et promu** dans le socle générique (`decisions/`, `patterns/`, `principles/`), anonymisé de tout contexte client.
-
-2. **Répartition des rôles (Architecte + Agent)** :
-   - **L'Agent** : Vous pouvez lui dicter votre choix technique en langage naturel. Il rédige le Markdown avec le Frontmatter YAML conforme, classe l'artefact et relance `poetry run ingest` pour mettre à jour Kùzu DB.
-   - **L'Architecte** : Définit le niveau de certitude (`confidence: verified / vendor-stated / assumed`) et valide la Pull Request (`agent-drafted`).
-
----
-
-
-## 🧪 6. Exécution des Tests & Évaluations Sémantiques
-
-### Tests Unitaires & Intégration
-Exécuter la suite de tests unitaires (parsers, client Kùzu, outils MCP) :
-```bash
-poetry run pytest tests/unit tests/integration
-```
-
-### Evaluation de Non-Régression Sémantique (DeepEval)
-Pour exécuter les métriques sémantiques (pertinence et fidélité des réponses de l'agent) :
-```bash
-poetry run deepeval test run tests/evals/deepeval/test_semantic_regression.py
-```
-
-### Benchmarking de Prompts (Promptfoo)
-Pour tester des scénarios d'évaluation complémentaires avec Promptfoo :
-```bash
-npx promptfoo eval -c tests/evals/promptfoo/promptfooconfig.yaml
-```
-
----
-
-## 🐳 7. Exécution local via Docker Compose & Déploiement GCP Cloud Run
-
-### A. Test local avec Docker Compose
-Pour tester l'ensemble de la stack en local dans des conteneurs isolés :
+### A. Mode CLI (Hors-ligne / Démo)
 
 ```bash
-# Lancer l'ingestion puis le serveur FastMCP en mode SSE (HTTP)
-OPENAI_API_KEY="sk-..." docker compose -f docker/docker-compose.yml up --build
+# 1. Détecter les manques du projet et poser les questions dans la boîte aux lettres
+poetry run elicit scan --engagement demo-2026
+
+# 2. Un architecte (ex: Alice) répond
+poetry run elicit answer Q-0001 --author alice --role cloud-architect --text "SAN NVMe dual-controller tier-1"
+
+# 3. Validation de la proposition d'extraction (interrupt) dans un nouveau processus
+poetry run elicit confirm Q-0001 --accept
+
+# 4. Un 2ème architecte (Bob) propose une alternative -> Le système crée un conflit déterministe C-0001
+poetry run elicit answer Q-0001 --author bob --role storage-expert --text "Ceph HCI all-flash SSD"
+poetry run elicit confirm Q-0001 --accept
+
+# 5. Charlie (Chief Architect) arbitre le conflit avec une raison d'architecture
+poetry run elicit arbitrate C-0001 --keep S-1785078837800 --reason "Homogénéité du stockage SAN" --by chief-architect
+
+# 6. Assembler le document final (projects/demo-2026/document.md)
+poetry run elicit assemble --engagement demo-2026
 ```
-Le serveur FastMCP sera accessible sur `http://localhost:8000/sse`.
 
-### B. Déploiement sur GCP Cloud Run (Serverless)
+---
 
-Cloud Run permet d'héberger le serveur FastMCP à moindre coût (scale-to-zero, facturation à l'usage).
+## 📢 5. Comment Partager la Plateforme à vos Collègues
 
-1. **Construire et pousser l'image sur GCP Artifact Registry** :
-   ```bash
-   # Configurer votre projet GCP
-   gcloud config set project VOTRE_PROJECT_ID
+### Option 1 : Partager l'accès au Serveur MCP (Claude Desktop / Cursor / Antigravity / VS Code)
+Transmettez simplement cet extrait de configuration à vos collègues pour qu'ils l'ajoutent dans leur fichier `mcp_config.json` local :
 
-   # Pusher l'image optimisée
-   gcloud builds submit --tag gcr.io/VOTRE_PROJECT_ID/llmops-mcp-server:latest -f docker/Dockerfile.cloudrun .
-   ```
-
-2. **Stocker la clé d'API OpenAI et le Jeton d'Authentification dans GCP Secret Manager** :
-   ```bash
-   # Clé d'API OpenAI
-   gcloud secrets create openai-api-key --replication-policy="automatic"
-   echo -n "sk-proj-..." | gcloud secrets versions add openai-api-key --data-file=-
-
-   # Jeton secret pour sécuriser l'accès au serveur FastMCP
-   gcloud secrets create llmops-auth-token --replication-policy="automatic"
-   echo -n "llmops-token-2026-sec-98a41f" | gcloud secrets versions add llmops-auth-token --data-file=-
-   ```
-
-3. **Déployer sur Cloud Run avec authentification sécurisée** :
-   ```bash
-   gcloud run deploy llmops-mcp-server \
-     --image gcr.io/VOTRE_PROJECT_ID/llmops-mcp-server:latest \
-     --platform managed \
-     --region europe-west1 \
-     --allow-unauthenticated \
-     --port 8000 \
-     --set-env-vars LLMOPS_TRANSPORT=sse \
-     --set-secrets="OPENAI_API_KEY=openai-api-key:latest,LLMOPS_AUTH_TOKEN=llmops-auth-token:latest"
-   ```
-
-### C. Partager l'accès à votre serveur MCP avec vos collègues
-
-Pour donner l'accès à un collègue tout en bloquant les personnes non autorisées, transmettez-lui simplement l'extrait de configuration suivant à coller dans son IDE (**Claude Desktop, Antigravity, Cursor, VS Code**) :
-
-**Dans son fichier `mcp_config.json` local :**
 ```json
 {
   "mcpServers": {
@@ -221,17 +92,37 @@ Pour donner l'accès à un collègue tout en bloquant les personnes non autoris�
   }
 }
 ```
-
-*Note : Toute requête effectuée sans ce jeton secret recevra un rejet `HTTP 401 Unauthorized`.*
+*Vos collègues peuvent alors interroger directement la base d'architecture en langage naturel depuis leur IDE.*
 
 ---
 
+### Option 2 : Partager le Visualiseur Web Interactif du Graphe
+Transmettez ce lien direct à vos collègues pour qu'ils explorent la base de connaissances sans rien installer :
+👉 **`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`**
 
-## ❓ 8. Résolution des Problèmes Fréquents (FAQ)
+---
 
+### Option 3 : Partager l'Élicitation Collaborative sur GitHub Issues (Sans ligne de commande pour vos collègues !)
 
-| Problème | Cause Possible | Solution |
-|---|---|---|
-| `Lock error` sur Kùzu DB | Plusieurs processus tentent d'écrire en même temps dans Kùzu DB | Assurez-vous que le job d'ingestion est terminé avant de démarrer le serveur MCP en écriture |
-| `AuthenticationError: OPENAI_API_KEY missing` | La variable d'environnement n'est pas définie | Exécutez `export OPENAI_API_KEY="sk-..."` avant de lancer les commandes |
-| Outil MCP non trouvé par l'agent | Mauvais fichier de config MCP dans l'IDE | Vérifiez le chemin absolu `cwd` dans la configuration MCP de l'IDE |
+Vos collègues n'ont **rien à installer** sur leur poste. Ils répondent directement dans leur navigateur sur GitHub !
+
+1. **Déclarer vos collègues dans le fichier d'annuaire `projects/demo-2026/roster.yaml`** :
+   ```yaml
+   - login: alice-gh
+     name: Alice
+     roles: [cloud-architect]
+   - login: bob-gh
+     name: Bob
+     roles: [storage-expert]
+   - login: charlie-gh
+     name: Charlie
+     roles: [chief-architect]
+   ```
+
+2. **Génération automatique des Issues GitHub** :
+   Lorsqu'un scan tourne, le système crée une Issue GitHub privée avec la fiche Markdown complète, le tag du rôle assigné (ex: `role:cloud-architect`) et la commande pré-remplie `/answer Q-0001 --text "..."`.
+
+3. **Vos collègues répondent par simple commentaire GitHub** :
+   - Alice écrit un commentaire `/answer ...` puis `/confirm`.
+   - Bob écrit un commentaire `/answer ...` pour proposer une alternative.
+   - Charlie résout le conflit en commentant `/arbitrate keep S-0001 --reason "..."`.

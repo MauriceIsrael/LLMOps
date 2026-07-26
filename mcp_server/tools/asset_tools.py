@@ -20,17 +20,25 @@ def list_assets(
     """Lister les identifiants et titres des artefacts correspondant aux filtres.
 
     Args:
-        type: Type de document (ex: 'template', 'decision', 'principle').
+        type: Type de document (ex: 'template', 'decision', 'principle', 'questionnaire', 'estimate', 'risk-register').
         phase: Phase de projet (ex: 'BID', 'BUILD', 'RUN').
-        domain: Domaine fonctionnel/technique (ex: 'ai-assistance').
-        status: Statut de l'artefact ('active', 'deprecated', etc.).
+        domain: Domaine fonctionnel/technique (ex: 'ai-assistance', 'telecom', 'delivery').
+        status: Statut de l'artefact ('active', 'superseded', etc.).
     """
     conditions = [f"a.status = '{status}'"]
     if type:
         conditions.append(f"a.type = '{type}'")
+    if phase:
+        conditions.append(f"a.phase CONTAINS '{phase}'")
+    if domain:
+        conditions.append(f"a.domain CONTAINS '{domain}'")
 
     where_clause = " WHERE " + " AND ".join(conditions) if conditions else ""
-    query = f"MATCH (a:Asset){where_clause} RETURN a.id as id, a.title as title, a.type as type, a.status as status, a.confidence as confidence;"
+    query = (
+        f"MATCH (a:Asset){where_clause} "
+        f"RETURN a.id as id, a.title as title, a.type as type, a.status as status, "
+        f"a.confidence as confidence, a.phase as phase, a.domain as domain, a.last_reviewed as last_reviewed;"
+    )
 
     return db_client.execute_cypher(query)
 
@@ -39,19 +47,34 @@ def get_asset(id: str) -> dict[str, Any]:
     """Obtenir le contenu complet d'un artefact d'architecture avec ses métadonnées.
 
     Args:
-        id: Identifiant unique de l'artefact (ex: 'TPL-mcp-spec' ou nom du fichier).
+        id: Identifiant unique de l'artefact (ex: 'ADR-0011', 'QST-core-ems', 'RSK-netdevops-telco').
     """
     # Chercher d'abord le chemin source dans Kùzu DB
-    query = f"MATCH (a:Asset {{id: '{id}'}}) RETURN a.source_path as source_path;"
+    query = (
+        f"MATCH (a:Asset {{id: '{id}'}}) "
+        f"RETURN a.source_path as source_path, a.confidence as confidence, a.last_reviewed as last_reviewed;"
+    )
     res = db_client.execute_cypher(query)
 
+    parsed = None
     if res and res[0].get("source_path") and Path(res[0]["source_path"]).exists():
-        return parser.parse_file(res[0]["source_path"])
+        parsed = parser.parse_file(res[0]["source_path"])
 
-    # Fallback search dans data/kb/
-    for path in settings.KB_DIR.rglob("*.md"):
-        if path.stem == id or id in path.name:
-            return parser.parse_file(path)
+    if not parsed:
+        # Fallback search dans data/kb/
+        kb_files = list(settings.KB_DIR.rglob("*.md")) + list(settings.KB_DIR.rglob("*.yaml")) + list(settings.KB_DIR.rglob("*.yml"))
+        for path in kb_files:
+            if path.stem == id or id in path.name:
+                parsed = parser.parse_file(path)
+                if parsed:
+                    break
+
+    if parsed:
+        # Garantir que confidence et last_reviewed sont toujours présents au niveau racine
+        if res and res[0]:
+            parsed["confidence"] = parsed.get("confidence") or res[0].get("confidence", "")
+            parsed["last_reviewed"] = parsed.get("last_reviewed") or res[0].get("last_reviewed", "")
+        return parsed
 
     return {"error": f"Artefact avec l'identifiant '{id}' non trouvé dans la base."}
 

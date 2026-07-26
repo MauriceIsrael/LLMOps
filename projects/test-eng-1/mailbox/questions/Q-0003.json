@@ -1,0 +1,8 @@
+{
+  "id": "Q-0003",
+  "engagement": "test-eng-1",
+  "question": "Quelle est la configuration de stockage du cluster de management pour la section 6.1 ?",
+  "why_it_matters": "La section 6.1 (Réseau et Interconnexion Telco) ne contient aucun énoncé d'architecture.",
+  "expected_shape": "decision",
+  "routed_to": "cloud-architect"
+}

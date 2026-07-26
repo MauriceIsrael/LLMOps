@@ -17,7 +17,7 @@ class KuzuGraphLoader:
         self._init_schema()
 
     def _init_schema(self) -> None:
-        """Initialise les tables de nœuds et de relations dans Kùzu DB si elles n'existent pas."""
+        """Initialise ou met à jour le schéma Kùzu DB."""
         tables_res = self.conn.execute("CALL show_tables() RETURN *;")
         table_names = []
         while tables_res.has_next():
@@ -34,6 +34,8 @@ class KuzuGraphLoader:
                     type STRING,
                     status STRING,
                     confidence STRING,
+                    phase STRING,
+                    domain STRING,
                     last_reviewed STRING,
                     owner STRING,
                     source_path STRING,
@@ -41,6 +43,16 @@ class KuzuGraphLoader:
                 );
                 """
             )
+        else:
+            # Migration douce du schéma si phase / domain manquent
+            try:
+                self.conn.execute("ALTER TABLE Asset ADD phase STRING;")
+            except Exception:
+                pass
+            try:
+                self.conn.execute("ALTER TABLE Asset ADD domain STRING;")
+            except Exception:
+                pass
 
         if "GlossaryTerm" not in table_names:
             self.conn.execute(
@@ -82,6 +94,8 @@ class KuzuGraphLoader:
                 doc_type = props.get("type", "").replace("'", "''")
                 status = props.get("status", "").replace("'", "''")
                 confidence = props.get("confidence", "").replace("'", "''")
+                phase = props.get("phase", "").replace("'", "''")
+                domain = props.get("domain", "").replace("'", "''")
                 last_reviewed = props.get("last_reviewed", "").replace("'", "''")
                 owner = props.get("owner", "").replace("'", "''")
                 source_path = props.get("source_path", "").replace("'", "''")
@@ -92,6 +106,8 @@ class KuzuGraphLoader:
                     a.type = '{doc_type}',
                     a.status = '{status}',
                     a.confidence = '{confidence}',
+                    a.phase = '{phase}',
+                    a.domain = '{domain}',
                     a.last_reviewed = '{last_reviewed}',
                     a.owner = '{owner}',
                     a.source_path = '{source_path}';
