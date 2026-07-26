@@ -184,26 +184,48 @@ Cloud Run permet d'héberger le serveur FastMCP à moindre coût (scale-to-zero,
    gcloud builds submit --tag gcr.io/VOTRE_PROJECT_ID/llmops-mcp-server:latest -f docker/Dockerfile.cloudrun .
    ```
 
-2. **Stocker la clé d'API dans GCP Secret Manager (Sécurité recommandée)** :
+2. **Stocker la clé d'API OpenAI et le Jeton d'Authentification dans GCP Secret Manager** :
    ```bash
+   # Clé d'API OpenAI
    gcloud secrets create openai-api-key --replication-policy="automatic"
    echo -n "sk-proj-..." | gcloud secrets versions add openai-api-key --data-file=-
+
+   # Jeton secret pour sécuriser l'accès au serveur FastMCP
+   gcloud secrets create llmops-auth-token --replication-policy="automatic"
+   echo -n "llmops-token-2026-sec-98a41f" | gcloud secrets versions add llmops-auth-token --data-file=-
    ```
 
-3. **Déployer sur Cloud Run** :
+3. **Déployer sur Cloud Run avec authentification sécurisée** :
    ```bash
    gcloud run deploy llmops-mcp-server \
      --image gcr.io/VOTRE_PROJECT_ID/llmops-mcp-server:latest \
      --platform managed \
      --region europe-west1 \
      --allow-unauthenticated \
+     --port 8000 \
      --set-env-vars LLMOPS_TRANSPORT=sse \
-     --set-secrets="OPENAI_API_KEY=openai-api-key:latest"
+     --set-secrets="OPENAI_API_KEY=openai-api-key:latest,LLMOPS_AUTH_TOKEN=llmops-auth-token:latest"
    ```
 
+### C. Partager l'accès à votre serveur MCP avec vos collègues
 
+Pour donner l'accès à un collègue tout en bloquant les personnes non autorisées, transmettez-lui simplement l'extrait de configuration suivant à coller dans son IDE (**Claude Desktop, Antigravity, Cursor, VS Code**) :
+
+**Dans son fichier `mcp_config.json` local :**
+```json
+{
+  "mcpServers": {
+    "llmops-architecture-kb": {
+      "url": "https://llmops-mcp-server-344571265365.europe-west1.run.app/sse?token=llmops-token-2026-sec-98a41f"
+    }
+  }
+}
+```
+
+*Note : Toute requête effectuée sans ce jeton secret recevra un rejet `HTTP 401 Unauthorized`.*
 
 ---
+
 
 ## ❓ 8. Résolution des Problèmes Fréquents (FAQ)
 

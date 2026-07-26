@@ -128,3 +128,61 @@ La validation sémantique garantit que l'agent consommant le FastMCP produit des
   - `ci.yml` : Validation syntaxique, linting (Ruff), typage (Mypy) et tests unitaires.
   - `ingest-kb.yml` : Reconstitution du graphe Kùzu DB lors d'un push sur `main` modifiant `data/kb/`.
   - `eval.yml` : Exécution des évaluations DeepEval en CI.
+
+---
+
+## 8. Diagramme de Flux d'Interactions (Antigravity ↔ GCP Cloud Run ↔ OpenAI)
+
+Le schéma ci-dessous détaille le flux d'exécution et les échanges de données sécurisés entre l'environnement de développement local (Antigravity), le serveur FastMCP hébergé en Serverless sur GCP Cloud Run, et l'API OpenAI :
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as 👤 Utilisateur / Développeur
+    participant AG as 🤖 Antigravity (IDE Local / Agent)
+    box GCP Cloud Run (Serverless Europe-West1)
+        participant MCP as ⚡ Serveur FastMCP (FastAPI/Uvicorn)
+        participant SM as 🔐 GCP Secret Manager
+        participant KUZU as 📊 Kùzu Graph DB (Lecture Seule)
+    end
+    participant OAI as 🧠 OpenAI API (Embeddings / LLM)
+
+    User->>AG: Requête (ex: "Génère le document HLA selon la KB")
+    AG->>AG: Analyse du besoin & identification de l'outil FastMCP
+    
+    note over AG,MCP: Connexion HTTP/SSE Sécurisée sur Port 8000 (HTTPS)
+    AG->>MCP: Appel d'outil FastMCP JSON-RPC (POST /messages?session_id=...)<br/>ex: get_asset("TPL-hla-section-map") / query_graph(...)
+    
+    rect rgb(240, 248, 255)
+        note over MCP,SM: Résolution des secrets & interrogation du graphe
+        MCP->>SM: Récupération sécurisée de OPENAI_API_KEY (IAM Role)
+        SM-->>MCP: Clé API déchiffrée en mémoire conteneur
+        MCP->>KUZU: Exécution requête Cypher / Lecture documentaire
+        KUZU-->>MCP: Résultats typés (Entités, ADRs, Principes, Dépendances)
+    end
+
+    opt Appel facultatif à OpenAI (Extraction sémantique ou Évaluations)
+        MCP->>OAI: Requête Completion / Embedding (api.openai.com)
+        OAI-->>MCP: Réponse LLM / Embeddings
+    end
+
+    MCP-->>AG: Stream SSE (text/event-stream) — Résultat structuré JSON-RPC
+    AG->>AG: Synthèse et construction de l'artefact (HLA / Draw.io / Doc)
+    AG-->>User: Présentation du résultat final dans l'interface Antigravity
+```
+
+### 💡 Points clés d'architecture & sécurité :
+- **Séparation des responsabilités :** Antigravity gère le raisonnement local et le dialogue avec le développeur, tandis que le serveur FastMCP sur GCP Cloud Run sert de coffre-fort de connaissances structuré et déterministe.
+- **Sécurité des secrets :** `OPENAI_API_KEY` n'est jamais exposée ni envoyée par Antigravity : elle est directement injectée par **GCP Secret Manager** dans la mémoire du conteneur Cloud Run au moment de l'exécution via IAM.
+- **Transport SSE / HTTP2 :** Les échanges entre Antigravity et Cloud Run s'effectuent en streaming temps réel via **Server-Sent Events (SSE)**.
+
+### ❓ Pourquoi l'appel à OpenAI est-il facultatif au niveau du Serveur FastMCP ?
+
+1. **Sans appel à OpenAI (0 cost, 0ms latence LLM, 100% déterministe)** :
+   Lorsqu'Antigravity appelle un outil MCP standard (`get_asset`, `list_assets`, `get_decision_trail`, `query_graph`, `get_glossary_term`), le serveur FastMCP interroge directement la base de connaissances embarquée **Kùzu DB**. La donnée (Markdown, JSON-RPC, relations Cypher) est renvoyée de manière **purement symbolique et déterministe** sans faire appel à l'API OpenAI. C'est Antigravity qui réalise la synthèse.
+
+2. **Avec appel à OpenAI (`api.openai.com`)** :
+   Un appel à OpenAI est déclenché dans les cas suivants :
+   - **Ingestion automatique du graphe (`pipelines/ingestion/`)** : Le parser LlamaIndex `SchemaLLMPathExtractor` utilise OpenAI pour extraire les entités et relations implicites des nouveaux documents Markdown.
+   - **Évaluations automatisées (`tests/evals/semantic/`)** : DeepEval interroge OpenAI pour calculer les métriques de fidélité sémantique (*Faithfulness*) et de pertinence (*Answer Relevancy*).
+   - **Recherche hybride / Embeddings (Extensions futures)** : Calcul d'embeddings vectoriels pour des requêtes en langage naturel sur le texte libre des documents.

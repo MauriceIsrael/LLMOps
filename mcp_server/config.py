@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     TRANSPORT: str = "stdio"  # "stdio" pour CLI/Cursor local, "sse" pour Docker/Cloud Run
     HOST: str = "0.0.0.0"
     PORT: int = 8000
+    AUTH_TOKEN: str | None = None  # Jeton Bearer / API Key pour sécuriser l'accès SSE
+
 
     class Config:
         env_prefix = "LLMOPS_"
