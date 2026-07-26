@@ -20,14 +20,19 @@ console = Console()
 
 def ingest(
     kb_dir: Path = typer.Option(
-        default=Path("data/kb"),
+        Path("data/kb"),
+        "--kb-dir",
+        "-k",
         help="Répertoire racine de la base de connaissances d'architecture.",
     ),
     db_path: Path = typer.Option(
-        default=Path("data/kuzu_db"),
+        Path("data/kuzu_db"),
+        "--db-path",
+        "-d",
         help="Répertoire de stockage de la base Kùzu DB.",
     ),
 ) -> None:
+
 
     """Ingère tous les fichiers Markdown du dossier KB et construit le graphe dans Kùzu DB."""
     console.print(f"[bold blue]🚀 Démarrage de l'ingestion depuis :[/bold blue] {kb_dir}")

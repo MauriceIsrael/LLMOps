@@ -184,15 +184,23 @@ Cloud Run permet d'héberger le serveur FastMCP à moindre coût (scale-to-zero,
    gcloud builds submit --tag gcr.io/VOTRE_PROJECT_ID/llmops-mcp-server:latest -f docker/Dockerfile.cloudrun .
    ```
 
-2. **Déployer sur Cloud Run** :
+2. **Stocker la clé d'API dans GCP Secret Manager (Sécurité recommandée)** :
+   ```bash
+   gcloud secrets create openai-api-key --replication-policy="automatic"
+   echo -n "sk-proj-..." | gcloud secrets versions add openai-api-key --data-file=-
+   ```
+
+3. **Déployer sur Cloud Run** :
    ```bash
    gcloud run deploy llmops-mcp-server \
      --image gcr.io/VOTRE_PROJECT_ID/llmops-mcp-server:latest \
      --platform managed \
      --region europe-west1 \
      --allow-unauthenticated \
-     --set-env-vars LLMOPS_TRANSPORT=sse,OPENAI_API_KEY=sk-...
+     --set-env-vars LLMOPS_TRANSPORT=sse \
+     --set-secrets="OPENAI_API_KEY=openai-api-key:latest"
    ```
+
 
 
 ---
