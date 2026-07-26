@@ -1,6 +1,7 @@
 """Outils FastMCP pour la navigation graphique et l'exécution de requêtes Cypher dans Kùzu DB."""
 
 from typing import Any
+
 from mcp_server.db.kuzu_client import KuzuClient
 
 db_client = KuzuClient()

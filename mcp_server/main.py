@@ -1,6 +1,9 @@
 """Point d'entrée du serveur FastMCP pour la Base de Connaissances d'Architecture."""
 
+import os
+
 from fastmcp import FastMCP
+
 from mcp_server.config import settings
 from mcp_server.tools.asset_tools import (
     get_asset,
@@ -24,9 +27,6 @@ mcp.tool()(query_graph)
 mcp.tool()(get_graph_summary)
 
 
-import os
-
-
 def main() -> None:
     """Point d'entrée CLI exécutable pour démarrer le serveur FastMCP sur STDIO ou SSE/HTTP."""
     transport = os.getenv("LLMOPS_TRANSPORT", settings.TRANSPORT).lower()
@@ -34,11 +34,11 @@ def main() -> None:
     host = os.getenv("HOST", settings.HOST)
 
     if transport in ("sse", "http"):
-        mcp.run(transport="sse")
+        mcp.run(transport="sse", host=host, port=port)
     else:
         mcp.run(transport="stdio")
 
 
-
 if __name__ == "__main__":
     main()
+

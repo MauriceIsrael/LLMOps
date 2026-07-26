@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Generates the 5 architecture diagrams (v1.0, English) in SVG then PNG."""
 import cairosvg
 

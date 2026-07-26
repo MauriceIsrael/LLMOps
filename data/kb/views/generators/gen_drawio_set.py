@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Full v1.1 drawio set: 8 pages, English."""
 import importlib.util
 

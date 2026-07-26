@@ -1,12 +1,11 @@
 """CLI Typer pour lancer le pipeline d'ingestion de la base de connaissances dans Kùzu DB."""
 
 from pathlib import Path
+
+import typer
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.progress import track
-import typer
-
-load_dotenv()
 
 from pipelines.ingestion.graph_loader import KuzuGraphLoader
 from pipelines.ingestion.llama_extractor import ArchitectureGraphExtractor
@@ -16,6 +15,7 @@ app = typer.Typer(
     help="CLI d'ingestion des documents d'architecture Markdown vers le Graphe de Connaissances Kùzu DB."
 )
 console = Console()
+
 
 
 def ingest(
@@ -32,10 +32,10 @@ def ingest(
         help="Répertoire de stockage de la base Kùzu DB.",
     ),
 ) -> None:
-
-
     """Ingère tous les fichiers Markdown du dossier KB et construit le graphe dans Kùzu DB."""
+    load_dotenv()
     console.print(f"[bold blue]🚀 Démarrage de l'ingestion depuis :[/bold blue] {kb_dir}")
+
 
     if not kb_dir.exists():
         console.print(f"[bold red]❌ Le répertoire {kb_dir} n'existe pas.[/bold red]")

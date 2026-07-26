@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Generates a .drawio file (4 pages) with the 4 architecture views in English."""
 import html
 import uuid

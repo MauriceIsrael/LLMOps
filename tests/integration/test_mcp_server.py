@@ -1,6 +1,6 @@
 """Tests d'intégration des outils exposés par le serveur FastMCP."""
 
-from mcp_server.tools.asset_tools import list_assets, get_glossary_term, get_decision_trail
+from mcp_server.tools.asset_tools import get_decision_trail, get_glossary_term, list_assets
 
 
 def test_list_assets_tool() -> None:

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Validates front matter of every asset. Run before pushing; CI runs the same."""
-import sys, os, json, re, datetime
+import datetime
+import json
+import os
+import re
+import sys
 
 try:
     import yaml

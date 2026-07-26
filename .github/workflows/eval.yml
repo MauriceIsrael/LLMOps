@@ -30,4 +30,5 @@ jobs:
       - name: Run DeepEval Semantic Tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: poetry run deepeval test run tests/evals/deepeval/test_semantic_regression.py
+        run: poetry run deepeval test run tests/evals/semantic/test_semantic_regression.py
+

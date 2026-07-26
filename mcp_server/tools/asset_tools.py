@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Any
+
 from mcp_server.config import settings
 from mcp_server.db.kuzu_client import KuzuClient
 from pipelines.ingestion.markdown_parser import MarkdownDocParser

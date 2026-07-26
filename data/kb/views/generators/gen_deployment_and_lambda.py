@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Figure 6 (deployment view) and Figure 7 (lambda / prod-preprod view)."""
 import importlib.util
 

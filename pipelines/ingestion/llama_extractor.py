@@ -1,6 +1,7 @@
 """Extracteur d'ontologie et de graphe d'architecture utilisant LlamaIndex PropertyGraph."""
 
 from typing import Any
+
 from llama_index.core.graph_stores.types import EntityNode, Relation
 
 

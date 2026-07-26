@@ -1,6 +1,7 @@
 """Tests unitaires pour le client Kùzu DB."""
 
 import pytest
+
 from mcp_server.db.kuzu_client import KuzuClient
 
 

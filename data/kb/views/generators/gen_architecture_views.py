@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """v1.2 diagrams: local CPU inference, SUSE Observability (infra) + Elastic (service)."""
 import importlib.util
 
@@ -205,6 +204,7 @@ src = src.replace("Liz supervisor and agents · read-only MCP tools · prepares,
                   "Liz supervisor and agents · local inference · read-only MCP tools · prepares, never executes")
 open("/home/claude/archi/v4_functional_view.svg", "w").write(src)
 import cairosvg
+
 cairosvg.svg2png(url="/home/claude/archi/v4_functional_view.svg",
                  write_to="/home/claude/archi/v4_functional_view.png", scale=2.0)
 print("OK /home/claude/archi/v4_functional_view.svg")

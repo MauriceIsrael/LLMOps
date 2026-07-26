@@ -2,7 +2,9 @@
 
 from pathlib import Path
 from typing import Any
+
 import kuzu
+
 from mcp_server.config import settings
 
 
