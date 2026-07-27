@@ -1,8 +1,8 @@
-<!-- elicit:nordwave-mcx-2027:Q-0001:question:sha=4c333c -->
-### Quelle est l'architecture de la section 5.2 (Architecture Stockage Management) ?
+<!-- elicit:nordwave-mcx-2027:Q-0001:question:sha=66725f -->
+### Quelle est l'architecture de la section 4.1 (MCX Services Boundary & Framing) ?
 
 **Why this matters**
-La section 5.2 (Architecture Stockage Management) ne contient aucun énoncé d'architecture. (Sections bloquées : `5.2`)
+La section 4.1 (MCX Services Boundary & Framing) ne contient aucun énoncé d'architecture. (Sections bloquées : `4.1`)
 
 **Please use these terms**
 - Sujet canonique : `mcx-services`

@@ -13,7 +13,13 @@ from tools.elicitation.repository import ElicitationRepository
 def repo(tmp_path):
     """Fixture retournant un repository Elicitation isolée."""
     db_path = tmp_path / "kuzu_db"
-    return ElicitationRepository(db_path=db_path)
+    r = ElicitationRepository(db_path=db_path)
+    yield r
+    r.close()
+    from mcp_server.db.kuzu_client import KuzuClient
+    KuzuClient.clear_cache()
+    import gc
+    gc.collect()
 
 
 def test_question_matches_subject_level(repo, tmp_path):
@@ -22,8 +28,9 @@ def test_question_matches_subject_level(repo, tmp_path):
     repo.save_subject("Storage-5.2")
     repo.advance_subject_level("Storage-5.2", "L1_framed")
 
+    sections = [{"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L0_named"}]
     graph = build_scan_graph()
-    res = graph.invoke({"engagement": "test-mat-1", "db_path": str(db_path)})
+    res = graph.invoke({"engagement": "test-mat-1", "sections": sections, "db_path": str(db_path)})
 
     questions = res.get("questions", [])
     assert len(questions) > 0
@@ -38,9 +45,9 @@ def test_level_gate_holds_premature_question(repo, tmp_path):
     repo.save_subject("Storage-5.2")
     repo.advance_subject_level("Storage-5.2", "L1_framed")
 
-    # Déclencher un scan avec une exigence L4
+    sections = [{"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L4_specified"}]
     graph = build_scan_graph()
-    res = graph.invoke({"engagement": "test-gate-1", "db_path": str(db_path)})
+    res = graph.invoke({"engagement": "test-gate-1", "sections": sections, "db_path": str(db_path)})
 
     # Si la question requiert L4 alors que le sujet est L1, enrich_node la retient (held_premature)
     enriched = res.get("enriched_gaps", [])
@@ -56,12 +63,16 @@ def test_patterns_proposed_at_l2(repo, tmp_path):
     repo.save_subject("Storage-5.2")
     repo.advance_subject_level("Storage-5.2", "L2_decomposed")
 
+    sections = [
+        {"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L0_named"},
+    ]
     graph = build_scan_graph()
-    res = graph.invoke({"engagement": "test-l2-patterns", "db_path": str(db_path)})
+    res = graph.invoke({"engagement": "test-l2-patterns", "sections": sections, "db_path": str(db_path)})
 
     questions = res.get("questions", [])
     assert len(questions) > 0
-    q_text = questions[0]["question"]
+    q_l2 = next(q for q in questions if q.get("subject") == "Storage-5.2" or "Pattern" in q.get("question", ""))
+    q_text = q_l2["question"]
     assert "Pattern proposé" in q_text
     assert "Quand ne pas utiliser" in q_text
 
@@ -109,7 +120,8 @@ def test_section_readiness(repo, tmp_path):
     res = graph.invoke({"engagement": "test-readiness", "db_path": str(db_path)})
 
     assert res["is_provisional"] is True
-    assert "Storage-5.2" in res["unripe_subjects"]
+    unripe_names = [u["subject"] if isinstance(u, dict) else u for u in res["unripe_subjects"]]
+    assert "Storage-5.2" in unripe_names
 
 
 def test_prior_answer_goes_to_confirmation_batch(repo, tmp_path):
@@ -129,8 +141,11 @@ def test_prior_answer_goes_to_confirmation_batch(repo, tmp_path):
     import gc
     gc.collect()
 
+    sections = [
+        {"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L0_named"},
+    ]
     graph = build_scan_graph()
-    res = graph.invoke({"engagement": "test-prior-batch", "db_path": str(db_path)})
+    res = graph.invoke({"engagement": "test-prior-batch", "sections": sections, "db_path": str(db_path)})
     enriched = res.get("enriched_gaps", [])
     target = [g for g in enriched if g["subject"] == "Storage-5.2"][0]
     assert target["prior_answer"]["value"] == "SAN NVMe dual-controller"

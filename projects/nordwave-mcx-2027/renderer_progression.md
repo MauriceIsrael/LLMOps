@@ -7,11 +7,11 @@ Ce document rassemble les sorties **réellement générées par les renderers Ji
 
 ### 📨 Fiche Question générée par le Question Renderer (`question.md.j2`) :
 ```markdown
-<!-- elicit:nordwave-mcx-2027:Q-0001:question:sha=4c333c -->
-### Quelle est l'architecture de la section 5.2 (Architecture Stockage Management) ?
+<!-- elicit:nordwave-mcx-2027:Q-0001:question:sha=66725f -->
+### Quelle est l'architecture de la section 4.1 (MCX Services Boundary & Framing) ?
 
 **Why this matters**
-La section 5.2 (Architecture Stockage Management) ne contient aucun énoncé d'architecture. (Sections bloquées : `5.2`)
+La section 4.1 (MCX Services Boundary & Framing) ne contient aucun énoncé d'architecture. (Sections bloquées : `4.1`)
 
 **Please use these terms**
 - Sujet canonique : `mcx-services`
@@ -65,12 +65,13 @@ Copiez la commande suivante et répondez :
 ### Section 4.1
 
 - Énoncé validé (`designed`) par Amina Duarte : `is_constrained_by` = `3GPP MC service layer boundary`.
+  > *Verbatim :* "The MCX layer delivers group voice. Boundary is 3GPP MC service layer."
+- Énoncé validé (`stated-by-client`) par Amina Duarte : `has_property` = `group voice must survive site isolation from national data centres`.
+  > *Verbatim :* "The MCX layer delivers group voice. Boundary is 3GPP MC service layer."
+- Énoncé validé (`designed`) par Amina Duarte : `is_constrained_by` = `3GPP MC service layer boundary`.
   > *Verbatim :* ""
 - Énoncé validé (`stated-by-client`) par Amina Duarte : `has_property` = `group voice must survive site isolation from national data centres`.
   > *Verbatim :* ""
-
----
-## ⚠️ Registre des Conflits Ouverts
 
 ```
 
@@ -79,12 +80,14 @@ Copiez la commande suivante et répondez :
 
 ### 📌 Maturity Board généré par le Maturity Board Renderer (`maturity_board.md.j2`) :
 ```markdown
-<!-- elicit:nordwave-mcx-2027:maturity_board:board:sha=a49d8e -->
+<!-- elicit:nordwave-mcx-2027:maturity_board:board:sha=6b35ea -->
 ### 📊 Tableau de Maturité des Sujets d'Architecture (Maturity Board) — nordwave-mcx-2027
 
 | Sujet Canonique | Niveau Atteint | Blocage / Question Ouverte | Assigné À | Délais au Niveau | Stagnation (> 7 j) | Sections Dépendantes |
 |---|---|---|---|---|---|---|
 | `mcx-services` | `L2_decomposed` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `mobile-core` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `transport` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `group-management` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `floor-control` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `media-distribution` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
@@ -100,8 +103,8 @@ Copiez la commande suivante et répondez :
 
 ### ⚠️ Fiche Conflit générée par le Conflict Renderer (`conflict.md.j2`) :
 ```markdown
-<!-- elicit:nordwave-mcx-2027:C-1785097433689:conflict:sha=f42598 -->
-### ⚠️ Registre de Conflit d'Architecture — C-1785097433689
+<!-- elicit:nordwave-mcx-2027:C-0001:conflict:sha=fd6778 -->
+### ⚠️ Registre de Conflit d'Architecture — C-0001
 
 **Sujet & Prédicat Contestés :** `floor-control` · `has_property / depends_on`
 **Détail :** Tension inter-prédicats décelée sur floor-control (has_property vs depends_on).
@@ -110,7 +113,7 @@ Copiez la commande suivante et répondez :
 - **Énoncé `S-0034`** par Amina Duarte (Rôle : `mcx-service-architect`) le  :
   - Valeur proposé : `arbitration terminates in the MC service layer, at the site` (Confiance : `designed`)
   - *Verbatim :* ""
-- **Énoncé `S-1785097433682`** par Rui Vasconcelos (Rôle : `mobile-core-architect`) le  :
+- **Énoncé `S-0006`** par Rui Vasconcelos (Rôle : `mobile-core-architect`) le  :
   - Valeur proposé : `depends on a committed priority and pre-emption profile in the core` (Confiance : `designed`)
   - *Verbatim :* ""
 
@@ -129,14 +132,14 @@ Exécutez la commande suivante en précisant obligatoirement la raison d'archite
 
 ### ✅ Fiche Arbitrage générée par le Arbitration Renderer (`arbitration.md.j2`) :
 ```markdown
-<!-- elicit:nordwave-mcx-2027:C-1785097433689:arbitration:sha=d22b8d -->
-### ⚖️ Rapport d'Arbitrage — Conflit C-1785097433689
+<!-- elicit:nordwave-mcx-2027:C-0001:arbitration:sha=bd8b76 -->
+### ⚖️ Rapport d'Arbitrage — Conflit C-0001
 
 **Arbitré par :** `Sofia Lindqvist`
 
 #### Décision d'Architecture :
-- **Énoncé Conservé (Actif) :** `S-1785097433682` (`floor-control` · `depends_on` = `depends on a committed priority and pre-emption profile in the core`) par Rui Vasconcelos.
-- **Énoncé Rendu Caduc (`superseded`) :** `S-1785097433670` (`floor-control` · `has_property` = `floor arbitration terminates in the MC service layer at the site`) par Amina Duarte.
+- **Énoncé Conservé (Actif) :** `S-0006` (`floor-control` · `depends_on` = `depends on a committed priority and pre-emption profile in the core`) par Rui Vasconcelos.
+- **Énoncé Rendu Caduc (`superseded`) :** `S-0005` (`floor-control` · `has_property` = `floor arbitration terminates in the MC service layer at the site`) par Amina Duarte.
 
 > 📌 **Note d'historique :** L'énoncé rendu caduc reste conservé dans l'historique d'architecture et constitue un candidat de promotion si l'expérience terrain le justifie ultérieurement.
 
@@ -151,13 +154,17 @@ Exécutez la commande suivante en précisant obligatoirement la raison d'archite
 ```markdown
 # Document d'Architecture System — Engagement nordwave-mcx-2027
 **Statut du Document :** `PROVISIONAL`
-**Conflits Ouverts :** 0
+**Conflits Ouverts :** 1
 
 ---
 ## Sections Rédigées
 
 ### Section 4.1
 
+- Énoncé validé (`designed`) par Amina Duarte : `is_constrained_by` = `3GPP MC service layer boundary`.
+  > *Verbatim :* "The MCX layer delivers group voice. Boundary is 3GPP MC service layer."
+- Énoncé validé (`stated-by-client`) par Amina Duarte : `has_property` = `group voice must survive site isolation from national data centres`.
+  > *Verbatim :* "The MCX layer delivers group voice. Boundary is 3GPP MC service layer."
 - Énoncé validé (`designed`) par Amina Duarte : `is_constrained_by` = `3GPP MC service layer boundary`.
   > *Verbatim :* ""
 - Énoncé validé (`stated-by-client`) par Amina Duarte : `has_property` = `group voice must survive site isolation from national data centres`.
@@ -167,22 +174,25 @@ Exécutez la commande suivante en précisant obligatoirement la raison d'archite
 
 - Énoncé validé (`designed`) par Amina Duarte : `has_property` = `floor arbitration terminates in the MC service layer at the site`.
   > *Verbatim :* ""
-- Énoncé validé (`designed`) par Rui Vasconcelos : `depends_on` = `depends on a committed priority and pre-emption profile in t`.
+- Énoncé validé (`designed`) par Rui Vasconcelos : `depends_on` = `depends on a committed priority and pre-emption profile in the core`.
   > *Verbatim :* "depends on a committed priority and pre-emption profile in the core"
 
 ---
 ## ⚠️ Registre des Conflits Ouverts
 
+- **Conflit `C-0001`** (contradiction) : Contestation de l'énoncé S-0005 par Rui Vasconcelos (mobile-core-architect) : depends on a committed priority and pre-emption profile in the core
 ```
 
 ### 📌 Maturity Board Final généré par le Renderer :
 ```markdown
-<!-- elicit:nordwave-mcx-2027:maturity_board:board:sha=1387ab -->
+<!-- elicit:nordwave-mcx-2027:maturity_board:board:sha=9e5733 -->
 ### 📊 Tableau de Maturité des Sujets d'Architecture (Maturity Board) — nordwave-mcx-2027
 
 | Sujet Canonique | Niveau Atteint | Blocage / Question Ouverte | Assigné À | Délais au Niveau | Stagnation (> 7 j) | Sections Dépendantes |
 |---|---|---|---|---|---|---|
 | `mcx-services` | `L2_decomposed` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `mobile-core` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `transport` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `group-management` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `floor-control` | `L3_decided` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `media-distribution` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |

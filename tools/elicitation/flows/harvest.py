@@ -1,6 +1,7 @@
 """Flux D : Harvest (Récolte des candidats à la promotion dans la base de connaissance)."""
 
 from typing import Any
+
 from langgraph.graph import END, StateGraph
 from typing_extensions import TypedDict
 

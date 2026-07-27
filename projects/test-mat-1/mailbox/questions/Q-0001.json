@@ -1,8 +1,8 @@
 {
   "id": "Q-0001",
   "engagement": "test-mat-1",
-  "question": "Quelle est l'architecture de la section 5.2 (Architecture Stockage Management) ?",
-  "why_it_matters": "La section 5.2 (Architecture Stockage Management) ne contient aucun énoncé d'architecture.",
+  "question": "Quelle est l'architecture de la section 5.2 (Storage System) ?",
+  "why_it_matters": "La section 5.2 (Storage System) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "cloud-architect"
+  "routed_to": "mobile-core-architect"
 }

@@ -1,8 +1,8 @@
 {
   "id": "Q-0001",
   "engagement": "nordwave-mcx-2027",
-  "question": "Quelle est l'architecture de la section 5.4 (Transport Topology & Redundancy) ?",
-  "why_it_matters": "La section 5.4 (Transport Topology & Redundancy) ne contient aucun énoncé d'architecture.",
+  "question": "Quelle est l'architecture de la section 4.2 (Floor Control Latency Budget) ?",
+  "why_it_matters": "La section 4.2 (Floor Control Latency Budget) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mobile-core-architect"
+  "routed_to": "mcx-service-architect"
 }

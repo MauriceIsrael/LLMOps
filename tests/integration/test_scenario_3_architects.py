@@ -1,13 +1,12 @@
 """Test d'intégration automatisé du scénario d'élicitation collaboratif avec 3 acteurs fictifs (Alice, Bob, Charlie)."""
 
-import pytest
-from pathlib import Path
 
-from tools.elicitation.repository import ElicitationRepository
-from tools.elicitation.flows.scan import build_scan_graph
-from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
-from tools.elicitation.flows.assemble import build_assemble_graph
 from langgraph.types import Command
+
+from tools.elicitation.flows.assemble import build_assemble_graph
+from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
+from tools.elicitation.flows.scan import build_scan_graph
+from tools.elicitation.repository import ElicitationRepository
 
 
 def test_end_to_end_3_architects_scenario(tmp_path):
@@ -80,8 +79,9 @@ def test_end_to_end_3_architects_scenario(tmp_path):
         arbitrated_by="Charlie",
     )
 
-    # Avancer la maturité du sujet à L3 pour débloquer la section readiness
-    repo.advance_subject_level("Storage-5.2", "L3_decided")
+    # Avancer la maturité des sujets à L3 pour débloquer la section readiness
+    for s_info in repo.get_subjects_maturity_board(engagement):
+        repo.advance_subject_level(s_info["subject"], "L3_decided")
     repo.close()
     del repo
     import gc

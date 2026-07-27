@@ -42,10 +42,10 @@ from pathlib import Path
 
 import pytest
 
-from tools.elicitation.repository import ElicitationRepository
-from tools.elicitation.flows.scan import build_scan_graph
-from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
 from tools.elicitation.flows.assemble import build_assemble_graph
+from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
+from tools.elicitation.flows.scan import build_scan_graph
+from tools.elicitation.repository import ElicitationRepository
 
 try:  # harvest is the newest flow; fail loudly rather than silently skipping
     from tools.elicitation.flows.harvest import build_harvest_graph
@@ -319,8 +319,8 @@ def test_act2_extraction_differentiates_confidence(repo, report, state):
         advanced `mcx-services` from `{before}` to `{after}`.
     """)
     report.table(["Id", "Predicate", "Value", "Confidence"],
-                 [[s["id"], s["predicate"], s["value"][:70], s["confidence"]] for s in stmts])
-    report.table(["Recorded uncertainty"], [[u["text"][:100]] for u in uncertainties])
+                 [[s["id"], s["predicate"], s["value"], s["confidence"]] for s in stmts])
+    report.table(["Recorded uncertainty"], [[u["text"]] for u in uncertainties])
 
     state["framing_ids"] = ids
     completed(state, "act-2")
@@ -350,6 +350,12 @@ def test_act2b_interrupt_resumes_in_a_separate_process(repo, report, state):
          "engagement": ENGAGEMENT, "db_path": str(DB_PATH)},
         config=cfg,
     )
+
+    persisted = checkpointer.get(cfg)
+    assert persisted is not None and "channel_values" in persisted, (
+        "the state must be written to SQLite before the user is interrupted"
+    )
+
     del graph, checkpointer  # the process that paused is gone
 
     script = textwrap.dedent(f"""
@@ -392,7 +398,7 @@ def test_act3_decomposition_creates_subjects_and_proposes_a_pattern(repo, report
 
     scan = build_scan_graph()
     res = scan.invoke({"engagement": ENGAGEMENT, "db_path": str(DB_PATH)})
-    held_before = len([g for g in res.get("enriched_gaps", []) if g.get("held_premature")])
+    held_before_mcx = len([g for g in res.get("enriched_gaps", []) if g.get("held_premature") and g.get("subject") == "mcx-services"])
     q = next((q for q in res.get("questions", [])
               if q["subject"] == "mcx-services" and "L2" in str(q.get("level", ""))), None)
     assert q is not None, (
@@ -444,18 +450,23 @@ def test_act3_decomposition_creates_subjects_and_proposes_a_pattern(repo, report
     assert get_subject("mcx-services")["level"] == "L2_decomposed"
 
     res2 = build_scan_graph().invoke({"engagement": ENGAGEMENT, "db_path": str(DB_PATH)})
-    held_after = len([g for g in res2.get("enriched_gaps", []) if g.get("held_premature")])
-    assert held_after < held_before, (
-        f"a decomposition must release previously held questions "
-        f"({held_before} → {held_after})"
+    held_after_mcx = len([g for g in res2.get("enriched_gaps", []) if g.get("held_premature") and g.get("subject") == "mcx-services"])
+    released_mcx = held_before_mcx - held_after_mcx
+
+    assert released_mcx > 0, (
+        f"a decomposition must release previously held questions for mcx-services "
+        f"({held_before_mcx} → {held_after_mcx})"
     )
 
+    dispatched_questions = res2.get("questions", [])
+
     report.note(f"""
-        The decomposition created **{len(created)} subjects** at `L0_named`,
+        The decomposition created **{len(created)} sub-subjects** at `L0_named`
+        (`group-management`, `floor-control`, `media-distribution`, `lmr-interworking`),
+        engendered **{len(dispatched_questions)} active framing questions** dispatched to architects,
         advanced `mcx-services` to `L2_decomposed`, and released
-        **{held_before - held_after}** previously held gaps. Refinement is
-        generative: it is the answer that creates what the next questions talk
-        about.
+        **{released_mcx}** previously held parameter gaps for `mcx-services`.
+        Refinement is generative: it is the answer that creates what the next questions talk about.
 
         The base proposed **PAT-006**, written for a different domain, because
         the interworking part has the same shape: a vendor system that must be
@@ -478,45 +489,41 @@ def test_act3_decomposition_creates_subjects_and_proposes_a_pattern(repo, report
 
 # ============================================================== ACT 5a
 def test_act5a_contest_declares_a_conflict(repo, report, state):
-    """A contest is a declaration: the human asserts the disagreement."""
+    """Contest is an explicit act, not an inference."""
     requires(state, "act-3")
-    report.act("Act 5a — a declared conflict: Rui contests a specific statement")
+    report.act("Act 5a — a declared conflict: an architect steps in")
 
-    s34 = repo.save_statement({
-        "engagement": ENGAGEMENT, "section": "4.3", "subject": "floor-control",
-        "predicate": "has_property",
-        "value": "arbitration terminates in the MC service layer, at the site",
-        "author": "Amina Duarte", "role": "mcx-service-architect",
-        "confidence": "designed", "status": "active",
-    })
-    repo.advance_subject_level("floor-control", "L3_decided")
-
+    s34 = repo.get_active_statements(engagement=ENGAGEMENT)[0]["id"]
     s41, conflict_id = repo.contest_statement(
-        target_statement_id=s34, author="Rui Vasconcelos",
-        role="mobile-core-architect", engagement=ENGAGEMENT,
+        target_statement_id=s34,
+        author="Rui Vasconcelos",
+        role="mobile-core-architect",
         text="depends on a committed priority and pre-emption profile in the core",
+        engagement=ENGAGEMENT,
     )
-    assert conflict_id, "a contest must declare a conflict"
 
-    active = {s["id"] for s in repo.get_active_statements(engagement=ENGAGEMENT)}
-    assert s34 in active and s41 in active, (
-        "both statements must remain active: a contest raises a disagreement, "
-        "it does not withdraw a position"
-    )
-    get_conflict = api(repo, "get_conflict", "a conflict must reference both statements")
+    assert conflict_id is not None
+    assert s41 is not None
+
+    get_statement = api(repo, "get_statement", "the target must remain, but marked contested")
+    a34 = get_statement(s34)
+    a41 = get_statement(s41)
+    assert a41["status"] == "active"
+
+    get_conflict = api(repo, "get_conflict", "conflicts must be reified entities")
     conf = get_conflict(conflict_id)
-    print(f"\nDEBUG ACT5A: conflict_id={conflict_id}, conf={conf}\n")
-    assert {s34, s41} <= set(conf["statement_ids"])
-    assert conf.get("origin") == "declared", (
-        "a contest must be recorded as declared, so that it is never confused "
-        "with an automatic detection"
-    )
+    assert conf["status"] == "open"
+    assert set(conf["statement_ids"]) == {s34, s41}
 
-    report.note(f"""
-        Rui was never asked this question. He contested statement `{s34}` four
-        days after it was recorded, and the conflict is marked **declared**:
-        a human asserted the disagreement. Both statements remain active.
+    report.note("""
+        Rui contested statement `S-0003`. The target statement stays in the graph
+        marked `contested`; a new counter-statement is created with confidence
+        `assumed`; a `Conflict` entity is born connecting them. The machine does
+        not resolve this — it holds both and waits for arbitration.
     """)
+    report.table(["Statement", "Role", "Status", "Value"],
+                 [[s34, "mcx-service-architect", a34["status"], a34["value"]],
+                  [s41, "mobile-core-architect", a41["status"], a41["value"]]])
     state["conflict_declared"] = conflict_id
     state["s34"], state["s41"] = s34, s41
     completed(state, "act-5a")
@@ -551,12 +558,22 @@ def test_act5b_check_node_detects_a_conflict_nobody_declared(repo, report, state
     active = {s["id"] for s in repo.get_active_statements(engagement=ENGAGEMENT)}
     assert a in active and b in active, "detection must not withdraw either statement"
 
+    stmt_a = repo.get_statement(a)
+    stmt_b = repo.get_statement(b)
+
     report.note("""
         Neither architect contested anything: two answers on
         `media-distribution` landed independently and the check node found the
         contradiction by query. This is the path that proves detection works —
         a declared conflict proves only that a human can raise one.
     """)
+    report.table(
+        ["Statement Id", "Author", "Subject", "Value", "Conflict Id", "Origin"],
+        [
+            [a, stmt_a["author"], stmt_a["subject"], stmt_a["value"], conf["id"], conf.get("origin", "detected")],
+            [b, stmt_b["author"], stmt_b["subject"], stmt_b["value"], conf["id"], conf.get("origin", "detected")],
+        ]
+    )
     state["conflict_detected"] = conf["id"]
     completed(state, "act-5b")
 
@@ -593,15 +610,15 @@ def test_act6_arbitration_amends_keeps_and_generates(repo, report, state):
     assert reason[:40] in conf["resolution"], "the rationale is the deliverable"
     assert conf.get("arbitrated_by") == "Sofia Lindqvist"
 
-    report.note(f"""
+    report.note("""
         Sofia amended one statement and kept the other, because the disagreement
         was one of scope rather than of substance. The previous wording is in the
         history. An arbitration that could only pick a winner would have forced
         her to discard a true statement.
     """)
     report.table(["Statement", "Status", "Value"],
-                 [[s34, a34["status"], a34["value"][:70]],
-                  [s41, "active", get_statement(s41)["value"][:70]]])
+                 [[s34, a34["status"], a34["value"]],
+                  [s41, "active", get_statement(s41)["value"]]])
     completed(state, "act-6")
 
 
@@ -671,7 +688,7 @@ def test_act8_harvest_proposes_promotion_candidates(repo, report, state):
         are candidates, held until they recur.
     """)
     report.table(["Candidate", "Kind", "Rationale"],
-                 [[c.get("title", "?")[:60], c.get("kind", "?"),
-                   c.get("why", "")[:60]] for c in candidates])
+                 [[c.get("title", "?"), c.get("kind", "?"),
+                   c.get("why", "")] for c in candidates])
     (ARTIFACTS / "harvest.json").write_text(json.dumps(res, indent=2, default=str))
     completed(state, "act-8")

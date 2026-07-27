@@ -1,0 +1,8 @@
+{
+  "id": "Q-0008",
+  "engagement": "nordwave-mcx-2027",
+  "question": "Quelle est l'architecture de la section 4.1.7 (MCX inter-service interface contracts) ?\nPattern proposé : PAT-006 Vendor boundary through northbound interface (Quand ne pas utiliser : Ne pas utiliser si le fournisseur supporte un accès direct modèle.)",
+  "why_it_matters": "La section 4.1.7 (MCX inter-service interface contracts) ne contient aucun énoncé d'architecture.",
+  "expected_shape": "decision",
+  "routed_to": "mcx-service-architect"
+}

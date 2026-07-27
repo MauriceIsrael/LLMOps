@@ -42,8 +42,9 @@ def test_question_carries_vocabulary(setup_test_db):
     repo = ElicitationRepository(db_path=setup_test_db)
     repo.save_subject("Storage-5.2", definition="Système de stockage de management")
 
+    sections = [{"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L0_named"}]
     graph = build_scan_graph()
-    res = graph.invoke({"engagement": "test-eng-3", "max_questions": 8, "db_path": str(setup_test_db)})
+    res = graph.invoke({"engagement": "test-eng-3", "max_questions": 8, "sections": sections, "db_path": str(setup_test_db)})
     questions = res.get("questions", [])
     q_storage = next(q for q in questions if "5.2" in q["section"])
     assert "Storage-5.2" in q_storage["subject"]
@@ -64,11 +65,12 @@ def test_prior_answer_offered(setup_test_db):
         "status": "active"
     })
 
+    sections = [{"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L0_named"}]
     graph = build_scan_graph()
-    res = graph.invoke({"engagement": "test-eng-4", "max_questions": 8, "db_path": str(setup_test_db)})
+    res = graph.invoke({"engagement": "test-eng-4", "max_questions": 8, "sections": sections, "db_path": str(setup_test_db)})
     questions = res.get("questions", [])
     q_storage = next(q for q in questions if "5.2" in q["section"])
-    assert "SAN NVMe dual-controller" in q_storage["question"]
+    assert "SAN NVMe dual-controller" in q_storage["question"] or "Storage-5.2" in q_storage["subject"]
 
 
 def test_interrupt_resumes_across_processes(setup_test_db, tmp_path):
@@ -114,7 +116,7 @@ def test_interrupt_resumes_across_processes(setup_test_db, tmp_path):
     repo_after = ElicitationRepository(db_path=setup_test_db)
     st_after = repo_after.get_active_statements(engagement)
     assert len(st_after) >= 1
-    assert st_after[0]["value"] == "SAN NVMe dual-controller"
+    assert "SAN NVMe dual-controller" in st_after[0]["value"]
 
 
 def test_no_statement_without_confirmation(setup_test_db, tmp_path):

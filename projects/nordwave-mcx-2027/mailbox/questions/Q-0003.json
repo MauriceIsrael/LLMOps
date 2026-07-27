@@ -1,8 +1,8 @@
 {
   "id": "Q-0003",
   "engagement": "nordwave-mcx-2027",
-  "question": "Quelle est l'architecture de la section 4.1.2 (MCX sub-components taxonomy) ?",
-  "why_it_matters": "La section 4.1.2 (MCX sub-components taxonomy) ne contient aucun énoncé d'architecture.",
+  "question": "Quelle est l'architecture de la section 4.5 (LMR Interworking Gateway) ?",
+  "why_it_matters": "La section 4.5 (LMR Interworking Gateway) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
   "routed_to": "mcx-service-architect"
 }

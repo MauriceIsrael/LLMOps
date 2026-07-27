@@ -455,7 +455,7 @@ class ElicitationRepository:
             "section": "4.3",
             "subject": "floor-control",
             "predicate": "depends_on",
-            "value": text[:60],
+            "value": text,
             "author": author,
             "role": role,
             "confidence": "designed",
@@ -467,7 +467,7 @@ class ElicitationRepository:
         c_id = self.save_conflict(
             {
                 "kind": "contradiction",
-                "detail": f"Contestation de l'énoncé {target_statement_id} par {author} ({role}) : {text[:80]}",
+                "detail": f"Contestation de l'énoncé {target_statement_id} par {author} ({role}) : {text}",
                 "status": "open",
                 "origin": "declared",
             },

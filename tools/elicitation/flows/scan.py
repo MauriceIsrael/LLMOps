@@ -10,6 +10,10 @@ from tools.elicitation.mailbox import FileMailbox, QuestionMessage
 from tools.elicitation.repository import ElicitationRepository
 
 
+def _esc(val: Any) -> str:
+    return str(val or "").replace("'", "\\'")
+
+
 class ScanState(TypedDict, total=False):
     """État du flux A : scan."""
     engagement: str
@@ -29,12 +33,12 @@ def load_frame_node(state: ScanState) -> dict[str, Any]:
     db_path = state.get("db_path", "data/kuzu_db")
     sections = state.get("sections") or [
         {"id": "4.1", "name": "MCX Services Boundary & Framing", "subject": "mcx-services", "required_level": "L0_named"},
-        {"id": "4.2", "name": "Floor Control Latency Budget", "subject": "floor-control", "required_level": "L2_decomposed"},
+        {"id": "4.2", "name": "Floor Control Latency Budget", "subject": "floor-control", "required_level": "L0_named"},
         {"id": "4.3", "name": "Floor Control Arbitration", "subject": "floor-control", "required_level": "L3_decided"},
-        {"id": "4.4", "name": "Media Distribution Topology", "subject": "media-distribution", "required_level": "L2_decomposed"},
-        {"id": "4.5", "name": "LMR Interworking Gateway", "subject": "lmr-interworking", "required_level": "L2_decomposed"},
+        {"id": "4.4", "name": "Media Distribution Topology", "subject": "media-distribution", "required_level": "L0_named"},
+        {"id": "4.5", "name": "LMR Interworking Gateway", "subject": "lmr-interworking", "required_level": "L0_named"},
+        {"id": "4.6", "name": "Group Management Domain & Affiliation", "subject": "group-management", "required_level": "L0_named"},
         {"id": "5.1", "name": "Mobile Core Framing & Topology", "subject": "mobile-core", "required_level": "L0_named"},
-        {"id": "5.2", "name": "Subscriber Database Architecture", "subject": "subscriber-db", "required_level": "L2_decomposed"},
         {"id": "5.3", "name": "Mobile Core QoS & Pre-emption Profile", "subject": "mobile-core", "required_level": "L3_decided"},
         {"id": "5.4", "name": "Transport Topology & Redundancy", "subject": "transport", "required_level": "L0_named"},
     ]
@@ -42,12 +46,22 @@ def load_frame_node(state: ScanState) -> dict[str, Any]:
 
 
 def detect_gaps_node(state: ScanState) -> dict[str, Any]:
-    """Détecte de manière 100% déterministe en Cypher les manques (Gaps G1, G2, G3)."""
+    """Détecte de manière 100% déterministe les manques basés sur les sujets réellement nés dans le graphe."""
     db_path = state.get("db_path", "data/kuzu_db")
     db_client = KuzuClient(db_path=db_path, read_only=False)
     engagement = state.get("engagement", "demo-2026")
     repo = ElicitationRepository(db_path=db_path)
     gaps: list[dict[str, Any]] = []
+
+    # S'assurer que les sujets racines existent au premier scan
+    board_subjects = repo.get_subjects_maturity_board(engagement)
+    if not board_subjects:
+        repo.save_subject("mcx-services")
+        repo.save_subject("mobile-core")
+        repo.save_subject("transport")
+        board_subjects = repo.get_subjects_maturity_board(engagement)
+
+    active_subjects = {b["subject"] for b in board_subjects}
 
     # Vérifier l'état de maturité des sujets principaux
     mcx_mat = repo.get_subject_maturity("mcx-services")
@@ -63,12 +77,25 @@ def detect_gaps_node(state: ScanState) -> dict[str, Any]:
             "required_level": "L1_framed",
             "target_level": "L2_decomposed",
             "blocking_count": 4,
-            "blocking": ["4.2", "4.4", "4.5"],
+            "blocking": ["4.2", "4.4", "4.5", "4.6"],
         })
 
-    # Parcourir les sections configurées
+    # Parcourir les sections configurées SEULEMENT pour les sujets qui existent dans la base
     for sec in state.get("sections", []):
         sec_id = sec["id"]
+        sec_sub = sec.get("subject", "mcx-services")
+
+        if sec_sub not in active_subjects:
+            continue
+
+        subj_mat = repo.get_subject_maturity(sec_sub)
+        subj_lvl = subj_mat.get("level", "L0_named")
+        req_lvl = sec.get("required_level", "L0_named")
+
+        # Règle : Une section exigeant L2+ n'est scannée que si le sujet est au moins à L1_framed
+        if req_lvl in ("L2_decomposed", "L3_decided", "L4_specified") and subj_lvl == "L0_named" and sec_sub not in ("mcx-services", "mobile-core", "transport"):
+            continue
+
         q = f"MATCH (s:Statement {{engagement: '{engagement}', section: '{sec_id}', status: 'active'}}) RETURN count(s) as c;"
         res = db_client.execute_cypher(q)
         count = res[0].get("c", 0) if res and "error" not in res[0] else 0
@@ -78,46 +105,68 @@ def detect_gaps_node(state: ScanState) -> dict[str, Any]:
                 "gap_type": "G1_empty_section",
                 "section": sec_id,
                 "section_name": sec["name"],
-                "subject": sec.get("subject", "mcx-services"),
-                "required_level": sec.get("required_level", "L0_named"),
+                "subject": sec_sub,
+                "required_level": req_lvl,
                 "blocking_count": 3 if sec_id.startswith("4.") else (2 if "5." in sec_id else 1),
                 "blocking": [f"{sec_id}.1", f"{sec_id}.2"],
             })
 
-    # Générer des manques granulaires prématurés pour simuler la grille complète (~25-30 manques)
-    premature_specs = [
+    # Manques granulaires prématurés : uniquement pour les sujets DÉJÀ NÉS dans le graphe Kùzu DB
+    all_premature_specs = [
         ("4.1.1", "mcx-services", "MCX service boundary framing", "L1_framed"),
         ("4.1.2", "mcx-services", "MCX sub-components taxonomy", "L2_decomposed"),
+        ("4.1.7", "mcx-services", "MCX inter-service interface contracts", "L2_decomposed"),
+        ("4.1.8", "mcx-services", "MCX service deployment boundaries", "L2_decomposed"),
+        ("4.1.3", "mcx-services", "MCX local site survival mechanism", "L3_decided"),
+        ("4.1.4", "mcx-services", "MCX talkgroup capacity limits", "L4_specified"),
+        ("4.1.5", "mcx-services", "MCX dispatcher console protocol", "L3_decided"),
+        ("4.1.6", "mcx-services", "MCX encryption key profile", "L4_specified"),
+
         ("4.2.1", "floor-control", "Floor Control PTT latency SLA", "L2_decomposed"),
         ("4.2.2", "floor-control", "Floor Control packet drop behavior", "L2_decomposed"),
         ("4.3.1", "floor-control", "Floor Control arbitration queue size", "L3_decided"),
         ("4.3.2", "floor-control", "Floor Control pre-emption override policy", "L3_decided"),
+
         ("4.4.1", "media-distribution", "Multicast stream synchronization", "L2_decomposed"),
         ("4.4.2", "media-distribution", "Unicast fallback trigger threshold", "L2_decomposed"),
+
         ("4.5.1", "lmr-interworking", "Analog gateway transcoding latency", "L2_decomposed"),
         ("4.5.2", "lmr-interworking", "LMR signaling mapping matrix", "L3_decided"),
-        ("5.2.1", "subscriber-db", "HSS/UDM sync protocol", "L2_decomposed"),
-        ("5.2.2", "subscriber-db", "Subscriber profile caching TTL", "L3_decided"),
+
+        ("4.6.1", "group-management", "Group membership sync protocol", "L2_decomposed"),
+        ("4.6.2", "group-management", "Affiliation state caching TTL", "L3_decided"),
+
+        ("5.1.1", "mobile-core", "5G Standalone core topology", "L1_framed"),
+        ("5.1.2", "mobile-core", "UPF placement strategy", "L2_decomposed"),
         ("5.3.1", "mobile-core", "5QI allocation for MC voice", "L3_decided"),
         ("5.3.2", "mobile-core", "ARP priority level mapping", "L3_decided"),
         ("5.3.3", "mobile-core", "Pre-emption vulnerability setting", "L4_specified"),
+        ("5.3.4", "mobile-core", "Network slicing isolation policy", "L3_decided"),
+        ("5.3.5", "mobile-core", "Dual-site active-active core sync", "L3_decided"),
+
+        ("5.4.1", "transport", "Backhaul redundancy framing", "L1_framed"),
+        ("5.4.2", "transport", "Physical link separation", "L2_decomposed"),
         ("5.5.1", "transport", "Backhaul failover convergence time", "L2_decomposed"),
         ("5.5.2", "transport", "IPSec tunnel throughput limit", "L3_decided"),
         ("5.5.3", "transport", "Site isolation local breakout route", "L3_decided"),
+        ("5.5.4", "transport", "Dark fiber path latency SLA", "L3_decided"),
+        ("5.5.5", "transport", "MPLS TE tunnel QoS policy", "L4_specified"),
+
         ("6.1.1", "telco-interconn", "SGi-LAN firewall throughput", "L2_decomposed"),
         ("6.1.2", "telco-interconn", "eNodeB/gNodeB SCTP multihoming", "L3_decided"),
     ]
 
-    for sec_id, subj, name, req_lvl in premature_specs:
-        gaps.append({
-            "gap_type": "G3_unspecified_parameter",
-            "section": sec_id,
-            "section_name": name,
-            "subject": subj,
-            "required_level": req_lvl,
-            "blocking_count": 1,
-            "blocking": [],
-        })
+    for sec_id, subj, name, req_lvl in all_premature_specs:
+        if subj in active_subjects:
+            gaps.append({
+                "gap_type": "G3_unspecified_parameter",
+                "section": sec_id,
+                "section_name": name,
+                "subject": subj,
+                "required_level": req_lvl,
+                "blocking_count": 1,
+                "blocking": [],
+            })
 
     return {"gaps": gaps}
 
@@ -155,6 +204,16 @@ def enrich_node(state: ScanState) -> dict[str, Any]:
                     "when_not_to_use": "Ne pas utiliser si le fournisseur supporte un accès direct modèle.",
                 }
             ]
+
+        # Chercher une réponse antérieure sur un autre engagement (défaut à confirmer)
+        prior_query = f"""
+        MATCH (st:Statement {{status: 'active'}})
+        WHERE st.subject = '{_esc(sub_name)}' AND st.engagement <> '{_esc(state.get('engagement', 'demo-2026'))}'
+        RETURN st.value as value, st.author as author, st.predicate as predicate, st.confidence as confidence;
+        """
+        prior_rows = repo.db_client.execute_cypher(prior_query)
+        if prior_rows and "error" not in prior_rows[0]:
+            gap["prior_answer"] = prior_rows[0]
 
         # Liens de contexte permanents
         gap["draft_ref"] = f"file:///projects/{state.get('engagement', 'demo-2026')}/draft#section-{gap['section']}"
@@ -196,6 +255,12 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
             shape = "decision"
             q_level = "L1_framing"
 
+        candidate_patterns = gap.get("candidate_patterns")
+        if candidate_patterns:
+            p_str = ", ".join(p["name"] for p in candidate_patterns)
+            w_str = ", ".join(p.get("when_not_to_use", "") for p in candidate_patterns)
+            q_text += f"\nPattern proposé : {p_str} (Quand ne pas utiliser : {w_str})"
+
         questions.append(
             {
                 "id": q_id,
@@ -209,6 +274,7 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
                 "subject": sub,
                 "level": q_level,
                 "blocking": gap.get("blocking", []),
+                "candidate_patterns": candidate_patterns,
                 "draft_ref": gap.get("draft_ref"),
                 "subject_ref": gap.get("subject_ref"),
                 "status": "open",

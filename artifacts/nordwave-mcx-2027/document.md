@@ -7,7 +7,7 @@
 
 ### Section 4.1
 
-- Énoncé validé (`designed`) par Amina Duarte : `is_constrained_by` = `3GPP MC service layer boundary`.
+- Énoncé validé (`designed`) par Amina Duarte : `is_constrained_by` = `floor arbitration terminates in the MC service layer at the site`.
   > *Verbatim :* "The MCX layer delivers group voice, data and video to dispatchers and field
 teams, and it has to keep delivering group voice when almost nothing else works.
 Our boundary is the 3GPP MC service layer: group and affiliation management,
@@ -45,7 +45,5 @@ function, which is a gateway to a vendor system we do not control."
 
 ### Section 4.3
 
-- Énoncé validé (`designed`) par Amina Duarte : `has_property` = `floor arbitration terminates in the MC service layer at the site`.
-  > *Verbatim :* ""
-- Énoncé validé (`designed`) par Rui Vasconcelos : `depends_on` = `depends on a committed priority and pre-emption profile in t`.
+- Énoncé validé (`designed`) par Rui Vasconcelos : `depends_on` = `depends on a committed priority and pre-emption profile in the core`.
   > *Verbatim :* "depends on a committed priority and pre-emption profile in the core"

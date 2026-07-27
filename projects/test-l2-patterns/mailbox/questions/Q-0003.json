@@ -1,8 +1,8 @@
 {
   "id": "Q-0003",
   "engagement": "test-l2-patterns",
-  "question": "Quelle est l'architecture de la section 6.1 (Réseau et Interconnexion Telco) ?",
-  "why_it_matters": "La section 6.1 (Réseau et Interconnexion Telco) ne contient aucun énoncé d'architecture.",
+  "question": "Quelle est l'architecture de la section 5.4 (Transport Topology & Redundancy) ?",
+  "why_it_matters": "La section 5.4 (Transport Topology & Redundancy) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
   "routed_to": "mobile-core-architect"
 }

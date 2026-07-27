@@ -1,8 +1,8 @@
 {
   "id": "Q-0001",
   "engagement": "test-l2-patterns",
-  "question": "Quelle est l'architecture de la section 5.2 (Architecture Stockage Management) ? [Pattern proposé: PAT-006 Vendor boundary through northbound interface - Quand ne pas utiliser: Ne pas utiliser si le fournisseur supporte un accès direct modèle.]",
-  "why_it_matters": "La section 5.2 (Architecture Stockage Management) ne contient aucun énoncé d'architecture.",
+  "question": "Quelle est l'architecture de la section 5.2 (Storage System) ?\nPattern proposé : PAT-006 Vendor boundary through northbound interface (Quand ne pas utiliser : Ne pas utiliser si le fournisseur supporte un accès direct modèle.)",
+  "why_it_matters": "La section 5.2 (Storage System) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "cloud-architect"
+  "routed_to": "mobile-core-architect"
 }

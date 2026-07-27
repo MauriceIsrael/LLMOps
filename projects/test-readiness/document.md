@@ -4,6 +4,3 @@
 
 ---
 ## Sections Rédigées
-
----
-## ⚠️ Registre des Conflits Ouverts

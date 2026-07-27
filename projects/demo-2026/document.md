@@ -13,4 +13,4 @@
 ---
 ## ⚠️ Registre des Conflits Ouverts
 
-- **Conflit `C-101`** (contradiction) : Contradiction entre SAN NVMe et Ceph HCI
+- **Conflit `C-0001`** (contradiction) : Contradiction entre SAN NVMe et Ceph HCI

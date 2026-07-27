@@ -10,29 +10,30 @@ et les snapshots individuels sous `projects/nordwave-mcx-2027/snapshots/`.
 
 import gc
 from pathlib import Path
-import pytest
-from tools.elicitation.repository import ElicitationRepository
-from tools.elicitation.flows.scan import build_scan_graph
-from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
-from tools.elicitation.flows.assemble import build_assemble_graph
+
 from langgraph.types import Command
+
+from tools.elicitation.flows.assemble import build_assemble_graph
+from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
+from tools.elicitation.flows.scan import build_scan_graph
+from tools.elicitation.mailbox.models import (
+    ArbitrationCardData,
+    ConflictCardData,
+    ProposalCardData,
+    QuestionCardData,
+    QuestionFrame,
+    StatementData,
+)
 
 # Import direct des renderers et modèles de données du système Mailbox
 from tools.elicitation.mailbox.renderers import (
-    render_question_card,
-    render_proposal_card,
-    render_conflict_card,
     render_arbitration_card,
+    render_conflict_card,
     render_maturity_board,
+    render_proposal_card,
+    render_question_card,
 )
-from tools.elicitation.mailbox.models import (
-    QuestionCardData,
-    QuestionFrame,
-    ProposalCardData,
-    ConflictCardData,
-    ArbitrationCardData,
-    StatementData,
-)
+from tools.elicitation.repository import ElicitationRepository
 
 
 def test_mcx_scenario_end_to_end(tmp_path):
@@ -106,8 +107,7 @@ def test_mcx_scenario_end_to_end(tmp_path):
         config=thread_config_1,
     )
 
-    confirm_1 = intake_graph.invoke(Command(resume={"action": "accept", "accept": True}), config=thread_config_1)
-    s_ids_1 = confirm_1.get("persisted_statement_ids", [])
+    intake_graph.invoke(Command(resume={"action": "accept", "accept": True}), config=thread_config_1)
 
     s1 = StatementData(
         id="S-0001",

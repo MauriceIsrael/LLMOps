@@ -1,8 +1,8 @@
 {
   "id": "Q-0001",
   "engagement": "test-3-arch",
-  "question": "Quelle est l'architecture de la section 5.2 (Architecture Stockage Management) ?",
-  "why_it_matters": "La section 5.2 (Architecture Stockage Management) ne contient aucun énoncé d'architecture.",
+  "question": "Quelle est l'architecture de la section 4.1 (MCX Services Boundary & Framing) ?",
+  "why_it_matters": "La section 4.1 (MCX Services Boundary & Framing) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "cloud-architect"
+  "routed_to": "mcx-service-architect"
 }
