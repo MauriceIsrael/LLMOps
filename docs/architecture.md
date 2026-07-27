@@ -248,9 +248,9 @@ Le serveur repose sur la bibliothèque **FastMCP** en Python.
 
 La validation repose sur des tests d'intégration complets et des évaluations sémantiques :
 
-1. **Tests d'Intégration Collaboratifs (`test_scenario_nordwave_mcx.py`) :**
-   - Simulation bout-en-bout de 8 actes avec 3 architectes fictifs.
-   - Génération automatisée d'un rapport de progression visuel (`progression.md`) projetant l'état réel du graphe (Maturity Boards, tables de preuves non-tronquées, diagrammes Mermaid).
+1. **Scénario Référent d'Élicitation Collaborative ([test_scenario_nordwave_mcx.py](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx.py)) :**
+   - Simulation bout-en-bout de 8 actes avec 3 architectes fictifs (*Amina Duarte*, *Rui Vasconcelos*, *Sofia Lindqvist*).
+   - Génération automatisée d'un rapport de progression visuel complet ([artifacts/nordwave-mcx-2027/progression.md](file:///home/momo/Dev/LLMOps/artifacts/nordwave-mcx-2027/progression.md)) projetant l'état réel du graphe à chaque étape (Maturity Boards, tables de preuves non-tronquées, diagrammes Mermaid).
 2. **DeepEval Metrics & Promptfoo Benchmarking (`tests/evals/`) :**
    - **FaithfulnessMetric & AnswerRelevancyMetric** : Évaluation de la fidélité des réponses formulées à partir des outils FastMCP.
    - Assertion automatisée sur le dataset `adr_qa_dataset.json`.
