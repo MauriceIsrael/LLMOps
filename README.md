@@ -67,7 +67,6 @@ LLMOps/
 ### 1. Prérequis
 - Python `>= 3.11`
 - [Poetry](https://python-poetry.org/) pour la gestion de l'environnement virtuel.
-- Clé d'API OpenAI (`OPENAI_API_KEY`) pour l'extraction LlamaIndex et les évaluations DeepEval.
 
 ### 2. Installation
 ```bash
