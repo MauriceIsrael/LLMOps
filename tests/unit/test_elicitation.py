@@ -40,7 +40,7 @@ def test_scan_prioritises_by_blocking(setup_test_db):
 def test_question_carries_vocabulary(setup_test_db):
     """Test 3 : La question générée porte le nom du sujet canonique."""
     repo = ElicitationRepository(db_path=setup_test_db)
-    repo.save_subject("Storage-5.2", definition="Système de stockage de management")
+    repo.save_subject("Storage-5.2", definition="Système de stockage de management", engagement="test-eng-3")
 
     sections = [{"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L0_named"}]
     graph = build_scan_graph()
@@ -53,7 +53,7 @@ def test_question_carries_vocabulary(setup_test_db):
 def test_prior_answer_offered(setup_test_db):
     """Test 4 : Une réponse antérieure d'un autre engagement alimente la question élicitée."""
     repo = ElicitationRepository(db_path=setup_test_db)
-    repo.save_subject("Storage-5.2")
+    repo.save_subject("Storage-5.2", engagement="test-eng-4")
     repo.save_statement({
         "id": "S-prior-01",
         "engagement": "other-eng",

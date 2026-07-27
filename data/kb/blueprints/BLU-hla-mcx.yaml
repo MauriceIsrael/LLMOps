@@ -1,0 +1,618 @@
+id: BLU-hla-mcx
+title: High-level solution architecture — mission-critical mobile network
+version: 2
+status: active
+confidence: verified
+owner: core-owner-architecture
+last_reviewed: 2026-07-27
+derived_from:
+  - HLA_Mission_Critical_Mobile_Network_Structure.docx — 44 subsections, titles verbatim
+  - the NetDevOps and Dark NOC architecture designed for the same system
+
+notes: >-
+  Section identifiers and titles follow the bid template exactly. Five
+  sub-subsections carry `added_by_engagement: true`: they hold design work this
+  engagement produced which the template has no home for. Nothing else deviates,
+  and nothing outside this file should depend on the numbering.
+
+  `roots` are created at `L0_named` when the blueprint is bound. Every other
+  subject is expected to be discovered by a decomposition; a section requiring
+  one of them holds until it exists, which is how the dependency between sections
+  becomes visible rather than assumed.
+
+  Sections marked `instructed: false` belong to other programmes. They appear in
+  coverage so that the deliverable is complete, and generate no question.
+
+roots:
+  - name: engagement-scope
+    definition: What is being built, for whom, and where the boundaries fall.
+  - name: mcx-services
+    definition: The 3GPP mission-critical service layer delivered to end users.
+  - name: mobile-core
+    definition: The mobile core network and its bearers.
+  - name: transport
+    definition: The IP underlay serving every hosting domain.
+  - name: radio-access
+    definition: The radio access layer.
+    instructed: false
+  - name: device-fleet
+    definition: Terminals, accessories and their management.
+    instructed: false
+  - name: location-services
+    definition: Location and geographic information services.
+    instructed: false
+  - name: rancher-domain
+    definition: The container platform operated by the project.
+  - name: observation
+    definition: How the system is observed, across service and platform signals.
+  - name: automation-chain
+    definition: The chain that configures, verifies and restores the system.
+  - name: service-management
+    definition: Order management, assurance, inventory and the configuration database.
+  - name: security-posture
+    definition: Zoning, identity, cryptography and accreditation.
+  - name: ai-assistance
+    definition: The advisory assistant layer, optional at run time.
+  - name: delivery-plan
+    definition: Phasing, effort and the risks carried.
+  - name: sim-esim-lifecycle
+    definition: Subscriber identity module lifecycle, state and provisioning.
+
+sections:
+- id: '1.1'
+  title: Executive Summary & Value Proposition
+  must_answer: What is the proposition, and what does the customer gain?
+  generated_from: bid
+  requires: []
+  unlocks:
+  - '1.2'
+  routes_to: bid-manager
+- id: '1.2'
+  title: System Scope & Operational Boundaries
+  must_answer: What is in scope, what is explicitly out, and what is deferred?
+  requires:
+  - subject: engagement-scope
+    level: L2_decomposed
+  unlocks:
+  - '4.1'
+  - '5.1'
+  - '8.1'
+  - '10.1'
+  routes_to: chief-architect
+  informed_by:
+  - brief
+  - decision
+- id: '1.3'
+  title: Business Drivers & Operational Directives
+  must_answer: Why now, what forces the programme, and under which directives?
+  requires:
+  - subject: engagement-scope
+    level: L1_framed
+  unlocks:
+  - '1.2'
+  - '2.1'
+  routes_to: chief-architect
+  informed_by:
+  - brief
+- id: '1.4'
+  title: Architecture Vision & Guiding Principles
+  must_answer: Which principles constrain every subsequent choice?
+  generated_from: knowledge
+  requires: []
+  unlocks: []
+  routes_to: chief-architect
+  informed_by:
+  - principle
+- id: '2.1'
+  title: Personas & Operational Stakeholders
+  must_answer: Who uses the system, in which role, and with which authority?
+  requires:
+  - subject: engagement-scope
+    level: L2_decomposed
+  unlocks:
+  - '2.2'
+  routes_to: mcx-service-architect
+- id: '2.2'
+  title: Use Case Catalog & Critical Scenarios
+  must_answer: Which operational scenarios must the system support, including the degraded ones?
+  requires:
+  - subject: mcx-services
+    level: L1_framed
+  unlocks:
+  - '2.3'
+  - '6.3'
+  routes_to: mcx-service-architect
+- id: '2.3'
+  title: Service Level Agreements (SLAs) & Key Performance Indicators (KPIs)
+  must_answer: Which service levels are committed, and how is each one measured?
+  requires:
+  - subject: observation
+    level: L3_decided
+  unlocks:
+  - '6.1'
+  - '10.5'
+  routes_to: delivery-lead
+- id: '3.1'
+  title: Information Domain & Conceptual Data Model
+  must_answer: Which data domains exist, and which system is the master of each?
+  requires:
+  - subject: service-management
+    level: L3_decided
+  unlocks:
+  - '3.3'
+  - '8.6'
+  routes_to: service-management-architect
+  informed_by:
+  - principle
+  - decision
+- id: '3.2'
+  title: Control, Signaling & Media Data Flows
+  must_answer: How do control, signalling and media flows traverse the system?
+  requires:
+  - subject: mcx-services
+    level: L2_decomposed
+  unlocks:
+  - '3.3'
+  - '5.1'
+  routes_to: mcx-service-architect
+- id: '3.3'
+  title: Data Governance, Retention & Sovereignty
+  must_answer: Which signals carry identifying data, how are they classified, pseudonymised and retained?
+  requires:
+  - subject: security-posture
+    level: L3_decided
+  - subject: observation
+    level: L3_decided
+  unlocks:
+  - '7.3'
+  - '7.4'
+  routes_to: security-architect
+  informed_by:
+  - principle
+  - decision
+- id: '4.1'
+  title: Core Application Building Blocks (Application Map)
+  must_answer: Which application building blocks make up the service layer, and what must survive isolation?
+  requires:
+  - subject: mcx-services
+    level: L2_decomposed
+  unlocks:
+  - 4.1.1
+  - 4.1.2
+  - '4.2'
+  - '4.3'
+  - '4.6'
+  routes_to: mcx-service-architect
+  informed_by:
+  - principle
+  - pattern
+- id: 4.1.1
+  title: Floor Control Arbitration
+  must_answer: Where does floor arbitration terminate, and what was ruled out?
+  requires:
+  - subject: floor-control
+    level: L3_decided
+  provisional_at: L1_framed
+  unlocks:
+  - 4.1.3
+  - '5.3'
+  routes_to: mcx-service-architect
+  added_by_engagement: true
+- id: 4.1.2
+  title: Group Management & Affiliation
+  must_answer: How are talkgroups modelled, provisioned and affiliated?
+  requires:
+  - subject: group-management
+    level: L3_decided
+  unlocks: []
+  routes_to: mcx-service-architect
+  added_by_engagement: true
+- id: 4.1.3
+  title: Floor Grant Latency Budget
+  must_answer: Which floor grant latency budget, at which percentile and under what load?
+  requires:
+  - subject: floor-control
+    level: L4_specified
+  unlocks: []
+  routes_to: mobile-core-architect
+  added_by_engagement: true
+- id: '4.2'
+  title: Interoperability & External Integration Architecture
+  must_answer: Which external systems are integrated, through which interfaces, and where does the vendor
+    boundary fall?
+  requires:
+  - subject: lmr-interworking
+    level: L3_decided
+  provisional_at: L1_framed
+  unlocks:
+  - '10.2'
+  routes_to: mcx-service-architect
+  informed_by:
+  - decision
+  - pattern
+  - questionnaire
+- id: '4.3'
+  title: Application Delivery & Microservices Model
+  must_answer: How are the service applications packaged, delivered and reconciled?
+  requires:
+  - subject: rancher-domain
+    level: L2_decomposed
+  unlocks:
+  - '5.2'
+  routes_to: cloud-platform-architect
+  informed_by:
+  - decision
+- id: '4.4'
+  title: SIM & eSIM Lifecycle Management (GSMA SGP.22/SGP.32 & SMS-Free OTA)
+  must_answer: Which system masters the lifecycle state, which performs provisioning, and what is the
+    integration?
+  requires:
+  - subject: sim-esim-lifecycle
+    level: L3_decided
+  unlocks:
+  - '3.1'
+  routes_to: service-management-architect
+  informed_by:
+  - decision
+  - questionnaire
+- id: '4.5'
+  title: Enterprise Mobility Management (EMM/MDM) & Fleet Device Lifecycle
+  must_answer: How is the device fleet enrolled, configured and retired?
+  requires:
+  - subject: device-fleet
+    level: L3_decided
+  unlocks: []
+  routes_to: mcx-service-architect
+  instructed: false
+- id: '4.6'
+  title: Broadcast & Multicast Architecture (eMBMS / 5G MBS)
+  must_answer: Unicast or multicast on the radio side, and under which conditions?
+  requires:
+  - subject: media-distribution
+    level: L3_decided
+  unlocks:
+  - '5.3'
+  routes_to: mcx-service-architect
+- id: '4.7'
+  title: Geographic Information System (GIS) & Location-Based Services (LBS)
+  must_answer: Which location services are delivered, and with which accuracy?
+  requires:
+  - subject: location-services
+    level: L3_decided
+  unlocks: []
+  routes_to: mcx-service-architect
+  instructed: false
+- id: '5.1'
+  title: End-to-End Network Topology
+  must_answer: What is the end-to-end topology, and who operates each segment?
+  requires:
+  - subject: mobile-core
+    level: L1_framed
+  unlocks:
+  - 5.1.1
+  - 5.1.2
+  - '5.2'
+  - '5.3'
+  - '8.4'
+  routes_to: mobile-core-architect
+- id: 5.1.1
+  title: Hybrid Multi-RAN Access Strategy & Radio Resilience
+  must_answer: Which access technologies, and which coverage tiers?
+  requires:
+  - subject: radio-access
+    level: L3_decided
+  unlocks: []
+  routes_to: mobile-core-architect
+  instructed: false
+- id: 5.1.2
+  title: Transport Topology & Redundancy
+  must_answer: Which transport redundancy, and what happens to a site that is cut off?
+  requires:
+  - subject: transport
+    level: L3_decided
+  provisional_at: L1_framed
+  unlocks:
+  - '5.3'
+  - '6.2'
+  routes_to: transport-architect
+  added_by_engagement: true
+- id: '5.2'
+  title: Compute & Telco Cloud Virtualization Platform
+  must_answer: Which hosting domains exist, which are operated by the project, and where does the vendor
+    boundary fall?
+  requires:
+  - subject: rancher-domain
+    level: L2_decomposed
+  unlocks:
+  - 5.2.1
+  - '6.1'
+  - '6.3'
+  - '8.4'
+  - '9.1'
+  routes_to: cloud-platform-architect
+  informed_by:
+  - decision
+  - principle
+- id: 5.2.1
+  title: Multi-Environment Staging & Minimum Viable Solution (MVS)
+  must_answer: Which environments exist, how is validation isolated, and how are rules proven before being
+    armed?
+  requires:
+  - subject: shadow-cluster
+    level: L3_decided
+  unlocks:
+  - '8.5'
+  - '10.3'
+  routes_to: cloud-platform-architect
+  informed_by:
+  - pattern
+  - decision
+- id: '5.3'
+  title: Edge Computing & Tactical Local Survivability
+  must_answer: What continues to work at a site cut off from the core, and how is priority enforced end
+    to end?
+  requires:
+  - subject: mobile-core
+    level: L4_specified
+  - subject: floor-control
+    level: L3_decided
+  unlocks:
+  - '6.3'
+  routes_to: mobile-core-architect
+- id: '6.1'
+  title: High Availability (HA) Architecture
+  must_answer: Which availability is committed, and what are the failure domains?
+  requires:
+  - subject: rancher-domain
+    level: L3_decided
+  unlocks:
+  - '6.2'
+  - '6.3'
+  routes_to: cloud-platform-architect
+- id: '6.2'
+  title: Disaster Recovery (DR) Strategy
+  must_answer: What survives the loss of a site, and how is service restored?
+  requires:
+  - subject: mobile-core
+    level: L3_decided
+  unlocks: []
+  routes_to: mobile-core-architect
+- id: '6.3'
+  title: Graceful Degradation & Isolated Mode Operation
+  must_answer: What continues in isolation, and how is the recovery tooling itself kept available?
+  requires:
+  - subject: break-glass
+    level: L3_decided
+  - subject: management-cluster
+    level: L3_decided
+  unlocks: []
+  routes_to: cloud-platform-architect
+  informed_by:
+  - principle
+  - pattern
+- id: '7.1'
+  title: Security Principles & Zero-Trust Architecture
+  must_answer: Which zones exist, what may cross between them, and which crossings are structurally prohibited?
+  requires:
+  - subject: security-posture
+    level: L2_decomposed
+  unlocks:
+  - '7.2'
+  - '7.3'
+  - '7.4'
+  routes_to: security-architect
+  informed_by:
+  - principle
+- id: '7.2'
+  title: Identity, Authentication & Access Management (IAM)
+  must_answer: Which operational profiles exist, who approves what, and how are credentials held and rotated?
+  requires:
+  - subject: security-posture
+    level: L3_decided
+  unlocks:
+  - '8.5'
+  routes_to: security-architect
+- id: '7.3'
+  title: End-to-End Cryptography & Privacy
+  must_answer: How are identifiers protected in transit, at rest and in duplicated flows?
+  requires:
+  - subject: security-posture
+    level: L3_decided
+  - subject: observation
+    level: L3_decided
+  unlocks: []
+  routes_to: security-architect
+- id: '7.4'
+  title: Threat Protection & Regulatory Compliance
+  must_answer: Which hardening baselines apply, and how is compliance evidence produced continuously?
+  requires:
+  - subject: automation-chain
+    level: L3_decided
+  unlocks:
+  - '10.5'
+  routes_to: security-architect
+  informed_by:
+  - principle
+  - decision
+- id: '7.5'
+  title: SOC & CSIRT Operational Boundaries & Incident Response Model
+  must_answer: How is a security event detected, escalated and recorded, and by whom?
+  requires:
+  - subject: observation
+    level: L3_decided
+  unlocks: []
+  routes_to: security-architect
+- id: '8.1'
+  title: The 'Dark NOC' Operational Vision & Evolution Model
+  must_answer: Which loops govern the system, and how does autonomy increase over time?
+  requires:
+  - subject: automation-chain
+    level: L1_framed
+  unlocks:
+  - 8.1.1
+  - '8.2'
+  - '8.3'
+  - '8.4'
+  - '8.5'
+  routes_to: chief-architect
+  informed_by:
+  - principle
+- id: 8.1.1
+  title: Observation Planes — Service & Infrastructure
+  must_answer: Which signals belong to the service plane, which to the infrastructure plane, and how does
+    correlation stay single-engine?
+  requires:
+  - subject: observation
+    level: L3_decided
+  unlocks:
+  - '2.3'
+  - '3.2'
+  routes_to: observability-architect
+  informed_by:
+  - decision
+  - pattern
+  added_by_engagement: true
+- id: '8.2'
+  title: Agentic AI Capabilities in BUILD (Automated Engineering & Staging)
+  must_answer: Where does the assistant help while the system is being built?
+  requires:
+  - subject: ai-assistance
+    level: L2_decomposed
+  unlocks: []
+  routes_to: ai-architect
+- id: '8.3'
+  title: Agentic AI Capabilities in RUN (Autonomous Operations &
+  must_answer: What may the assistant do in production, what may it never do, and where is inference served?
+  requires:
+  - subject: ai-assistance
+    level: L3_decided
+  unlocks: []
+  routes_to: ai-architect
+  informed_by:
+  - principle
+  - decision
+- id: '8.4'
+  title: Single Source of Truth (SoT) & Agentic Automation Chain
+  must_answer: Where does intended state live, how does it reach each domain, and how is deviation detected?
+  requires:
+  - subject: automation-chain
+    level: L2_decomposed
+  - subject: source-of-truth
+    level: L3_decided
+  provisional_at: L1_framed
+  unlocks:
+  - '7.4'
+  - '9.1'
+  - '10.4'
+  routes_to: automation-architect
+  informed_by:
+  - principle
+  - decision
+  - pattern
+- id: '8.5'
+  title: Supervised Dark NOC Governance & Human-in-the-Loop (HITL)
+  must_answer: How is a remediation approved, which guardrails bound it, and how does an action class
+    earn autonomy?
+  requires:
+  - subject: closed-loop
+    level: L3_decided
+  - subject: fallback-plan
+    level: L3_decided
+  unlocks:
+  - '10.4'
+  routes_to: automation-architect
+  informed_by:
+  - principle
+  - pattern
+- id: '8.6'
+  title: ITSM Integration, Immutable Audit Trails & Agentic Post-Mortems
+  must_answer: Which flows connect to order management, assurance and inventory, and how is the audit
+    trail kept?
+  requires:
+  - subject: service-management
+    level: L3_decided
+  unlocks:
+  - '3.1'
+  routes_to: service-management-architect
+  informed_by:
+  - decision
+  - questionnaire
+- id: '9.1'
+  title: Software Stack & Licensing Breakdown
+  must_answer: Which components, under which licence, and which are bespoke?
+  requires:
+  - subject: automation-chain
+    level: L3_decided
+  unlocks:
+  - '10.3'
+  routes_to: automation-architect
+  informed_by:
+  - decision
+- id: '9.2'
+  title: Hardware & Infrastructure Footprint
+  must_answer: Which hardware, in which quantity, at which site?
+  requires:
+  - subject: rancher-domain
+    level: L4_specified
+  unlocks: []
+  routes_to: cloud-platform-architect
+  instructed: false
+- id: '9.3'
+  title: Device & Accessory Ecosystem
+  must_answer: Which terminals and accessories, and who supports them?
+  requires:
+  - subject: device-fleet
+    level: L3_decided
+  unlocks: []
+  routes_to: delivery-lead
+  instructed: false
+- id: '10.1'
+  title: Multi-Dimensional Staging Framework
+  must_answer: Which dimensions are staged, which audits gate the scope, and which decisions wait on them?
+  requires:
+  - subject: delivery-plan
+    level: L1_framed
+  unlocks:
+  - '10.2'
+  - '10.3'
+  - '10.4'
+  - '10.5'
+  routes_to: delivery-lead
+  informed_by:
+  - questionnaire
+- id: '10.2'
+  title: Business & Functional User Services Roadmap (Functional Roadmap)
+  must_answer: In which order are user-facing services delivered, and how does the legacy fleet coexist?
+  requires:
+  - subject: lmr-interworking
+    level: L3_decided
+  unlocks: []
+  routes_to: delivery-lead
+- id: '10.3'
+  title: Infrastructure & Platform Staging Roadmap ('Keep It Simple First')
+  must_answer: How is the platform staged, and what is proven at each step?
+  requires:
+  - subject: delivery-plan
+    level: L2_decomposed
+  unlocks: []
+  routes_to: delivery-lead
+- id: '10.4'
+  title: Software, NetDevOps & Dark NOC Evolution Roadmap
+  must_answer: Which milestones, in which order, with which effort and exit condition for each?
+  requires:
+  - subject: delivery-plan
+    level: L3_decided
+  unlocks: []
+  routes_to: delivery-lead
+  informed_by:
+  - estimate
+- id: '10.5'
+  title: Legacy System Migration Strategy & Architectural Risk Mitigation
+  must_answer: How is the incumbent retired, and which risks are carried with what mitigation?
+  requires:
+  - subject: delivery-plan
+    level: L3_decided
+  unlocks: []
+  routes_to: delivery-lead
+  informed_by:
+  - risk-register

@@ -29,14 +29,22 @@ class ElicitationSchemaInitializer:
             self.conn.execute(
                 """
                 CREATE NODE TABLE Subject (
+                    id STRING,
                     name STRING,
+                    engagement STRING,
                     definition STRING,
                     level STRING,
+                    origin STRING,
                     updated_at STRING,
-                    PRIMARY KEY(name)
+                    PRIMARY KEY(id)
                 );
                 """
             )
+        else:
+            try:
+                self.conn.execute("ALTER TABLE Subject ADD origin STRING DEFAULT 'declared';")
+            except Exception:
+                pass
 
 
         # 2. Table Statement

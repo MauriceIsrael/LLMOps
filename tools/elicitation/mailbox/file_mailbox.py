@@ -69,8 +69,39 @@ class FileMailbox:
         self.notifications_dir.mkdir(parents=True, exist_ok=True)
 
     def post(self, question: QuestionMessage) -> str:
-        """Écrit un fichier JSON de question sous projects/<engagement>/mailbox/questions/<id>.json."""
-        filepath = self.questions_dir / f"{question.question_id}.json"
+        """Écrit un fichier Markdown carte de question remplissable sous artifacts/<engagement>/mailbox/<id>.md."""
+        artifacts_dir = Path("artifacts") / self.engagement / "mailbox"
+        artifacts_dir.mkdir(parents=True, exist_ok=True)
+        filepath = artifacts_dir / f"{question.question_id}.md"
+
+        card_md = f"""# ✉️ Question Card — {question.question_id}
+
+**Engagement:** `{question.engagement}`  
+**Routed to:** `{question.routed_to}`  
+**Expected shape:** `{question.expected_shape}`  
+
+### ❓ Question:
+{question.question_text}
+
+### 💡 Why it matters:
+{question.why_it_matters}
+
+---
+
+## Your answer
+
+<!-- Write below this line, in your own words. Prose is fine and preferred.
+     Nothing is recorded until you have seen and confirmed the extraction. -->
+
+
+## How to submit
+
+    elicit answer --from-file artifacts/{self.engagement}/mailbox/{question.question_id}.md --as {question.routed_to.split('-')[0]}
+"""
+        filepath.write_text(card_md, encoding="utf-8")
+        
+        # Aussi sauvegarder en JSON sous questions_dir
+        json_path = self.questions_dir / f"{question.question_id}.json"
         data = {
             "id": question.question_id,
             "engagement": question.engagement,
@@ -79,7 +110,7 @@ class FileMailbox:
             "expected_shape": question.expected_shape,
             "routed_to": question.routed_to,
         }
-        filepath.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+        json_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
         return str(filepath)
 
     def notify(self, ref: str, message: str) -> None:

@@ -1,8 +1,8 @@
 {
   "id": "Q-0003",
   "engagement": "nordwave-mcx-2027",
-  "question": "Quelle est l'architecture de la section 4.5 (LMR Interworking Gateway) ?",
-  "why_it_matters": "La section 4.5 (LMR Interworking Gateway) ne contient aucun énoncé d'architecture.",
+  "question": "Which dimensions are staged, which audits gate the scope, and which decisions wait on them?",
+  "why_it_matters": "La section 10.1 (10.1) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mcx-service-architect"
+  "routed_to": "delivery-lead"
 }

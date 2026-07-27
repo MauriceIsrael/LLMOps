@@ -1,0 +1,8 @@
+{
+  "id": "Q-0005",
+  "engagement": "test-distinguish",
+  "question": "Quelle est l'architecture de la section 4.6 (Group Management Domain & Affiliation) ?",
+  "why_it_matters": "La section 4.6 (Group Management Domain & Affiliation) ne contient aucun énoncé d'architecture.",
+  "expected_shape": "decision",
+  "routed_to": "mcx-service-architect"
+}

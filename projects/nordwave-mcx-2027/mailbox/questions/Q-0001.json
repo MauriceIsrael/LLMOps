@@ -1,8 +1,8 @@
 {
   "id": "Q-0001",
   "engagement": "nordwave-mcx-2027",
-  "question": "Quelle est l'architecture de la section 4.2 (Floor Control Latency Budget) ?",
-  "why_it_matters": "La section 4.2 (Floor Control Latency Budget) ne contient aucun énoncé d'architecture.",
+  "question": "What is the end-to-end topology, and who operates each segment?",
+  "why_it_matters": "La section 5.1 (5.1) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mcx-service-architect"
+  "routed_to": "mobile-core-architect"
 }

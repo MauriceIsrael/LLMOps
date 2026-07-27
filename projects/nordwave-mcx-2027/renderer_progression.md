@@ -7,11 +7,11 @@ Ce document rassemble les sorties **réellement générées par les renderers Ji
 
 ### 📨 Fiche Question générée par le Question Renderer (`question.md.j2`) :
 ```markdown
-<!-- elicit:nordwave-mcx-2027:Q-0001:question:sha=66725f -->
-### Quelle est l'architecture de la section 4.1 (MCX Services Boundary & Framing) ?
+<!-- elicit:nordwave-mcx-2027:Q-0001:question:sha=586079 -->
+### What is the mission-critical service layer for, and what must keep working when everything else degrades?
 
 **Why this matters**
-La section 4.1 (MCX Services Boundary & Framing) ne contient aucun énoncé d'architecture. (Sections bloquées : `4.1`)
+La section 4.1 (4.1) ne contient aucun énoncé d'architecture. (Sections bloquées : `4.1`)
 
 **Please use these terms**
 - Sujet canonique : `mcx-services`
@@ -80,18 +80,18 @@ Copiez la commande suivante et répondez :
 
 ### 📌 Maturity Board généré par le Maturity Board Renderer (`maturity_board.md.j2`) :
 ```markdown
-<!-- elicit:nordwave-mcx-2027:maturity_board:board:sha=6b35ea -->
+<!-- elicit:nordwave-mcx-2027:maturity_board:board:sha=eebca9 -->
 ### 📊 Tableau de Maturité des Sujets d'Architecture (Maturity Board) — nordwave-mcx-2027
 
 | Sujet Canonique | Niveau Atteint | Blocage / Question Ouverte | Assigné À | Délais au Niveau | Stagnation (> 7 j) | Sections Dépendantes |
 |---|---|---|---|---|---|---|
+| `lmr-interworking` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `mcx-services` | `L2_decomposed` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
-| `mobile-core` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
-| `transport` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `group-management` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `floor-control` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `mobile-core` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `transport` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `media-distribution` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
-| `lmr-interworking` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 
 > 📌 **Règles de maturité :**
 > - **L0_named** (Nommé) → **L1_framed** (Cadré) → **L2_decomposed** (Décomposé - Patterns candidats proposés) → **L3_decided** (Mécanisme décidé) → **L4_specified** (Paramétré).
@@ -185,18 +185,18 @@ Exécutez la commande suivante en précisant obligatoirement la raison d'archite
 
 ### 📌 Maturity Board Final généré par le Renderer :
 ```markdown
-<!-- elicit:nordwave-mcx-2027:maturity_board:board:sha=9e5733 -->
+<!-- elicit:nordwave-mcx-2027:maturity_board:board:sha=dd6261 -->
 ### 📊 Tableau de Maturité des Sujets d'Architecture (Maturity Board) — nordwave-mcx-2027
 
 | Sujet Canonique | Niveau Atteint | Blocage / Question Ouverte | Assigné À | Délais au Niveau | Stagnation (> 7 j) | Sections Dépendantes |
 |---|---|---|---|---|---|---|
+| `lmr-interworking` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `mcx-services` | `L2_decomposed` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
-| `mobile-core` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
-| `transport` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `group-management` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `floor-control` | `L3_decided` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `mobile-core` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `transport` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `media-distribution` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
-| `lmr-interworking` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 
 > 📌 **Règles de maturité :**
 > - **L0_named** (Nommé) → **L1_framed** (Cadré) → **L2_decomposed** (Décomposé - Patterns candidats proposés) → **L3_decided** (Mécanisme décidé) → **L4_specified** (Paramétré).

@@ -1,0 +1,8 @@
+{
+  "id": "Q-0001",
+  "engagement": "eng-rec-3",
+  "question": "Question 1?",
+  "why_it_matters": "La section 4.1 (4.1) ne contient aucun énoncé d'architecture.",
+  "expected_shape": "decision",
+  "routed_to": "architect"
+}

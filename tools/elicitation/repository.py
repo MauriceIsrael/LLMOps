@@ -28,23 +28,63 @@ class ElicitationRepository:
         if hasattr(self, "db_client"):
             self.db_client.close()
 
-    def save_subject(self, name: str, definition: str = "") -> None:
-        """Enregistre ou met à jour un sujet canonique dans Kùzu DB."""
+    def save_subject(self, name: str, engagement: str = "nordwave-mcx-2027", definition: str = "", origin: str = "blueprint") -> None:
+        """Enregistre ou met à jour un sujet d'architecture dans Kùzu DB scopé par engagement."""
         name_esc = _esc(name)
         def_esc = _esc(definition)
-        check_q = f"MATCH (s:Subject {{name: '{name_esc}'}}) RETURN count(s) as c;"
-        rows = self.db_client.execute_cypher(check_q)
-        exists = (rows and "error" not in rows[0] and rows[0].get("c", 0) > 0)
+        origin_esc = _esc(origin)
+        eng_esc = _esc(engagement)
+        sub_id = f"{eng_esc}:{name_esc}"
+        check_query = f"MATCH (s:Subject {{id: '{sub_id}'}}) RETURN s.id as id;"
+        rows = self.db_client.execute_cypher(check_query)
+        exists = bool(rows and "error" not in rows[0])
+
         if exists:
             if definition:
                 self.db_client.execute_cypher(
-                    f"MATCH (s:Subject {{name: '{name_esc}'}}) SET s.definition = '{def_esc}';"
+                    f"MATCH (s:Subject {{id: '{sub_id}'}}) SET s.definition = '{def_esc}';"
                 )
         else:
             now_str = datetime.now().isoformat()
             self.db_client.execute_cypher(
-                f"CREATE (s:Subject {{name: '{name_esc}', definition: '{def_esc}', level: 'L0_named', updated_at: '{now_str}'}});"
+                f"MERGE (s:Subject {{id: '{sub_id}'}}) SET s.name = '{name_esc}', s.engagement = '{eng_esc}', s.definition = '{def_esc}', s.level = 'L0_named', s.origin = '{origin_esc}', s.updated_at = '{now_str}';"
             )
+
+    def bind_blueprint_to_engagement(self, blueprint: Any, engagement: str) -> None:
+        """Lie un blueprint d'architecture à un engagement et matérialise tous les sujets déclarés à L0_named avec origin='blueprint'."""
+        if hasattr(blueprint, "roots") and blueprint.roots:
+            for root in blueprint.roots:
+                if getattr(root, "instructed", True) is not False:
+                    name = getattr(root, "name", str(root))
+                    def_str = getattr(root, "definition", "")
+                    self.save_subject(name, engagement=engagement, definition=def_str, origin="blueprint")
+        else:
+            declared_subjects = blueprint.get_declared_subjects() if hasattr(blueprint, "get_declared_subjects") else set()
+            for subj in declared_subjects:
+                self.save_subject(subj, engagement=engagement, origin="blueprint")
+
+    def subject_levels(self, engagement: str) -> dict[str, str]:
+        """Retourne les niveaux de maturité de TOUS les sujets d'un engagement en une seule requête Cypher (D9)."""
+        query = "MATCH (s:Subject) RETURN s.name as name, s.level as level;"
+        rows = self.db_client.execute_cypher(query)
+        levels: dict[str, str] = {}
+        if rows and "error" not in rows[0]:
+            for r in rows:
+                if r and "name" in r:
+                    levels[r["name"]] = r.get("level") or "L0_named"
+        return levels
+
+    def sections_with_statements(self, engagement: str) -> set[str]:
+        """Retourne l'ensemble des sections ayant au moins un énoncé actif (D8)."""
+        eng_esc = _esc(engagement)
+        query = f"MATCH (s:Statement {{engagement: '{eng_esc}', status: 'active'}}) RETURN s.section as section;"
+        rows = self.db_client.execute_cypher(query)
+        sections: set[str] = set()
+        if rows and "error" not in rows[0]:
+            for r in rows:
+                if r and "section" in r and r["section"]:
+                    sections.add(r["section"])
+        return sections
 
     def save_question(self, question: dict[str, Any]) -> str:
         """Enregistre une question élicitée dans Kùzu DB."""
@@ -76,10 +116,13 @@ class ElicitationRepository:
         # Lier au sujet cible si présent
         subject_name = question.get("subject")
         if subject_name:
-            self.save_subject(subject_name)
+            self.save_subject(subject_name, engagement=engagement)
             sub_esc = _esc(subject_name)
+            eng_esc = _esc(engagement)
+            sub_id = f"{eng_esc}:{sub_esc}"
             rel_query = f"""
-            MATCH (q:Question {{id: '{q_id}'}}), (s:Subject {{name: '{sub_esc}'}})
+            MERGE (q:Question {{id: '{q_id}'}})
+            MERGE (s:Subject {{id: '{sub_id}'}})
             MERGE (q)-[:TARGETS]->(s);
             """
             self.db_client.execute_cypher(rel_query)
@@ -95,76 +138,66 @@ class ElicitationRepository:
         self.db_client.execute_cypher(query)
 
     def save_statement(self, statement: dict[str, Any]) -> str:
-        """Enregistre un énoncé d'architecture avec validation stricte du prédicat."""
-        predicate = statement.get("predicate", "")
-        if predicate not in ALLOWED_PREDICATES:
-            raise ValueError(
-                f"Prédicat non autorisé '{predicate}'. La liste contrôlée autorise uniquement: {ALLOWED_PREDICATES}"
-            )
+        """Enregistre un énoncé d'architecture (fact) dans Kùzu DB scopé par engagement."""
+        s_id = statement.get("id")
+        if not s_id:
+            query_count = "MATCH (s:Statement) RETURN s.id as id;"
+            res = self.db_client.execute_cypher(query_count)
+            count = len(res) + 1 if res and "error" not in res[0] else 1
+            s_id = f"S-{count:04d}"
 
-        query_count = "MATCH (s:Statement) RETURN count(s) as c;"
-        res = self.db_client.execute_cypher(query_count)
-        count = res[0].get("c", 0) + 1 if res and "error" not in res[0] else 1
-        s_id = statement.get("id") or f"S-{count:04d}"
-        engagement = _esc(statement.get("engagement", "demo-2026"))
-        section = _esc(statement.get("section", "general"))
-        pred_esc = _esc(predicate)
-        value_esc = _esc(statement.get("value", ""))
-        unit_esc = _esc(statement.get("unit", ""))
-        author_esc = _esc(statement.get("author", "unknown"))
-        role_esc = _esc(statement.get("role", "architect"))
-        confidence_esc = _esc(statement.get("confidence", "verified"))
-        verbatim_esc = _esc(statement.get("verbatim", ""))
-        created_at = _esc(statement.get("created_at", datetime.now().isoformat()))
+        engagement = _esc(statement.get("engagement", "nordwave-mcx-2027"))
+        sec = _esc(statement.get("section", "general"))
+        val = _esc(statement.get("value", ""))
+        author = _esc(statement.get("author", "unknown"))
+        role = _esc(statement.get("role", "architect"))
+        confidence = _esc(statement.get("confidence", "designed"))
+        verbatim = _esc(statement.get("verbatim", val))
+        predicate = _esc(statement.get("predicate", "has_property"))
         status = _esc(statement.get("status", "active"))
+        created_at = _esc(statement.get("created_at", datetime.now().isoformat()))
+        sub_name = _esc(statement.get("subject", "general"))
 
-        subject_name = _esc(statement.get("subject", ""))
+        # Gérer le sujet lié
+        sub_id = f"{engagement}:{sub_name}"
+        self.save_subject(sub_name, engagement=engagement)
 
         query = f"""
-        MERGE (s:Statement {{id: '{s_id}'}})
-        SET s.engagement = '{engagement}',
-            s.section = '{section}',
-            s.subject = '{subject_name}',
-            s.predicate = '{pred_esc}',
-            s.value = '{value_esc}',
-            s.unit = '{unit_esc}',
-            s.author = '{author_esc}',
-            s.role = '{role_esc}',
-            s.confidence = '{confidence_esc}',
-            s.verbatim = '{verbatim_esc}',
-            s.created_at = '{created_at}',
-            s.status = '{status}';
+        MERGE (st:Statement {{id: '{s_id}'}})
+        SET st.engagement = '{engagement}',
+            st.section = '{sec}',
+            st.subject = '{sub_name}',
+            st.predicate = '{predicate}',
+            st.value = '{val}',
+            st.author = '{author}',
+            st.role = '{role}',
+            st.confidence = '{confidence}',
+            st.verbatim = '{verbatim}',
+            st.status = '{status}',
+            st.created_at = '{created_at}';
         """
         self.db_client.execute_cypher(query)
 
-        # Relations ABOUT, ANSWERS, BASED_ON
-        if statement.get("subject"):
-            self.save_subject(statement["subject"])
-            sub_esc = _esc(statement["subject"])
-            self.db_client.execute_cypher(
-                f"MATCH (st:Statement {{id: '{s_id}'}}), (sub:Subject {{name: '{sub_esc}'}}) MERGE (st)-[:ABOUT]->(sub);"
-            )
+        # Lier à la section/sujet via ABOUT
+        self.db_client.execute_cypher(
+            f"MERGE (st:Statement {{id: '{s_id}'}}) MERGE (sub:Subject {{id: '{sub_id}'}}) MERGE (st)-[:ABOUT]->(sub);"
+        )
 
-        question_id = statement.get("question_id")
-        if question_id:
-            self.db_client.execute_cypher(
-                f"MATCH (st:Statement {{id: '{s_id}'}}), (q:Question {{id: '{question_id}'}}) MERGE (st)-[:ANSWERS]->(q);"
-            )
-
+        # Lier à un asset si fourni
         based_on_asset = statement.get("based_on_asset")
         if based_on_asset:
             asset_esc = _esc(based_on_asset)
             self.db_client.execute_cypher(
-                f"MATCH (st:Statement {{id: '{s_id}'}}), (a:Asset {{id: '{asset_esc}'}}) MERGE (st)-[:BASED_ON]->(a);"
+                f"MERGE (st:Statement {{id: '{s_id}'}}) MERGE (a:Asset {{id: '{asset_esc}'}}) MERGE (st)-[:BASED_ON]->(a);"
             )
 
         return s_id
 
     def save_conflict(self, conflict_data: dict[str, Any], statement_ids: list[str]) -> str:
         """Enregistre un conflit d'architecture lié à un ou plusieurs énoncés."""
-        query_count = "MATCH (c:Conflict) RETURN count(c) as c;"
+        query_count = "MATCH (c:Conflict) RETURN c.id as id;"
         res = self.db_client.execute_cypher(query_count)
-        count = res[0].get("c", 0) + 1 if res and "error" not in res[0] else 1
+        count = len(res) + 1 if res and "error" not in res[0] else 1
         c_id = f"C-{count:04d}"
 
         kind_esc = _esc(conflict_data.get("kind", "contradiction"))
@@ -188,7 +221,7 @@ class ElicitationRepository:
         for s_id in statement_ids:
             s_esc = _esc(s_id)
             self.db_client.execute_cypher(
-                f"MATCH (c:Conflict {{id: '{c_id}'}}), (st:Statement {{id: '{s_esc}'}}) MERGE (c)-[:INVOLVES]->(st);"
+                f"MERGE (c:Conflict {{id: '{c_id}'}}), (st:Statement {{id: '{s_esc}'}}) MERGE (c)-[:INVOLVES]->(st);"
             )
 
         return c_id
@@ -237,7 +270,7 @@ class ElicitationRepository:
 
     def save_uncertainty(self, data: dict[str, Any]) -> str:
         """Enregistre une incertitude identifiée dans l'engagement."""
-        query_count = "MATCH (u:Uncertainty) RETURN count(u) as c;"
+        query_count = "MATCH (u:Uncertainty) RETURN count(u.id) as c;"
         res = self.db_client.execute_cypher(query_count)
         count = res[0].get("c", 0) + 1 if res and "error" not in res[0] else 1
         u_id = f"U-{count:04d}"
@@ -383,23 +416,26 @@ class ElicitationRepository:
         """
         self.db_client.execute_cypher(query)
 
-    def get_subject_maturity(self, subject_name: str) -> dict[str, Any]:
-        """Récupère les détails de maturité d'un sujet."""
-        sub_esc = subject_name.replace("'", "''")
-        query = f"MATCH (s:Subject {{name: '{sub_esc}'}}) RETURN s.name as name, s.level as level, s.updated_at as updated_at;"
+    def get_subject_maturity(self, subject_name: str, engagement: str = "nordwave-mcx-2027") -> dict[str, Any]:
+        """Récupère les détails de maturité d'un sujet scopé par engagement (avec fallback)."""
+        sub_esc = _esc(subject_name)
+        eng_esc = _esc(engagement)
+        query = f"MATCH (s:Subject) WHERE s.name = '{sub_esc}' AND (s.engagement = '{eng_esc}' OR s.engagement = 'default' OR s.engagement IS NULL) RETURN s.name as name, s.level as level, s.origin as origin, s.updated_at as updated_at;"
         rows = self.db_client.execute_cypher(query)
         if rows and "error" not in rows[0]:
             r = rows[0]
             return {
                 "name": r.get("name", subject_name),
+                "subject": r.get("name", subject_name),
                 "level": r.get("level") or "L0_named",
+                "origin": r.get("origin") or "declared",
                 "updated_at": r.get("updated_at") or datetime.now().isoformat(),
             }
-        return {"name": subject_name, "level": "L0_named", "updated_at": datetime.now().isoformat()}
+        return {"name": subject_name, "subject": subject_name, "level": "L0_named", "origin": "declared", "updated_at": datetime.now().isoformat()}
 
     def get_subjects_maturity_board(self, engagement: str, stall_days: int = 7) -> list[dict[str, Any]]:
         """Récupère les données d'avancement pour le Maturity Board."""
-        query = "MATCH (s:Subject) RETURN s.name as name, s.level as level, s.updated_at as updated_at;"
+        query = "MATCH (s:Subject) RETURN s.name as name, s.level as level, s.origin as origin, s.updated_at as updated_at;"
         rows = self.db_client.execute_cypher(query)
         board = []
         now = datetime.now()
@@ -409,17 +445,17 @@ class ElicitationRepository:
                 continue
             name = r.get("name")
             level = r.get("level") or "L0_named"
+            origin = r.get("origin") or "declared"
             updated_at_str = r.get("updated_at")
 
             is_stalled = False
             days_at_level = 0
             if updated_at_str:
                 try:
-                    dt = datetime.fromisoformat(updated_at_str)
-                    days_at_level = (now - dt).days
-                    if days_at_level >= stall_days:
-                        is_stalled = True
-                except Exception:
+                    updated_at = datetime.fromisoformat(updated_at_str)
+                    days_at_level = (now - updated_at).days
+                    is_stalled = days_at_level >= stall_days
+                except ValueError:
                     pass
 
             # Chercher une question ouverte bloquante pour ce sujet
@@ -436,6 +472,7 @@ class ElicitationRepository:
             board.append({
                 "subject": name,
                 "level": level,
+                "origin": origin,
                 "days_at_level": days_at_level,
                 "is_stalled": is_stalled and (open_q_ref is not None),
                 "open_question_ref": open_q_ref,
@@ -474,3 +511,42 @@ class ElicitationRepository:
             statement_ids=[target_statement_id, s_id],
         )
         return s_id, c_id
+
+    def demote_subject(
+        self, subject_name: str, to_level: str, author: str, reason: str, engagement: str = "nordwave-mcx-2027"
+    ) -> dict[str, Any]:
+        """Rétrograde la maturité d'un sujet (demotion non-monotone).
+        Marque les énoncés de niveau supérieur en 'under_review' et réouvre les questions fermées.
+        """
+        sub_esc = _esc(subject_name)
+        to_lvl_esc = _esc(to_level)
+        eng_esc = _esc(engagement)
+
+        # 1. Mettre à jour le niveau du sujet
+        self.db_client.execute_cypher(
+            f"MATCH (s:Subject {{name: '{sub_esc}'}}) SET s.level = '{to_lvl_esc}', s.updated_at = '{datetime.now().isoformat()}';"
+        )
+
+        # 2. Marquer les énoncés comme 'under_review'
+        st_query = f"""
+        MATCH (st:Statement {{engagement: '{eng_esc}', subject: '{sub_esc}'}})
+        WHERE st.status = 'active'
+        SET st.status = 'under_review';
+        """
+        self.db_client.execute_cypher(st_query)
+
+        # 3. Réouvrir les questions fermées avec contexte conservé
+        q_query = f"""
+        MATCH (q:Question {{engagement: '{eng_esc}'}})-[:TARGETS]->(s:Subject {{name: '{sub_esc}'}})
+        WHERE q.status IN ['confirmed', 'sent']
+        SET q.status = 'open';
+        """
+        self.db_client.execute_cypher(q_query)
+
+        return {
+            "subject": subject_name,
+            "demoted_to": to_level,
+            "author": author,
+            "reason": reason,
+            "status": "demoted",
+        }

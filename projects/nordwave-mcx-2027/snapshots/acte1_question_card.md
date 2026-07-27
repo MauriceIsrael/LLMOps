@@ -1,8 +1,8 @@
-<!-- elicit:nordwave-mcx-2027:Q-0001:question:sha=66725f -->
-### Quelle est l'architecture de la section 4.1 (MCX Services Boundary & Framing) ?
+<!-- elicit:nordwave-mcx-2027:Q-0001:question:sha=586079 -->
+### What is the mission-critical service layer for, and what must keep working when everything else degrades?
 
 **Why this matters**
-La section 4.1 (MCX Services Boundary & Framing) ne contient aucun énoncé d'architecture. (Sections bloquées : `4.1`)
+La section 4.1 (4.1) ne contient aucun énoncé d'architecture. (Sections bloquées : `4.1`)
 
 **Please use these terms**
 - Sujet canonique : `mcx-services`

@@ -60,8 +60,9 @@ def test_level_gate_holds_premature_question(repo, tmp_path):
 def test_patterns_proposed_at_l2(repo, tmp_path):
     """Test 11 : Atteindre L2 produit des patterns candidats avec leur clause 'quand ne pas utiliser'."""
     db_path = tmp_path / "kuzu_db"
-    repo.save_subject("Storage-5.2")
-    repo.advance_subject_level("Storage-5.2", "L2_decomposed")
+    r = ElicitationRepository(db_path=db_path)
+    r.save_subject("Storage-5.2", engagement="test-l2-patterns")
+    r.advance_subject_level("Storage-5.2", "L2_decomposed")
 
     sections = [
         {"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L0_named"},
@@ -113,8 +114,9 @@ def test_board_flags_stall(repo):
 def test_section_readiness(repo, tmp_path):
     """Test 14 : Une section dont les sujets sont sous L3 rend un statut PROVISIONAL et les nomme."""
     db_path = tmp_path / "kuzu_db"
-    repo.save_subject("Storage-5.2")
-    repo.advance_subject_level("Storage-5.2", "L1_framed")
+    r = ElicitationRepository(db_path=db_path)
+    r.save_subject("Storage-5.2")
+    r.advance_subject_level("Storage-5.2", "L1_framed")
 
     graph = build_assemble_graph()
     res = graph.invoke({"engagement": "test-readiness", "db_path": str(db_path)})
@@ -127,8 +129,9 @@ def test_section_readiness(repo, tmp_path):
 def test_prior_answer_goes_to_confirmation_batch(repo, tmp_path):
     """Test 15 : Une réponse antérieure apparaît dans les données d'enrichissement comme défaut à confirmer."""
     db_path = tmp_path / "kuzu_db"
-    repo.save_subject("Storage-5.2")
-    repo.save_statement({
+    r = ElicitationRepository(db_path=db_path)
+    r.save_subject("Storage-5.2", engagement="test-prior-batch")
+    r.save_statement({
         "id": "S-prior-1",
         "engagement": "other-eng",
         "section": "5.2",
@@ -137,9 +140,6 @@ def test_prior_answer_goes_to_confirmation_batch(repo, tmp_path):
         "value": "SAN NVMe dual-controller",
         "status": "active"
     })
-    del repo
-    import gc
-    gc.collect()
 
     sections = [
         {"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L0_named"},

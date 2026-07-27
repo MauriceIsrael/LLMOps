@@ -1,6 +1,6 @@
 # Document d'Architecture System — Engagement nordwave-mcx-2027
 **Statut du Document :** `PROVISIONAL`
-**Conflits Ouverts :** 0
+**Conflits Ouverts :** 1
 
 ---
 ## Sections Rédigées
@@ -38,12 +38,19 @@ one and the reason people will judge the system. Media distribution, where the
 question is unicast versus multicast on the radio side. And the LMR interworking
 function, which is a gateway to a vendor system we do not control."
 
-### Section 5.1
-
-- Énoncé validé (`designed`) par Rui Vasconcelos : `has_property` = `dedicated 5G standalone core, 2 sites active-active, reserved slicing`.
-  > *Verbatim :* "The core is a dedicated 5G standalone core, national, two sites active-active, with slicing reserved for the mission-critical service."
-
 ### Section 4.3
 
 - Énoncé validé (`designed`) par Rui Vasconcelos : `depends_on` = `depends on a committed priority and pre-emption profile in the core`.
   > *Verbatim :* "depends on a committed priority and pre-emption profile in the core"
+
+### Section 4.4
+
+- Énoncé validé (`designed`) par Amina Duarte : `has_property` = `multicast on the radio side`.
+  > *Verbatim :* "multicast on the radio side"
+- Énoncé validé (`designed`) par Rui Vasconcelos : `has_property` = `unicast only, multicast deferred`.
+  > *Verbatim :* "unicast only, multicast deferred"
+
+---
+## ⚠️ Registre des Conflits Ouverts
+
+- **Conflit `C-0002`** (contradiction) : Contradiction automatique détectée entre S-0005 et S-0006 sur media-distribution (has_property)

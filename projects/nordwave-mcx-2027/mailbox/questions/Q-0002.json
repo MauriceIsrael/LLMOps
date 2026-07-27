@@ -1,8 +1,8 @@
 {
   "id": "Q-0002",
   "engagement": "nordwave-mcx-2027",
-  "question": "Quelle est l'architecture de la section 4.4 (Media Distribution Topology) ?",
-  "why_it_matters": "La section 4.4 (Media Distribution Topology) ne contient aucun énoncé d'architecture.",
+  "question": "Which loops govern the system, and how does autonomy increase over time?",
+  "why_it_matters": "La section 8.1 (8.1) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mcx-service-architect"
+  "routed_to": "chief-architect"
 }

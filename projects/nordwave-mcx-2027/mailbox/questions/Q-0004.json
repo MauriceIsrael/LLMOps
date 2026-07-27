@@ -1,8 +1,8 @@
 {
   "id": "Q-0004",
   "engagement": "nordwave-mcx-2027",
-  "question": "Quelle est l'architecture de la section 4.6 (Group Management Domain & Affiliation) ?",
-  "why_it_matters": "La section 4.6 (Group Management Domain & Affiliation) ne contient aucun énoncé d'architecture.",
+  "question": "Why now, what forces the programme, and under which directives?",
+  "why_it_matters": "La section 1.3 (1.3) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mcx-service-architect"
+  "routed_to": "chief-architect"
 }

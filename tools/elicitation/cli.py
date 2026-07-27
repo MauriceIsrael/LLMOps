@@ -5,7 +5,6 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from mcp_server.db.kuzu_client import KuzuClient
 from tools.elicitation.flows.assemble import build_assemble_graph
 from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
 from tools.elicitation.flows.scan import build_scan_graph
@@ -17,23 +16,40 @@ console = Console()
 
 
 @app.command()
+def plan(
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement projet"),
+    blueprint_path: str = typer.Option("data/kb/blueprints/BLU-hla-mcx.yaml", "--blueprint", "-b", help="Fichier blueprint structuré"),
+) -> None:
+    """Affiche le plan d'instructions complet (Instruction Plan) à 4 blocs selon SPEC-PLANNING-AND-DEMO."""
+    from tools.elicitation.plan import generate_instruction_plan, render_plan_cli
+    plan_data = generate_instruction_plan(engagement=engagement, blueprint_path=blueprint_path)
+    render_plan_cli(plan_data)
+
+
+@app.command()
 def scan(
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement projet"),
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement projet"),
+    blueprint: str = typer.Option("BLU-hla-mcx", "--blueprint", "-b", help="Identifiant ou chemin du blueprint d'architecture"),
     max_questions: int = typer.Option(8, "--max-questions", "-m", help="Nombre maximal de questions à émettre"),
+    strategy: str = typer.Option("breadth", "--strategy", help="Stratégie de dispatch : breadth (défaut pour BID) ou depth (pour BUILD)"),
 ) -> None:
     """Détecte les manques (gaps) du projet et émet des questions aux experts."""
-    console.print(f"[bold blue]🔎 Scan des manques pour l'engagement : {engagement}...[/bold blue]")
+    console.print(f"[bold blue]🔎 Scan des manques pour l'engagement : {engagement} (blueprint: {blueprint}, stratégie: {strategy})...[/bold blue]")
 
     graph = build_scan_graph()
-    initial_state = {"engagement": engagement, "max_questions": max_questions}
+    initial_state = {
+        "engagement": engagement,
+        "blueprint_id": blueprint,
+        "max_questions": max_questions,
+        "strategy": strategy,
+    }
     result = graph.invoke(initial_state)
 
     questions = result.get("questions", [])
-    _dispatched = result.get("dispatched", [])
+    counts = result.get("counts_summary", {})
 
     console.print(
-
-        f"[bold green]✅ Scan terminé avec succès ! {len(questions)} question(s) générée(s) et postée(s).[/bold green]"
+        f"[bold green]✅ Scan terminé ! Nouveaux: {counts.get('new', 0)} · Ouverts: {counts.get('open', 0)} · Retenus prématurés: {counts.get('held_premature', 0)} · Retenus file d'attente: {counts.get('held_queued', 0)}[/bold green]"
     )
 
     table = Table(title=f"Questions Émises — {engagement}")
@@ -44,32 +60,6 @@ def scan(
 
     for q in questions:
         table.add_row(q["id"], q["section"], q["routed_to"], q["question"])
-
-    console.print(table)
-
-
-@app.command()
-def questions(
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement projet"),
-    status: str = typer.Option("sent", "--status", "-s", help="Statut des questions (open, sent, confirmed, declined)"),
-) -> None:
-    """Lister les questions de l'engagement par statut."""
-    db_client = KuzuClient()
-    query = f"MATCH (q:Question {{engagement: '{engagement}', status: '{status}'}}) RETURN q.id as id, q.section as section, q.question as question, q.routed_to as routed_to;"
-    rows = db_client.execute_cypher(query)
-
-    if not rows or "error" in rows[0]:
-        console.print(f"[yellow]Aucune question avec le statut '{status}' trouvée pour {engagement}.[/yellow]")
-        return
-
-    table = Table(title=f"Questions ({status}) — {engagement}")
-    table.add_column("ID", style="cyan")
-    table.add_column("Section", style="magenta")
-    table.add_column("Rôle Cible", style="yellow")
-    table.add_column("Question", style="white")
-
-    for r in rows:
-        table.add_row(r["id"], r["section"], r["routed_to"], r["question"])
 
     console.print(table)
 
@@ -92,13 +82,40 @@ def resolve_impersonation(
 
 @app.command()
 def answer(
-    question_id: str = typer.Argument(..., help="Identifiant de la question (ex: Q-0001)"),
-    text: str = typer.Option(..., "--text", "-t", help="Texte de la réponse de l'expert"),
+    question_id: str | None = typer.Argument(None, help="Identifiant de la question (ex: Q-0001)"),
+    text: str | None = typer.Option(None, "--text", "-t", help="Texte de la réponse de l'expert"),
+    from_file: str | None = typer.Option(None, "--from-file", help="Fichier carte Markdown contenant la réponse"),
     author: str = typer.Option("alice", "--author", "-a", help="Nom de l'expert"),
     role: str = typer.Option("cloud-architect", "--role", "-r", help="Rôle de l'expert"),
-    as_user: str | None = typer.Option(None, "--as", help="Usurper un utilisateur du roster (ex: --as alice, --as bob)"),
+    as_user: str | None = typer.Option(None, "--as", help="Usurper un utilisateur du roster (ex: --as alice, --as rui)"),
     engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement"),
 ) -> None:
+    """Soumettre une réponse d'expert (directe ou depuis un fichier carte .md) et démarrer le flux d'intake."""
+    from pathlib import Path
+
+    if from_file:
+        filepath = Path(from_file)
+        if not filepath.exists():
+            console.print(f"[bold red]Fichier introuvable : {from_file}[/bold red]")
+            return
+        content = filepath.read_text(encoding="utf-8")
+        
+        # Extraire l'ID de question depuis le nom de fichier ou le header
+        if not question_id:
+            question_id = filepath.stem.split(".")[0]
+        
+        # Extraire le texte de réponse sous "## Your answer"
+        if "## Your answer" in content:
+            ans_part = content.split("## Your answer", 1)[1]
+            if "## How to submit" in ans_part:
+                ans_part = ans_part.split("## How to submit", 1)[0]
+            text = ans_part.strip()
+        else:
+            text = content.strip()
+
+    if not question_id or not text:
+        console.print("[bold red]Erreur : question_id et text (ou --from-file) sont requis.[/bold red]")
+        return
     """Soumettre une réponse d'expert et démarrer le flux d'intake jusqu'à l'interruption."""
     author, role = resolve_impersonation(as_user, author, role, engagement)
     console.print(f"[bold blue]💬 Soumission de la réponse pour {question_id} par {author} ({role})...[/bold blue]")
@@ -203,9 +220,141 @@ def arbitrate(
         amend_statement_id=amend,
         amend_to=to,
     )
-    console.print(
-        f"[bold green]✅ Conflit {conflict_id} arbitré par {by_user}. Énoncé conservé : {keep}. Raison : {reason}[/bold green]"
-    )
+@app.command()
+def subject(
+    name: str = typer.Argument(..., help="Nom du sujet canonique (ex: floor-control)"),
+    trajectory: bool = typer.Option(True, "--trajectory", help="Aicher la trajectoire de maturité chronologique du sujet"),
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+) -> None:
+    """Affiche la trajectoire de maturité d'un sujet (questions et énoncés chronologiques)."""
+    from tools.elicitation.trajectory import get_subject_trajectory, render_trajectory_cli
+    traj = get_subject_trajectory(subject_name=name, engagement=engagement)
+    render_trajectory_cli(traj)
+
+
+@app.command()
+def demote(
+    subject_name: str = typer.Argument(..., help="Nom du sujet à rétrograder"),
+    to: str = typer.Option("L2_decomposed", "--to", help="Niveau de cible après rétrogradation (ex: L2_decomposed)"),
+    as_user: str | None = typer.Option(None, "--as", help="Auteur de la rétrogradation (ex: --as sofia)"),
+    reason: str = typer.Option(..., "--reason", "-r", help="Raison explicite de la rétrogradation"),
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+) -> None:
+    """Rétrograde la maturité d'un sujet (demotion non-monotone) et réouvre les questions fermées."""
+    author, _ = resolve_impersonation(as_user, "sofia", "chief-architect", engagement)
+    repo = ElicitationRepository()
+    repo.demote_subject(subject_name=subject_name, to_level=to, author=author, reason=reason, engagement=engagement)
+    console.print(f"[bold yellow]⚠️ Sujet '{subject_name}' rétrogradé à {to} par {author}. Raison : {reason}[/bold yellow]")
+    console.print("Énoncés de niveau supérieur marqués en 'under_review'. Questions réouvertes.")
+
+
+@app.command()
+def submit(
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    as_user: str = typer.Option("external:m.okonkwo", "--as", help="Identifiant du contributeur externe (ex: --as external:m.okonkwo)"),
+    title: str = typer.Option(..., "--title", help="Titre explicatif du matériel proposé"),
+    material: str = typer.Option(..., "--material", help="Texte ou chemin vers le fichier de matériel"),
+    attach: str | None = typer.Option(None, "--attach", help="Diagramme ou preuve jointe (optionnel)"),
+    relates_to: str | None = typer.Option(None, "--relates-to", help="Sujet associé à titre indicatif"),
+) -> None:
+    """Soumettre une contribution spontanée externe en staging sans écriture directe dans le graphe."""
+    from pathlib import Path
+
+    from tools.elicitation.contribution_repository import ContributionRepository
+
+    mat_text = material
+    if Path(material).exists():
+        mat_text = Path(material).read_text(encoding="utf-8")
+
+    crepo = ContributionRepository(engagement=engagement)
+    c = crepo.submit(contributor=as_user, title=title, material_text=mat_text, attachment_path=attach, relates_to=relates_to)
+    console.print(f"[bold green]📥 Contribution {c.id} soumise avec succès par {as_user} ! Status: {c.status}[/bold green]")
+    console.print("En attente de tri par l'architecte lead (elicit triage).")
+
+
+@app.command()
+def contributions(
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    status: str | None = typer.Option(None, "--status", help="Filtrer par statut (submitted, triaged, accepted, declined)"),
+) -> None:
+    """Lister les contributions spontanées de l'engagement."""
+    from tools.elicitation.contribution_repository import ContributionRepository
+    crepo = ContributionRepository(engagement=engagement)
+    items = crepo.list_all(status=status)
+
+    if not items:
+        console.print(f"[yellow]Aucune contribution spontanée trouvée pour {engagement}.[/yellow]")
+        return
+
+    table = Table(title=f"Contributions Spontanées — {engagement}")
+    table.add_column("ID", style="cyan")
+    table.add_column("Contributeur", style="magenta")
+    table.add_column("Titre", style="white")
+    table.add_column("Statut", style="bold yellow")
+
+    for c in items:
+        table.add_row(c.id, c.contributor, c.title, c.status)
+
+    console.print(table)
+
+
+@app.command()
+def triage(
+    contribution_id: str = typer.Argument(..., help="Identifiant de la contribution (ex: CT-0001)"),
+    as_user: str = typer.Option("sofia", "--as", help="Architecte lead effectuant le tri (ex: --as sofia)"),
+    accept: bool = typer.Option(True, "--accept/--decline", help="Accepter ou refuser le tri de la contribution"),
+    reason: str = typer.Option("", "--reason", help="Raison en cas de refus ou de réorientation"),
+    to_subject: str | None = typer.Option(None, "--to-subject", help="Sujet canonique cible"),
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+) -> None:
+    """Effectuer le tri d'une contribution spontanée par l'architecte lead."""
+    from tools.elicitation.contribution_repository import ContributionRepository
+    crepo = ContributionRepository(engagement=engagement)
+    decision = "accept" if accept else "decline"
+    c = crepo.triage(ct_id=contribution_id, lead_author=as_user, decision=decision, reason=reason, to_subject=to_subject)
+    console.print(f"[bold green]✅ Contribution {c.id} triée par {as_user}. Décision : {decision}. Statut : {c.status}[/bold green]")
+
+
+@app.command()
+def crystallise(
+    contribution_id: str = typer.Argument(..., help="Identifiant de la contribution (ex: CT-0001)"),
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+) -> None:
+    """Formuler les énoncés candidats et cartographier le vocabulaire d'une contribution triée."""
+    from tools.elicitation.contribution_repository import ContributionRepository
+    crepo = ContributionRepository(engagement=engagement)
+    c = crepo.crystallise(ct_id=contribution_id)
+    console.print(f"[bold blue]💎 Contribution {c.id} cristallisée ! Sujets cartographiés : {c.mapped_subjects}[/bold blue]")
+    if c.unmapped_terms:
+        console.print(f"[bold yellow]⚠️ Termes non cartographiés proposés : {c.unmapped_terms}[/bold yellow]")
+
+
+@app.command()
+def confirm_contribution(
+    contribution_id: str = typer.Argument(..., help="Identifiant de la contribution (ex: CT-0001)"),
+    as_user: str = typer.Option(..., "--as", help="Auteur de la contribution confirmant le sens (ex: --as external:m.okonkwo)"),
+    accept: bool = typer.Option(True, "--accept/--reject", help="Confirmer ou rejeter la fidélité du sens extrait"),
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+) -> None:
+    """Confirmation du SENS par l'auteur d'une contribution externe."""
+    from tools.elicitation.contribution_repository import ContributionRepository
+    crepo = ContributionRepository(engagement=engagement)
+    c = crepo.confirm_by_author(ct_id=contribution_id, author=as_user, accept=accept)
+    console.print(f"[bold green]✍️ Sens confirmé par l'auteur {as_user} pour {c.id}. Statut : {c.status}[/bold green]")
+
+
+@app.command()
+def accept(
+    contribution_id: str = typer.Argument(..., help="Identifiant de la contribution (ex: CT-0001)"),
+    as_user: str = typer.Option("sofia", "--as", help="Architecte lead validant l'entrée dans le graphe (ex: --as sofia)"),
+    section: str = typer.Option("4.5", "--section", help="Section documentaire cible"),
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+) -> None:
+    """Validation finale de l'ENTRÉE dans le graphe par l'architecte lead."""
+    from tools.elicitation.contribution_repository import ContributionRepository
+    crepo = ContributionRepository(engagement=engagement)
+    c, p_ids = crepo.accept_by_lead(ct_id=contribution_id, lead_author=as_user, section_id=section)
+    console.print(f"[bold green]🎉 Contribution {c.id} acceptée par {as_user} ! Énoncés enregistrés dans Kùzu DB : {p_ids}[/bold green]")
 
 
 

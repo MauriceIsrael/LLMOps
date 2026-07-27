@@ -1,0 +1,8 @@
+{
+  "id": "Q-0007",
+  "engagement": "test-distinguish",
+  "question": "Quelle est l'architecture de la section 5.4 (Transport Topology & Redundancy) ?",
+  "why_it_matters": "La section 5.4 (Transport Topology & Redundancy) ne contient aucun énoncé d'architecture.",
+  "expected_shape": "decision",
+  "routed_to": "mobile-core-architect"
+}

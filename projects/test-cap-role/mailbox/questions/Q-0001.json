@@ -1,0 +1,8 @@
+{
+  "id": "Q-0001",
+  "engagement": "test-cap-role",
+  "question": "What is the mission-critical service layer for, and what must keep working when everything else degrades?",
+  "why_it_matters": "La section 4.1 (4.1) ne contient aucun énoncé d'architecture.",
+  "expected_shape": "decision",
+  "routed_to": "mcx-service-architect"
+}

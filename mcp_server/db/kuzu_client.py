@@ -1,5 +1,6 @@
 """Client Kùzu DB pour l'exécution des requêtes du serveur FastMCP."""
 
+import gc
 from pathlib import Path
 from typing import Any
 
@@ -9,46 +10,53 @@ from mcp_server.config import settings
 
 
 class KuzuClient:
-    """Client de lecture/requêtage thread-safe pour Kùzu DB avec cache de connexion par chemin."""
+    """Client de lecture/requêtage thread-safe pour Kùzu DB avec singleton Database par chemin."""
 
-    _cache: dict[str, tuple[Any, Any]] = {}
+    _db_cache: dict[str, Any] = {}
+
+    @classmethod
+    def get_database(cls, db_path: str) -> Any:
+        if db_path in cls._db_cache:
+            db = cls._db_cache[db_path]
+            try:
+                test_conn = kuzu.Connection(db)
+                test_conn.execute("RETURN 1;")
+                del test_conn
+                return db
+            except Exception:
+                cls._db_cache.pop(db_path, None)
+
+        db = kuzu.Database(db_path, buffer_pool_size=64 * 1024 * 1024, read_only=False)
+        cls._db_cache[db_path] = db
+        return db
 
     def __init__(self, db_path: Path | str | None = None, read_only: bool = True) -> None:
         self.db_path = str(db_path or settings.DB_PATH)
         db_dir = Path(self.db_path)
+        db_dir.mkdir(parents=True, exist_ok=True)
 
-        if self.db_path not in KuzuClient._cache:
-            db_dir.mkdir(parents=True, exist_ok=True)
-            db = kuzu.Database(self.db_path, read_only=False)
-            conn = kuzu.Connection(db)
-            KuzuClient._cache[self.db_path] = (db, conn)
-
-        self.db, self.conn = KuzuClient._cache[self.db_path]
+        self.db = KuzuClient.get_database(self.db_path)
+        self.conn = kuzu.Connection(self.db)
 
     @classmethod
     def clear_cache(cls, db_path: str | None = None) -> None:
-        if db_path and db_path in cls._cache:
-            db, conn = cls._cache.pop(db_path)
-            del conn
+        if db_path and db_path in cls._db_cache:
+            db = cls._db_cache.pop(db_path, None)
             del db
         else:
-            for p, (db, conn) in list(cls._cache.items()):
-                del conn
-                del db
-            cls._cache.clear()
+            cls._db_cache.clear()
+        gc.collect()
 
     def execute_cypher(self, query: str) -> list[dict[str, Any]]:
         """Exécute une requête Cypher et retourne les résultats sous forme de liste de dictionnaires."""
-        try:
-            response = self.conn.execute(query)
-            cols = response.get_column_names()
-            results = []
-            while response.has_next():
-                row = response.get_next()
-                results.append(dict(zip(cols, row)))
-            return results
-        except Exception as e:
-            return [{"error": str(e)}]
+        conn = kuzu.Connection(self.db)
+        response = conn.execute(query)
+        cols = response.get_column_names()
+        results = []
+        while response.has_next():
+            row = response.get_next()
+            results.append(dict(zip(cols, row)))
+        return results
 
     def close(self) -> None:
         """Ferme la connexion et libère les ressources Kùzu DB."""
