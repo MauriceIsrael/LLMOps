@@ -11,7 +11,11 @@ ENV/
 
 # Kùzu DB & local storage
 data/kuzu_db/
+data/knowledge.kuzu/
+data/engagements/
 *.kuzu
+*.kz
+*.hindex
 
 # DeepEval / Promptfoo caches
 .deepeval/
@@ -21,12 +25,13 @@ data/kuzu_db/
 .pytest_cache/
 .coverage
 htmlcov/
+artifacts/test-*
+projects/test-*
 
 # Environment variables
 .env
 .env.*
 !.env.example
-
 
 # IDE
 .vscode/
@@ -34,6 +39,7 @@ htmlcov/
 
 # SQLite Checkpoints & Locks
 *.checkpoints.sqlite
+*.sqlite
 .lock
 .shadow
 .wal
