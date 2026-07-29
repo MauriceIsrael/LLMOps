@@ -257,7 +257,7 @@ Héberge les actifs réutilisables d'architecture (`Asset`, `GlossaryTerm`, `ADR
 ### 7.2 Engagement Server (`mcp_server/main_engagement.py`)
 Héberge l'état d'avancement des projets clients (`Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`).
 - **Références Cross-Plane** : Les énoncés font référence aux actifs de la base de connaissances via leurs identifiants sous forme de propriété string (`based_on: [{"id": "ADR-0005"}]`), sans jamais copier de nœuds `Asset` ou créer de relations de graphe inter-bases.
-- **Outils exposés** : `get_subject`, `get_subject_trajectory`, `get_board`, `get_statements`, `get_conflicts`, `get_open_questions`, `get_diagram_graph`, `get_dangling_references`, `query_graph`, `get_graph_summary`.
+- **Outils exposés** : `get_subject`, `get_subject_trajectory`, `get_board`, `get_statements`, `get_conflicts`, `get_open_questions`, `get_diagram_graph`, `get_render_payload`, `get_dangling_references`, `query_graph`, `get_graph_summary`.
 
 ### 7.3 Isolation du Driver & Enveloppes Normalisées
 - **Sûreté au niveau du Driver (`ReadOnlyKuzuClient`)** : Toute tentative d'écriture Cypher (`CREATE`, `SET`, `DELETE`, `MERGE`, etc.) est rejetée au niveau du driver Python.

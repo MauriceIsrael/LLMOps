@@ -122,6 +122,7 @@ Tous les outils retournent une **enveloppe de réponse normalisée** : `{"status
 | `get_conflicts` | Conflits d'architecture ouverts pour un engagement | `engagement` |
 | `get_open_questions` | Questions d'élicitation ouvertes | `engagement` |
 | `get_diagram_graph` | Graphe structuré & code Mermaid prêt à être rendu | `engagement`, `format` |
+| `get_render_payload` | Payload JSON complet d'affichage pour les renderers | `engagement` |
 | `get_dangling_references` | Rapport d'identifiants d'actifs non résolus ou obsolètes | `engagement` |
 | `query_graph` | Exécuter une requête Cypher en lecture seule sur l'engagement | `cypher_query` |
 | `get_graph_summary` | Résumé des nœuds et relations du plan d'engagement | *(aucun)* |
