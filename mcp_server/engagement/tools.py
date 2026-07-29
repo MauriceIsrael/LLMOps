@@ -3,22 +3,32 @@
 Provides tools for inspecting and interacting with engagement-specific graph state (Subject, Statement, Conflict, Question, Uncertainty).
 """
 
+from pathlib import Path
 from typing import Any
 from mcp_server.core.auth import authorise
 from mcp_server.core.config import server_config
-from mcp_server.core.db import ReadOnlyKuzuClient
+from mcp_server.core.db import (
+    ReadOnlyKuzuClient,
+    discover_engagements,
+    get_engagement_path,
+    open_connection,
+)
 from mcp_server.core.envelope import (
     error_response,
     invalid_argument_response,
     not_found_response,
     ok_response,
-    unauthorized_response,
 )
 from tools.elicitation.repository import ElicitationRepository
 
 
-def _get_repo(db_path: str | None = None) -> ElicitationRepository:
-    return ElicitationRepository(db_path=db_path or server_config.db_path)
+def _get_repo(engagement: str | None = None, db_path: str | Path | None = None) -> ElicitationRepository:
+    if db_path:
+        p = Path(db_path)
+    else:
+        eng_id = engagement or server_config.engagement or "nordwave-mcx-2027"
+        p = get_engagement_path(eng_id)
+    return ElicitationRepository(db_path=p)
 
 
 def get_subject(subject: str, engagement: str | None = None) -> dict[str, Any]:
@@ -28,7 +38,7 @@ def get_subject(subject: str, engagement: str | None = None) -> dict[str, Any]:
         subject: Name of the architecture subject (e.g. 'mcx-services').
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    eng = engagement or server_config.engagement or "default-engagement"
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     if not subject:
@@ -38,13 +48,15 @@ def get_subject(subject: str, engagement: str | None = None) -> dict[str, Any]:
         return not_found_response(subject)
 
     try:
-        repo = _get_repo()
+        repo = _get_repo(engagement=eng)
         board = repo.get_subjects_maturity_board(engagement=eng)
         repo.close()
 
         match = [s for s in board if s.get("subject") == subject]
         if match:
             return ok_response(match[0], count=1)
+        return not_found_response(subject)
+    except FileNotFoundError:
         return not_found_response(subject)
     except Exception as e:
         return error_response(str(e))
@@ -57,7 +69,7 @@ def get_subject_trajectory(subject: str, engagement: str | None = None) -> dict[
         subject: Name of the architecture subject (e.g. 'mcx-services').
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    eng = engagement or server_config.engagement or "default-engagement"
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     if not subject:
@@ -67,11 +79,13 @@ def get_subject_trajectory(subject: str, engagement: str | None = None) -> dict[
         return ok_response([])
 
     try:
-        repo = _get_repo()
+        repo = _get_repo(engagement=eng)
         trajectory = repo.get_subject_trajectory(engagement=eng, subject=subject)
         repo.close()
 
         return ok_response(trajectory)
+    except FileNotFoundError:
+        return ok_response([])
     except Exception as e:
         return error_response(str(e))
 
@@ -82,17 +96,19 @@ def get_board(engagement: str | None = None) -> dict[str, Any]:
     Args:
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    eng = engagement or server_config.engagement or "default-engagement"
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     if eng == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
-        repo = _get_repo()
+        repo = _get_repo(engagement=eng)
         board = repo.get_subjects_maturity_board(engagement=eng)
         repo.close()
         return ok_response(board)
+    except FileNotFoundError:
+        return ok_response([])
     except Exception as e:
         return error_response(str(e))
 
@@ -106,14 +122,14 @@ def get_statements(engagement: str | None = None, subject: str | None = None, se
         section: Optional document section filter.
         status: Optional statement status filter ('active', 'under_review', 'contested').
     """
-    eng = engagement or server_config.engagement or "default-engagement"
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     if eng == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
-        repo = _get_repo()
+        repo = _get_repo(engagement=eng)
         statements = repo.get_active_statements(engagement=eng)
         repo.close()
 
@@ -125,6 +141,8 @@ def get_statements(engagement: str | None = None, subject: str | None = None, se
             statements = [s for s in statements if s.get("status") == status]
 
         return ok_response(statements)
+    except FileNotFoundError:
+        return ok_response([])
     except Exception as e:
         return error_response(str(e))
 
@@ -136,17 +154,19 @@ def get_conflicts(engagement: str | None = None, status: str = "open") -> dict[s
         engagement: Unique engagement identifier (defaults to deployment configuration).
         status: Conflict status filter ('open', 'arbitrated').
     """
-    eng = engagement or server_config.engagement or "default-engagement"
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     if eng == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
-        repo = _get_repo()
+        repo = _get_repo(engagement=eng)
         conflicts = repo.get_conflicts(engagement=eng, status=status)
         repo.close()
         return ok_response(conflicts)
+    except FileNotFoundError:
+        return ok_response([])
     except Exception as e:
         return error_response(str(e))
 
@@ -158,14 +178,14 @@ def get_open_questions(engagement: str | None = None, role: str | None = None) -
         engagement: Unique engagement identifier (defaults to deployment configuration).
         role: Optional architect role filter (e.g. 'mcx-architect', 'chief-architect').
     """
-    eng = engagement or server_config.engagement or "default-engagement"
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     if eng == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
-        repo = _get_repo()
+        repo = _get_repo(engagement=eng)
         questions = repo.get_questions(engagement=eng, status="open")
         repo.close()
 
@@ -173,6 +193,8 @@ def get_open_questions(engagement: str | None = None, role: str | None = None) -
             questions = [q for q in questions if q.get("routed_to") == role]
 
         return ok_response(questions)
+    except FileNotFoundError:
+        return ok_response([])
     except Exception as e:
         return error_response(str(e))
 
@@ -184,14 +206,14 @@ def get_diagram_graph(engagement: str | None = None, format: str = "json") -> di
         engagement: Unique engagement identifier (defaults to deployment configuration).
         format: Desired output format ('json' for nodes & edges array, 'mermaid' for Mermaid flowchart).
     """
-    eng = engagement or server_config.engagement or "default-engagement"
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     if eng == "zzz-does-not-exist-9999":
         return ok_response({"nodes": [], "edges": [], "mermaid": "flowchart TD"})
 
     try:
-        repo = _get_repo()
+        repo = _get_repo(engagement=eng)
         board = repo.get_subjects_maturity_board(engagement=eng)
         statements = repo.get_active_statements(engagement=eng)
         conflicts = repo.get_conflicts(engagement=eng, status="open")
@@ -221,6 +243,8 @@ def get_diagram_graph(engagement: str | None = None, format: str = "json") -> di
             "edges": edges,
             "mermaid": "\n".join(mermaid_lines),
         }, count=len(nodes))
+    except FileNotFoundError:
+        return ok_response({"nodes": [], "edges": [], "mermaid": ""}, count=0)
     except Exception as e:
         return error_response(str(e))
 
@@ -231,14 +255,14 @@ def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
     Args:
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    eng = engagement or server_config.engagement or "default-engagement"
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     if eng == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
-        repo = _get_repo()
+        repo = _get_repo(engagement=eng)
         statements = repo.get_active_statements(engagement=eng)
         repo.close()
 
@@ -254,6 +278,8 @@ def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
                     })
 
         return ok_response(dangling)
+    except FileNotFoundError:
+        return ok_response([])
     except Exception as e:
         return error_response(str(e))
 
@@ -264,11 +290,11 @@ def get_render_payload(engagement: str | None = None) -> dict[str, Any]:
     Args:
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    eng = engagement or server_config.engagement or "default-engagement"
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     try:
-        repo = _get_repo()
+        repo = _get_repo(engagement=eng)
         board = repo.get_subjects_maturity_board(engagement=eng)
         statements = repo.get_active_statements(engagement=eng)
         conflicts = repo.get_conflicts(engagement=eng, status="open")
@@ -290,51 +316,38 @@ def get_render_payload(engagement: str | None = None) -> dict[str, Any]:
             "unripe_subjects": [u.get("subject") for u in unripe],
         }
         return ok_response(payload)
+    except FileNotFoundError:
+        return ok_response({
+            "engagement": eng,
+            "status": "provisional",
+            "is_provisional": True,
+            "maturity_board": [],
+            "active_statements": [],
+            "open_conflicts": [],
+            "uncertainties": [],
+            "unripe_subjects": [],
+        })
     except Exception as e:
         return error_response(str(e))
 
 
 def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, Any]:
     """Executes a read-only Cypher query against the engagement graph when engagement is specified, or against the active server database. Contains no reusable assets."""
-    eng = engagement or server_config.engagement or "default-engagement"
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     try:
-        db_client = ReadOnlyKuzuClient(db_path=server_config.db_path)
+        db_client = open_connection(scope=eng)
         data = db_client.execute_cypher(cypher_query)
         return ok_response(data)
+    except FileNotFoundError as e:
+        return not_found_response(id_val=eng, data=str(e))
     except Exception as e:
         return error_response(str(e))
 
 
 def get_graph_summary() -> dict[str, Any]:
-    """Returns node counts and metadata for the engagement graph — subjects, statements, conflicts."""
-    eng = server_config.engagement or "default-engagement"
-    authorise(caller="default_user", engagement=eng)
-    db_client = ReadOnlyKuzuClient(db_path=server_config.db_path)
-    try:
-        subjects = db_client.execute_cypher("MATCH (s:Subject) RETURN count(s) as count;")
-    except Exception:
-        subjects = []
-    try:
-        statements = db_client.execute_cypher("MATCH (st:Statement) RETURN count(st) as count;")
-    except Exception:
-        statements = []
-    try:
-        conflicts = db_client.execute_cypher("MATCH (c:Conflict) RETURN count(c) as count;")
-    except Exception:
-        conflicts = []
-
-    node_counts = {
-        "Subject": subjects[0]["count"] if subjects else 0,
-        "Statement": statements[0]["count"] if statements else 0,
-        "Conflict": conflicts[0]["count"] if conflicts else 0,
-    }
-
-    return ok_response(
-        data={"node_counts": node_counts},
-        plane="engagement",
-        engagement=server_config.engagement or "default-engagement",
-        dataset=str(server_config.db_path),
-        schema_version="3",
-    )
+    """Discovers available databases and returns node counts for knowledge assets and active engagements."""
+    authorise(caller="default_user", engagement="nordwave-mcx-2027")
+    from mcp_server.knowledge.tools import get_graph_summary as kb_summary
+    return kb_summary()

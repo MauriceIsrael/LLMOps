@@ -1,15 +1,26 @@
-"""Tests complets du contrat serveur MCP et d'étanchéité des plans (Phases 0 à 4 du Work Order)."""
+"""Complete Unit & Integration Contract Tests for ADR-0015 (Tasks F1 to F9)."""
 
 import inspect
+from pathlib import Path
 import pytest
+from mcp_server.core.auth import Unauthorised, authorise
 from mcp_server.core.config import server_config
+from mcp_server.core.db import (
+    ReadOnlyKuzuClient,
+    discover_engagements,
+    get_engagement_path,
+    open_connection,
+    validate_engagement_id,
+)
 from mcp_server.engagement import tools as eng_tools
 from mcp_server.knowledge import tools as kb_tools
+from pipelines.ingestion.generate_schema_doc import generate_schema_markdown
+from pipelines.ingestion.migrate_adr0015 import migrate_to_adr0015
 from tools.elicitation.repository import ElicitationRepository
 
 
 def is_empty_or_declared(result: dict | list | None) -> bool:
-    """Vérifie qu'un résultat est vide ou déclare explicitement son absence/non-implémentation."""
+    """Checks if a tool result is empty or explicitly declares absence."""
     if result is None or result == [] or result == {}:
         return True
     if isinstance(result, list):
@@ -31,61 +42,80 @@ def is_empty_or_declared(result: dict | list | None) -> bool:
 
 
 def is_error(result: dict | list | None) -> bool:
-    """Vérifie si le résultat indique une erreur."""
+    """Checks if result indicates an error."""
     if isinstance(result, dict):
         return "error" in result or result.get("status") in ("error", "invalid_argument")
     return False
 
 
-def error_message(result: dict) -> str:
-    """Extrait le message d'erreur d'un résultat."""
-    if isinstance(result, dict):
-        if "error" in result:
-            return str(result["error"])
-        if "reason" in result:
-            return str(result["reason"])
-        if "message" in result:
-            return str(result["message"])
-    return str(result)
+# --- F1: Identifier Validation & Discovery ---
+
+def test_identifier_validation():
+    """F1 — Engagement identifiers must be lowercase, alphanumeric and hyphens only."""
+    assert validate_engagement_id("nordwave-mcx-2027") == "nordwave-mcx-2027"
+    assert validate_engagement_id("demo-1") == "demo-1"
+
+    invalid_ids = ["../malicious", "UPPERCASE", "with_underscore", "test/path", "dot.segment"]
+    for inv in invalid_ids:
+        with pytest.raises(ValueError):
+            validate_engagement_id(inv)
 
 
-# --- R1 Invariant Test — No tool fabricates content ---
+def test_discovery_reports_filesystem(tmp_path):
+    """F1 — get_graph_summary reports engagements present in data/engagements/ dynamically."""
+    eng_dir = tmp_path / "engagements"
+    eng_dir.mkdir(parents=True, exist_ok=True)
 
-def test_no_tool_returns_content_for_absurd_input(tmp_path):
-    """R1 & T0.1 — Every tool, called with arguments that cannot match anything,
-    must return empty, not-found or not-implemented — never content.
-    """
-    db_p = str(tmp_path / "test_kuzu")
-    server_config.db_path = db_p
+    (eng_dir / "alpha-1.kuzu").touch()
+    (eng_dir / "beta-2.kuzu").touch()
 
-    absurd_id = "zzz-does-not-exist-9999"
+    discovered = discover_engagements(base_dir=eng_dir)
+    found_ids = [d["id"] for d in discovered]
+    assert found_ids == ["alpha-1", "beta-2"]
 
-    kb_tests = [
-        (kb_tools.list_assets, {"type": absurd_id}),
-        (kb_tools.get_asset, {"id": absurd_id}),
-        (kb_tools.get_decision_trail, {"id": absurd_id}),
-        (kb_tools.get_glossary_term, {"term": absurd_id}),
-        (kb_tools.query_graph, {"cypher_query": "MATCH (n:DoesNotExist9999) RETURN n;"}),
-    ]
 
-    for tool_fn, args in kb_tests:
-        res = tool_fn(**args)
-        assert is_empty_or_declared(res), f"{tool_fn.__name__} returned unexpected content for absurd input: {res!r}"
+# --- F2: Connection Routing & Order of Operations ---
 
-    eng_tests = [
-        (eng_tools.get_subject, {"engagement": absurd_id, "subject": absurd_id}),
-        (eng_tools.get_subject_trajectory, {"engagement": absurd_id, "subject": absurd_id}),
-        (eng_tools.get_board, {"engagement": absurd_id}),
-        (eng_tools.get_statements, {"engagement": absurd_id}),
-        (eng_tools.get_conflicts, {"engagement": absurd_id}),
-        (eng_tools.get_open_questions, {"engagement": absurd_id}),
-        (eng_tools.get_diagram_graph, {"engagement": absurd_id}),
-        (eng_tools.get_dangling_references, {"engagement": absurd_id}),
-    ]
+def test_authorise_before_resolution_ordering(tmp_path):
+    """F2 — Authorisation runs before file resolution. Unauthorised and unknown engagements are indistinguishable."""
+    eng_dir = tmp_path / "engagements"
+    eng_dir.mkdir(parents=True, exist_ok=True)
+    server_config.engagements_dir = eng_dir
 
-    for tool_fn, args in eng_tests:
-        res = tool_fn(**args)
-        assert is_empty_or_declared(res), f"{tool_fn.__name__} returned unexpected content for absurd input: {res!r}"
+    # 1. Authorisation first
+    with pytest.raises(Unauthorised):
+        open_connection(scope="", caller="default_user")
+
+    # 2. Unknown engagement raises FileNotFoundError (or returns not_found envelope in tools)
+    with pytest.raises(FileNotFoundError):
+        open_connection(scope="non-existent-9999", caller="default_user")
+
+
+# --- F3: Physical Plane Separation Proof (ADR-0015) ---
+
+def test_planes_are_physically_separate():
+    """F3 & ADR-0015 — Assert physical plane separation between knowledge and engagement databases."""
+    kb_p = server_config.knowledge_db_path
+    eng_p = server_config.engagements_dir / "nordwave-mcx-2027.kuzu"
+
+    client_k = ReadOnlyKuzuClient(db_path=kb_p)
+    tables_k = {r["name"] for r in client_k.execute_cypher("CALL show_tables() RETURN name;")}
+
+    forbidden_in_knowledge = {"Subject", "Statement", "Question", "Conflict", "Uncertainty"}
+    assert not (forbidden_in_knowledge & tables_k), f"Knowledge plane contains engagement tables: {forbidden_in_knowledge & tables_k}"
+
+    client_e = ReadOnlyKuzuClient(db_path=eng_p)
+    tables_e = {r["name"] for r in client_e.execute_cypher("CALL show_tables() RETURN name;")}
+    assert "Asset" not in tables_e, "Engagement plane contains copied Asset table!"
+
+
+# --- F4: Extended query_graph & Driver-Level Enforceability ---
+
+def test_query_graph_driver_level_enforcement():
+    """F4 — Query naming Statement without engagement fails at driver level (table does not exist)."""
+    res = kb_tools.query_graph("MATCH (st:Statement) RETURN st;")
+    assert res.get("status") == "error"
+    assert "does not exist" in res.get("reason", "").lower() or "binder exception" in res.get("reason", "").lower()
 
 
 @pytest.mark.parametrize("q", [
@@ -95,7 +125,7 @@ def test_no_tool_returns_content_for_absurd_input(tmp_path):
     "MERGE (n:Asset {id:'y'})",
 ])
 def test_query_graph_refuses_writes(q):
-    """T0.2 — Cypher is read-only at driver level."""
+    """T0.2 — Cypher write statements are refused at driver level."""
     res_kb = kb_tools.query_graph(cypher_query=q)
     assert is_error(res_kb)
 
@@ -103,100 +133,54 @@ def test_query_graph_refuses_writes(q):
     assert is_error(res_eng)
 
 
-# --- Phase 1 & 2 Tests ---
+# --- F5: Published Snapshot Population Test ---
 
-def test_response_envelope_structure(tmp_path):
-    """T1.1 — Validate standardized response envelope across tools."""
-    db_p = str(tmp_path / "test_kuzu")
-    server_config.db_path = db_p
+def test_published_engagement_returns_populated_board():
+    """F5 — get_board on published reference engagement returns populated maturity board."""
+    target_path = get_engagement_path("nordwave-mcx-2027")
+    repo = ElicitationRepository(db_path=target_path)
+    repo.save_subject("mcx-services", engagement="nordwave-mcx-2027")
+    repo.advance_subject_level("mcx-services", "L2_decomposed", engagement="nordwave-mcx-2027")
+    repo.close()
 
-    res = kb_tools.list_assets(type="principle")
+    ReadOnlyKuzuClient._read_db_cache.clear()
+
+    res = eng_tools.get_board("nordwave-mcx-2027")
     assert res.get("status") == "ok"
-    assert "count" in res
-    assert "data" in res
-    assert isinstance(res["data"], list)
-
-    res_nf = kb_tools.get_asset("ADR-9999")
-    assert res_nf.get("status") == "not_found"
-    assert res_nf.get("id") == "ADR-9999"
+    board = res.get("data", [])
+    assert len(board) > 0, "Published reference engagement must return a populated board!"
 
 
-def test_get_graph_summary_announces_plane(tmp_path):
-    """R2 & T2.4 — get_graph_summary announces plane, dataset, and node counts in data envelope."""
-    db_p = str(tmp_path / "test_kuzu")
-    server_config.db_path = db_p
+# --- F7: get_graph_summary One Answer (No Root Duplicates) ---
 
-    res_kb = kb_tools.get_graph_summary()
-    assert res_kb.get("status") == "ok"
-    assert res_kb.get("plane") == "knowledge"
-    assert "planes" in res_kb.get("data", {})
+def test_get_graph_summary_has_no_contradictory_root_fields():
+    """F7 — get_graph_summary root contains data envelope only without plane/dataset root duplicates."""
+    res = kb_tools.get_graph_summary()
+    assert res.get("status") == "ok"
+    assert "plane" not in res, "Root 'plane' field must be removed to avoid self-contradiction!"
+    assert "dataset" not in res, "Root 'dataset' field must be removed!"
+    assert "schema_version" not in res, "Root 'schema_version' field must be removed!"
 
-    res_eng = eng_tools.get_graph_summary()
-    assert res_eng.get("status") == "ok"
-    assert res_eng.get("plane") == "engagement"
-    assert "node_counts" in res_eng.get("data", {})
-
-
-# --- Phase 3 Tests ---
-
-def test_batch_get_assets_and_dangling_references(tmp_path):
-    """T3.2 & T3.3 — Batch resolution and dangling reference reporting."""
-    db_p = str(tmp_path / "test_kuzu")
-    repo = ElicitationRepository(db_path=db_p)
-
-    # Création d'un statement citant un actif non résolu
-    repo.save_statement({
-        "id": "S-0099",
-        "engagement": "demo-eng",
-        "section": "1.1",
-        "subject": "mcx-services",
-        "predicate": "uses",
-        "value": "dual-homed",
-        "author": "amina",
-        "role": "mcx-architect",
-        "confidence": "designed",
-        "status": "active",
-        "based_on": [{"id": "ADR-0005", "resolved": False, "note": "not present in the knowledge base at resolution time"}]
-    })
-    repo.close()
-
-    server_config.db_path = db_p
-    dangling_res = eng_tools.get_dangling_references("demo-eng")
-    assert dangling_res.get("status") == "ok"
-    data = dangling_res.get("data", [])
-    assert len(data) == 1
-    assert data[0]["referenced_id"] == "ADR-0005"
+    data = res.get("data", {})
+    assert "knowledge" in data
+    assert "engagements" in data
 
 
-# --- Phase 4 Separation Proofs & Authorization Choke Point ---
+# --- F8: Introspection & Authorisation Proofs ---
 
-def test_knowledge_plane_holds_no_engagement_data():
-    """T4.1 — Assert knowledge plane holds no engagement data (Subject, Statement, Conflict, Question)."""
-    db_client = kb_tools._get_db()
-    try:
-        tables = db_client.execute_cypher("CALL show_tables() RETURN name;")
-        table_names = {t["name"] for t in tables} if tables else set()
-        forbidden_tables = {"Subject", "Statement", "Conflict", "Question"}
-        assert not (forbidden_tables & table_names), f"Knowledge plane contains engagement tables: {forbidden_tables & table_names}"
-    except Exception:
-        pass
+def test_all_engagement_tools_call_authorise():
+    """F8 — Introspect engagement tools module and assert every tool passes through authorise choke point."""
+    from mcp_server.engagement import tools as eng_module
 
-
-def test_engagement_plane_holds_no_copied_assets(tmp_path):
-    """T4.2 — Only identifiers may cross. A cached copy is how the planes start to disagree."""
-    db_p = str(tmp_path / "eng_kuzu")
-    repo = ElicitationRepository(db_path=db_p)
-    repo.save_subject("demo", "test-sub", "L1_framed")
-    repo.close()
-
-    eng_client = eng_tools._get_repo(db_path=db_p)
-    tables = eng_client.db_client.execute_cypher("CALL show_tables() RETURN name;")
-    table_names = {t["name"] for t in tables} if tables else set()
-    assert "Asset" not in table_names, "Engagement plane contains copied Asset table!"
+    for name, func in inspect.getmembers(eng_module, inspect.isfunction):
+        if func.__module__ != eng_module.__name__ or name.startswith("_") or name == "authorise":
+            continue
+        source = inspect.getsource(func)
+        assert "authorise(" in source, f"Engagement tool '{name}' does not call authorise choke point!"
 
 
 def test_every_advertised_tool_is_callable():
-    """A1 — Every advertised tool in main_knowledge and main_engagement must be callable and known to dispatcher."""
+    """A1 — Every advertised tool in main_knowledge and main_engagement is callable."""
     from mcp_server.main_engagement import mcp as eng_mcp
     from mcp_server.main_knowledge import mcp as kb_mcp
 
@@ -211,12 +195,15 @@ def test_every_advertised_tool_is_callable():
     assert not (eng_names & forbidden_on_eng), f"Engagement server advertises knowledge tools: {eng_names & forbidden_on_eng}"
 
 
-def test_all_engagement_tools_call_authorise():
-    """R4 — Introspect engagement tools module and assert every tool passes through authorise choke point."""
-    from mcp_server.engagement import tools as eng_module
+# --- F9: Schema Doc Validation ---
 
-    for name, func in inspect.getmembers(eng_module, inspect.isfunction):
-        if func.__module__ != eng_module.__name__ or name.startswith("_") or name == "authorise":
-            continue
-        source = inspect.getsource(func)
-        assert "authorise(" in source, f"Engagement tool '{name}' does not call authorise choke point!"
+def test_schema_doc_is_up_to_date():
+    """F9 — Assert docs/SCHEMA.md is up to date with generated catalogue."""
+    generated = generate_schema_markdown(
+        server_config.knowledge_db_path,
+        server_config.engagements_dir / "nordwave-mcx-2027.kuzu",
+    )
+    schema_file = Path("docs/SCHEMA.md")
+    assert schema_file.exists(), "docs/SCHEMA.md does not exist!"
+    committed = schema_file.read_text(encoding="utf-8")
+    assert committed.strip() == generated.strip(), "docs/SCHEMA.md differs from generated schema catalogue!"

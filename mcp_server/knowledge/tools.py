@@ -6,7 +6,11 @@ Provides tools for searching and retrieving reusable architecture knowledge asse
 from pathlib import Path
 from typing import Any
 from mcp_server.core.config import server_config
-from mcp_server.core.db import ReadOnlyKuzuClient
+from mcp_server.core.db import (
+    ReadOnlyKuzuClient,
+    discover_engagements,
+    open_connection,
+)
 from mcp_server.core.envelope import (
     error_response,
     invalid_argument_response,
@@ -17,7 +21,7 @@ from pipelines.ingestion.markdown_parser import MarkdownDocParser
 
 
 def _get_db():
-    return ReadOnlyKuzuClient(db_path=server_config.db_path)
+    return ReadOnlyKuzuClient(db_path=server_config.knowledge_db_path)
 
 
 def list_assets(
@@ -204,68 +208,71 @@ def search_assets(query: str, filters: dict[str, Any] | None = None) -> dict[str
 
 
 def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, Any]:
-    """Executes a read-only Cypher query against the reusable knowledge graph when engagement is omitted, or against the specified engagement graph when provided."""
-    if engagement:
-        from mcp_server.core.auth import authorise
-        authorise(caller="default_user", engagement=engagement)
+    """Executes a read-only Cypher query.
+
+    Without `engagement`: the reusable knowledge graph — assets, principles, decisions, glossary.
+    With `engagement`: that engagement's graph — subjects, statements, questions, conflicts.
+    These are separate databases and a single query cannot span them; use `get_assets` to resolve the asset identifiers cited by statements.
+    """
     try:
-        data = _get_db().execute_cypher(cypher_query)
+        client = open_connection(scope=engagement)
+        data = client.execute_cypher(cypher_query)
         return ok_response(data)
+    except FileNotFoundError as e:
+        return not_found_response(id_val=engagement or "unknown", data=str(e))
     except Exception as e:
         return error_response(str(e))
 
 
 def get_graph_summary() -> dict[str, Any]:
-    """Returns plane information, dataset path, and node counts for knowledge assets and active engagements."""
-    db_client = _get_db()
+    """Discovers available databases and returns node counts for knowledge assets and active engagements."""
+    kb_client = ReadOnlyKuzuClient(db_path=server_config.knowledge_db_path)
     try:
-        assets = db_client.execute_cypher("MATCH (a:Asset) RETURN count(a) as count;")
+        assets = kb_client.execute_cypher("MATCH (a:Asset) RETURN count(a) as count;")
     except Exception:
         assets = []
     try:
-        terms = db_client.execute_cypher("MATCH (g:GlossaryTerm) RETURN count(g) as count;")
+        terms = kb_client.execute_cypher("MATCH (g:GlossaryTerm) RETURN count(g) as count;")
     except Exception:
         terms = []
-    try:
-        subjects = db_client.execute_cypher("MATCH (s:Subject) RETURN count(s) as count;")
-    except Exception:
-        subjects = []
-    try:
-        statements = db_client.execute_cypher("MATCH (st:Statement) RETURN count(st) as count;")
-    except Exception:
-        statements = []
-
-    asset_cnt = assets[0]["count"] if assets else 0
-    term_cnt = terms[0]["count"] if terms else 0
-    subj_cnt = subjects[0]["count"] if subjects else 0
-    stmt_cnt = statements[0]["count"] if statements else 0
 
     kb_counts = {
-        "Asset": asset_cnt,
-        "GlossaryTerm": term_cnt,
+        "Asset": assets[0]["count"] if assets else 0,
+        "GlossaryTerm": terms[0]["count"] if terms else 0,
     }
 
-    eng_id = server_config.engagement or "nordwave-mcx-2027"
+    discovered = discover_engagements()
+    engagements_list = []
+    for eng in discovered:
+        eng_id = eng["id"]
+        eng_path = eng["dataset"]
+        try:
+            client = ReadOnlyKuzuClient(db_path=eng_path)
+            sub_res = client.execute_cypher("MATCH (s:Subject) RETURN count(s) as count;")
+            stmt_res = client.execute_cypher("MATCH (st:Statement) RETURN count(st) as count;")
+            conf_res = client.execute_cypher("MATCH (c:Conflict) RETURN count(c) as count;")
+            sub_cnt = sub_res[0]["count"] if sub_res else 0
+            stmt_cnt = stmt_res[0]["count"] if stmt_res else 0
+            conf_cnt = conf_res[0]["count"] if conf_res else 0
+        except Exception:
+            sub_cnt, stmt_cnt, conf_cnt = 0, 0, 0
+
+        engagements_list.append({
+            "id": eng_id,
+            "dataset": eng_path,
+            "node_counts": {
+                "Subject": sub_cnt,
+                "Statement": stmt_cnt,
+                "Conflict": conf_cnt,
+            },
+        })
 
     payload = {
-        "planes": ["knowledge", "engagement"],
         "knowledge": {
-            "dataset": str(server_config.db_path),
+            "dataset": str(server_config.knowledge_db_path),
             "node_counts": kb_counts,
         },
-        "engagements": [
-            {
-                "id": eng_id,
-                "dataset": str(server_config.db_path),
-                "node_counts": {"Subject": subj_cnt, "Statement": stmt_cnt},
-            }
-        ],
-        "schema_version": "3",
+        "engagements": engagements_list,
     }
 
-    return ok_response(
-        data=payload,
-        plane="knowledge",
-        dataset=str(server_config.db_path),
-        schema_version="3",
-    )
+    return ok_response(data=payload, count=1)

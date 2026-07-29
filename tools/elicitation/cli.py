@@ -453,10 +453,101 @@ def harvest(
 
 
 
+@app.command()
+def publish(
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Engagement identifier to publish"),
+    db_path: str | None = typer.Option(None, "--db-path", "-d", help="Optional working database source path"),
+) -> None:
+    """Takes a consistent snapshot of the working graph and installs it atomically at data/engagements/<id>.kuzu."""
+    import shutil
+    from pathlib import Path
+    from mcp_server.core.db import get_engagement_path, validate_engagement_id
+    from tools.elicitation.db_schema import ElicitationSchemaInitializer
+
+    valid_id = validate_engagement_id(engagement)
+    target_path = get_engagement_path(valid_id)
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if db_path and Path(db_path).exists():
+        src = Path(db_path)
+    else:
+        art_path = Path("artifacts") / valid_id / "graph"
+        if art_path.exists():
+            src = art_path
+        else:
+            src = Path("data/kuzu_db")
+
+    console.print(f"[bold blue]📦 Publishing engagement snapshot for {valid_id} from {src}...[/bold blue]")
+
+    tmp_target = target_path.parent / f"{valid_id}.tmp.kuzu"
+    if tmp_target.exists():
+        shutil.rmtree(tmp_target)
+
+    shutil.copytree(src, tmp_target)
+
+    schema_init = ElicitationSchemaInitializer(db_path=tmp_target)
+    del schema_init
+
+    if target_path.exists():
+        shutil.rmtree(target_path)
+    tmp_target.rename(target_path)
+
+    console.print(f"[bold green]✅ Engagement {valid_id} published successfully to {target_path}![/bold green]")
+
+
+engagement_app = typer.Typer(help="Engagement lifecycle commands (create, archive).")
+app.add_typer(engagement_app, name="engagement")
+
+
+@engagement_app.command(name="create")
+def engagement_create(
+    engagement_id: str = typer.Argument(..., help="Identifier for new engagement (e.g. nordwave-mcx-2027)"),
+) -> None:
+    """Creates a new empty engagement database with engagement schema."""
+    import shutil
+    from mcp_server.core.db import get_engagement_path, validate_engagement_id
+    from tools.elicitation.db_schema import ElicitationSchemaInitializer
+
+    valid_id = validate_engagement_id(engagement_id)
+    target_path = get_engagement_path(valid_id)
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if target_path.exists():
+        console.print(f"[yellow]Engagement database {valid_id} already exists at {target_path}.[/yellow]")
+        return
+
+    schema_init = ElicitationSchemaInitializer(db_path=target_path)
+    del schema_init
+    console.print(f"[bold green]✨ Engagement database '{valid_id}' created successfully at {target_path}![/bold green]")
+
+
+@engagement_app.command(name="archive")
+def engagement_archive(
+    engagement_id: str = typer.Argument(..., help="Identifier of engagement to archive"),
+) -> None:
+    """Archives an active engagement database by moving it to data/engagements/archive/."""
+    import shutil
+    from mcp_server.core.db import get_engagement_path, validate_engagement_id
+
+    valid_id = validate_engagement_id(engagement_id)
+    source_path = get_engagement_path(valid_id)
+    if not source_path.exists():
+        console.print(f"[bold red]❌ Engagement database '{valid_id}' not found at {source_path}.[/bold red]")
+        return
+
+    archive_dir = source_path.parent / "archive"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    target_path = archive_dir / source_path.name
+
+    if target_path.exists():
+        shutil.rmtree(target_path)
+
+    shutil.move(str(source_path), str(target_path))
+    console.print(f"[bold green]📦 Engagement '{valid_id}' archived successfully to {target_path}![/bold green]")
+
+
 def main() -> None:
     app()
-
-
 
 
 if __name__ == "__main__":
