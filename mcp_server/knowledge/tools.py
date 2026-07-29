@@ -204,7 +204,7 @@ def search_assets(query: str, filters: dict[str, Any] | None = None) -> dict[str
 
 
 def query_graph(cypher_query: str) -> dict[str, Any]:
-    """Executes a Cypher query against the reusable knowledge graph — assets, principles, decisions, glossary. Contains no engagement data."""
+    """Executes a read-only Cypher query against the reusable knowledge graph — assets, principles, decisions, glossary. Contains no engagement data."""
     try:
         data = _get_db().execute_cypher(cypher_query)
         return ok_response(data)
@@ -213,7 +213,7 @@ def query_graph(cypher_query: str) -> dict[str, Any]:
 
 
 def get_graph_summary() -> dict[str, Any]:
-    """Obtenir un résumé des nœuds et relations de la base de connaissances (T2.4)."""
+    """Returns node counts and metadata for the reusable knowledge graph — assets, principles, decisions, glossary."""
     db_client = _get_db()
     try:
         assets = db_client.execute_cypher("MATCH (a:Asset) RETURN count(a) as count;")
@@ -242,6 +242,5 @@ def get_graph_summary() -> dict[str, Any]:
         data={"node_counts": node_counts},
         plane="knowledge",
         dataset=str(server_config.db_path),
-        node_counts=node_counts,
         schema_version="3",
     )

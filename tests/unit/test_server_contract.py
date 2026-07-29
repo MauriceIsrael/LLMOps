@@ -128,19 +128,19 @@ def test_no_default_on_identity_arguments():
 
 
 def test_get_graph_summary_announces_plane(tmp_path):
-    """T2.4 — get_graph_summary announces plane, dataset, and node counts."""
+    """T2.4 — get_graph_summary announces plane, dataset, and node counts in data envelope."""
     db_p = str(tmp_path / "test_kuzu")
     server_config.db_path = db_p
 
     res_kb = kb_tools.get_graph_summary()
     assert res_kb.get("status") == "ok"
     assert res_kb.get("plane") == "knowledge"
-    assert "node_counts" in res_kb
+    assert "node_counts" in res_kb.get("data", {})
 
     res_eng = eng_tools.get_graph_summary()
     assert res_eng.get("status") == "ok"
     assert res_eng.get("plane") == "engagement"
-    assert "node_counts" in res_eng
+    assert "node_counts" in res_eng.get("data", {})
 
 
 # --- Phase 3 Tests ---
@@ -199,3 +199,19 @@ def test_engagement_plane_holds_no_copied_assets(tmp_path):
     tables = eng_client.db_client.execute_cypher("CALL show_tables() RETURN name;")
     table_names = {t["name"] for t in tables} if tables else set()
     assert "Asset" not in table_names, "Engagement plane contains copied Asset table!"
+
+
+def test_every_advertised_tool_is_callable():
+    """A1 — Every advertised tool in main_knowledge and main_engagement must be callable and known to dispatcher."""
+    from mcp_server.main_engagement import mcp as eng_mcp
+    from mcp_server.main_knowledge import mcp as kb_mcp
+
+    kb_tools_list = kb_mcp._tool_manager.list_tools()
+    kb_names = {t.name for t in kb_tools_list}
+    forbidden_on_kb = {"get_subject_trajectory", "get_diagram_graph", "get_render_payload", "get_subject", "get_board"}
+    assert not (kb_names & forbidden_on_kb), f"Knowledge server advertises engagement tools: {kb_names & forbidden_on_kb}"
+
+    eng_tools_list = eng_mcp._tool_manager.list_tools()
+    eng_names = {t.name for t in eng_tools_list}
+    forbidden_on_eng = {"list_assets", "get_asset", "get_assets", "get_decision_trail", "get_glossary_term", "search_assets", "get_principles_for"}
+    assert not (eng_names & forbidden_on_eng), f"Engagement server advertises knowledge tools: {eng_names & forbidden_on_eng}"

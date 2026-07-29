@@ -246,8 +246,42 @@ def get_dangling_references(engagement: str) -> dict[str, Any]:
         return error_response(str(e))
 
 
+def get_render_payload(engagement: str | None = None) -> dict[str, Any]:
+    """Obtenir l'intégralité du document d'architecture et de ses données de synthèse pour le rendu.
+
+    Args:
+        engagement: Identifiant de l'engagement (optionnel, hérité du serveur si non fourni).
+    """
+    eng = engagement or server_config.engagement or "default-engagement"
+    try:
+        repo = _get_repo()
+        board = repo.get_subjects_maturity_board(engagement=eng)
+        statements = repo.get_active_statements(engagement=eng)
+        conflicts = repo.get_conflicts(engagement=eng, status="open")
+        uncertainties = repo.get_uncertainties(engagement=eng)
+
+        unripe = [b for b in board if b.get("level") in ("L0_named", "L1_framed", "L2_decomposed")]
+        is_provisional = len(conflicts) > 0 or len(unripe) > 0
+
+        repo.close()
+
+        payload = {
+            "engagement": eng,
+            "status": "provisional" if is_provisional else "final",
+            "is_provisional": is_provisional,
+            "maturity_board": board,
+            "active_statements": statements,
+            "open_conflicts": conflicts,
+            "uncertainties": uncertainties,
+            "unripe_subjects": [u.get("subject") for u in unripe],
+        }
+        return ok_response(payload)
+    except Exception as e:
+        return error_response(str(e))
+
+
 def query_graph(cypher_query: str) -> dict[str, Any]:
-    """Executes a Cypher query against the graph of engagement <id> — subjects, statements, questions, conflicts. Contains no reusable assets."""
+    """Executes a read-only Cypher query against the graph of engagement — subjects, statements, questions, conflicts. Contains no reusable assets."""
     try:
         db_client = ReadOnlyKuzuClient(db_path=server_config.db_path)
         data = db_client.execute_cypher(cypher_query)
@@ -257,7 +291,7 @@ def query_graph(cypher_query: str) -> dict[str, Any]:
 
 
 def get_graph_summary() -> dict[str, Any]:
-    """Obtenir un résumé des nœuds et relations du plan d'engagement (T2.4)."""
+    """Returns node counts and metadata for the engagement graph — subjects, statements, conflicts."""
     db_client = ReadOnlyKuzuClient(db_path=server_config.db_path)
     try:
         subjects = db_client.execute_cypher("MATCH (s:Subject) RETURN count(s) as count;")
@@ -283,6 +317,5 @@ def get_graph_summary() -> dict[str, Any]:
         plane="engagement",
         engagement=server_config.engagement or "default-engagement",
         dataset=str(server_config.db_path),
-        node_counts=node_counts,
         schema_version="3",
     )

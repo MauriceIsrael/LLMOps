@@ -27,6 +27,7 @@ from mcp_server.engagement.tools import (
     get_dangling_references,
     get_diagram_graph,
     get_open_questions,
+    get_render_payload,
     get_statements,
     get_subject,
     get_subject_trajectory,
@@ -71,6 +72,7 @@ mcp.tool()(get_statements)
 mcp.tool()(get_conflicts)
 mcp.tool()(get_open_questions)
 mcp.tool()(get_diagram_graph)
+mcp.tool()(get_render_payload)
 mcp.tool()(get_dangling_references)
 
 
