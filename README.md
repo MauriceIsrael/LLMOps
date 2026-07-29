@@ -166,12 +166,12 @@ Tous les outils retournent une **enveloppe de réponse normalisée** : `{"status
 ---
 
 ## 📚 Liens Utiles vers la Documentation
+- 🔌 **[Spécification d'Interface Externe (INTERFACE.md)](file:///home/momo/Dev/LLMOps/docs/INTERFACE.md)**
 - 🎨 **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)**
 - 📊 **[Spécification Auto-générée du Schéma Graphe Kùzu DB](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)**
 - 📖 **[Documentation d'Architecture Logicielle (ADR-0014 / ADR-0015)](file:///home/momo/Dev/LLMOps/docs/architecture.md)**
 - 🟢 **[Test d'Intégration de l'Interface Renderer (Python SDK)](file:///home/momo/Dev/LLMOps/tests/unit/test_renderer_interface.py)**
 - 🏆 **[Scénario d'Élicitation de Référence (Test Nordwave MCX v2)](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx_v2.py)**
-- 📊 **[Rapport Visuel de Progression Généré](file:///home/momo/Dev/LLMOps/artifacts/nordwave-mcx-2027/progression.md)**
 - 📗 **[Manuel Utilisateur Pas-à-Pas](file:///home/momo/Dev/LLMOps/docs/user_manual.md)**
 
 ---
