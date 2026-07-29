@@ -11,11 +11,13 @@ Une plateforme MLOps / LLMOps robuste conçue pour ingérer des dossiers d'archi
 
 ---
 
-## 🎨 Document d'Interface pour Moteur de Rendu (Renderer)
+## 🎨 Documentation & Spécification des Interfaces
 
-Pour connecter un moteur de rendu externe (UI Web, React, Vue, Canvas interactive, ou générateur PDF/Mermaid), consultez la documentation dédiée :
+Pour intégrer un système tiers ou connecter un moteur de rendu externe (UI Web, React, Vue, Canvas interactive, ou générateur PDF/Mermaid) :
 
-👉 **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)** 👈
+- 🔌 **[Spécification d'Interface Externe (INTERFACE.md)](file:///home/momo/Dev/LLMOps/docs/INTERFACE.md)** : Spécification technique complète avec les **schémas JSON de réponse** pour chaque outil.
+- 🎨 **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)** : Manuel dédié aux développeurs de moteurs de rendu (SDK Python / HTTP SSE).
+- 📊 **[Spécification du Schéma Graphe Kùzu DB (SCHEMA.md)](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)** : Structure des tables et propriétés générée automatiquement depuis les bases.
 
 ---
 
@@ -54,32 +56,48 @@ graph TD
 
 ---
 
-## 📂 Structure du Répertoire (Mise à Jour ADR-0015)
+## 📂 Structure du Répertoire (Complete Workspace Layout)
 
 ```text
 LLMOps/
-├── .github/workflows/    # CI automatisée, Ingestion KB & Évaluations sémantiques
-├── artifacts/            # Artefacts générés (Rapports de progression, document.md, instantanés)
+├── .github/workflows/         # CI automatisée, Ingestion KB & Évaluations sémantiques
+├── artifacts/                 # Artefacts générés (Rapports de progression, document.md, instantanés)
 ├── data/
-│   ├── kb/               # Dossier source Markdown (ADRs, Glossaire, Principes...)
-│   ├── knowledge.kuzu    # [ADR-0015] Base physique de la base de connaissances réutilisable
-│   └── engagements/      # [ADR-0015] Répertoire des bases physiques par projet client (.kuzu)
+│   ├── kb/                    # Dossier source des documents Markdown (ADRs, Glossaire, Principes...)
+│   ├── knowledge.kuzu         # [ADR-0015] Base physique de la base de connaissances réutilisable
+│   └── engagements/           # [ADR-0015] Répertoire des bases physiques par projet client (.kuzu)
 │       └── nordwave-mcx-2027.kuzu
-├── docs/                 # Documentation d'architecture logicielle & Manuels
-│   ├── architecture.md           # Spécification d'architecture logicielle ADR-0014/ADR-0015
-│   ├── renderer_integration.md   # 🎨 Spécification d'interface Moteur de Rendu (Renderer)
-│   ├── SCHEMA.md                 # 📊 Spécification du schéma Kùzu DB générée automatiquement
-│   └── user_manual.md            # Manuel d'utilisation pas-à-pas
-├── docker/               # Dockerfiles & docker-compose.yml
-├── mcp_server/           # Serveurs FastMCP (Core Auth/DB, Knowledge, Engagement, Renderer Interface)
-├── pipelines/            # Ingestion GraphRAG, migration ADR-0015 & générateur de schéma
-│   └── ingestion/
-│       ├── migrate_adr0015.py         # Script d'exécution de la migration physique multi-bases
-│       └── generate_schema_doc.py     # Générateur de docs/SCHEMA.md
-├── tools/
-│   └── elicitation/      # Moteur d'élicitation LangGraph (flows, repository Cypher, CLI publish)
-├── tests/                # Unit tests (test_server_contract, test_renderer_interface), Evals
-├── pyproject.toml        # Dépendances Poetry & scripts d'entrée CLI
+├── docker/                    # Dockerfile, docker-compose.yml & scripts conteneurisés
+├── docs/                      # Documentation complète du projet
+│   ├── INTERFACE.md           # 🔌 Spécification complète de l'interface & schémas JSON des réponses
+│   ├── SCHEMA.md              # 📊 Spécification du schéma Kùzu DB générée automatiquement
+│   ├── architecture.md        # 📖 Spécification de l'architecture logicielle (ADR-0014 / ADR-0015)
+│   ├── renderer_integration.md# 🎨 Guide d'intégration dédié au moteur de rendu (Renderer)
+│   ├── user_manual.md         # 📗 Manuel d'utilisation pas-à-pas
+│   └── graph_explorer.html    # Visualiseur interactif de graphe HTML/JS
+├── mcp_server/                # Serveurs FastMCP & architecture multi-bases
+│   ├── core/                  # Configuration, auth (`authorise()`), DB (`open_connection()`), envelope
+│   ├── knowledge/             # Outils du Knowledge Server (Assets, Glossaire, ADRs)
+│   ├── engagement/            # Outils de l'Engagement Server (Sujets, Énoncés, Conflits, Renderer)
+│   ├── main_knowledge.py      # Point d'entrée du Knowledge Server (`mcp-server-knowledge`)
+│   ├── main_engagement.py     # Point d'entrée de l'Engagement Server (`mcp-server-engagement`)
+│   ├── main.py                # Point d'entrée serveur unique rétrocompatible (`mcp-server`)
+│   └── renderer_interface.py  # SDK Client Python Native (`RendererClient`)
+├── pipelines/                 # Pipelines ETL & Ingestion LlamaIndex
+│   ├── ingestion/             # Extracteur GraphRAG, migration ADR-0015, générateurs
+│   │   ├── migrate_adr0015.py        # Script de migration vers le layout multi-bases ADR-0015
+│   │   ├── generate_schema_doc.py    # Générateur de docs/SCHEMA.md à partir des bases
+│   │   ├── markdown_parser.py        # Parser frontmatter & sections Markdown
+│   │   └── graph_loader.py           # Chargeur Kùzu DB PropertyGraph LlamaIndex
+│   └── cli.py                 # CLI Typer d'ingestion (`poetry run ingest`)
+├── tools/                     # Moteur d'élicitation collaboratif LangGraph
+│   └── elicitation/           # Repository Cypher, flows (Scan, Intake, Assemble), Mailbox & CLI `elicit`
+├── tests/                     # Tests unitaires, d'intégration & évaluations sémantiques
+│   ├── unit/                  # test_server_contract.py, test_renderer_interface.py
+│   ├── integration/           # test_scenario_nordwave_mcx_v2.py
+│   └── evals/                 # Benchmarks DeepEval & Promptfoo
+├── cloudbuild.yaml            # Configuration de build automatisé GCP Cloud Build
+├── pyproject.toml             # Dépendances Poetry & points d'entrée CLI
 └── README.md
 ```
 
