@@ -11,52 +11,75 @@ Une plateforme MLOps / LLMOps robuste conçue pour ingérer des dossiers d'archi
 
 ---
 
-## 📐 Architecture Neuro-Symbolique & Élicitatoire
+## 🎨 Document d'Interface pour Moteur de Rendu (Renderer)
+
+Pour connecter un moteur de rendu externe (UI Web, React, Vue, Canvas interactive, ou générateur PDF/Mermaid), consultez la documentation dédiée :
+
+👉 **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)** 👈
+
+---
+
+## 📐 Architecture Neuro-Symbolique, ADR-0014 & ADR-0015
 
 Plutôt que d'effectuer du RAG classique par découpage de texte (chunking naïf), cette plateforme combine :
-1. **Raisonnement Symbolique :** Nœuds et relations explicites (`Asset`, `Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`) stockés dans **Kùzu DB**.
+1. **Raisonnement Symbolique & Séparation Physique (ADR-0015) :** Nœuds et relations explicites isolés dans deux espaces physiques Kùzu DB :
+   - `data/knowledge.kuzu` : Actifs réutilisables d'architecture (`Asset`, `GlossaryTerm`, `SUPERSEDES`).
+   - `data/engagements/<engagement-id>.kuzu` : État dynamique par projet client (`Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`).
 2. **Moteur d'Élicitation Collaboratif (LangGraph) :** Orchestration par machines d'état avec **Level Gate de maturité** (`L0_named` → `L4_specified`), détection automatique de contradictions (`check_node`), contestation et arbitrage traçables, et persistance inter-processus via Checkpointer SQLite.
-3. **Capacité Neuro-Sémantique & MCP :** Extraction d'ontologies complexes par LLM via **LlamaIndex** et exposition d'outils typés via **FastMCP**.
+3. **Capacité Neuro-Sémantique & MCP :** Extraction d'ontologies complexes par LLM via **LlamaIndex** et exposition d'outils typés via **FastMCP** avec enveloppe de réponse normalisée.
 
 ```mermaid
 graph TD
     A["Markdown ADRs / KB"] -->|Parser & Frontmatter| B["Pipelines ETL"]
     B -->|PropertyGraphExtractor| C["LlamaIndex"]
-    C -->|Batch Loading| D[("Kùzu Graph DB")]
+    C -->|Batch Loading| D1[("data/knowledge.kuzu")]
     
     subgraph Elicitation ["Moteur d'Élicitation Collaboratif (LangGraph)"]
         E1["Scan Flow (Level Gate)"]
         E2["Intake Flow (Confiance & Conflits)"]
         E3["Assembly Flow (Maturité Document)"]
-        E4["Harvest Flow (Récolte de Patterns)"]
+        E4["Publish Snapshot"]
     end
 
-    D <--> Elicitation
+    D2[("data/engagements/<id>.kuzu")] <--> Elicitation
     Elicitation <-->|Checkpointer SQLite| S[("SQLite State DB")]
-    D <-->|Cypher & Hybride| F["FastMCP Server"]
-    F <-->|STDIO / HTTP| G["Agent AI / Antigravity / Cursor"]
-    F -->|Validation & Evals| H["DeepEval / Promptfoo"]
+    
+    D1 <-->|Read-Only Cypher| F1["FastMCP Knowledge Server"]
+    D2 <-->|Read-Only Cypher| F2["FastMCP Engagement Server"]
+    
+    F1 <-->|STDIO / HTTP SSE| G["Agent AI / Antigravity / Cursor"]
+    F2 <-->|STDIO / HTTP SSE| G
+    F2 -->|Payload / Mermaid| R["Moteur de Rendu (Renderer)"]
 ```
 
 ---
 
-## 📂 Structure du Répertoire
+## 📂 Structure du Répertoire (Mise à Jour ADR-0015)
 
 ```text
 LLMOps/
 ├── .github/workflows/    # CI automatisée, Ingestion KB & Évaluations sémantiques
-├── artifacts/            # Artefacts générés (Rapports de progression, document.md, harvest.json)
-├── data/kb/              # Base de connaissances d'architecture (ADRs, Glossaire, Principes...)
-├── docs/                 # Documentation d'architecture logicielle & Manuel utilisateur
-│   ├── architecture.md
-│   └── user_manual.md
+├── artifacts/            # Artefacts générés (Rapports de progression, document.md, instantanés)
+├── data/
+│   ├── kb/               # Dossier source Markdown (ADRs, Glossaire, Principes...)
+│   ├── knowledge.kuzu    # [ADR-0015] Base physique de la base de connaissances réutilisable
+│   └── engagements/      # [ADR-0015] Répertoire des bases physiques par projet client (.kuzu)
+│       └── nordwave-mcx-2027.kuzu
+├── docs/                 # Documentation d'architecture logicielle & Manuels
+│   ├── architecture.md           # Spécification d'architecture logicielle ADR-0014/ADR-0015
+│   ├── renderer_integration.md   # 🎨 Spécification d'interface Moteur de Rendu (Renderer)
+│   ├── SCHEMA.md                 # 📊 Spécification du schéma Kùzu DB générée automatiquement
+│   └── user_manual.md            # Manuel d'utilisation pas-à-pas
 ├── docker/               # Dockerfiles & docker-compose.yml
-├── mcp_server/           # Serveur FastMCP (Client Kùzu DB, Outils typés & GraphRAG)
-├── pipelines/            # Pipeline d'ingestion LlamaIndex & CLI Typer
+├── mcp_server/           # Serveurs FastMCP (Core Auth/DB, Knowledge, Engagement, Renderer Interface)
+├── pipelines/            # Ingestion GraphRAG, migration ADR-0015 & générateur de schéma
+│   └── ingestion/
+│       ├── migrate_adr0015.py         # Script d'exécution de la migration physique multi-bases
+│       └── generate_schema_doc.py     # Générateur de docs/SCHEMA.md
 ├── tools/
-│   └── elicitation/      # Moteur d'élicitation LangGraph (flows, repository Cypher, adapters)
-├── tests/                # Unit tests, integration tests & Evals (DeepEval / Promptfoo)
-├── pyproject.toml        # Dépendances Poetry & Outillage
+│   └── elicitation/      # Moteur d'élicitation LangGraph (flows, repository Cypher, CLI publish)
+├── tests/                # Unit tests (test_server_contract, test_renderer_interface), Evals
+├── pyproject.toml        # Dépendances Poetry & scripts d'entrée CLI
 └── README.md
 ```
 
@@ -74,28 +97,41 @@ LLMOps/
 poetry install
 ```
 
-### 3. Ingestion de la Base de Connaissances (GraphRAG)
-Traiter l'ensemble du dossier `data/kb/` et construire le graphe dans Kùzu DB :
+### 3. Ingestion & Migration des Bases Graphiques (ADR-0015)
+Exécuter la migration physique des bases pour créer `data/knowledge.kuzu` et `data/engagements/nordwave-mcx-2027.kuzu` :
 ```bash
-poetry run ingest --kb-dir data/kb --db-path data/kuzu_db
+poetry run python -m pipelines.ingestion.migrate_adr0015
 ```
 
-### 4. Démarrer les Serveurs FastMCP (Découpage ADR-0014)
-Lancer le serveur de la base de connaissances (Knowledge Server) ou du projet client (Engagement Server) :
+Générer la documentation à jour du schéma graphique ([docs/SCHEMA.md](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)) :
 ```bash
-# Serveur 1 : Base de Connaissances Réutilisable (Assets, ADRs, Principes)
+poetry run python -m pipelines.ingestion.generate_schema_doc
+```
+
+### 4. Démarrer les Serveurs FastMCP (Découpage ADR-0014 / ADR-0015)
+```bash
+# Serveur 1 : Base Connaissances Réutilisables (Assets, ADRs, Principes)
 poetry run mcp-server-knowledge
 
-# Serveur 2 : État d'Engagement Projet (Sujets, Énoncés, Conflits, Manques)
+# Serveur 2 : État d'Engagement Projet Client (Sujets, Énoncés, Conflits)
 poetry run mcp-server-engagement
+```
 
-# Ou serveur monolithique rétrocompatible
-poetry run mcp-server
+### 5. Gestion des Engagements & Publication d'Instantannés (CLI `elicit`)
+```bash
+# Publier un instantané atomique du graphe de travail vers data/engagements/
+poetry run elicit publish --engagement nordwave-mcx-2027
+
+# Créer un nouvel engagement vierge
+poetry run elicit engagement create client-demo-2026
+
+# Archiver un engagement
+poetry run elicit engagement archive client-demo-2026
 ```
 
 ---
 
-## 🛠 Outils Exposés par les Serveurs FastMCP (ADR-0014 & Enveloppes Normalisées)
+## 🛠 Outils Exposés par les Serveurs FastMCP
 
 Tous les outils retournent une **enveloppe de réponse normalisée** : `{"status": "ok" | "not_found" | "invalid_argument" | "error", "count": int, "data": ...}`.
 
@@ -124,19 +160,19 @@ Tous les outils retournent une **enveloppe de réponse normalisée** : `{"status
 | `get_diagram_graph` | Graphe structuré & code Mermaid prêt à être rendu | `engagement`, `format` |
 | `get_render_payload` | Payload JSON complet d'affichage pour les renderers | `engagement` |
 | `get_dangling_references` | Rapport d'identifiants d'actifs non résolus ou obsolètes | `engagement` |
-| `query_graph` | Exécuter une requête Cypher en lecture seule sur l'engagement | `cypher_query` |
+| `query_graph` | Exécuter une requête Cypher en lecture seule sur l'engagement | `cypher_query`, `engagement` |
 | `get_graph_summary` | Résumé des nœuds et relations du plan d'engagement | *(aucun)* |
 
 ---
 
-## 📚 Documentation & Exemples
-- 🏆 [Scénario d'Élicitation de Référence v2 (Test d'Intégration Nordwave MCX v2)](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx_v2.py)
-- 🎨 [Guide d'Intégration du Moteur de Rendu (Renderer)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)
-- 📊 [Rapport Visuel de Progression Généré](file:///home/momo/Dev/LLMOps/artifacts/nordwave-mcx-2027/progression.md)
-- 📖 [Documentation d'Architecture Logicielle](file:///home/momo/Dev/LLMOps/docs/architecture.md)
-- 📗 [Manuel Utilisateur Pas-à-Pas](file:///home/momo/Dev/LLMOps/docs/user_manual.md)
-- 📄 [Spécification Ingestion Documentaire](file:///home/momo/Dev/LLMOps/Arborescence%20exemple/architecture-kb/tools/elicitation/SPEC-DOCUMENT-INGESTION.md)
-- 📄 [Spécification Raffinement & Contributions](file:///home/momo/Dev/LLMOps/Arborescence%20exemple/architecture-kb/tools/elicitation/SPEC-REFINEMENT-AND-CONTRIBUTIONS.md)
+## 📚 Liens Utiles vers la Documentation
+- 🎨 **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)**
+- 📊 **[Spécification Auto-générée du Schéma Graphe Kùzu DB](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)**
+- 📖 **[Documentation d'Architecture Logicielle (ADR-0014 / ADR-0015)](file:///home/momo/Dev/LLMOps/docs/architecture.md)**
+- 🟢 **[Test d'Intégration de l'Interface Renderer (Python SDK)](file:///home/momo/Dev/LLMOps/tests/unit/test_renderer_interface.py)**
+- 🏆 **[Scénario d'Élicitation de Référence (Test Nordwave MCX v2)](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx_v2.py)**
+- 📊 **[Rapport Visuel de Progression Généré](file:///home/momo/Dev/LLMOps/artifacts/nordwave-mcx-2027/progression.md)**
+- 📗 **[Manuel Utilisateur Pas-à-Pas](file:///home/momo/Dev/LLMOps/docs/user_manual.md)**
 
 ---
 
