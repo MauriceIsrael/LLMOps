@@ -1,5 +1,6 @@
 """Flux B : Intake des réponses d'experts avec interruption LangGraph (interrupt) et persistance SQLite."""
 
+import re
 import sqlite3
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,8 @@ from tools.elicitation.repository import ElicitationRepository
 class IntakeState(TypedDict, total=False):
     """État du flux B : intake."""
     question_id: str
+    from_file: str
+    as_person: str
     answer_text: str
     author: str
     role: str
@@ -48,13 +51,32 @@ def load_question_node(state: IntakeState) -> dict[str, Any]:
             "question": state.get("question_text", "Question d'architecture"),
             "status": "sent",
         }
-    return {"question": question}
+    res: dict[str, Any] = {"question": question}
+    if state.get("as_person"):
+        res["author"] = state["as_person"]
+
+    if state.get("from_file"):
+        from_path = Path(state["from_file"])
+        if from_path.exists():
+            content = from_path.read_text(encoding="utf-8")
+            print(f"DEBUG LOAD_QUESTION_NODE CONTENT FOR {from_path}: {repr(content)}")
+            if "## Your answer" in content:
+                ans_text = content.split("## Your answer", 1)[1]
+                if "## How to submit" in ans_text:
+                    ans_text = ans_text.split("## How to submit", 1)[0]
+                ans_text = re.sub(r"<!--.*?-->", "", ans_text, flags=re.DOTALL).strip()
+                res["answer_text"] = ans_text
+            else:
+                res["answer_text"] = content.strip()
+
+    return res
 
 
 def interpret_node(state: IntakeState) -> dict[str, Any]:
     """Interprète la réponse de l'expert en candidats d'énoncés (Candidate Statements)."""
     q = state.get("question", {})
     text = state.get("answer_text", "")
+    print(f"DEBUG INTERPRET_NODE TEXT: {repr(text)}")
     norm_text = " ".join(text.lower().split())
     sec = q.get("section", "4.1")
     q_id = q.get("id", "Q-0001")
@@ -233,13 +255,15 @@ def persist_node(state: IntakeState) -> dict[str, Any]:
         repo.advance_subject_level(target_sub, adv_lvl)
 
     # Création des sous-sujets s'il s'agit d'une décomposition
+    eng = state.get("engagement", "nordwave-mcx-2027")
     for c_sub in state.get("created_subjects", []):
-        repo.save_subject(c_sub)
+        repo.save_subject(c_sub, engagement=eng, origin="discovered")
 
     q_id = state.get("question_id")
     if q_id:
         repo.update_question_status(q_id, "confirmed")
 
+    repo.close()
     return {"persisted_statement_ids": persisted_ids}
 
 
@@ -279,7 +303,7 @@ def check_node(state: IntakeState) -> dict[str, Any]:
                 }
             )
 
-
+    db_client.close()
     return {"detected_conflicts": detected_conflicts}
 
 
@@ -295,6 +319,7 @@ def raise_conflicts_node(state: IntakeState) -> dict[str, Any]:
         cid = repo.save_conflict(conf, conf["statement_ids"])
         conflict_ids.append(cid)
 
+    repo.close()
     return {"created_conflict_ids": conflict_ids}
 
 

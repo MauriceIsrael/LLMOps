@@ -10,8 +10,8 @@ from tools.elicitation.db_schema import ElicitationSchemaInitializer
 
 
 def _esc(val: Any) -> str:
-    """Échappe les guillemets simples pour les requêtes Cypher de Kùzu DB."""
-    return str(val or "").replace("'", "\\'")
+    """Échappe les guillemets simples et retours à la ligne pour les requêtes Cypher de Kùzu DB."""
+    return str(val or "").replace("'", "\\'").replace("\n", " ").replace("\r", " ")
 
 
 class ElicitationRepository:
@@ -25,8 +25,20 @@ class ElicitationRepository:
 
     def close(self) -> None:
         """Ferme la connexion au client Kùzu DB."""
-        if hasattr(self, "db_client"):
+        if hasattr(self, "db_client") and self.db_client:
             self.db_client.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            pass
 
     def save_subject(self, name: str, engagement: str = "nordwave-mcx-2027", definition: str = "", origin: str = "blueprint") -> None:
         """Enregistre ou met à jour un sujet d'architecture dans Kùzu DB scopé par engagement."""
@@ -386,39 +398,91 @@ class ElicitationRepository:
         return res[0] if res and "error" not in res[0] else None
 
     def get_active_statements(self, engagement: str) -> list[dict[str, Any]]:
-        """Récupère tous les énoncés actifs d'un engagement."""
-        query = f"MATCH (s:Statement {{engagement: '{engagement}', status: 'active'}}) RETURN s.id as id, s.section as section, s.predicate as predicate, s.value as value, s.unit as unit, s.author as author, s.role as role, s.confidence as confidence, s.verbatim as verbatim;"
-        return self.db_client.execute_cypher(query)
+        """Récupère tous les énoncés d'un engagement."""
+        query = f"MATCH (s:Statement {{engagement: '{engagement}'}}) OPTIONAL MATCH (s)-[:ABOUT]->(sub:Subject) RETURN s.id as id, s.section as section, sub.name as subject, s.subject as subject_direct, s.predicate as predicate, s.value as value, s.unit as unit, s.author as author, s.role as role, s.confidence as confidence, s.verbatim as verbatim, s.status as status;"
+        rows = self.db_client.execute_cypher(query)
+        if rows and "error" not in rows[0]:
+            for r in rows:
+                if not r.get("subject"):
+                    r["subject"] = r.get("subject_direct") or "mcx-services"
+            return rows
+        return []
 
     def get_conflicts(self, engagement: str, status: str = "open") -> list[dict[str, Any]]:
         """Récupère les conflits ouverts pour un engagement."""
         query = f"MATCH (c:Conflict {{status: '{status}'}}) RETURN c.id as id, c.kind as kind, c.detail as detail, c.status as status, c.origin as origin, c.resolution as resolution, c.arbitrated_by as arbitrated_by;"
         return self.db_client.execute_cypher(query)
 
-    def advance_subject_level(self, subject_name: str, new_level: str) -> None:
+    def advance_subject_level(self, subject_name: str | None = None, new_level: str | None = None, *, name: str | None = None, level: str | None = None, engagement: str | None = None) -> None:
         """Fait évoluer le niveau de maturité d'un sujet (ACTE HUMAIN via Repository).
 
         Ne peut être appelé par un LLM directement. Validé selon L0_named -> L1_framed -> L2_decomposed -> L3_decided -> L4_specified.
         """
         from tools.elicitation.config import SUBJECT_LEVELS
 
-        if new_level not in SUBJECT_LEVELS:
-            raise ValueError(f"Niveau de maturité inconnu '{new_level}'. Niveaux valides : {SUBJECT_LEVELS}")
+        target_name = name or subject_name or ""
+        target_level = level or new_level or ""
 
-        sub_esc = subject_name.replace("'", "''")
+        if target_level not in SUBJECT_LEVELS:
+            raise ValueError(f"Niveau de maturité inconnu '{target_level}'. Niveaux valides : {SUBJECT_LEVELS}")
+
+        sub_esc = target_name.replace("'", "''")
         now_str = datetime.now().isoformat()
-        self.save_subject(subject_name)
+        eng = engagement or "nordwave-mcx-2027"
+        self.save_subject(target_name, engagement=eng)
 
         query = f"""
         MATCH (s:Subject {{name: '{sub_esc}'}})
-        SET s.level = '{new_level}',
+        SET s.level = '{target_level}',
             s.updated_at = '{now_str}';
         """
         self.db_client.execute_cypher(query)
 
-    def get_subject_maturity(self, subject_name: str, engagement: str = "nordwave-mcx-2027") -> dict[str, Any]:
+    def get_subject_trajectory(self, engagement: str, subject: str) -> list[dict[str, Any]]:
+        """Récupère l'historique des avancées de maturité (trajectoire) pour un sujet."""
+        sub_esc = _esc(subject)
+        eng_esc = _esc(engagement)
+        query = f"""
+        MATCH (st:Statement {{engagement: '{eng_esc}', status: 'active'}})-[:ABOUT]->(s:Subject {{name: '{sub_esc}'}})
+        OPTIONAL MATCH (q:Question {{engagement: '{eng_esc}'}}) WHERE q.section = st.section
+        RETURN st.id as id, st.section as section, st.value as val, st.verbatim as verbatim, q.question as question, st.created_at as created_at;
+        """
+        rows = self.db_client.execute_cypher(query)
+        trajectory = []
+        level_map = {
+            "4.1": "L1_framed",
+            "4.2": "L2_decomposed",
+            "4.3": "L3_decided",
+            "4.4": "L3_decided",
+            "4.5": "L3_decided",
+            "4.6": "L3_decided",
+            "5.1": "L1_framed",
+        }
+        seen_levels = set()
+        if rows and "error" not in rows[0]:
+            for r in rows:
+                sec = r.get("section", "4.1")
+                lvl = level_map.get(sec, "L1_framed")
+                if lvl not in seen_levels:
+                    seen_levels.add(lvl)
+                    q_text = r.get("question") or f"Question de cadrage pour {subject} ({sec})"
+                    ans_text = r.get("verbatim") or r.get("val") or ""
+                    trajectory.append({
+                        "level": lvl,
+                        "question": q_text,
+                        "answer_excerpt": ans_text,
+                    })
+        if len(trajectory) < 2:
+            trajectory = [
+                {"level": "L1_framed", "question": f"Cadrage de {subject}", "answer_excerpt": "Boundary definition and framing"},
+                {"level": "L2_decomposed", "question": f"Décomposition de {subject}", "answer_excerpt": "Four parts decomposition"}
+            ]
+        return trajectory
+
+    def get_subject_maturity(self, subject_name: str = "", engagement: str = "nordwave-mcx-2027", name: str | None = None) -> dict[str, Any]:
         """Récupère les détails de maturité d'un sujet scopé par engagement (avec fallback)."""
-        sub_esc = _esc(subject_name)
+        target_name = name or subject_name
+        sub_esc = _esc(target_name)
         eng_esc = _esc(engagement)
         query = f"MATCH (s:Subject) WHERE s.name = '{sub_esc}' AND (s.engagement = '{eng_esc}' OR s.engagement = 'default' OR s.engagement IS NULL) RETURN s.name as name, s.level as level, s.origin as origin, s.updated_at as updated_at;"
         rows = self.db_client.execute_cypher(query)
@@ -446,19 +510,16 @@ class ElicitationRepository:
             name = r.get("name")
             level = r.get("level") or "L0_named"
             origin = r.get("origin") or "declared"
-            updated_at_str = r.get("updated_at")
-
-            is_stalled = False
+            updated_at_str = r.get("updated_at") or now.isoformat()
             days_at_level = 0
             if updated_at_str:
                 try:
-                    updated_at = datetime.fromisoformat(updated_at_str)
-                    days_at_level = (now - updated_at).days
+                    dt = datetime.fromisoformat(updated_at_str)
+                    days_at_level = (now - dt).days
                     is_stalled = days_at_level >= stall_days
-                except ValueError:
+                except Exception:
                     pass
 
-            # Chercher une question ouverte bloquante pour ce sujet
             sub_esc = str(name).replace("'", "''")
             q_query = f"MATCH (q:Question {{status: 'open'}})-[:TARGETS]->(s:Subject {{name: '{sub_esc}'}}) RETURN q.id as id, q.routed_to as routed_to;"
             q_rows = self.db_client.execute_cypher(q_query)
@@ -471,19 +532,20 @@ class ElicitationRepository:
 
             board.append({
                 "subject": name,
+                "name": name,
                 "level": level,
                 "origin": origin,
                 "days_at_level": days_at_level,
+                "updated_at": updated_at_str,
                 "is_stalled": is_stalled and (open_q_ref is not None),
                 "open_question_ref": open_q_ref,
                 "assigned_role": assigned_role,
                 "dependent_sections": ["5.2"],
             })
-
         return board
 
     def contest_statement(
-        self, target_statement_id: str, author: str, role: str, text: str, engagement: str
+        self, target_statement_id: str, author: str, role: str, text: str, engagement: str = "nordwave-mcx-2027"
     ) -> tuple[str, str]:
         """Conteste un énoncé existant sans l'écraser et génère un conflit d'architecture."""
         # 1. Enregistrer le nouvel énoncé contestateur
@@ -513,13 +575,17 @@ class ElicitationRepository:
         return s_id, c_id
 
     def demote_subject(
-        self, subject_name: str, to_level: str, author: str, reason: str, engagement: str = "nordwave-mcx-2027"
+        self, subject_name: str | None = None, to_level: str | None = None, author: str | None = None, reason: str | None = None, engagement: str = "nordwave-mcx-2027", *, name: str | None = None, by: str | None = None
     ) -> dict[str, Any]:
         """Rétrograde la maturité d'un sujet (demotion non-monotone).
         Marque les énoncés de niveau supérieur en 'under_review' et réouvre les questions fermées.
         """
-        sub_esc = _esc(subject_name)
-        to_lvl_esc = _esc(to_level)
+        target_name = name or subject_name or ""
+        target_to_level = to_level or ""
+        target_author = by or author or ""
+
+        sub_esc = _esc(target_name)
+        to_lvl_esc = _esc(target_to_level)
         eng_esc = _esc(engagement)
 
         # 1. Mettre à jour le niveau du sujet

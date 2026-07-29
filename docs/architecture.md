@@ -224,8 +224,24 @@ L'arbitrage d'un conflit par un architecte référent (Sofia) ne se limite pas �
 - **Conservation & Amendement :** Permet de conserver un énoncé tout en amendant le second (ex: restriction de portée) pour préserver deux vérités complémentaires.
 - **Traçabilité des Motifs :** L'explication d'arbitrage est enregistrée dans le nœud `Conflict` qui passe au statut `arbitrated`, et l'historique des reformulations est conservé sous `previous_values`.
 
-### 6.5 Assemblage du Document & Harvest (`assemble.py` & `harvest.py`)
-- **Assemblage (`assemble.py`) :** Recompose le document d'architecture global (`document.md`). Le document reste marqué **`PROVISIONAL`** tant qu'au moins un sujet n'a pas atteint la maturité requise (`L3_decided`) ou qu'un conflit reste ouvert.
+### 6.5 Rétrogradation Non-Monotone (`demote_subject`) & Trajectoire de Maturité
+- **Rétrogradation non-monotone :** Lorsqu'un arbitrage ou une réévaluation remet en cause le cadrage d'un sujet, `demote_subject()` rétrograde le sujet vers un niveau inférieur (ex: `L3_decided` → `L2_decomposed`).
+- **Flagging sous revue (`under_review`) :** Les énoncés de niveau supérieur ne sont **jamais supprimés**, mais marqués `under_review`.
+- **Réouverture avec contexte :** Les questions des niveaux abandonnés sont réouvertes en conservant les réponses antérieures (`prior_answer`) comme contexte d'élaboration.
+- **Trajectoire d'avancement (`get_subject_trajectory`) :** Permet d'observer et restituer l'historique complet des étapes de cadrage et de décomposition d'un sujet au fil du temps.
+
+### 6.6 Ingestion Documentaire Spécifiée (`SPEC-DOCUMENT-INGESTION.md`)
+- **Pipeline d'ingestion de livrables et drafts :** Lit et découpe les documents d'architecture `.md` selon leurs titres de sections (`1.1`, `4.1`, `5.4`).
+- **Extraction sémantique d'énoncés :** Chaque section est parsée pour en extraire les énoncés (`Statement`) avec leur niveau de confiance (`designed`, `stated-by-client`, `assumed`).
+- **Rapprochement Cypher avec Kùzu DB :** Les énoncés extraits sont rattachés aux sujets (`ABOUT`) et au blueprint (`requires`), permettant la réconciliation automatique des manques de la base.
+
+### 6.7 Workflow de Contributions Externes (`contribution.py`)
+- **Gestion des apports externes :** Permet à un intervenant externe de soumettre un retour d'expérience ou une contrainte terrain (`elicit contribute`).
+- **Validation à double confirmation :** La contribution nécessite deux validations explicites avant d'être intégrée dans les énoncés actifs de l'engagement.
+- **Propagation dans le Harvest :** Les contributions acceptées sont automatiquement classées comme candidats de promotion (`source: external-contribution`) dans le flux de récolte (`harvest.py`).
+
+### 6.8 Assemblage du Document & Harvest (`assemble.py` & `harvest.py`)
+- **Assemblage (`assemble.py`) :** Recompose le document d'architecture global (`document.md`). Le document reste marqué **`provisional`** tant qu'au moins un sujet n'a pas atteint la maturité requise (`L3_decided`) ou qu'un conflit reste ouvert.
 - **Récolte (`harvest.py`) :** Identifie les solutions et décompositions généralisables pour proposer des candidats de motifs d'architecture (`Pattern`) destinés à être réutilisés dans la base de connaissances globale.
 
 ---

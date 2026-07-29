@@ -4,7 +4,8 @@ from typing import Any
 
 from mcp_server.db.kuzu_client import KuzuClient
 
-db_client = KuzuClient()
+def _get_db():
+    return KuzuClient()
 
 
 def query_graph(cypher_query: str) -> list[dict[str, Any]]:
@@ -13,11 +14,12 @@ def query_graph(cypher_query: str) -> list[dict[str, Any]]:
     Args:
         cypher_query: Requête Cypher à exécuter (ex: 'MATCH (a:Asset) RETURN a.id, a.title LIMIT 5;').
     """
-    return db_client.execute_cypher(cypher_query)
+    return _get_db().execute_cypher(cypher_query)
 
 
 def get_graph_summary() -> dict[str, Any]:
     """Obtenir un résumé des nœuds et des relations stockés dans Kùzu DB."""
+    db_client = _get_db()
     assets = db_client.execute_cypher("MATCH (a:Asset) RETURN count(a) as total_assets;")
     terms = db_client.execute_cypher("MATCH (g:GlossaryTerm) RETURN count(g) as total_glossary_terms;")
     supersedes = db_client.execute_cypher("MATCH ()-[r:SUPERSEDES]->() RETURN count(r) as total_supersedes;")

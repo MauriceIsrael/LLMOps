@@ -1,0 +1,9 @@
+- login: amina
+  roles:
+  - mcx-service-architect
+- login: rui
+  roles:
+  - mobile-core-architect
+- login: sofia
+  roles:
+  - chief-architect

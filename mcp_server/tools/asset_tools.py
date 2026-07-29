@@ -7,8 +7,12 @@ from mcp_server.config import settings
 from mcp_server.db.kuzu_client import KuzuClient
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
 
-db_client = KuzuClient()
-parser = MarkdownDocParser()
+def _get_db():
+    return KuzuClient()
+
+
+def _get_parser():
+    return MarkdownDocParser()
 
 
 def list_assets(
@@ -40,7 +44,7 @@ def list_assets(
         f"a.confidence as confidence, a.phase as phase, a.domain as domain, a.last_reviewed as last_reviewed;"
     )
 
-    return db_client.execute_cypher(query)
+    return _get_db().execute_cypher(query)
 
 
 def get_asset(id: str) -> dict[str, Any]:
@@ -54,9 +58,10 @@ def get_asset(id: str) -> dict[str, Any]:
         f"MATCH (a:Asset {{id: '{id}'}}) "
         f"RETURN a.source_path as source_path, a.confidence as confidence, a.last_reviewed as last_reviewed;"
     )
-    res = db_client.execute_cypher(query)
+    res = _get_db().execute_cypher(query)
 
     parsed = None
+    parser = _get_parser()
     if res and res[0].get("source_path") and Path(res[0]["source_path"]).exists():
         parsed = parser.parse_file(res[0]["source_path"])
 
@@ -96,8 +101,8 @@ def get_decision_trail(id: str) -> dict[str, Any]:
     """
 
     current_asset = get_asset(id)
-    supersedes = db_client.execute_cypher(supersedes_query)
-    superseded_by = db_client.execute_cypher(superseded_by_query)
+    supersedes = _get_db().execute_cypher(supersedes_query)
+    superseded_by = _get_db().execute_cypher(superseded_by_query)
 
     return {
         "asset": current_asset,
@@ -117,7 +122,7 @@ def get_glossary_term(term: str) -> dict[str, Any]:
     WHERE g.term CONTAINS '{term}' OR '{term}' CONTAINS g.term
     RETURN g.term as term, g.definition as definition;
     """
-    res = db_client.execute_cypher(query)
+    res = _get_db().execute_cypher(query)
     if res and "error" not in res[0]:
         return res[0]
     return {"term": term, "definition": "Terme non trouvé dans le glossaire."}

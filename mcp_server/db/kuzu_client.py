@@ -41,8 +41,7 @@ class KuzuClient:
     @classmethod
     def clear_cache(cls, db_path: str | None = None) -> None:
         if db_path and db_path in cls._db_cache:
-            db = cls._db_cache.pop(db_path, None)
-            del db
+            cls._db_cache.pop(db_path, None)
         else:
             cls._db_cache.clear()
         gc.collect()
@@ -61,9 +60,15 @@ class KuzuClient:
     def close(self) -> None:
         """Ferme la connexion et libère les ressources Kùzu DB."""
         if hasattr(self, "conn"):
-            del self.conn
+            try:
+                del self.conn
+            except Exception:
+                pass
         if hasattr(self, "db"):
-            del self.db
-        KuzuClient.clear_cache(self.db_path)
+            try:
+                del self.db
+            except Exception:
+                pass
+        gc.collect()
 
 

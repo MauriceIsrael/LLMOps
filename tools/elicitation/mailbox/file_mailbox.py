@@ -80,13 +80,14 @@ class FileMailbox:
 **Routed to:** `{question.routed_to}`  
 **Expected shape:** `{question.expected_shape}`  
 
-### ❓ Question:
+## Question
 {question.question_text}
 
-### 💡 Why it matters:
+## Why this matters
 {question.why_it_matters}
 
----
+## Please use these terms
+- `mcx-services`
 
 ## Your answer
 

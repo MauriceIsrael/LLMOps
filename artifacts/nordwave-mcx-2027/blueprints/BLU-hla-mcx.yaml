@@ -1,0 +1,98 @@
+id: BLU-hla-mcx
+title: "High-level architecture blueprint \u2014 mission-critical mobile"
+version: 1
+sections:
+- id: '4.1'
+  title: MCX services boundary and framing
+  must_answer: What is the mission-critical service layer for, and what must keep
+    working when everything else degrades?
+  requires:
+  - subject: mcx-services
+    level: L1_framed
+  unlocks:
+  - '4.2'
+  - '4.3'
+  - '4.4'
+  - '4.5'
+  - '4.6'
+  routes_to: mcx-service-architect
+- id: '4.2'
+  title: MCX services decomposition
+  must_answer: What parts does the service layer break into?
+  requires:
+  - subject: mcx-services
+    level: L2_decomposed
+  unlocks:
+  - '4.3'
+  - '4.4'
+  - '4.5'
+  - '4.6'
+  routes_to: mcx-service-architect
+- id: '4.3'
+  title: Floor control arbitration
+  must_answer: Where does floor arbitration terminate, and what was ruled out?
+  requires:
+  - subject: floor-control
+    level: L3_decided
+  unlocks:
+  - 4.3.1
+  routes_to: mcx-service-architect
+- id: 4.3.1
+  title: Floor grant latency budget
+  must_answer: What latency budget, at which percentile and under what load?
+  requires:
+  - subject: floor-control
+    level: L4_specified
+  unlocks: []
+  routes_to: mobile-core-architect
+- id: '4.4'
+  title: Media distribution topology
+  must_answer: Unicast or multicast on the radio side, and why?
+  requires:
+  - subject: media-distribution
+    level: L3_decided
+  unlocks: []
+  routes_to: mcx-service-architect
+- id: '4.5'
+  title: LMR interworking gateway
+  must_answer: How does the service layer interwork with the legacy fleet?
+  requires:
+  - subject: lmr-interworking
+    level: L3_decided
+  unlocks: []
+  routes_to: mcx-service-architect
+- id: '4.6'
+  title: Group management and affiliation
+  must_answer: How are talkgroups modelled and affiliated?
+  requires:
+  - subject: group-management
+    level: L3_decided
+  unlocks: []
+  routes_to: mcx-service-architect
+- id: '5.1'
+  title: Mobile core framing
+  must_answer: What is the core for, and what must survive site isolation?
+  requires:
+  - subject: mobile-core
+    level: L1_framed
+  unlocks:
+  - '5.3'
+  routes_to: mobile-core-architect
+- id: '5.3'
+  title: Priority, QoS and pre-emption
+  must_answer: Which mapping per talkgroup class, committed end to end?
+  requires:
+  - subject: mobile-core
+    level: L4_specified
+  - subject: floor-control
+    level: L3_decided
+  unlocks: []
+  routes_to: mobile-core-architect
+- id: '5.4'
+  title: Transport topology and redundancy
+  must_answer: What redundancy, and what happens on a site cut?
+  requires:
+  - subject: transport
+    level: L1_framed
+  unlocks: []
+  routes_to: security-architect

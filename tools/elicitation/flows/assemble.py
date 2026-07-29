@@ -84,11 +84,11 @@ def global_check_node(state: AssembleState) -> dict[str, Any]:
 
     is_prov = (len(open_conflicts_list) > 0) or (len(unripe_subjects) > 0)
     section_status = {
-        "4.1": "PROVISIONAL" if is_prov else "COMPLETE",
-        "4.2": "INCOMPLETE",
-        "4.3": "PROVISIONAL",
-        "4.4": "INCOMPLETE",
-        "5.1": "PROVISIONAL",
+        "4.1": "provisional" if is_prov else "final",
+        "4.2": "empty",
+        "4.3": "provisional",
+        "4.4": "empty",
+        "5.1": "provisional",
     }
 
     return {
@@ -108,7 +108,7 @@ def report_node(state: AssembleState) -> dict[str, Any]:
     doc_path = out_dir / "document.md"
 
     is_prov = state.get("is_provisional", False)
-    status_str = "PROVISIONAL" if is_prov else "COMPLETE"
+    status_str = "provisional" if is_prov else "final"
     open_conflicts_count = state.get("open_conflicts", 0)
     open_conflicts_list = state.get("open_conflicts_list", [])
 

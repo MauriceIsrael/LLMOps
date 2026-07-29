@@ -31,3 +31,10 @@ htmlcov/
 # IDE
 .vscode/
 .idea/
+
+# SQLite Checkpoints & Locks
+*.checkpoints.sqlite
+.lock
+.shadow
+.wal
+graph_proc/

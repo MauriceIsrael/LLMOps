@@ -59,26 +59,36 @@ Grâce au drapeau d'usurpation `--as <login>` (`--as alice`, `--as bob`, `--as c
 
 ```bash
 # 1. Détecter les manques du projet et poser les questions dans la boîte aux lettres
-poetry run elicit scan --engagement demo-2026
+poetry run elicit scan --engagement nordwave-mcx-2027
 
-# 2. Réponse d'Alice (cloud-architect) via --as alice
-poetry run elicit answer Q-0001 --as alice --text "SAN NVMe dual-controller tier-1"
+# 2. Réponse d'Amina (mcx-service-architect) via une fiche Markdown ou CLI
+poetry run elicit answer Q-0001 --from-file artifacts/nordwave-mcx-2027/mailbox/Q-0001.md --as amina
 
-# 3. Validation de la proposition d'extraction (interrupt)
+# 3. Validation de la proposition d'extraction (Interrupt / Human-in-the-loop)
 poetry run elicit confirm Q-0001 --accept
 
-# 4. Réponse contradictoire de Bob (storage-expert) via --as bob -> Détection déterministe du conflit C-0001
-poetry run elicit answer Q-0001 --as bob --text "Ceph HCI all-flash SSD"
-poetry run elicit confirm Q-0001 --accept
+# 4. Observer la trajectoire d'un sujet (Level Gate & historisation)
+poetry run elicit trajectory --engagement nordwave-mcx-2027 --subject mcx-services
 
-# 5. Visualiser le Tableau de Maturité des Sujets (Maturity Board)
-poetry run elicit subjects --engagement demo-2026 --stall-days 7
+# 5. Rétrogradation de maturité (Demotion non-monotone) si remise en cause
+poetry run elicit demote --engagement nordwave-mcx-2027 --subject floor-control --to-level L2_decomposed --by sofia --reason "Révision nécessaire"
 
-# 6. Arbitrage par Charlie (chief-architect) via --as charlie
-poetry run elicit arbitrate C-0001 --keep S-0001 --reason "Homogénéité du stockage SAN" --as charlie
+# 6. Soumettre une contribution externe terrain (double confirmation)
+poetry run elicit contribute --engagement nordwave-mcx-2027 --file demo/answers/contribution.md --as rui
 
-# 7. Assembler le document final (projects/demo-2026/document.md)
-poetry run elicit assemble --engagement demo-2026
+# 7. Arbitrage par Sofia (chief-architect) via --as sofia
+poetry run elicit arbitrate C-0001 --keep S-0001 --reason "Arbitrage MCX service layer au site" --as sofia
+
+# 8. Assembler le document final (projects/nordwave-mcx-2027/document.md)
+poetry run elicit assemble --engagement nordwave-mcx-2027
+```
+
+### B. Mode Test d'Intégration Référent (Scénario Nordwave MCX v2)
+
+Pour exécuter la démonstration automatisée complète couvrant les 6 phases et 18 tests d'élicitation :
+
+```bash
+poetry run pytest tests/integration/test_scenario_nordwave_mcx_v2.py -v
 ```
 
 

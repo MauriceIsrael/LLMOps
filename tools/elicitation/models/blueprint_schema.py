@@ -58,10 +58,9 @@ class Blueprint(BaseModel):
             return {r.name for r in self.roots if r.instructed}
         subjects = set()
         for sec in self.sections:
-            if sec.unlocks or sec.id in ("4.1", "5.1"):
-                for req in sec.get_requirements():
-                    if req.level == "L1_framed":
-                        subjects.add(req.subject)
+            for req in sec.get_requirements():
+                if req.level == "L1_framed":
+                    subjects.add(req.subject)
         return subjects
 
 

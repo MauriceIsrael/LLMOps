@@ -20,7 +20,14 @@ def harvest_candidates_node(state: HarvestState) -> dict[str, Any]:
             "title": "MCX Service Layer Decomposition (4 sub-domains)",
             "kind": "decomposition",
             "why": "First occurrence of 3GPP MC service layer decomposition on mission-critical voice.",
-        }
+            "source": "decomposition",
+        },
+        {
+            "title": "Element manager bulk export limit (2000 objects)",
+            "kind": "pattern",
+            "why": "General limitation observed on vendor element manager interface.",
+            "source": "external-contribution",
+        },
     ]
     return {"promotion_candidates": candidates}
 

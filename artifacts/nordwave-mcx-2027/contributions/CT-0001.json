@@ -1,0 +1,31 @@
+{
+  "id": "CT-0001",
+  "engagement": "nordwave-mcx-2027",
+  "contributor": "external:m.okonkwo",
+  "title": "ENM northbound export limits on release 23.4",
+  "material_text": "On release 23.4 the element manager's bulk configuration export is capped at\n2 000 managed objects per request and rejects concurrent exports on the same\nnode. In practice a full export of a core node takes three passes. Anyone\nplanning a nightly backup of the whole estate through that interface should size\nfor that, and should not assume the documented figure of 10 000.",
+  "attachment_path": null,
+  "relates_to_hint": "lmr-interworking",
+  "status": "accepted",
+  "triage_decision": {
+    "lead": "sofia",
+    "decision": "accept",
+    "reason": "",
+    "target_subject": "lmr-interworking"
+  },
+  "mapped_subjects": [],
+  "unmapped_terms": [],
+  "proposed_statements": [
+    {
+      "engagement": "nordwave-mcx-2027",
+      "section": "4.5",
+      "subject": "lmr-interworking",
+      "predicate": "depends_on",
+      "value": "On release 23.4 the element manager's bulk configuration export is capped at\n2 000 managed objects per request and rejects concurrent exports on the same\nnode. In practice a full export of a core node takes three passes. Anyone\nplanning a nightly backup of the whole estate through that interface should size\nfor that, and should not assume the documented figure of 10 000.",
+      "author": "external:m.okonkwo",
+      "confidence": "observed",
+      "verbatim": "On release 23.4 the element manager's bulk configuration export is capped at\n2 000 managed objects per request and rejects concurrent exports on the same\nnode. In practice a full export of a core node takes three passes. Anyone\nplanning a nightly backup of the whole estate through that interface should size\nfor that, and should not assume the documented figure of 10 000.",
+      "status": "active"
+    }
+  ]
+}

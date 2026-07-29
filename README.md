@@ -90,17 +90,21 @@ poetry run mcp-server
 poetry run fastmcp dev mcp_server/main.py
 ```
 
-### 5. Exécuter le Scénario d'Élicitation Référent (Démonstration Nordwave MCX)
-Le test d'intégration [tests/integration/test_scenario_nordwave_mcx.py](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx.py) constitue le **scénario exemple de référence** illustrant l'ensemble des capacités de la plateforme LLMOps :
-- Collaboration entre 3 architectes système (*Amina*, *Rui*, *Sofia*).
+### 5. Exécuter le Scénario d'Élicitation Référent (Démonstration Nordwave MCX v2)
+Le test d'intégration [tests/integration/test_scenario_nordwave_mcx_v2.py](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx_v2.py) constitue le **scénario exemple de référence v2** illustrant l'ensemble des capacités avancées de la plateforme LLMOps :
+- Collaboration multi-acteurs entre architectes (*Amina*, *Rui*, *Sofia*).
 - Progression par paliers de maturité (*Level Gate* `L0` → `L4`).
-- Détections de manques génératifs et décomposition de sujets.
-- Contestation d'énoncés et détection automatique de contradictions par requêtes Cypher.
-- Arbitrage traçable non-manichéen.
-- Génération d'un rapport de progression visuel complet : [artifacts/nordwave-mcx-2027/progression.md](file:///home/momo/Dev/LLMOps/artifacts/nordwave-mcx-2027/progression.md).
+- Ingestion documentaire et réconciliation avec le blueprint.
+- Reprise d'élicitation inter-processus via SQLite Checkpointer (`thread_id`).
+- Trajectoire d'avancement observée par sujet (`get_subject_trajectory`).
+- Rétrogradation non-monotone (`demote_subject`) conservant les réponses antérieures sous revue.
+- Soumission et validation à double confirmation des contributions externes (`build_contribution_graph`).
+- Détection de manques génératifs, décomposition et arbitrage traçable non-manichéen.
+- Récolte de candidats de patterns d'architecture (`build_harvest_graph`).
+- Génération du rapport de progression et de l'assemblage provisionnel (`document.md`).
 
 ```bash
-poetry run pytest tests/integration/test_scenario_nordwave_mcx.py -v
+poetry run pytest tests/integration/test_scenario_nordwave_mcx_v2.py -v
 ```
 
 ### 6. Exécuter les Tests & Évaluations Sémantiques
@@ -108,8 +112,8 @@ poetry run pytest tests/integration/test_scenario_nordwave_mcx.py -v
 # Linting & validation syntaxique
 poetry run ruff check .
 
-# Ensemble de la suite de tests unitaires et d'intégration (45 tests)
-poetry run pytest tests/unit tests/integration
+# Suite complète de tests unitaires et d'intégration
+poetry run pytest tests/unit tests/integration -v
 
 # Tests de non-régression sémantique (DeepEval)
 poetry run deepeval test run tests/evals/deepeval/test_semantic_regression.py
@@ -128,14 +132,20 @@ poetry run deepeval test run tests/evals/deepeval/test_semantic_regression.py
 | `get_decision_trail` | Historique et chaîne d'antériorité d'un ADR (`SUPERSEDES`) | `id` |
 | `get_glossary_term` | Obtenir la définition canonique d'un terme du glossaire | `term` |
 | `query_graph` | Exécuter une requête Cypher directe sur Kùzu DB | `cypher_query` |
+| `get_render_payload` | Payload JSON complet d'affichage pour les renderers | `engagement` |
+| `get_diagram_graph` | Graphe structuré & code Mermaid prêt à être rendu | `engagement`, `format` |
+| `get_subject_trajectory_tool` | Trajectoire d'avancement par sujet pour timeline | `engagement`, `subject` |
 
 ---
 
 ## 📚 Documentation & Exemples
-- 🏆 [Scénario d'Élicitation de Référence (Test d'Intégration Nordwave MCX)](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx.py)
+- 🏆 [Scénario d'Élicitation de Référence v2 (Test d'Intégration Nordwave MCX v2)](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx_v2.py)
+- 🎨 [Guide d'Intégration du Moteur de Rendu (Renderer)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)
 - 📊 [Rapport Visuel de Progression Généré](file:///home/momo/Dev/LLMOps/artifacts/nordwave-mcx-2027/progression.md)
 - 📖 [Documentation d'Architecture Logicielle](file:///home/momo/Dev/LLMOps/docs/architecture.md)
 - 📗 [Manuel Utilisateur Pas-à-Pas](file:///home/momo/Dev/LLMOps/docs/user_manual.md)
+- 📄 [Spécification Ingestion Documentaire](file:///home/momo/Dev/LLMOps/Arborescence%20exemple/architecture-kb/tools/elicitation/SPEC-DOCUMENT-INGESTION.md)
+- 📄 [Spécification Raffinement & Contributions](file:///home/momo/Dev/LLMOps/Arborescence%20exemple/architecture-kb/tools/elicitation/SPEC-REFINEMENT-AND-CONTRIBUTIONS.md)
 
 ---
 

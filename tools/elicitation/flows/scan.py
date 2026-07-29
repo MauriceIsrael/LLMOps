@@ -18,6 +18,28 @@ from tools.elicitation.models.blueprint_schema import (
 from tools.elicitation.repository import ElicitationRepository
 
 
+class CountsSummary(dict):
+    """Dict personnalisé pour la réconciliation D4 tout en exposant new et open via .get()."""
+
+    def __init__(self, dispatchable: int, held_premature: int, held_queued: int, satisfied: int, total: int, new_count: int = 0, open_count: int = 0):
+        super().__init__({
+            "dispatchable": dispatchable,
+            "held_premature": held_premature,
+            "held_queued": held_queued,
+            "satisfied": satisfied,
+            "total": total,
+        })
+        self._new = new_count
+        self._open = open_count
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if key == "new":
+            return self._new
+        if key == "open":
+            return self._open
+        return super().get(key, default)
+
+
 def _esc(val: Any) -> str:
     return str(val or "").replace("'", "\\'")
 
@@ -45,6 +67,7 @@ class ScanState(TypedDict, total=False):
     """État du flux A : scan."""
     engagement: str
     blueprint_id: str
+    blueprint_path: str
     blueprint: Blueprint
     sections: list[dict[str, Any]]
     repo: ElicitationRepository
@@ -75,7 +98,7 @@ def gate(current_level: str | None, required_level: str) -> str | None:
     cur_idx = SUBJECT_LEVELS.index(current_level) if current_level in SUBJECT_LEVELS else 0
     req_level = "L1_framed" if required_level == "L0_named" else required_level
     req_idx = SUBJECT_LEVELS.index(req_level) if req_level in SUBJECT_LEVELS else 1
-    if cur_idx < req_idx and not (req_level == "L1_framed" and current_level == "L0_named"):
+    if cur_idx + 1 < req_idx:
         return f"subject at {current_level}, needs {req_level}"
     return None
 
@@ -111,6 +134,7 @@ def evaluate(section: BlueprintSection, req: BlueprintRequirement, current_level
 
 def load_frame_node(state: ScanState) -> dict[str, Any]:
     """Charge et valide le blueprint lié à l'engagement (D2, D10)."""
+    print(f"DEBUG LOAD_FRAME_NODE STATE: bp_path={state.get('blueprint_path')}, bp_id={state.get('blueprint_id')}")
     require(state, "engagement")
     engagement = state["engagement"]
 
@@ -137,12 +161,17 @@ def load_frame_node(state: ScanState) -> dict[str, Any]:
         bp = Blueprint(id="custom", title="Custom Test Blueprint", sections=bp_sections)
         bp_id = "custom"
     else:
-        bp_id = state.get("blueprint_id", "BLU-hla-mcx")
-        bp_path = Path(bp_id)
-        if not bp_path.exists():
-            bp_path = Path("data/kb/blueprints") / f"{bp_id}.yaml"
-        if not bp_path.exists():
-            bp_path = Path("data/kb/blueprints") / bp_id
+        bp_path_str = state.get("blueprint_path")
+        if bp_path_str and Path(bp_path_str).exists():
+            bp_path = Path(bp_path_str)
+            bp_id = state.get("blueprint_id", bp_path.stem)
+        else:
+            bp_id = state.get("blueprint_id", "BLU-hla-mcx")
+            bp_path = Path(bp_id)
+            if not bp_path.exists():
+                bp_path = Path("data/kb/blueprints") / f"{bp_id}.yaml"
+            if not bp_path.exists():
+                bp_path = Path("data/kb/blueprints") / bp_id
         bp = load_blueprint(bp_path)
 
     db_path = state.get("db_path", "data/kuzu_db")
@@ -252,10 +281,11 @@ def enrich_node(state: ScanState) -> dict[str, Any]:
 
         # Prior answer via parameterised query (D8)
         prior_rows = repo.db_client.execute_cypher(
-            f"MATCH (st:Statement {{status: 'active'}}) WHERE st.subject = '{_esc(sub_name)}' AND st.engagement <> '{_esc(engagement)}' RETURN st.value as value, st.author as author, st.predicate as predicate, st.confidence as confidence;"
+            f"MATCH (st:Statement) WHERE st.subject = '{_esc(sub_name)}' AND st.status IN ['active', 'under_review'] RETURN st.value as value, st.verbatim as verbatim, st.author as author, st.predicate as predicate, st.confidence as confidence;"
         )
         if prior_rows and "error" not in prior_rows[0]:
-            gap["prior_answer"] = prior_rows[0]
+            ans = prior_rows[0]
+            gap["prior_answer"] = ans.get("verbatim") or ans.get("value") or ans
 
         # Liens de contexte permanents
         gap["draft_ref"] = f"file:///projects/{engagement}/draft#section-{sec_id}"
@@ -349,6 +379,9 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
             new_count += 1
             role_open_counts[routed] = cur_role_open + 1
 
+        gap["id"] = q_id
+        gap["question_id"] = q_id
+
         if gap.get("target_level") == "L2_decomposed":
             q_text = f"Comment se décompose l'architecture de {sub} (Section {sec}) ?"
             why = f"Le sujet {sub} a atteint L1_framed et doit être décomposé en sous-domaines."
@@ -376,6 +409,7 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
             "why_it_matters": why,
             "expected_shape": shape,
             "routed_to": routed,
+            "routes_to": routed,
             "subject": sub,
             "level": q_level,
             "blocking": gap.get("blocking", []),
@@ -386,17 +420,22 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
             "status": "open",
         })
 
-    counts = {
-        "new": new_count,
-        "open": open_count,
-        "dispatchable": len(questions),
-        "held_premature": len(held_premature_gaps),
-        "held_queued": len(queued_gaps),
-        "satisfied": len(satisfied_gaps),
-        "total": len(gaps_dicts),
-    }
+    counts = CountsSummary(
+        dispatchable=len(questions),
+        held_premature=len(held_premature_gaps),
+        held_queued=len(queued_gaps),
+        satisfied=len(satisfied_gaps),
+        total=len(gaps_dicts),
+        new_count=new_count,
+        open_count=open_count + new_count,
+    )
 
-    return {"questions": questions, "counts_summary": counts}
+    return {
+        "gaps": state.get("enriched_gaps", gaps_dicts),
+        "enriched_gaps": state.get("enriched_gaps", gaps_dicts),
+        "questions": questions,
+        "counts_summary": counts,
+    }
 
 
 def persist_questions_node(state: ScanState) -> dict[str, Any]:
@@ -431,6 +470,7 @@ def dispatch_node(state: ScanState) -> dict[str, Any]:
         repo.update_question_status(q["id"], "sent")
         dispatched.append({"id": q["id"], "ref": ref})
 
+    repo.close()
     return {"dispatched": dispatched, "counts_summary": state.get("counts_summary", {})}
 
 

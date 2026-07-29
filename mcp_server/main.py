@@ -27,6 +27,11 @@ from mcp_server.tools.asset_tools import (
     list_assets,
 )
 from mcp_server.tools.graph_tools import get_graph_summary, query_graph
+from mcp_server.tools.renderer_tools import (
+    get_diagram_graph,
+    get_render_payload,
+    get_subject_trajectory_tool,
+)
 
 # Initialisation de l'instance FastMCP
 mcp = FastMCP(settings.APP_NAME)
@@ -40,6 +45,11 @@ mcp.tool()(get_glossary_term)
 # Enregistrement des outils de graphe Cypher & résumé Kùzu DB
 mcp.tool()(query_graph)
 mcp.tool()(get_graph_summary)
+
+# Enregistrement des outils dédiés au Renderer
+mcp.tool()(get_render_payload)
+mcp.tool()(get_diagram_graph)
+mcp.tool()(get_subject_trajectory_tool)
 
 
 class TokenPreservingSseServerTransport(SseServerTransport):
