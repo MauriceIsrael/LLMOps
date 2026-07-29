@@ -39,5 +39,10 @@ register_tools(
     ],
 )
 
-if __name__ == "__main__":
+def main() -> None:
+    """Point d'entrée pour l'Engagement Server."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

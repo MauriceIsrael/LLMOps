@@ -1,8 +1,8 @@
 {
   "id": "Q-0002",
   "engagement": "test-depth",
-  "question": "What is the mission-critical service layer for, and what must keep working when everything else degrades?",
-  "why_it_matters": "La section 4.1 (4.1) ne contient aucun énoncé d'architecture.",
+  "question": "Which loops govern the system, and how does autonomy increase over time?",
+  "why_it_matters": "La section 8.1 (8.1) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mcx-service-architect"
+  "routed_to": "chief-architect"
 }

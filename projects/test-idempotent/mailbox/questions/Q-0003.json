@@ -1,8 +1,8 @@
 {
   "id": "Q-0003",
   "engagement": "test-idempotent",
-  "question": "What is the 5G Standalone core topology and UPF placement strategy?",
-  "why_it_matters": "La section 5.1 (5.1) ne contient aucun énoncé d'architecture.",
+  "question": "Which dimensions are staged, which audits gate the scope, and which decisions wait on them?",
+  "why_it_matters": "La section 10.1 (10.1) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mobile-core-architect"
+  "routed_to": "delivery-lead"
 }

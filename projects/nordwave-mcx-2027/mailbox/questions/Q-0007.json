@@ -1,8 +1,8 @@
 {
   "id": "Q-0007",
   "engagement": "nordwave-mcx-2027",
-  "question": "Quelle est l'architecture de la section 4.1.1 (MCX service boundary framing) ?\nPattern proposé : PAT-006 Vendor boundary through northbound interface (Quand ne pas utiliser : Ne pas utiliser si le fournisseur supporte un accès direct modèle.)",
-  "why_it_matters": "La section 4.1.1 (MCX service boundary framing) ne contient aucun énoncé d'architecture.",
+  "question": "How do control, signalling and media flows traverse the system?\nPattern proposé : PAT-006 Vendor boundary through northbound interface (Quand ne pas utiliser : Ne pas utiliser si le fournisseur supporte un accès direct modèle.)",
+  "why_it_matters": "La section 3.2 (3.2) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
   "routed_to": "mcx-service-architect"
 }

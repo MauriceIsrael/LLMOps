@@ -1,8 +1,8 @@
 {
   "id": "Q-0004",
   "engagement": "test-depth",
-  "question": "How is backhaul physical link redundancy and IPsec failover convergence configured?",
-  "why_it_matters": "La section 5.4 (5.4) ne contient aucun énoncé d'architecture.",
+  "question": "Why now, what forces the programme, and under which directives?",
+  "why_it_matters": "La section 1.3 (1.3) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mobile-core-architect"
+  "routed_to": "chief-architect"
 }

@@ -19,6 +19,7 @@ from starlette.responses import HTMLResponse, JSONResponse
 from starlette.routing import Route
 from starlette.types import Receive, Scope, Send
 
+from mcp_server.config import settings
 from mcp_server.core.config import server_config
 from mcp_server.engagement.tools import (
     get_board,

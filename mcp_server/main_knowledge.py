@@ -37,5 +37,10 @@ register_tools(
     ],
 )
 
-if __name__ == "__main__":
+def main() -> None:
+    """Point d'entrée pour le Knowledge Server."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

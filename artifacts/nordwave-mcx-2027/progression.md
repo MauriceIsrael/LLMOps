@@ -18,9 +18,9 @@ engagement, ● is produced by it.
 
 | Subject | L0 L1 L2 L3 L4 | Level | Origin | Blocked by |
 |---|---|---|---|---|
+| ⬢ mcx-services | █ · · · · | L0_named | blueprint | — |
 | ⬢ transport | █ · · · · | L0_named | blueprint | — |
 | ⬢ mobile-core | █ · · · · | L0_named | blueprint | — |
-| ⬢ mcx-services | █ · · · · | L0_named | blueprint | — |
 
 The plan covers **10 sections** and derives the expertise
 needed from the routing of every gap, not only the dispatched ones.
@@ -101,9 +101,9 @@ graph TD
 
 | Subject | L0 L1 L2 L3 L4 | Level | Origin | Blocked by |
 |---|---|---|---|---|
+| ⬢ mcx-services | █ █ █ · · | L2_decomposed | blueprint | — |
 | ⬢ transport | █ · · · · | L0_named | blueprint | — |
 | ⬢ mobile-core | █ █ · · · | L1_framed | blueprint | — |
-| ⬢ mcx-services | █ █ █ · · | L2_decomposed | blueprint | — |
 | ⬢ synthetic-subject | █ · · · · | L0_named | blueprint | — |
 | ● group-management | █ · · · · | L0_named | discovered | — |
 | ● floor-control | █ · · · · | L0_named | discovered | — |
@@ -175,9 +175,9 @@ have failed: this engagement is not finished.
 
 | Subject | L0 L1 L2 L3 L4 | Level | Origin | Blocked by |
 |---|---|---|---|---|
+| ⬢ mcx-services | █ █ █ · · | L2_decomposed | blueprint | — |
 | ⬢ transport | █ · · · · | L0_named | blueprint | — |
 | ⬢ mobile-core | █ █ · · · | L1_framed | blueprint | — |
-| ⬢ mcx-services | █ █ █ · · | L2_decomposed | blueprint | — |
 | ⬢ synthetic-subject | █ · · · · | L0_named | blueprint | — |
 | ● group-management | █ · · · · | L0_named | discovered | — |
 | ● floor-control | █ █ █ · · | L2_decomposed | discovered | — |

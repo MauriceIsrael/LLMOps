@@ -1,8 +1,8 @@
 {
   "id": "Q-0004",
   "engagement": "test-distinguish",
-  "question": "How is backhaul physical link redundancy and IPsec failover convergence configured?",
-  "why_it_matters": "La section 5.4 pour le sujet transport requiert le niveau L1_framed.",
+  "question": "Which operational scenarios must the system support, including the degraded ones?",
+  "why_it_matters": "La section 2.2 (2.2) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mobile-core-architect"
+  "routed_to": "mcx-service-architect"
 }

@@ -1,5 +1,5 @@
 # Document d'Architecture System — Engagement demo-2026
-**Statut du Document :** `PROVISIONAL`
+**Statut du Document :** `provisional`
 **Conflits Ouverts :** 1
 
 ---
@@ -7,8 +7,8 @@
 
 ### Section 5.2
 
-- Énoncé validé (`verified`) par alice : `has_property` = `SAN NVMe`.
-  > *Verbatim :* ""
+- Énoncé validé (`designed`) par alice : `has_property` = `SAN NVMe`.
+  > *Verbatim :* "SAN NVMe"
 
 ---
 ## ⚠️ Registre des Conflits Ouverts

@@ -1,5 +1,5 @@
 steps:
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'gcr.io/canvas-eye-403415/llmops-mcp-server:latest', '-f', 'docker/Dockerfile.cloudrun', '.' ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/canvas-eye-403415/llmops-mcp-server', '-f', 'docker/Dockerfile.cloudrun', '.']
 images:
-- 'gcr.io/canvas-eye-403415/llmops-mcp-server:latest'
+  - 'gcr.io/canvas-eye-403415/llmops-mcp-server'

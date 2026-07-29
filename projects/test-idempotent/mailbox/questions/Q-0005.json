@@ -1,8 +1,8 @@
 {
   "id": "Q-0005",
   "engagement": "test-idempotent",
-  "question": "Quelle est l'architecture de la section 4.6 (Group Management Domain & Affiliation) ?",
-  "why_it_matters": "La section 4.6 (Group Management Domain & Affiliation) ne contient aucun énoncé d'architecture.",
+  "question": "Which operational scenarios must the system support, including the degraded ones?",
+  "why_it_matters": "La section 2.2 (2.2) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
   "routed_to": "mcx-service-architect"
 }

@@ -1,8 +1,8 @@
-<!-- elicit:nordwave-mcx-2027:Q-0001:question:sha=586079 -->
-### What is the mission-critical service layer for, and what must keep working when everything else degrades?
+<!-- elicit:nordwave-mcx-2027:Q-0001:question:sha=29bcc7 -->
+### What is the end-to-end topology, and who operates each segment?
 
 **Why this matters**
-La section 4.1 (4.1) ne contient aucun énoncé d'architecture. (Sections bloquées : `4.1`)
+La section 5.1 (5.1) ne contient aucun énoncé d'architecture. (Sections bloquées : `5.1`)
 
 **Please use these terms**
 - Sujet canonique : `mcx-services`
