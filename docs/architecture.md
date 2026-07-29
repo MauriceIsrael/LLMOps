@@ -246,23 +246,31 @@ L'arbitrage d'un conflit par un architecte référent (Sofia) ne se limite pas �
 
 ---
 
-## 7. Architecture des Serveurs FastMCP & Durcissement du Contrat (ADR-0014)
+## 7. Architecture des Serveurs FastMCP, Séparation Physique & ADR-0015
 
-Conformément à l'ADR-0014, le serveur MCP est découpé en deux entités indépendantes pour garantir la séparation stricte des données de la base de connaissances et des données d'engagement projet :
+Conformément à l'**ADR-0015**, la plateforme repose sur une séparation physique stricte des bases de données graphiques Kùzu DB :
 
-### 7.1 Knowledge Server (`mcp_server/main_knowledge.py`)
-Héberge les actifs réutilisables d'architecture (`Asset`, `GlossaryTerm`, `ADR`, `Principle`). Il n'a aucune connaissance des projets clients, sujets d'élicitation ou énoncés actifs.
-- **Outils exposés** : `list_assets`, `get_asset`, `get_assets` (batch), `get_decision_trail`, `get_glossary_term`, `search_assets`, `get_principles_for`, `query_graph`, `get_graph_summary`.
+### 7.1 Disposition Physique des Fichiers (Layout ADR-0015)
+```
+data/
+  knowledge.kuzu                   # Base Connaissances Réutilisable (Asset, GlossaryTerm, SUPERSEDES)
+  engagements/
+    nordwave-mcx-2027.kuzu         # Base Engagement Projet (Subject, Statement, Question, Conflict)
+    <engagement-id>.kuzu           # Base dédiée par projet client
+```
 
-### 7.2 Engagement Server (`mcp_server/main_engagement.py`)
-Héberge l'état d'avancement des projets clients (`Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`).
-- **Références Cross-Plane** : Les énoncés font référence aux actifs de la base de connaissances via leurs identifiants sous forme de propriété string (`based_on: [{"id": "ADR-0005"}]`), sans jamais copier de nœuds `Asset` ou créer de relations de graphe inter-bases.
-- **Outils exposés** : `get_subject`, `get_subject_trajectory`, `get_board`, `get_statements`, `get_conflicts`, `get_open_questions`, `get_diagram_graph`, `get_render_payload`, `get_dangling_references`, `query_graph`, `get_graph_summary`.
+### 7.2 Découverte Dynamique & Routage des Connexions (`open_connection`)
+- **Découverte Automatique (`discover_engagements`)** : Les bases d'engagement sont découvertes dynamiquement par scan du répertoire `data/engagements/*.kuzu`.
+- **Routage & Sûreté des Connexions (`open_connection`)** :
+  1. **Autorisation en premier** (`authorise(caller, scope)` est appelé avant toute résolution de fichier).
+  2. **Validation d'identifiant** : Format contraint à `[a-z0-9-]+` (rejet de `/`, `\`, `..`).
+  3. **Connexion en lecture seule** : Pool de connexions Kùzu DB en lecture seule.
 
-### 7.3 Isolation du Driver & Enveloppes Normalisées
-- **Sûreté au niveau du Driver (`ReadOnlyKuzuClient`)** : Toute tentative d'écriture Cypher (`CREATE`, `SET`, `DELETE`, `MERGE`, etc.) est rejetée au niveau du driver Python.
-- **Format d'Enveloppe Standardisé** : Tous les outils renvoient une structure uniforme :
-  `{"status": "ok" | "not_found" | "invalid_argument" | "error", "count": int, "data": ...}`.
+### 7.3 Instantanés Atomiques & Publication (`elicit publish`)
+L'enregistrement et la publication d'un graphe d'engagement s'effectuent par instantanés atomiques (`elicit publish --engagement <id>`) depuis l'espace de travail vers `data/engagements/<id>.kuzu`. Les opérations d'écriture du moteur d'élicitation et de lecture du serveur MCP sont ainsi strictement isolées.
+
+### 7.4 Spécification du Schéma (`docs/SCHEMA.md`)
+La structure du schéma graphique pour chaque plan est documentée de manière automatisée dans [docs/SCHEMA.md](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md) via l'outil `generate_schema_doc.py`.
 
 ---
 

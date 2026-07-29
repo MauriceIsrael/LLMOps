@@ -124,16 +124,35 @@ Génère la structure graphique de l'architecture (nœuds, arêtes, statut des c
 
 ---
 
-### C. `get_subject_trajectory_tool(engagement: str, subject: str)`
+### C. `get_subject_trajectory(engagement: str, subject: str)`
 Fournit la trajectoire historique des niveaux de maturité franchis par un sujet pour afficher une timeline interactive ou un histogramme d'avancement.
+
+**Signature JSON-RPC (MCP) :**
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "get_subject_trajectory",
+    "arguments": {
+      "engagement": "nordwave-mcx-2027",
+      "subject": "mcx-services"
+    }
+  },
+  "id": 3
+}
+```
 
 **Exemple de retour :**
 ```json
-[
-  { "level": "L0_named", "question": "Cadrage initial", "answer_excerpt": "Nommé dans le blueprint" },
-  { "level": "L1_framed", "question": "Architecture des services MCX ?", "answer_excerpt": "Services hébergés sur Kubernetes" },
-  { "level": "L2_decomposed", "question": "Décomposition en sous-composants ?", "answer_excerpt": "Contrôle de plancher et dispatch" }
-]
+{
+  "status": "ok",
+  "count": 2,
+  "data": [
+    { "level": "L1_framed", "question": "Cadrage des services MCX", "answer_excerpt": "Services hébergés sur Kubernetes" },
+    { "level": "L2_decomposed", "question": "Décomposition en sous-composants", "answer_excerpt": "Contrôle de plancher et dispatch" }
+  ]
+}
 ```
 
 ---
