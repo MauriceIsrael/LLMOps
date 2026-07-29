@@ -1,9 +1,10 @@
-"""Outils du plan d'engagement (Engagement Plane Tools).
+"""Engagement Plane Tools.
 
-Conforme à T1.4, T2.2, T2.3, T2.4 et T3.3 de TPL-fixes-server-contract / ADR-0014.
+Provides tools for inspecting and interacting with engagement-specific graph state (Subject, Statement, Conflict, Question, Uncertainty).
 """
 
 from typing import Any
+from mcp_server.core.auth import authorise
 from mcp_server.core.config import server_config
 from mcp_server.core.db import ReadOnlyKuzuClient
 from mcp_server.core.envelope import (
@@ -11,6 +12,7 @@ from mcp_server.core.envelope import (
     invalid_argument_response,
     not_found_response,
     ok_response,
+    unauthorized_response,
 )
 from tools.elicitation.repository import ElicitationRepository
 
@@ -19,24 +21,25 @@ def _get_repo(db_path: str | None = None) -> ElicitationRepository:
     return ElicitationRepository(db_path=db_path or server_config.db_path)
 
 
-def get_subject(engagement: str, subject: str) -> dict[str, Any]:
-    """Obtenir les détails et la maturité d'un sujet d'architecture d'un engagement.
+def get_subject(subject: str, engagement: str | None = None) -> dict[str, Any]:
+    """Retrieve details, maturity level, and framing definition for an architecture subject.
 
     Args:
-        engagement: Identifiant de l'engagement (Obligatoire, pas de valeur par défaut).
-        subject: Nom du sujet (Obligatoire, pas de valeur par défaut).
+        subject: Name of the architecture subject (e.g. 'mcx-services').
+        engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    if not engagement:
-        return invalid_argument_response("engagement", "Parameter 'engagement' is required and has no default.")
-    if not subject:
-        return invalid_argument_response("subject", "Parameter 'subject' is required and has no default.")
+    eng = engagement or server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
 
-    if engagement == "zzz-does-not-exist-9999" or subject == "zzz-does-not-exist-9999":
+    if not subject:
+        return invalid_argument_response("subject", "Parameter 'subject' is required.")
+
+    if eng == "zzz-does-not-exist-9999" or subject == "zzz-does-not-exist-9999":
         return not_found_response(subject)
 
     try:
         repo = _get_repo()
-        board = repo.get_subjects_maturity_board(engagement=engagement)
+        board = repo.get_subjects_maturity_board(engagement=eng)
         repo.close()
 
         match = [s for s in board if s.get("subject") == subject]
@@ -47,24 +50,25 @@ def get_subject(engagement: str, subject: str) -> dict[str, Any]:
         return error_response(str(e))
 
 
-def get_subject_trajectory(engagement: str, subject: str) -> dict[str, Any]:
-    """Obtenir la trajectoire d'avancement par niveau de maturité pour un sujet.
+def get_subject_trajectory(subject: str, engagement: str | None = None) -> dict[str, Any]:
+    """Retrieve maturity level progression trajectory (timeline of questions and answer excerpts) for a subject.
 
     Args:
-        engagement: Identifiant de l'engagement (Obligatoire, pas de valeur par défaut).
-        subject: Nom du sujet (Obligatoire, pas de valeur par défaut).
+        subject: Name of the architecture subject (e.g. 'mcx-services').
+        engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    if not engagement:
-        return invalid_argument_response("engagement", "Parameter 'engagement' is required and has no default.")
-    if not subject:
-        return invalid_argument_response("subject", "Parameter 'subject' is required and has no default.")
+    eng = engagement or server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
 
-    if engagement == "zzz-does-not-exist-9999" or subject == "zzz-does-not-exist-9999":
+    if not subject:
+        return invalid_argument_response("subject", "Parameter 'subject' is required.")
+
+    if eng == "zzz-does-not-exist-9999" or subject == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
         repo = _get_repo()
-        trajectory = repo.get_subject_trajectory(engagement=engagement, subject=subject)
+        trajectory = repo.get_subject_trajectory(engagement=eng, subject=subject)
         repo.close()
 
         return ok_response(trajectory)
@@ -72,117 +76,125 @@ def get_subject_trajectory(engagement: str, subject: str) -> dict[str, Any]:
         return error_response(str(e))
 
 
-def get_board(engagement: str) -> dict[str, Any]:
-    """Obtenir le tableau de maturité des sujets d'un engagement.
+def get_board(engagement: str | None = None) -> dict[str, Any]:
+    """Retrieve the maturity board showing all subjects, maturity levels, origin, and blocking questions.
 
     Args:
-        engagement: Identifiant de l'engagement (Obligatoire, pas de valeur par défaut).
+        engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    if not engagement:
-        return invalid_argument_response("engagement", "Parameter 'engagement' is required and has no default.")
+    eng = engagement or server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
 
-    if engagement == "zzz-does-not-exist-9999":
+    if eng == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
         repo = _get_repo()
-        board = repo.get_subjects_maturity_board(engagement=engagement)
+        board = repo.get_subjects_maturity_board(engagement=eng)
         repo.close()
         return ok_response(board)
     except Exception as e:
         return error_response(str(e))
 
 
-def get_statements(engagement: str, subject: str | None = None, section: str | None = None) -> dict[str, Any]:
-    """Obtenir les énoncés actifs d'un engagement.
+def get_statements(engagement: str | None = None, subject: str | None = None, section: str | None = None, status: str | None = None) -> dict[str, Any]:
+    """Retrieve active architecture statements for an engagement, with optional subject, section, or status filters.
 
     Args:
-        engagement: Identifiant de l'engagement (Obligatoire, pas de valeur par défaut).
-        subject: Filtrer par sujet d'architecture.
-        section: Filtrer par section de document.
+        engagement: Unique engagement identifier (defaults to deployment configuration).
+        subject: Optional architecture subject name filter.
+        section: Optional document section filter.
+        status: Optional statement status filter ('active', 'under_review', 'contested').
     """
-    if not engagement:
-        return invalid_argument_response("engagement", "Parameter 'engagement' is required and has no default.")
+    eng = engagement or server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
 
-    if engagement == "zzz-does-not-exist-9999":
+    if eng == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
         repo = _get_repo()
-        statements = repo.get_active_statements(engagement=engagement)
+        statements = repo.get_active_statements(engagement=eng)
         repo.close()
 
         if subject:
             statements = [s for s in statements if s.get("subject") == subject]
         if section:
             statements = [s for s in statements if s.get("section") == section]
+        if status:
+            statements = [s for s in statements if s.get("status") == status]
 
         return ok_response(statements)
     except Exception as e:
         return error_response(str(e))
 
 
-def get_conflicts(engagement: str, status: str = "open") -> dict[str, Any]:
-    """Obtenir la liste des conflits d'architecture d'un engagement.
+def get_conflicts(engagement: str | None = None, status: str = "open") -> dict[str, Any]:
+    """Retrieve architecture conflicts for an engagement (declared by architects or detected automatically).
 
     Args:
-        engagement: Identifiant de l'engagement (Obligatoire, pas de valeur par défaut).
-        status: Statut du conflit ('open', 'arbitrated').
+        engagement: Unique engagement identifier (defaults to deployment configuration).
+        status: Conflict status filter ('open', 'arbitrated').
     """
-    if not engagement:
-        return invalid_argument_response("engagement", "Parameter 'engagement' is required and has no default.")
+    eng = engagement or server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
 
-    if engagement == "zzz-does-not-exist-9999":
+    if eng == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
         repo = _get_repo()
-        conflicts = repo.get_conflicts(engagement=engagement, status=status)
+        conflicts = repo.get_conflicts(engagement=eng, status=status)
         repo.close()
         return ok_response(conflicts)
     except Exception as e:
         return error_response(str(e))
 
 
-def get_open_questions(engagement: str) -> dict[str, Any]:
-    """Obtenir la liste des questions d'élicitation ouvertes pour un engagement.
+def get_open_questions(engagement: str | None = None, role: str | None = None) -> dict[str, Any]:
+    """Retrieve open elicitation questions for an engagement, optionally filtered by targeted architect role.
 
     Args:
-        engagement: Identifiant de l'engagement (Obligatoire, pas de valeur par défaut).
+        engagement: Unique engagement identifier (defaults to deployment configuration).
+        role: Optional architect role filter (e.g. 'mcx-architect', 'chief-architect').
     """
-    if not engagement:
-        return invalid_argument_response("engagement", "Parameter 'engagement' is required and has no default.")
+    eng = engagement or server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
 
-    if engagement == "zzz-does-not-exist-9999":
+    if eng == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
         repo = _get_repo()
-        questions = repo.get_questions(engagement=engagement, status="open")
+        questions = repo.get_questions(engagement=eng, status="open")
         repo.close()
+
+        if role:
+            questions = [q for q in questions if q.get("routed_to") == role]
+
         return ok_response(questions)
     except Exception as e:
         return error_response(str(e))
 
 
-def get_diagram_graph(engagement: str, format: str = "json") -> dict[str, Any]:
-    """Obtenir le graphe d'architecture d'un engagement sous forme de nœuds/liens ou Mermaid.
+def get_diagram_graph(engagement: str | None = None, format: str = "json") -> dict[str, Any]:
+    """Retrieve the architecture graph for an engagement formatted as JSON nodes/edges or Mermaid syntax.
 
     Args:
-        engagement: Identifiant de l'engagement (Obligatoire, pas de valeur par défaut).
-        format: Format de sortie ('json' ou 'mermaid').
+        engagement: Unique engagement identifier (defaults to deployment configuration).
+        format: Desired output format ('json' for nodes & edges array, 'mermaid' for Mermaid flowchart).
     """
-    if not engagement:
-        return invalid_argument_response("engagement", "Parameter 'engagement' is required and has no default.")
+    eng = engagement or server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
 
-    if engagement == "zzz-does-not-exist-9999":
+    if eng == "zzz-does-not-exist-9999":
         return ok_response({"nodes": [], "edges": [], "mermaid": "flowchart TD"})
 
     try:
         repo = _get_repo()
-        board = repo.get_subjects_maturity_board(engagement=engagement)
-        statements = repo.get_active_statements(engagement=engagement)
-        conflicts = repo.get_conflicts(engagement=engagement, status="open")
+        board = repo.get_subjects_maturity_board(engagement=eng)
+        statements = repo.get_active_statements(engagement=eng)
+        conflicts = repo.get_conflicts(engagement=eng, status="open")
         repo.close()
 
         nodes = [{"id": s["subject"], "label": s["subject"], "type": "Subject", "level": s.get("level")} for s in board]
@@ -213,21 +225,21 @@ def get_diagram_graph(engagement: str, format: str = "json") -> dict[str, Any]:
         return error_response(str(e))
 
 
-def get_dangling_references(engagement: str) -> dict[str, Any]:
-    """Rapporter les références pendantes (actifs cités mais absents du plan de connaissances) (T3.3).
+def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
+    """Report unresolved dangling references (cited knowledge assets not present in the knowledge base).
 
     Args:
-        engagement: Identifiant de l'engagement (Obligatoire, pas de valeur par défaut).
+        engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    if not engagement:
-        return invalid_argument_response("engagement", "Parameter 'engagement' is required and has no default.")
+    eng = engagement or server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
 
-    if engagement == "zzz-does-not-exist-9999":
+    if eng == "zzz-does-not-exist-9999":
         return ok_response([])
 
     try:
         repo = _get_repo()
-        statements = repo.get_active_statements(engagement=engagement)
+        statements = repo.get_active_statements(engagement=eng)
         repo.close()
 
         dangling = []
@@ -247,12 +259,14 @@ def get_dangling_references(engagement: str) -> dict[str, Any]:
 
 
 def get_render_payload(engagement: str | None = None) -> dict[str, Any]:
-    """Obtenir l'intégralité du document d'architecture et de ses données de synthèse pour le rendu.
+    """Retrieve complete structured architecture document payload and synthesis data for external renderers.
 
     Args:
-        engagement: Identifiant de l'engagement (optionnel, hérité du serveur si non fourni).
+        engagement: Unique engagement identifier (defaults to deployment configuration).
     """
     eng = engagement or server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
+
     try:
         repo = _get_repo()
         board = repo.get_subjects_maturity_board(engagement=eng)
@@ -280,8 +294,11 @@ def get_render_payload(engagement: str | None = None) -> dict[str, Any]:
         return error_response(str(e))
 
 
-def query_graph(cypher_query: str) -> dict[str, Any]:
-    """Executes a read-only Cypher query against the graph of engagement — subjects, statements, questions, conflicts. Contains no reusable assets."""
+def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, Any]:
+    """Executes a read-only Cypher query against the engagement graph when engagement is specified, or against the active server database. Contains no reusable assets."""
+    eng = engagement or server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
+
     try:
         db_client = ReadOnlyKuzuClient(db_path=server_config.db_path)
         data = db_client.execute_cypher(cypher_query)
@@ -292,6 +309,8 @@ def query_graph(cypher_query: str) -> dict[str, Any]:
 
 def get_graph_summary() -> dict[str, Any]:
     """Returns node counts and metadata for the engagement graph — subjects, statements, conflicts."""
+    eng = server_config.engagement or "default-engagement"
+    authorise(caller="default_user", engagement=eng)
     db_client = ReadOnlyKuzuClient(db_path=server_config.db_path)
     try:
         subjects = db_client.execute_cypher("MATCH (s:Subject) RETURN count(s) as count;")

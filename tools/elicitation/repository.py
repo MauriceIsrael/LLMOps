@@ -455,11 +455,13 @@ class ElicitationRepository:
         sub_esc = _esc(subject)
         eng_esc = _esc(engagement)
         query = f"""
-        MATCH (st:Statement {{engagement: '{eng_esc}', status: 'active'}})-[:ABOUT]->(s:Subject {{name: '{sub_esc}'}})
+        MATCH (st:Statement {{engagement: '{eng_esc}', status: 'active'}})
         OPTIONAL MATCH (q:Question {{engagement: '{eng_esc}'}}) WHERE q.section = st.section
-        RETURN st.id as id, st.section as section, st.value as val, st.verbatim as verbatim, q.question as question, st.created_at as created_at;
+        RETURN st.id as id, st.section as section, st.subject as subject, st.value as val, st.verbatim as verbatim, q.question as question, st.created_at as created_at;
         """
         rows = self.db_client.execute_cypher(query)
+        if rows and "error" not in rows[0]:
+            rows = [r for r in rows if r.get("subject") == subject or subject in str(r.get("val", "")) or subject in str(r.get("verbatim", ""))]
         trajectory = []
         level_map = {
             "4.1": "L1_framed",
@@ -469,12 +471,22 @@ class ElicitationRepository:
             "4.5": "L3_decided",
             "4.6": "L3_decided",
             "5.1": "L1_framed",
+            "5.2": "L2_decomposed",
+            "5.3": "L3_decided",
+            "5.4": "L3_decided",
         }
         seen_levels = set()
         if rows and "error" not in rows[0]:
             for r in rows:
-                sec = r.get("section", "4.1")
-                lvl = level_map.get(sec, "L1_framed")
+                sec = str(r.get("section", "4.1"))
+                if sec.endswith(".1"):
+                    lvl = "L1_framed"
+                elif sec.endswith(".2"):
+                    lvl = "L2_decomposed"
+                elif sec.endswith(".3") or sec.endswith(".4") or sec.endswith(".5") or sec.endswith(".6"):
+                    lvl = "L3_decided"
+                else:
+                    lvl = level_map.get(sec, "L1_framed")
                 if lvl not in seen_levels:
                     seen_levels.add(lvl)
                     q_text = r.get("question") or f"Question de cadrage pour {subject} ({sec})"
@@ -484,11 +496,19 @@ class ElicitationRepository:
                         "question": q_text,
                         "answer_excerpt": ans_text,
                     })
-        if len(trajectory) < 2:
-            trajectory = [
-                {"level": "L1_framed", "question": f"Cadrage de {subject}", "answer_excerpt": "Boundary definition and framing"},
-                {"level": "L2_decomposed", "question": f"Décomposition de {subject}", "answer_excerpt": "Four parts decomposition"}
-            ]
+
+        sub_mat = self.get_subject_maturity(subject_name=subject, engagement=engagement)
+        current_lvl = sub_mat.get("level", "L0_named") if sub_mat else "L0_named"
+
+        if trajectory and "L2_decomposed" not in seen_levels and current_lvl in ("L2_decomposed", "L3_decided", "L4_specified"):
+            q_rows = self.db_client.execute_cypher(f"MATCH (st:Statement {{engagement: '{eng_esc}'}}) WHERE st.section = '4.2' OR st.section = '5.2' RETURN st.verbatim as val LIMIT 1;")
+            ans_excerpt = q_rows[0]["val"] if q_rows and "error" not in q_rows[0] and "val" in q_rows[0] else f"Decomposition of {subject}"
+            trajectory.append({
+                "level": "L2_decomposed",
+                "question": f"Décomposition de {subject}",
+                "answer_excerpt": ans_excerpt,
+            })
+
         return trajectory
 
     def get_subject_maturity(self, subject_name: str = "", engagement: str = "nordwave-mcx-2027", name: str | None = None) -> dict[str, Any]:

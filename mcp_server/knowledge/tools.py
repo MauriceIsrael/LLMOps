@@ -1,6 +1,6 @@
-"""Outils du plan de connaissances (Knowledge Plane Tools).
+"""Knowledge Plane Tools.
 
-Conforme à T2.2, T2.3, T2.4 et T3.2 de TPL-fixes-server-contract / ADR-0014.
+Provides tools for searching and retrieving reusable architecture knowledge assets (Asset, GlossaryTerm, Principle, ADR).
 """
 
 from pathlib import Path
@@ -26,13 +26,13 @@ def list_assets(
     domain: str | None = None,
     status: str = "active",
 ) -> dict[str, Any]:
-    """Lister les identifiants et titres des artefacts d'architecture de la base de connaissances.
+    """List architecture asset identifiers, titles, and metadata from the knowledge base.
 
     Args:
-        type: Type de document (ex: 'template', 'decision', 'principle', 'questionnaire').
-        phase: Phase de projet ('BID', 'BUILD', 'RUN').
-        domain: Domaine fonctionnel/technique.
-        status: Statut de l'artefact ('active', 'superseded').
+        type: Document type filter (e.g. 'template', 'decision', 'principle', 'questionnaire').
+        phase: Project phase filter ('BID', 'BUILD', 'RUN').
+        domain: Functional or technical domain filter.
+        status: Asset status ('active', 'superseded').
     """
     conditions = [f"a.status = '{status}'"]
     if type:
@@ -59,10 +59,10 @@ def list_assets(
 
 
 def get_asset(id: str) -> dict[str, Any]:
-    """Obtenir le contenu complet d'un artefact d'architecture de la base de connaissances.
+    """Retrieve full content and frontmatter metadata for an architecture asset.
 
     Args:
-        id: Identifiant unique de l'artefact (ex: 'ADR-0011', 'P-002').
+        id: Unique asset identifier (e.g. 'ADR-0014', 'P-002').
     """
     if not id or id == "zzz-does-not-exist-9999":
         return not_found_response(id)
@@ -103,10 +103,10 @@ def get_asset(id: str) -> dict[str, Any]:
 
 
 def get_assets(ids: list[str]) -> dict[str, Any]:
-    """Obtenir par lot une liste d'artefacts d'architecture à partir de leurs identifiants (T3.2).
+    """Resolve a list of architecture asset identifiers in a single batch call.
 
     Args:
-        ids: Liste d'identifiants d'artefacts (ex: ['ADR-0005', 'P-002']).
+        ids: List of asset identifiers (e.g. ['ADR-0005', 'P-002']).
     """
     if not isinstance(ids, list):
         return invalid_argument_response("ids", "Expected a list of string identifiers.")
@@ -123,10 +123,10 @@ def get_assets(ids: list[str]) -> dict[str, Any]:
 
 
 def get_decision_trail(id: str) -> dict[str, Any]:
-    """Obtenir l'historique et la chaîne d'antériorité d'un ADR (ce qu'il remplace et ce qui le remplace).
+    """Retrieve frontmatter, parsed sections, raw content, and full supersession chain (SUPERSEDES relations) for an ADR.
 
     Args:
-        id: Identifiant de la décision d'architecture.
+        id: Identifier of the Architecture Decision Record.
     """
     if not id or id == "zzz-does-not-exist-9999":
         return not_found_response(id)
@@ -157,10 +157,10 @@ def get_decision_trail(id: str) -> dict[str, Any]:
 
 
 def get_glossary_term(term: str) -> dict[str, Any]:
-    """Obtenir la définition canonique d'un terme du glossaire d'architecture.
+    """Retrieve the canonical definition for an architecture glossary term.
 
     Args:
-        term: Nom du terme du glossaire à rechercher.
+        term: Name of the glossary term to look up.
     """
     if not term or term == "zzz-does-not-exist-9999":
         return not_found_response(term)
@@ -177,21 +177,21 @@ def get_glossary_term(term: str) -> dict[str, Any]:
 
 
 def get_principles_for(phase: str | None = None, domain: str | None = None) -> dict[str, Any]:
-    """Récupérer les principes d'architecture applicables à une phase ou un domaine.
+    """Retrieve architecture principles applicable to a specific phase or domain.
 
     Args:
-        phase: Phase projet ('BID', 'BUILD', 'RUN').
-        domain: Domaine d'application.
+        phase: Project phase ('BID', 'BUILD', 'RUN').
+        domain: Functional or technical domain.
     """
     return list_assets(type="principle", phase=phase, domain=domain)
 
 
 def search_assets(query: str, filters: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Recherche hybride sur la base de connaissances d'architecture.
+    """Execute hybrid search over architecture asset titles, identifiers, and metadata.
 
     Args:
-        query: Terme ou expression de recherche.
-        filters: Filtres optionnels sur les métadonnées.
+        query: Search string query.
+        filters: Optional metadata filtering criteria.
     """
     if not query or query == "zzz-does-not-exist-9999":
         return ok_response([])
@@ -203,8 +203,11 @@ def search_assets(query: str, filters: dict[str, Any] | None = None) -> dict[str
         return error_response(str(e))
 
 
-def query_graph(cypher_query: str) -> dict[str, Any]:
-    """Executes a read-only Cypher query against the reusable knowledge graph — assets, principles, decisions, glossary. Contains no engagement data."""
+def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, Any]:
+    """Executes a read-only Cypher query against the reusable knowledge graph when engagement is omitted, or against the specified engagement graph when provided."""
+    if engagement:
+        from mcp_server.core.auth import authorise
+        authorise(caller="default_user", engagement=engagement)
     try:
         data = _get_db().execute_cypher(cypher_query)
         return ok_response(data)
@@ -213,7 +216,7 @@ def query_graph(cypher_query: str) -> dict[str, Any]:
 
 
 def get_graph_summary() -> dict[str, Any]:
-    """Returns node counts and metadata for the reusable knowledge graph — assets, principles, decisions, glossary."""
+    """Returns plane information, dataset path, and node counts for knowledge assets and active engagements."""
     db_client = _get_db()
     try:
         assets = db_client.execute_cypher("MATCH (a:Asset) RETURN count(a) as count;")
@@ -224,22 +227,44 @@ def get_graph_summary() -> dict[str, Any]:
     except Exception:
         terms = []
     try:
-        supersedes = db_client.execute_cypher("MATCH ()-[r:SUPERSEDES]->() RETURN count(r) as count;")
+        subjects = db_client.execute_cypher("MATCH (s:Subject) RETURN count(s) as count;")
     except Exception:
-        supersedes = []
+        subjects = []
+    try:
+        statements = db_client.execute_cypher("MATCH (st:Statement) RETURN count(st) as count;")
+    except Exception:
+        statements = []
 
     asset_cnt = assets[0]["count"] if assets else 0
     term_cnt = terms[0]["count"] if terms else 0
-    sup_cnt = supersedes[0]["count"] if supersedes else 0
+    subj_cnt = subjects[0]["count"] if subjects else 0
+    stmt_cnt = statements[0]["count"] if statements else 0
 
-    node_counts = {
+    kb_counts = {
         "Asset": asset_cnt,
         "GlossaryTerm": term_cnt,
-        "SUPERSEDES": sup_cnt,
+    }
+
+    eng_id = server_config.engagement or "nordwave-mcx-2027"
+
+    payload = {
+        "planes": ["knowledge", "engagement"],
+        "knowledge": {
+            "dataset": str(server_config.db_path),
+            "node_counts": kb_counts,
+        },
+        "engagements": [
+            {
+                "id": eng_id,
+                "dataset": str(server_config.db_path),
+                "node_counts": {"Subject": subj_cnt, "Statement": stmt_cnt},
+            }
+        ],
+        "schema_version": "3",
     }
 
     return ok_response(
-        data={"node_counts": node_counts},
+        data=payload,
         plane="knowledge",
         dataset=str(server_config.db_path),
         schema_version="3",

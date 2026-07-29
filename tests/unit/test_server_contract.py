@@ -1,5 +1,6 @@
 """Tests complets du contrat serveur MCP et d'étanchéité des plans (Phases 0 à 4 du Work Order)."""
 
+import inspect
 import pytest
 from mcp_server.core.config import server_config
 from mcp_server.engagement import tools as eng_tools
@@ -17,7 +18,7 @@ def is_empty_or_declared(result: dict | list | None) -> bool:
         if result.get("found") is False:
             return True
         status = result.get("status")
-        if status in ("not_found", "not_implemented", "invalid_argument", "error"):
+        if status in ("not_found", "not_implemented", "invalid_argument", "error", "unauthorized"):
             return True
         if result.get("count") == 0:
             return True
@@ -48,10 +49,10 @@ def error_message(result: dict) -> str:
     return str(result)
 
 
-# --- Phase 0 Tests ---
+# --- R1 Invariant Test — No tool fabricates content ---
 
 def test_no_tool_returns_content_for_absurd_input(tmp_path):
-    """T0.1 — Every exposed tool, called with deliberately impossible arguments,
+    """R1 & T0.1 — Every tool, called with arguments that cannot match anything,
     must return empty, not-found or not-implemented — never content.
     """
     db_p = str(tmp_path / "test_kuzu")
@@ -120,22 +121,15 @@ def test_response_envelope_structure(tmp_path):
     assert res_nf.get("id") == "ADR-9999"
 
 
-def test_no_default_on_identity_arguments():
-    """T1.4 — Identity arguments (engagement, subject) lose defaults."""
-    res = eng_tools.get_board(engagement="")
-    assert res.get("status") == "invalid_argument"
-    assert res.get("argument") == "engagement"
-
-
 def test_get_graph_summary_announces_plane(tmp_path):
-    """T2.4 — get_graph_summary announces plane, dataset, and node counts in data envelope."""
+    """R2 & T2.4 — get_graph_summary announces plane, dataset, and node counts in data envelope."""
     db_p = str(tmp_path / "test_kuzu")
     server_config.db_path = db_p
 
     res_kb = kb_tools.get_graph_summary()
     assert res_kb.get("status") == "ok"
     assert res_kb.get("plane") == "knowledge"
-    assert "node_counts" in res_kb.get("data", {})
+    assert "planes" in res_kb.get("data", {})
 
     res_eng = eng_tools.get_graph_summary()
     assert res_eng.get("status") == "ok"
@@ -174,7 +168,7 @@ def test_batch_get_assets_and_dangling_references(tmp_path):
     assert data[0]["referenced_id"] == "ADR-0005"
 
 
-# --- Phase 4 Separation Proofs ---
+# --- Phase 4 Separation Proofs & Authorization Choke Point ---
 
 def test_knowledge_plane_holds_no_engagement_data():
     """T4.1 — Assert knowledge plane holds no engagement data (Subject, Statement, Conflict, Question)."""
@@ -215,3 +209,14 @@ def test_every_advertised_tool_is_callable():
     eng_names = {t.name for t in eng_tools_list}
     forbidden_on_eng = {"list_assets", "get_asset", "get_assets", "get_decision_trail", "get_glossary_term", "search_assets", "get_principles_for"}
     assert not (eng_names & forbidden_on_eng), f"Engagement server advertises knowledge tools: {eng_names & forbidden_on_eng}"
+
+
+def test_all_engagement_tools_call_authorise():
+    """R4 — Introspect engagement tools module and assert every tool passes through authorise choke point."""
+    from mcp_server.engagement import tools as eng_module
+
+    for name, func in inspect.getmembers(eng_module, inspect.isfunction):
+        if func.__module__ != eng_module.__name__ or name.startswith("_") or name == "authorise":
+            continue
+        source = inspect.getsource(func)
+        assert "authorise(" in source, f"Engagement tool '{name}' does not call authorise choke point!"

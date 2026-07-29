@@ -65,3 +65,12 @@ def error_response(reason: str) -> dict[str, Any]:
         "status": "error",
         "reason": reason,
     }
+
+
+def unauthorized_response(engagement: str, reason: str = "Unauthorized to access engagement") -> dict[str, Any]:
+    """Accès non autorisé à un engagement (403-equivalent)."""
+    return {
+        "status": "unauthorized",
+        "engagement": engagement,
+        "reason": f"{reason}: '{engagement}'",
+    }
