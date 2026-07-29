@@ -1,6 +1,6 @@
-# 🔌 Spécification d'Interface Externe du Serveur MCP (ADR-0014 / ADR-0015)
+# 🔌 Spécification d'Interface Externe & Schémas des Réponses MCP (ADR-0014 / ADR-0015)
 
-Ce document constitue la spécification technique officielle du contrat d'interface exposé par les serveurs **FastMCP** de la plateforme **LLMOps**. Il permet à tout développeur ou système tiers (moteur de rendu, UI web, agent IA, client SDK) d'intégrer et de consommer les services d'architecture.
+Ce document constitue la spécification technique officielle du contrat d'interface exposé par les serveurs **FastMCP** de la plateforme **LLMOps**. Il fournit la structure complète et les **schémas JSON de réponse** pour chaque outil.
 
 ---
 
@@ -40,51 +40,306 @@ Tous les outils FastMCP retournent une **enveloppe JSON uniformisée** :
 
 ```json
 {
-  "status": "ok" | "not_found" | "invalid_argument" | "error" | "unauthorized",
-  "count": 1,
-  "data": { ... }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ResponseEnvelope",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["ok", "not_found", "invalid_argument", "error", "unauthorized"]
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "data": {
+      "description": "Payload de réponse dont le schéma dépend de l'outil appelé"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Présent uniquement en cas d'erreur ou d'argument invalide"
+    }
+  },
+  "required": ["status", "count", "data"]
 }
 ```
 
 ### Comportement des Cas Limites :
-- **Cas Nominal (`status: "ok"`)** : Contient `count` et le payload dans `data`.
-- **Cas Non Trouvé (`status: "not_found"`)** : Identifiant inexistant ou non résolu. Distinct d'une erreur.
-- **Cas Erreur ou Argument Invalide (`status: "error"` / `"invalid_argument"`)** : Contient un champ `reason` explicatif en anglais.
-- **Cas Résultat Vide (`count: 0, data: []`)** : Un filtre valide sans résultat renvoie une liste vide, pas une erreur.
+- **Cas Nominal (`status: "ok"`)** : Contient `count` (ex: `1` ou nombre d'éléments) et le payload dans `data`.
+- **Cas Non Trouvé (`status: "not_found"`)** : Identifiant inexistant ou non résolu. Contient `data: null` ou l'ID réclamé. Distinct d'une erreur.
+- **Cas Erreur / Argument Invalide (`status: "error"` / `"invalid_argument"`)** : Contient un champ `reason` explicatif en anglais.
+- **Cas Résultat Vide (`count: 0, data: []`)** : Un filtre valide sans résultat renvoie une liste vide `[]`, pas une erreur.
 
 ---
 
-## 📚 4. Référence des Outils — Knowledge Server
+## 📚 4. Schémas de Réponse — Knowledge Server
 
-| Outil | Description | Paramètres Requis / Optionnels | Retour Nominal |
-|---|---|---|---|
-| `list_assets` | Lister les documents d'architecture selon leur statut, domaine ou phase | `type`, `phase`, `domain`, `status` (def: 'active') | Liste d'objets `Asset` |
-| `get_asset` | Obtenir le contenu complet et le frontmatter d'un actif | `id` (ex: 'ADR-0014') | Objet `Asset` complet ou `not_found` |
-| `get_assets` | Résolution par lot (*batch*) de plusieurs actifs | `ids: list[str]` | Liste des résultats résolus |
-| `search_assets` | Recherche hybride sur les titres, identifiants et métadonnées | `query`, `filters` | Liste des correspondances |
-| `get_principles_for` | Obtenir les principes d'architecture pour une phase/domaine | `phase`, `domain` | Liste de principes |
-| `get_decision_trail` | Historique et chaîne de supersession d'un ADR | `id` | Payload avec relations `SUPERSEDES` |
-| `get_glossary_term` | Récupérer la définition canonique d'un terme | `term` | Définition du terme |
-| `query_graph` | Exécuter une requête Cypher en lecture seule sur la KB | `cypher_query` | Résultat de la requête Cypher |
-| `get_graph_summary` | Résumé des nœuds et relations de la base de connaissances | *(aucun)* | Dictionnaire de comptage des nœuds |
+### 4.1 `list_assets` & `search_assets`
+**Payload Schema (`data`) :**
+```json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string", "example": "ADR-0014" },
+      "title": { "type": "string", "example": "Server Splitting & Security Contract" },
+      "type": { "type": "string", "example": "decision" },
+      "status": { "type": "string", "example": "active" },
+      "confidence": { "type": "string", "example": "verified" },
+      "phase": { "type": "string", "example": "BUILD" },
+      "domain": { "type": "string", "example": "ai-assistance" },
+      "last_reviewed": { "type": "string", "example": "2026-07-27" }
+    },
+    "required": ["id", "title", "type"]
+  }
+}
+```
+
+### 4.2 `get_asset`
+**Payload Schema (`data`) :**
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "type": { "type": "string" },
+    "status": { "type": "string" },
+    "confidence": { "type": "string" },
+    "sections": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "raw_body": { "type": "string" }
+  },
+  "required": ["id", "title", "type"]
+}
+```
+
+### 4.3 `get_decision_trail`
+**Payload Schema (`data`) :**
+```json
+{
+  "type": "object",
+  "properties": {
+    "asset": { "$ref": "#/definitions/Asset" },
+    "supersedes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supersedes_id": { "type": "string" },
+          "supersedes_title": { "type": "string" }
+        }
+      }
+    },
+    "superseded_by": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "superseded_by_id": { "type": "string" },
+          "superseded_by_title": { "type": "string" }
+        }
+      }
+    }
+  },
+  "required": ["asset", "supersedes", "superseded_by"]
+}
+```
 
 ---
 
-## 🎯 5. Référence des Outils — Engagement Server
+## 🎯 5. Schémas de Réponse — Engagement Server (Moteur de Rendu)
 
-| Outil | Description | Paramètres Requis / Optionnels | Retour Nominal |
-|---|---|---|---|
-| `get_subject` | Détails et niveau de maturité d'un sujet d'architecture | `subject`, `engagement` (def: 'nordwave-mcx-2027') | Objet `Subject` ou `not_found` |
-| `get_subject_trajectory` | Trajectoire d'avancement historique (timeline) d'un sujet | `subject`, `engagement` | Liste des jalons franchis |
-| `get_board` | Tableau de maturité complet (Maturity Board) | `engagement` | Liste de tous les sujets & niveaux |
-| `get_statements` | Énoncés d'architecture actifs filtrables | `engagement`, `subject`, `section`, `status` | Liste des énoncés `Statement` |
-| `get_conflicts` | Conflits d'architecture ouverts ou arbitrés | `engagement`, `status` (def: 'open') | Liste des conflits |
-| `get_open_questions` | Questions d'élicitation ouvertes | `engagement`, `role` | Liste des questions ouvertes |
-| `get_diagram_graph` | Graphe de structure & code **Mermaid** prêt à l'affichage | `engagement`, `format` ('json' ou 'mermaid') | Nœuds, arêtes & chaîne Mermaid |
-| `get_render_payload` | Payload d'affichage complet structuré pour UI / PDF | `engagement` | Synthèse complète de l'engagement |
-| `get_dangling_references` | Rapport d'identifiants d'actifs cités mais non résolus | `engagement` | Liste des références en suspens |
-| `query_graph` | Exécuter une requête Cypher sur le graphe projet | `cypher_query`, `engagement` | Résultat Cypher |
-| `get_graph_summary` | Découverte et résumé des nœuds des engagements | *(aucun)* | Nœuds et bases actives découvertes |
+### 5.1 `get_render_payload` (Payload Complet Renderer)
+**Payload Schema (`data`) :**
+```json
+{
+  "type": "object",
+  "properties": {
+    "engagement": { "type": "string", "example": "nordwave-mcx-2027" },
+    "status": { "type": "string", "enum": ["provisional", "final"] },
+    "is_provisional": { "type": "boolean" },
+    "maturity_board": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "example": "mcx-services" },
+          "level": { "type": "string", "enum": ["L0_named", "L1_framed", "L2_decomposed", "L3_designed", "L4_specified"] },
+          "origin": { "type": "string" },
+          "open_question_ref": { "type": ["string", "null"] },
+          "days_at_level": { "type": "integer" },
+          "is_stalled": { "type": "boolean" },
+          "updated_at": { "type": "string" }
+        },
+        "required": ["subject", "level"]
+      }
+    },
+    "active_statements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "S-0001" },
+          "section": { "type": "string", "example": "4.1" },
+          "subject": { "type": "string", "example": "mcx-services" },
+          "predicate": { "type": "string", "example": "runs_on" },
+          "value": { "type": "string", "example": "Kubernetes site dual-homed" },
+          "author": { "type": "string" },
+          "role": { "type": "string" },
+          "confidence": { "type": "string", "enum": ["declared", "designed", "validated", "tested"] },
+          "status": { "type": "string", "enum": ["active", "under_review", "contested", "superseded"] },
+          "based_on": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "resolved": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        "required": ["id", "subject", "predicate", "value"]
+      }
+    },
+    "open_conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "C-0001" },
+          "kind": { "type": "string", "enum": ["contradiction", "incompatibility", "scope_overlap"] },
+          "detail": { "type": "string" },
+          "status": { "type": "string", "enum": ["open", "arbitrated"] },
+          "statement_ids": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["id", "kind", "detail", "status"]
+      }
+    },
+    "uncertainties": { "type": "array", "items": { "type": "object" } },
+    "unripe_subjects": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["engagement", "status", "is_provisional", "maturity_board", "active_statements", "open_conflicts"]
+}
+```
+
+### 5.2 `get_diagram_graph` (Graphe & Mermaid)
+**Payload Schema (`data`) :**
+```json
+{
+  "type": "object",
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "type": { "type": "string" },
+          "level": { "type": "string" }
+        },
+        "required": ["id", "label", "type"]
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "predicate": { "type": "string" }
+        },
+        "required": ["source", "target", "predicate"]
+      }
+    },
+    "mermaid": { "type": "string", "example": "flowchart TD\n    mcx-services[\"mcx-services (L2_decomposed)\"]" }
+  },
+  "required": ["nodes", "edges", "mermaid"]
+}
+```
+
+### 5.3 `get_subject_trajectory` (Trajectoire Chronologique)
+**Payload Schema (`data`) :**
+```json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "level": { "type": "string", "enum": ["L0_named", "L1_framed", "L2_decomposed", "L3_designed", "L4_specified"] },
+      "question": { "type": "string" },
+      "answer_excerpt": { "type": "string" }
+    },
+    "required": ["level", "question", "answer_excerpt"]
+  }
+}
+```
+
+### 5.4 `get_dangling_references` (Références Obsolètes / Manquantes)
+**Payload Schema (`data`) :**
+```json
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "statement_id": { "type": "string", "example": "S-0012" },
+      "referenced_id": { "type": "string", "example": "ADR-9999" },
+      "note": { "type": "string" }
+    },
+    "required": ["statement_id", "referenced_id"]
+  }
+}
+```
+
+### 5.5 `get_graph_summary` (Découverte Multi-Bases ADR-0015)
+**Payload Schema (`data`) :**
+```json
+{
+  "type": "object",
+  "properties": {
+    "knowledge": {
+      "type": "object",
+      "properties": {
+        "dataset": { "type": "string", "example": "data/knowledge.kuzu" },
+        "node_counts": {
+          "type": "object",
+          "properties": {
+            "Asset": { "type": "integer" },
+            "GlossaryTerm": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "engagements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "nordwave-mcx-2027" },
+          "dataset": { "type": "string", "example": "data/engagements/nordwave-mcx-2027.kuzu" },
+          "node_counts": {
+            "type": "object",
+            "properties": {
+              "Subject": { "type": "integer" },
+              "Statement": { "type": "integer" },
+              "Conflict": { "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["knowledge", "engagements"]
+}
+```
 
 ---
 
