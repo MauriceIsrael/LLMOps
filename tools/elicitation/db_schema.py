@@ -65,6 +65,7 @@ class ElicitationSchemaInitializer:
                     verbatim STRING,
                     created_at STRING,
                     status STRING,
+                    based_on STRING,
                     PRIMARY KEY(id)
                 );
                 """
@@ -72,6 +73,10 @@ class ElicitationSchemaInitializer:
         else:
             try:
                 self.conn.execute("ALTER TABLE Statement ADD subject STRING DEFAULT '';")
+            except Exception:
+                pass
+            try:
+                self.conn.execute("ALTER TABLE Statement ADD based_on STRING DEFAULT '[]';")
             except Exception:
                 pass
 
@@ -131,35 +136,12 @@ class ElicitationSchemaInitializer:
                 """
             )
 
-        # 6. Table Asset (si elle n'existe pas)
-        if "Asset" not in table_names:
-            self.conn.execute(
-                """
-                CREATE NODE TABLE Asset (
-                    id STRING,
-                    title STRING,
-                    type STRING,
-                    status STRING,
-                    confidence STRING,
-                    phase STRING,
-                    domain STRING,
-                    last_reviewed STRING,
-                    owner STRING,
-                    source_path STRING,
-                    PRIMARY KEY (id)
-                );
-                """
-            )
-
         # 6. Tables de Relations
         if "ABOUT" not in table_names:
             self.conn.execute("CREATE REL TABLE ABOUT (FROM Statement TO Subject);")
 
         if "ANSWERS" not in table_names:
             self.conn.execute("CREATE REL TABLE ANSWERS (FROM Statement TO Question);")
-
-        if "BASED_ON" not in table_names:
-            self.conn.execute("CREATE REL TABLE BASED_ON (FROM Statement TO Asset);")
 
         if "TARGETS" not in table_names:
             self.conn.execute("CREATE REL TABLE TARGETS (FROM Question TO Subject);")

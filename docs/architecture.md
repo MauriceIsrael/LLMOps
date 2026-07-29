@@ -246,17 +246,23 @@ L'arbitrage d'un conflit par un architecte référent (Sofia) ne se limite pas �
 
 ---
 
-## 7. Architecture du Serveur FastMCP (`mcp_server/`)
+## 7. Architecture des Serveurs FastMCP & Durcissement du Contrat (ADR-0014)
 
-Le serveur repose sur la bibliothèque **FastMCP** en Python.
+Conformément à l'ADR-0014, le serveur MCP est découpé en deux entités indépendantes pour garantir la séparation stricte des données de la base de connaissances et des données d'engagement projet :
 
-### Caractéristiques clés :
-- **Connexion Kùzu DB thread-safe :** Gestionnaire de session `kuzu_client.py` avec gestion automatique des verrous.
-- **Strict-Typed Asset Tools :**
-  - `get_asset(id)` : Renvoie l'intégralité d'un document avec son état de révision et sa confiance.
-  - `get_decision_trail(id)` : Parcourt les relations `SUPERSEDES` dans les deux sens pour reconstituer l'historique d'une décision d'architecture.
-  - `get_glossary_term(term)` : Fournit la définition canonique pour éviter toute ambiguïté sémantique.
-- **Isolation de l'Engagement :** Les requêtes sur les projets nécessitent un filtre `engagement` pour prévenir toute fuite de données entre différents engagements clients.
+### 7.1 Knowledge Server (`mcp_server/main_knowledge.py`)
+Héberge les actifs réutilisables d'architecture (`Asset`, `GlossaryTerm`, `ADR`, `Principle`). Il n'a aucune connaissance des projets clients, sujets d'élicitation ou énoncés actifs.
+- **Outils exposés** : `list_assets`, `get_asset`, `get_assets` (batch), `get_decision_trail`, `get_glossary_term`, `search_assets`, `get_principles_for`, `query_graph`, `get_graph_summary`.
+
+### 7.2 Engagement Server (`mcp_server/main_engagement.py`)
+Héberge l'état d'avancement des projets clients (`Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`).
+- **Références Cross-Plane** : Les énoncés font référence aux actifs de la base de connaissances via leurs identifiants sous forme de propriété string (`based_on: [{"id": "ADR-0005"}]`), sans jamais copier de nœuds `Asset` ou créer de relations de graphe inter-bases.
+- **Outils exposés** : `get_subject`, `get_subject_trajectory`, `get_board`, `get_statements`, `get_conflicts`, `get_open_questions`, `get_diagram_graph`, `get_dangling_references`, `query_graph`, `get_graph_summary`.
+
+### 7.3 Isolation du Driver & Enveloppes Normalisées
+- **Sûreté au niveau du Driver (`ReadOnlyKuzuClient`)** : Toute tentative d'écriture Cypher (`CREATE`, `SET`, `DELETE`, `MERGE`, etc.) est rejetée au niveau du driver Python.
+- **Format d'Enveloppe Standardisé** : Tous les outils renvoient une structure uniforme :
+  `{"status": "ok" | "not_found" | "invalid_argument" | "error", "count": int, "data": ...}`.
 
 ---
 

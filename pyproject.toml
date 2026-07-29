@@ -41,6 +41,8 @@ mypy = "^1.9.0"
 ingest = "pipelines.cli:ingest_main"
 visualize = "pipelines.cli:visualize_main"
 mcp-server = "mcp_server.main:main"
+mcp-server-knowledge = "mcp_server.main_knowledge:main"
+mcp-server-engagement = "mcp_server.main_engagement:main"
 elicit = "tools.elicitation.cli:main"
 
 

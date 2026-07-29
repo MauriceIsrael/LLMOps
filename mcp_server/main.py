@@ -19,37 +19,58 @@ from starlette.responses import HTMLResponse, JSONResponse
 from starlette.routing import Route
 from starlette.types import Receive, Scope, Send
 
-from mcp_server.config import settings
-from mcp_server.tools.asset_tools import (
+from mcp_server.core.config import server_config
+from mcp_server.engagement.tools import (
+    get_board,
+    get_conflicts,
+    get_dangling_references,
+    get_diagram_graph,
+    get_open_questions,
+    get_statements,
+    get_subject,
+    get_subject_trajectory,
+)
+from mcp_server.engagement.tools import (
+    get_graph_summary as get_engagement_graph_summary,
+)
+from mcp_server.engagement.tools import (
+    query_graph as query_engagement_graph,
+)
+from mcp_server.knowledge.tools import (
     get_asset,
+    get_assets,
     get_decision_trail,
     get_glossary_term,
+    get_graph_summary,
+    get_principles_for,
     list_assets,
-)
-from mcp_server.tools.graph_tools import get_graph_summary, query_graph
-from mcp_server.tools.renderer_tools import (
-    get_diagram_graph,
-    get_render_payload,
-    get_subject_trajectory_tool,
+    query_graph,
+    search_assets,
 )
 
-# Initialisation de l'instance FastMCP
-mcp = FastMCP(settings.APP_NAME)
+# Initialisation de l'instance FastMCP principale (par défaut plane knowledge/omnibus)
+mcp = FastMCP(server_config.app_name)
 
-# Enregistrement des outils typés d'architecture
+# Enregistrement des outils typés du plan de connaissances
 mcp.tool()(list_assets)
 mcp.tool()(get_asset)
+mcp.tool()(get_assets)
 mcp.tool()(get_decision_trail)
 mcp.tool()(get_glossary_term)
-
-# Enregistrement des outils de graphe Cypher & résumé Kùzu DB
+mcp.tool()(search_assets)
+mcp.tool()(get_principles_for)
 mcp.tool()(query_graph)
 mcp.tool()(get_graph_summary)
 
-# Enregistrement des outils dédiés au Renderer
-mcp.tool()(get_render_payload)
+# Enregistrement des outils du plan d'engagement
+mcp.tool()(get_subject)
+mcp.tool()(get_subject_trajectory)
+mcp.tool()(get_board)
+mcp.tool()(get_statements)
+mcp.tool()(get_conflicts)
+mcp.tool()(get_open_questions)
 mcp.tool()(get_diagram_graph)
-mcp.tool()(get_subject_trajectory_tool)
+mcp.tool()(get_dangling_references)
 
 
 class TokenPreservingSseServerTransport(SseServerTransport):

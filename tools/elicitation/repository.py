@@ -46,18 +46,18 @@ class ElicitationRepository:
         def_esc = _esc(definition)
         origin_esc = _esc(origin)
         eng_esc = _esc(engagement)
-        sub_id = f"{eng_esc}:{name_esc}"
-        check_query = f"MATCH (s:Subject {{id: '{sub_id}'}}) RETURN s.id as id;"
+        check_query = f"MATCH (s:Subject) WHERE s.name = '{name_esc}' AND (s.engagement = '{eng_esc}' OR s.engagement = 'default') RETURN s.name as name, s.level as level;"
         rows = self.db_client.execute_cypher(check_query)
         exists = bool(rows and "error" not in rows[0])
 
         if exists:
             if definition:
                 self.db_client.execute_cypher(
-                    f"MATCH (s:Subject {{id: '{sub_id}'}}) SET s.definition = '{def_esc}';"
+                    f"MATCH (s:Subject) WHERE s.name = '{name_esc}' AND (s.engagement = '{eng_esc}' OR s.engagement = 'default') SET s.definition = '{def_esc}';"
                 )
         else:
             now_str = datetime.now().isoformat()
+            sub_id = f"{eng_esc}:{name_esc}"
             self.db_client.execute_cypher(
                 f"MERGE (s:Subject {{id: '{sub_id}'}}) SET s.name = '{name_esc}', s.engagement = '{eng_esc}', s.definition = '{def_esc}', s.level = 'L0_named', s.origin = '{origin_esc}', s.updated_at = '{now_str}';"
             )
@@ -174,6 +174,16 @@ class ElicitationRepository:
         sub_id = f"{engagement}:{sub_name}"
         self.save_subject(sub_name, engagement=engagement)
 
+        import json
+        based_on_raw = statement.get("based_on") or []
+        if not based_on_raw and statement.get("based_on_asset"):
+            based_on_raw = [{"id": statement["based_on_asset"], "resolved": None}]
+
+        if not isinstance(based_on_raw, str):
+            based_on_str = _esc(json.dumps(based_on_raw))
+        else:
+            based_on_str = _esc(based_on_raw)
+
         query = f"""
         MERGE (st:Statement {{id: '{s_id}'}})
         SET st.engagement = '{engagement}',
@@ -186,6 +196,7 @@ class ElicitationRepository:
             st.confidence = '{confidence}',
             st.verbatim = '{verbatim}',
             st.status = '{status}',
+            st.based_on = '{based_on_str}',
             st.created_at = '{created_at}';
         """
         self.db_client.execute_cypher(query)
@@ -194,14 +205,6 @@ class ElicitationRepository:
         self.db_client.execute_cypher(
             f"MERGE (st:Statement {{id: '{s_id}'}}) MERGE (sub:Subject {{id: '{sub_id}'}}) MERGE (st)-[:ABOUT]->(sub);"
         )
-
-        # Lier à un asset si fourni
-        based_on_asset = statement.get("based_on_asset")
-        if based_on_asset:
-            asset_esc = _esc(based_on_asset)
-            self.db_client.execute_cypher(
-                f"MERGE (st:Statement {{id: '{s_id}'}}) MERGE (a:Asset {{id: '{asset_esc}'}}) MERGE (st)-[:BASED_ON]->(a);"
-            )
 
         return s_id
 
@@ -399,12 +402,21 @@ class ElicitationRepository:
 
     def get_active_statements(self, engagement: str) -> list[dict[str, Any]]:
         """Récupère tous les énoncés d'un engagement."""
-        query = f"MATCH (s:Statement {{engagement: '{engagement}'}}) OPTIONAL MATCH (s)-[:ABOUT]->(sub:Subject) RETURN s.id as id, s.section as section, sub.name as subject, s.subject as subject_direct, s.predicate as predicate, s.value as value, s.unit as unit, s.author as author, s.role as role, s.confidence as confidence, s.verbatim as verbatim, s.status as status;"
+        import json
+        query = f"MATCH (s:Statement {{engagement: '{engagement}'}}) OPTIONAL MATCH (s)-[:ABOUT]->(sub:Subject) RETURN s.id as id, s.section as section, sub.name as subject, s.subject as subject_direct, s.predicate as predicate, s.value as value, s.unit as unit, s.author as author, s.role as role, s.confidence as confidence, s.verbatim as verbatim, s.status as status, s.based_on as based_on;"
         rows = self.db_client.execute_cypher(query)
         if rows and "error" not in rows[0]:
             for r in rows:
                 if not r.get("subject"):
                     r["subject"] = r.get("subject_direct") or "mcx-services"
+                bo = r.get("based_on")
+                if bo and isinstance(bo, str):
+                    try:
+                        r["based_on"] = json.loads(bo)
+                    except Exception:
+                        r["based_on"] = []
+                elif not bo:
+                    r["based_on"] = []
             return rows
         return []
 

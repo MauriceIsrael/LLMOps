@@ -41,12 +41,17 @@ def test_renderer_tools_direct_call(tmp_path):
     repo.save_subject("demo", "mcx-services", "L1_framed")
     repo.close()
 
-    payload = get_render_payload("demo", db_path=db_p)
+    res = get_render_payload("demo", db_path=db_p)
+    assert res["status"] == "ok"
+    payload = res["data"]
     assert payload["engagement"] == "demo"
     assert "status" in payload
 
-    diagram = get_diagram_graph("demo", db_path=db_p)
+    res_diag = get_diagram_graph("demo", db_path=db_p)
+    assert res_diag["status"] == "ok"
+    diagram = res_diag["data"]
     assert "mermaid" in diagram
 
-    trajectory = get_subject_trajectory_tool("demo", "mcx-services", db_path=db_p)
-    assert isinstance(trajectory, list)
+    res_traj = get_subject_trajectory_tool("demo", "mcx-services", db_path=db_p)
+    assert res_traj["status"] == "ok"
+    assert isinstance(res_traj["data"], list)

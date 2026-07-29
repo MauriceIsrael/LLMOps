@@ -5,6 +5,7 @@ pour les interfaces web, générateurs PDF, visualiseurs de diagrammes et dashbo
 """
 
 from typing import Any
+from mcp_server.core.envelope import ok_response
 from mcp_server.db.kuzu_client import KuzuClient
 from tools.elicitation.repository import ElicitationRepository
 
@@ -32,7 +33,7 @@ def get_render_payload(engagement: str = "nordwave-mcx-2027", db_path: str | Non
 
     repo.close()
 
-    return {
+    payload = {
         "engagement": engagement,
         "status": "provisional" if is_provisional else "final",
         "is_provisional": is_provisional,
@@ -42,6 +43,7 @@ def get_render_payload(engagement: str = "nordwave-mcx-2027", db_path: str | Non
         "uncertainties": uncertainties,
         "unripe_subjects": [u["subject"] for u in unripe],
     }
+    return ok_response(payload)
 
 
 def get_diagram_graph(engagement: str = "nordwave-mcx-2027", format: str = "json", db_path: str | None = None) -> dict[str, Any]:
@@ -123,16 +125,17 @@ def get_diagram_graph(engagement: str = "nordwave-mcx-2027", format: str = "json
 
     mermaid_code = "\n".join(mermaid_lines)
 
-    return {
+    payload = {
         "engagement": engagement,
         "format": format,
         "nodes": nodes,
         "edges": edges,
         "mermaid": mermaid_code,
     }
+    return ok_response(payload)
 
 
-def get_subject_trajectory_tool(engagement: str = "nordwave-mcx-2027", subject: str = "mcx-services", db_path: str | None = None) -> list[dict[str, Any]]:
+def get_subject_trajectory_tool(engagement: str = "nordwave-mcx-2027", subject: str = "mcx-services", db_path: str | None = None) -> dict[str, Any]:
     """Obtenir la trajectoire d'avancement par niveau de maturité pour un sujet (timeline).
 
     Args:
@@ -144,4 +147,4 @@ def get_subject_trajectory_tool(engagement: str = "nordwave-mcx-2027", subject: 
     repo = ElicitationRepository(db_path=db_p)
     trajectory = repo.get_subject_trajectory(engagement=engagement, subject=subject)
     repo.close()
-    return trajectory
+    return ok_response(trajectory)

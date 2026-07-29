@@ -80,61 +80,51 @@ Traiter l'ensemble du dossier `data/kb/` et construire le graphe dans Kùzu DB :
 poetry run ingest --kb-dir data/kb --db-path data/kuzu_db
 ```
 
-### 4. Démarrer le Serveur FastMCP
-Lancer le serveur FastMCP sur STDOUT ou en mode Dev Inspector :
+### 4. Démarrer les Serveurs FastMCP (Découpage ADR-0014)
+Lancer le serveur de la base de connaissances (Knowledge Server) ou du projet client (Engagement Server) :
 ```bash
-# Lancement direct du serveur MCP
+# Serveur 1 : Base de Connaissances Réutilisable (Assets, ADRs, Principes)
+poetry run mcp-server-knowledge
+
+# Serveur 2 : État d'Engagement Projet (Sujets, Énoncés, Conflits, Manques)
+poetry run mcp-server-engagement
+
+# Ou serveur monolithique rétrocompatible
 poetry run mcp-server
-
-# Mode dev interactif avec FastMCP Inspector
-poetry run fastmcp dev mcp_server/main.py
-```
-
-### 5. Exécuter le Scénario d'Élicitation Référent (Démonstration Nordwave MCX v2)
-Le test d'intégration [tests/integration/test_scenario_nordwave_mcx_v2.py](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx_v2.py) constitue le **scénario exemple de référence v2** illustrant l'ensemble des capacités avancées de la plateforme LLMOps :
-- Collaboration multi-acteurs entre architectes (*Amina*, *Rui*, *Sofia*).
-- Progression par paliers de maturité (*Level Gate* `L0` → `L4`).
-- Ingestion documentaire et réconciliation avec le blueprint.
-- Reprise d'élicitation inter-processus via SQLite Checkpointer (`thread_id`).
-- Trajectoire d'avancement observée par sujet (`get_subject_trajectory`).
-- Rétrogradation non-monotone (`demote_subject`) conservant les réponses antérieures sous revue.
-- Soumission et validation à double confirmation des contributions externes (`build_contribution_graph`).
-- Détection de manques génératifs, décomposition et arbitrage traçable non-manichéen.
-- Récolte de candidats de patterns d'architecture (`build_harvest_graph`).
-- Génération du rapport de progression et de l'assemblage provisionnel (`document.md`).
-
-```bash
-poetry run pytest tests/integration/test_scenario_nordwave_mcx_v2.py -v
-```
-
-### 6. Exécuter les Tests & Évaluations Sémantiques
-```bash
-# Linting & validation syntaxique
-poetry run ruff check .
-
-# Suite complète de tests unitaires et d'intégration
-poetry run pytest tests/unit tests/integration -v
-
-# Tests de non-régression sémantique (DeepEval)
-poetry run deepeval test run tests/evals/deepeval/test_semantic_regression.py
 ```
 
 ---
 
-## 🛠 Outils Exposés par FastMCP
+## 🛠 Outils Exposés par les Serveurs FastMCP (ADR-0014 & Enveloppes Normalisées)
 
-| Outil FastMCP | Description | Paramètres |
+Tous les outils retournent une **enveloppe de réponse normalisée** : `{"status": "ok" | "not_found" | "invalid_argument" | "error", "count": int, "data": ...}`.
+
+### 📚 Serveur 1 — Knowledge Server (`mcp_server/main_knowledge.py`)
+| Outil MCP | Description | Paramètres |
 |---|---|---|
 | `list_assets` | Lister les documents selon leur statut, domaine ou phase | `type`, `phase`, `domain`, `status` |
 | `get_asset` | Obtenir le contenu complet d'un artefact avec son frontmatter | `id` |
+| `get_assets` | Résolution par lot (*batch*) d'artefacts d'architecture | `ids` |
 | `search_assets` | Recherche hybride sur les métadonnées et le graphe | `query`, `filters` |
 | `get_principles_for` | Récupérer les principes d'architecture actifs | `phase`, `domain` |
 | `get_decision_trail` | Historique et chaîne d'antériorité d'un ADR (`SUPERSEDES`) | `id` |
 | `get_glossary_term` | Obtenir la définition canonique d'un terme du glossaire | `term` |
-| `query_graph` | Exécuter une requête Cypher directe sur Kùzu DB | `cypher_query` |
-| `get_render_payload` | Payload JSON complet d'affichage pour les renderers | `engagement` |
+| `query_graph` | Exécuter une requête Cypher en lecture seule sur la KB | `cypher_query` |
+| `get_graph_summary` | Résumé des nœuds et relations de la base de connaissances | *(aucun)* |
+
+### 🎯 Serveur 2 — Engagement Server (`mcp_server/main_engagement.py`)
+| Outil MCP | Description | Paramètres |
+|---|---|---|
+| `get_subject` | Consulter l'état de maturité d'un sujet d'architecture | `engagement`, `subject` |
+| `get_subject_trajectory` | Trajectoire d'avancement par sujet pour timeline | `engagement`, `subject` |
+| `get_board` | Tableau de maturité des sujets pour un engagement | `engagement` |
+| `get_statements` | Énoncés d'architecture actifs pour un engagement | `engagement` |
+| `get_conflicts` | Conflits d'architecture ouverts pour un engagement | `engagement` |
+| `get_open_questions` | Questions d'élicitation ouvertes | `engagement` |
 | `get_diagram_graph` | Graphe structuré & code Mermaid prêt à être rendu | `engagement`, `format` |
-| `get_subject_trajectory_tool` | Trajectoire d'avancement par sujet pour timeline | `engagement`, `subject` |
+| `get_dangling_references` | Rapport d'identifiants d'actifs non résolus ou obsolètes | `engagement` |
+| `query_graph` | Exécuter une requête Cypher en lecture seule sur l'engagement | `cypher_query` |
+| `get_graph_summary` | Résumé des nœuds et relations du plan d'engagement | *(aucun)* |
 
 ---
 

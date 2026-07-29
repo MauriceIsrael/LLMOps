@@ -85,7 +85,8 @@ class RendererClient:
 
     def fetch_render_payload(self) -> RenderPayload:
         """Récupère l'intégralité du payload structuré pour le rendu de document."""
-        raw = get_render_payload(engagement=self.engagement, db_path=self.db_path)
+        raw_res = get_render_payload(engagement=self.engagement, db_path=self.db_path)
+        raw = raw_res.get("data", raw_res)
         return RenderPayload(
             engagement=raw["engagement"],
             status=raw["status"],
@@ -99,7 +100,8 @@ class RendererClient:
 
     def fetch_diagram_graph(self, format: str = "mermaid") -> DiagramGraph:
         """Récupère la structure de graphe ou le code Mermaid pour l'affichage de diagrammes."""
-        raw = get_diagram_graph(engagement=self.engagement, format=format, db_path=self.db_path)
+        raw_res = get_diagram_graph(engagement=self.engagement, format=format, db_path=self.db_path)
+        raw = raw_res.get("data", raw_res)
         return DiagramGraph(
             engagement=raw["engagement"],
             format=raw["format"],
@@ -110,7 +112,8 @@ class RendererClient:
 
     def fetch_subject_trajectory(self, subject: str) -> list[TrajectoryStep]:
         """Récupère la trajectoire d'avancement par niveau de maturité d'un sujet."""
-        raw = get_subject_trajectory_tool(engagement=self.engagement, subject=subject, db_path=self.db_path)
+        raw_res = get_subject_trajectory_tool(engagement=self.engagement, subject=subject, db_path=self.db_path)
+        raw = raw_res.get("data", raw_res)
         return [
             TrajectoryStep(
                 level=step["level"],

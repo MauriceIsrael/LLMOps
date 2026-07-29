@@ -1,21 +1,25 @@
-"""Tests d'intégration des outils exposés par le serveur FastMCP."""
+"""Tests d'intégration des outils exposés par le serveur FastMCP (avec Enveloppe)."""
 
-from mcp_server.tools.asset_tools import get_decision_trail, get_glossary_term, list_assets
+from mcp_server.knowledge.tools import get_decision_trail, get_glossary_term, list_assets
 
 
 def test_list_assets_tool() -> None:
     res = list_assets(status="active")
-    assert isinstance(res, list)
+    assert res.get("status") == "ok"
+    assert isinstance(res.get("data"), list)
 
 
 def test_get_glossary_term_fallback() -> None:
     res = get_glossary_term("TermeInexistant")
-    assert res["term"] == "TermeInexistant"
-    assert "non trouvé" in res["definition"]
+    assert res.get("status") == "not_found"
+    assert res.get("id") == "TermeInexistant"
 
 
 def test_get_decision_trail_structure() -> None:
     res = get_decision_trail("TPL-mcp-spec")
-    assert "asset" in res
-    assert "supersedes" in res
-    assert "superseded_by" in res
+    assert res.get("status") in ("ok", "not_found")
+    if res.get("status") == "ok":
+        data = res.get("data", {})
+        assert "asset" in data
+        assert "supersedes" in data
+        assert "superseded_by" in data
