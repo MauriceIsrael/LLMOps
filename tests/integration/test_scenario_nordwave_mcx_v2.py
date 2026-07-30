@@ -34,13 +34,13 @@ from pathlib import Path
 import pytest
 import yaml
 
-from tools.elicitation.repository import ElicitationRepository
-from tools.elicitation.blueprint import load_blueprint, bind_blueprint
-from tools.elicitation.flows.scan import build_scan_graph, evaluate
-from tools.elicitation.flows.plan import build_plan_graph
-from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
+from tools.elicitation.blueprint import bind_blueprint, load_blueprint
 from tools.elicitation.flows.assemble import build_assemble_graph
 from tools.elicitation.flows.contribution import build_contribution_graph
+from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
+from tools.elicitation.flows.plan import build_plan_graph
+from tools.elicitation.flows.scan import build_scan_graph
+from tools.elicitation.repository import ElicitationRepository
 
 try:
     from tools.elicitation.flows.harvest import build_harvest_graph
@@ -666,8 +666,8 @@ def test_10_trajectory_shows_increasing_specificity(repo, report, state):
         engagement=ENGAGEMENT, subject="mcx-services")
     assert len(traj) >= 2, "mcx-services advanced two levels; both must appear"
     order = [t["level"] for t in traj]
-    assert order == sorted(order, key=lambda l: ["L0_named", "L1_framed", "L2_decomposed",
-                                                 "L3_decided", "L4_specified"].index(l))
+    assert order == sorted(order, key=lambda lvl: ["L0_named", "L1_framed", "L2_decomposed",
+                                                 "L3_decided", "L4_specified"].index(lvl))
     assert all(t.get("question") and t.get("answer_excerpt") for t in traj), (
         "each step must pair the question with what it produced"
     )

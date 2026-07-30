@@ -9,7 +9,9 @@ import gc
 import re
 from pathlib import Path
 from typing import Any
+
 import kuzu
+
 from mcp_server.core.auth import authorise
 from mcp_server.core.config import server_config
 

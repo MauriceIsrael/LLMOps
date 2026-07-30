@@ -9,13 +9,12 @@ import shutil
 from pathlib import Path
 
 import kuzu
-from pipelines.ingestion.graph_loader import KuzuGraphLoader
+
 from tools.elicitation.db_schema import ElicitationSchemaInitializer
 
 
 def migrate_to_adr0015(data_dir: Path | str = "data") -> dict[str, str]:
     base = Path(data_dir)
-    src_db = base / "kuzu_db"
     knowledge_db = base / "knowledge.kuzu"
     engagements_dir = base / "engagements"
     ref_engagement_db = engagements_dir / "nordwave-mcx-2027.kuzu"

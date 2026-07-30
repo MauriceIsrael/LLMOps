@@ -23,13 +23,15 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction
 
-      - name: Run KB Ingestion Pipeline
+      - name: Run ADR-0015 KB Ingestion & Migration Pipeline
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: poetry run ingest --kb-dir data/kb --db-path data/kuzu_db
+        run: poetry run python -m pipelines.ingestion.migrate_adr0015
 
-      - name: Upload Kùzu DB Artifact
+      - name: Upload Kùzu DB Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kuzu-db-artifact
-          path: data/kuzu_db
+          name: kuzu-db-artifacts
+          path: |
+            data/knowledge.kuzu
+            data/engagements

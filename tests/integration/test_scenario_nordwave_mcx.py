@@ -32,7 +32,6 @@ Run:
 
 from __future__ import annotations
 
-import gc
 import json
 import shutil
 import subprocess

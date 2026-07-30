@@ -5,6 +5,7 @@ Conforme à T1.3 de TPL-fixes-server-contract / ADR-0014.
 
 from pathlib import Path
 from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

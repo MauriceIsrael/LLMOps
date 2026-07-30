@@ -4,6 +4,7 @@ from typing import Any
 
 from mcp_server.db.kuzu_client import KuzuClient
 
+
 def _get_db():
     return KuzuClient()
 

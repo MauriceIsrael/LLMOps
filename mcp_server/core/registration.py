@@ -3,8 +3,11 @@
 Conforme à T2.1 de TPL-fixes-server-contract / ADR-0014.
 """
 
-from typing import Callable, Any
+from collections.abc import Callable
+from typing import Any
+
 from fastmcp import FastMCP
+
 from mcp_server.core.config import ServerConfig, server_config
 
 

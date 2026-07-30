@@ -4,6 +4,7 @@ Conforme à T3.4 de TPL-fixes-server-contract / ADR-0014.
 """
 
 from typing import Any
+
 from mcp_server.core.db import ReadOnlyKuzuClient
 
 

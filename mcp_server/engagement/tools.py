@@ -5,11 +5,10 @@ Provides tools for inspecting and interacting with engagement-specific graph sta
 
 from pathlib import Path
 from typing import Any
+
 from mcp_server.core.auth import authorise
 from mcp_server.core.config import server_config
 from mcp_server.core.db import (
-    ReadOnlyKuzuClient,
-    discover_engagements,
     get_engagement_path,
     open_connection,
 )
@@ -216,7 +215,6 @@ def get_diagram_graph(engagement: str | None = None, format: str = "json") -> di
         repo = _get_repo(engagement=eng)
         board = repo.get_subjects_maturity_board(engagement=eng)
         statements = repo.get_active_statements(engagement=eng)
-        conflicts = repo.get_conflicts(engagement=eng, status="open")
         repo.close()
 
         nodes = [{"id": s["subject"], "label": s["subject"], "type": "Subject", "level": s.get("level")} for s in board]

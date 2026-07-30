@@ -461,6 +461,7 @@ def publish(
     """Takes a consistent snapshot of the working graph and installs it atomically at data/engagements/<id>.kuzu."""
     import shutil
     from pathlib import Path
+
     from mcp_server.core.db import get_engagement_path, validate_engagement_id
     from tools.elicitation.db_schema import ElicitationSchemaInitializer
 
@@ -474,23 +475,28 @@ def publish(
         art_path = Path("artifacts") / valid_id / "graph"
         if art_path.exists():
             src = art_path
+        elif target_path.exists():
+            src = target_path
         else:
-            src = Path("data/kuzu_db")
+            src = None
 
-    console.print(f"[bold blue]📦 Publishing engagement snapshot for {valid_id} from {src}...[/bold blue]")
+    if src and src != target_path:
+        console.print(f"[bold blue]📦 Publishing engagement snapshot for {valid_id} from {src}...[/bold blue]")
+        tmp_target = target_path.parent / f"{valid_id}.tmp.kuzu"
+        if tmp_target.exists():
+            shutil.rmtree(tmp_target)
 
-    tmp_target = target_path.parent / f"{valid_id}.tmp.kuzu"
-    if tmp_target.exists():
-        shutil.rmtree(tmp_target)
+        shutil.copytree(src, tmp_target)
 
-    shutil.copytree(src, tmp_target)
+        schema_init = ElicitationSchemaInitializer(db_path=tmp_target)
+        del schema_init
 
-    schema_init = ElicitationSchemaInitializer(db_path=tmp_target)
-    del schema_init
-
-    if target_path.exists():
-        shutil.rmtree(target_path)
-    tmp_target.rename(target_path)
+        if target_path.exists():
+            shutil.rmtree(target_path)
+        tmp_target.rename(target_path)
+    else:
+        schema_init = ElicitationSchemaInitializer(db_path=target_path)
+        del schema_init
 
     console.print(f"[bold green]✅ Engagement {valid_id} published successfully to {target_path}![/bold green]")
 
@@ -504,7 +510,6 @@ def engagement_create(
     engagement_id: str = typer.Argument(..., help="Identifier for new engagement (e.g. nordwave-mcx-2027)"),
 ) -> None:
     """Creates a new empty engagement database with engagement schema."""
-    import shutil
     from mcp_server.core.db import get_engagement_path, validate_engagement_id
     from tools.elicitation.db_schema import ElicitationSchemaInitializer
 
@@ -527,6 +532,7 @@ def engagement_archive(
 ) -> None:
     """Archives an active engagement database by moving it to data/engagements/archive/."""
     import shutil
+
     from mcp_server.core.db import get_engagement_path, validate_engagement_id
 
     valid_id = validate_engagement_id(engagement_id)

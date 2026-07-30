@@ -2,7 +2,8 @@
 
 from pathlib import Path
 from typing import Any, TypedDict
-from langgraph.graph import StateGraph, END
+
+from langgraph.graph import END, StateGraph
 
 from tools.elicitation.contribution_repository import ContributionRepository
 

@@ -2,8 +2,10 @@
 
 import inspect
 from pathlib import Path
+
 import pytest
-from mcp_server.core.auth import Unauthorised, authorise
+
+from mcp_server.core.auth import Unauthorised
 from mcp_server.core.config import server_config
 from mcp_server.core.db import (
     ReadOnlyKuzuClient,
@@ -15,7 +17,6 @@ from mcp_server.core.db import (
 from mcp_server.engagement import tools as eng_tools
 from mcp_server.knowledge import tools as kb_tools
 from pipelines.ingestion.generate_schema_doc import generate_schema_markdown
-from pipelines.ingestion.migrate_adr0015 import migrate_to_adr0015
 from tools.elicitation.repository import ElicitationRepository
 
 

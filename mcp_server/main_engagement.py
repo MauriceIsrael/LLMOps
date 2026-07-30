@@ -5,6 +5,7 @@ Conforme à T2.2 / ADR-0014.
 """
 
 from fastmcp import FastMCP
+
 from mcp_server.core.config import server_config
 from mcp_server.core.registration import register_tools
 from mcp_server.engagement.tools import (

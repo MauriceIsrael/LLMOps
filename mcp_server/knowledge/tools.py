@@ -5,6 +5,7 @@ Provides tools for searching and retrieving reusable architecture knowledge asse
 
 from pathlib import Path
 from typing import Any
+
 from mcp_server.core.config import server_config
 from mcp_server.core.db import (
     ReadOnlyKuzuClient,

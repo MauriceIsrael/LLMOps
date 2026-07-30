@@ -20,8 +20,9 @@ COPY data ./data
 RUN poetry install --no-interaction --no-ansi --only-root
 
 
-# Pré-ingestion de la base de connaissances si kuzu_db n'est pas déjà présente dans data/
-RUN poetry run ingest --kb-dir data/kb --db-path data/kuzu_db || true
+# Pré-ingestion et publication des bases d'architecture (ADR-0015)
+RUN poetry run python -m pipelines.ingestion.migrate_adr0015 || true
+RUN poetry run elicit publish --engagement nordwave-mcx-2027 || true
 
 EXPOSE 8000
 

@@ -1,7 +1,9 @@
 """Generates docs/SCHEMA.md programmatically from Kùzu DB table catalogue (F9)."""
 
 from pathlib import Path
+
 import kuzu
+
 from mcp_server.core.config import server_config
 
 

@@ -2,9 +2,10 @@
 
 from pathlib import Path
 from typing import Any, TypedDict
-import yaml
 
-from langgraph.graph import StateGraph, END
+import yaml
+from langgraph.graph import END, StateGraph
+
 from tools.elicitation.models.blueprint_schema import load_blueprint
 from tools.elicitation.repository import ElicitationRepository
 

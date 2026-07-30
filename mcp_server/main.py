@@ -32,12 +32,6 @@ from mcp_server.engagement.tools import (
     get_subject,
     get_subject_trajectory,
 )
-from mcp_server.engagement.tools import (
-    get_graph_summary as get_engagement_graph_summary,
-)
-from mcp_server.engagement.tools import (
-    query_graph as query_engagement_graph,
-)
 from mcp_server.knowledge.tools import (
     get_asset,
     get_assets,

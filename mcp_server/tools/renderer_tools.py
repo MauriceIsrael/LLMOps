@@ -5,9 +5,11 @@ pour les interfaces web, générateurs PDF, visualiseurs de diagrammes et dashbo
 """
 
 from typing import Any
+
 from mcp_server.core.envelope import ok_response
 from mcp_server.db.kuzu_client import KuzuClient
 from tools.elicitation.repository import ElicitationRepository
+
 
 def _get_db():
     return KuzuClient()

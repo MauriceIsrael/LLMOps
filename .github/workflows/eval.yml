@@ -22,10 +22,10 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction
 
-      - name: Ingest KB locally for tests
+      - name: Ingest KB and migrate databases locally for evals
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: poetry run ingest --kb-dir data/kb --db-path data/kuzu_db
+        run: poetry run python -m pipelines.ingestion.migrate_adr0015
 
       - name: Run DeepEval Semantic Tests
         env:

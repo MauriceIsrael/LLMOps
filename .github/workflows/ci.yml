@@ -36,5 +36,8 @@ jobs:
       - name: Run Ruff Linter
         run: poetry run ruff check .
 
-      - name: Run Unit Tests
-        run: poetry run pytest tests/unit tests/integration
+      - name: Run ADR-0015 Migration
+        run: poetry run python -m pipelines.ingestion.migrate_adr0015
+
+      - name: Run Unit & Integration Tests
+        run: poetry run pytest tests/unit tests/integration/test_scenario_nordwave_mcx_v2.py -v

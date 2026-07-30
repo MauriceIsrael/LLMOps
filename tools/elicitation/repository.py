@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any
 
 from mcp_server.db.kuzu_client import KuzuClient
-from tools.elicitation.config import ALLOWED_PREDICATES
 from tools.elicitation.db_schema import ElicitationSchemaInitializer
 
 
@@ -452,7 +451,6 @@ class ElicitationRepository:
 
     def get_subject_trajectory(self, engagement: str, subject: str) -> list[dict[str, Any]]:
         """Récupère l'historique des avancées de maturité (trajectoire) pour un sujet."""
-        sub_esc = _esc(subject)
         eng_esc = _esc(engagement)
         query = f"""
         MATCH (st:Statement {{engagement: '{eng_esc}', status: 'active'}})
@@ -614,7 +612,6 @@ class ElicitationRepository:
         """
         target_name = name or subject_name or ""
         target_to_level = to_level or ""
-        target_author = by or author or ""
 
         sub_esc = _esc(target_name)
         to_lvl_esc = _esc(target_to_level)

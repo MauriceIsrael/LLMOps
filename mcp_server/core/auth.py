@@ -1,6 +1,6 @@
 """Single choke point for engagement authorization (R4)."""
 
-class Unauthorised(PermissionError):
+class Unauthorised(PermissionError):  # noqa: N818
     """Exception levée en cas d'accès non autorisé à un engagement (403-equivalent)."""
 
     def __init__(self, engagement: str):
