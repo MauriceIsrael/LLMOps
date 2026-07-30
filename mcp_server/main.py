@@ -26,6 +26,7 @@ from mcp_server.engagement.tools import (
     get_conflicts,
     get_dangling_references,
     get_diagram_graph,
+    get_engagement_export,
     get_open_questions,
     get_render_payload,
     get_statements,
@@ -68,6 +69,7 @@ mcp.tool()(get_open_questions)
 mcp.tool()(get_diagram_graph)
 mcp.tool()(get_render_payload)
 mcp.tool()(get_dangling_references)
+mcp.tool()(get_engagement_export)
 
 
 class TokenPreservingSseServerTransport(SseServerTransport):

@@ -299,47 +299,63 @@ Tous les outils FastMCP retournent une **enveloppe JSON uniformisée** :
 }
 ```
 
-### 5.5 `get_graph_summary` (Découverte Multi-Bases ADR-0015)
-**Payload Schema (`data`) :**
-```json
-{
-  "type": "object",
-  "properties": {
-    "knowledge": {
-      "type": "object",
-      "properties": {
-        "dataset": { "type": "string", "example": "data/knowledge.kuzu" },
-        "node_counts": {
-          "type": "object",
-          "properties": {
-            "Asset": { "type": "integer" },
-            "GlossaryTerm": { "type": "integer" }
-          }
-        }
-      }
-    },
-    "engagements": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string", "example": "nordwave-mcx-2027" },
-          "dataset": { "type": "string", "example": "data/engagements/nordwave-mcx-2027.kuzu" },
-          "node_counts": {
-            "type": "object",
-            "properties": {
-              "Subject": { "type": "integer" },
-              "Statement": { "type": "integer" },
-              "Conflict": { "type": "integer" }
-            }
-          }
-        }
-      }
-    }
-  },
-  "required": ["knowledge", "engagements"]
-}
-```
+302: ### 5.5 `get_graph_summary` (Découverte Multi-Bases ADR-0015 & schema_version)
+303: **Payload Schema (`data`) :**
+304: ```json
+305: {
+306:   "type": "object",
+307:   "properties": {
+308:     "schema_version": { "type": "string", "example": "1.0" },
+309:     "knowledge": {
+310:       "type": "object",
+311:       "properties": {
+312:         "dataset": { "type": "string", "example": "data/knowledge.kuzu" },
+313:         "node_counts": {
+314:           "type": "object",
+315:           "properties": {
+316:             "Asset": { "type": "integer" },
+317:             "GlossaryTerm": { "type": "integer" }
+318:           }
+319:         }
+320:       }
+321:     },
+322:     "engagements": {
+323:       "type": "array",
+324:       "items": {
+325:         "type": "object",
+326:         "properties": {
+327:           "id": { "type": "string", "example": "nordwave-mcx-2027" },
+328:           "dataset": { "type": "string", "example": "data/engagements/nordwave-mcx-2027.kuzu" },
+329:           "node_counts": {
+330:             "type": "object",
+331:             "properties": {
+332:               "Subject": { "type": "integer" },
+333:               "Statement": { "type": "integer" },
+334:               "Conflict": { "type": "integer" }
+335:             }
+336:           }
+337:         }
+338:       }
+339:     }
+340:   },
+341:   "required": ["schema_version", "knowledge", "engagements"]
+342: }
+343: ```
+344: 
+345: ### 5.6 `get_engagement_export` (Export Global en Un Seul Appel - E4)
+346: **Payload Schema (`data`) :**
+347: ```json
+348: {
+349:   "type": "object",
+350:   "properties": {
+351:     "engagement": { "type": "string", "example": "nordwave-mcx-2027" },
+352:     "board": { "type": "array" },
+353:     "render_payload": { "type": "object" },
+354:     "diagram_graph": { "type": "object" }
+355:   },
+356:   "required": ["engagement", "board", "render_payload", "diagram_graph"]
+357: }
+358: ```
 
 ---
 

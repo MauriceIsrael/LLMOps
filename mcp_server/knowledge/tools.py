@@ -226,7 +226,10 @@ def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, A
 
 
 def get_graph_summary() -> dict[str, Any]:
-    """Discovers available databases and returns node counts for knowledge assets and active engagements."""
+    """Discovers available databases and returns node counts for knowledge assets and active engagements.
+
+    This server is read-only by design. Project data is written only through the elicitation engine's human-confirmation flow; see TPL-elicitation-proto for how to produce an engagement graph.
+    """
     kb_client = ReadOnlyKuzuClient(db_path=server_config.knowledge_db_path)
     try:
         assets = kb_client.execute_cypher("MATCH (a:Asset) RETURN count(a) as count;")
@@ -269,6 +272,7 @@ def get_graph_summary() -> dict[str, Any]:
         })
 
     payload = {
+        "schema_version": "1.0",
         "knowledge": {
             "dataset": str(server_config.knowledge_db_path),
             "node_counts": kb_counts,

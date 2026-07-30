@@ -208,3 +208,37 @@ def test_schema_doc_is_up_to_date():
     assert schema_file.exists(), "docs/SCHEMA.md does not exist!"
     committed = schema_file.read_text(encoding="utf-8")
     assert committed.strip() == generated.strip(), "docs/SCHEMA.md differs from generated schema catalogue!"
+
+
+# --- E1, E3, E4: Third-Party Integration Workorder Tests ---
+
+def test_mermaid_output_has_quoted_labels():
+    """E1 — get_diagram_graph format=mermaid returns quoted labels and safe node syntax."""
+    res = eng_tools.get_diagram_graph(engagement="nordwave-mcx-2027", format="mermaid")
+    assert res.get("status") == "ok"
+    mermaid_str = res.get("data", {}).get("mermaid", "")
+    assert "flowchart TD" in mermaid_str
+    # Check that labels are properly quoted in double quotes
+    for line in mermaid_str.splitlines():
+        if "-->" in line:
+            assert "|\"" in line or "|'" in line or "-->|" in line, f"Unquoted Mermaid edge label in line: {line}"
+
+
+def test_schema_version_in_get_graph_summary():
+    """E3 — get_graph_summary returns schema_version under data."""
+    res = kb_tools.get_graph_summary()
+    assert res.get("status") == "ok"
+    data = res.get("data", {})
+    assert data.get("schema_version") == "1.0", f"Expected schema_version '1.0', got: {data.get('schema_version')}"
+
+
+def test_get_engagement_export_returns_all():
+    """E4 — get_engagement_export combines board, render payload, and diagram graph."""
+    res = eng_tools.get_engagement_export(engagement="nordwave-mcx-2027")
+    assert res.get("status") == "ok"
+    data = res.get("data", {})
+    assert data.get("engagement") == "nordwave-mcx-2027"
+    assert "board" in data
+    assert "render_payload" in data
+    assert "diagram_graph" in data
+

@@ -21,6 +21,15 @@ from mcp_server.core.envelope import (
 from tools.elicitation.repository import ElicitationRepository
 
 
+def _mermaid_label(text: str, max_len: int = 48) -> str:
+    if not text:
+        return '""'
+    clean = text.replace('"', "'").replace("\n", " ").strip()
+    if len(clean) > max_len:
+        clean = clean[: max_len - 1] + "…"
+    return f'"{clean}"'
+
+
 def _get_repo(engagement: str | None = None, db_path: str | Path | None = None) -> ElicitationRepository:
     if db_path:
         p = Path(db_path)
@@ -229,12 +238,18 @@ def get_diagram_graph(engagement: str | None = None, format: str = "json") -> di
 
         mermaid_lines = ["flowchart TD"]
         for n in nodes:
-            mermaid_lines.append(f'    {n["id"]}["{n["label"]} ({n.get("level", "")})"]')
-        for e in edges:
-            mermaid_lines.append(f'    {e["source"]} -->|"{e["predicate"]}"| {e["target"]}')
+            lbl = _mermaid_label(f"{n['label']} ({n.get('level', '')})")
+            mermaid_lines.append(f'    {n["id"]}[{lbl}]')
+        for idx, e in enumerate(edges):
+            pred_lbl = _mermaid_label(e["predicate"])
+            target_text = e["target"]
+            target_id = f"node_t_{idx}"
+            target_lbl = _mermaid_label(target_text)
+            mermaid_lines.append(f'    {target_id}[{target_lbl}]')
+            mermaid_lines.append(f'    {e["source"]} -->|{pred_lbl}| {target_id}')
 
         if not nodes:
-            return ok_response({"nodes": [], "edges": [], "mermaid": ""}, count=0)
+            return ok_response({"nodes": [], "edges": [], "mermaid": "flowchart TD"}, count=0)
 
         return ok_response({
             "nodes": nodes,
@@ -242,7 +257,7 @@ def get_diagram_graph(engagement: str | None = None, format: str = "json") -> di
             "mermaid": "\n".join(mermaid_lines),
         }, count=len(nodes))
     except FileNotFoundError:
-        return ok_response({"nodes": [], "edges": [], "mermaid": ""}, count=0)
+        return ok_response({"nodes": [], "edges": [], "mermaid": "flowchart TD"}, count=0)
     except Exception as e:
         return error_response(str(e))
 
@@ -329,6 +344,29 @@ def get_render_payload(engagement: str | None = None) -> dict[str, Any]:
         return error_response(str(e))
 
 
+def get_engagement_export(engagement: str | None = None) -> dict[str, Any]:
+    """Retrieve complete bulk export (board, render payload, diagram graph) for an engagement in a single call (E4).
+
+    Args:
+        engagement: Unique engagement identifier (defaults to deployment configuration).
+    """
+    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    authorise(caller="default_user", engagement=eng)
+
+    board_res = get_board(engagement=eng)
+    payload_res = get_render_payload(engagement=eng)
+    diagram_res = get_diagram_graph(engagement=eng, format="mermaid")
+
+    export_data = {
+        "engagement": eng,
+        "board": board_res.get("data", []),
+        "render_payload": payload_res.get("data", {}),
+        "diagram_graph": diagram_res.get("data", {}),
+    }
+
+    return ok_response(export_data)
+
+
 def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, Any]:
     """Executes a read-only Cypher query against the engagement graph when engagement is specified, or against the active server database. Contains no reusable assets."""
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
@@ -345,7 +383,10 @@ def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, A
 
 
 def get_graph_summary() -> dict[str, Any]:
-    """Discovers available databases and returns node counts for knowledge assets and active engagements."""
+    """Discovers available databases and returns node counts for knowledge assets and active engagements.
+
+    This server is read-only by design. Project data is written only through the elicitation engine's human-confirmation flow; see TPL-elicitation-proto for how to produce an engagement graph (E5).
+    """
     authorise(caller="default_user", engagement="nordwave-mcx-2027")
     from mcp_server.knowledge.tools import get_graph_summary as kb_summary
     return kb_summary()
