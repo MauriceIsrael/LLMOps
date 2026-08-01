@@ -34,8 +34,10 @@ langgraph-checkpoint-sqlite = "^3.1.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
 pytest-asyncio = "^0.23.0"
+pytest-cov = "^6.0"
 ruff = "^0.4.0"
 mypy = "^1.9.0"
+mutmut = "^3.2.0"
 
 [tool.poetry.scripts]
 ingest = "pipelines.cli:ingest_main"
@@ -72,3 +74,7 @@ minversion = "6.0"
 addopts = "-ra -q"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "deterministic: oracle de migration — aucun appel LLM, résultat reproductible",
+    "stochastic: extraction LLM, DeepEval, Promptfoo — non utilisable comme oracle",
+]

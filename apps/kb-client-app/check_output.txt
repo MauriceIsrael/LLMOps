@@ -1,0 +1,123 @@
+
+> template-app@0.0.1 check
+> svelte-kit sync && svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: /home/momo/Dev/template-app
+Getting Svelte diagnostics...
+
+/home/momo/Dev/template-app/src/lib/components/ui/button/button.svelte:2:42
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+<script lang="ts" module>
+	import { cn, type WithElementRef } from "$lib/utils.js";
+	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from "svelte/elements";
+
+/home/momo/Dev/template-app/src/lib/components/ui/dropdown-menu/dropdown-menu-checkbox-item.svelte:5:50
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import CheckIcon from '@lucide/svelte/icons/check';
+	import { cn, type WithoutChildrenOrChild } from "$lib/utils.js";
+	import type { Snippet } from "svelte";
+
+/home/momo/Dev/template-app/src/lib/components/ui/dropdown-menu/dropdown-menu-content.svelte:2:50
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+<script lang="ts">
+	import { cn, type WithoutChildrenOrChild } from "$lib/utils.js";
+	import DropdownMenuPortal from "./dropdown-menu-portal.svelte";
+
+/home/momo/Dev/template-app/src/lib/components/ui/dropdown-menu/dropdown-menu-item.svelte:2:21
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+<script lang="ts">
+	import { cn } from "$lib/utils.js";
+	import { DropdownMenu as DropdownMenuPrimitive } from "bits-ui";
+
+/home/momo/Dev/template-app/src/lib/components/ui/dropdown-menu/dropdown-menu-label.svelte:2:42
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+<script lang="ts">
+	import { cn, type WithElementRef } from "$lib/utils.js";
+	import type { HTMLAttributes } from "svelte/elements";
+
+/home/momo/Dev/template-app/src/lib/components/ui/dropdown-menu/dropdown-menu-radio-item.svelte:4:40
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import CheckIcon from '@lucide/svelte/icons/check';
+	import { cn, type WithoutChild } from "$lib/utils.js";
+
+/home/momo/Dev/template-app/src/lib/components/ui/dropdown-menu/dropdown-menu-separator.svelte:3:21
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import { DropdownMenu as DropdownMenuPrimitive } from "bits-ui";
+	import { cn } from "$lib/utils.js";
+
+/home/momo/Dev/template-app/src/lib/components/ui/dropdown-menu/dropdown-menu-shortcut.svelte:3:42
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import type { HTMLAttributes } from "svelte/elements";
+	import { cn, type WithElementRef } from "$lib/utils.js";
+
+/home/momo/Dev/template-app/src/lib/components/ui/dropdown-menu/dropdown-menu-sub-content.svelte:3:21
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import { DropdownMenu as DropdownMenuPrimitive } from "bits-ui";
+	import { cn } from "$lib/utils.js";
+
+/home/momo/Dev/template-app/src/lib/components/ui/dropdown-menu/dropdown-menu-sub-trigger.svelte:4:21
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import { cn } from "$lib/utils.js";
+
+/home/momo/Dev/template-app/src/lib/components/ui/dropdown-menu/dropdown-menu-group-heading.svelte:3:21
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import { DropdownMenu as DropdownMenuPrimitive } from "bits-ui";
+	import { cn } from "$lib/utils.js";
+	import type { ComponentProps } from "svelte";
+
+/home/momo/Dev/template-app/src/lib/components/ui/sheet/sheet-overlay.svelte:3:21
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import { Dialog as SheetPrimitive } from "bits-ui";
+	import { cn } from "$lib/utils.js";
+
+/home/momo/Dev/template-app/src/lib/components/ui/sheet/sheet-content.svelte:12:50
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import XIcon from '@lucide/svelte/icons/x';
+	import { cn, type WithoutChildrenOrChild } from "$lib/utils.js";
+	import type { ComponentProps } from "svelte";
+
+/home/momo/Dev/template-app/src/lib/components/ui/sheet/sheet-header.svelte:3:42
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import type { HTMLAttributes } from "svelte/elements";
+	import { cn, type WithElementRef } from "$lib/utils.js";
+
+/home/momo/Dev/template-app/src/lib/components/ui/sheet/sheet-footer.svelte:2:42
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+<script lang="ts">
+	import { cn, type WithElementRef } from "$lib/utils.js";
+	import type { HTMLAttributes } from "svelte/elements";
+
+/home/momo/Dev/template-app/src/lib/components/ui/sheet/sheet-title.svelte:3:21
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import { Dialog as SheetPrimitive } from "bits-ui";
+	import { cn } from "$lib/utils.js";
+
+/home/momo/Dev/template-app/src/lib/components/ui/sheet/sheet-description.svelte:3:21
+Error: Cannot find module '$lib/utils.js' or its corresponding type declarations. (ts)
+	import { Dialog as SheetPrimitive } from "bits-ui";
+	import { cn } from "$lib/utils.js";
+
+/home/momo/Dev/template-app/src/lib/LoremIpsum.svelte:38:3
+Warn: Unused CSS selector ".lorem-ipsum-container p"
+https://svelte.dev/e/css_unused_selector (svelte)
+  /* Style pour les paragraphes générés */
+  .lorem-ipsum-container p {
+    margin-bottom: 1em; /* Espace entre les paragraphes */
+
+/home/momo/Dev/template-app/src/lib/LoremIpsum.svelte:42:3
+Warn: Unused CSS selector ".lorem-ipsum-container p:last-child"
+https://svelte.dev/e/css_unused_selector (svelte)
+
+  .lorem-ipsum-container p:last-child {
+    margin-bottom: 0; /* Pas de marge sous le dernier paragraphe */
+
+/home/momo/Dev/template-app/src/lib/components/LanguageSwitcher.svelte:27:30
+Error: Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'. (ts)
+    <DropdownMenu.Separator />
+    <DropdownMenu.RadioGroup value={localeState.current} onValueChange={(v) => localeState.set(v)}>
+      {#each localeState.available as langCode (langCode)}
+
+====================================
+svelte-check found 18 errors and 2 warnings in 19 files

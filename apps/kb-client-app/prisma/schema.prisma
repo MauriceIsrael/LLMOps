@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ── Authentication & Users ──────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  role          String    @default("user") // Default base role
+  
+  // ABAC Attributes (JSON for flexibility)
+  // Store things like: { "clearance": 1, "department": "R&D", "tags": ["beta"] }
+  attributes    String    @default("{}") 
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// ── Casbin Authorization (Persistence) ──────────────────────────────────────
+
+model CasbinRule {
+  id    Int     @id @default(autoincrement())
+  ptype String
+  v0    String?
+  v1    String?
+  v2    String?
+  v3    String?
+  v4    String?
+  v5    String?
+
+  @@map("casbin_rule")
+}
+
+// ── Resource Management (Tagging) ───────────────────────────────────────────
+
+model Resource {
+  id          String   @id @default(cuid())
+  type        String   // e.g. "api:demo", "ui:settings"
+  identifier  String   // e.g. "item_123"
+  
+  // Dynamic tags/labels added by users
+  tags        String   @default("[]") // JSON array of strings
+  
+  ownerId     String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type, identifier])
+  @@map("resources")
+}
+
+model Idea {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  authorId    String?
+  authorName  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("ideas")
+}

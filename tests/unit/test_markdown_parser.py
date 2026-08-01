@@ -1,6 +1,10 @@
 """Tests unitaires pour le parser de document Markdown et frontmatter YAML."""
 
+import pytest
+
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
+
+pytestmark = pytest.mark.deterministic
 
 
 def test_markdown_parser_with_frontmatter() -> None:

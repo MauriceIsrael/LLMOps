@@ -1,0 +1,676 @@
+{
+  "analytics": {
+    "volume_by_type": [
+      {
+        "type": "template",
+        "count": 5
+      },
+      {
+        "type": "yaml-asset",
+        "count": 1
+      },
+      {
+        "type": "decision",
+        "count": 13
+      },
+      {
+        "type": "estimate",
+        "count": 1
+      },
+      {
+        "type": "pattern",
+        "count": 7
+      },
+      {
+        "type": "questionnaire",
+        "count": 3
+      },
+      {
+        "type": "principle",
+        "count": 15
+      },
+      {
+        "type": "risk-register",
+        "count": 1
+      }
+    ],
+    "status_breakdown": [
+      {
+        "status": "active",
+        "count": 45
+      },
+      {
+        "status": "superseded",
+        "count": 1
+      }
+    ],
+    "confidence_breakdown": [
+      {
+        "confidence": "verified",
+        "count": 41
+      },
+      {
+        "confidence": "vendor-stated",
+        "count": 2
+      },
+      {
+        "confidence": "assumed",
+        "count": 3
+      }
+    ],
+    "glossary_count": 10,
+    "relations": {
+      "REQUIRES": 0,
+      "SUPERSEDES": 1
+    }
+  },
+  "prominence": {
+    "domain_volumes": [
+      {
+        "domain": "General",
+        "count": 1
+      },
+      {
+        "domain": "ai-assistance",
+        "count": 8
+      },
+      {
+        "domain": "cloud-platform",
+        "count": 5
+      },
+      {
+        "domain": "delivery",
+        "count": 6
+      },
+      {
+        "domain": "mcx",
+        "count": 1
+      },
+      {
+        "domain": "mobile-core",
+        "count": 4
+      },
+      {
+        "domain": "network-automation",
+        "count": 11
+      },
+      {
+        "domain": "observability",
+        "count": 7
+      },
+      {
+        "domain": "service-management",
+        "count": 3
+      }
+    ],
+    "cross_domain_dependencies": []
+  },
+  "graph": {
+    "domains": [
+      "General",
+      "ai-assistance",
+      "cloud-platform",
+      "delivery",
+      "mcx",
+      "mobile-core",
+      "network-automation",
+      "observability",
+      "service-management"
+    ],
+    "nodes": [
+      {
+        "id": "TPL-getting-started",
+        "title": "Getting started \u2014 publishing and collaborating on this base",
+        "type": "template",
+        "domain": "delivery",
+        "status": "active",
+        "confidence": "verified",
+        "x": -12,
+        "y": 18,
+        "z": -10,
+        "degree": 5
+      },
+      {
+        "id": "BLU-hla-mcx",
+        "title": "High-level solution architecture \u2014 mission-critical mobile network",
+        "type": "yaml-asset",
+        "domain": "General",
+        "status": "active",
+        "confidence": "verified",
+        "x": -6,
+        "y": 0,
+        "z": -10,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0001",
+        "title": "Git as the source of truth for network and platform configuration",
+        "type": "decision",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 36,
+        "z": -10,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0002",
+        "title": "Network source of truth and compliance engine",
+        "type": "decision",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 36,
+        "z": -10,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0003",
+        "title": "Orchestration and approval engine",
+        "type": "decision",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": 12,
+        "y": 36,
+        "z": -10,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0004",
+        "title": "Event-driven remediation engine",
+        "type": "decision",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": -12,
+        "y": 36,
+        "z": -5,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0005",
+        "title": "Access the mobile core exclusively through the element manager northbound interfaces",
+        "type": "decision",
+        "domain": "mobile-core",
+        "status": "active",
+        "confidence": "vendor-stated",
+        "x": -6,
+        "y": 30,
+        "z": -5,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0006",
+        "title": "GitOps engine for the container platform",
+        "type": "decision",
+        "domain": "cloud-platform",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 12,
+        "z": -5,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0007",
+        "title": "Dedicated management cluster with its own storage and southbound paths",
+        "type": "decision",
+        "domain": "cloud-platform",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 12,
+        "z": -5,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0008",
+        "title": "Split observability: service plane and infrastructure plane",
+        "type": "decision",
+        "domain": "observability",
+        "status": "active",
+        "confidence": "verified",
+        "x": 12,
+        "y": 42,
+        "z": -5,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0009",
+        "title": "Mastership arbitration between inventory systems",
+        "type": "decision",
+        "domain": "service-management",
+        "status": "active",
+        "confidence": "assumed",
+        "x": -12,
+        "y": 48,
+        "z": 0,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0010",
+        "title": "Inference served by an external endpoint",
+        "type": "decision",
+        "domain": "ai-assistance",
+        "status": "superseded",
+        "confidence": "vendor-stated",
+        "x": -6,
+        "y": 6,
+        "z": 0,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0011",
+        "title": "Inference served locally on general-purpose processors",
+        "type": "decision",
+        "domain": "ai-assistance",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 6,
+        "z": 0,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0012",
+        "title": "Shadow environment on a separate cluster",
+        "type": "decision",
+        "domain": "observability",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 42,
+        "z": 0,
+        "degree": 5
+      },
+      {
+        "id": "ADR-0013",
+        "title": "Subscriber and SIM provisioning excluded from the configuration chain",
+        "type": "decision",
+        "domain": "mcx",
+        "status": "active",
+        "confidence": "assumed",
+        "x": 12,
+        "y": 24,
+        "z": 0,
+        "degree": 5
+      },
+      {
+        "id": "EST-netdevops-telco",
+        "title": "Effort model \u2014 network automation chain for a mission-critical telecom system",
+        "type": "estimate",
+        "domain": "delivery",
+        "status": "active",
+        "confidence": "assumed",
+        "x": -12,
+        "y": 18,
+        "z": 5,
+        "degree": 5
+      },
+      {
+        "id": "TPL-glossary",
+        "title": "Glossary",
+        "type": "template",
+        "domain": "delivery",
+        "status": "active",
+        "confidence": "verified",
+        "x": -6,
+        "y": 18,
+        "z": 5,
+        "degree": 5
+      },
+      {
+        "id": "TPL-mcp-spec",
+        "title": "Knowledge server specification",
+        "type": "template",
+        "domain": "ai-assistance",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 6,
+        "z": 5,
+        "degree": 5
+      },
+      {
+        "id": "PAT-001",
+        "title": "Supervised closed loop",
+        "type": "pattern",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 36,
+        "z": 5,
+        "degree": 5
+      },
+      {
+        "id": "PAT-002",
+        "title": "Shadow validation of rules",
+        "type": "pattern",
+        "domain": "observability",
+        "status": "active",
+        "confidence": "verified",
+        "x": 12,
+        "y": 42,
+        "z": 5,
+        "degree": 5
+      },
+      {
+        "id": "PAT-003",
+        "title": "Fallback plan bound to its baseline",
+        "type": "pattern",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": -12,
+        "y": 36,
+        "z": 10,
+        "degree": 5
+      },
+      {
+        "id": "PAT-004",
+        "title": "Break-glass with an independent failure domain",
+        "type": "pattern",
+        "domain": "cloud-platform",
+        "status": "active",
+        "confidence": "verified",
+        "x": -6,
+        "y": 12,
+        "z": 10,
+        "degree": 5
+      },
+      {
+        "id": "PAT-005",
+        "title": "Two observation planes, one collection layer",
+        "type": "pattern",
+        "domain": "observability",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 42,
+        "z": 10,
+        "degree": 5
+      },
+      {
+        "id": "PAT-006",
+        "title": "Vendor boundary through the northbound interface",
+        "type": "pattern",
+        "domain": "mobile-core",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 30,
+        "z": 10,
+        "degree": 5
+      },
+      {
+        "id": "PAT-007",
+        "title": "Advisory assistant with prepare-only tooling",
+        "type": "pattern",
+        "domain": "ai-assistance",
+        "status": "active",
+        "confidence": "verified",
+        "x": 12,
+        "y": 6,
+        "z": 10,
+        "degree": 5
+      },
+      {
+        "id": "P-001",
+        "title": "Generalized GitOps",
+        "type": "principle",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": -12,
+        "y": 36,
+        "z": 15,
+        "degree": 5
+      },
+      {
+        "id": "P-002",
+        "title": "Human in the loop",
+        "type": "principle",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": -6,
+        "y": 36,
+        "z": 15,
+        "degree": 5
+      },
+      {
+        "id": "P-003",
+        "title": "Bounded unitary actions",
+        "type": "principle",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 36,
+        "z": 15,
+        "degree": 5
+      },
+      {
+        "id": "P-004",
+        "title": "Graduated autonomy",
+        "type": "principle",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 36,
+        "z": 15,
+        "degree": 5
+      },
+      {
+        "id": "P-005",
+        "title": "Shadow validation before arming",
+        "type": "principle",
+        "domain": "observability",
+        "status": "active",
+        "confidence": "verified",
+        "x": 12,
+        "y": 42,
+        "z": 15,
+        "degree": 5
+      },
+      {
+        "id": "P-006",
+        "title": "One chain, several southbound methods",
+        "type": "principle",
+        "domain": "network-automation",
+        "status": "active",
+        "confidence": "verified",
+        "x": -12,
+        "y": 36,
+        "z": 20,
+        "degree": 5
+      },
+      {
+        "id": "P-007",
+        "title": "Respect the vendor boundary",
+        "type": "principle",
+        "domain": "mobile-core",
+        "status": "active",
+        "confidence": "verified",
+        "x": -6,
+        "y": 30,
+        "z": 20,
+        "degree": 5
+      },
+      {
+        "id": "P-008",
+        "title": "The chain observes itself",
+        "type": "principle",
+        "domain": "observability",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 42,
+        "z": 20,
+        "degree": 5
+      },
+      {
+        "id": "P-009",
+        "title": "Independent failure domain",
+        "type": "principle",
+        "domain": "cloud-platform",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 12,
+        "z": 20,
+        "degree": 5
+      },
+      {
+        "id": "P-010",
+        "title": "One master per data domain",
+        "type": "principle",
+        "domain": "service-management",
+        "status": "active",
+        "confidence": "verified",
+        "x": 12,
+        "y": 48,
+        "z": 20,
+        "degree": 5
+      },
+      {
+        "id": "P-011",
+        "title": "Separate observation planes, single collection layer",
+        "type": "principle",
+        "domain": "observability",
+        "status": "active",
+        "confidence": "verified",
+        "x": -12,
+        "y": 42,
+        "z": 25,
+        "degree": 5
+      },
+      {
+        "id": "P-012",
+        "title": "The assistant advises, it does not act",
+        "type": "principle",
+        "domain": "ai-assistance",
+        "status": "active",
+        "confidence": "verified",
+        "x": -6,
+        "y": 6,
+        "z": 25,
+        "degree": 5
+      },
+      {
+        "id": "P-013",
+        "title": "Assistant configuration is code",
+        "type": "principle",
+        "domain": "ai-assistance",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 6,
+        "z": 25,
+        "degree": 5
+      },
+      {
+        "id": "P-014",
+        "title": "The assistant is never on the critical path",
+        "type": "principle",
+        "domain": "ai-assistance",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 6,
+        "z": 25,
+        "degree": 5
+      },
+      {
+        "id": "P-015",
+        "title": "The model stays inside the trust boundary",
+        "type": "principle",
+        "domain": "ai-assistance",
+        "status": "active",
+        "confidence": "verified",
+        "x": 12,
+        "y": 6,
+        "z": 25,
+        "degree": 5
+      },
+      {
+        "id": "QST-cloud-platform",
+        "title": "Container platform, observability and assistant \u2014 framing",
+        "type": "questionnaire",
+        "domain": "cloud-platform",
+        "status": "active",
+        "confidence": "verified",
+        "x": -12,
+        "y": 12,
+        "z": 30,
+        "degree": 5
+      },
+      {
+        "id": "QST-core-ems",
+        "title": "Mobile core element manager \u2014 northbound capability audit",
+        "type": "questionnaire",
+        "domain": "mobile-core",
+        "status": "active",
+        "confidence": "verified",
+        "x": -6,
+        "y": 30,
+        "z": 30,
+        "degree": 5
+      },
+      {
+        "id": "QST-service-management",
+        "title": "Service management platform \u2014 integration framing",
+        "type": "questionnaire",
+        "domain": "service-management",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 48,
+        "z": 30,
+        "degree": 5
+      },
+      {
+        "id": "RSK-netdevops-telco",
+        "title": "Risk register \u2014 network automation for mission-critical telecom",
+        "type": "risk-register",
+        "domain": "delivery",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 18,
+        "z": 30,
+        "degree": 5
+      },
+      {
+        "id": "TPL-claims-register",
+        "title": "Claims register for proposals",
+        "type": "template",
+        "domain": "delivery",
+        "status": "active",
+        "confidence": "verified",
+        "x": 12,
+        "y": 18,
+        "z": 30,
+        "degree": 5
+      },
+      {
+        "id": "TPL-hla-section-map",
+        "title": "Mapping of knowledge assets to the high-level architecture blueprint",
+        "type": "template",
+        "domain": "delivery",
+        "status": "active",
+        "confidence": "verified",
+        "x": -12,
+        "y": 18,
+        "z": 35,
+        "degree": 5
+      }
+    ],
+    "edges": []
+  }
+}

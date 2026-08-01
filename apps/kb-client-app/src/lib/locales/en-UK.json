@@ -1,0 +1,78 @@
+{
+  "app": {
+    "title": "A small app to have fun"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "explorer": "3D Visualizer (Threlte)",
+    "assets": "KB Asset Catalogue",
+    "users": "Users",
+    "settings": "Settings",
+    "language": "Language",
+    "admin": "Administration"
+  },
+  "sidebar": {
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
+  },
+  "menu": {
+    "home": "Home",
+    "drawings": "Drawings",
+    "nested-squares": "Nested Squares",
+    "nested-polygons": "Nested Polygons",
+    "title": "Super Menu",
+    "subtitle": "The best menu ever",
+    "items": {
+      "grayKittens": "Grey Kittens",
+      "spaceRocket": "A Space Rocket",
+      "gravel": "100 Pounds of Gravel",
+      "shrimp": "All of the Shrimp",
+      "planetWithMall": "A Planet with a Mall"
+    }
+  },
+  "home_page": {
+    "welcome": "Welcome to the homepage!",
+    "select_option": "Select an option from the left menu to begin.",
+    "nested_squares_accessible": "The \"Nested Squares Drawer\" component is now accessible via the menu."
+  },
+  "themeSelector": {
+    "switchToDark": "Switch to Dark Mode",
+    "switchToClassic": "Switch to Classic Mode"
+  },
+  "auth": {
+    "signOut": "Sign out",
+    "signIn": "Sign In"
+  },
+  "a11y": {
+    "userMenu": "User menu"
+  },
+  "dashboard": {
+    "notifications": {
+      "title": "Notification System",
+      "desc": "Global toast queue — callable from anywhere in the app.",
+      "default": "Default",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning",
+      "info": "Info"
+    },
+    "api": {
+      "title": "Typed API Layer",
+      "desc": "Zod-validated +server.ts route with apiFetch<T>.",
+      "placeholder": "Item name…",
+      "post": "POST",
+      "get": "GET",
+      "deleteAll": "DELETE all"
+    }
+  },
+  "feedback": {
+    "operationSuccessful": "Operation successful!",
+    "somethingWentWrong": "Something went wrong",
+    "pleaseReview": "Please review before continuing",
+    "newVersion": "New version available",
+    "defaultNotification": "Default notification",
+    "signedOut": "Signed out",
+    "created": "Created \"{name}\""
+  }
+}
+

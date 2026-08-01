@@ -1,0 +1,124 @@
+{
+  "app": {
+    "title": "Una pequeña aplicación para divertirse"
+  },
+  "nav": {
+    "dashboard": "Panel de control",
+    "users": "Usuarios",
+    "settings": "Ajustes",
+    "ideas": "Buzón de sugerencias",
+    "language": "Idioma",
+    "admin": "Administración"
+  },
+  "sidebar": {
+    "collapse": "Ocultar menú",
+    "expand": "Mostrar menú"
+  },
+  "menu": {
+    "home": "Inicio",
+    "drawings": "Dibujos",
+    "nested-squares": "Cuadrados Anidados",
+    "nested-polygons": "Polígonos Anidados",
+    "title": "Super Menú",
+    "subtitle": "El mejor menú de todos los tiempos",
+    "items": {
+      "grayKittens": "Gatitos grises",
+      "spaceRocket": "Un cohete espacial",
+      "gravel": "100 libras de grava",
+      "shrimp": "Todos los camarones",
+      "planetWithMall": "Un planeta con un centro comercial"
+    }
+  },
+  "home_page": {
+    "welcome": "¡Bienvenido a la página de inicio!",
+    "select_option": "Selecciona una option en el menú de la izquierda para comenzar.",
+    "nested_squares_accessible": "El componente \"Cajón de cuadrados anidados\" ahora está accesible a través del menú."
+  },
+  "themeSelector": {
+    "title": "Cambiar tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "auth": {
+    "signOut": "Cerrar sesión",
+    "signIn": "Iniciar sesión"
+  },
+  "a11y": {
+    "userMenu": "Menú de usuario"
+  },
+  "dashboard": {
+    "notifications": {
+      "title": "Sistema de Notificaciones",
+      "desc": "Cola global de notificaciones — utilizable desde cualquier lugar.",
+      "default": "Por defecto",
+      "success": "Éxito",
+      "error": "Error",
+      "warning": "Advertencia",
+      "info": "Info"
+    },
+    "api": {
+      "title": "Capa API Tipada",
+      "desc": "Ruta +server.ts validada con Zod usando apiFetch<T>.",
+      "placeholder": "Nombre del elemento…",
+      "post": "POST",
+      "get": "GET",
+      "deleteAll": "ELIMINAR todo"
+    }
+  },
+  "feedback": {
+    "operationSuccessful": "¡Operación exitosa!",
+    "somethingWentWrong": "Algo salió mal",
+    "pleaseReview": "Por favor, revise antes de continuar",
+    "newVersion": "Nueva versión disponible",
+    "defaultNotification": "Notificación por defecto",
+    "signedOut": "Sesión cerrada",
+    "created": "Elemento \"{name}\" creado"
+  },
+  "actions": {
+    "save": "Guardar",
+    "download": "Descargar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "common": {
+    "noResults": "No se encontraron resultados"
+  },
+  "users": {
+    "title": "Usuarios",
+    "invoices": {
+      "title": "Facturas",
+      "desc": "Una lista de sus facturas recientes.",
+      "invoice": "Factura",
+      "status": "Estado",
+      "method": "Método",
+      "amount": "Cantidad"
+    },
+    "status": {
+      "paid": "Pagado",
+      "pending": "Pendiente",
+      "unpaid": "No pagado"
+    }
+  },
+  "settings": {
+    "title": "Ajustes",
+    "profile": {
+      "title": "Perfil",
+      "desc": "Así es como los demás te verán en el sitio.",
+      "username": "Nombre de usuario",
+      "usernameDesc": "Este es su nombre de pantalla público. Puede ser su nombre real o un seudónimo. Solo puede cambiar esto una vez cada 30 días.",
+      "email": "Correo electrónico",
+      "emailDesc": "Puede gestionar las direcciones de correo electrónico verificadas en la configuración de su correo electrónico.",
+      "update": "Actualizar perfil"
+    }
+  },
+  "admin": {
+    "title": "Administración",
+    "desc": "Accesible solo para usuarios con el rol admin.",
+    "rbacNotice": "RBAC en acción. Esta página está protegida por requireRole(locals, 'admin') en +page.server.ts.",
+    "users": {
+      "title": "Usuarios de demostración",
+      "desc": "{count} usuarios pre-registrados."
+    }
+  }
+}

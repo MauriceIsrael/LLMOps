@@ -20,6 +20,7 @@ def setup_test_db(tmp_path: Path):
     return db_dir
 
 
+@pytest.mark.stochastic
 def test_scan_detects_empty_section(setup_test_db):
     """Test 1 : scan détecte une section vide (G1) et crée au moins une question."""
     graph = build_scan_graph()
@@ -29,6 +30,7 @@ def test_scan_detects_empty_section(setup_test_db):
     assert any(q["gap_type"] == "G1_empty_section" for q in questions)
 
 
+@pytest.mark.stochastic
 def test_scan_prioritises_by_blocking(setup_test_db):
     """Test 2 : scan trie les manques par nombre de blocages et plafonne à max_questions."""
     graph = build_scan_graph()
@@ -37,6 +39,7 @@ def test_scan_prioritises_by_blocking(setup_test_db):
     assert len(questions) == 1
 
 
+@pytest.mark.stochastic
 def test_question_carries_vocabulary(setup_test_db):
     """Test 3 : La question générée porte le nom du sujet canonique."""
     repo = ElicitationRepository(db_path=setup_test_db)
@@ -50,6 +53,7 @@ def test_question_carries_vocabulary(setup_test_db):
     assert "Storage-5.2" in q_storage["subject"]
 
 
+@pytest.mark.stochastic
 def test_prior_answer_offered(setup_test_db):
     """Test 4 : Une réponse antérieure d'un autre engagement alimente la question élicitée."""
     repo = ElicitationRepository(db_path=setup_test_db)
@@ -73,6 +77,7 @@ def test_prior_answer_offered(setup_test_db):
     assert "SAN NVMe dual-controller" in q_storage["question"] or "Storage-5.2" in q_storage["subject"]
 
 
+@pytest.mark.stochastic
 def test_interrupt_resumes_across_processes(setup_test_db, tmp_path):
     """Test 5 (CRITIQUE) : Exécute intake jusqu'à l'interrupt, détruit le graphe, recrée un nouveau graphe et reprend."""
     engagement = "test-eng-durability"
@@ -119,6 +124,7 @@ def test_interrupt_resumes_across_processes(setup_test_db, tmp_path):
     assert "SAN NVMe dual-controller" in st_after[0]["value"]
 
 
+@pytest.mark.stochastic
 def test_no_statement_without_confirmation(setup_test_db, tmp_path):
     """Test 6 : Rejet lors de l'interrupt -> aucun énoncé n'est écrit dans Kùzu DB."""
     engagement = "test-eng-reject"
@@ -143,6 +149,7 @@ def test_no_statement_without_confirmation(setup_test_db, tmp_path):
     assert len(statements) == 0
 
 
+@pytest.mark.stochastic
 def test_contradiction_creates_conflict(setup_test_db, tmp_path):
     """Test 7 : Deux réponses contradictoires génèrent un conflit. Les DEUX énoncés restent actifs."""
     repo = ElicitationRepository(db_path=setup_test_db)
@@ -192,6 +199,7 @@ def test_contradiction_creates_conflict(setup_test_db, tmp_path):
     assert len(statements) >= 2
 
 
+@pytest.mark.stochastic
 def test_conflict_blocks_completion_not_rendering(setup_test_db):
     """Test 8 : Un conflit ouvert passe le statut du document à PROVISIONAL mais n'empêche pas le rendu."""
     repo = ElicitationRepository(db_path=setup_test_db)
@@ -218,6 +226,7 @@ def test_conflict_blocks_completion_not_rendering(setup_test_db):
     assert Path(res.get("document_path")).exists()
 
 
+@pytest.mark.deterministic
 def test_llm_cannot_write(setup_test_db):
     """Test 9 : Valide que la tentative d'écriture directe sans passer par Repository lève une erreur de prédicat non autorisé."""
     repo = ElicitationRepository(db_path=setup_test_db)

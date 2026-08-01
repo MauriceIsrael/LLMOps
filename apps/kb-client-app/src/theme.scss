@@ -1,0 +1,32 @@
+// Import the SMUI theme
+@use 'smui/theme' as theme;
+
+// Import Material Icons (optional, if not linked in app.html)
+// @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+// Import any custom SMUI theme overrides if needed
+// For example, to set a custom primary color:
+// @include theme.theme-styles((
+//   primary: #007bff, // Custom blue
+//   secondary: #6c757d // Custom gray
+// ));
+
+// Include all SMUI component styles
+@include theme.smui-styles();
+
+// Include any other global styles or Material Design component styles you need
+// For example, if you need typography styles globally:
+// @use '@material/typography/mdc-typography';
+
+
+
+
+
+
+
+
+
+
+
+
+

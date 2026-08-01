@@ -281,3 +281,81 @@ def get_graph_summary() -> dict[str, Any]:
     }
 
     return ok_response(data=payload, count=1)
+
+
+def get_knowledge_analytics() -> dict[str, Any]:
+    """Retrieve volume indicators, hygiene statistics, and lifecycle distribution for the knowledge base."""
+    kb_client = _get_db()
+
+    try:
+        type_res = kb_client.execute_cypher("MATCH (a:Asset) RETURN a.type as type, count(a) as count;")
+    except Exception:
+        type_res = []
+
+    try:
+        status_res = kb_client.execute_cypher("MATCH (a:Asset) RETURN a.status as status, count(a) as count;")
+    except Exception:
+        status_res = []
+
+    try:
+        confidence_res = kb_client.execute_cypher("MATCH (a:Asset) RETURN a.confidence as confidence, count(a) as count;")
+    except Exception:
+        confidence_res = []
+
+    try:
+        glossary_res = kb_client.execute_cypher("MATCH (g:GlossaryTerm) RETURN count(g) as count;")
+        glossary_count = glossary_res[0]["count"] if glossary_res else 0
+    except Exception:
+        glossary_count = 0
+
+    try:
+        requires_res = kb_client.execute_cypher("MATCH ()-[r:REQUIRES]->() RETURN count(r) as count;")
+        requires_count = requires_res[0]["count"] if requires_res else 0
+    except Exception:
+        requires_count = 0
+
+    try:
+        supersedes_res = kb_client.execute_cypher("MATCH ()-[r:SUPERSEDES]->() RETURN count(r) as count;")
+        supersedes_count = supersedes_res[0]["count"] if supersedes_res else 0
+    except Exception:
+        supersedes_count = 0
+
+    payload = {
+        "volume_by_type": type_res,
+        "status_breakdown": status_res,
+        "confidence_breakdown": confidence_res,
+        "glossary_count": glossary_count,
+        "relations": {
+            "REQUIRES": requires_count,
+            "SUPERSEDES": supersedes_count,
+        },
+    }
+    return ok_response(payload, count=1)
+
+
+def get_domain_prominence_report() -> dict[str, Any]:
+    """Retrieve domain weight, cross-domain dependencies (hub/consumer gravity), and prominence scores."""
+    kb_client = _get_db()
+
+    try:
+        domain_vol = kb_client.execute_cypher(
+            "MATCH (a:Asset) WHERE a.domain IS NOT NULL RETURN a.domain as domain, count(a) as count;"
+        )
+    except Exception:
+        domain_vol = []
+
+    try:
+        cross_deps = kb_client.execute_cypher("""
+            MATCH (a1:Asset)-[:REQUIRES]->(a2:Asset)
+            WHERE a1.domain IS NOT NULL AND a2.domain IS NOT NULL
+            RETURN a1.domain as source_domain, a2.domain as target_domain, count(*) as weight;
+        """)
+    except Exception:
+        cross_deps = []
+
+    payload = {
+        "domain_volumes": domain_vol,
+        "cross_domain_dependencies": cross_deps,
+    }
+    return ok_response(payload, count=1)
+

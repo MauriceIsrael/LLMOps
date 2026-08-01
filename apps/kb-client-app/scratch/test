@@ -1,0 +1,5 @@
+curl -X POST http://localhost:8000/redfish/v1/Systems/73a97155-6a2a-4ccf-8418-1ee92e73e49e/Actions/ComputerSystem.Reset \
+-H 'Content-Type: application/json' \
+-d '{"ResetType":"On"}'
+
+curl http://localhost:8000/redfish/v1/Systems/

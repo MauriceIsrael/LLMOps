@@ -19,6 +19,8 @@ from mcp_server.knowledge import tools as kb_tools
 from pipelines.ingestion.generate_schema_doc import generate_schema_markdown
 from tools.elicitation.repository import ElicitationRepository
 
+pytestmark = pytest.mark.deterministic
+
 
 def is_empty_or_declared(result: dict | list | None) -> bool:
     """Checks if a tool result is empty or explicitly declares absence."""

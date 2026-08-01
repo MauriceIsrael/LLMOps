@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%sveltekit.assets%/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <!--
+    Chargement non-bloquant de la police Inter.
+    rel="preload" + onload évite de bloquer le premier rendu (render-blocking resource).
+    Le fallback system-ui dans app.css garantit que le texte est lisible immédiatement.
+  -->
+  <link
+    rel="preload"
+    as="style"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'"
+  />
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  </noscript>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* Critical CSS: Instant background and font setup before app.css loads */
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 222 47% 11%;
+    }
+    .dark {
+      --background: 222.2 84% 4.9%;
+      --foreground: 210 40% 98%;
+    }
+    body {
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      margin: 0;
+    }
+  </style>
+  %sveltekit.head%
+
+
+  <!--
+    Flash-free dark mode: runs synchronously before the first paint.
+    Reads localStorage (app:preferences) and matchMedia to apply the
+    correct dark/light class on <html> before any CSS or JS is parsed.
+    @see src/lib/stores/preferences.svelte.ts
+  -->
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('app:preferences');
+        var prefs = stored ? JSON.parse(stored) : {};
+        var override = prefs.themeOverride || 'system';
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var isDark = override === 'dark' || (override === 'system' && prefersDark);
+        document.documentElement.classList.toggle('dark', isDark);
+      } catch (_) {
+        /* storage blocked — silently fall back to light mode */
+      }
+    })();
+  </script>
+</head>
+
+<body data-sveltekit-preload-data="hover">
+  <div style="display: contents">%sveltekit.body%</div>
+</body>
+
+</html>

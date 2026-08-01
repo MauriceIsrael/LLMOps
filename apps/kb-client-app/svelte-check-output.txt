@@ -1,0 +1,41 @@
+
+> template-app@0.0.1 check
+> svelte-kit sync && svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: /home/momo/Dev/template-app
+Getting Svelte diagnostics...
+
+/home/momo/Dev/template-app/src/routes/api/admin/users/+server.ts:13:17
+Error: Expected 2-3 arguments, but got 1. 
+  role: z.enum(['admin', 'user']),
+  attributes: z.record(z.any()).optional()
+});
+
+/home/momo/Dev/template-app/src/routes/api/admin/users/+server.ts:27:34
+Error: Property 'errors' does not exist on type 'ZodError<{ name: string; email: string; role: "admin" | "user"; password?: string | undefined; attributes?: Record<any, unknown> | undefined; }>'. 
+  if (!result.success) {
+    const message = result.error.errors.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`).join(', ');
+    throw error(400, message);
+
+/home/momo/Dev/template-app/src/routes/api/admin/users/+server.ts:68:34
+Error: Property 'errors' does not exist on type 'ZodError<{ name?: string | undefined; email?: string | undefined; password?: string | undefined; role?: "admin" | "user" | undefined; attributes?: Record<any, unknown> | undefined; }>'. 
+  if (!result.success) {
+    const message = result.error.errors.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`).join(', ');
+    throw error(400, message);
+
+/home/momo/Dev/template-app/src/lib/LoremIpsum.svelte:38:3
+Warn: Unused CSS selector ".lorem-ipsum-container p"
+https://svelte.dev/e/css_unused_selector (svelte)
+  /* Style pour les paragraphes générés */
+  .lorem-ipsum-container p {
+    margin-bottom: 1em; /* Espace entre les paragraphes */
+
+/home/momo/Dev/template-app/src/lib/LoremIpsum.svelte:42:3
+Warn: Unused CSS selector ".lorem-ipsum-container p:last-child"
+https://svelte.dev/e/css_unused_selector (svelte)
+
+  .lorem-ipsum-container p:last-child {
+    margin-bottom: 0; /* Pas de marge sous le dernier paragraphe */
+
+====================================
+svelte-check found 3 errors and 2 warnings in 2 files

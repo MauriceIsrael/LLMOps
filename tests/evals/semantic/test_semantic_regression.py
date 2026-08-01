@@ -10,6 +10,8 @@ from deepeval.test_case import LLMTestCase
 
 from mcp_server.tools.asset_tools import get_asset
 
+pytestmark = pytest.mark.stochastic
+
 DATASET_PATH = Path("tests/evals/datasets/adr_qa_dataset.json")
 
 

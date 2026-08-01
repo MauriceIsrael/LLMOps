@@ -1,0 +1,129 @@
+{
+  "app": {
+    "title": "Une petite app pour rigoler"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "explorer": "Visualiseur 3D Threlte",
+    "assets": "Catalogue d'Actifs KB",
+    "users": "Utilisateurs (Exemple)",
+    "settings": "Paramètres (Exemple)",
+    "ideas": "Boîte à idées",
+    "language": "Langue",
+    "admin": "Administration"
+  },
+  "sidebar": {
+    "collapse": "Réduire le menu",
+    "expand": "Développer le menu"
+  },
+  "menu": {
+    "home": "Accueil",
+    "drawings": "Dessins",
+    "nested-squares": "Carrés Imbriqués",
+    "nested-polygons": "Polygones Imbriqués",
+    "title": "Super Menu",
+    "subtitle": "Le meilleur menu de tous les temps",
+    "items": {
+      "grayKittens": "Chatons gris",
+      "spaceRocket": "Une fusée spatiale",
+      "gravel": "100 livres de gravier",
+      "shrimp": "Toutes les crevettes",
+      "planetWithMall": "Une planète avec un centre commercial"
+    }
+  },
+  "home_page": {
+    "welcome": "Bienvenue sur la page d'accueil !",
+    "select_option": "Sélectionnez une option dans le menu de gauche pour commencer.",
+    "nested_squares_accessible": "Le composant \"Dessinateur de Carrés Imbriqués\" est maintenant accessible via le menu."
+  },
+  "themeSelector": {
+    "title": "Changer le thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+
+  "auth": {
+    "signOut": "Déconnexion",
+    "signIn": "Connexion"
+  },
+  "a11y": {
+    "userMenu": "Menu utilisateur"
+  },
+  "dashboard": {
+    "notifications": {
+      "title": "Système de Notifications",
+      "desc": "File d'attente globale de toasts — utilisable partout dans l'app.",
+      "default": "Par défaut",
+      "success": "Succès",
+      "error": "Erreur",
+      "warning": "Avertissement",
+      "info": "Info"
+    },
+    "api": {
+      "title": "Couche API Typée",
+      "desc": "Route +server.ts validée par Zod avec apiFetch<T>.",
+      "placeholder": "Nom de l'élément…",
+      "post": "POST",
+      "get": "GET",
+      "deleteAll": "Tout SUPPRIMER"
+    }
+  },
+  "feedback": {
+    "operationSuccessful": "Opération réussie !",
+    "somethingWentWrong": "Quelque chose s'est mal passé",
+    "pleaseReview": "Veuillez vérifier avant de continuer",
+    "newVersion": "Nouvelle version disponible",
+    "defaultNotification": "Notification par défaut",
+    "signedOut": "Déconnecté",
+    "created": "Élément \"{name}\" créé"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "download": "Télécharger",
+    "cancel": "Annuler",
+    "delete": "Supprimer"
+  },
+  "common": {
+    "noResults": "Aucun résultat trouvé"
+  },
+  "users": {
+    "title": "Utilisateurs",
+    "invoices": {
+      "title": "Factures",
+      "desc": "Liste de vos factures récentes.",
+      "invoice": "Facture",
+      "status": "État",
+      "method": "Méthode",
+      "amount": "Montant"
+    },
+    "status": {
+      "paid": "Payé",
+      "pending": "En attente",
+      "unpaid": "Non payé"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "profile": {
+      "title": "Profil",
+      "desc": "C'est ainsi que les autres vous verront sur le site.",
+      "username": "Nom d'utilisateur",
+      "usernameDesc": "C'est votre nom d'affichage public. Il peut s'agir de votre vrai nom ou d'un pseudonyme. Vous ne pouvez le changer qu'une fois tous les 30 jours.",
+      "email": "E-mail",
+      "emailDesc": "Vous pouvez gérer les adresses e-mail vérifiées dans vos paramètres de messagerie.",
+      "update": "Mettre à jour le profil"
+    }
+  },
+  "admin": {
+    "title": "Administration",
+    "desc": "Accessible uniquement aux utilisateurs ayant le rôle admin.",
+    "rbacNotice": "RBAC en action. Cette page est protégée par requireRole(locals, 'admin') dans +page.server.ts.",
+    "users": {
+      "title": "Utilisateurs de démonstration",
+      "desc": "{count} utilisateurs pré-enregistrés."
+    }
+  }
+}
+
+

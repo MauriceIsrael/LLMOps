@@ -61,6 +61,8 @@ graph TD
 ```text
 LLMOps/
 ├── .github/workflows/         # CI automatisée, Ingestion KB & Évaluations sémantiques
+├── apps/
+│   └── kb-client-app/         # App cliente dédiée SvelteKit + Threlte 3D (Multi-KB, Analytics & Lecteur KB)
 ├── artifacts/                 # Artefacts générés (Rapports de progression, document.md, instantanés)
 ├── data/
 │   ├── kb/                    # Dossier source des documents Markdown (ADRs, Glossaire, Principes...)
@@ -163,6 +165,8 @@ Tous les outils retournent une **enveloppe de réponse normalisée** : `{"status
 | `get_principles_for` | Récupérer les principes d'architecture actifs | `phase`, `domain` |
 | `get_decision_trail` | Historique et chaîne d'antériorité d'un ADR (`SUPERSEDES`) | `id` |
 | `get_glossary_term` | Obtenir la définition canonique d'un terme du glossaire | `term` |
+| `get_knowledge_analytics` | Métriques de volume, statut, confiance et antériorité | *(aucun)* |
+| `get_domain_prominence_report` | Volume et matrice des dépendances inter-domaines (`REQUIRES`) | *(aucun)* |
 | `query_graph` | Exécuter une requête Cypher en lecture seule sur la KB | `cypher_query` |
 | `get_graph_summary` | Résumé des nœuds et relations de la base de connaissances | *(aucun)* |
 

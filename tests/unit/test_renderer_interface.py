@@ -1,5 +1,7 @@
 """Tests unitaires isolés pour l'interface du Renderer et les outils FastMCP associés."""
 
+import pytest
+
 from mcp_server.renderer_interface import RendererClient
 from mcp_server.tools.renderer_tools import (
     get_diagram_graph,
@@ -7,6 +9,8 @@ from mcp_server.tools.renderer_tools import (
     get_subject_trajectory_tool,
 )
 from tools.elicitation.repository import ElicitationRepository
+
+pytestmark = pytest.mark.deterministic
 
 
 def test_renderer_client_payload(tmp_path):

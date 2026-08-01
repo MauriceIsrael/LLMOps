@@ -11,6 +11,7 @@ def temp_kuzu_client(tmp_path) -> KuzuClient:
     return KuzuClient(db_path=db_dir)
 
 
+@pytest.mark.deterministic
 def test_kuzu_client_query_execution(temp_kuzu_client: KuzuClient) -> None:
     temp_kuzu_client.execute_cypher("CREATE NODE TABLE Test (id INT64, PRIMARY KEY(id));")
     temp_kuzu_client.execute_cypher("CREATE (t:Test {id: 42});")

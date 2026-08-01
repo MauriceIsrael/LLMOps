@@ -7,18 +7,22 @@ Ce manuel fournit toutes les instructions nécessaires pour installer, alimenter
 ## 📋 1. Prérequis & Installation
 
 ### Prérequis Système
+
 - Linux / macOS / WSL2
 - Python `>= 3.11`
 - [Poetry](https://python-poetry.org/docs/#installation)
 - Docker & Docker Compose (Optionnel)
 
 ### Clé d'API LLM
+
 Exposez votre clé OpenAI pour l'extraction LlamaIndex :
+
 ```bash
 export OPENAI_API_KEY="sk-..."
 ```
 
 ### Installation
+
 ```bash
 cd LLMOps
 poetry install
@@ -31,6 +35,7 @@ poetry install
 ```bash
 poetry run ingest --kb-dir data/kb --db-path data/kuzu_db
 ```
+
 - Ingestion des fichiers Markdown (`.md`) et des spécifications YAML (`.yaml` / `.yml`).
 - Filtrage automatique des fichiers de prose sans `id` (`README.md`, `CONTRIBUTING.md`, etc.).
 
@@ -38,13 +43,16 @@ poetry run ingest --kb-dir data/kb --db-path data/kuzu_db
 
 ## 🎨 3. Visualisation du Graphe & Plans de Connaissance
 
-### Visualiseur Web local :
+### Visualiseur Web local
+
 ```bash
 poetry run visualize
 ```
+
 *Ouvrez [docs/graph_explorer.html](file:///home/momo/Dev/LLMOps/docs/graph_explorer.html) dans votre navigateur.*
 
-### Visualiseur Web GCP Cloud Run en direct :
+### Visualiseur Web GCP Cloud Run en direct
+
 👉 **`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`**
 
 ---
@@ -91,13 +99,12 @@ Pour exécuter la démonstration automatisée complète couvrant les 6 phases et
 poetry run pytest tests/integration/test_scenario_nordwave_mcx_v2.py -v
 ```
 
-
-
 ---
 
-## 📢 5. Comment Partager la Plateforme à vos Collègues
+## 📢 5. Comment utiliser la Plateforme
 
 ### Option 1 : Partager l'accès au Serveur MCP (Claude Desktop / Cursor / Antigravity / VS Code)
+
 Transmettez simplement cet extrait de configuration à vos collègues pour qu'ils l'ajoutent dans leur fichier `mcp_config.json` local :
 
 ```json
@@ -109,11 +116,13 @@ Transmettez simplement cet extrait de configuration à vos collègues pour qu'il
   }
 }
 ```
+
 *Vos collègues peuvent alors interroger directement la base d'architecture en langage naturel depuis leur IDE.*
 
 ---
 
 ### Option 2 : Partager le Visualiseur Web Interactif du Graphe
+
 Transmettez ce lien direct à vos collègues pour qu'ils explorent la base de connaissances sans rien installer :
 👉 **`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`**
 
@@ -123,7 +132,8 @@ Transmettez ce lien direct à vos collègues pour qu'ils explorent la base de co
 
 Vos collègues n'ont **rien à installer** sur leur poste. Ils répondent directement dans leur navigateur sur GitHub !
 
-1. **Déclarer vos collègues dans le fichier d'annuaire `projects/demo-2026/roster.yaml`** :
+1. **Déclarer vos collaborateurs dans le fichier d'annuaire `projects/demo-2026/roster.yaml`** :
+
    ```yaml
    - login: alice-gh
      name: Alice

@@ -149,6 +149,59 @@ Tous les outils FastMCP retournent une **enveloppe JSON uniformisée** :
 }
 ```
 
+### 4.4 `get_knowledge_analytics`
+Rapport global sur les métriques de volume, de statut et d'antériorité de la base de connaissances.
+
+**Payload Schema (`data`) :**
+```json
+{
+  "type": "object",
+  "properties": {
+    "total_assets": { "type": "integer" },
+    "by_type": { "type": "object", "additionalProperties": { "type": "integer" } },
+    "by_status": { "type": "object", "additionalProperties": { "type": "integer" } },
+    "by_confidence": { "type": "object", "additionalProperties": { "type": "integer" } },
+    "total_relations": { "type": "integer" }
+  },
+  "required": ["total_assets", "by_type", "by_status", "by_confidence", "total_relations"]
+}
+```
+
+### 4.5 `get_domain_prominence_report`
+Rapport de poids et de centralité des domaines d'expertise avec matrice des dépendances inter-domaines (`REQUIRES`).
+
+**Payload Schema (`data`) :**
+```json
+{
+  "type": "object",
+  "properties": {
+    "domain_volumes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "domain": { "type": "string" },
+          "count": { "type": "integer" },
+          "share_pct": { "type": "number" }
+        }
+      }
+    },
+    "cross_domain_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "count": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "required": ["domain_volumes", "cross_domain_matrix"]
+}
+```
+
 ---
 
 ## 🎯 5. Schémas de Réponse — Engagement Server (Moteur de Rendu)

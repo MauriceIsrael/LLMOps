@@ -22,6 +22,7 @@ def repo(tmp_path):
     gc.collect()
 
 
+@pytest.mark.stochastic
 def test_question_matches_subject_level(repo, tmp_path):
     """Test 9 : Un sujet à L1 reçoit une question de cadrage, jamais une question de paramétrage."""
     db_path = tmp_path / "kuzu_db"
@@ -39,6 +40,7 @@ def test_question_matches_subject_level(repo, tmp_path):
     assert q["status"] == "open"
 
 
+@pytest.mark.stochastic
 def test_level_gate_holds_premature_question(repo, tmp_path):
     """Test 10 : Une question de paramétrage (L4) sur un sujet L1 est retenue (Level Gate)."""
     db_path = tmp_path / "kuzu_db"
@@ -57,6 +59,7 @@ def test_level_gate_holds_premature_question(repo, tmp_path):
                 assert gap.get("held_premature") is True
 
 
+@pytest.mark.stochastic
 def test_patterns_proposed_at_l2(repo, tmp_path):
     """Test 11 : Atteindre L2 produit des patterns candidats avec leur clause 'quand ne pas utiliser'."""
     db_path = tmp_path / "kuzu_db"
@@ -78,12 +81,14 @@ def test_patterns_proposed_at_l2(repo, tmp_path):
     assert "Quand ne pas utiliser" in q_text
 
 
+@pytest.mark.deterministic
 def test_model_cannot_set_level(repo):
     """Test 12 : Un appel avec un niveau invalide ou non autorisé par un modèle lève une erreur."""
     with pytest.raises(ValueError, match="Niveau de maturité inconnu"):
         repo.advance_subject_level("Storage-5.2", "L9_invalid_level")
 
 
+@pytest.mark.deterministic
 def test_board_flags_stall(repo):
     """Test 13 : Un sujet inchangé depuis plus de 7 jours avec une question ouverte est marqué STAGNANT."""
     repo.save_subject("Storage-5.2")
@@ -111,6 +116,7 @@ def test_board_flags_stall(repo):
     assert target["assigned_role"] == "cloud-architect"
 
 
+@pytest.mark.stochastic
 def test_section_readiness(repo, tmp_path):
     """Test 14 : Une section dont les sujets sont sous L3 rend un statut PROVISIONAL et les nomme."""
     db_path = tmp_path / "kuzu_db"
@@ -126,6 +132,7 @@ def test_section_readiness(repo, tmp_path):
     assert "Storage-5.2" in unripe_names
 
 
+@pytest.mark.stochastic
 def test_prior_answer_goes_to_confirmation_batch(repo, tmp_path):
     """Test 15 : Une réponse antérieure apparaît dans les données d'enrichissement comme défaut à confirmer."""
     db_path = tmp_path / "kuzu_db"
@@ -153,6 +160,7 @@ def test_prior_answer_goes_to_confirmation_batch(repo, tmp_path):
 
 
 
+@pytest.mark.stochastic
 def test_question_carries_fresh_context_links(repo, tmp_path):
     """Test 16 : Chaque question émise porte des liens de contexte permanents non obsolètes (draft_ref et subject_ref)."""
     db_path = tmp_path / "kuzu_db"
@@ -166,6 +174,7 @@ def test_question_carries_fresh_context_links(repo, tmp_path):
     assert "subject_ref" in q and q["subject_ref"].startswith("file://")
 
 
+@pytest.mark.deterministic
 def test_llm_cannot_write(repo):
     """Test 17 : Seul le module Repository est autorisé à écrire dans Kùzu DB avec validation des prédicats."""
     with pytest.raises(ValueError, match="Prédicat non autorisé"):

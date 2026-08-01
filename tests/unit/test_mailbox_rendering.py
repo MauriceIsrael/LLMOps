@@ -16,6 +16,8 @@ from tools.elicitation.mailbox.renderers import (
 )
 from tools.elicitation.mailbox.roster import RosterManager
 
+pytestmark = pytest.mark.deterministic
+
 
 @pytest.fixture
 def sample_question_data():

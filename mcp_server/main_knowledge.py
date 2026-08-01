@@ -12,8 +12,10 @@ from mcp_server.knowledge.tools import (
     get_asset,
     get_assets,
     get_decision_trail,
+    get_domain_prominence_report,
     get_glossary_term,
     get_graph_summary,
+    get_knowledge_analytics,
     get_principles_for,
     list_assets,
     query_graph,
@@ -35,6 +37,8 @@ register_tools(
         get_principles_for,
         query_graph,
         get_graph_summary,
+        get_knowledge_analytics,
+        get_domain_prominence_report,
     ],
 )
 
