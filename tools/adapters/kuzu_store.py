@@ -34,7 +34,7 @@ def make_graph_store(
     db_path: str | Path, read_only: bool = False, backend: str | None = None
 ) -> GraphStore:
     """Factory function for creating GraphStore instances based on environment or argument."""
-    selected_backend = (backend or os.getenv("GRAPH_BACKEND", "kuzu")).lower()
+    selected_backend = (backend or os.getenv("GRAPH_BACKEND", "ladybug")).lower()
 
     if selected_backend == "kuzu":
         return KuzuGraphStore(db_path=db_path, read_only=read_only)
