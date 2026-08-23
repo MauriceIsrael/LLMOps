@@ -11,6 +11,7 @@ et les snapshots individuels sous `projects/nordwave-mcx-2027/snapshots/`.
 import gc
 from pathlib import Path
 
+import pytest
 from langgraph.types import Command
 
 from tools.elicitation.flows.assemble import build_assemble_graph
@@ -34,6 +35,8 @@ from tools.elicitation.mailbox.renderers import (
     render_question_card,
 )
 from tools.elicitation.repository import ElicitationRepository
+
+pytestmark = pytest.mark.stochastic
 
 
 def test_mcx_scenario_end_to_end(tmp_path):

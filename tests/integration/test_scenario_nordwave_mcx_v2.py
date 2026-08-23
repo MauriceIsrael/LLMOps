@@ -49,6 +49,9 @@ except ImportError:  # pragma: no cover
 
 from langgraph.types import Command
 
+pytestmark = pytest.mark.stochastic
+
+
 ENGAGEMENT = "nordwave-mcx-2027"
 BLUEPRINT_ID = "BLU-hla-mcx"
 ARTIFACTS = Path("artifacts") / ENGAGEMENT

@@ -9,6 +9,8 @@ from tools.elicitation.models.blueprint_schema import load_blueprint
 from tools.elicitation.plan import generate_instruction_plan
 from tools.elicitation.repository import ElicitationRepository
 
+pytestmark = pytest.mark.stochastic
+
 
 @pytest.fixture
 def temp_db(tmp_path: Path) -> Path:

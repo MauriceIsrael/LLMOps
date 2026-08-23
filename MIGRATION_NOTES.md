@@ -32,7 +32,17 @@ Conséquences :
 
 ### Section — Améliorations repérées mais non faites (Règle 3)
 
+1. `repository.py` : pas de validation de prédicat (`save_statement` accepte n'importe quel prédicat). Les tests `test_llm_cannot_write` dans `test_elicitation.py` et `test_subject_maturity.py` attendent un `ValueError("Prédicat non autorisé")` qui n'est jamais levé. **Échec pré-existant sur `main`** — non corrigé (Règle 3 + interdiction de modifier un test).
+2. `_esc()` utilise `\\'` pour échapper les guillemets dans les requêtes Cypher. Kùzu accepte aussi `''` (convention SQL). Le mix des deux conventions dans le fichier est repéré mais non modifié.
+3. Dépendance fantôme `llama-index-graph-stores-kuzu` dans `pyproject.toml` — sera retirée en Phase 3 (dans le périmètre).
 
+### Section — Échecs pré-existants (baseline `main`)
+
+| Test | Fichier | Cause | Impact migration |
+|------|---------|-------|-----------------|
+| `test_llm_cannot_write` | `tests/unit/test_elicitation.py:230` | Validation prédicat non implémentée | Aucun |
+| `test_llm_cannot_write` | `tests/unit/test_subject_maturity.py:169` | Idem | Aucun |
 
 ### Section — Divergences de dialecte rencontrées
 
+_(vide — à remplir en Phases 2-3 si des différences Kùzu/Ladybug sont découvertes)_

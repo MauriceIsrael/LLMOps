@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import json
-import sys
 
 from mcp_server.db.kuzu_client import KuzuClient
 
@@ -16,13 +15,14 @@ NODE_TABLES = [
 ]
 
 REL_TABLES = {
-    "SUPERSEDES": ("Asset", "Asset"),
-    "REQUIRES": ("Asset", "Asset"),
-    "DEFINES": ("Asset", "GlossaryTerm"),
-    "ABOUT": ("Statement", "Subject"),
-    "ANSWERS": ("Statement", "Question"),
-    "TARGETS": ("Question", "Subject"),
-    "INVOLVES": ("Conflict", "Statement"),
+    # rel_name: (src_table, src_pk, dst_table, dst_pk)
+    "SUPERSEDES": ("Asset", "id", "Asset", "id"),
+    "REQUIRES": ("Asset", "id", "Asset", "id"),
+    "DEFINES": ("Asset", "id", "GlossaryTerm", "term"),
+    "ABOUT": ("Statement", "id", "Subject", "id"),
+    "ANSWERS": ("Statement", "id", "Question", "id"),
+    "TARGETS": ("Question", "id", "Subject", "id"),
+    "INVOLVES": ("Conflict", "id", "Statement", "id"),
 }
 
 EXCLUDED_FIELDS = {
@@ -36,50 +36,62 @@ EXCLUDED_FIELDS = {
 
 def dump_graph(db_path: str, output_path: str | None = None) -> None:
     client = KuzuClient(db_path=db_path)
-    
+
+    # Discover which tables actually exist (ADR-0015: planes are physically separate)
+    existing = set()
+    try:
+        rows = client.execute_cypher("CALL show_tables() RETURN name;")
+        existing = {r["name"] for r in rows if r and "name" in r}
+    except Exception:
+        pass
+
     data = {
         "nodes": {},
         "relations": {},
         "_meta": {
-            "tables": NODE_TABLES + list(REL_TABLES.keys()),
-            "excluded_fields": sorted(list(EXCLUDED_FIELDS))
-        }
+            "tables": sorted(existing),
+            "excluded_fields": sorted(list(EXCLUDED_FIELDS)),
+        },
     }
-    
+
     for node_table in NODE_TABLES:
+        if node_table not in existing:
+            continue
         query = f"MATCH (n:{node_table}) RETURN n.*"
         results = client.execute_cypher(query)
-        
+
         cleaned_results = []
         for row in results:
             cleaned_row = {
-                k.replace("n.", ""): v 
-                for k, v in row.items() 
+                k.replace("n.", ""): v
+                for k, v in row.items()
                 if k.replace("n.", "") not in EXCLUDED_FIELDS
             }
             cleaned_results.append(cleaned_row)
-            
-        cleaned_results.sort(key=lambda x: str(x.get("id", "")))
+
+        cleaned_results.sort(key=lambda x: str(x.get("id", x.get("term", ""))))
         if cleaned_results:
             data["nodes"][node_table] = cleaned_results
-            
-    for rel_table, (src_table, dst_table) in REL_TABLES.items():
-        query = f"MATCH (a:{src_table})-[r:{rel_table}]->(b:{dst_table}) RETURN a.id AS _src, b.id AS _dst, r.*"
+
+    for rel_table, (src_table, src_pk, dst_table, dst_pk) in REL_TABLES.items():
+        if rel_table not in existing:
+            continue
+        query = f"MATCH (a:{src_table})-[r:{rel_table}]->(b:{dst_table}) RETURN a.{src_pk} AS _src, b.{dst_pk} AS _dst, r.*"
         results = client.execute_cypher(query)
-        
+
         cleaned_results = []
         for row in results:
             cleaned_row = {
-                k.replace("r.", ""): v 
-                for k, v in row.items() 
+                k.replace("r.", ""): v
+                for k, v in row.items()
                 if k.replace("r.", "") not in EXCLUDED_FIELDS
             }
             cleaned_results.append(cleaned_row)
-            
+
         cleaned_results.sort(key=lambda x: (str(x.get("_src", "")), str(x.get("_dst", ""))))
         if cleaned_results:
             data["relations"][rel_table] = cleaned_results
-            
+
     json_str = json.dumps(data, sort_keys=True, separators=(',', ':'), ensure_ascii=False, default=str)
     
     if output_path:

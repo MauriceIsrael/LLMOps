@@ -11,6 +11,8 @@ from tools.elicitation.repository import ElicitationRepository
 from tools.elicitation.trajectory import get_subject_trajectory
 from tools.elicitation.vocabulary_protector import map_material_vocabulary
 
+pytestmark = pytest.mark.stochastic
+
 
 @pytest.fixture
 def temp_db(tmp_path: Path) -> Path:

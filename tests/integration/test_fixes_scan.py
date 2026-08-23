@@ -13,6 +13,8 @@ from tools.elicitation.models.blueprint_schema import (
 )
 from tools.elicitation.repository import ElicitationRepository
 
+pytestmark = pytest.mark.stochastic
+
 
 @pytest.fixture
 def temp_db(tmp_path: Path) -> Path:

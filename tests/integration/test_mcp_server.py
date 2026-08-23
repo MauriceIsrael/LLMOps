@@ -1,6 +1,10 @@
 """Tests d'intégration des outils exposés par le serveur FastMCP (avec Enveloppe)."""
 
+import pytest
+
 from mcp_server.knowledge.tools import get_decision_trail, get_glossary_term, list_assets
+
+pytestmark = pytest.mark.stochastic
 
 
 def test_list_assets_tool() -> None:

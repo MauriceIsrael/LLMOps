@@ -1,12 +1,14 @@
 """Test d'intégration automatisé du scénario d'élicitation collaboratif avec 3 acteurs fictifs (Alice, Bob, Charlie)."""
 
-
+import pytest
 from langgraph.types import Command
 
 from tools.elicitation.flows.assemble import build_assemble_graph
 from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
 from tools.elicitation.flows.scan import build_scan_graph
 from tools.elicitation.repository import ElicitationRepository
+
+pytestmark = pytest.mark.stochastic
 
 
 def test_end_to_end_3_architects_scenario(tmp_path):

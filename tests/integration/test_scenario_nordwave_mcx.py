@@ -53,6 +53,9 @@ except ImportError:  # pragma: no cover
 
 from langgraph.types import Command
 
+pytestmark = pytest.mark.stochastic
+
+
 ENGAGEMENT = "nordwave-mcx-2027"
 ARTIFACTS = Path("artifacts") / ENGAGEMENT
 DB_PATH = ARTIFACTS / "graph"

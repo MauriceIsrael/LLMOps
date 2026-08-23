@@ -1,9 +1,11 @@
 """Contract tests for Cypher queries used across the application."""
 
 import pytest
+
 from mcp_server.db.kuzu_client import KuzuClient
-from tools.elicitation.db_schema import ElicitationSchemaInitializer
 from pipelines.ingestion.graph_loader import KuzuGraphLoader
+from tools.elicitation.db_schema import ElicitationSchemaInitializer
+
 
 @pytest.mark.deterministic
 def test_char_save_subject_check(tmp_path):
