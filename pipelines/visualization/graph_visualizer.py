@@ -1,18 +1,22 @@
-"""Module de visualisation du graphe de connaissances Kùzu DB avec Plans de Connaissance et Haut Contraste."""
+"""Module de visualisation du graphe de connaissances avec Plans de Connaissance et Haut Contraste."""
 
 import json
 from pathlib import Path
 
-import kuzu
+from tools.adapters.kuzu_store import make_graph_store
+from tools.ports.graph_store import GraphStore
 
 
 class GraphVisualizer:
-    """Générateur de visualiseur web interactif (Plans de Connaissance & High Contrast UI) pour Kùzu DB."""
+    """Générateur de visualiseur web interactif (Plans de Connaissance & High Contrast UI) pour le graphe."""
 
-    def __init__(self, db_path: str | Path = "data/kuzu_db") -> None:
+    def __init__(
+        self,
+        db_path: str | Path = "data/kuzu_db",
+        graph_store: GraphStore | None = None,
+    ) -> None:
         self.db_path = str(db_path)
-        self.db = kuzu.Database(self.db_path, read_only=True)
-        self.conn = kuzu.Connection(self.db)
+        self.store = graph_store or make_graph_store(self.db_path, read_only=True)
 
     def extract_graph_data(self) -> dict:
         """Extrait les nœuds et relations avec typage par Plan de Connaissance et contrastes optimisés."""
@@ -20,24 +24,23 @@ class GraphVisualizer:
         edges = []
 
         # 1. Extraction des Assets
-        asset_res = self.conn.execute(
-            "MATCH (a:Asset) RETURN a.id, a.title, a.type, a.status, a.confidence, a.owner, a.source_path, a.phase, a.domain;"
+        rows_asset = self.store.execute_cypher(
+            "MATCH (a:Asset) RETURN a.id as id, a.title as title, a.type as type, a.status as status, a.confidence as confidence, a.owner as owner, a.source_path as source_path, a.phase as phase, a.domain as domain;"
         )
-        while asset_res.has_next():
-            row = asset_res.get_next()
-            if not row or not row[0]:
+        for r in rows_asset:
+            if not r or not r.get("id"):
                 continue
 
             doc_id, title, doc_type, status, confidence, owner, source_path, phase, domain = (
-                str(row[0]),
-                str(row[1] or ""),
-                str(row[2] or "asset"),
-                str(row[3] or ""),
-                str(row[4] or ""),
-                str(row[5] or ""),
-                str(row[6] or ""),
-                str(row[7] or ""),
-                str(row[8] or ""),
+                str(r["id"]),
+                str(r.get("title") or ""),
+                str(r.get("type") or "asset"),
+                str(r.get("status") or ""),
+                str(r.get("confidence") or ""),
+                str(r.get("owner") or ""),
+                str(r.get("source_path") or ""),
+                str(r.get("phase") or ""),
+                str(r.get("domain") or ""),
             )
 
             dtype = doc_type.lower()
@@ -94,15 +97,13 @@ class GraphVisualizer:
                 }
             )
 
-
         # 2. Extraction des Glossaire Terms
-        gloss_res = self.conn.execute("MATCH (g:GlossaryTerm) RETURN g.term, g.definition;")
-        while gloss_res.has_next():
-            row = gloss_res.get_next()
-            if not row or not row[0]:
+        rows_gloss = self.store.execute_cypher("MATCH (g:GlossaryTerm) RETURN g.term as term, g.definition as definition;")
+        for r in rows_gloss:
+            if not r or not r.get("term"):
                 continue
 
-            term, definition = str(row[0]), str(row[1] or "")
+            term, definition = str(r["term"]), str(r.get("definition") or "")
             nodes.append(
                 {
                     "id": f"GLOSS:{term}",
@@ -124,14 +125,13 @@ class GraphVisualizer:
             )
 
         # 3. Extraction des relations SUPERSEDES (Plan Décisionnel)
-        sup_res = self.conn.execute("MATCH (a1:Asset)-[r:SUPERSEDES]->(a2:Asset) RETURN a1.id, a2.id;")
-        while sup_res.has_next():
-            row = sup_res.get_next()
-            if row:
+        rows_sup = self.store.execute_cypher("MATCH (a1:Asset)-[r:SUPERSEDES]->(a2:Asset) RETURN a1.id as src, a2.id as tgt;")
+        for r in rows_sup:
+            if r and r.get("src") and r.get("tgt"):
                 edges.append(
                     {
-                        "from": str(row[0]),
-                        "to": str(row[1]),
+                        "from": str(r["src"]),
+                        "to": str(r["tgt"]),
                         "label": "SUPERSEDES",
                         "plane": "decisions",
                         "color": {"color": "#ef4444", "highlight": "#dc2626"},
@@ -150,14 +150,13 @@ class GraphVisualizer:
                 )
 
         # 4. Extraction des relations REQUIRES (Plan Principes)
-        req_res = self.conn.execute("MATCH (a1:Asset)-[r:REQUIRES]->(a2:Asset) RETURN a1.id, a2.id;")
-        while req_res.has_next():
-            row = req_res.get_next()
-            if row:
+        rows_req = self.store.execute_cypher("MATCH (a1:Asset)-[r:REQUIRES]->(a2:Asset) RETURN a1.id as src, a2.id as tgt;")
+        for r in rows_req:
+            if r and r.get("src") and r.get("tgt"):
                 edges.append(
                     {
-                        "from": str(row[0]),
-                        "to": str(row[1]),
+                        "from": str(r["src"]),
+                        "to": str(r["tgt"]),
                         "label": "REQUIRES",
                         "plane": "principles",
                         "color": {"color": "#38bdf8", "highlight": "#0284c7"},
@@ -175,14 +174,13 @@ class GraphVisualizer:
                 )
 
         # 5. Extraction des relations DEFINES (Plan Sémantique)
-        def_res = self.conn.execute("MATCH (a:Asset)-[r:DEFINES]->(g:GlossaryTerm) RETURN a.id, g.term;")
-        while def_res.has_next():
-            row = def_res.get_next()
-            if row:
+        rows_def = self.store.execute_cypher("MATCH (a:Asset)-[r:DEFINES]->(g:GlossaryTerm) RETURN a.id as src, g.term as tgt;")
+        for r in rows_def:
+            if r and r.get("src") and r.get("tgt"):
                 edges.append(
                     {
-                        "from": str(row[0]),
-                        "to": f"GLOSS:{row[1]}",
+                        "from": str(r["src"]),
+                        "to": f"GLOSS:{r['tgt']}",
                         "label": "DEFINES",
                         "plane": "glossary",
                         "color": {"color": "#c084fc", "highlight": "#9333ea"},

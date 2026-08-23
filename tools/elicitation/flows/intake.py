@@ -10,7 +10,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.types import interrupt
 from typing_extensions import TypedDict
 
-from mcp_server.db.kuzu_client import KuzuClient
+from tools.adapters.kuzu_store import make_graph_store
 from tools.elicitation.repository import ElicitationRepository
 
 
@@ -274,7 +274,7 @@ def check_node(state: IntakeState) -> dict[str, Any]:
         return {}
 
     db_path = state.get("db_path", "data/kuzu_db")
-    db_client = KuzuClient(db_path=db_path, read_only=False)
+    db_client = make_graph_store(db_path=db_path, read_only=False)
     engagement = state.get("engagement", "demo-2026")
 
     detected_conflicts = []

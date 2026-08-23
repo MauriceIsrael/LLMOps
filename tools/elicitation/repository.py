@@ -4,28 +4,34 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from mcp_server.db.kuzu_client import KuzuClient
+from tools.adapters.kuzu_store import make_graph_store
 from tools.elicitation.db_schema import ElicitationSchemaInitializer
+from tools.ports.graph_store import GraphStore
 
 
 def _esc(val: Any) -> str:
-    """Échappe les guillemets simples et retours à la ligne pour les requêtes Cypher de Kùzu DB."""
+    """Échappe les guillemets simples et retours à la ligne pour les requêtes Cypher."""
     return str(val or "").replace("'", "\\'").replace("\n", " ").replace("\r", " ")
 
 
 class ElicitationRepository:
     """Repository d'accès aux données pour l'élicitation avec validation stricte."""
 
-    def __init__(self, db_path: str | Path = "data/kuzu_db") -> None:
+    def __init__(
+        self,
+        db_path: str | Path = "data/kuzu_db",
+        graph_store: GraphStore | None = None,
+    ) -> None:
         self.db_path = str(db_path)
+        self.graph_store = graph_store or make_graph_store(db_path=self.db_path, read_only=False)
+        self.db_client = self.graph_store  # Property alias for compatibility
         # Initialise le schéma au besoin
-        ElicitationSchemaInitializer(db_path=self.db_path)
-        self.db_client = KuzuClient(db_path=self.db_path, read_only=False)
+        ElicitationSchemaInitializer(db_path=self.db_path, graph_store=self.graph_store)
 
     def close(self) -> None:
-        """Ferme la connexion au client Kùzu DB."""
-        if hasattr(self, "db_client") and self.db_client:
-            self.db_client.close()
+        """Ferme la connexion au client graphe."""
+        if hasattr(self, "graph_store") and self.graph_store:
+            self.graph_store.close()
 
     def __enter__(self):
         return self

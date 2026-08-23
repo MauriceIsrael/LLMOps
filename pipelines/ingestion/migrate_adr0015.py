@@ -8,8 +8,7 @@ Migrates single kuzu_db layout to physical two-plane layout:
 import shutil
 from pathlib import Path
 
-import kuzu
-
+from tools.adapters.kuzu_store import make_graph_store
 from tools.elicitation.db_schema import ElicitationSchemaInitializer
 
 
@@ -38,27 +37,15 @@ def migrate_to_adr0015(data_dir: Path | str = "data") -> dict[str, str]:
 
     # Assert physical plane separation
     forbidden_in_knowledge = ["Subject", "Statement", "Question", "Conflict", "Uncertainty"]
-    db_k = kuzu.Database(str(knowledge_db))
-    conn_k = kuzu.Connection(db_k)
-    res_k = conn_k.execute("CALL show_tables() RETURN name;")
-    final_tables_k = set()
-    while res_k.has_next():
-        row = res_k.get_next()
-        if row:
-            final_tables_k.add(str(row[0]))
-    del conn_k
-    del db_k
+    store_k = make_graph_store(str(knowledge_db))
+    res_k = store_k.execute_cypher("CALL show_tables() RETURN name;")
+    final_tables_k = {str(row["name"]) for row in res_k if row and "name" in row}
+    store_k.close()
 
-    db_e = kuzu.Database(str(ref_engagement_db))
-    conn_e = kuzu.Connection(db_e)
-    res_e = conn_e.execute("CALL show_tables() RETURN name;")
-    final_tables_e = set()
-    while res_e.has_next():
-        row = res_e.get_next()
-        if row:
-            final_tables_e.add(str(row[0]))
-    del conn_e
-    del db_e
+    store_e = make_graph_store(str(ref_engagement_db))
+    res_e = store_e.execute_cypher("CALL show_tables() RETURN name;")
+    final_tables_e = {str(row["name"]) for row in res_e if row and "name" in row}
+    store_e.close()
 
     assert not (set(forbidden_in_knowledge) & final_tables_k), (
         f"Migration failed: knowledge database contains engagement tables: {set(forbidden_in_knowledge) & final_tables_k}"

@@ -7,12 +7,12 @@ pour les interfaces web, générateurs PDF, visualiseurs de diagrammes et dashbo
 from typing import Any
 
 from mcp_server.core.envelope import ok_response
-from mcp_server.db.kuzu_client import KuzuClient
+from tools.adapters.kuzu_store import make_graph_store
 from tools.elicitation.repository import ElicitationRepository
 
 
 def _get_db():
-    return KuzuClient()
+    return make_graph_store("data/kuzu_db", read_only=True)
 
 
 def get_render_payload(engagement: str = "nordwave-mcx-2027", db_path: str | None = None) -> dict[str, Any]:

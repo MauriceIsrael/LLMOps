@@ -1,32 +1,29 @@
-"""Module d'initialisation et de migration du schéma Kùzu DB pour l'élicitation."""
-
 from pathlib import Path
 
-from mcp_server.db.kuzu_client import KuzuClient
+from tools.adapters.kuzu_store import make_graph_store
+from tools.ports.graph_store import GraphStore
 
 
 class ElicitationSchemaInitializer:
-    """Gestionnaire d'initialisation des tables d'élicitation dans Kùzu DB."""
+    """Gestionnaire d'initialisation des tables d'élicitation dans le graphe."""
 
-    def __init__(self, db_path: str | Path = "data/kuzu_db") -> None:
+    def __init__(
+        self,
+        db_path: str | Path = "data/kuzu_db",
+        graph_store: GraphStore | None = None,
+    ) -> None:
         self.db_path = str(db_path)
-        self.client = KuzuClient(db_path=self.db_path, read_only=False)
-        self.db = self.client.db
-        self.conn = self.client.conn
+        self.graph_store = graph_store or make_graph_store(db_path=self.db_path, read_only=False)
         self.init_schema()
 
     def init_schema(self) -> None:
         """Crée les tables de nœuds et de relations d'élicitation si elles n'existent pas."""
-        tables_res = self.conn.execute("CALL show_tables() RETURN *;")
-        table_names = []
-        while tables_res.has_next():
-            row = tables_res.get_next()
-            if row:
-                table_names.append(str(row[0]))
+        tables_res = self.graph_store.execute_cypher("CALL show_tables() RETURN name;")
+        table_names = [str(r["name"]) for r in tables_res if r and "name" in r]
 
         # 1. Table Subject
         if "Subject" not in table_names:
-            self.conn.execute(
+            self.graph_store.execute_cypher(
                 """
                 CREATE NODE TABLE Subject (
                     id STRING,
@@ -42,14 +39,14 @@ class ElicitationSchemaInitializer:
             )
         else:
             try:
-                self.conn.execute("ALTER TABLE Subject ADD origin STRING DEFAULT 'declared';")
+                self.graph_store.execute_cypher("ALTER TABLE Subject ADD origin STRING DEFAULT 'declared';")
             except Exception:
                 pass
 
 
         # 2. Table Statement
         if "Statement" not in table_names:
-            self.conn.execute(
+            self.graph_store.execute_cypher(
                 """
                 CREATE NODE TABLE Statement (
                     id STRING,
@@ -72,17 +69,17 @@ class ElicitationSchemaInitializer:
             )
         else:
             try:
-                self.conn.execute("ALTER TABLE Statement ADD subject STRING DEFAULT '';")
+                self.graph_store.execute_cypher("ALTER TABLE Statement ADD subject STRING DEFAULT '';")
             except Exception:
                 pass
             try:
-                self.conn.execute("ALTER TABLE Statement ADD based_on STRING DEFAULT '[]';")
+                self.graph_store.execute_cypher("ALTER TABLE Statement ADD based_on STRING DEFAULT '[]';")
             except Exception:
                 pass
 
         # 3. Table Question
         if "Question" not in table_names:
-            self.conn.execute(
+            self.graph_store.execute_cypher(
                 """
                 CREATE NODE TABLE Question (
                     id STRING,
@@ -102,7 +99,7 @@ class ElicitationSchemaInitializer:
 
         # 4. Table Conflict
         if "Conflict" not in table_names:
-            self.conn.execute(
+            self.graph_store.execute_cypher(
                 """
                 CREATE NODE TABLE Conflict (
                     id STRING,
@@ -118,13 +115,13 @@ class ElicitationSchemaInitializer:
             )
         else:
             try:
-                self.conn.execute("ALTER TABLE Conflict ADD origin STRING DEFAULT 'declared';")
+                self.graph_store.execute_cypher("ALTER TABLE Conflict ADD origin STRING DEFAULT 'declared';")
             except Exception:
                 pass
 
         # 5. Table Uncertainty
         if "Uncertainty" not in table_names:
-            self.conn.execute(
+            self.graph_store.execute_cypher(
                 """
                 CREATE NODE TABLE Uncertainty (
                     id STRING,
@@ -138,13 +135,13 @@ class ElicitationSchemaInitializer:
 
         # 6. Tables de Relations
         if "ABOUT" not in table_names:
-            self.conn.execute("CREATE REL TABLE ABOUT (FROM Statement TO Subject);")
+            self.graph_store.execute_cypher("CREATE REL TABLE ABOUT (FROM Statement TO Subject);")
 
         if "ANSWERS" not in table_names:
-            self.conn.execute("CREATE REL TABLE ANSWERS (FROM Statement TO Question);")
+            self.graph_store.execute_cypher("CREATE REL TABLE ANSWERS (FROM Statement TO Question);")
 
         if "TARGETS" not in table_names:
-            self.conn.execute("CREATE REL TABLE TARGETS (FROM Question TO Subject);")
+            self.graph_store.execute_cypher("CREATE REL TABLE TARGETS (FROM Question TO Subject);")
 
         if "INVOLVES" not in table_names:
-            self.conn.execute("CREATE REL TABLE INVOLVES (FROM Conflict TO Statement);")
+            self.graph_store.execute_cypher("CREATE REL TABLE INVOLVES (FROM Conflict TO Statement);")

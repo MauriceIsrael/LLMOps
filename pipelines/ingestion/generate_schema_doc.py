@@ -1,10 +1,9 @@
-"""Generates docs/SCHEMA.md programmatically from Kùzu DB table catalogue (F9)."""
+"""Generates docs/SCHEMA.md programmatically from graph database catalogues (F9)."""
 
 from pathlib import Path
 
-import kuzu
-
 from mcp_server.core.config import server_config
+from tools.adapters.kuzu_store import make_graph_store
 
 
 def generate_schema_markdown(knowledge_path: Path | str, engagement_path: Path | str) -> str:
@@ -23,14 +22,13 @@ def generate_schema_markdown(knowledge_path: Path | str, engagement_path: Path |
             out.append("*(Database not initialized)*\n")
             return out
 
-        db = kuzu.Database(str(db_p))
-        conn = kuzu.Connection(db)
-        tables_res = conn.execute("CALL show_tables() RETURN name, type;")
-        tables = []
-        while tables_res.has_next():
-            row = tables_res.get_next()
-            if row:
-                tables.append((str(row[0]), str(row[1])))
+        store = make_graph_store(str(db_p), read_only=True)
+        tables_res = store.execute_cypher("CALL show_tables() RETURN name, type;")
+        tables = [
+            (str(row["name"]), str(row["type"]))
+            for row in tables_res
+            if row and "name" in row and "type" in row
+        ]
 
         tables.sort(key=lambda x: (x[1], x[0]))
 
@@ -42,13 +40,12 @@ def generate_schema_markdown(knowledge_path: Path | str, engagement_path: Path |
         for name, _ in nodes:
             out.append(f"#### `{name}`")
             try:
-                cols_res = conn.execute(f"CALL table_info('{name}') RETURN name, type;")
+                cols_res = store.execute_cypher(f"CALL table_info('{name}') RETURN name, type;")
                 out.append("| Column | Type |")
                 out.append("|---|---|")
-                while cols_res.has_next():
-                    c_row = cols_res.get_next()
-                    if c_row:
-                        out.append(f"| `{c_row[0]}` | `{c_row[1]}` |")
+                for c_row in cols_res:
+                    if c_row and "name" in c_row:
+                        out.append(f"| `{c_row['name']}` | `{c_row.get('type', '')}` |")
             except Exception:
                 out.append("*(Table metadata unavailable)*")
             out.append("")
@@ -58,19 +55,20 @@ def generate_schema_markdown(knowledge_path: Path | str, engagement_path: Path |
         for name, _ in rels:
             out.append(f"#### `{name}`")
             try:
-                cols_res = conn.execute(f"CALL table_info('{name}') RETURN *;")
+                cols_res = store.execute_cypher(f"CALL table_info('{name}') RETURN *;")
                 out.append("| Property / Connection | Details |")
                 out.append("|---|---|")
-                while cols_res.has_next():
-                    c_row = cols_res.get_next()
+                for c_row in cols_res:
                     if c_row:
-                        out.append(f"| `{c_row[0]}` | `{c_row[1] if len(c_row) > 1 else ''}` |")
+                        keys = list(c_row.keys())
+                        first_val = c_row[keys[0]]
+                        sec_val = c_row[keys[1]] if len(keys) > 1 else ""
+                        out.append(f"| `{first_val}` | `{sec_val}` |")
             except Exception:
                 out.append("*(Relation metadata unavailable)*")
             out.append("")
 
-        del conn
-        del db
+        store.close()
         return out
 
     lines.extend(_extract_schema(knowledge_path))

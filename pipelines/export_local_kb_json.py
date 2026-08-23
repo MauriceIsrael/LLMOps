@@ -2,8 +2,10 @@
 
 import json
 from pathlib import Path
-from mcp_server.core.db import ReadOnlyKuzuClient
+
 from mcp_server.core.config import server_config
+from mcp_server.core.db import ReadOnlyKuzuClient
+
 
 def export_kb():
     client = ReadOnlyKuzuClient(db_path=server_config.knowledge_db_path)

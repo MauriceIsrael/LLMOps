@@ -10,10 +10,9 @@ import re
 from pathlib import Path
 from typing import Any
 
-import kuzu
-
 from mcp_server.core.auth import authorise
 from mcp_server.core.config import server_config
+from tools.adapters.kuzu_store import make_graph_store
 
 
 def validate_engagement_id(engagement_id: str) -> str:
@@ -56,36 +55,15 @@ def discover_engagements(base_dir: Path | str | None = None) -> list[dict[str, A
 
 
 class ReadOnlyKuzuClient:
-    """Read-only driver wrapper around Kùzu DB connections."""
+    """Read-only driver wrapper around graph DB connections implementing GraphStore protocol."""
 
     _read_db_cache: dict[str, Any] = {}
 
     @classmethod
     def get_read_database(cls, db_path: str | Path) -> Any:
         db_path_str = str(db_path)
-        if db_path_str in cls._read_db_cache:
-            db = cls._read_db_cache[db_path_str]
-            try:
-                test_conn = kuzu.Connection(db)
-                test_conn.execute("RETURN 1;")
-                del test_conn
-                return db
-            except Exception:
-                cls._read_db_cache.pop(db_path_str, None)
-
-        db_p = Path(db_path_str)
-        db_p.mkdir(parents=True, exist_ok=True)
-        if not (db_p / "catalog.kz").exists() and not (db_p / "metadata.kz").exists():
-            init_db = kuzu.Database(db_path_str, buffer_pool_size=64 * 1024 * 1024, read_only=False)
-            del init_db
-            gc.collect()
-
-        try:
-            db = kuzu.Database(db_path_str, buffer_pool_size=64 * 1024 * 1024, read_only=True)
-        except Exception:
-            db = kuzu.Database(db_path_str, buffer_pool_size=64 * 1024 * 1024, read_only=False)
-        cls._read_db_cache[db_path_str] = db
-        return db
+        from mcp_server.db.kuzu_client import KuzuClient
+        return KuzuClient.get_database(db_path_str)
 
     def __init__(self, db_path: Path | str | None = None, max_rows: int = 1000):
         self.db_path = str(db_path or server_config.knowledge_db_path)
@@ -100,17 +78,10 @@ class ReadOnlyKuzuClient:
             raise PermissionError("Cypher write operations are not allowed on this read-only serving endpoint.")
 
         try:
-            from mcp_server.db.kuzu_client import KuzuClient
-            db = KuzuClient.get_database(self.db_path)
-            conn = kuzu.Connection(db)
-            response = conn.execute(query)
-            cols = response.get_column_names()
-            results = []
-            count = 0
-            while response.has_next() and count < self.max_rows:
-                row = response.get_next()
-                results.append(dict(zip(cols, row)))
-                count += 1
+            store = make_graph_store(self.db_path, read_only=True)
+            results = store.execute_cypher(query)
+            if self.max_rows and len(results) > self.max_rows:
+                return results[: self.max_rows]
             return results
         except Exception as e:
             err_msg = str(e)

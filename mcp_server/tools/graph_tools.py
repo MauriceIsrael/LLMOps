@@ -2,11 +2,11 @@
 
 from typing import Any
 
-from mcp_server.db.kuzu_client import KuzuClient
+from tools.adapters.kuzu_store import make_graph_store
 
 
 def _get_db():
-    return KuzuClient()
+    return make_graph_store("data/kuzu_db", read_only=True)
 
 
 def query_graph(cypher_query: str) -> list[dict[str, Any]]:
