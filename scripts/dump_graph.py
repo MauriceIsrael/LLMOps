@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import argparse
 import json
+from pathlib import Path
 
-from mcp_server.db.kuzu_client import KuzuClient
+from tools.adapters.kuzu_store import make_graph_store
 
 NODE_TABLES = [
     "Asset",
@@ -34,13 +35,16 @@ EXCLUDED_FIELDS = {
 }
 
 
-def dump_graph(db_path: str, output_path: str | None = None) -> None:
-    client = KuzuClient(db_path=db_path)
+def dump_graph(db_path: str, output_path: str | None = None, backend: str | None = None) -> None:
+    if backend is None:
+        backend = "ladybug" if (str(db_path).endswith(".lbug") or Path(db_path).is_file()) else "kuzu"
+
+    store = make_graph_store(db_path=db_path, read_only=True, backend=backend)
 
     # Discover which tables actually exist (ADR-0015: planes are physically separate)
     existing = set()
     try:
-        rows = client.execute_cypher("CALL show_tables() RETURN name;")
+        rows = store.execute_cypher("CALL show_tables() RETURN name;")
         existing = {r["name"] for r in rows if r and "name" in r}
     except Exception:
         pass
@@ -58,7 +62,7 @@ def dump_graph(db_path: str, output_path: str | None = None) -> None:
         if node_table not in existing:
             continue
         query = f"MATCH (n:{node_table}) RETURN n.*"
-        results = client.execute_cypher(query)
+        results = store.execute_cypher(query)
 
         cleaned_results = []
         for row in results:
@@ -77,7 +81,7 @@ def dump_graph(db_path: str, output_path: str | None = None) -> None:
         if rel_table not in existing:
             continue
         query = f"MATCH (a:{src_table})-[r:{rel_table}]->(b:{dst_table}) RETURN a.{src_pk} AS _src, b.{dst_pk} AS _dst, r.*"
-        results = client.execute_cypher(query)
+        results = store.execute_cypher(query)
 
         cleaned_results = []
         for row in results:
@@ -93,7 +97,15 @@ def dump_graph(db_path: str, output_path: str | None = None) -> None:
             data["relations"][rel_table] = cleaned_results
 
     json_str = json.dumps(data, sort_keys=True, separators=(',', ':'), ensure_ascii=False, default=str)
-    
+
+    store.close()
+    if backend == "kuzu":
+        from mcp_server.db.kuzu_client import KuzuClient
+        KuzuClient.clear_cache()
+    elif backend == "ladybug":
+        from tools.adapters.ladybug_store import LadybugGraphStore
+        LadybugGraphStore.clear_cache()
+
     if output_path:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(json_str)
@@ -103,8 +115,9 @@ def dump_graph(db_path: str, output_path: str | None = None) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Deterministic dump of a Kùzu/Ladybug graph database")
-    parser.add_argument("--db", required=True, help="Path to the database directory")
+    parser.add_argument("--db", required=True, help="Path to the database directory or file")
     parser.add_argument("--out", help="Output JSON file (default: stdout)")
-    
+    parser.add_argument("--backend", help="Graph backend ('kuzu' or 'ladybug', auto-detected if omitted)")
+
     args = parser.parse_args()
-    dump_graph(args.db, args.out)
+    dump_graph(args.db, args.out, args.backend)
