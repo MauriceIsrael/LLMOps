@@ -9,16 +9,7 @@ import pytest
 from tools.adapters.kuzu_store import make_graph_store
 from tools.ports.graph_store import GraphStore
 
-BACKENDS = [
-    "kuzu",
-    pytest.param(
-        "ladybug",
-        marks=pytest.mark.xfail(
-            reason="LadybugDB backend will be implemented in Phase 3",
-            strict=False,
-        ),
-    ),
-]
+BACKENDS = ["kuzu", "ladybug"]
 
 
 @pytest.fixture(params=BACKENDS)

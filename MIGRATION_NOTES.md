@@ -45,4 +45,7 @@ Conséquences :
 
 ### Section — Divergences de dialecte rencontrées
 
-_(vide — à remplir en Phases 2-3 si des différences Kùzu/Ladybug sont découvertes)_
+1. **Format de stockage physique (Répertoire vs Fichier)** :
+   - **Kùzu DB** : le chemin de base de données `db_path` est un **répertoire** (ex: `data/knowledge.kuzu/` contenant `catalog.kz`, `metadata.kz`, etc.).
+   - **LadybugDB** : le chemin `db_path` doit désigner un **fichier** unique (ex: `data/knowledge.lbug`). LadybugDB lève une `RuntimeError("Database path cannot be a directory")` si le chemin est un dossier existant.
+   - **Solution apportée** : `LadybugGraphStore` gère cette différence de manière transparente en ciblant un fichier `.lbug` et en créant les répertoires parents nécessaires.

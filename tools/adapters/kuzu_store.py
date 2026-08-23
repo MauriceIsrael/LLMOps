@@ -39,7 +39,9 @@ def make_graph_store(
     if selected_backend == "kuzu":
         return KuzuGraphStore(db_path=db_path, read_only=read_only)
     elif selected_backend == "ladybug":
-        raise NotImplementedError("The 'ladybug' backend will be implemented in Phase 3.")
+        from tools.adapters.ladybug_store import LadybugGraphStore
+
+        return LadybugGraphStore(db_path=db_path, read_only=read_only)
     else:
         raise ValueError(
             f"Unknown graph backend '{selected_backend}'. Supported options: 'kuzu', 'ladybug'."
