@@ -20,7 +20,9 @@ from pathlib import Path
 # Add parent directory to path for common imports
 sys.path.insert(0, os.path.dirname(__file__))
 from common import (
-    find_repo_root, get_projects_dir, get_project_number_from_dir,
+    find_repo_root,
+    get_project_number_from_dir,
+    get_projects_dir,
     log_warning,
 )
 

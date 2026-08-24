@@ -1,6 +1,7 @@
 """Integration tests conftest — autouse cache cleanup fixture for LadybugDB / Kùzu DB."""
 
 import gc
+
 import pytest
 
 from mcp_server.db.kuzu_client import KuzuClient

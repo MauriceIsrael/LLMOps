@@ -759,7 +759,7 @@ sdg-{nn}-{slug}/
 def main() -> None:
     """Create the SDG mono-repo."""
     total_projects = sum(len(s["projects"]) for s in SDGS)
-    print(f"ArcKit SDG Mono-Repo Creator")
+    print("ArcKit SDG Mono-Repo Creator")
     print(f"Version: {VERSION}")
     print(f"SDGs: {len(SDGS)}, Projects: {total_projects}")
     print()
@@ -796,7 +796,6 @@ def main() -> None:
     # 4. Create SDG workspaces
     print("\nCreating SDG workspaces...")
     for sdg in SDGS:
-        nn = fmt_sdg_num(sdg["number"])
         print(f"  SDG {sdg['number']:2d}: {sdg['name']} ({len(sdg['projects'])} projects)")
         create_sdg_workspace(sdg)
 

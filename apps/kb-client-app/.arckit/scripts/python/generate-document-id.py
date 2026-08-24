@@ -17,7 +17,6 @@ Examples:
 """
 
 import argparse
-import glob
 import os
 import re
 import sys
@@ -60,7 +59,6 @@ def main():
             next_num_dir = args.next_num_dir
             if os.path.isdir(next_num_dir):
                 # Scan directory for existing files to find next sequence number
-                pattern_prefix = f"ARC-{padded_pid}-{doc_type}-"
                 last_num = 0
                 for fname in os.listdir(next_num_dir):
                     if not fname.endswith(".md"):

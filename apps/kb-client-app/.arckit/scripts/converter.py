@@ -1,10 +1,9 @@
+import json
 import os
 import re
-import json
 import shutil
 
 import yaml
-
 
 CLAUDE_ONLY_COMMAND_FIELDS = (
     "effort",
@@ -52,7 +51,7 @@ def build_agent_map(agents_dir):
             agent_path = os.path.join(agents_dir, filename)
             if is_subagent_file(agent_path):
                 continue
-            with open(agent_path, "r", encoding="utf-8") as f:
+            with open(agent_path, encoding="utf-8") as f:
                 agent_content = f.read()
             agent_prompt = extract_agent_prompt(agent_content)
             agent_map[command_filename] = (agent_path, agent_prompt)
@@ -92,7 +91,7 @@ def is_subagent_file(agent_path):
     dispatch, so the converter filters them out of those targets.
     """
     try:
-        with open(agent_path, "r", encoding="utf-8") as f:
+        with open(agent_path, encoding="utf-8") as f:
             content = f.read()
     except OSError:
         return False
@@ -110,7 +109,7 @@ def is_subagent_file(agent_path):
 
 def copy_agent_stripped(src_path, dest_path):
     """Copy an agent file to dest, stripping Claude-only frontmatter fields."""
-    with open(src_path, "r", encoding="utf-8") as f:
+    with open(src_path, encoding="utf-8") as f:
         content = f.read()
     if content.startswith("---"):
         parts = content.split("---", 2)
@@ -362,7 +361,7 @@ def read_template_for_command(name, templates_dir):
     """
     template_path = os.path.join(templates_dir, f"{name}-template.md")
     if os.path.isfile(template_path):
-        with open(template_path, "r", encoding="utf-8") as f:
+        with open(template_path, encoding="utf-8") as f:
             return f.read()
     return None
 
@@ -395,7 +394,7 @@ def convert(commands_dir, agents_dir):
 
         command_path = os.path.join(commands_dir, filename)
 
-        with open(command_path, "r", encoding="utf-8") as f:
+        with open(command_path, encoding="utf-8") as f:
             command_content = f.read()
 
         # Extract frontmatter from command (always use command's description)
@@ -443,7 +442,7 @@ def convert(commands_dir, agents_dir):
         has_standalone = os.path.isfile(standalone_path)
         standalone_prompt = None
         if has_standalone:
-            with open(standalone_path, "r", encoding="utf-8") as f:
+            with open(standalone_path, encoding="utf-8") as f:
                 standalone_content = f.read()
             _, standalone_prompt = extract_frontmatter_and_prompt(standalone_content)
 
@@ -593,7 +592,7 @@ def strip_claude_only_skill_fields(skills_dir):
             if filename != "SKILL.md":
                 continue
             filepath = os.path.join(root, filename)
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 content = f.read()
             if not content.startswith("---"):
                 continue
@@ -627,7 +626,7 @@ def generate_codex_config_toml(mcp_json_path, agents_dir, output_path):
 
     # MCP servers section
     if os.path.isfile(mcp_json_path):
-        with open(mcp_json_path, "r", encoding="utf-8") as f:
+        with open(mcp_json_path, encoding="utf-8") as f:
             mcp_config = json.load(f)
         servers = mcp_config.get("mcpServers", {})
         if servers:
@@ -635,11 +634,11 @@ def generate_codex_config_toml(mcp_json_path, agents_dir, output_path):
             lines.append("")
             # Claude Code-only MCP fields that other platforms (Codex/Gemini/OpenCode)
             # don't understand and shouldn't see in their generated configs.
-            CLAUDE_ONLY_MCP_FIELDS = {"alwaysLoad"}
+            claude_only_mcp_fields = {"alwaysLoad"}
             for name, server in servers.items():
                 lines.append(f"[mcp_servers.{name}]")
                 for key, value in server.items():
-                    if key in CLAUDE_ONLY_MCP_FIELDS:
+                    if key in claude_only_mcp_fields:
                         continue
                     if key == "headers":
                         header_parts = []
@@ -670,7 +669,7 @@ def generate_codex_config_toml(mcp_json_path, agents_dir, output_path):
                 agent_path = os.path.join(agents_dir, filename)
                 if is_subagent_file(agent_path):
                     continue
-                with open(agent_path, "r", encoding="utf-8") as f:
+                with open(agent_path, encoding="utf-8") as f:
                     content = f.read()
                 frontmatter, _ = extract_frontmatter_and_prompt(content)
                 name = frontmatter.get("name", filename.replace(".md", ""))
@@ -705,7 +704,7 @@ def generate_agent_toml_files(agents_dir, output_dir, path_prefix=".arckit"):
         agent_path = os.path.join(agents_dir, filename)
         if is_subagent_file(agent_path):
             continue
-        with open(agent_path, "r", encoding="utf-8") as f:
+        with open(agent_path, encoding="utf-8") as f:
             content = f.read()
 
         frontmatter, prompt = extract_frontmatter_and_prompt(content)
@@ -753,7 +752,7 @@ def rewrite_codex_skills(skills_dir):
             if not filename.endswith(".md"):
                 continue
             filepath = os.path.join(root, filename)
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 content = f.read()
 
             original = content
@@ -819,7 +818,7 @@ def generate_gemini_agents(agents_dir, output_dir):
         agent_path = os.path.join(agents_dir, filename)
         if is_subagent_file(agent_path):
             continue
-        with open(agent_path, "r", encoding="utf-8") as f:
+        with open(agent_path, encoding="utf-8") as f:
             content = f.read()
 
         frontmatter, prompt = extract_frontmatter_and_prompt(content)
@@ -994,7 +993,7 @@ def generate_copilot_agents(agents_dir, output_dir):
         agent_path = os.path.join(agents_dir, filename)
         if is_subagent_file(agent_path):
             continue
-        with open(agent_path, "r", encoding="utf-8") as f:
+        with open(agent_path, encoding="utf-8") as f:
             content = f.read()
 
         frontmatter, prompt = extract_frontmatter_and_prompt(content)

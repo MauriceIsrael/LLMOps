@@ -67,7 +67,6 @@ class LadybugGraphStore(GraphStore):
         if lb is None:
             raise RuntimeError("LadybugDB driver ('ladybug') is not installed.")
 
-        db_file = Path(self.db_path)
         self.db = self.get_database(self.db_path, read_only=self.read_only)
         self.conn = lb.Connection(self.db)
 

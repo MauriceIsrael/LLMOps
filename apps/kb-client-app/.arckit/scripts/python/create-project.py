@@ -22,9 +22,14 @@ from pathlib import Path
 # Add parent directory to path for common imports
 sys.path.insert(0, os.path.dirname(__file__))
 from common import (
-    find_repo_root, get_next_project_number, slugify, create_project_dir,
-    get_arckit_dir, get_memory_dir, get_templates_dir,
-    log_info, log_success, log_error, output_json_array,
+    create_project_dir,
+    find_repo_root,
+    get_memory_dir,
+    get_next_project_number,
+    log_error,
+    log_info,
+    log_success,
+    slugify,
 )
 
 

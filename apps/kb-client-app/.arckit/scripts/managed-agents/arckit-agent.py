@@ -143,7 +143,6 @@ def load_mcp_servers() -> tuple[list[dict], list[dict]]:
 
     servers = []
     toolsets = []
-    auth_needed = []
 
     for name, spec in config.get("mcpServers", {}).items():
         url = spec.get("url", "")
@@ -408,7 +407,7 @@ def main() -> None:
     run_session(client, session.id, args.prompt)
 
     # Print reuse hints
-    print(f"\n--- Reuse IDs ---")
+    print("\n--- Reuse IDs ---")
     print(f"  --agent-id {agent_id}")
     print(f"  --environment-id {env_id}")
     print(f"  --session-id {session.id}")

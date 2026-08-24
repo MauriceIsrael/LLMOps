@@ -4,10 +4,8 @@ import pytest
 
 from pipelines.ingestion.graph_loader import KuzuGraphLoader
 from tools.adapters.kuzu_store import make_graph_store
-from tools.elicitation.db_schema import ElicitationSchemaInitializer
-
-
 from tools.adapters.ladybug_store import LadybugGraphStore
+from tools.elicitation.db_schema import ElicitationSchemaInitializer
 
 
 @pytest.fixture(autouse=True)

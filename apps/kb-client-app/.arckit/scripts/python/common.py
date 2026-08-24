@@ -4,12 +4,12 @@ Common utilities for ArcKit scripts (main repo / CLI version).
 Looks for .arckit/ directory as repo root indicator.
 """
 
+import json
 import os
 import re
-import sys
-import json
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 # ANSI color codes

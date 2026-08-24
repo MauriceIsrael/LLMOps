@@ -15,7 +15,6 @@ from mcp_server.core.db import (
 )
 from mcp_server.engagement import tools as eng_tools
 from mcp_server.knowledge import tools as kb_tools
-from pipelines.ingestion.generate_schema_doc import generate_schema_markdown
 from tools.elicitation.repository import ElicitationRepository
 
 pytestmark = pytest.mark.deterministic

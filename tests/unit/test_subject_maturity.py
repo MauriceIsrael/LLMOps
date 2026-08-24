@@ -1,6 +1,5 @@
 """Tests d'acceptation automatisés pour le modèle de maturité des sujets et le Maturity Board (SPEC maturity.md - Tests 9 à 17)."""
 
-import json
 from datetime import datetime, timedelta
 
 import pytest
