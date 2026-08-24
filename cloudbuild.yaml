@@ -1,10 +1,13 @@
+substitutions:
+  _TAG: 'latest'
+
 steps:
   # 1. Builder l'image Docker de mcp_server
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
-      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:$COMMIT_SHA'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:${_TAG}'
       - '-t'
       - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:latest'
       - '-f'
@@ -15,7 +18,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:$COMMIT_SHA'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:${_TAG}'
 
   - name: 'gcr.io/cloud-builders/docker'
     args:
@@ -30,7 +33,7 @@ steps:
       - 'deploy'
       - 'llmops-mcp-server'
       - '--image'
-      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:$COMMIT_SHA'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:${_TAG}'
       - '--region'
       - 'europe-west1'
       - '--platform'
@@ -42,5 +45,5 @@ steps:
       - '8000'
 
 images:
-  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:$COMMIT_SHA'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:${_TAG}'
   - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:latest'

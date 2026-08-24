@@ -1,16 +1,16 @@
-# gcloudignore for Cloud Build container image packaging
 .gcloudignore
 .git
-.github
-.venv/
-.pytest_cache/
-.deepeval/
-.promptfoo/
-.coverage
-htmlcov/
+.gitignore
+.venv
+node_modules
+apps/kb-client-app/node_modules
+apps/kb-client-app/.svelte-kit
+artifacts
+projects
+__pycache__
 *.pyc
-__pycache__/
-
-# Keep data/ knowledge and engagement databases included!
-!data/knowledge.kuzu
-!data/engagements/nordwave-mcx-2027.kuzu
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov
