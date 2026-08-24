@@ -168,19 +168,11 @@ def import_graph(in_dir: str, db_path: str, backend: str = "ladybug") -> dict[st
             summary["relations_imported"] += 1
 
     store.close()
-    if backend == "kuzu":
-        from mcp_server.db.kuzu_client import KuzuClient
-
-        KuzuClient.clear_cache()
-    elif backend == "ladybug":
-        from tools.adapters.ladybug_store import LadybugGraphStore
-
-        LadybugGraphStore.clear_cache()
-
     return summary
 
 
 if __name__ == "__main__":
+    import os
     parser = argparse.ArgumentParser(description="Import graph data into LadybugDB or Kùzu DB")
     parser.add_argument("--dir", required=True, help="Input directory containing exported JSON files")
     parser.add_argument("--db", required=True, help="Target database path")
@@ -189,3 +181,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     summary = import_graph(args.dir, args.db, args.backend)
     print(f"✅ Import completed to {args.db}: {summary['nodes_imported']} nodes, {summary['relations_imported']} relations imported")
+    os._exit(0)

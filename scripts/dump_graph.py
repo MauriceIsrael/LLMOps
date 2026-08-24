@@ -99,12 +99,6 @@ def dump_graph(db_path: str, output_path: str | None = None, backend: str | None
     json_str = json.dumps(data, sort_keys=True, separators=(',', ':'), ensure_ascii=False, default=str)
 
     store.close()
-    if backend == "kuzu":
-        from mcp_server.db.kuzu_client import KuzuClient
-        KuzuClient.clear_cache()
-    elif backend == "ladybug":
-        from tools.adapters.ladybug_store import LadybugGraphStore
-        LadybugGraphStore.clear_cache()
 
     if output_path:
         with open(output_path, "w", encoding="utf-8") as f:
@@ -114,6 +108,7 @@ def dump_graph(db_path: str, output_path: str | None = None, backend: str | None
 
 
 if __name__ == "__main__":
+    import os
     parser = argparse.ArgumentParser(description="Deterministic dump of a Kùzu/Ladybug graph database")
     parser.add_argument("--db", required=True, help="Path to the database directory or file")
     parser.add_argument("--out", help="Output JSON file (default: stdout)")
@@ -121,3 +116,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     dump_graph(args.db, args.out, args.backend)
+    os._exit(0)

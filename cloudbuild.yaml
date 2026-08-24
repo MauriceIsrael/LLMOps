@@ -1,5 +1,46 @@
 steps:
+  # 1. Builder l'image Docker de mcp_server
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/canvas-eye-403415/llmops-mcp-server', '-f', 'docker/Dockerfile.cloudrun', '.']
+    args:
+      - 'build'
+      - '-t'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:$COMMIT_SHA'
+      - '-t'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:latest'
+      - '-f'
+      - 'Dockerfile'
+      - '.'
+
+  # 2. Pousser l'image vers GCP Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:latest'
+
+  # 3. Déployer l'application sur GCP Cloud Run avec GRAPH_BACKEND=ladybug
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'llmops-mcp-server'
+      - '--image'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:$COMMIT_SHA'
+      - '--region'
+      - 'europe-west1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'GRAPH_BACKEND=ladybug,LLMOPS_TRANSPORT=sse'
+      - '--port'
+      - '8000'
+
 images:
-  - 'gcr.io/canvas-eye-403415/llmops-mcp-server'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:$COMMIT_SHA'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/llmops/mcp-server:latest'

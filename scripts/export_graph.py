@@ -103,19 +103,11 @@ def export_graph(db_path: str, out_dir: str, backend: str = "kuzu") -> dict[str,
     )
 
     store.close()
-    if backend == "kuzu":
-        from mcp_server.db.kuzu_client import KuzuClient
-
-        KuzuClient.clear_cache()
-    elif backend == "ladybug":
-        from tools.adapters.ladybug_store import LadybugGraphStore
-
-        LadybugGraphStore.clear_cache()
-
     return manifest
 
 
 if __name__ == "__main__":
+    import os
     parser = argparse.ArgumentParser(description="Export graph database to data directory")
     parser.add_argument("--db", required=True, help="Path to source graph database")
     parser.add_argument("--out", required=True, help="Output directory for exported JSON files")
@@ -124,3 +116,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     summary = export_graph(args.db, args.out, args.backend)
     print(f"✅ Export completed to {args.out}: {summary['nodes']} nodes, {summary['relations']} relations")
+    os._exit(0)

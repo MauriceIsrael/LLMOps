@@ -1,0 +1,16 @@
+.venv
+.git
+.gitignore
+.github
+node_modules
+apps/kb-client-app/node_modules
+apps/kb-client-app/.svelte-kit
+artifacts
+projects
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov

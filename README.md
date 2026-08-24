@@ -1,13 +1,13 @@
-# 🧠 LLMOps — Architecture Neuro-Symbolique & Élicitation Collaborative (GraphRAG + FastMCP + LangGraph)
+# 🧠 LLMOps — Architecture Neuro-Symbolique & Élicitation Collaborative (GraphRAG + FastMCP + LangGraph + LadybugDB)
 
 ![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)
 ![Poetry](https://img.shields.io/badge/Dependency%20Manager-Poetry-blueviolet.svg)
 ![FastMCP](https://img.shields.io/badge/MCP-FastMCP-green.svg)
 ![LangGraph](https://img.shields.io/badge/Orchestration-LangGraph-blue.svg)
-![KuzuDB](https://img.shields.io/badge/GraphDB-KùzuDB-orange.svg)
+![LadybugDB](https://img.shields.io/badge/GraphDB-LadybugDB-red.svg)
 ![DeepEval](https://img.shields.io/badge/Evals-DeepEval-red.svg)
 
-Une plateforme MLOps / LLMOps robuste conçue pour ingérer des dossiers d'architecture (ADRs, Principes, Glossaire, Risques en Markdown), extraire une ontologie et un graphe de connaissances (**Kùzu DB**) via **LlamaIndex PropertyGraph**, élaborer des documents d'architecture de manière collaboratives avec plusieurs architectes grâce à un **Moteur d'Élicitation LangGraph**, exposer des artefacts typés via un serveur **FastMCP**, et automatiser les tests de non-régression sémantique avec **DeepEval** et **Promptfoo**.
+Une plateforme MLOps / LLMOps robuste conçue pour ingérer des dossiers d'architecture (ADRs, Principes, Glossaire, Risques en Markdown), extraire une ontologie et un graphe de connaissances (**LadybugDB** / **Kùzu DB**) via **LlamaIndex PropertyGraph**, élaborer des documents d'architecture de manière collaborative avec plusieurs architectes grâce à un **Moteur d'Élicitation LangGraph**, exposer des artefacts typés via un serveur **FastMCP**, et automatiser les tests de non-régression sémantique avec **DeepEval** et **Promptfoo**.
 
 ---
 
@@ -17,15 +17,16 @@ Pour intégrer un système tiers ou connecter un moteur de rendu externe (UI Web
 
 - 🔌 **[Spécification d'Interface Externe (INTERFACE.md)](file:///home/momo/Dev/LLMOps/docs/INTERFACE.md)** : Spécification technique complète avec les **schémas JSON de réponse** pour chaque outil.
 - 🎨 **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)** : Manuel dédié aux développeurs de moteurs de rendu (SDK Python / HTTP SSE).
-- 📊 **[Spécification du Schéma Graphe Kùzu DB (SCHEMA.md)](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)** : Structure des tables et propriétés générée automatiquement depuis les bases.
+- 📊 **[Spécification du Schéma Graphe (SCHEMA.md)](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)** : Structure des tables et propriétés générée automatiquement depuis les bases.
+- ☁️ **[Guide de Déploiement GCP Cloud Run & CI](file:///home/momo/Dev/LLMOps/docs/user_manual.md)** : Instructions d'hébergement Serverless GCP et pipelines GitHub Actions.
 
 ---
 
-## 📐 Architecture Neuro-Symbolique, ADR-0014 & ADR-0015
+## 📐 Architecture Neuro-Symbolique, ADR-0014, ADR-0015 & Moteur LadybugDB
 
 Plutôt que d'effectuer du RAG classique par découpage de texte (chunking naïf), cette plateforme combine :
-1. **Raisonnement Symbolique & Séparation Physique (ADR-0015) :** Nœuds et relations explicites isolés dans deux espaces physiques Kùzu DB :
-   - `data/knowledge.kuzu` : Actifs réutilisables d'architecture (`Asset`, `GlossaryTerm`, `SUPERSEDES`).
+1. **Moteur Graphique Haute Performance & Séparation Physique (ADR-0015) :** Nœuds et relations explicites gérés par **LadybugDB** (avec rétrocompatibilité Kùzu DB via le flag `GRAPH_BACKEND`), isolés dans deux espaces physiques :
+   - `data/knowledge.kuzu` (`database.lbug`) : Actifs réutilisables d'architecture (`Asset`, `GlossaryTerm`, `SUPERSEDES`).
    - `data/engagements/<engagement-id>.kuzu` : État dynamique par projet client (`Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`).
 2. **Moteur d'Élicitation Collaboratif (LangGraph) :** Orchestration par machines d'état avec **Level Gate de maturité** (`L0_named` → `L4_specified`), détection automatique de contradictions (`check_node`), contestation et arbitrage traçables, et persistance inter-processus via Checkpointer SQLite.
 3. **Capacité Neuro-Sémantique & MCP :** Extraction d'ontologies complexes par LLM via **LlamaIndex** et exposition d'outils typés via **FastMCP** avec enveloppe de réponse normalisée.
@@ -117,9 +118,10 @@ LLMOps/
 poetry install
 ```
 
-### 3. Ingestion & Migration des Bases Graphiques (ADR-0015)
-Exécuter la migration physique des bases pour créer `data/knowledge.kuzu` et `data/engagements/nordwave-mcx-2027.kuzu` :
+### 3. Ingestion & Migration des Bases Graphiques (ADR-0015 & LadybugDB)
+Exécuter la migration physique des bases vers LadybugDB pour créer `data/knowledge.kuzu` (`database.lbug`) et `data/engagements/nordwave-mcx-2027.kuzu` :
 ```bash
+# Exécuter la migration d'ingestion (GRAPH_BACKEND=ladybug par défaut)
 poetry run python -m pipelines.ingestion.migrate_adr0015
 ```
 
@@ -137,7 +139,17 @@ poetry run mcp-server-knowledge
 poetry run mcp-server-engagement
 ```
 
-### 5. Gestion des Engagements & Publication d'Instantannés (CLI `elicit`)
+### 5. Exécution de la Suite de Tests & Non-Régression
+```bash
+# Lancer l'intégralité de la suite déterministe (Unitaires, Contrats, Équivalence LadybugDB)
+poetry run pytest -m deterministic -v
+
+# Lancer la suite de benchmarks et d'évaluations DeepEval
+poetry run python tests/bench/harness.py
+poetry run pytest tests/bench/test_bench.py -v
+```
+
+### 6. Gestion des Engagements & Publication d'Instantannés (CLI `elicit`)
 ```bash
 # Publier un instantané atomique du graphe de travail vers data/engagements/
 poetry run elicit publish --engagement nordwave-mcx-2027
@@ -147,6 +159,33 @@ poetry run elicit engagement create client-demo-2026
 
 # Archiver un engagement
 poetry run elicit engagement archive client-demo-2026
+```
+
+---
+
+## ☁️ Publication & Déploiement GCP Cloud Run
+
+Le serveur FastMCP est déployé sur **Google Cloud Platform (GCP) Cloud Run** (région `europe-west1`) sous forme de conteneur Serverless sécurisé par jeton d'authentification (`SERVER_TOKEN`).
+
+### Spécifications de Déploiement
+- **Image Docker multi-stage** basée sur `python:3.11-slim` avec installation Poetry.
+- **Points d'accès HTTP/SSE Serverless** :
+  - Endpoint SSE MCP : `https://llmops-mcp-server-344571265365.europe-west1.run.app/sse?token=llmops-token-2026-sec-98a41f`
+  - Visualiseur Graphe interactif : `https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`
+  - Health check : `https://llmops-mcp-server-344571265365.europe-west1.run.app/health`
+
+### Commandes de Déploiement Manuel
+```bash
+# 1. Build de l'image Docker avec Google Cloud Build
+gcloud builds submit --config cloudbuild.yaml .
+
+# 2. Déploiement sur GCP Cloud Run (Serverless)
+gcloud run deploy llmops-mcp-server \
+  --image europe-west1-docker.pkg.dev/llmops-platform-450000/llmops-repo/llmops-mcp-server:latest \
+  --platform managed \
+  --region europe-west1 \
+  --allow-unauthenticated \
+  --set-env-vars SERVER_TOKEN="llmops-token-2026-sec-98a41f",GRAPH_BACKEND="ladybug"
 ```
 
 ---

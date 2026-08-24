@@ -36,8 +36,14 @@ jobs:
       - name: Run Ruff Linter
         run: poetry run ruff check .
 
-      - name: Run ADR-0015 Migration
-        run: poetry run python -m pipelines.ingestion.migrate_adr0015
+      - name: Run ADR-0015 Migration & Publish Reference Engagement
+        env:
+          GRAPH_BACKEND: ladybug
+        run: |
+          poetry run python -m pipelines.ingestion.migrate_adr0015
+          poetry run elicit publish --engagement nordwave-mcx-2027
 
       - name: Run Unit & Integration Tests
-        run: poetry run pytest tests/unit tests/integration/test_scenario_nordwave_mcx_v2.py -v
+        env:
+          GRAPH_BACKEND: ladybug
+        run: poetry run pytest tests/contract tests/unit tests/integration/test_scenario_nordwave_mcx_v2.py -v

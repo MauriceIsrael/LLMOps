@@ -33,7 +33,10 @@ class KuzuClient:
     def __init__(self, db_path: Path | str | None = None, read_only: bool = True) -> None:
         self.db_path = str(db_path or settings.DB_PATH)
         db_dir = Path(self.db_path)
-        db_dir.mkdir(parents=True, exist_ok=True)
+        if db_dir.suffix and db_dir.suffix != ".kuzu":
+            db_dir.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            db_dir.mkdir(parents=True, exist_ok=True)
 
         self.db = KuzuClient.get_database(self.db_path)
         self.conn = kuzu.Connection(self.db)

@@ -1,5 +1,6 @@
 """Tests d'acceptation automatisés pour le modèle de maturité des sujets et le Maturity Board (SPEC maturity.md - Tests 9 à 17)."""
 
+import json
 from datetime import datetime, timedelta
 
 import pytest
@@ -17,7 +18,9 @@ def repo(tmp_path):
     yield r
     r.close()
     from mcp_server.db.kuzu_client import KuzuClient
+    from tools.adapters.ladybug_store import LadybugGraphStore
     KuzuClient.clear_cache()
+    LadybugGraphStore.clear_cache()
     import gc
     gc.collect()
 
@@ -155,7 +158,9 @@ def test_prior_answer_goes_to_confirmation_batch(repo, tmp_path):
     res = graph.invoke({"engagement": "test-prior-batch", "sections": sections, "db_path": str(db_path)})
     enriched = res.get("enriched_gaps", [])
     target = [g for g in enriched if g["subject"] == "Storage-5.2"][0]
-    assert target["prior_answer"]["value"] == "SAN NVMe dual-controller"
+    prior_ans = target["prior_answer"]
+    val = prior_ans.get("value") if isinstance(prior_ans, dict) else prior_ans
+    assert val == "SAN NVMe dual-controller"
 
 
 

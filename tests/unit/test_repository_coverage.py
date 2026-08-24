@@ -12,6 +12,8 @@ def repo(tmp_path):
     r = ElicitationRepository(db_path=db_path)
     yield r
     r.close()
+    from tools.adapters.ladybug_store import LadybugGraphStore
+    LadybugGraphStore.clear_cache()
     KuzuClient.clear_cache()
     gc.collect()
 

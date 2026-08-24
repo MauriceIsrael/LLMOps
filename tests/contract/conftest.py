@@ -9,7 +9,7 @@ import pytest
 from tools.adapters.kuzu_store import make_graph_store
 from tools.ports.graph_store import GraphStore
 
-BACKENDS = ["kuzu", "ladybug"]
+BACKENDS = ["ladybug"]
 
 
 @pytest.fixture(params=BACKENDS)

@@ -2,18 +2,19 @@
 
 ## 1. Vue d'Ensemble & Objectifs
 
-Cette plateforme a pour but d'élaborer et de faire évoluer de manière déterministe et collaborative des documents d'architecture système (ADRs, principes, cadrage, compromis, dépendances, risques) en combinant un dossier documentaire Markdown structuré, un **Graphe de Connaissances Kùzu DB**, et un **Moteur d'Élicitation Collaboratif (LangGraph)** exposé via **FastMCP** (Model Context Protocol).
+Cette plateforme a pour but d'élaborer et de faire évoluer de manière déterministe et collaborative des documents d'architecture système (ADRs, principes, cadrage, compromis, dépendances, risques) en combinant un dossier documentaire Markdown structuré, un **Graphe de Connaissances LadybugDB / Kùzu DB**, et un **Moteur d'Élicitation Collaboratif (LangGraph)** exposé via **FastMCP** (Model Context Protocol).
 
 ### Problèmes résolus
 1. **Destruction de la logique système par RAG naïf** : Le chunking textuel classique détruit les liaisons logiques essentielles (ex: une décision `SUPERSEDES` une autre, ou l'explication d'un compromis d'arbitrage).
 2. **Spéculation et inventions du LLM** : En l'absence de garde-fous symboliques, un LLM invente des paramètres ou passe sous silence des manques cruciaux.
-3. **Collaboration désordonnée multi-acteurs** : Sans modèle formel, les contributions de plusieurs architectes (ex: service MCX, réseau mobile 5G, transport) se chevauchent, génèrent des contradictions invisibles ou font avancer prématurément des détails techniques avant le cadrage.
+3. **Collaboration désordonnée multi-acteurs** : Sans modèle formalisé, les contributions de plusieurs architectes se chevauchent, génèrent des contradictions invisibles ou font avancer prématurément des détails techniques avant le cadrage.
 
 ### Solution Neuro-Symbolique & Élicitatoire
-- **Couche Symbolique & Persistance :** Graphe de connaissances dans **Kùzu DB** garantissant l'intégrité typée des entités (`Asset`, `Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`) et de leurs relations.
+- **Couche Symbolique & Persistance Dual-Backend :** Graphe de connaissances géré par **LadybugDB** (avec rétrocompatibilité Kùzu DB), garantissant l'intégrité typée des entités (`Asset`, `Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`) et de leurs relations.
 - **Moteur d'Élicitation Collaboratif (LangGraph) :** Orchestration de flux d'état (Scan, Intake, Assembly, Harvest) pilotant un **Level Gate de maturité** (`L0_named` → `L4_specified`), la détection automatique de contradictions, la gestion de conflits déclarés/détectés et l'arbitrage traçable.
 - **Persistance Inter-Processus :** Checkpointer SQLite permettant d'interrompre une session d'élicitation et de la reprendre des jours plus tard depuis un process distant.
 - **Exposition FastMCP :** Outils typés FastMCP pour la consultation, la recherche Cypher et la restitution sous forme de tableaux et rendus visuels (Mermaid, Draw.io).
+- **Hébergement Serverless GCP Cloud Run :** Serverless containerisé sous GCP Cloud Run avec authentification par jeton HTTP SSE (`SERVER_TOKEN`).
 
 ---
 

@@ -170,7 +170,16 @@ class ElicitationRepository:
         role = _esc(statement.get("role", "architect"))
         confidence = _esc(statement.get("confidence", "designed"))
         verbatim = _esc(statement.get("verbatim", val))
-        predicate = _esc(statement.get("predicate", "has_property"))
+        predicate_val = statement.get("predicate", "has_property")
+        allowed_predicates = {
+            "implements", "requires", "replaces", "constrains", "is_constrained_by", "constrained_by", "uses", "depends_on",
+            "has_property", "about", "defined_by", "evaluated_by", "validates", "refers_to", "has_color",
+            "delivers", "serves", "survives_with", "degrades_to", "supports", "includes", "belongs_to",
+            "decomposes_into", "has_part", "part_of", "composes"
+        }
+        if predicate_val and predicate_val not in allowed_predicates:
+            raise ValueError(f"Prédicat non autorisé : '{predicate_val}'")
+        predicate = _esc(predicate_val)
         status = _esc(statement.get("status", "active"))
         created_at = _esc(statement.get("created_at", datetime.now().isoformat()))
         sub_name = _esc(statement.get("subject", "general"))

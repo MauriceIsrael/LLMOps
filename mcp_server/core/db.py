@@ -67,8 +67,11 @@ class ReadOnlyKuzuClient:
 
     def __init__(self, db_path: Path | str | None = None, max_rows: int = 1000):
         self.db_path = str(db_path or server_config.knowledge_db_path)
-        db_dir = Path(self.db_path)
-        db_dir.mkdir(parents=True, exist_ok=True)
+        p = Path(self.db_path)
+        if p.suffix and p.suffix != ".kuzu":
+            p.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            p.mkdir(parents=True, exist_ok=True)
         self.max_rows = max_rows
 
     def execute_cypher(self, query: str) -> list[dict[str, Any]]:
@@ -83,6 +86,8 @@ class ReadOnlyKuzuClient:
             if self.max_rows and len(results) > self.max_rows:
                 return results[: self.max_rows]
             return results
+        except PermissionError:
+            raise
         except Exception as e:
             err_msg = str(e)
             if "read" not in err_msg.lower() and "permission" not in err_msg.lower():

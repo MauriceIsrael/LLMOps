@@ -4,12 +4,13 @@ from pathlib import Path
 from typing import Any
 
 from mcp_server.config import settings
+from mcp_server.core.config import server_config
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
 from tools.adapters.kuzu_store import make_graph_store
 
 
 def _get_db():
-    return make_graph_store(settings.DB_PATH, read_only=True)
+    return make_graph_store(server_config.knowledge_db_path, read_only=True)
 
 
 def _get_parser():

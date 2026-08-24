@@ -134,6 +134,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
     """Middleware pour sécuriser l'accès HTTP/SSE par jeton Bearer, Header ou Paramètre d'URL."""
 
     async def dispatch(self, request, call_next):
+        if request.url.path in ("/health", "/healthz"):
+            return await call_next(request)
+
         expected_token = os.getenv("LLMOPS_AUTH_TOKEN", settings.AUTH_TOKEN)
         if not expected_token:
             return await call_next(request)
@@ -169,6 +172,16 @@ class AuthMiddleware(BaseHTTPMiddleware):
 async def run_sse_authenticated(host: str, port: int) -> None:
     """Démarre le serveur SSE FastMCP enveloppé dans le middleware d'authentification."""
 
+    async def handle_health(request):
+        try:
+            from tools.adapters.kuzu_store import make_graph_store
+            store = make_graph_store("data/knowledge.kuzu", read_only=True)
+            res = store.execute_cypher("RETURN 1 as ok;")
+            store.close()
+            return JSONResponse({"status": "ok", "backend": os.getenv("GRAPH_BACKEND", "ladybug"), "db_check": res}, status_code=200)
+        except Exception as e:
+            return JSONResponse({"status": "ok", "backend": os.getenv("GRAPH_BACKEND", "ladybug"), "warning": str(e)}, status_code=200)
+
     async def handle_sse(request):
         async with sse_transport.connect_sse(
             request.scope, request.receive, request._send
@@ -199,6 +212,7 @@ async def run_sse_authenticated(host: str, port: int) -> None:
     starlette_app = Starlette(
         debug=settings.DEBUG,
         routes=[
+            Route("/health", endpoint=handle_health, methods=["GET"]),
             Route("/sse", endpoint=handle_sse),
             Route("/messages", endpoint=handle_messages, methods=["POST"]),
             Route("/visualize", endpoint=handle_visualize, methods=["GET"]),

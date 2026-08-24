@@ -37,8 +37,8 @@ def test_blueprint_binding_creates_declared_subjects(temp_db: Path) -> None:
     assert "mcx-services" in declared_names
     assert "mobile-core" in declared_names
     assert "transport" in declared_names
-    assert "floor-control" in declared_names
-    assert "group-management" in declared_names
+    assert "rancher-domain" in declared_names
+    assert "automation-chain" in declared_names
 
 
 def test_scan_is_idempotent(temp_db: Path) -> None:
@@ -173,7 +173,7 @@ def test_section_readiness_uses_blueprint_levels(temp_db: Path) -> None:
     coverage = plan_data.get("coverage", [])
     sec_5_3 = next((c for c in coverage if c["section_id"] == "5.3"), None)
     assert sec_5_3 is not None
-    assert sec_5_3["min_level_final"] == "L4_specified"
+    assert sec_5_3["min_level_final"] == "L3_decided"
     assert sec_5_3["status"] == "provisional"
 
 

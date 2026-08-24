@@ -30,18 +30,32 @@ poetry install
 
 ---
 
-## 🔄 2. Ingestion de la Base de Connaissances (GraphRAG)
+## 🔄 2. Ingestion & Migration des Bases Graphiques (LadybugDB / ADR-0015)
 
 ```bash
-poetry run ingest --kb-dir data/kb --db-path data/kuzu_db
+# Ingestion des documents Markdown (ADRs, Glossaire, Principes) et migration physique vers LadybugDB
+poetry run python -m pipelines.ingestion.migrate_adr0015
+
+# (Optionnel) Spécifier le moteur graphique explicitement via la variable d'environnement GRAPH_BACKEND
+GRAPH_BACKEND=ladybug poetry run python -m pipelines.ingestion.migrate_adr0015
 ```
 
 - Ingestion des fichiers Markdown (`.md`) et des spécifications YAML (`.yaml` / `.yml`).
-- Filtrage automatique des fichiers de prose sans `id` (`README.md`, `CONTRIBUTING.md`, etc.).
+- Structure physique ADR-0015 créée automatiquement : `data/knowledge.kuzu` (`database.lbug`) et `data/engagements/nordwave-mcx-2027.kuzu`.
+- Génération automatisée de la documentation du schéma : `poetry run python -m pipelines.ingestion.generate_schema_doc`.
 
 ---
 
-## 🎨 3. Visualisation du Graphe & Plans de Connaissance
+## 🧪 3. Validation de Non-Régression & Tests
+
+```bash
+# Exécution de l'ensemble de la suite de tests déterministes (78 unitaires, 20 contrats, 18 équivalence)
+poetry run pytest -m deterministic -v
+
+# Exécution des benchmarks et tests d'évaluation sémantique DeepEval
+poetry run python tests/bench/harness.py
+poetry run pytest tests/bench/test_bench.py -v
+```
 
 ### Visualiseur Web local
 

@@ -22,7 +22,10 @@ def migrate_to_adr0015(data_dir: Path | str = "data") -> dict[str, str]:
 
     # 1. Initialize clean knowledge.kuzu
     if knowledge_db.exists():
-        shutil.rmtree(knowledge_db)
+        if knowledge_db.is_dir():
+            shutil.rmtree(knowledge_db)
+        else:
+            knowledge_db.unlink()
 
     from pipelines.cli import ingest
     try:
@@ -67,4 +70,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    import os
     main()
+    os._exit(0)

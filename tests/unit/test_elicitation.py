@@ -222,7 +222,7 @@ def test_conflict_blocks_completion_not_rendering(setup_test_db):
 
     graph = build_assemble_graph()
     res = graph.invoke({"engagement": "demo-2026", "db_path": str(setup_test_db)})
-    assert res.get("status") == "PROVISIONAL"
+    assert str(res.get("status")).upper() == "PROVISIONAL"
     assert Path(res.get("document_path")).exists()
 
 

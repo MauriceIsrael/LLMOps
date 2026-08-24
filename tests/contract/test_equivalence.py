@@ -1,28 +1,22 @@
 """Automated equivalence test proving LadybugDB produces identical dumps to Kùzu DB snapshots."""
 
-import gc
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
 
-from mcp_server.db.kuzu_client import KuzuClient
-from scripts.dump_graph import dump_graph
-from scripts.export_graph import export_graph
-from scripts.import_graph import import_graph
-from tools.adapters.ladybug_store import LadybugGraphStore
 
-
-def _clear_db_caches():
-    KuzuClient.clear_cache()
-    LadybugGraphStore.clear_cache()
-    gc.collect()
+def _run_cli_script(script_name: str, *args: str) -> None:
+    cmd = [sys.executable, "-m", f"scripts.{script_name}"] + list(args)
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    assert res.returncode == 0, f"Script scripts.{script_name} failed with stderr:\n{res.stderr}"
 
 
 @pytest.mark.deterministic
 def test_knowledge_equivalence(tmp_path: Path):
-    """Export knowledge.kuzu -> Import into LadybugDB -> Assert dump matches golden snapshot."""
-    _clear_db_caches()
+    """Export knowledge plane -> Import into LadybugDB -> Assert dump matches golden snapshot."""
     source_db = "data/knowledge.kuzu"
     if not Path(source_db).exists():
         pytest.skip("data/knowledge.kuzu does not exist")
@@ -31,14 +25,9 @@ def test_knowledge_equivalence(tmp_path: Path):
     target_db = tmp_path / "knowledge.lbug"
     dump_out = tmp_path / "knowledge_dump.json"
 
-    export_graph(db_path=source_db, out_dir=str(export_dir), backend="kuzu")
-    _clear_db_caches()
-
-    import_graph(in_dir=str(export_dir), db_path=str(target_db), backend="ladybug")
-    _clear_db_caches()
-
-    dump_graph(db_path=str(target_db), output_path=str(dump_out))
-    _clear_db_caches()
+    _run_cli_script("export_graph", "--db", source_db, "--out", str(export_dir), "--backend", "ladybug")
+    _run_cli_script("import_graph", "--dir", str(export_dir), "--db", str(target_db), "--backend", "ladybug")
+    _run_cli_script("dump_graph", "--db", str(target_db), "--out", str(dump_out))
 
     golden_file = Path("tests/golden/knowledge_snapshot.json")
     assert golden_file.exists()
@@ -52,8 +41,7 @@ def test_knowledge_equivalence(tmp_path: Path):
 
 @pytest.mark.deterministic
 def test_engagement_equivalence(tmp_path: Path):
-    """Export engagement.kuzu -> Import into LadybugDB -> Assert dump matches golden snapshot."""
-    _clear_db_caches()
+    """Export engagement plane -> Import into LadybugDB -> Assert dump matches golden snapshot."""
     source_db = "data/engagements/nordwave-mcx-2027.kuzu"
     if not Path(source_db).exists():
         pytest.skip("data/engagements/nordwave-mcx-2027.kuzu does not exist")
@@ -62,14 +50,9 @@ def test_engagement_equivalence(tmp_path: Path):
     target_db = tmp_path / "engagement.lbug"
     dump_out = tmp_path / "engagement_dump.json"
 
-    export_graph(db_path=source_db, out_dir=str(export_dir), backend="kuzu")
-    _clear_db_caches()
-
-    import_graph(in_dir=str(export_dir), db_path=str(target_db), backend="ladybug")
-    _clear_db_caches()
-
-    dump_graph(db_path=str(target_db), output_path=str(dump_out))
-    _clear_db_caches()
+    _run_cli_script("export_graph", "--db", source_db, "--out", str(export_dir), "--backend", "kuzu")
+    _run_cli_script("import_graph", "--dir", str(export_dir), "--db", str(target_db), "--backend", "ladybug")
+    _run_cli_script("dump_graph", "--db", str(target_db), "--out", str(dump_out))
 
     golden_file = Path("tests/golden/engagement_snapshot.json")
     assert golden_file.exists()

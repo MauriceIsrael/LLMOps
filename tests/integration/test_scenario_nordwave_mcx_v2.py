@@ -561,15 +561,19 @@ def test_07_resume_in_a_separate_process(repo, report, state):
                   "engagement": ENGAGEMENT, "db_path": str(DB_PATH)}, config=cfg)
     repo.close()
     from mcp_server.db.kuzu_client import KuzuClient
+    from tools.adapters.ladybug_store import LadybugGraphStore
     KuzuClient.clear_cache(str(DB_PATH))
+    LadybugGraphStore.clear_cache(str(DB_PATH))
 
     script = textwrap.dedent(f"""
+        import os
         from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
         from langgraph.types import Command
         g = build_intake_graph(checkpointer=get_sqlite_checkpointer(engagement="{ENGAGEMENT}"))
         r = g.invoke(Command(resume={{"action": "accept", "accept": True}}),
                      config={{"configurable": {{"thread_id": "{qid}"}}}})
         print(len(r.get("persisted_statement_ids", [])))
+        os._exit(0)
     """)
     proc = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True)
     assert proc.returncode == 0, (

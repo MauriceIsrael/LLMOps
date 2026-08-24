@@ -91,11 +91,17 @@ class ElicitationSchemaInitializer:
                     expected_shape STRING,
                     routed_to STRING,
                     status STRING,
+                    level STRING DEFAULT '',
                     created_at STRING,
                     PRIMARY KEY(id)
                 );
                 """
             )
+        else:
+            try:
+                self.graph_store.execute_cypher("ALTER TABLE Question ADD level STRING DEFAULT '';")
+            except Exception:
+                pass
 
         # 4. Table Conflict
         if "Conflict" not in table_names:

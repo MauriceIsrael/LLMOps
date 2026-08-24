@@ -18,6 +18,16 @@ jobs:
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependencies
         run: poetry install --no-interaction
@@ -25,10 +35,21 @@ jobs:
       - name: Ingest KB and migrate databases locally for evals
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: poetry run python -m pipelines.ingestion.migrate_adr0015
+          GRAPH_BACKEND: ladybug
+        run: |
+          poetry run python -m pipelines.ingestion.migrate_adr0015
+          poetry run elicit publish --engagement nordwave-mcx-2027
+
+      - name: Run ADR Benchmark & Evaluation Harness
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GRAPH_BACKEND: ladybug
+        run: |
+          poetry run python tests/bench/harness.py
+          poetry run pytest tests/bench/test_bench.py -v
 
       - name: Run DeepEval Semantic Tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GRAPH_BACKEND: ladybug
         run: poetry run deepeval test run tests/evals/semantic/test_semantic_regression.py
-
