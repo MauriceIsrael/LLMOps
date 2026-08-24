@@ -1,4 +1,4 @@
-# 🧠 LLMOps — Architecture Neuro-Symbolique & Élicitation Collaborative (GraphRAG + FastMCP + LangGraph + LadybugDB)
+# LLMOps — Plateforme GraphRAG & Élicitation d'Architecture (LadybugDB + LangGraph + FastMCP)
 
 ![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)
 ![Poetry](https://img.shields.io/badge/Dependency%20Manager-Poetry-blueviolet.svg)
@@ -7,29 +7,29 @@
 ![LadybugDB](https://img.shields.io/badge/GraphDB-LadybugDB-red.svg)
 ![DeepEval](https://img.shields.io/badge/Evals-DeepEval-red.svg)
 
-Une plateforme MLOps / LLMOps robuste conçue pour ingérer des dossiers d'architecture (ADRs, Principes, Glossaire, Risques en Markdown), extraire une ontologie et un graphe de connaissances (**LadybugDB** / **Kùzu DB**) via **LlamaIndex PropertyGraph**, élaborer des documents d'architecture de manière collaborative avec plusieurs architectes grâce à un **Moteur d'Élicitation LangGraph**, exposer des artefacts typés via un serveur **FastMCP**, et automatiser les tests de non-régression sémantique avec **DeepEval** et **Promptfoo**.
+Une plateforme LLMOps conçue pour ingérer des dossiers d'architecture (ADRs, Principes, Glossaire, Risques en Markdown), extraire un graphe de connaissances (**LadybugDB** / **Kùzu DB**) via **LlamaIndex PropertyGraph**, piloter le processus d'élicitation collaboratif via un **moteur d'état LangGraph**, exposer des outils typés via **FastMCP**, et automatiser les tests de non-régression sémantique avec **DeepEval** et **Promptfoo**.
 
 ---
 
-## 🎨 Documentation & Spécification des Interfaces
+## Documentation & Spécification des Interfaces
 
 Pour intégrer un système tiers ou connecter un moteur de rendu externe (UI Web, React, Vue, Canvas interactive, ou générateur PDF/Mermaid) :
 
-- 🔌 **[Spécification d'Interface Externe (INTERFACE.md)](file:///home/momo/Dev/LLMOps/docs/INTERFACE.md)** : Spécification technique complète avec les **schémas JSON de réponse** pour chaque outil.
-- 🎨 **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)** : Manuel dédié aux développeurs de moteurs de rendu (SDK Python / HTTP SSE).
-- 📊 **[Spécification du Schéma Graphe (SCHEMA.md)](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)** : Structure des tables et propriétés générée automatiquement depuis les bases.
-- ☁️ **[Guide de Déploiement GCP Cloud Run & CI](file:///home/momo/Dev/LLMOps/docs/user_manual.md)** : Instructions d'hébergement Serverless GCP et pipelines GitHub Actions.
+- **[Spécification d'Interface Externe (INTERFACE.md)](file:///home/momo/Dev/LLMOps/docs/INTERFACE.md)** : Spécification technique complète avec les **schémas JSON de réponse** pour chaque outil.
+- **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)** : Manuel dédié aux développeurs de moteurs de rendu (SDK Python / HTTP SSE).
+- **[Spécification du Schéma Graphe (SCHEMA.md)](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)** : Structure des tables et propriétés générée automatiquement depuis les bases.
+- **[Guide de Déploiement GCP Cloud Run & CI](file:///home/momo/Dev/LLMOps/docs/user_manual.md)** : Instructions d'hébergement Serverless GCP et pipelines GitHub Actions.
 
 ---
 
-## 📐 Architecture Neuro-Symbolique, ADR-0014, ADR-0015 & Moteur LadybugDB
+## Architecture Hybride Graphe & Moteur d'Élicitation (ADR-0014, ADR-0015 & LadybugDB)
 
-Plutôt que d'effectuer du RAG classique par découpage de texte (chunking naïf), cette plateforme combine :
+Au lieu d'un RAG basique par découpage de texte (chunking naïf), cette plateforme s'appuie sur une approche hybride (graphe de connaissances déterministe + extraction LLM) :
 1. **Moteur Graphique Haute Performance & Séparation Physique (ADR-0015) :** Nœuds et relations explicites gérés par **LadybugDB** (avec rétrocompatibilité Kùzu DB via le flag `GRAPH_BACKEND`), isolés dans deux espaces physiques :
    - `data/knowledge.kuzu` (`database.lbug`) : Actifs réutilisables d'architecture (`Asset`, `GlossaryTerm`, `SUPERSEDES`).
    - `data/engagements/<engagement-id>.kuzu` : État dynamique par projet client (`Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`).
 2. **Moteur d'Élicitation Collaboratif (LangGraph) :** Orchestration par machines d'état avec **Level Gate de maturité** (`L0_named` → `L4_specified`), détection automatique de contradictions (`check_node`), contestation et arbitrage traçables, et persistance inter-processus via Checkpointer SQLite.
-3. **Capacité Neuro-Sémantique & MCP :** Extraction d'ontologies complexes par LLM via **LlamaIndex** et exposition d'outils typés via **FastMCP** avec enveloppe de réponse normalisée.
+3. **Services FastMCP :** Extraction de sous-graphes par LLM via **LlamaIndex** et exposition d'outils Cypher/JSON typés via **FastMCP** avec enveloppe de réponse normalisée.
 
 ```mermaid
 graph TD
@@ -57,7 +57,7 @@ graph TD
 
 ---
 
-## 📂 Structure du Répertoire (Complete Workspace Layout)
+## Structure du Répertoire (Complete Workspace Layout)
 
 ```text
 LLMOps/
@@ -72,11 +72,11 @@ LLMOps/
 │       └── nordwave-mcx-2027.kuzu
 ├── docker/                    # Dockerfile, docker-compose.yml & scripts conteneurisés
 ├── docs/                      # Documentation complète du projet
-│   ├── INTERFACE.md           # 🔌 Spécification complète de l'interface & schémas JSON des réponses
-│   ├── SCHEMA.md              # 📊 Spécification du schéma Kùzu DB générée automatiquement
-│   ├── architecture.md        # 📖 Spécification de l'architecture logicielle (ADR-0014 / ADR-0015)
-│   ├── renderer_integration.md# 🎨 Guide d'intégration dédié au moteur de rendu (Renderer)
-│   ├── user_manual.md         # 📗 Manuel d'utilisation pas-à-pas
+│   ├── INTERFACE.md           # Spécification complète de l'interface & schémas JSON des réponses
+│   ├── SCHEMA.md              # Spécification du schéma Kùzu DB générée automatiquement
+│   ├── architecture.md        # Spécification de l'architecture logicielle (ADR-0014 / ADR-0015)
+│   ├── renderer_integration.md# Guide d'intégration dédié au moteur de rendu (Renderer)
+│   ├── user_manual.md         # Manuel d'utilisation pas-à-pas
 │   └── graph_explorer.html    # Visualiseur interactif de graphe HTML/JS
 ├── mcp_server/                # Serveurs FastMCP & architecture multi-bases
 │   ├── core/                  # Configuration, auth (`authorise()`), DB (`open_connection()`), envelope
@@ -106,7 +106,7 @@ LLMOps/
 
 ---
 
-## 🚀 Démarrage Rapide
+## Démarrage Rapide
 
 ### 1. Prérequis
 - Python `>= 3.11`
@@ -163,7 +163,7 @@ poetry run elicit engagement archive client-demo-2026
 
 ---
 
-## ☁️ Publication & Déploiement GCP Cloud Run
+## Publication & Déploiement GCP Cloud Run
 
 Le serveur FastMCP est déployé sur **Google Cloud Platform (GCP) Cloud Run** (région `europe-west1`) sous forme de conteneur Serverless sécurisé par jeton d'authentification (`SERVER_TOKEN`).
 
@@ -190,11 +190,11 @@ gcloud run deploy llmops-mcp-server \
 
 ---
 
-## 🛠 Outils Exposés par les Serveurs FastMCP
+## Outils Exposés par les Serveurs FastMCP
 
 Tous les outils retournent une **enveloppe de réponse normalisée** : `{"status": "ok" | "not_found" | "invalid_argument" | "error", "count": int, "data": ...}`.
 
-### 📚 Serveur 1 — Knowledge Server (`mcp_server/main_knowledge.py`)
+### Serveur 1 — Knowledge Server (`mcp_server/main_knowledge.py`)
 | Outil MCP | Description | Paramètres |
 |---|---|---|
 | `list_assets` | Lister les documents selon leur statut, domaine ou phase | `type`, `phase`, `domain`, `status` |
@@ -209,7 +209,7 @@ Tous les outils retournent une **enveloppe de réponse normalisée** : `{"status
 | `query_graph` | Exécuter une requête Cypher en lecture seule sur la KB | `cypher_query` |
 | `get_graph_summary` | Résumé des nœuds et relations de la base de connaissances | *(aucun)* |
 
-### 🎯 Serveur 2 — Engagement Server (`mcp_server/main_engagement.py`)
+### Serveur 2 — Engagement Server (`mcp_server/main_engagement.py`)
 | Outil MCP | Description | Paramètres |
 |---|---|---|
 | `get_subject` | Consulter l'état de maturité d'un sujet d'architecture | `engagement`, `subject` |
@@ -226,16 +226,16 @@ Tous les outils retournent une **enveloppe de réponse normalisée** : `{"status
 
 ---
 
-## 📚 Liens Utiles vers la Documentation
-- 🔌 **[Spécification d'Interface Externe (INTERFACE.md)](file:///home/momo/Dev/LLMOps/docs/INTERFACE.md)**
-- 🎨 **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)**
-- 📊 **[Spécification Auto-générée du Schéma Graphe Kùzu DB](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)**
-- 📖 **[Documentation d'Architecture Logicielle (ADR-0014 / ADR-0015)](file:///home/momo/Dev/LLMOps/docs/architecture.md)**
-- 🟢 **[Test d'Intégration de l'Interface Renderer (Python SDK)](file:///home/momo/Dev/LLMOps/tests/unit/test_renderer_interface.py)**
-- 🏆 **[Scénario d'Élicitation de Référence (Test Nordwave MCX v2)](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx_v2.py)**
-- 📗 **[Manuel Utilisateur Pas-à-Pas](file:///home/momo/Dev/LLMOps/docs/user_manual.md)**
+## Liens Utiles vers la Documentation
+- **[Spécification d'Interface Externe (INTERFACE.md)](file:///home/momo/Dev/LLMOps/docs/INTERFACE.md)**
+- **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)**
+- **[Spécification Auto-générée du Schéma Graphe Kùzu DB](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)**
+- **[Documentation d'Architecture Logicielle (ADR-0014 / ADR-0015)](file:///home/momo/Dev/LLMOps/docs/architecture.md)**
+- **[Test d'Intégration de l'Interface Renderer (Python SDK)](file:///home/momo/Dev/LLMOps/tests/unit/test_renderer_interface.py)**
+- **[Scénario d'Élicitation de Référence (Test Nordwave MCX v2)](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx_v2.py)**
+- **[Manuel Utilisateur Pas-à-Pas](file:///home/momo/Dev/LLMOps/docs/user_manual.md)**
 
 ---
 
-## 📄 Licence
+## Licence
 Sous licence MIT. Voir `LICENSE` pour plus de détails.

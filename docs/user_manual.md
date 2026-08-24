@@ -1,10 +1,10 @@
-# 📗 Manuel Utilisateur — Plateforme LLMOps (GraphRAG + FastMCP + Élicitation)
+# Manuel Utilisateur — Plateforme LLMOps (GraphRAG + FastMCP + Élicitation)
 
-Ce manuel fournit toutes les instructions nécessaires pour installer, alimenter, utiliser, visualiser et partager la plateforme LLMOps neuro-symbolique et son système d'élicitation collaboratif.
+Ce manuel fournit toutes les instructions nécessaires pour installer, alimenter, utiliser, visualiser et partager la plateforme LLMOps (GraphRAG, FastMCP, LadybugDB) et son système d'élicitation collaboratif.
 
 ---
 
-## 📋 1. Prérequis & Installation
+## 1. Prérequis & Installation
 
 ### Prérequis Système
 
@@ -30,7 +30,7 @@ poetry install
 
 ---
 
-## 🔄 2. Ingestion & Migration des Bases Graphiques (LadybugDB / ADR-0015)
+## 2. Ingestion & Migration des Bases Graphiques (LadybugDB / ADR-0015)
 
 ```bash
 # Ingestion des documents Markdown (ADRs, Glossaire, Principes) et migration physique vers LadybugDB
@@ -46,7 +46,7 @@ GRAPH_BACKEND=ladybug poetry run python -m pipelines.ingestion.migrate_adr0015
 
 ---
 
-## 🧪 3. Validation de Non-Régression & Tests
+## 3. Validation de Non-Régression & Tests
 
 ```bash
 # Exécution de l'ensemble de la suite de tests déterministes (78 unitaires, 20 contrats, 18 équivalence)
@@ -67,11 +67,11 @@ poetry run visualize
 
 ### Visualiseur Web GCP Cloud Run en direct
 
-👉 **`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`**
+`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`
 
 ---
 
-## 🤖 4. Élicitation Collaborative (Chatbot Inversé)
+## 4. Élicitation Collaborative (Chatbot Inversé)
 
 Le système d'élicitation (`elicit`) permet à une équipe d'architectes de compléter déterministement les dossiers d'architecture.
 
@@ -115,7 +115,7 @@ poetry run pytest tests/integration/test_scenario_nordwave_mcx_v2.py -v
 
 ---
 
-## 📢 5. Comment utiliser la Plateforme
+## 5. Comment utiliser la Plateforme
 
 ### Option 1 : Partager l'accès au Serveur MCP (Claude Desktop / Cursor / Antigravity / VS Code)
 
@@ -138,7 +138,7 @@ Transmettez simplement cet extrait de configuration à vos collègues pour qu'il
 ### Option 2 : Partager le Visualiseur Web Interactif du Graphe
 
 Transmettez ce lien direct à vos collègues pour qu'ils explorent la base de connaissances sans rien installer :
-👉 **`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`**
+`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`
 
 ---
 
