@@ -1,8 +1,0 @@
-{
-  "id": "Q-0002",
-  "engagement": "test-eng-1",
-  "question": "Which loops govern the system, and how does autonomy increase over time?",
-  "why_it_matters": "La section 8.1 (8.1) ne contient aucun énoncé d'architecture.",
-  "expected_shape": "decision",
-  "routed_to": "chief-architect"
-}

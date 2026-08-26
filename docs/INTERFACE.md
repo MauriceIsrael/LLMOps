@@ -418,6 +418,6 @@ Rapport de poids et de centralité des domaines d'expertise avec matrice des dé
 
 ## 🎨 6. Documents de Référence Complémentaires
 
-- 🎨 **[Guide d'Intégration du Moteur de Rendu (Renderer Integration Guide)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)** : Manuel dédié au développement de moteurs de rendu (UI Web, React, PDF).
-- 📊 **[Spécification du Schéma Graphe Kùzu DB (SCHEMA.md)](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)** : Structure des tables et propriétés pour les utilisateurs de `query_graph`.
-- 📖 **[Documentation d'Architecture Logicielle (architecture.md)](file:///home/momo/Dev/LLMOps/docs/architecture.md)** : Spécification des choix d'architecture interne (ADR-0014 / ADR-0015).
+- 🎨 **[Guide d'Intégration du Moteur de Rendu (Renderer Integration Guide)](renderer_integration.md)** : Manuel dédié au développement de moteurs de rendu (UI Web, React, PDF).
+- 📊 **[Spécification du Schéma Graphe Kùzu DB (SCHEMA.md)](SCHEMA.md)** : Structure des tables et propriétés pour les utilisateurs de `query_graph`.
+- 📖 **[Documentation d'Architecture Logicielle (architecture.md)](architecture.md)** : Spécification des choix d'architecture interne (ADR-0014 / ADR-0015).

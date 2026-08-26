@@ -63,7 +63,7 @@ poetry run pytest tests/bench/test_bench.py -v
 poetry run visualize
 ```
 
-*Ouvrez [docs/graph_explorer.html](file:///home/momo/Dev/LLMOps/docs/graph_explorer.html) dans votre navigateur.*
+*Ouvrez [graph_explorer.html](graph_explorer.html) dans votre navigateur.*
 
 ### Visualiseur Web GCP Cloud Run en direct
 

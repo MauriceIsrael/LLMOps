@@ -48,3 +48,9 @@ Arborescence exemple/
 .shadow
 .wal
 graph_proc/
+
+# apps/kb-client-app build logs & scratch
+apps/kb-client-app/npm_output.log
+apps/kb-client-app/check_output.txt
+apps/kb-client-app/svelte-check-output.txt
+apps/kb-client-app/scratch/

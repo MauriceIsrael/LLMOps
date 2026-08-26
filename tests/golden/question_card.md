@@ -13,8 +13,8 @@ Forme attendue : decision
 **Previously answered elsewhere**
 Référence dans l'engagement `other-eng` : `SAN NVMe dual-controller` (Confiance : `verified`). Vous pouvez confirmer cette valeur ou vous en écarter.
 **Constrained by**
-- [P-012](file:///data/kb/assets/P-012.md)
-- [ADR-0011](file:///data/kb/assets/ADR-0011.md)
+- [P-012](data/kb/assets/P-012.md)
+- [ADR-0011](data/kb/assets/ADR-0011.md)
 
 **How to answer**
 Copiez la commande suivante et répondez :

@@ -1,8 +1,0 @@
-{
-  "id": "Q-0003",
-  "engagement": "test-eng-4",
-  "question": "What is the 5G Standalone core topology and UPF placement strategy?",
-  "why_it_matters": "La section 5.1 (5.1) ne contient aucun énoncé d'architecture.",
-  "expected_shape": "decision",
-  "routed_to": "mobile-core-architect"
-}

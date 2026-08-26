@@ -1,8 +1,0 @@
-{
-  "id": "Q-0004",
-  "engagement": "test-cap-role",
-  "question": "Why now, what forces the programme, and under which directives?",
-  "why_it_matters": "La section 1.3 (1.3) ne contient aucun énoncé d'architecture.",
-  "expected_shape": "decision",
-  "routed_to": "chief-architect"
-}

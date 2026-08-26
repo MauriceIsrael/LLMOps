@@ -1,8 +1,0 @@
-{
-  "id": "Q-0001",
-  "engagement": "test-prior-batch",
-  "question": "Quelle est l'architecture de la section 5.2 (Storage System) ?",
-  "why_it_matters": "La section 5.2 (Storage System) ne contient aucun énoncé d'architecture.",
-  "expected_shape": "decision",
-  "routed_to": "architect"
-}

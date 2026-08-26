@@ -12,6 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check for absolute file:/// links in Markdown files
+        run: |
+          if git grep -n "file:///" -- "*.md"; then
+            echo "ERROR: Absolute file:/// links found in versioned Markdown files!"
+            exit 1
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

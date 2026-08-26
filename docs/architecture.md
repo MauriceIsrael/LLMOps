@@ -194,7 +194,7 @@ flowchart LR
    - Chaque énoncé reçoit un niveau de confiance (`assumed`, `designed`, `committed`).
    - Si la réponse exprime une indétermination (ex: *"nous ne savons pas encore pour la bande passante"*), le parser crée une entité `Uncertainty` au lieu d'inventer une valeur factuelle.
 3. **Traçabilité des Références (`BASED_ON`) :**
-   - Si l'architecte mentionne un document de la KB (ex: `file:///projects/nordwave-mcx-2027/draft#section-5.4`), le parser relie l'énoncé au nœud `Asset` correspondant via la relation `BASED_ON`.
+   - Si l'architecte mentionne un document de la KB (ex: `projects/nordwave-mcx-2027/draft#section-5.4`), le parser relie l'énoncé au nœud `Asset` correspondant via la relation `BASED_ON`.
 
 ---
 
@@ -271,7 +271,7 @@ data/
 L'enregistrement et la publication d'un graphe d'engagement s'effectuent par instantanés atomiques (`elicit publish --engagement <id>`) depuis l'espace de travail vers `data/engagements/<id>.kuzu`. Les opérations d'écriture du moteur d'élicitation et de lecture du serveur MCP sont ainsi strictement isolées.
 
 ### 7.4 Spécification du Schéma (`docs/SCHEMA.md`)
-La structure du schéma graphique pour chaque plan est documentée de manière automatisée dans [docs/SCHEMA.md](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md) via l'outil `generate_schema_doc.py`.
+La structure du schéma graphique pour chaque plan est documentée de manière automatisée dans [docs/SCHEMA.md](SCHEMA.md) via l'outil `generate_schema_doc.py`.
 
 ---
 
@@ -279,9 +279,9 @@ La structure du schéma graphique pour chaque plan est documentée de manière a
 
 La validation repose sur des tests d'intégration complets et des évaluations sémantiques :
 
-1. **Scénario Référent d'Élicitation Collaborative ([test_scenario_nordwave_mcx.py](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx.py)) :**
+1. **Scénario Référent d'Élicitation Collaborative ([test_scenario_nordwave_mcx.py](../tests/integration/test_scenario_nordwave_mcx.py)) :**
    - Simulation bout-en-bout de 8 actes avec 3 architectes fictifs (*Amina Duarte*, *Rui Vasconcelos*, *Sofia Lindqvist*).
-   - Génération automatisée d'un rapport de progression visuel complet ([artifacts/nordwave-mcx-2027/progression.md](file:///home/momo/Dev/LLMOps/artifacts/nordwave-mcx-2027/progression.md)) projetant l'état réel du graphe à chaque étape (Maturity Boards, tables de preuves non-tronquées, diagrammes Mermaid).
+   - Génération automatisée d'un rapport de progression visuel complet ([artifacts/nordwave-mcx-2027/progression.md](../artifacts/nordwave-mcx-2027/progression.md)) projetant l'état réel du graphe à chaque étape (Maturity Boards, tables de preuves non-tronquées, diagrammes Mermaid).
 2. **DeepEval Metrics & Promptfoo Benchmarking (`tests/evals/`) :**
    - **FaithfulnessMetric & AnswerRelevancyMetric** : Évaluation de la fidélité des réponses formulées à partir des outils FastMCP.
    - Assertion automatisée sur le dataset `adr_qa_dataset.json`.

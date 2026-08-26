@@ -1,8 +1,0 @@
-{
-  "id": "Q-0002",
-  "engagement": "test-mat-1",
-  "question": "Comment se décompose l'architecture de Storage-5.2 (Section 4.1) ?\nPattern proposé : PAT-006 Vendor boundary through northbound interface (Quand ne pas utiliser : Ne pas utiliser si le fournisseur supporte un accès direct modèle.)",
-  "why_it_matters": "Le sujet Storage-5.2 a atteint L1_framed et doit être décomposé en sous-domaines.",
-  "expected_shape": "decomposition",
-  "routed_to": "mcx-service-architect"
-}

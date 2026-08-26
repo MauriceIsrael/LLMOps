@@ -11,7 +11,7 @@ La section 5.2 (Architecture Stockage Management) ne contient aucun énoncé. (S
 Forme attendue : decision
 
 **Constrained by**
-- [P-012](file:///data/kb/assets/P-012.md)
+- [P-012](data/kb/assets/P-012.md)
 
 **How to answer**
 Copiez la commande suivante et répondez :

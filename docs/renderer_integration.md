@@ -159,7 +159,7 @@ Fournit la trajectoire historique des niveaux de maturité franchis par un sujet
 
 ## 🐍 3. Intégration Directe en Python (Client SDK)
 
-Si votre renderer est développé en Python, vous pouvez importer directement `RendererClient` depuis [mcp_server/renderer_interface.py](file:///home/momo/Dev/LLMOps/mcp_server/renderer_interface.py) :
+Si votre renderer est développé en Python, vous pouvez importer directement `RendererClient` depuis [mcp_server/renderer_interface.py](../mcp_server/renderer_interface.py) :
 
 ```python
 from mcp_server.renderer_interface import RendererClient
@@ -220,7 +220,7 @@ eventSource.addEventListener("endpoint", (event) => {
 
 ## 🧪 5. Validation & Tests d'Intégration
 
-Un test unitaire d'intégration d'interface est disponible sous [tests/unit/test_renderer_interface.py](file:///home/momo/Dev/LLMOps/tests/unit/test_renderer_interface.py). Vous pouvez l'exécuter à tout moment pour vérifier le bon fonctionnement de l'interface :
+Un test unitaire d'intégration d'interface est disponible sous [tests/unit/test_renderer_interface.py](../tests/unit/test_renderer_interface.py). Vous pouvez l'exécuter à tout moment pour vérifier le bon fonctionnement de l'interface :
 
 ```bash
 poetry run pytest tests/unit/test_renderer_interface.py -v

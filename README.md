@@ -21,10 +21,10 @@ Une plateforme LLMOps conçue pour ingérer des dossiers d'architecture (ADRs, P
 
 Pour intégrer un système tiers ou connecter un moteur de rendu externe (UI Web, React, Vue, Canvas interactive, ou générateur PDF/Mermaid) :
 
-- **[Spécification d'Interface Externe (INTERFACE.md)](file:///home/momo/Dev/LLMOps/docs/INTERFACE.md)** : Spécification technique complète avec les **schémas JSON de réponse** pour chaque outil.
-- **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)** : Manuel dédié aux développeurs de moteurs de rendu (SDK Python / HTTP SSE).
-- **[Spécification du Schéma Graphe (SCHEMA.md)](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)** : Structure des tables et propriétés générée automatiquement depuis les bases.
-- **[Guide de Déploiement GCP Cloud Run & CI](file:///home/momo/Dev/LLMOps/docs/user_manual.md)** : Instructions d'hébergement Serverless GCP et pipelines GitHub Actions.
+- **[Spécification d'Interface Externe (INTERFACE.md)](docs/INTERFACE.md)** : Spécification technique complète avec les **schémas JSON de réponse** pour chaque outil.
+- **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](docs/renderer_integration.md)** : Manuel dédié aux développeurs de moteurs de rendu (SDK Python / HTTP SSE).
+- **[Spécification du Schéma Graphe (SCHEMA.md)](docs/SCHEMA.md)** : Structure des tables et propriétés générée automatiquement depuis les bases.
+- **[Guide de Déploiement GCP Cloud Run & CI](docs/user_manual.md)** : Instructions d'hébergement Serverless GCP et pipelines GitHub Actions.
 
 ---
 
@@ -131,7 +131,7 @@ Exécuter la migration physique des bases vers LadybugDB pour créer `data/knowl
 poetry run python -m pipelines.ingestion.migrate_adr0015
 ```
 
-Générer la documentation à jour du schéma graphique ([docs/SCHEMA.md](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)) :
+Générer la documentation à jour du schéma graphique ([docs/SCHEMA.md](docs/SCHEMA.md)) :
 ```bash
 poetry run python -m pipelines.ingestion.generate_schema_doc
 ```
@@ -233,13 +233,13 @@ Tous les outils retournent une **enveloppe de réponse normalisée** : `{"status
 ---
 
 ## Liens Utiles vers la Documentation
-- **[Spécification d'Interface Externe (INTERFACE.md)](file:///home/momo/Dev/LLMOps/docs/INTERFACE.md)**
-- **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](file:///home/momo/Dev/LLMOps/docs/renderer_integration.md)**
-- **[Spécification Auto-générée du Schéma Graphe Kùzu DB](file:///home/momo/Dev/LLMOps/docs/SCHEMA.md)**
-- **[Documentation d'Architecture Logicielle (ADR-0014 / ADR-0015)](file:///home/momo/Dev/LLMOps/docs/architecture.md)**
-- **[Test d'Intégration de l'Interface Renderer (Python SDK)](file:///home/momo/Dev/LLMOps/tests/unit/test_renderer_interface.py)**
-- **[Scénario d'Élicitation de Référence (Test Nordwave MCX v2)](file:///home/momo/Dev/LLMOps/tests/integration/test_scenario_nordwave_mcx_v2.py)**
-- **[Manuel Utilisateur Pas-à-Pas](file:///home/momo/Dev/LLMOps/docs/user_manual.md)**
+- **[Spécification d'Interface Externe (INTERFACE.md)](docs/INTERFACE.md)**
+- **[Guide d'Intégration du Moteur de Rendu (Renderer Interface Doc)](docs/renderer_integration.md)**
+- **[Spécification Auto-générée du Schéma Graphe Kùzu DB](docs/SCHEMA.md)**
+- **[Documentation d'Architecture Logicielle (ADR-0014 / ADR-0015)](docs/architecture.md)**
+- **[Test d'Intégration de l'Interface Renderer (Python SDK)](tests/unit/test_renderer_interface.py)**
+- **[Scénario d'Élicitation de Référence (Test Nordwave MCX v2)](tests/integration/test_scenario_nordwave_mcx_v2.py)**
+- **[Manuel Utilisateur Pas-à-Pas](docs/user_manual.md)**
 
 ---
 
