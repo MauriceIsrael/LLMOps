@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ResponseEnvelope",
+  "description": "Standardized envelope returned by all LLMOps FastMCP tools.",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "not_found",
+        "invalid_argument",
+        "error",
+        "unauthorized"
+      ]
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "data": {
+      "description": "Payload response whose structure depends on the tool called."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Explanation provided when status is error, invalid_argument, or unauthorized."
+    }
+  },
+  "required": [
+    "status",
+    "count",
+    "data"
+  ]
+}

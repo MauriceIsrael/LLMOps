@@ -1,0 +1,11 @@
+{
+  "status": "ok",
+  "count": 0,
+  "data": {
+    "engagement": "nordwave-mcx-2027",
+    "format": "mermaid",
+    "nodes": [],
+    "edges": [],
+    "mermaid": "flowchart TD"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "status": "ok",
+  "count": 1,
+  "data": {
+    "engagement": "nordwave-mcx-2027",
+    "board": [],
+    "render_payload": {
+      "engagement": "nordwave-mcx-2027",
+      "status": "final",
+      "is_provisional": false,
+      "maturity_board": [],
+      "active_statements": [],
+      "open_conflicts": [],
+      "uncertainties": [],
+      "unripe_subjects": []
+    },
+    "diagram_graph": {
+      "engagement": "nordwave-mcx-2027",
+      "format": "mermaid",
+      "nodes": [],
+      "edges": [],
+      "mermaid": "flowchart TD"
+    }
+  }
+}

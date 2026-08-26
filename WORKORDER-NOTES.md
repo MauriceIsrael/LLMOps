@@ -44,3 +44,18 @@ This document tracks the execution progress, audit findings, deferred items, and
 - None.
 
 ---
+
+## Lot 2 — Réduire le coût d'écriture d'un client (Completed)
+
+### 1. Accomplished Actions
+- **Published Offline Fixtures (2.1)**: Created `fixtures/` containing exported JSON files (`knowledge_snapshot.json`, `engagement_snapshot.json`, `get_render_payload.json`, `get_board.json`, `get_diagram_graph.json`) and `fixtures/README.md` in English. Added generator script `scripts/export_fixtures.py`.
+- **Machine Contract & Schemas (2.2)**: Created `scripts/generate_schemas.py` producing `schemas/envelope.schema.json` and TypeScript definitions `schemas/types.ts`. Added contract test `tests/contract/test_fixtures_contract.py` enforcing fixture envelope validity and zero divergence from `scripts/export_fixtures.py`.
+- **Contract Versioning Policy (2.3)**: Created `docs/VERSIONING.md` in English documenting semver rules for `schema_version: "1.0"`, stable vs transient fields, and deprecation policies.
+
+### 2. Noticed but Deferred / Action Required
+- None.
+
+### 3. Discrepancies with Workorder Spec
+- None.
+
+---

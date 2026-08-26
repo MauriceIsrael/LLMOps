@@ -1,0 +1,25 @@
+{
+  "status": "ok",
+  "count": 1,
+  "data": {
+    "schema_version": "1.0",
+    "knowledge": {
+      "dataset": "data/knowledge.kuzu",
+      "node_counts": {
+        "Asset": 47,
+        "GlossaryTerm": 10
+      }
+    },
+    "engagements": [
+      {
+        "id": "nordwave-mcx-2027",
+        "dataset": "data/engagements/nordwave-mcx-2027.kuzu",
+        "node_counts": {
+          "Subject": 0,
+          "Statement": 0,
+          "Conflict": 0
+        }
+      }
+    ]
+  }
+}
