@@ -27,9 +27,13 @@ graph LR
 - **Transport Recommandé :** HTTP SSE (`Server-Sent Events`) à la racine du serveur `/sse`.
 - **Transport STDIO (Agents Locaux) :** `poetry run mcp-server-knowledge` et `poetry run mcp-server-engagement`.
 - **Endpoint Public GCP Cloud Run :** `https://llmops-mcp-server-344571265365.europe-west1.run.app/sse`
+- **Authentification HTTP (Bearer Token) :**
+  - Tout démarrage du serveur HTTP exige la variable d'environnement `SERVER_TOKEN` (ou `LLMOPS_AUTH_TOKEN`).
+  - Les requêtes HTTP / SSE doivent fournir le jeton dans l'en-tête HTTP : `Authorization: Bearer <SERVER_TOKEN>` (ou `X-API-Key: <SERVER_TOKEN>`).
+  - Le serveur valide le jeton de manière constante (`secrets.compare_digest`) et retourne `HTTP 401 Unauthorized` si le jeton est invalide ou absent.
 - **Sûreté de Connexion & Sémantique :** 
-  - Connexion strictement **Read-Only** sur la base de données graphique Kùzu DB.
-  - Toute tentative de mutation Cypher (`CREATE`, `SET`, `DELETE`) est refusée au niveau du driver.
+  - Connexion strictement **Read-Only** sur la base de données graphique Kùzu DB en production.
+  - Toute tentative de mutation Cypher via l'interface publique est refusée au niveau du driver.
   - Ordre de contrôle : l'autorisation (`authorise`) est toujours vérifiée avant la résolution de fichier.
 
 ---
