@@ -501,6 +501,59 @@ def publish(
     console.print(f"[bold green]✅ Engagement {valid_id} published successfully to {target_path}![/bold green]")
 
 
+@app.command(name="import")
+def import_data(
+    file_path: str = typer.Argument(..., help="Path to JSON import file"),
+    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifier of engagement target"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate and report without writing to database"),
+) -> None:
+    """Import third-party elicitation payload (Subjects, Statements, Conflicts, Uncertainties) via Repository pipeline."""
+    import json
+    from pathlib import Path
+
+    p = Path(file_path)
+    if not p.exists():
+        console.print(f"[bold red]File not found: {file_path}[/bold red]")
+        return
+
+    try:
+        payload = json.loads(p.read_text(encoding="utf-8"))
+    except Exception as e:
+        console.print(f"[bold red]Invalid JSON file: {e}[/bold red]")
+        return
+
+    target_engagement = payload.get("engagement") or engagement
+    console.print(f"[bold blue]📥 Import payload for engagement {target_engagement} (dry-run: {dry_run})...[/bold blue]")
+
+    statements = payload.get("statements", [])
+    subjects = payload.get("subjects", [])
+    conflicts = payload.get("conflicts", [])
+    uncertainties = payload.get("uncertainties", [])
+
+    console.print(f"  - Subjects to import: {len(subjects)}")
+    console.print(f"  - Statements to import: {len(statements)}")
+    console.print(f"  - Conflicts to import: {len(conflicts)}")
+    console.print(f"  - Uncertainties to import: {len(uncertainties)}")
+
+    if dry_run:
+        console.print("[bold yellow]🔍 Dry-run complete. No changes written to database.[/bold yellow]")
+        return
+
+    repo = ElicitationRepository()
+    for s in subjects:
+        repo.save_subject(s["name"], engagement=target_engagement, definition=s.get("definition", ""))
+        if "level" in s:
+            repo.advance_subject_level(s["name"], s["level"], engagement=target_engagement)
+
+    persisted_stmt_ids = []
+    for stmt in statements:
+        stmt["engagement"] = target_engagement
+        stmt_id = repo.save_statement(stmt)
+        persisted_stmt_ids.append(stmt_id)
+
+    console.print(f"[bold green]✅ Import complete for engagement {target_engagement}! Statements saved: {len(persisted_stmt_ids)}[/bold green]")
+
+
 engagement_app = typer.Typer(help="Engagement lifecycle commands (create, archive).")
 app.add_typer(engagement_app, name="engagement")
 

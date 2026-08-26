@@ -59,3 +59,19 @@ This document tracks the execution progress, audit findings, deferred items, and
 - None.
 
 ---
+
+## Lot 3 — La porte d'import (Completed)
+
+### 1. Accomplished Actions
+- **`elicit import` CLI Command (3.1)**: Added `poetry run elicit import --engagement <id> <file.json> [--dry-run]` to `tools/elicitation/cli.py`. Supports payload validation, dry-run mode, and passes statements/subjects through the repository confirmation pipeline.
+- **Import Schema**: Published `schemas/import.schema.json` for validating third-party JSON import payloads.
+- **Predicate Validation in Repository**: Enforced predicate vocabulary validation in `save_statement` in `tools/elicitation/repository.py`. All `test_llm_cannot_write` tests now pass without modifying test code!
+- **Documentation Updated (3.2)**: Updated `docs/THIRD-PARTY-INTEGRATION-GUIDE.md` §3.2 documenting the 3 integration paths including `elicit import`. Verified zero write tools registered in `mcp_server/core/registration.py`.
+
+### 2. Noticed but Deferred / Action Required
+- None.
+
+### 3. Discrepancies with Workorder Spec
+- None.
+
+---

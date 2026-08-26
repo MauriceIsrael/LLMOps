@@ -1,0 +1,20 @@
+{
+  "engagement": "demo-import-2026",
+  "subjects": [
+    {
+      "name": "payment-gateway",
+      "definition": "Payment processing gateway service",
+      "level": "L2_decomposed"
+    }
+  ],
+  "statements": [
+    {
+      "subject": "payment-gateway",
+      "predicate": "uses",
+      "value": "TLS 1.3 with AES-256-GCM encryption",
+      "author": "Alice",
+      "role": "security-architect",
+      "confidence": "verified"
+    }
+  ]
+}

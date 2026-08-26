@@ -108,18 +108,15 @@ declared one. The maturity board is genuinely rich: level, origin
 (`blueprint` vs `discovered`), staleness (`days_at_level`, `is_stalled`) and
 which document sections depend on each subject.
 
-### 3.2 Write path — not exposed by MCP, by design
+### 3.2 Write path — 3 options available for integrators
 
-There is no `create_statement` or `submit_answer` tool, and there should not be
-one: every write on our side goes through a human confirmation step (the
-elicitation flow), which is precisely the guarantee that makes the base
-trustworthy. A third party does not get to bypass that by calling a tool.
+There is no `create_statement` or `submit_answer` MCP tool, and there should not be one: every write on our side goes through a human confirmation step or validation pipeline, which is precisely the guarantee that makes the base trustworthy.
 
-**What this means for you.** To inject project data, you populate an engagement
-Kùzu database directly, following the schema below, or you run our elicitation
-engine against your own project (see `TPL-elicitation-proto`) and let it produce
-the graph through its own confirmation flow. The second is more work to adopt
-and preserves the guarantee; the first is faster and puts the guarantee on you.
+**Three integration paths exist today:**
+
+1. **CLI Import Gateway (`poetry run elicit import`) (Recommended)**: Import a JSON payload (`schemas/import.schema.json`) into an engagement database via `poetry run elicit import --engagement <id> <file.json> [--dry-run]`. It validates predicates against the domain vocabulary and passes through the repository pipeline.
+2. **Elicitation Engine**: Run our elicitation CLI (`poetry run elicit scan` / `answer` / `confirm`) against your own project and let it build the graph through its own confirmation flow.
+3. **Direct Kùzu Database Population**: Populate an engagement Kùzu database directly following the schema in §3.3. This option is faster but transfers data validation responsibility to the integrator.
 
 ### 3.3 The engagement schema, reverse-engineered from live responses
 
