@@ -16,8 +16,10 @@ class KuzuGraphStore(GraphStore):
         self.read_only = read_only
         self._client = KuzuClient(db_path=self.db_path, read_only=read_only)
 
-    def execute_cypher(self, query: str) -> list[dict[str, Any]]:
-        return self._client.execute_cypher(query)
+    def execute_cypher(
+        self, query: str, params: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
+        return self._client.execute_cypher(query, params)
 
     def close(self) -> None:
         if hasattr(self, "_client") and self._client:

@@ -74,7 +74,9 @@ class ReadOnlyKuzuClient:
             p.mkdir(parents=True, exist_ok=True)
         self.max_rows = max_rows
 
-    def execute_cypher(self, query: str) -> list[dict[str, Any]]:
+    def execute_cypher(
+        self, query: str, params: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """Executes a read-only Cypher query."""
         write_keywords = r"\b(CREATE|SET|DELETE|MERGE|DROP|ALTER|DETACH|REMOVE)\b"
         if re.search(write_keywords, query, re.IGNORECASE):
@@ -82,7 +84,7 @@ class ReadOnlyKuzuClient:
 
         try:
             store = make_graph_store(self.db_path, read_only=True)
-            results = store.execute_cypher(query)
+            results = store.execute_cypher(query, params)
             if self.max_rows and len(results) > self.max_rows:
                 return results[: self.max_rows]
             return results

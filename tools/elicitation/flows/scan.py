@@ -40,10 +40,6 @@ class CountsSummary(dict):
         return super().get(key, default)
 
 
-def _esc(val: Any) -> str:
-    return str(val or "").replace("'", "\\'")
-
-
 @dataclass
 class Gap:
     """Modèle pur d'un manque d'architecture identifié."""
@@ -281,7 +277,8 @@ def enrich_node(state: ScanState) -> dict[str, Any]:
 
         # Prior answer via parameterised query (D8)
         prior_rows = repo.db_client.execute_cypher(
-            f"MATCH (st:Statement) WHERE st.subject = '{_esc(sub_name)}' AND st.status IN ['active', 'under_review'] RETURN st.value as value, st.verbatim as verbatim, st.author as author, st.predicate as predicate, st.confidence as confidence;"
+            "MATCH (st:Statement) WHERE st.subject = $sub_name AND st.status IN ['active', 'under_review'] RETURN st.value as value, st.verbatim as verbatim, st.author as author, st.predicate as predicate, st.confidence as confidence;",
+            params={"sub_name": sub_name},
         )
         if prior_rows and "error" not in prior_rows[0]:
             ans = prior_rows[0]
@@ -335,7 +332,8 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
 
     # Récupérer les questions ouvertes/envoyées dans Kùzu DB
     existing_rows = repo.db_client.execute_cypher(
-        f"MATCH (q:Question {{engagement: '{_esc(engagement)}'}}) WHERE q.status IN ['open', 'sent'] RETURN q.id as id, q.section as section, q.routed_to as routed_to, q.status as status;"
+        "MATCH (q:Question {engagement: $engagement}) WHERE q.status IN ['open', 'sent'] RETURN q.id as id, q.section as section, q.routed_to as routed_to, q.status as status;",
+        params={"engagement": engagement},
     )
     existing_by_sec = {}
     role_open_counts: dict[str, int] = {}

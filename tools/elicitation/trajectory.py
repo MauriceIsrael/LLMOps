@@ -5,7 +5,7 @@ from typing import Any
 
 from rich.console import Console
 
-from tools.elicitation.repository import ElicitationRepository, _esc
+from tools.elicitation.repository import ElicitationRepository
 
 console = Console()
 
@@ -17,25 +17,26 @@ def get_subject_trajectory(
     repo = ElicitationRepository(db_path=db_path)
     sub_mat = repo.get_subject_maturity(subject_name)
 
-    sub_esc = _esc(subject_name)
-    eng_esc = _esc(engagement)
-
     # Questions posées cibles
-    q_query = f"""
-    MATCH (q:Question)-[:TARGETS]->(s:Subject {{name: '{sub_esc}'}})
-    WHERE q.engagement = '{eng_esc}'
+    q_query = """
+    MATCH (q:Question)-[:TARGETS]->(s:Subject {name: $subject_name})
+    WHERE q.engagement = $engagement
     RETURN q.id as id, q.section as section, q.question as question, q.level as level, q.routed_to as routed_to, q.created_at as created_at
     ORDER BY q.created_at;
     """
-    q_rows = repo.db_client.execute_cypher(q_query)
+    q_rows = repo.db_client.execute_cypher(
+        q_query, params={"subject_name": subject_name, "engagement": engagement}
+    )
 
     # Énoncés enregistrés
-    st_query = f"""
-    MATCH (st:Statement {{engagement: '{eng_esc}', subject: '{sub_esc}'}})
+    st_query = """
+    MATCH (st:Statement {engagement: $engagement, subject: $subject_name})
     RETURN st.id as id, st.predicate as predicate, st.value as value, st.author as author, st.status as status, st.created_at as created_at
     ORDER BY st.created_at;
     """
-    st_rows = repo.db_client.execute_cypher(st_query)
+    st_rows = repo.db_client.execute_cypher(
+        st_query, params={"subject_name": subject_name, "engagement": engagement}
+    )
 
     steps = []
     # Reconstruire les étapes de maturité (L1 à L4)

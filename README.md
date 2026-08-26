@@ -7,7 +7,13 @@
 ![LadybugDB](https://img.shields.io/badge/GraphDB-LadybugDB-red.svg)
 ![DeepEval](https://img.shields.io/badge/Evals-DeepEval-red.svg)
 
-Une plateforme LLMOps conçue pour ingérer des dossiers d'architecture (ADRs, Principes, Glossaire, Risques en Markdown), extraire un graphe de connaissances (**LadybugDB** / **Kùzu DB**) via **LlamaIndex PropertyGraph**, piloter le processus d'élicitation collaboratif via un **moteur d'état LangGraph**, exposer des outils typés via **FastMCP**, et automatiser les tests de non-régression sémantique avec **DeepEval** et **Promptfoo**.
+Une plateforme LLMOps conçue pour ingérer des dossiers d'architecture (ADRs, Principes, Glossaire, Risques en Markdown), extraire un graphe de connaissances (**LadybugDB** / **Kùzu DB**) via **LlamaIndex PropertyGraph**, piloter le processus d'élicitation collaboratif via un **moteur d'état LangGraph 100% déterministe**, exposer des outils typés via **FastMCP**, et automatiser les tests de non-régression sémantique avec **DeepEval** et **Promptfoo**.
+
+> **Principe Architectural Clef : Serveur Déterministe & Intelligence Client**
+> Le serveur LLMOps est **100% déterministe et auditable** : il ne réalise aucun appel LLM en boîte noire au runtime de requêtage. L'intelligence raisonnante et l'interprétation sémantique résident chez le **client** (Agent AI, IDE Antigravity / Cursor / Claude Desktop), qui consomme les outils MCP typés du serveur.
+> - **Zero Coût d'API Serveur** : Aucun abonnement ou clé LLM requis pour faire tourner le serveur de connaissances.
+> - **Zéro Hallucination de Serving** : Les requêtes Cypher et les payloads de rendu sont 100% reproductibles et vérifiables.
+> - **Liberté Totale du Client** : Chaque utilisateur ou agent client choisit son propre modèle (OpenAI, Gemini, Anthropic, Ollama local).
 
 ---
 
@@ -24,12 +30,12 @@ Pour intégrer un système tiers ou connecter un moteur de rendu externe (UI Web
 
 ## Architecture Hybride Graphe & Moteur d'Élicitation (ADR-0014, ADR-0015 & LadybugDB)
 
-Au lieu d'un RAG basique par découpage de texte (chunking naïf), cette plateforme s'appuie sur une approche hybride (graphe de connaissances déterministe + extraction LLM) :
+Au lieu d'un RAG basique par découpage de texte (chunking naïf), cette plateforme s'appuie sur une approche hybride (graphe de connaissances déterministe + serveur FastMCP) :
 1. **Moteur Graphique Haute Performance & Séparation Physique (ADR-0015) :** Nœuds et relations explicites gérés par **LadybugDB** (avec rétrocompatibilité Kùzu DB via le flag `GRAPH_BACKEND`), isolés dans deux espaces physiques :
    - `data/knowledge.kuzu` (`database.lbug`) : Actifs réutilisables d'architecture (`Asset`, `GlossaryTerm`, `SUPERSEDES`).
    - `data/engagements/<engagement-id>.kuzu` : État dynamique par projet client (`Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`).
-2. **Moteur d'Élicitation Collaboratif (LangGraph) :** Orchestration par machines d'état avec **Level Gate de maturité** (`L0_named` → `L4_specified`), détection automatique de contradictions (`check_node`), contestation et arbitrage traçables, et persistance inter-processus via Checkpointer SQLite.
-3. **Services FastMCP :** Extraction de sous-graphes par LLM via **LlamaIndex** et exposition d'outils Cypher/JSON typés via **FastMCP** avec enveloppe de réponse normalisée.
+2. **Moteur d'Élicitation Collaboratif (LangGraph) :** Orchestration par machines d'état déterministes avec **Level Gate de maturité** (`L0_named` → `L4_specified`), détection automatique de contradictions (`check_node`), contestation et arbitrage traçables, et persistance inter-processus via Checkpointer SQLite.
+3. **Services FastMCP :** Exposition d'outils Cypher/JSON typés via **FastMCP** avec enveloppe de réponse normalisée.
 
 ```mermaid
 graph TD

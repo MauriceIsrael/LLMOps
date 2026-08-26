@@ -3,7 +3,7 @@ import gc
 import pytest
 
 from mcp_server.db.kuzu_client import KuzuClient
-from tools.elicitation.repository import ElicitationRepository, _esc
+from tools.elicitation.repository import ElicitationRepository
 
 
 @pytest.fixture
@@ -16,15 +16,6 @@ def repo(tmp_path):
     LadybugGraphStore.clear_cache()
     KuzuClient.clear_cache()
     gc.collect()
-
-
-@pytest.mark.deterministic
-def test_esc():
-    assert _esc(None) == ""
-    assert _esc("test") == "test"
-    assert _esc("it's a test") == "it\\'s a test"
-    assert _esc("line1\nline2") == "line1 line2"
-    assert _esc("line1\rline2") == "line1 line2"
 
 
 @pytest.mark.deterministic

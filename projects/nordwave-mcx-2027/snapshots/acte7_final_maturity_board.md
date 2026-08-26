@@ -1,15 +1,24 @@
-<!-- elicit:nordwave-mcx-2027:maturity_board:board:sha=dd6261 -->
+<!-- elicit:nordwave-mcx-2027:maturity_board:board:sha=95e634 -->
 ### 📊 Tableau de Maturité des Sujets d'Architecture (Maturity Board) — nordwave-mcx-2027
 
 | Sujet Canonique | Niveau Atteint | Blocage / Question Ouverte | Assigné À | Délais au Niveau | Stagnation (> 7 j) | Sections Dépendantes |
 |---|---|---|---|---|---|---|
-| `lmr-interworking` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `engagement-scope` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `mcx-services` | `L2_decomposed` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
-| `group-management` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
-| `floor-control` | `L3_decided` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `mobile-core` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `transport` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `rancher-domain` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `observation` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `automation-chain` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `service-management` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `security-posture` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `ai-assistance` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `delivery-plan` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `sim-esim-lifecycle` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `group-management` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `floor-control` | `L3_decided` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 | `media-distribution` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
+| `lmr-interworking` | `L0_named` | *Aucun* | - | 0 j | ✅ Normal | 5.2 |
 
 > 📌 **Règles de maturité :**
 > - **L0_named** (Nommé) → **L1_framed** (Cadré) → **L2_decomposed** (Décomposé - Patterns candidats proposés) → **L3_decided** (Mécanisme décidé) → **L4_specified** (Paramétré).

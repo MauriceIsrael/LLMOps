@@ -7,10 +7,12 @@ directement avec la plateforme LLMOps via des structures typées ou via le Serve
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
-from mcp_server.tools.renderer_tools import (
+from mcp_server.engagement.tools import (
     get_diagram_graph,
     get_render_payload,
-    get_subject_trajectory_tool,
+)
+from mcp_server.engagement.tools import (
+    get_subject_trajectory as get_subject_trajectory_tool,
 )
 
 

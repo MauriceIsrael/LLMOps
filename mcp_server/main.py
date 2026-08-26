@@ -4,7 +4,7 @@ import asyncio
 import os
 from contextlib import asynccontextmanager
 from typing import Any
-from urllib.parse import parse_qs, quote
+from urllib.parse import quote
 from uuid import uuid4
 
 import anyio
@@ -72,17 +72,16 @@ mcp.tool()(get_dangling_references)
 mcp.tool()(get_engagement_export)
 
 
+import secrets
+
+
 class TokenPreservingSseServerTransport(SseServerTransport):
-    """Transport SSE qui préserve le jeton d'authentification dans l'URI de callback /messages."""
+    """Transport SSE qui génère le callback /messages pour les sessions SSE."""
 
     @asynccontextmanager
     async def connect_sse(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] != "http":
             raise ValueError("connect_sse can only handle HTTP requests")
-
-        query_string = scope.get("query_string", b"").decode("utf-8")
-        query_params = parse_qs(query_string)
-        token_val = query_params.get("token", [None])[0]
 
         read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
         write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
@@ -92,10 +91,7 @@ class TokenPreservingSseServerTransport(SseServerTransport):
 
         root_path = scope.get("root_path", "")
         full_message_path = root_path.rstrip("/") + self._endpoint
-
         client_post_uri = f"{quote(full_message_path)}?session_id={session_id.hex}"
-        if token_val:
-            client_post_uri += f"&token={quote(token_val)}"
 
         sse_stream_writer, sse_stream_reader = anyio.create_memory_object_stream[dict[str, Any]](0)
 
@@ -126,24 +122,26 @@ class TokenPreservingSseServerTransport(SseServerTransport):
             self._read_stream_writers.pop(session_id, None)
 
 
-# Transport SSE global avec préservation du token pour la compatibilité avec tous les clients MCP
+# Transport SSE global
 sse_transport = TokenPreservingSseServerTransport("/messages")
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
-    """Middleware pour sécuriser l'accès HTTP/SSE par jeton Bearer, Header ou Paramètre d'URL."""
+    """Middleware pour sécuriser l'accès HTTP/SSE par jeton Bearer ou Header HTTP (constant-time)."""
 
     async def dispatch(self, request, call_next):
         if request.url.path in ("/health", "/healthz"):
             return await call_next(request)
 
-        expected_token = os.getenv("LLMOPS_AUTH_TOKEN", settings.AUTH_TOKEN)
-        if not expected_token:
-            return await call_next(request)
+        expected_token = os.getenv("SERVER_TOKEN") or os.getenv("LLMOPS_AUTH_TOKEN") or settings.AUTH_TOKEN
+        if not expected_token or not expected_token.strip():
+            return JSONResponse(
+                {"error": "Unauthorized: SERVER_TOKEN or LLMOPS_AUTH_TOKEN is not configured on server"},
+                status_code=500,
+            )
 
         auth_header = request.headers.get("Authorization")
-        query_token = request.query_params.get("token")
-        header_token = request.headers.get("X-API-Key")
+        header_token = request.headers.get("X-API-Key") or request.headers.get("X-Server-Token")
         session_id = request.query_params.get("session_id")
 
         provided_token = None
@@ -151,11 +149,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
             provided_token = auth_header[7:].strip()
         elif header_token:
             provided_token = header_token.strip()
-        elif query_token:
-            provided_token = query_token.strip()
 
-        # 1. Validation du jeton explicite
-        if provided_token == expected_token:
+        # 1. Validation du jeton explicite à temps constant (secrets.compare_digest)
+        if provided_token and secrets.compare_digest(provided_token, expected_token):
             return await call_next(request)
 
         # 2. Validation de secours si session_id appartient à une session SSE active sur la même instance
@@ -164,7 +160,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 return await call_next(request)
 
         return JSONResponse(
-            {"error": "Unauthorized: Invalid or missing LLMOps authentication token"},
+            {"error": "Unauthorized: Invalid or missing LLMOps authentication token in Authorization header"},
             status_code=401,
         )
 
@@ -237,6 +233,11 @@ def main() -> None:
     host = os.getenv("HOST", settings.HOST)
 
     if transport in ("sse", "http"):
+        expected_token = os.getenv("SERVER_TOKEN") or os.getenv("LLMOPS_AUTH_TOKEN") or settings.AUTH_TOKEN
+        if not expected_token or not expected_token.strip():
+            raise RuntimeError(
+                "CRITICAL SECURITY FAILURE: SERVER_TOKEN or LLMOPS_AUTH_TOKEN environment variable must be set to start the HTTP/SSE server. Refusing to run in unauthenticated mode."
+            )
         asyncio.run(run_sse_authenticated(host=host, port=port))
     else:
         mcp.run(transport="stdio")

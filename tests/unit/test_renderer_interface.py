@@ -2,12 +2,14 @@
 
 import pytest
 
-from mcp_server.renderer_interface import RendererClient
-from mcp_server.tools.renderer_tools import (
+from mcp_server.engagement.tools import (
     get_diagram_graph,
     get_render_payload,
-    get_subject_trajectory_tool,
 )
+from mcp_server.engagement.tools import (
+    get_subject_trajectory as get_subject_trajectory_tool,
+)
+from mcp_server.renderer_interface import RendererClient
 from tools.elicitation.repository import ElicitationRepository
 
 pytestmark = pytest.mark.deterministic

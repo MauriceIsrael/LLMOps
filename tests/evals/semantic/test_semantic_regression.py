@@ -8,7 +8,7 @@ from deepeval import assert_test
 from deepeval.metrics import AnswerRelevancyMetric, FaithfulnessMetric
 from deepeval.test_case import LLMTestCase
 
-from mcp_server.tools.asset_tools import get_asset
+from mcp_server.knowledge.tools import get_asset
 
 pytestmark = pytest.mark.stochastic
 

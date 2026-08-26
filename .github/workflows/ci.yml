@@ -46,4 +46,4 @@ jobs:
       - name: Run Unit & Integration Tests
         env:
           GRAPH_BACKEND: ladybug
-        run: poetry run pytest tests/contract tests/unit tests/integration/test_scenario_nordwave_mcx_v2.py -v
+        run: poetry run pytest tests/contract tests/unit tests/integration -v

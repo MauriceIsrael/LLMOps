@@ -1,4 +1,4 @@
-"""Module de stockage (Repository) — Seul composant autorisé à écrire dans Kùzu DB."""
+"""Module de stockage (Repository) — Seul composant autorisé à écrire dans Kùzu DB / LadybugDB."""
 
 from datetime import datetime
 from pathlib import Path
@@ -7,11 +7,6 @@ from typing import Any
 from tools.adapters.kuzu_store import make_graph_store
 from tools.elicitation.db_schema import ElicitationSchemaInitializer
 from tools.ports.graph_store import GraphStore
-
-
-def _esc(val: Any) -> str:
-    """Échappe les guillemets simples et retours à la ligne pour les requêtes Cypher."""
-    return str(val or "").replace("'", "\\'").replace("\n", " ").replace("\r", " ")
 
 
 class ElicitationRepository:
@@ -45,26 +40,44 @@ class ElicitationRepository:
         except Exception:
             pass
 
-    def save_subject(self, name: str, engagement: str = "nordwave-mcx-2027", definition: str = "", origin: str = "blueprint") -> None:
+    def save_subject(
+        self,
+        name: str,
+        engagement: str = "nordwave-mcx-2027",
+        definition: str = "",
+        origin: str = "blueprint",
+    ) -> None:
         """Enregistre ou met à jour un sujet d'architecture dans Kùzu DB scopé par engagement."""
-        name_esc = _esc(name)
-        def_esc = _esc(definition)
-        origin_esc = _esc(origin)
-        eng_esc = _esc(engagement)
-        check_query = f"MATCH (s:Subject) WHERE s.name = '{name_esc}' AND (s.engagement = '{eng_esc}' OR s.engagement = 'default') RETURN s.name as name, s.level as level;"
-        rows = self.db_client.execute_cypher(check_query)
+        check_query = (
+            "MATCH (s:Subject) WHERE s.name = $name AND (s.engagement = $engagement OR s.engagement = 'default') "
+            "RETURN s.name as name, s.level as level;"
+        )
+        rows = self.db_client.execute_cypher(
+            check_query, params={"name": name, "engagement": engagement}
+        )
         exists = bool(rows and "error" not in rows[0])
 
         if exists:
             if definition:
                 self.db_client.execute_cypher(
-                    f"MATCH (s:Subject) WHERE s.name = '{name_esc}' AND (s.engagement = '{eng_esc}' OR s.engagement = 'default') SET s.definition = '{def_esc}';"
+                    "MATCH (s:Subject) WHERE s.name = $name AND (s.engagement = $engagement OR s.engagement = 'default') "
+                    "SET s.definition = $definition;",
+                    params={"name": name, "engagement": engagement, "definition": definition},
                 )
         else:
             now_str = datetime.now().isoformat()
-            sub_id = f"{eng_esc}:{name_esc}"
+            sub_id = f"{engagement}:{name}"
             self.db_client.execute_cypher(
-                f"MERGE (s:Subject {{id: '{sub_id}'}}) SET s.name = '{name_esc}', s.engagement = '{eng_esc}', s.definition = '{def_esc}', s.level = 'L0_named', s.origin = '{origin_esc}', s.updated_at = '{now_str}';"
+                "MERGE (s:Subject {id: $sub_id}) SET s.name = $name, s.engagement = $engagement, "
+                "s.definition = $definition, s.level = 'L0_named', s.origin = $origin, s.updated_at = $now_str;",
+                params={
+                    "sub_id": sub_id,
+                    "name": name,
+                    "engagement": engagement,
+                    "definition": definition,
+                    "origin": origin,
+                    "now_str": now_str,
+                },
             )
 
     def bind_blueprint_to_engagement(self, blueprint: Any, engagement: str) -> None:
@@ -82,8 +95,8 @@ class ElicitationRepository:
 
     def subject_levels(self, engagement: str) -> dict[str, str]:
         """Retourne les niveaux de maturité de TOUS les sujets d'un engagement en une seule requête Cypher (D9)."""
-        query = "MATCH (s:Subject) RETURN s.name as name, s.level as level;"
-        rows = self.db_client.execute_cypher(query)
+        query = "MATCH (s:Subject) WHERE s.engagement = $engagement OR s.engagement = 'default' OR s.engagement IS NULL RETURN s.name as name, s.level as level;"
+        rows = self.db_client.execute_cypher(query, params={"engagement": engagement})
         levels: dict[str, str] = {}
         if rows and "error" not in rows[0]:
             for r in rows:
@@ -93,9 +106,8 @@ class ElicitationRepository:
 
     def sections_with_statements(self, engagement: str) -> set[str]:
         """Retourne l'ensemble des sections ayant au moins un énoncé actif (D8)."""
-        eng_esc = _esc(engagement)
-        query = f"MATCH (s:Statement {{engagement: '{eng_esc}', status: 'active'}}) RETURN s.section as section;"
-        rows = self.db_client.execute_cypher(query)
+        query = "MATCH (s:Statement {engagement: $engagement, status: 'active'}) RETURN s.section as section;"
+        rows = self.db_client.execute_cypher(query, params={"engagement": engagement})
         sections: set[str] = set()
         if rows and "error" not in rows[0]:
             for r in rows:
@@ -106,53 +118,62 @@ class ElicitationRepository:
     def save_question(self, question: dict[str, Any]) -> str:
         """Enregistre une question élicitée dans Kùzu DB."""
         q_id = question.get("id") or f"Q-{int(datetime.now().timestamp() * 1000)}"
-        engagement = _esc(question.get("engagement", "demo-2026"))
-        gap_type = _esc(question.get("gap_type", "G1_empty_section"))
-        section = _esc(question.get("section", "general"))
-        question_text = _esc(question.get("question", ""))
-        why_it_matters = _esc(question.get("why_it_matters", ""))
-        expected_shape = _esc(question.get("expected_shape", "free_text"))
-        routed_to = _esc(question.get("routed_to", "architect"))
-        status = _esc(question.get("status", "open"))
-        created_at = _esc(question.get("created_at", datetime.now().isoformat()))
+        engagement = question.get("engagement", "demo-2026")
+        gap_type = question.get("gap_type", "G1_empty_section")
+        section = question.get("section", "general")
+        question_text = question.get("question", "")
+        why_it_matters = question.get("why_it_matters", "")
+        expected_shape = question.get("expected_shape", "free_text")
+        routed_to = question.get("routed_to", "architect")
+        status = question.get("status", "open")
+        created_at = question.get("created_at", datetime.now().isoformat())
 
-        query = f"""
-        MERGE (q:Question {{id: '{q_id}'}})
-        SET q.engagement = '{engagement}',
-            q.gap_type = '{gap_type}',
-            q.section = '{section}',
-            q.question = '{question_text}',
-            q.why_it_matters = '{why_it_matters}',
-            q.expected_shape = '{expected_shape}',
-            q.routed_to = '{routed_to}',
-            q.status = '{status}',
-            q.created_at = '{created_at}';
+        query = """
+        MERGE (q:Question {id: $q_id})
+        SET q.engagement = $engagement,
+            q.gap_type = $gap_type,
+            q.section = $section,
+            q.question = $question_text,
+            q.why_it_matters = $why_it_matters,
+            q.expected_shape = $expected_shape,
+            q.routed_to = $routed_to,
+            q.status = $status,
+            q.created_at = $created_at;
         """
-        self.db_client.execute_cypher(query)
+        self.db_client.execute_cypher(
+            query,
+            params={
+                "q_id": q_id,
+                "engagement": engagement,
+                "gap_type": gap_type,
+                "section": section,
+                "question_text": question_text,
+                "why_it_matters": why_it_matters,
+                "expected_shape": expected_shape,
+                "routed_to": routed_to,
+                "status": status,
+                "created_at": created_at,
+            },
+        )
 
         # Lier au sujet cible si présent
         subject_name = question.get("subject")
         if subject_name:
             self.save_subject(subject_name, engagement=engagement)
-            sub_esc = _esc(subject_name)
-            eng_esc = _esc(engagement)
-            sub_id = f"{eng_esc}:{sub_esc}"
-            rel_query = f"""
-            MERGE (q:Question {{id: '{q_id}'}})
-            MERGE (s:Subject {{id: '{sub_id}'}})
+            sub_id = f"{engagement}:{subject_name}"
+            rel_query = """
+            MERGE (q:Question {id: $q_id})
+            MERGE (s:Subject {id: $sub_id})
             MERGE (q)-[:TARGETS]->(s);
             """
-            self.db_client.execute_cypher(rel_query)
+            self.db_client.execute_cypher(rel_query, params={"q_id": q_id, "sub_id": sub_id})
 
         return q_id
 
     def update_question_status(self, question_id: str, status: str) -> None:
         """Met à jour le statut d'une question (sent, confirmed, declined, etc.)."""
-        query = f"""
-        MATCH (q:Question {{id: '{question_id}'}})
-        SET q.status = '{_esc(status)}';
-        """
-        self.db_client.execute_cypher(query)
+        query = "MATCH (q:Question {id: $question_id}) SET q.status = $status;"
+        self.db_client.execute_cypher(query, params={"question_id": question_id, "status": status})
 
     def save_statement(self, statement: dict[str, Any]) -> str:
         """Enregistre un énoncé d'architecture (fact) dans Kùzu DB scopé par engagement."""
@@ -163,13 +184,13 @@ class ElicitationRepository:
             count = len(res) + 1 if res and "error" not in res[0] else 1
             s_id = f"S-{count:04d}"
 
-        engagement = _esc(statement.get("engagement", "nordwave-mcx-2027"))
-        sec = _esc(statement.get("section", "general"))
-        val = _esc(statement.get("value", ""))
-        author = _esc(statement.get("author", "unknown"))
-        role = _esc(statement.get("role", "architect"))
-        confidence = _esc(statement.get("confidence", "designed"))
-        verbatim = _esc(statement.get("verbatim", val))
+        engagement = statement.get("engagement", "nordwave-mcx-2027")
+        sec = statement.get("section", "general")
+        val = statement.get("value", "")
+        author = statement.get("author", "unknown")
+        role = statement.get("role", "architect")
+        confidence = statement.get("confidence", "designed")
+        verbatim = statement.get("verbatim", val)
         predicate_val = statement.get("predicate", "has_property")
         allowed_predicates = {
             "implements", "requires", "replaces", "constrains", "is_constrained_by", "constrained_by", "uses", "depends_on",
@@ -179,10 +200,10 @@ class ElicitationRepository:
         }
         if predicate_val and predicate_val not in allowed_predicates:
             raise ValueError(f"Prédicat non autorisé : '{predicate_val}'")
-        predicate = _esc(predicate_val)
-        status = _esc(statement.get("status", "active"))
-        created_at = _esc(statement.get("created_at", datetime.now().isoformat()))
-        sub_name = _esc(statement.get("subject", "general"))
+        predicate = predicate_val
+        status = statement.get("status", "active")
+        created_at = statement.get("created_at", datetime.now().isoformat())
+        sub_name = statement.get("subject", "general")
 
         # Gérer le sujet lié
         sub_id = f"{engagement}:{sub_name}"
@@ -194,30 +215,48 @@ class ElicitationRepository:
             based_on_raw = [{"id": statement["based_on_asset"], "resolved": None}]
 
         if not isinstance(based_on_raw, str):
-            based_on_str = _esc(json.dumps(based_on_raw))
+            based_on_str = json.dumps(based_on_raw)
         else:
-            based_on_str = _esc(based_on_raw)
+            based_on_str = based_on_raw
 
-        query = f"""
-        MERGE (st:Statement {{id: '{s_id}'}})
-        SET st.engagement = '{engagement}',
-            st.section = '{sec}',
-            st.subject = '{sub_name}',
-            st.predicate = '{predicate}',
-            st.value = '{val}',
-            st.author = '{author}',
-            st.role = '{role}',
-            st.confidence = '{confidence}',
-            st.verbatim = '{verbatim}',
-            st.status = '{status}',
-            st.based_on = '{based_on_str}',
-            st.created_at = '{created_at}';
+        query = """
+        MERGE (st:Statement {id: $s_id})
+        SET st.engagement = $engagement,
+            st.section = $sec,
+            st.subject = $sub_name,
+            st.predicate = $predicate,
+            st.value = $val,
+            st.author = $author,
+            st.role = $role,
+            st.confidence = $confidence,
+            st.verbatim = $verbatim,
+            st.status = $status,
+            st.based_on = $based_on_str,
+            st.created_at = $created_at;
         """
-        self.db_client.execute_cypher(query)
+        self.db_client.execute_cypher(
+            query,
+            params={
+                "s_id": s_id,
+                "engagement": engagement,
+                "sec": sec,
+                "sub_name": sub_name,
+                "predicate": predicate,
+                "val": val,
+                "author": author,
+                "role": role,
+                "confidence": confidence,
+                "verbatim": verbatim,
+                "status": status,
+                "based_on_str": based_on_str,
+                "created_at": created_at,
+            },
+        )
 
         # Lier à la section/sujet via ABOUT
         self.db_client.execute_cypher(
-            f"MERGE (st:Statement {{id: '{s_id}'}}) MERGE (sub:Subject {{id: '{sub_id}'}}) MERGE (st)-[:ABOUT]->(sub);"
+            "MERGE (st:Statement {id: $s_id}) MERGE (sub:Subject {id: $sub_id}) MERGE (st)-[:ABOUT]->(sub);",
+            params={"s_id": s_id, "sub_id": sub_id},
         )
 
         return s_id
@@ -229,28 +268,37 @@ class ElicitationRepository:
         count = len(res) + 1 if res and "error" not in res[0] else 1
         c_id = f"C-{count:04d}"
 
-        kind_esc = _esc(conflict_data.get("kind", "contradiction"))
-        detail_esc = _esc(conflict_data.get("detail", ""))
-        status_esc = _esc(conflict_data.get("status", "open"))
-        origin_esc = _esc(conflict_data.get("origin", "declared"))
+        kind = conflict_data.get("kind", "contradiction")
+        detail = conflict_data.get("detail", "")
+        status = conflict_data.get("status", "open")
+        origin = conflict_data.get("origin", "declared")
 
-        query = f"""
-        CREATE (c:Conflict {{
-            id: '{c_id}',
-            kind: '{kind_esc}',
-            detail: '{detail_esc}',
-            status: '{status_esc}',
-            origin: '{origin_esc}',
+        query = """
+        CREATE (c:Conflict {
+            id: $c_id,
+            kind: $kind,
+            detail: $detail,
+            status: $status,
+            origin: $origin,
             resolution: '',
             arbitrated_by: ''
-        }});
+        });
         """
-        self.db_client.execute_cypher(query)
+        self.db_client.execute_cypher(
+            query,
+            params={
+                "c_id": c_id,
+                "kind": kind,
+                "detail": detail,
+                "status": status,
+                "origin": origin,
+            },
+        )
 
         for s_id in statement_ids:
-            s_esc = _esc(s_id)
             self.db_client.execute_cypher(
-                f"MERGE (c:Conflict {{id: '{c_id}'}}), (st:Statement {{id: '{s_esc}'}}) MERGE (c)-[:INVOLVES]->(st);"
+                "MERGE (c:Conflict {id: $c_id}), (st:Statement {id: $s_id}) MERGE (c)-[:INVOLVES]->(st);",
+                params={"c_id": c_id, "s_id": s_id},
             )
 
         return c_id
@@ -265,12 +313,10 @@ class ElicitationRepository:
         amend_to: str | None = None,
     ) -> None:
         """Arbitre un conflit (réservé à l'architecte en chef)."""
-        reason_esc = reason.replace("'", "''")
-        by_esc = arbitrated_by.replace("'", "''")
-
         # 1. Marquer le conflit comme arbitré
         self.db_client.execute_cypher(
-            f"MATCH (c:Conflict {{id: '{conflict_id}'}}) SET c.status = 'arbitrated', c.resolution = '{reason_esc}', c.arbitrated_by = '{by_esc}';"
+            "MATCH (c:Conflict {id: $conflict_id}) SET c.status = 'arbitrated', c.resolution = $reason, c.arbitrated_by = $arbitrated_by;",
+            params={"conflict_id": conflict_id, "reason": reason, "arbitrated_by": arbitrated_by},
         )
 
         # 2. Amender explicitement l'énoncé si demandé
@@ -280,22 +326,24 @@ class ElicitationRepository:
             if not hasattr(self, "_prev_vals"):
                 self._prev_vals = {}
             self._prev_vals[amend_statement_id] = [old_val]
-            new_val_esc = amend_to.replace("'", "''")
             self.db_client.execute_cypher(
-                f"MATCH (st:Statement {{id: '{amend_statement_id}'}}) SET st.value = '{new_val_esc}', st.status = 'active';"
+                "MATCH (st:Statement {id: $amend_statement_id}) SET st.value = $amend_to, st.status = 'active';",
+                params={"amend_statement_id": amend_statement_id, "amend_to": amend_to},
             )
 
         # 3. Récupérer tous les énoncés impliqués
-        inv_query = f"MATCH (c:Conflict {{id: '{conflict_id}'}})-[:INVOLVES]->(st:Statement) RETURN st.id as id;"
-        rows = self.db_client.execute_cypher(inv_query)
+        inv_query = "MATCH (c:Conflict {id: $conflict_id})-[:INVOLVES]->(st:Statement) RETURN st.id as id;"
+        rows = self.db_client.execute_cypher(inv_query, params={"conflict_id": conflict_id})
 
         # 4. Traitement des énoncés perdants
-        for r in rows:
-            s_id = r.get("id")
-            if s_id and s_id != keep_statement_id and s_id != amend_statement_id:
-                self.db_client.execute_cypher(
-                    f"MATCH (st:Statement {{id: '{s_id}'}}) SET st.status = 'superseded';"
-                )
+        if rows and "error" not in rows[0]:
+            for r in rows:
+                s_id = r.get("id")
+                if s_id and s_id != keep_statement_id and s_id != amend_statement_id:
+                    self.db_client.execute_cypher(
+                        "MATCH (st:Statement {id: $s_id}) SET st.status = 'superseded';",
+                        params={"s_id": s_id},
+                    )
 
     def save_uncertainty(self, data: dict[str, Any]) -> str:
         """Enregistre une incertitude identifiée dans l'engagement."""
@@ -304,19 +352,21 @@ class ElicitationRepository:
         count = res[0].get("c", 0) + 1 if res and "error" not in res[0] else 1
         u_id = f"U-{count:04d}"
 
-        eng_esc = str(data.get("engagement", "")).replace("'", "''")
-        txt_esc = str(data.get("text", "")).replace("'", "''")
-        sub_esc = str(data.get("subject", "")).replace("'", "''")
+        eng = str(data.get("engagement", ""))
+        txt = str(data.get("text", ""))
+        sub = str(data.get("subject", ""))
 
-        query = f"""
-        CREATE (u:Uncertainty {{
-            id: '{u_id}',
-            engagement: '{eng_esc}',
-            text: '{txt_esc}',
-            subject: '{sub_esc}'
-        }});
+        query = """
+        CREATE (u:Uncertainty {
+            id: $u_id,
+            engagement: $eng,
+            text: $txt,
+            subject: $sub
+        });
         """
-        self.db_client.execute_cypher(query)
+        self.db_client.execute_cypher(
+            query, params={"u_id": u_id, "eng": eng, "txt": txt, "sub": sub}
+        )
         return u_id
 
     def get_subject(self, subject_name: str) -> dict[str, Any]:
@@ -332,14 +382,14 @@ class ElicitationRepository:
 
     def get_statement(self, statement_id: str) -> dict[str, Any] | None:
         """Récupère un énoncé par son identifiant."""
-        query = f"""
-        MATCH (s:Statement {{id: '{statement_id}'}})
+        query = """
+        MATCH (s:Statement {id: $statement_id})
         OPTIONAL MATCH (s)-[:ABOUT]->(sub:Subject)
         RETURN s.id as id, s.section as section, sub.name as subject, s.predicate as predicate,
                s.value as value, s.unit as unit, s.author as author, s.role as role,
                s.confidence as confidence, s.verbatim as verbatim, s.status as status;
         """
-        res = self.db_client.execute_cypher(query)
+        res = self.db_client.execute_cypher(query, params={"statement_id": statement_id})
         if res and "error" not in res[0]:
             st = res[0]
             st["previous_values"] = getattr(self, "_prev_vals", {}).get(statement_id, [])
@@ -348,8 +398,8 @@ class ElicitationRepository:
 
     def get_uncertainties(self, engagement: str, subject: str | None = None) -> list[dict[str, Any]]:
         """Récupère les incertitudes de l'engagement."""
-        query = f"MATCH (u:Uncertainty {{engagement: '{engagement}'}}) RETURN u.id as id, u.text as text, u.subject as subject;"
-        res = self.db_client.execute_cypher(query)
+        query = "MATCH (u:Uncertainty {engagement: $engagement}) RETURN u.id as id, u.text as text, u.subject as subject;"
+        res = self.db_client.execute_cypher(query, params={"engagement": engagement})
         if res and "error" not in res[0]:
             if subject:
                 return [r for r in res if r.get("subject") == subject or subject in str(r.get("text", ""))]
@@ -358,14 +408,14 @@ class ElicitationRepository:
 
     def get_conflict(self, conflict_id: str) -> dict[str, Any] | None:
         """Récupère un conflit par son identifiant avec les statement_ids impliqués."""
-        query = f"MATCH (c:Conflict {{id: '{conflict_id}'}}) RETURN c.id as id, c.kind as kind, c.detail as detail, c.status as status, c.origin as origin, c.resolution as resolution, c.arbitrated_by as arbitrated_by;"
-        res = self.db_client.execute_cypher(query)
+        query = "MATCH (c:Conflict {id: $conflict_id}) RETURN c.id as id, c.kind as kind, c.detail as detail, c.status as status, c.origin as origin, c.resolution as resolution, c.arbitrated_by as arbitrated_by;"
+        res = self.db_client.execute_cypher(query, params={"conflict_id": conflict_id})
         if not res or "error" in res[0]:
             print(f"DEBUG GET_CONFLICT ERROR FOR {conflict_id}: {res}")
         if res and "error" not in res[0]:
             c = res[0]
-            inv_query = f"MATCH (c:Conflict {{id: '{conflict_id}'}})-[:INVOLVES]->(st:Statement) RETURN st.id as id;"
-            rows = self.db_client.execute_cypher(inv_query)
+            inv_query = "MATCH (c:Conflict {id: $conflict_id})-[:INVOLVES]->(st:Statement) RETURN st.id as id;"
+            rows = self.db_client.execute_cypher(inv_query, params={"conflict_id": conflict_id})
             st_ids = [r["id"] for r in rows if r and "id" in r] if rows and "error" not in rows[0] else []
             c["statement_ids"] = st_ids
             return c
@@ -373,16 +423,16 @@ class ElicitationRepository:
 
     def run_checks(self, engagement: str, statement_ids: list[str] | None = None) -> list[dict[str, Any]]:
         """Détecte automatiquement les contradictions dans le graphe (check_node)."""
-        query = f"""
-        MATCH (s1:Statement {{engagement: '{engagement}', status: 'active'}}),
-              (s2:Statement {{engagement: '{engagement}', status: 'active'}})
+        query = """
+        MATCH (s1:Statement {engagement: $engagement, status: 'active'}),
+              (s2:Statement {engagement: $engagement, status: 'active'})
         WHERE s1.id < s2.id AND s1.subject = s2.subject AND (
             (s1.predicate = s2.predicate AND s1.value <> s2.value) OR
             (s1.author <> s2.author AND s1.predicate = s2.predicate)
         )
         RETURN s1.id as s1_id, s2.id as s2_id, s1.subject as subject, s1.predicate as pred, s1.value as v1, s2.value as v2;
         """
-        rows = self.db_client.execute_cypher(query)
+        rows = self.db_client.execute_cypher(query, params={"engagement": engagement})
         detected_conflicts = []
         if rows and "error" not in rows[0]:
             for r in rows:
@@ -410,15 +460,15 @@ class ElicitationRepository:
 
     def get_question(self, question_id: str) -> dict[str, Any] | None:
         """Récupère une question par son identifiant."""
-        query = f"MATCH (q:Question {{id: '{question_id}'}}) RETURN q.id as id, q.engagement as engagement, q.section as section, q.question as question, q.why_it_matters as why_it_matters, q.expected_shape as expected_shape, q.routed_to as routed_to, q.status as status;"
-        res = self.db_client.execute_cypher(query)
+        query = "MATCH (q:Question {id: $question_id}) RETURN q.id as id, q.engagement as engagement, q.section as section, q.question as question, q.why_it_matters as why_it_matters, q.expected_shape as expected_shape, q.routed_to as routed_to, q.status as status;"
+        res = self.db_client.execute_cypher(query, params={"question_id": question_id})
         return res[0] if res and "error" not in res[0] else None
 
     def get_active_statements(self, engagement: str) -> list[dict[str, Any]]:
         """Récupère tous les énoncés d'un engagement."""
         import json
-        query = f"MATCH (s:Statement {{engagement: '{engagement}'}}) OPTIONAL MATCH (s)-[:ABOUT]->(sub:Subject) RETURN s.id as id, s.section as section, sub.name as subject, s.subject as subject_direct, s.predicate as predicate, s.value as value, s.unit as unit, s.author as author, s.role as role, s.confidence as confidence, s.verbatim as verbatim, s.status as status, s.based_on as based_on;"
-        rows = self.db_client.execute_cypher(query)
+        query = "MATCH (s:Statement {engagement: $engagement}) OPTIONAL MATCH (s)-[:ABOUT]->(sub:Subject) RETURN s.id as id, s.section as section, sub.name as subject, s.subject as subject_direct, s.predicate as predicate, s.value as value, s.unit as unit, s.author as author, s.role as role, s.confidence as confidence, s.verbatim as verbatim, s.status as status, s.based_on as based_on;"
+        rows = self.db_client.execute_cypher(query, params={"engagement": engagement})
         if rows and "error" not in rows[0]:
             for r in rows:
                 if not r.get("subject"):
@@ -436,8 +486,8 @@ class ElicitationRepository:
 
     def get_conflicts(self, engagement: str, status: str = "open") -> list[dict[str, Any]]:
         """Récupère les conflits ouverts pour un engagement."""
-        query = f"MATCH (c:Conflict {{status: '{status}'}}) RETURN c.id as id, c.kind as kind, c.detail as detail, c.status as status, c.origin as origin, c.resolution as resolution, c.arbitrated_by as arbitrated_by;"
-        return self.db_client.execute_cypher(query)
+        query = "MATCH (c:Conflict {status: $status}) RETURN c.id as id, c.kind as kind, c.detail as detail, c.status as status, c.origin as origin, c.resolution as resolution, c.arbitrated_by as arbitrated_by;"
+        return self.db_client.execute_cypher(query, params={"status": status})
 
     def advance_subject_level(self, subject_name: str | None = None, new_level: str | None = None, *, name: str | None = None, level: str | None = None, engagement: str | None = None) -> None:
         """Fait évoluer le niveau de maturité d'un sujet (ACTE HUMAIN via Repository).
@@ -452,27 +502,27 @@ class ElicitationRepository:
         if target_level not in SUBJECT_LEVELS:
             raise ValueError(f"Niveau de maturité inconnu '{target_level}'. Niveaux valides : {SUBJECT_LEVELS}")
 
-        sub_esc = target_name.replace("'", "''")
         now_str = datetime.now().isoformat()
         eng = engagement or "nordwave-mcx-2027"
         self.save_subject(target_name, engagement=eng)
 
-        query = f"""
-        MATCH (s:Subject {{name: '{sub_esc}'}})
-        SET s.level = '{target_level}',
-            s.updated_at = '{now_str}';
+        query = """
+        MATCH (s:Subject {name: $target_name})
+        SET s.level = $target_level,
+            s.updated_at = $now_str;
         """
-        self.db_client.execute_cypher(query)
+        self.db_client.execute_cypher(
+            query, params={"target_name": target_name, "target_level": target_level, "now_str": now_str}
+        )
 
     def get_subject_trajectory(self, engagement: str, subject: str) -> list[dict[str, Any]]:
         """Récupère l'historique des avancées de maturité (trajectoire) pour un sujet."""
-        eng_esc = _esc(engagement)
-        query = f"""
-        MATCH (st:Statement {{engagement: '{eng_esc}', status: 'active'}})
-        OPTIONAL MATCH (q:Question {{engagement: '{eng_esc}'}}) WHERE q.section = st.section
+        query = """
+        MATCH (st:Statement {engagement: $engagement, status: 'active'})
+        OPTIONAL MATCH (q:Question {engagement: $engagement}) WHERE q.section = st.section
         RETURN st.id as id, st.section as section, st.subject as subject, st.value as val, st.verbatim as verbatim, q.question as question, st.created_at as created_at;
         """
-        rows = self.db_client.execute_cypher(query)
+        rows = self.db_client.execute_cypher(query, params={"engagement": engagement})
         if rows and "error" not in rows[0]:
             rows = [r for r in rows if r.get("subject") == subject or subject in str(r.get("val", "")) or subject in str(r.get("verbatim", ""))]
         trajectory = []
@@ -514,7 +564,10 @@ class ElicitationRepository:
         current_lvl = sub_mat.get("level", "L0_named") if sub_mat else "L0_named"
 
         if trajectory and "L2_decomposed" not in seen_levels and current_lvl in ("L2_decomposed", "L3_decided", "L4_specified"):
-            q_rows = self.db_client.execute_cypher(f"MATCH (st:Statement {{engagement: '{eng_esc}'}}) WHERE st.section = '4.2' OR st.section = '5.2' RETURN st.verbatim as val LIMIT 1;")
+            q_rows = self.db_client.execute_cypher(
+                "MATCH (st:Statement {engagement: $engagement}) WHERE st.section = '4.2' OR st.section = '5.2' RETURN st.verbatim as val LIMIT 1;",
+                params={"engagement": engagement},
+            )
             ans_excerpt = q_rows[0]["val"] if q_rows and "error" not in q_rows[0] and "val" in q_rows[0] else f"Decomposition of {subject}"
             trajectory.append({
                 "level": "L2_decomposed",
@@ -527,10 +580,11 @@ class ElicitationRepository:
     def get_subject_maturity(self, subject_name: str = "", engagement: str = "nordwave-mcx-2027", name: str | None = None) -> dict[str, Any]:
         """Récupère les détails de maturité d'un sujet scopé par engagement (avec fallback)."""
         target_name = name or subject_name
-        sub_esc = _esc(target_name)
-        eng_esc = _esc(engagement)
-        query = f"MATCH (s:Subject) WHERE s.name = '{sub_esc}' AND (s.engagement = '{eng_esc}' OR s.engagement = 'default' OR s.engagement IS NULL) RETURN s.name as name, s.level as level, s.origin as origin, s.updated_at as updated_at;"
-        rows = self.db_client.execute_cypher(query)
+        query = (
+            "MATCH (s:Subject) WHERE s.name = $target_name AND (s.engagement = $engagement OR s.engagement = 'default' OR s.engagement IS NULL) "
+            "RETURN s.name as name, s.level as level, s.origin as origin, s.updated_at as updated_at;"
+        )
+        rows = self.db_client.execute_cypher(query, params={"target_name": target_name, "engagement": engagement})
         if rows and "error" not in rows[0]:
             r = rows[0]
             return {
@@ -565,9 +619,8 @@ class ElicitationRepository:
                 except Exception:
                     pass
 
-            sub_esc = str(name).replace("'", "''")
-            q_query = f"MATCH (q:Question {{status: 'open'}})-[:TARGETS]->(s:Subject {{name: '{sub_esc}'}}) RETURN q.id as id, q.routed_to as routed_to;"
-            q_rows = self.db_client.execute_cypher(q_query)
+            q_query = "MATCH (q:Question {status: 'open'})-[:TARGETS]->(s:Subject {name: $name}) RETURN q.id as id, q.routed_to as routed_to;"
+            q_rows = self.db_client.execute_cypher(q_query, params={"name": name})
 
             open_q_ref = None
             assigned_role = None
@@ -627,31 +680,29 @@ class ElicitationRepository:
         """
         target_name = name or subject_name or ""
         target_to_level = to_level or ""
-
-        sub_esc = _esc(target_name)
-        to_lvl_esc = _esc(target_to_level)
-        eng_esc = _esc(engagement)
+        now_str = datetime.now().isoformat()
 
         # 1. Mettre à jour le niveau du sujet
         self.db_client.execute_cypher(
-            f"MATCH (s:Subject {{name: '{sub_esc}'}}) SET s.level = '{to_lvl_esc}', s.updated_at = '{datetime.now().isoformat()}';"
+            "MATCH (s:Subject {name: $name}) SET s.level = $to_level, s.updated_at = $now_str;",
+            params={"name": target_name, "to_level": target_to_level, "now_str": now_str},
         )
 
         # 2. Marquer les énoncés comme 'under_review'
-        st_query = f"""
-        MATCH (st:Statement {{engagement: '{eng_esc}', subject: '{sub_esc}'}})
+        st_query = """
+        MATCH (st:Statement {engagement: $engagement, subject: $name})
         WHERE st.status = 'active'
         SET st.status = 'under_review';
         """
-        self.db_client.execute_cypher(st_query)
+        self.db_client.execute_cypher(st_query, params={"engagement": engagement, "name": target_name})
 
         # 3. Réouvrir les questions fermées avec contexte conservé
-        q_query = f"""
-        MATCH (q:Question {{engagement: '{eng_esc}'}})-[:TARGETS]->(s:Subject {{name: '{sub_esc}'}})
+        q_query = """
+        MATCH (q:Question {engagement: $engagement})-[:TARGETS]->(s:Subject {name: $name})
         WHERE q.status IN ['confirmed', 'sent']
         SET q.status = 'open';
         """
-        self.db_client.execute_cypher(q_query)
+        self.db_client.execute_cypher(q_query, params={"engagement": engagement, "name": target_name})
 
         return {
             "subject": subject_name,

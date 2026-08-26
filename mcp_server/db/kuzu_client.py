@@ -49,10 +49,12 @@ class KuzuClient:
             cls._db_cache.clear()
         gc.collect()
 
-    def execute_cypher(self, query: str) -> list[dict[str, Any]]:
+    def execute_cypher(
+        self, query: str, params: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """Exécute une requête Cypher et retourne les résultats sous forme de liste de dictionnaires."""
         conn = kuzu.Connection(self.db)
-        response = conn.execute(query)
+        response = conn.execute(query, params) if params else conn.execute(query)
         cols = response.get_column_names()
         results = []
         while response.has_next():

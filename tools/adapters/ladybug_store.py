@@ -70,8 +70,10 @@ class LadybugGraphStore(GraphStore):
         self.db = self.get_database(self.db_path, read_only=self.read_only)
         self.conn = lb.Connection(self.db)
 
-    def execute_cypher(self, query: str) -> list[dict[str, Any]]:
-        response = self.conn.execute(query)
+    def execute_cypher(
+        self, query: str, params: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
+        response = self.conn.execute(query, params) if params else self.conn.execute(query)
         cols = response.get_column_names()
         results = []
         while response.has_next():

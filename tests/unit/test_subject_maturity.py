@@ -28,8 +28,8 @@ def repo(tmp_path):
 def test_question_matches_subject_level(repo, tmp_path):
     """Test 9 : Un sujet à L1 reçoit une question de cadrage, jamais une question de paramétrage."""
     db_path = tmp_path / "kuzu_db"
-    repo.save_subject("Storage-5.2")
-    repo.advance_subject_level("Storage-5.2", "L1_framed")
+    repo.save_subject("Storage-5.2", engagement="test-mat-1")
+    repo.advance_subject_level("Storage-5.2", "L1_framed", engagement="test-mat-1")
 
     sections = [{"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L0_named"}]
     graph = build_scan_graph()
@@ -46,8 +46,8 @@ def test_question_matches_subject_level(repo, tmp_path):
 def test_level_gate_holds_premature_question(repo, tmp_path):
     """Test 10 : Une question de paramétrage (L4) sur un sujet L1 est retenue (Level Gate)."""
     db_path = tmp_path / "kuzu_db"
-    repo.save_subject("Storage-5.2")
-    repo.advance_subject_level("Storage-5.2", "L1_framed")
+    repo.save_subject("Storage-5.2", engagement="test-gate-1")
+    repo.advance_subject_level("Storage-5.2", "L1_framed", engagement="test-gate-1")
 
     sections = [{"id": "5.2", "name": "Storage System", "subject": "Storage-5.2", "required_level": "L4_specified"}]
     graph = build_scan_graph()

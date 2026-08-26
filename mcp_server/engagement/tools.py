@@ -39,12 +39,13 @@ def _get_repo(engagement: str | None = None, db_path: str | Path | None = None) 
     return ElicitationRepository(db_path=p)
 
 
-def get_subject(subject: str, engagement: str | None = None) -> dict[str, Any]:
+def get_subject(subject: str, engagement: str | None = None, db_path: str | Path | None = None) -> dict[str, Any]:
     """Retrieve details, maturity level, and framing definition for an architecture subject.
 
     Args:
         subject: Name of the architecture subject (e.g. 'mcx-services').
         engagement: Unique engagement identifier (defaults to deployment configuration).
+        db_path: Optional explicit database path override.
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
@@ -56,7 +57,7 @@ def get_subject(subject: str, engagement: str | None = None) -> dict[str, Any]:
         return not_found_response(subject)
 
     try:
-        repo = _get_repo(engagement=eng)
+        repo = _get_repo(engagement=eng, db_path=db_path)
         board = repo.get_subjects_maturity_board(engagement=eng)
         repo.close()
 
@@ -70,12 +71,13 @@ def get_subject(subject: str, engagement: str | None = None) -> dict[str, Any]:
         return error_response(str(e))
 
 
-def get_subject_trajectory(subject: str, engagement: str | None = None) -> dict[str, Any]:
+def get_subject_trajectory(subject: str, engagement: str | None = None, db_path: str | Path | None = None) -> dict[str, Any]:
     """Retrieve maturity level progression trajectory (timeline of questions and answer excerpts) for a subject.
 
     Args:
         subject: Name of the architecture subject (e.g. 'mcx-services').
         engagement: Unique engagement identifier (defaults to deployment configuration).
+        db_path: Optional explicit database path override.
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
@@ -87,7 +89,7 @@ def get_subject_trajectory(subject: str, engagement: str | None = None) -> dict[
         return ok_response([])
 
     try:
-        repo = _get_repo(engagement=eng)
+        repo = _get_repo(engagement=eng, db_path=db_path)
         trajectory = repo.get_subject_trajectory(engagement=eng, subject=subject)
         repo.close()
 
@@ -207,12 +209,15 @@ def get_open_questions(engagement: str | None = None, role: str | None = None) -
         return error_response(str(e))
 
 
-def get_diagram_graph(engagement: str | None = None, format: str = "json") -> dict[str, Any]:
+def get_diagram_graph(
+    engagement: str | None = None, format: str = "json", db_path: str | Path | None = None
+) -> dict[str, Any]:
     """Retrieve the architecture graph for an engagement formatted as JSON nodes/edges or Mermaid syntax.
 
     Args:
         engagement: Unique engagement identifier (defaults to deployment configuration).
         format: Desired output format ('json' for nodes & edges array, 'mermaid' for Mermaid flowchart).
+        db_path: Optional explicit database path override.
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
@@ -221,7 +226,7 @@ def get_diagram_graph(engagement: str | None = None, format: str = "json") -> di
         return ok_response({"nodes": [], "edges": [], "mermaid": "flowchart TD"})
 
     try:
-        repo = _get_repo(engagement=eng)
+        repo = _get_repo(engagement=eng, db_path=db_path)
         board = repo.get_subjects_maturity_board(engagement=eng)
         statements = repo.get_active_statements(engagement=eng)
         repo.close()
@@ -249,15 +254,17 @@ def get_diagram_graph(engagement: str | None = None, format: str = "json") -> di
             mermaid_lines.append(f'    {e["source"]} -->|{pred_lbl}| {target_id}')
 
         if not nodes:
-            return ok_response({"nodes": [], "edges": [], "mermaid": "flowchart TD"}, count=0)
+            return ok_response({"engagement": eng, "format": format, "nodes": [], "edges": [], "mermaid": "flowchart TD"}, count=0)
 
         return ok_response({
+            "engagement": eng,
+            "format": format,
             "nodes": nodes,
             "edges": edges,
             "mermaid": "\n".join(mermaid_lines),
         }, count=len(nodes))
     except FileNotFoundError:
-        return ok_response({"nodes": [], "edges": [], "mermaid": "flowchart TD"}, count=0)
+        return ok_response({"engagement": eng, "format": format, "nodes": [], "edges": [], "mermaid": "flowchart TD"}, count=0)
     except Exception as e:
         return error_response(str(e))
 
@@ -297,17 +304,18 @@ def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
         return error_response(str(e))
 
 
-def get_render_payload(engagement: str | None = None) -> dict[str, Any]:
+def get_render_payload(engagement: str | None = None, db_path: str | Path | None = None) -> dict[str, Any]:
     """Retrieve complete structured architecture document payload and synthesis data for external renderers.
 
     Args:
         engagement: Unique engagement identifier (defaults to deployment configuration).
+        db_path: Optional explicit database path override.
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
     try:
-        repo = _get_repo(engagement=eng)
+        repo = _get_repo(engagement=eng, db_path=db_path)
         board = repo.get_subjects_maturity_board(engagement=eng)
         statements = repo.get_active_statements(engagement=eng)
         conflicts = repo.get_conflicts(engagement=eng, status="open")
