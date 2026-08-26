@@ -75,3 +75,19 @@ This document tracks the execution progress, audit findings, deferred items, and
 - None.
 
 ---
+
+## Lot 4 — Donner envie (Completed)
+
+### 1. Accomplished Actions
+- **README Restructuring & English Default (4.1 & 4.2)**: Rewrote `README.md` in English with top-to-bottom order: description, Quickstart MCP client config snippets, key differentiators, `make demo` and `make demo-check`, offline `fixtures/` link, third-party integration guide link, and repository layout. Created `README.fr.md` for French-speaking users.
+- **Public Documentation English Translation**: Translated `docs/INTERFACE.md` and `docs/SCHEMA.md` into English for international developer accessibility.
+- **Contribution Amorce & Framed Client Tasks (4.3)**: Created root `CONTRIBUTING.md` in English with setup instructions, core rules, and 3 framed good first client tasks (PPTX/PDF Renderer, VS Code Extension, Confluence Exporter).
+- **Issue Templates**: Created `.github/ISSUE_TEMPLATE/bug_report.md` and `.github/ISSUE_TEMPLATE/build_a_client.md`.
+
+### 2. Noticed but Deferred / Action Required
+- None.
+
+### 3. Discrepancies with Workorder Spec
+- None.
+
+---
