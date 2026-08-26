@@ -13,6 +13,7 @@ ENV/
 data/kuzu_db/
 data/knowledge.kuzu/
 data/engagements/
+!data/engagements/nordwave-mcx-2027.kuzu
 *.kuzu
 *.lbug
 *.kz

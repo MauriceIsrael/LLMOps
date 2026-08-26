@@ -6,10 +6,11 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.pipeline
     volumes:
-      - kuzu_data:/app/data/kuzu_db
+      - kuzu_data:/app/data
       - ../data/kb:/app/data/kb
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # Optional: OPENAI_API_KEY is only required for running DeepEval benchmarks in tests/evals/
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
 
   mcp-server:
     build:
@@ -21,9 +22,12 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - kuzu_data:/app/data/kuzu_db
+      - kuzu_data:/app/data
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # Optional: OPENAI_API_KEY is only required for running DeepEval benchmarks
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - SERVER_TOKEN=${SERVER_TOKEN:-llmops-dev-token-2026}
+      - GRAPH_BACKEND=${GRAPH_BACKEND:-ladybug}
       - LLMOPS_TRANSPORT=sse
       - PORT=8000
     restart: unless-stopped
