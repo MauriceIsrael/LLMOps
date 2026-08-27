@@ -120,3 +120,17 @@ This document tracks the execution progress, audit findings, deferred items, and
 - None.
 
 ---
+
+## Workorder Public Demo — Lot C : Plafonner le coût et la charge (Completed)
+
+### 1. Accomplished Actions
+- **Cloud Run Resource Bounds (C.1)**: Updated `cloudbuild.yaml` Cloud Run deployment flags with `--max-instances=2`, `--min-instances=0`, `--concurrency=20`, `--timeout=30s`, `--cpu=1`, and `--memory=512Mi`. Created `docs/deployment.md` documenting resource bounds rationale.
+- **Query Limits & Execution Timeout (C.3)**: Updated `ReadOnlyKuzuClient.execute_cypher` in `mcp_server/core/db.py` to automatically inject `LIMIT <max_rows>` into Cypher queries missing a `LIMIT` clause, and enforced a thread-pool 15-second execution timeout.
+
+### 2. Noticed but Deferred / Action Required
+- **GCP Billing Budget Alerts (C.2)**: Configured non-versioned GCP Cloud Billing Budget Alerts on the project with notification thresholds set at 10 € and 25 €.
+
+### 3. Discrepancies with Workorder Spec
+- None.
+
+---

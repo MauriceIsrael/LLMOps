@@ -82,12 +82,28 @@ class ReadOnlyKuzuClient:
         if re.search(write_keywords, query, re.IGNORECASE):
             raise PermissionError("Cypher write operations are not allowed on this read-only serving endpoint.")
 
-        try:
+        # Injecter une clause LIMIT dans la requête elle-même si absente
+        query_to_exec = query.strip().rstrip(";")
+        if self.max_rows and not re.search(r"\bLIMIT\b", query_to_exec, re.IGNORECASE):
+            query_to_exec = f"{query_to_exec} LIMIT {self.max_rows}"
+
+        def _run_query():
             store = make_graph_store(self.db_path, read_only=True)
-            results = store.execute_cypher(query, params)
-            if self.max_rows and len(results) > self.max_rows:
-                return results[: self.max_rows]
-            return results
+            try:
+                return store.execute_cypher(query_to_exec, params)
+            finally:
+                store.close()
+
+        import concurrent.futures
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_run_query)
+                results = future.result(timeout=15.0)
+                if self.max_rows and len(results) > self.max_rows:
+                    return results[: self.max_rows]
+                return results
+        except concurrent.futures.TimeoutError:
+            raise TimeoutError("Cypher query execution exceeded safety timeout of 15 seconds.")
         except PermissionError:
             raise
         except Exception as e:
