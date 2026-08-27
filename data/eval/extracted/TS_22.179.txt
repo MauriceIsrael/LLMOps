@@ -1,1 +1,2156 @@
-Directory Listing /ftp/Specs/archive/22_series/22.179/ www.3gpp.org / ftp / Specs / archive / 22_series / 22.179 Drag and drop documents here or click to upload Invalid folder name Download &nbsp; sort by name / desc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sort by date / desc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sort by size / desc 22179-031.zip 2014/02/27 10:40 193,2 KB 22179-040.zip 2014/05/16 7:16 423,9 KB 22179-060.zip 2014/07/22 14:15 1696,2 KB 22179-070.zip 2014/08/29 23:07 3698,2 KB 22179-100.zip 2014/09/22 11:10 1516,2 KB 22179-200.zip 2014/12/09 2:15 1552,3 KB 22179-210.zip 2014/12/09 3:01 3105,4 KB 22179-d00.zip 2014/12/19 5:09 1552,5 KB 22179-d01.zip 2015/01/05 13:02 1569,9 KB 22179-d10.zip 2015/03/21 7:50 1556,8 KB 22179-d20.zip 2015/06/30 14:29 1573,9 KB 22179-d30.zip 2015/12/18 12:41 1482 KB 22179-e00.zip 2016/03/18 13:39 1481,6 KB 22179-e10.zip 2016/06/24 13:17 1488,6 KB 22179-e20.zip 2016/09/30 11:14 1488,3 KB 22179-e30.zip 2016/12/16 15:50 1490,7 KB 22179-f00.zip 2017/06/16 13:22 1487,8 KB 22179-f10.zip 2017/09/22 14:19 1489,1 KB 22179-f20.zip 2018/01/05 11:27 1489,4 KB 22179-g00.zip 2018/01/05 11:30 1491 KB 22179-g10.zip 2018/04/06 14:44 1490,5 KB 22179-g20.zip 2018/06/23 13:19 1493 KB 22179-g30.zip 2018/09/21 13:45 1492 KB 22179-g40.zip 2018/12/21 15:40 1492,6 KB 22179-g50.zip 2019/03/29 15:40 1492,7 KB 22179-h00.zip 2019/12/20 18:55 1510,2 KB 22179-h10.zip 2022/04/01 8:29 1514,1 KB 22179-i00.zip 2023/06/23 14:58 1497,4 KB 22179-j00.zip 2023/07/06 13:44 1497,9 KB 22179-j10.zip 2023/09/22 17:09 1508,6 KB 22179-j20.zip 2023/12/22 18:14 1510 KB 22179-j30.zip 2024/09/27 14:50 1502 KB 22179-k00.zip 2025/03/28 16:53 1504 KB 33 items.
+3GPP TS 22.179 V20.0.0 (2025-03)
+Technical Specification
+3rd Generation Partnership Project;
+Technical Specification Group Services and System Aspects;
+Mission Critical Push To Talk (MCPTT);
+(Release 20)
+The present document has been developed within the 3rd Generation Partnership Project (3GPP TM) and may be further elaborated for the purposes of 3GPP.
+The present document has not been subject to any approval process by the 3GPP Organizational Partners and shall not be implemented.
+This Specification is provided for future development work within 3GPP only. The Organizational Partners accept no liability for any use of this Specification.
+Specifications and Reports for implementation of the 3GPP TM system should be obtained via the 3GPP Organizational Partners' Publications Offices.
+Postal address
+3GPP support office address
+650 Route des Lucioles - Sophia Antipolis
+Valbonne - France
+Tel.: +33 4 92 94 42 00 Fax: +33 4 93 65 47 16
+http://www.3gpp.org
+Copyright Notification
+No part may be reproduced except as authorized by written permission.
+The copyright and the foregoing restriction extend to reproduction in all media.
+2025, 3GPP Organizational Partners (ARIB, ATIS, CCSA, ETSI, TSDSI, TTA, TTC).
+All rights reserved.
+is a Trade Mark of ETSI registered for the benefit of its members
+is a Trade Mark of ETSI registered for the benefit of its Members and of the 3GPP Organizational Partners
+is a Trade Mark of ETSI registered for the benefit of its Members and of the 3GPP Organizational Partners
+and the GSM logo are registered and owned by the GSM Association
+TOC \o "1-9"
+PAGEREF _Toc194075136 \h
+Introduction
+PAGEREF _Toc194075137 \h
+PAGEREF _Toc194075138 \h
+2	References
+PAGEREF _Toc194075139 \h
+3	Definitions and abbreviations
+PAGEREF _Toc194075140 \h
+3.1	Definitions
+PAGEREF _Toc194075141 \h
+3.2	Abbreviations
+PAGEREF _Toc194075142 \h
+4	Mission Critical Push To Talk overview
+PAGEREF _Toc194075143 \h
+4.1	General
+PAGEREF _Toc194075144 \h
+4.2	Typical use of the MCPTT Service
+PAGEREF _Toc194075145 \h
+4.3	Overview of MCPTT Group affiliation, call and transmission
+PAGEREF _Toc194075146 \h
+4.4	General handling of requests
+PAGEREF _Toc194075147 \h
+4.5	Overview of MCPTT UE and MCPTT User in the MCPTT Service
+PAGEREF _Toc194075148 \h
+4.5.1	MCPTT User association to MCPTT UE in on-network mode
+PAGEREF _Toc194075149 \h
+4.5.2	MCPTT User and MCPTT UE relationship
+PAGEREF _Toc194075150 \h
+4.5.3	MCPTT Users accessing the service through non-3GPP access interface
+PAGEREF _Toc194075151 \h
+4.5.4	Shareable MCPTT UEs and gateway UEs
+PAGEREF _Toc194075152 \h
+4.5.5	MCPTT User association to MCPTT UE in off-network mode
+PAGEREF _Toc194075153 \h
+4.6	Overview of MCPTT priorities
+PAGEREF _Toc194075154 \h
+4.6.1	MCPTT priority model
+PAGEREF _Toc194075155 \h
+4.6.2	Generic processing of priority information
+PAGEREF _Toc194075156 \h
+4.6.3	Handling of MCPTT priority information for Floor control
+PAGEREF _Toc194075157 \h
+4.6.4	Handling of MCPTT priority information for interactions at the transport layer
+PAGEREF _Toc194075158 \h
+4.6.5	Handling of MCPTT priority information for interactions with non-3GPP PTT systems
+PAGEREF _Toc194075159 \h
+4.6.6	MCPTT priority for Private Call
+PAGEREF _Toc194075160 \h
+4.7	Overview of MCPTT identifiers
+PAGEREF _Toc194075161 \h
+5	MCPTT Service requirements common for on the network and off the network
+PAGEREF _Toc194075162 \h
+5.1	General group call requirements
+PAGEREF _Toc194075163 \h
+5.1.1	General aspects
+PAGEREF _Toc194075164 \h
+5.1.2	Group/status information
+PAGEREF _Toc194075165 \h
+5.1.3	Group configuration
+PAGEREF _Toc194075166 \h
+5.1.4	Identification
+PAGEREF _Toc194075167 \h
+5.1.5	Membership/affiliation
+PAGEREF _Toc194075168 \h
+5.1.6	Group Call administration
+PAGEREF _Toc194075169 \h
+5.1.7	Prioritization
+PAGEREF _Toc194075170 \h
+5.1.8	Charging requirements for MCPTT
+PAGEREF _Toc194075171 \h
+5.2	Broadcast Group
+PAGEREF _Toc194075172 \h
+5.2.1	General Broadcast Group Call
+PAGEREF _Toc194075173 \h
+5.2.2	Group-Broadcast Group (e.g., announcement group)
+PAGEREF _Toc194075174 \h
+5.2.3	User-Broadcast Group (e.g., System Call)
+PAGEREF _Toc194075175 \h
+5.3	Late call entry
+PAGEREF _Toc194075176 \h
+5.4	Dynamic group management (i.e., dynamic regrouping)
+PAGEREF _Toc194075177 \h
+5.5	Receiving from multiple MCPTT calls
+PAGEREF _Toc194075178 \h
+5.5.1	Overview
+PAGEREF _Toc194075179 \h
+5.5.2	Requirements
+PAGEREF _Toc194075180 \h
+5.6	Private Call
+PAGEREF _Toc194075181 \h
+5.6.1	Private Call overview
+PAGEREF _Toc194075182 \h
+5.6.2	Private Call (with Floor control) general requirements
+PAGEREF _Toc194075183 \h
+5.6.3	Private Call (with Floor control) commencement requirements
+PAGEREF _Toc194075184 \h
+5.6.4	Private Call (with Floor control) termination
+PAGEREF _Toc194075185 \h
+5.6.5	Private Call (with Floor control) administration
+PAGEREF _Toc194075186 \h
+5.7	MCPTT priority requirements
+PAGEREF _Toc194075187 \h
+5.7.1	Overview
+PAGEREF _Toc194075188 \h
+5.7.2	Call types based on priorities
+PAGEREF _Toc194075189 \h
+5.7.2.1	MCPTT Emergency Group Call
+PAGEREF _Toc194075190 \h
+5.7.2.1.1	MCPTT Emergency Group Call requirements
+PAGEREF _Toc194075191 \h
+5.7.2.1.2	 MCPTT Emergency Group Call cancellation requirements
+PAGEREF _Toc194075192 \h
+5.7.2.2	Imminent Peril group call
+PAGEREF _Toc194075193 \h
+5.7.2.2.1	Imminent Peril group call requirements
+PAGEREF _Toc194075194 \h
+5.7.2.2.2	Imminent Peril group call cancellation requirements
+PAGEREF _Toc194075195 \h
+5.7.2.3	MCPTT Emergency Private Call (with Floor control)
+PAGEREF _Toc194075196 \h
+5.7.2.3.1	MCPTT Emergency Private Call (with Floor control) requirements
+PAGEREF _Toc194075197 \h
+5.7.2.3.2	MCPTT Emergency Private Call (with Floor control) cancellation requirements
+PAGEREF _Toc194075198 \h
+5.7.2.4	MCPTT Emergency Alert
+PAGEREF _Toc194075199 \h
+5.7.2.4.1	MCPTT Emergency Alert requirements
+PAGEREF _Toc194075200 \h
+5.7.2.4.2	MCPTT Emergency Alert cancellation requirements
+PAGEREF _Toc194075201 \h
+5.8	User ID
+PAGEREF _Toc194075202 \h
+5.9	MCPTT UE management
+PAGEREF _Toc194075203 \h
+5.10	MCPTT User Profile
+PAGEREF _Toc194075204 \h
+5.11	Support for multiple devices
+PAGEREF _Toc194075205 \h
+5.12	Location
+PAGEREF _Toc194075206 \h
+5.13	Security
+PAGEREF _Toc194075207 \h
+5.14	Audio / voice quality
+PAGEREF _Toc194075208 \h
+5.15	Interactions between MCPTT Group calls and MCPTT Private Calls (with Floor control)
+PAGEREF _Toc194075209 \h
+5.16	Relay requirements
+PAGEREF _Toc194075210 \h
+5.17	Gateway requirements
+PAGEREF _Toc194075211 \h
+5.18	Control and management by Mission Critical Organizations
+PAGEREF _Toc194075212 \h
+5.18.1	Overview
+PAGEREF _Toc194075213 \h
+5.18.2	General requirements
+PAGEREF _Toc194075214 \h
+5.18.3	Operational visibility for Mission Critical Organizations
+PAGEREF _Toc194075215 \h
+5.19	General Administrative
+groups and users
+PAGEREF _Toc194075216 \h
+6	MCPTT Service requirements specific to on-network use
+PAGEREF _Toc194075217 \h
+6.1	General administrative
+groups and users
+PAGEREF _Toc194075218 \h
+6.2	MCPTT calls
+PAGEREF _Toc194075219 \h
+6.2.1	Commencement modes for MCPTT Group calls
+PAGEREF _Toc194075220 \h
+6.2.2	Queuing
+PAGEREF _Toc194075221 \h
+6.2.3	Floor control
+PAGEREF _Toc194075222 \h
+6.2.3.1	General aspects
+PAGEREF _Toc194075223 \h
+6.2.3.2	Requesting permission to transmit
+PAGEREF _Toc194075224 \h
+6.2.3.3	Override
+PAGEREF _Toc194075225 \h
+6.2.3.3.1	General aspects
+PAGEREF _Toc194075226 \h
+6.2.3.3.2	Override
+one transmitting Participant
+PAGEREF _Toc194075227 \h
+6.2.3.3.3	Override
+simultaneously Transmitting MCPTT Group Members
+PAGEREF _Toc194075228 \h
+6.2.3.4	Terminating permission to transmit
+PAGEREF _Toc194075229 \h
+6.2.3.5	Transmit time limit
+PAGEREF _Toc194075230 \h
+6.2.3.6	Audio cut-in on designated MCPTT Groups
+PAGEREF _Toc194075231 \h
+6.2.3.6.1	Overview
+PAGEREF _Toc194075232 \h
+6.2.3.6.2	 Requirements
+PAGEREF _Toc194075233 \h
+6.2.3.6.3	Requesting permission to transmit
+PAGEREF _Toc194075234 \h
+6.2.3.6.4	Terminating permission to transmit
+PAGEREF _Toc194075235 \h
+6.2.3.6.5	Transmit time limit
+PAGEREF _Toc194075236 \h
+6.2.3.7	MCPTT Groups configured for multi-talker control
+PAGEREF _Toc194075237 \h
+6.2.3.7.1	Overview
+PAGEREF _Toc194075238 \h
+6.2.3.7.2	General aspects
+PAGEREF _Toc194075239 \h
+6.2.3.7.3	Requesting permission to transmit
+PAGEREF _Toc194075240 \h
+6.2.3.7.4	Override
+PAGEREF _Toc194075241 \h
+6.2.4	Call termination
+PAGEREF _Toc194075242 \h
+6.3	General requirements
+PAGEREF _Toc194075243 \h
+6.4	General group call
+PAGEREF _Toc194075244 \h
+6.4.1	General aspects
+PAGEREF _Toc194075245 \h
+6.4.2	Group status/information
+PAGEREF _Toc194075246 \h
+6.4.3	Identification
+PAGEREF _Toc194075247 \h
+6.4.4	Membership/affiliation
+PAGEREF _Toc194075248 \h
+6.4.5	Membership/affiliation list
+PAGEREF _Toc194075249 \h
+6.4.6	Authorized user remotely changes another MCPTT User's affiliated and/or Selected MCPTT Group(s)
+PAGEREF _Toc194075250 \h
+6.4.6.1	Mandatory change
+PAGEREF _Toc194075251 \h
+6.4.6.2	Negotiated change
+PAGEREF _Toc194075252 \h
+6.4.7	Prioritization
+PAGEREF _Toc194075253 \h
+6.4.8	Relay requirements
+PAGEREF _Toc194075254 \h
+6.4.9	Administrative
+PAGEREF _Toc194075255 \h
+6.5	Broadcast group
+PAGEREF _Toc194075256 \h
+6.5.1	General Broadcast Group Call
+PAGEREF _Toc194075257 \h
+6.5.2	Group-Broadcast Group (e.g., announcement group)
+PAGEREF _Toc194075258 \h
+6.5.3	User-Broadcast Group (e.g., System Call)
+PAGEREF _Toc194075259 \h
+6.6	Dynamic group management (i.e., dynamic regrouping)
+PAGEREF _Toc194075260 \h
+6.6.1	General dynamic regrouping
+PAGEREF _Toc194075261 \h
+6.6.2	Group Regrouping
+PAGEREF _Toc194075262 \h
+6.6.2.1	Service description
+PAGEREF _Toc194075263 \h
+6.6.2.2	Requirements
+PAGEREF _Toc194075264 \h
+6.6.3	Temporary Group-Broadcast Group
+PAGEREF _Toc194075265 \h
+6.6.4	User regrouping
+PAGEREF _Toc194075266 \h
+6.6.4.1	Service description
+PAGEREF _Toc194075267 \h
+6.6.4.2	Requirements
+PAGEREF _Toc194075268 \h
+6.7	Private Call
+PAGEREF _Toc194075269 \h
+6.7.0	Overview
+PAGEREF _Toc194075270 \h
+6.7.1	General requirements
+PAGEREF _Toc194075271 \h
+6.7.2	Administrative
+PAGEREF _Toc194075272 \h
+6.7.3	Prioritization
+PAGEREF _Toc194075273 \h
+6.7.4	Private Call (without Floor control) commencement requirements
+PAGEREF _Toc194075274 \h
+6.7.4a	Private Call (with Floor control) commencement requirements
+PAGEREF _Toc194075275 \h
+6.7.5	Private Call (without Floor control) termination
+PAGEREF _Toc194075276 \h
+6.7.6	Call back request requirements
+PAGEREF _Toc194075277 \h
+6.8	MCPTT priority requirements
+PAGEREF _Toc194075278 \h
+6.8.1	General
+PAGEREF _Toc194075279 \h
+6.8.2	3GPP system access controls
+PAGEREF _Toc194075280 \h
+6.8.3	3GPP system admission controls
+PAGEREF _Toc194075281 \h
+6.8.4	3GPP system scheduling controls
+PAGEREF _Toc194075282 \h
+6.8.5	UE access controls
+PAGEREF _Toc194075283 \h
+6.8.6	Application layer priorities
+PAGEREF _Toc194075284 \h
+6.8.6.1	Overview
+PAGEREF _Toc194075285 \h
+6.8.6.2	Requirements
+PAGEREF _Toc194075286 \h
+6.8.7	Call types based on priorities
+PAGEREF _Toc194075287 \h
+6.8.7.1	MCPTT Emergency Group Call requirements
+PAGEREF _Toc194075288 \h
+6.8.7.2	MCPTT Emergency Private Call (with Floor control) requirements
+PAGEREF _Toc194075289 \h
+6.8.7.3	Imminent Peril group call requirements
+PAGEREF _Toc194075290 \h
+6.8.7.4	MCPTT Emergency Alert
+PAGEREF _Toc194075291 \h
+6.8.7.4.1	Requirements
+PAGEREF _Toc194075292 \h
+6.8.7.4.2	MCPTT Emergency Alert cancellation requirements
+PAGEREF _Toc194075293 \h
+6.9	IDs and aliases
+PAGEREF _Toc194075294 \h
+6.10	User Profile management
+PAGEREF _Toc194075295 \h
+6.11	Support for multiple devices
+PAGEREF _Toc194075296 \h
+6.12	Location
+PAGEREF _Toc194075297 \h
+6.13	Security
+PAGEREF _Toc194075298 \h
+6.13.1	Overview
+PAGEREF _Toc194075299 \h
+6.13.2	Cryptographic protocols
+PAGEREF _Toc194075300 \h
+6.13.3	Authentication
+PAGEREF _Toc194075301 \h
+6.13.4	Access control
+PAGEREF _Toc194075302 \h
+6.13.5	Regulatory issues
+PAGEREF _Toc194075303 \h
+6.14	Interactions for MCPTT Group Calls and MCPTT Private Calls
+PAGEREF _Toc194075304 \h
+6.15	Audio MCPTT call performance
+PAGEREF _Toc194075305 \h
+6.15.1	General overview
+PAGEREF _Toc194075306 \h
+6.15.2	General requirements
+PAGEREF _Toc194075307 \h
+6.15.3	MCPTT access time and mouth-to-ear latency
+PAGEREF _Toc194075308 \h
+6.15.3.1	General overview
+PAGEREF _Toc194075309 \h
+6.15.3.2 	Requirements
+PAGEREF _Toc194075310 \h
+6.15.4	Late call entry performance
+PAGEREF _Toc194075311 \h
+6.15.4.1	General overview
+PAGEREF _Toc194075312 \h
+6.15.4.2	Requirements
+PAGEREF _Toc194075313 \h
+6.15.5	Audio / voice quality
+PAGEREF _Toc194075314 \h
+6.15.6	Radio Resource Efficiency Performance
+PAGEREF _Toc194075315 \h
+6.16	Additional services for MCPTT calls
+PAGEREF _Toc194075316 \h
+6.16.1	Discreet listening capabilities
+PAGEREF _Toc194075317 \h
+6.16.2	Ambient listening
+PAGEREF _Toc194075318 \h
+6.16.2.1	Overview of ambient listening
+PAGEREF _Toc194075319 \h
+6.16.2.2	Ambient listening requirements
+PAGEREF _Toc194075320 \h
+6.16.2.2.1	General Ambient Listening requirements
+PAGEREF _Toc194075321 \h
+6.16.2.2.2	Remotely initiated Ambient Listening requirements
+PAGEREF _Toc194075322 \h
+6.16.2.2.3	Locally initiated Ambient Listening requirements
+PAGEREF _Toc194075323 \h
+6.16.3	Remotely initiated MCPTT call
+PAGEREF _Toc194075324 \h
+6.16.3.1	Overview
+PAGEREF _Toc194075325 \h
+6.16.3.2	Requirements
+PAGEREF _Toc194075326 \h
+6.16.4	Recording and audit requirements
+PAGEREF _Toc194075327 \h
+6.17	Interaction with telephony services
+PAGEREF _Toc194075328 \h
+6.18	Interworking
+PAGEREF _Toc194075329 \h
+6.18.1	Non-3GPP access
+PAGEREF _Toc194075330 \h
+6.18.2	Interworking between MCPTT systems
+PAGEREF _Toc194075331 \h
+6.18.3	Interworking with non-3GPP PTT systems
+PAGEREF _Toc194075332 \h
+6.18.3.1	Overview
+PAGEREF _Toc194075333 \h
+6.18.3.2	Project 25
+PAGEREF _Toc194075334 \h
+6.18.3.3	TETRA
+PAGEREF _Toc194075335 \h
+6.18.3.4	Legacy land mobile radio
+PAGEREF _Toc194075336 \h
+6.18.3.5	Void
+PAGEREF _Toc194075337 \h
+6.18.4	GSM-R
+PAGEREF _Toc194075338 \h
+6.18.4.1	Overview
+PAGEREF _Toc194075339 \h
+6.18.4.2	Requirements
+PAGEREF _Toc194075340 \h
+6.19	MCPTT coverage extension using ProSe UE-to-Network Relays
+PAGEREF _Toc194075341 \h
+6.20 	Ad hoc Group calls
+PAGEREF _Toc194075342 \h
+6.20.1	Call forwarding for Ad hoc Group calls
+PAGEREF _Toc194075343 \h
+7	MCPTT Service requirements specific to off-network use
+PAGEREF _Toc194075344 \h
+7.1	Off-network Push To Talk overview
+PAGEREF _Toc194075345 \h
+7.2	General off-network MCPTT requirements
+PAGEREF _Toc194075346 \h
+7.3	Floor control
+PAGEREF _Toc194075347 \h
+7.3.1	General aspects
+PAGEREF _Toc194075348 \h
+7.3.2	Requesting permission to transmit
+PAGEREF _Toc194075349 \h
+7.3.3	Override
+PAGEREF _Toc194075350 \h
+7.3.4	Terminating permission to transmit
+PAGEREF _Toc194075351 \h
+7.3.5	Transmit time limit
+PAGEREF _Toc194075352 \h
+7.4	Call Termination
+PAGEREF _Toc194075353 \h
+7.5	Broadcast Group
+PAGEREF _Toc194075354 \h
+7.6	Dynamic group management (i.e., dynamic regrouping)
+PAGEREF _Toc194075355 \h
+7.7	MCPTT priority requirements
+PAGEREF _Toc194075356 \h
+7.8	Call types based on priorities
+PAGEREF _Toc194075357 \h
+7.8.1	MCPTT Emergency Group Call requirements
+PAGEREF _Toc194075358 \h
+7.8.2	MCPTT Emergency Group Call cancellation requirements
+PAGEREF _Toc194075359 \h
+7.8.3	Imminent Peril Call
+PAGEREF _Toc194075360 \h
+7.8.3.1	 Imminent Peril group call requirements
+PAGEREF _Toc194075361 \h
+7.8.3.2 	Imminent Peril group call cancellation requirements
+PAGEREF _Toc194075362 \h
+7.9	Location
+PAGEREF _Toc194075363 \h
+7.10	Security
+PAGEREF _Toc194075364 \h
+7.11	Audio MCPTT Call performance
+PAGEREF _Toc194075365 \h
+7.11.1	MCPTT Access time and Mouth-to-ear latency
+PAGEREF _Toc194075366 \h
+7.11.1.1	General overview
+PAGEREF _Toc194075367 \h
+7.11.1.2	Requirements
+PAGEREF _Toc194075368 \h
+7.11.2	Late call entry performance
+PAGEREF _Toc194075369 \h
+7.11.2.1	General overview
+PAGEREF _Toc194075370 \h
+7.11.2.2	Requirements
+PAGEREF _Toc194075371 \h
+7.11.3	Audio / Voice quality
+PAGEREF _Toc194075372 \h
+7.12	Off-network MCPTT operations
+PAGEREF _Toc194075373 \h
+7.13	Off-network UE functionality
+PAGEREF _Toc194075374 \h
+7.14	Switching to off-network MCPTT
+PAGEREF _Toc194075375 \h
+7.15	Off-network recording and audit requirements
+PAGEREF _Toc194075376 \h
+7.16	Off-network UE-to-UE Relay
+PAGEREF _Toc194075377 \h
+7.16.1	Private Calls
+PAGEREF _Toc194075378 \h
+7.16.2	Group Calls
+PAGEREF _Toc194075379 \h
+Annex A (informative): Variables
+PAGEREF _Toc194075380 \h
+Annex A1 (Informative): MCPTT Requirements for MCCoRe
+PAGEREF _Toc194075381 \h
+Annex B (informative): Bibliography
+PAGEREF _Toc194075382 \h
+Annex C (informative): MCPTT scalability guide
+PAGEREF _Toc194075383 \h
+Annex D (informative): Change history
+PAGEREF _Toc194075384 \h
+This Technical Specification has been produced by the 3rd Generation Partnership Project (3GPP).
+The contents of the present document are subject to continuing work within the TSG and may change following formal TSG approval. Should the TSG modify the contents of the present document, it will be re-released by the TSG with an identifying change of release date and an increase in version number as follows:
+Version x.y.z
+x	the first digit:
+1	presented to TSG for information;
+2	presented to TSG for approval;
+3	or greater indicates TSG approved document under change control.
+y	the second digit is incremented for all changes of substance, i.e. technical enhancements, corrections, updates, etc.
+z	the third digit is incremented when editorial only changes have been incorporated in the document.
+Introduction
+The present document covers requirements for Mission Critical Push To Talk (MCPTT) service (represented by the term, MCPTT Service). The MCPTT Service can be used for public safety applications and also for general commercial applications (e.g., utility companies and railways). The specifications contained within the present document can also form the basis for a non-mission critical Push To Talk service (called a PTT service).
+Note that further development of mission critical services beyond MCPTT (such as Mission Critical Video and Mission Critical Data) created an opportunity to re-use base functionality documented in the Stage 1 requirements for MCPTT. For example, the ability to communicate mission critical information to groups of users is a common need regardless of service type. Wherever originating MCPTT requirements were found to be in common with other mission critical services, those requirements were moved to a new Technical Specification (3GPP TS 22.280). Each requirement that was moved has been voided in this version of 3GPP TS 22.179, and an informative annex has been created at the end of this specification documenting the location of the originating 3GPP TS 22.179 requirement in 3GPP TS 22.280.
+The present document provides the service requirements for operation of the MCPTT Service. MCPTT makes use of capabilities included in Group Communications System Enablers and Proximity Services, with additional requirements specific to the MCPTT Service. The MCPTT Service can be used for public safety applications and maritime safety applications and also for general commercial applications (e.g., utility companies, railways and maritime usage). The requirements in this specification do not apply to GSM or UMTS.
+2	References
+The following documents contain provisions which, through reference in this text, constitute provisions of the present document.
+-	References are either specific (identified by date of publication, edition number, version number, etc.) or non
+-	For a specific reference, subsequent revisions do not apply.
+-	For a non-specific reference, the latest version applies. In the case of a reference to a 3GPP document (including a GSM document), a non-specific reference implicitly refers to the latest version of that document in the same Release as the present document.
+21.905: "Vocabulary for 3GPP Specifications".
+[2]	TSB-102-B: "Project 25 TIA-102 Document Suite Overview".
+[3]	TIA-603-D: "Land Mobile FM or PM Communications Equipment Measurement and Performance Standards".
+[4]	TIA-102.BABA: "Vocoder Description".
+22.278: "Service requirements for the Evolved Packet System (EPS)".
+22.468: "Group Communication System Enablers for LTE (GCSE_LTE)".
+Recommendation
+P.862: "Perceptual evaluation of speech quality (PESQ): An objective method for end-to-end speech quality assessment of narrow-band telephone networks and speech codecs".
+Recommendation
+P.862.1: "Mapping function for transforming P.862 raw result scores to MOS-LQO".
+Recommendation
+P.863: "Perceptual objective listening quality assessment".
+[10]	TIA-102.BABG: "Enhanced Vocoder Methods of Measurement for Performance", March 2010.
+26.190: "Speech codec speech processing functions; Adaptive Multi-Rate - Wideband (AMR-WB) speech codec; Transcoding functions".
+26.194: "Speech codec speech processing functions; Adaptive Multi-Rate - Wideband (AMR-WB) speech codec; Voice Activity Detector (VAD)".
+22.011: "Service accessibility".
+23.122: "Non-Access-Stratum (NAS) functions related to Mobile Stations (MS) in idle mode".
+22.280: "Mission Critical Services Common Requirements (MCCoRe)".
+[16]	ISBN 2-7461-1832-4:
+UIC Project EIRENE System Requirements Specification
+[17]	ETSI EN 301 515 V3.0.0 (2018-03):
+Global System for Mobile communication (GSM); Requirements for GSM operation on railways
+3	Definitions and abbreviations
+3.1	Definitions
+For the purposes of the present document, the terms and definitions given in TR
+[1] and the following apply. A term defined in the present document takes precedence over the definition of the same term, if any, in TR
+[1]. Definitions provided in 3GPP TS 22.280 [15] also apply to this specification.
+Affiliated MCPTT Group Member: An MCPTT Group Member who has indicated an interest in the group and is prepared to receive and/or transmit Group Communications from/to the particular MCPTT Group.
+Automatic Commencement Private Call: A Private Call in which the initiation of the Private Call does not require any action on the part of the receiving MCPTT User.
+Broadcast Group Call: A group call where the initiating MCPTT User expects no response from the other MCPTT Users, so that when his transmission is complete, so is the call.
+Call Commencement Mode: This is a setting that determines the conditions under which a call is started.
+Dispatcher: An MCPTT User who participates in MCPTT communications for command and control purposes.
+Floor control: An arbitration system in an MCPTT Service that determines who has the authority to transmit (talk) at a point in time during an MCPTT call.
+Group-Broadcast Group: A collection of groups defined by the MCPTT Administrator (e.g., representing a particular organizational structure) and intended to be the recipients of Broadcast Group Calls.
+Group Regroup: The temporary combining of a multiplicity of groups into a single group.
+Hang Time: A configurable maximum length of the inactivity (silence) period between consecutive MCPTT transmissions within the same call.
+Imminent Peril Call: An urgent MCPTT Group call that highlights the potential of death or serious injury, but is less critical than an MCPTT Emergency Group Call. For example a call prioritized in the event of immediate threat to any human life such as resulting from an MCPTT User's observation of or engagement in a situation involving imminent peril to the general public (e.g., a forest fire about to encircle campers, tanker truck ready to explode near a school, casualties at the scene of a car bombing).
+In-progress Emergency: An emergency condition for a group that has been accepted by the MCPTT Service, but has not yet been cancelled by an authorized user.
+In-progress Imminent Peril: An imminent peril condition for a group that has been accepted by the MCPTT Service and has not yet been cancelled by an authorized MCPTT User.
+Late call entry: An Affiliated MCPTT Group Member joins in an in progress MCPTT Group Call.
+Location: The current physical location (i.e., co-ordinates plus estimated accuracy and timestamp) of the MCPTT UE that can be cross-referenced to a map.
+Losing audio: Audio of an overridden talker that is routed to selected authorized MCPTT Users.
+Manual Commencement Private Call: A Private Call in which the initiation of the Private Call requires the receiving MCPTT User to perform some action to accept or reject the Private Call setup.
+MCPTT Administrator: An individual authorized to control parameters of the MCPTT Service for an organization including, for example, user and group definition, user/group aliases, user priorities, group membership/priorities/hierarchies, security and privacy controls.
+MCPTT Emergency Alert: A notification from the MCPTT UE to the MCPTT Service that the MCPTT User has an emergency condition.
+MCPTT Emergency Group Call: An urgent MCPTT Group call that highlights the potential of death or serious injury to the initiator.
+MCPTT Emergency Private Call: An urgent MCPTT Private Call that highlights the potential of death or serious injury to the initiator.
+MCPTT Emergency State: A heightened condition of alarm for an MCPTT User indicating a need for immediate assistance due to a personal life-threatening situation.
+MCPTT Group: A defined set of MCPTT Users identified independently of transport or network type.
+MCPTT Ad hoc Group: The combining of a multiplicity of MCPTT Users into a group based on pre-defined criteria for the duration of a communication.
+MCPTT Group Member: An MCPTT User who has been authorized to participate in Group Communications of a particular MCPTT Group.
+MCPTT Request: The action taken by an MCPTT User to request the permission to transmit voice on a call.
+MCPTT Service: A Push To Talk communication service supporting applications for Mission Critical Organizations and mission critical applications for other businesses and organizations (e.g., utilities, railways) with fast setup times, high availability, reliability and priority handling.
+MCPTT system: The collection of applications, services, and enabling capabilities required to provide Mission Critical Push To Talk for a Mission Critical Organization.
+MCPTT UE: A UE that enables an MCPTT User to participate in MCPTT Service.
+MCPTT User: A user of an MCPTT Service, who has a device with the capability to participate in MCPTT Services.
+MCPTT User Profile: The set of information that allows an MCPTT User to employ the MCPTT Service in a given role and/or from a given MCPTT device.
+Mission Critical Push To Talk: A group communication service with fast setup times, ability to handle large groups, strong security and priority handling.
+Off-Network MCPTT Service: The collection of functions and capabilities required to provide MCPTT using ProSe Discovery and the ProSe Communication path for MCPTT Users using Public Safety ProSe-enabled UEs as a direct communication between UEs.
+Partner MCPTT System: Allied MCPTT system that provides MCPTT Services to an MCPTT User based on the MCPTT User Profile that is defined in the Primary MCPTT System of that MCPTT User.
+Pre-emption: The act of terminating on-going calls in order to free up resources for a higher priority call request.
+Primary MCPTT System: MCPTT system where the MCPTT User Profile of an MCPTT User is defined.
+Private Call: A call between a pair of MCPTT Users using the MCPTT Service with or without MCPTT Floor control.
+Project 25 RFSS: A Project 25 Radio Frequency (RF) Subsystem as defined in TSB-102-B [2].
+Receiving MCPTT Group Member: An Affiliated MCPTT Group Member who is currently receiving Group Communication from an MCPTT Group.
+Selected MCPTT Group: The MCPTT Group that a particular Affiliated MCPTT Group Member uses for transmission.
+System Call: A special case of a Broadcast Group Call that is transmitted to all users in a dynamically defined geographic area.
+Transmitting MCPTT Group Member: An Affiliated MCPTT Group Member who is currently transmitting a Group Communication to a Selected MCPTT Group.
+User-Broadcast Group: A collection of users defined by the MCPTT Administrator (e.g., representing a particular organizational structure) and intended to be the recipients of Broadcast Group Calls.
+User ID: The main unique identifier for an MCPTT User.
+User Regroup: The temporary combining of a multiplicity of users into a new group.
+3.2	Abbreviations
+For the purposes of the present document, the abbreviations given in TR
+[1] and the following apply. An abbreviation defined in the present document takes precedence over the definition of the same abbreviation, if any, in TR
+FIFO	First In First Out
+GCSE_LTE	Group Communication System Enablers for LTE
+KPI	Key Performance Indicator
+MCPTT	Mission Critical Push To Talk
+MOS-LQO	Mean Opinion Score
+Listening Quality Objective
+P25	Project 25
+PESQ	Perceptual Evaluation of Speech Quality
+POLQA	Perceptual Objective Listening Quality Assessment
+ProSe	Proximity Services
+PTT	Push To Talk
+RFSS	Radio Frequency (RF) Subsystem as defined in the TIA-102 specifications (P25)
+TETRA	Terrestrial Trunked Radio
+TIA	Telecommunications Industry Association
+UIC	Union Internationale des Chemins de Fer
+4	Mission Critical Push To Talk overview
+4.1	General
+A Push To Talk service provides an arbitrated method by which two or more users may engage in communication. Users may request permission to transmit (e.g., traditionally by means of a press of a button). The Mission Critical Push To Talk (MCPTT) service supports an enhanced PTT service, suitable for mission critical scenarios, based upon 3GPP system services. The requirements for Mission Critical Push To Talk (MCPTT) service defined within can also form the basis for a non-mission critical Push To Talk (PTT) service.
+The MCPTT Service is intended to support communication between several users (a group call), where each user has the ability to gain access to the permission to talk in an arbitrated manner. However, the MCPTT Service also supports Private Calls between pairs of users. The MCPTT Service builds on the existing 3GPP transport communication mechanisms provided by the 3GPP architectures to establish, maintain, and terminate the actual communication path(s) among the users.
+The MCPTT Service also builds upon service enablers: Group Communications System Enablers and Proximity Services. To the extent feasible, it is expected that the end user's experience to be similar regardless if the MCPTT Service is used under coverage of a 3GPP network or based on ProSe without network coverage. To clarify this intent, the requirements are grouped according to applicability to on-network use, off-network use, or both.
+Though the MCPTT Service primarily focuses on the use of the 3GPP system there might be users who access the MCPTT Service through non-3GPP access technology, dispatchers and administrators are examples of this. Dispatchers and administrators are special users who have particular admin and call management privileges which normal users might not have. In MCPTT dispatchers can use an MCPTT UE (i.e., 3GPP) or a non-3GPP access connection to the MCPTT Service based on a "dispatcher and Administrator" interface. Through this interface a user is able to access and manage the services related to on the network and those common to on the network and off the network.
+The MCPTT Service allows users to request the permission to talk (transmit voice/audio) and provides a deterministic mechanism to arbitrate between requests that are in contention (i.e., Floor control). When multiple requests occur, the determination of which user's request is accepted and which users' requests are rejected or queued is based upon a number of characteristics (including the respective priorities of the users in contention). MCPTT Service provides a means for a user with higher priority (e.g., MCPTT Emergency condition) to override (interrupt) the current talker. MCPTT Service also supports a mechanism to limit the time a user talks (hold the floor) thus permitting users of the same or lower priority a chance to gain the floor.
+The MCPTT Service provides the means for a user to monitor activity on a number of separate calls and enables the user to switch focus to a chosen call. An MCPTT Service user may join an already established MCPTT Group call (Late call entry). In addition the MCPTT Service provides the User ID of the current speaker(s) and user's Location determination features.
+The users of an MCPTT Service may have more stringent expectations of performance than the users of a commercial PTT service.
+MCPTT is primarily targeting to provide a professional Push To Talk service to e.g., public safety, transport companies, utilities or industrial and nuclear plants. In addition to this a commercial PTT service for non-professional use (e.g., groups of people on holiday) may be delivered through an MCPTT system. Based on their operational model, the performance and MCPTT features in use vary per user organization, where functionality which is more mission critical specific (e.g., Ambient Listening and Imminent Peril Call) might not be available to commercial customers.
+MCPTT Users expect to communicate with other MCPTT Users as outlined above, however MCPTT Users also need to be able to communicate with non MCPTT Users using their MCPTT UEs for normal telephony services.
+4.2	Typical use of the MCPTT Service
+NOTE:	Even though this subclause is written from an organization specific perspective the text is illustrative for typical use of MCPTT Services by all MCPTT Users.
+Public safety workers often operate in groups and perform different tasks during the day/week. Many tasks and operations are controlled, assisted and/or coordinated by a dispatcher.
+For their communications public safety workers are organized in groups. People that are working together communicate in the same MCPTT Group, the group communication helping them to coordinate quickly.
+People with different tasks often communicate in separate MCPTT Groups.
+Many of the public safety tasks are routine tasks, that are handled by standard procedures and communication structures, using dedicated MCPTT Groups. Communication structures and MCPTT Groups are also prepared for the handling of large incidents and control of large events. Similarly there are MCPTT Groups and procedures for coordination with public safety workers from other organizations and/or other countries.
+The standard procedures and communication structures help the public safety workers to do their work successfully. This results in a long list of (>100) MCPTT Groups available to a public safety worker, from which the correct one is selected depending on the task. To help the public safety worker to quickly find and select the correct MCPTT Group for the task, the MCPTT Groups in the radio are often structured in folders and/or accessible via key-shortcuts. In addition to pre-established MCPTT Groups that users select, there are also provisions in MCPTT systems to merge MCPTT Groups and to select on behalf of a user which group they should be using and for a dispatcher to push them onto it. The large number of MCPTT Groups provisioned on devices is helpful for the device to be able to operate on the network and off the network. However the ability to provision over the air is also seen as a very useful feature, as currently Land Mobile Radio devices often have to be locally re-programmed, rather than updated over the air.
+4.3	Overview of MCPTT Group affiliation, call and transmission
+An MCPTT Service provides Group Call and Private Call capabilities, which have various process flows, states and permissions associated with them. The figure 4.3.1, figure 4.3.2, and figure 4.3.3 indicate the high level flows, states and permissions associated with Group Calls and Private Calls. The diagrams apply to the on-network case and off-network case, as from a user perspective the service and concepts should appear similar on the network and off the network. From a technical perspective there might be differences between the on-network states and off-network states (e.g., off the network Affiliation might not require notifying an application server of a user's affiliation and there might also be other differences in the detail depending on the extent to which the off-network capabilities can match the on-network capabilities).
+If an MCPTT User wants to communicate with an MCPTT Group they have to be allowed to access the MCPTT Group (i.e., be an MCPTT Group Member), they then have to affiliate and then can have an MCPTT Group as their Selected MCPTT Group. If an MCPTT User is only affiliated to a group this is so that they can receive from the group, however if an MCPTT User has a Selected MCPTT Group this is their group for transmitting on. The differences in states enable an MCPTT User to receive from multiple MCPTT Groups, but specify which MCPTT Group they would like to transmit on.
+NOTE:	This diagram is for illustrative purposes only and does not supersede the requirements. The diagram is not exhaustive and does not include all the different scenarios.
+Figure 4.3.1: MCPTT User state diagram- transmit and receive for a particular MCPTT Group
+NOTE:	This diagram is for illustrative purposes only and does not supersede the requirements. The diagram is not exhaustive and does not include all the different scenarios.
+Figure 4.3.2: MCPTT User state diagram- transmit only for a particular MCPTT Group
+NOTE:	This diagram is for illustrative purposes only and does not supersede the requirements. The diagram is not exhaustive and does not include all the different scenarios.
+Figure 4.3.3: MCPTT User state diagram- receive only for a particular MCPTT Group
+It is possible for an MCPTT User to be affiliated with one or more MCPTT Groups. Normally, while in operation, an MCPTT User informs the MCPTT Service about which MCPTT Groups he would like to be affiliated to. These affiliations remain in effect until the MCPTT User removes them, or changes them, or signs out of the service. Some MCPTT Users have permanent affiliations to certain MCPTT Groups and those affiliations are set up implicitly (i.e., automatically) when operating on the network. For those users, the MCPTT Group affiliation starts when the MCPTT Service successfully signs in the user and ends when the MCPTT User's explicit or implicit (e.g., due to inactivity or the turning off of all its devices) request to sign out of the MCPTT Service is acknowledged.
+Every time a PTT request is granted a user can start an MCPTT transmission or "talk burst". An MCPTT Group Call consists of one or more MCPTT transmissions. Whether two consecutive transmissions from same or different users are part of the same call, or the second transmission starts a new call, depends on the configurable maximum length of the inactivity period between the consecutive MCPTT transmissions. This inactivity period can be seen as a Hang Time that starts at the end of the preceding transmission. While this timer is running, the resources associated with the call stay assigned to the call (except in case of pre-emption), which could reduce the latency of future floor requests for this group versus groups who are not involved in a call. When a new transmission starts during the inactivity period, the timer is stopped, reset and restarted again at the end of that transmission.
+The MCPTT Service recognizes a number of "special" group calls including: Broadcast Group Call, Emergency Group Call and Imminent Peril group call.
+A Broadcast Group Call can be seen as a special group call with only one MCPTT transmission.
+While the In-progress Emergency state or In-progress Imminent Peril state is active, the inactivity period is conceptually set to infinity; i.e., the resources assigned to calls during these states are never released (except in case of pre-emption). An MCPTT Emergency Group Call or an Imminent Peril group call can be seen as having an unspecified number of transmissions: essentially, all the transmissions to a group during In-progress Emergency state or In-progress Imminent Peril are part of the same MCPTT Group Call.
+Conditions on starting ("commencement") and continuing an MCPTT call can be established. Usually at least the call initiator (but also other users) are kept informed via notifications of the starting, stopping, queuing, etc., of a call.
+In general, commencement conditions are related to the presence on the call (i.e., participation) of certain members of the group, and/or of a minimum number of members, as well as on the availability of resources (e.g., GBR bearers) of proper ARP. If the commencement conditions are not met, the call does not start (it can be queued or rejected). Normally, commencement conditions are not checked for individual transmission within a call.
+Continuation conditions are similar (though not required to be identical) to commencement conditions and get re-evaluated when pre-emption, degradation of priority, motion out of communication range, de-selection of the group or de-affiliation (explicit or implicit) occur. If the continuation conditions are not met, the call stops.
+4.4	General handling of requests
+Request handling is by no means specific only to MCPTT Service, but it plays a central role in its functionality.
+Requests appear in the MCPTT Service in many forms and under many circumstances: e.g., requests for the floor during a call, requests for starting a call, requests for resources. Conceptually, requests are accompanied by priority information that is used in the arbitration, in case of contention; see also subclause 4.6 for a brief explanation and examples on how priority processing is modelled.
+Upon arrival, a request is immediately granted, denied, or queued.
+If queued, a request can be dropped due to queue overflow (i.e., too many items queued) or can be cancelled by an authorized user, who is usually the initiator of the request. Either way, the net result is that the request is denied.
+When a request denial is communicated, the request may be re-requested either manually by user action or automatically. In the automatic case, while the request remains denied, it may be automatically repeated a configurable number of times where a minimum time interval between re-transmissions may also be applied.
+There are many "queuing disciplines" possible that govern the placement of items in a queue and their subsequent removal from the queue: e.g., FIFO, priority order. Assuming that the queuing discipline chosen places the highest priority requests towards the top of the queue, the granted request is either, depending on the design and configuration, the front-most entry in the queue or the first entry counting from the top that can be satisfied by the available resources. For example, if the topmost entry in the queue is awaiting for ten GBR bearers of given characteristics to become available and the second entry in the queue is waiting for seven GBR bearers to become available, and at some point in time eight GBR bearers become available, then it is possible that the second request is granted ahead of the first one, which continues to wait. Alternatively, neither the first request nor the second request is granted and the wait continues until at least ten GBR bearers become available, at which time the first request is granted while the second request continues to wait.
+4.5	Overview of MCPTT UE and MCPTT User in the MCPTT Service
+The MCPTT Service supports MCPTT User Profiles. The MCPTT User Profile contains important information related to the MCPTT User receiving the MCPTT Service, including the MCPTT User identity, which is globally unique and independent of the mobile subscriber identity (IMSI) assigned by a 3GPP network operator. Part of the content of the MCPTT User Profile (e.g., containing some display preferences, some UE audio settings, some address books) can be set/modified/updated by the MCPTT User, but significant portions might be set/modified/updated only by authorized persons. The MCPTT User Profile is stored permanently in database(s) associated with the infrastructure providing the MCPTT Service. Relevant parts of the profile might be downloaded to and cached temporarily or permanently on certain MCPTT UEs. When stored on an MCPTT UE, the MCPTT User Profile associated with an MCPTT User might be confidentiality and integrity protected, with the information available only to a trusted application client associated to the MCPTT User, upon authentication. The MCPTT User Profile information can be synchronized automatically or on demand between the cache on the MCPTT UE and the main copy held in the database(s) of the MCPTT Service infrastructure. The MCPTT User Profile is part of the MCPTT application service domain and forms the basis of MCPTT application layer security and identifies an MCPTT User to the MCPTT Service.
+Each MCPTT User has at least one MCPTT User Profile, and possibly several. Typically, one of the MCPTT User Profiles is designated as the default MCPTT User Profile, to be used unless an MCPTT User Profile is explicitly selected. In general, a user profile is associated with a specific device, with a specific mode of operation (i.e., on the network or off the network) and/or with a specific situation (e.g., user being off-duty, in a certain city, or playing a certain role). When an MCPTT User Profile is synchronized between the infrastructure and an MCPTT device, information could be downloaded to the device and updated, as necessary. Subsequently and subject to permissions, the MCPTT User might choose a different associated MCPTT User Profile to be downloaded and stored on the device. Only one MCPTT User Profile is active at a time. Authorized users are allowed to create, delete and alter MCPTT User Profiles for an MCPTT User and/or pre-stored MCPTT User Profiles.
+The MCPTT Service supports MCPTT UEs which connect to the MCPTT Service. The capabilities of an MCPTT UE are specified in the present document. The MCPTT Application that is resident on the MCPTT UE establishes this connection, employing application layer security in its connection to the MCPTT Service. An MCPTT UE is capable of operating in on-network and off-network modes.
+4.5.1	MCPTT User association to MCPTT UE in on-network mode
+Consistent with the 3GPP paradigm, when an MCPTT UE is powered on, it accesses the 3GPP system, and connects to the 3GPP network. During this phase, the credentials from a USIM application (or possibly, an ISIM application, if IMS is used) on a UICC associated with the MCPTT UE is used for authentication with an HSS. This is followed by the MCPTT Application, resident on the MCPTT UE, establishing a connection, employing application layer security in its connection to the MCPTT Service.
+Possibilities for the MCPTT UE, when connecting to the MCPTT Service:
+-	An MCPTT UE, with credentials of an MCPTT User at the time of connection to the MCPTT Service, is able to authenticate using a specific MCPTT User identity (e.g., via an Identity Management service). After successful user authentication the MCPTT User Profiles are made available to the MCPTT UE for use in both on-network and off-network operation modes.
+-	An MCPTT UE, without credentials of a specific MCPTT User at the time of connection to the MCPTT Service, proceeds using a default identity associated with the MCPTT UE itself. In this case, the MCPTT Service is capable of assigning a temporary MCPTT User Identity to this MCPTT UE. Some level of authentication might be attempted, and, depending on the results, an appropriate MCPTT User Profile associated with this temporary MCPTT User Identity and with the circumstances of the access is made available to the MCPTT UE for use in both on-network and off-network operation modes.
+-	The MCPTT Administrator is able to retrieve hardware and software parameters to define specific parameters and attributes (e.g., groups, MCPTT Emergency behaviour, priority and QoS attributes) associated with a temporary MCPTT User Identity for operation of the MCPTT UE for use in both on-network and off-network operation modes.
+4.5.2	MCPTT User and MCPTT UE relationship
+A user can enter his identifying/authenticating credentials (e.g., user name/ password, PIN, biometrics, asserted identity from a remote, trusted device). This step typically gives the MCPTT User access to local information and applications stored on the MCPTT UE, and in particular, to the MCPTT client application.
+The MCPTT Service allows the same MCPTT User to sign in (and stay simultaneously signed in) from different MCPTT UEs. For example, an incident manager or commander might use a portable phone, a command tablet, or a separate messaging unit.
+4.5.3	MCPTT Users accessing the service through non-3GPP access interface
+This document primarily focuses on MCPTT Users accessing and managing the MCPTT Service through MCPTT UEs, however there might be some dispatchers and administrators who might access the service through a non-3GPP access interface.
+4.5.4	Shareable MCPTT UEs and gateway UEs
+The conceptual model for shareable MCPTT UEs is that of a pool of UEs, each UE being interchangeable with any other, and users randomly choosing one or more UEs from the pool, each user for his temporary exclusive use. A shareable MCPTT UE can be used by user who can gain access to the MCPTT client application stored on it and can become an authenticated MCPTT User. A shareable MCPTT UE can serve only one MCPTT User at a time. An MCPTT User who signs into a shareable MCPTT UE that is already in-use causes the sign-off of the previous MCPTT User.
+An MCPTT User can simultaneously have several active MCPTT UEs, which, from an MCPTT Service point of view, are addressable individually and/or collectively within the context of their association to the MCPTT User.
+The conceptual model for a gateway UE is that of a UE capable of providing service to an MCPTT User employing a non-3GPP device. A gateway UE is usable simultaneously by multiple MCPTT Users. Unlike a shareable MCPTT UE, if a new person enters his valid credentials towards signing in the MCPTT Service, his successful signing in and becoming an MCPTT User does not affect the initial MCPTT Users already served by the gateway UE.
+A gateway UE is typically installed in a vehicle (e.g., a police car, fire truck) and has wired and/or wireless connections to various devices in use by the MCPTT Users.
+A gateway UE differs functionally from a ProSe relay node. In the ProSe paradigm, the relay node and the devices served by it are all (ProSe enabled) 3GPP UEs, and are "visible" to the 3GPP system as UEs. In the gateway UE paradigm, only the gateway UE is an 3GPP device and only it is "visible" at the 3GPP network layer.
+Figure 4.5.4.1 shows schematically some of the relationships between MCPTT Users and MCPTT UEs.
+EMBED Visio.Drawing.11
+Figure 4.5.4-1: Relationships between MCPTT Users and MCPTT UEs
+4.5.5	MCPTT User association to MCPTT UE in off-network mode
+A user can enter his identifying/authenticating credentials (e.g., user name/ password, PIN, biometrics, asserted identity from a remote, trusted device). This step typically gives the MCPTT User access to local information and applications stored on the MCPTT UE, and in particular, to the MCPTT client application.
+After successful local user authentication an MCPTT User Profile, which was previously made available to the MCPTT UE, is used for off-network operation mode. This previously configured MCPTT User Profile information allows the MCPTT User to be identified using the same MCPTT User Identity as in the on-network mode.
+An MCPTT UE, without credentials of a specific MCPTT User, operates in off-network mode, if so configured by an MCPTT Administrator. The MCPTT Administrator defines specific parameters and attributes (e.g., groups, MCPTT Emergency behaviour, priority and QoS attributes) associated with a temporary MCPTT User Identity for operation of the MCPTT UE in off-network operation mode.
+4.6	Overview of MCPTT priorities
+4.6.1	MCPTT priority model
+Many non-public safety 3GPP users today subscribe to one particular priority and QoS level of service (e.g., "gold", "silver" or "bronze"), which always provides fixed differentiation. This model, effective and relatively straightforward for non-public safety users, falls short when it comes to the needs of the public safety applications.
+MCPTT Priority and QoS is situational. The MCPTT Service is intended to provide a real-time priority and QoS experience for MCPTT calls, as public safety users have significant dynamic operational conditions that determine their priority. For example, the type of incident a responder is serving or the responder's overall shift role needs to strongly influence a user's ability to obtain resources from the 3GPP system.
+Another feature of a mission critical service is transparency of interactions between the users and the system. A first responder that needs to change the QoS of his communications is not to be distracted from his mission due to complicated UE behaviours or service interactions. Instead, the service acts in an anticipatory and adaptive manner to provide the proper quality of experience to the user, automatically, or with simple and minimal interaction.
+The mission critical service is also expected to provide the ability to interface with public safety systems (e.g., Computer Aided Dispatch) in order to determine the user's state (e.g., incident severity), environment and conditions and to affect the most appropriate priority and QoS experience for the user.
+The MCPTT Priority handling for on-network use for MCPTT Calls is conceptually modelled as shown in figure 4.6.1.1. The conceptual model identifies three areas of prioritization: prioritization between and within calls, inter-system prioritization, and prioritization at the transport layer (3GPP system and UE). At the Application Layer a generic, network side, functional entity, "MCPTT Priority and QoS Control", processes with each request static, preconfigured information about users and groups participating in MCPTT, as well as dynamic (or situational) information about them. Based on the results of this processing, the "MCPTT Priority and QoS Control" provides information to and directs interactions with other functional entities, systems, or layers to ensure, to the extent possible, that from a quality of experience point of view, calls and transmissions are handled properly in accordance to established policy rules.
+EMBED Visio.Drawing.11
+Error! Objects cannot be created from editing field codes.
+Figure 4.6.1-1: A conceptual on-network MCPTT priority model
+The User Static Attributes include information categorizing the user, possibly by several criteria (e.g., first responder, second responder, supervisor, dispatcher, administrator), as well as jurisdictional boundaries and possibly a preconfigured system-wide individual priority level.
+The Group Static Attributes include information about the nature/type of the group and the owning organization(s), the jurisdictional boundaries for transmitters and receivers within the group, the normal hours of operation for the group, pre-emption dispositions relative to other groups, and the default minimum priority of the group, i.e., the minimum priority characteristics that are provided to all the Participants in a group call associated with this group, regardless of their individual priority characteristics.
+The User Dynamic Attributes include the user/Participant's operational status (e.g., on/off duty), his location, the type of incident (e.g., MCPTT Emergency or Imminent Peril) he might be involved in and whether or not he initiated it, whether or not he is individually involved in a formally managed incident and if yes, the boundaries of the incident area, the incident severity and his assigned role in the resolution of the incident.
+The Group Dynamic Attributes include the type of incident (e.g., MCPTT Emergency or Imminent Peril), if any, the group is currently handling and in case of involvement in a formally managed incident the boundaries of the incident area and the incident severity.
+4.6.2	Generic processing of priority information
+This functionality applies to MCPTT Call initiations and transmissions for the management of potentially contended resources (e.g., GBR bearers) and also for Floor control during an MCPTT Group Call.
+Each request for exclusive access to resource(s) or for preferential treatment over a contending request arrives accompanied by priority information. This information stays associated with the companion request, whether the request is granted or is queued. The priority information is used for comparison between requests and facilitates the adding and removing of requests from queues and/or authorized interruption of service associated with a previously granted request, if still active. For each request, whether initially queued or not, the requesting party is informed (directly or indirectly) when his request is granted or denied. Other users/Participants are also notified of the disposition of a request and the notification includes the identity of the requestor, as needed. In addition, each requestor can be notified of the position of his request in the queue and he is allowed to cancel his requests while queued.
+4.6.3	Handling of MCPTT priority information for Floor control
+Floor control is applied in the context of a single MCPTT Call and is triggered by a Participant request for the permission to transmit. Priority information accompanies each grant request.
+4.6.4	Handling of MCPTT priority information for interactions at the transport layer
+At the Transport Layer, the MCPTT Service uses3GPP controls to adapt the overall behaviour of the MCPTT System to the needs for resources and/or preferential treatment over other contenders, based on the priority information accompanying the request.
+The following four controls are available, to be used as necessary, based on the phase of the MCPTT call:
+3GPP system Access Controls;
+UE Access Controls;
+3GPP system Admission Controls; and
+3GPP system Scheduling Controls.
+3GPP system Access Controls and UE Access Controls are used to allow preferential treatment of public safety UEs in situations of access congestion. The controls use priority and QoS mechanisms (e.g., using mechanisms like Access Class Barring, Service Specific Access Control, Access Control for Circuit Switched Fallback, Extended Access Barring).
+Admission Controls are used for the establishment and maintenance of the priority levels and of the pre-emption vulnerability and capability of bearers associated with transmissions and calls. At the start of an MCPTT call, the MCPTT Service requires bearers with proper ARP and pre-emption characteristics are in place prior to the call proceeding.
+Scheduling Controls (e.g., QCI and bandwidth for the bearers) are used for assuring the appropriate QoS necessary for meeting the Participants' expectation in the perceived quality of the delivered information, primarily in terms of when the service starts and the real-time characteristics of the delivered traffic (e.g., perceived delay, choppiness, clarity).
+4.6.5	Handling of MCPTT priority information for interactions with non-3GPP PTT systems
+An MCPTT call can be mixed, with some Participants served by one network/system and other Participants served by a different network(s)/system(s). In general the systems can be quite different. For example, some Participants use MCPTT/LTE, while others could use a P25-based system.
+4.6.6	MCPTT priority for Private Call
+The MCPTT Service uses User Static Attributes of the Participants, potentially adjusted based on User Dynamic Attributes, if applicable. By default, the priority of an MCPTT Private Call is the same as the priority of the originator of the call. Similar to group calls there are MCPTT Emergency Private Calls (with Floor control), which also have a similarly high priority. These are used where there is immediate danger to the user and are typically used to communicate with a dispatcher.
+4.7	Overview of MCPTT identifiers
+The main identifiable entities in use by the MCPTT Service are Mission Critical Organizations, MCPTT Groups, MCPTT Users, and MCPTT Administrators. The UEs are identified at the transport or network layer, but in some situations they might also be identified by the MCPTT Service. Each identifiable entity is distinct from all others and has an identifier (ID) associated to it, unique within a proximate identity domain. Those domains correspond to identifiable entities and can be nested within other domains in a multi-level hierarchical fashion. For example an MCPTT User might have an identifier unique within the domain corresponding to a Mission Critical Organization. The top-down concatenation of identifiers can generate unique identifiers within larger contexts, eventually leading to the identifiers being globally unique.
+Each identifier can be associated with one or more aliases, which can be used for displaying and selection purposes. Some aliases are shortened equivalents of the identifier used for efficient signalling and are not intended for human interactions. At a minimum, each entity has one alias (default) which is the alphanumeric representation of its identifier. Most entities have a main alias, which is the entity's name. Some aliases can be pictures, icons or other graphic representations. It is up to the implementation to decide if aliases have to be unique and if so, within which domain. Finally, some aliases are public, can be created/deleted only by authorized persons and are available to the MCPTT Service, while other aliases are private, can be created/deleted by their owners and might be residing only on certain UEs or be part of some private address books.
+It is possible in principle for User IDs, Group IDs, as well as for aliases, to be defined system wide with certain values, but have different values for each application: e.g., the system wide User ID might be different from the MCPTT User ID and different from the video User ID for the same user. However, this type of separation might not be beneficial, and in practice only one identifier is likely to be used.
+For simplicity, the term "User ID" is employed to identify an MCPTT User, without distinction of whether it is an identifier or an alias.
+5	MCPTT Service requirements common for on the network and off the network
+5.1	General group call requirements
+5.1.1	General aspects
+[R-5.1.1-001] Void
+[R-5.1.1-002] Void
+[R-5.1.1-003] Void
+[R-5.1.1-004] Void
+[R-5.1.1-005] Void
+5.1.2	Group/status information
+[R-5.1.2-001] Void
+[R-5.1.2-002] Void
+5.1.3	Group configuration
+[R-5.1.3-001] Void
+[R-5.1.3-002] Void
+5.1.4	Identification
+[R-5.1.4-001] Void
+5.1.5	Membership/affiliation
+[R-5.1.5-001] Void
+[R-5.1.5-002] Void
+[R-5.1.5-003] Void
+[R-5.1.5-004] Void
+[R-5.1.5-005] Void
+[R-5.1.5-006] Void
+[R-5.1.5-007] Void
+[R-5.1.5-008] Void
+5.1.6	Group Call administration
+[R-5.1.6-001] Void
+5.1.7	Prioritization
+[R-5.1.7-001] Void
+[R-5.1.7-002] Void
+5.1.8	Charging requirements for MCPTT
+[R-5.1.8-001] Void
+[R-5.1.8-002] Void
+[R-5.1.8-003] Void
+[R-5.1.8-004] Void
+[R-5.1.8-005] Void
+[R-5.1.8-006] Void
+[R-5.1.8-007] Void
+[R-5.1.8-008] Void
+[R-5.1.8-009] Void
+[R-5.1.8-010] Void
+[R-5.1.8-011] Void
+5.2	Broadcast Group
+5.2.1	General Broadcast Group Call
+[R-5.2.1-001] Void
+[R-5.2.1-002] Void
+5.2.2	Group-Broadcast Group (e.g., announcement group)
+[R-5.2.2-001] Void
+[R-5.2.2-002] Void
+[R-5.2.2-003] Void
+[R-5.2.2-004] Void
+5.2.3	User-Broadcast Group (e.g., System Call)
+[R-5.2.3-001] Void
+[R-5.2.3-002] Void
+5.3	Late call entry
+[R-5.3-001] Void
+[R-5.3-002] Void
+[R-5.3-003] Void
+[R-5.3-004] Void
+[R-5.3-005] Void
+5.4	Dynamic group management (i.e., dynamic regrouping)
+NOTE:	No common on-network and off-network dynamic group management requirements have been identified.
+5.5	Receiving from multiple MCPTT calls
+5.5.1	Overview
+MCPTT Users receive call traffic of their affiliated MCPTT Groups. This multiple receiving, called monitoring by some organizations, provides MCPTT Users current information about police, fire or critical medical events that are occurring within their jurisdictions. This is useful for dispatchers or those that might not be the primary support for that event at that moment. The information gained by monitoring might be useful for the dispatcher to determine any actions to take or be useful later if the MCPTT User is deployed to provide additional support for that event. The MCPTT User might be assigned to support the activities of more than one MCPTT Group on the same shift. This means that the MCPTT User receives multiple MCPTT Groups.
+An MCPTT User with limited speaker resources (e.g., a handheld UE) might find that playing out concurrent received audio from multiple active MCPTT Groups becomes confusing and could also cause undesired voice distortion for the receiving user. During periods of time when the MCPTT User is receiving audio from multiple MCPTT Groups, which MCPTT Group's audio is presented to the MCPTT User is determined by the MCPTT User's choice, the priority associated with the talker of the Selected MCPTT Group(s), other considerations or combinations of these. The MCPTT UE is aware of all the active groups to which the MCPTT User has affiliated or selected and the identity of the other active receiving groups is available for display on the MCPTT UE. When the receive activity from the Selected MCPTT Group stops, the MCPTT UE might present the audio from the next group per the MCPTT User's choice or by other means.
+If none of the multiple groups to which the MCPTT User has affiliated or selected is active, the MCPTT UE would continue to monitor for activity by any of the multiple affiliated or Selected MCPTT Groups. Monitoring for activity of multiple MCPTT Groups is also known as scanning and the list of the multiple groups is also known as a scan list.
+5.5.2	Requirements
+[R-5.5.2-001] Void
+[R-5.5.2-002] Void
+[R-5.5.2-003] Void
+[R-5.5.2-004] Void
+[R-5.5.2-005] Void
+[R-5.5.2-006] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to limit the total number (N5) of MCPTT Group transmissions that an MCPTT UE simultaneously receives in one MCPTT Group call in case of override.
+[R-5.5.2-007] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to limit the total number (N10) of MCPTT Private Calls (with Floor control) in which an MCPTT UE simultaneously participates.
+[R-5.5.2-008] Void
+[R-5.5.2-009] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to limit the total number (N7) of MCPTT Group transmissions that an MCPTT User simultaneously receives in one MCPTT Group call in case of override.
+[R-5.5.2-010] Void
+[R-5.5.2-011] Void
+[R-5.5.2-012] Void
+[R-5.5.2-013] Void
+5.6	Private Call
+5.6.1	Private Call overview
+Private Calls allow two MCPTT Users to communicate directly with each other without the use of MCPTT Groups. They leverage many of the functions and features of MCPTT Group Calls, such as MCPTT User identity and alias information, location information, encryption, privacy, priority, and administrative control. Private Calls can use Floor control or not (i.e., be full voice duplex calls between users), though Private Calls without Floor control are only supported on the network.
+Two commencement modes of Private Calls are supported: Manual Commencement Private Call and Automatic Commencement Private Call. The two commencement modes can be used in conjunction with Private Calls with/without Floor control.
+Manual Commencement Private Calls mimic a telephone conversation where the called party receives a notification that they are being requested to join a Private Call, and the called party may accept, reject, or ignore the call request. Once the call setup is accepted, the Private Call is established and both Participants may communicate with each other.
+Automatic Commencement Private Calls mimic the immediate setup and voice propagation of Group Call operation between two users where the calling party initiates an Automatic Commencement Private Call to another user and sends audio without any additional call setup delay beyond Group Calls. If available and able to accept the Private Call from the calling party, the called party immediately joins the Private Call and processes the calling party's audio.
+5.6.2	Private Call (with Floor control) general requirements
+NOTE:	The requirements in this subclause should mirror requirements in 6.7.1 for Private Call (without Floor control).
+[R-5.6.2-001] The MCPTT Service shall provide the status (e.g., ringing, accepted, rejected, active) of an MCPTT Private Call (with Floor control) to the relevant MCPTT User that is a Participant of the MCPTT Private Call (with Floor control).
+[R-5.6.2-002] The MCPTT Service shall support Private Calls with Floor control.
+[R-5.6.2-003] The MCPTT Service shall provide a mechanism for an authorized MCPTT User that is a called party in an MCPTT Private Call (with Floor control), to restrict providing the reason why an MCPTT Private Call (with Floor control) setup has failed to the calling MCPTT User.
+[R-5.6.2-004] The MCPTT Service shall provide a mechanism for the Private Call (with Floor control) to be set up with the MCPTT UE designated by the called MCPTT User to be used for Private Calls (with Floor control) when the called MCPTT User has signed on to the MCPTT Service with multiple MCPTT UEs.
+[R-5.6.2-005] Void
+5.6.3	Private Call (with Floor control) commencement requirements
+NOTE 1:	The requirements in this subclause should mirror the requirements in 6.7.4 for Private Call (without Floor control).
+[R-5.6.3-001] The MCPTT Service shall support Call Commencement Modes for Private Calls (with Floor control), which determine the conditions under which Private Calls (with Floor control) are set up.
+[R-5.6.3-002] Void
+[R-5.6.3-003] The MCPTT Service shall provide a mechanism for an MCPTT User to cancel an MCPTT Private Call (with Floor control) prior to the call setup.
+[R-5.6.3-004] The MCPTT Service shall provide a means by which an authorized MCPTT User initiates an MCPTT Private Call (with Floor control).
+[R-5.6.3-005] The MCPTT Service shall provide a means by which an MCPTT UE initiates an MCPTT Private Call (with Floor control) to any MCPTT User for which the MCPTT UE's current MCPTT User is authorized.
+NOTE 2:	For off-network use, only an MCPTT UE within communication range (possibly via a ProSe UE-to-UE Relay) receives the transmission.
+[R-5.6.3-006] The MCPTT Service shall provide a means by which an MCPTT User initiates a Manual Commencement Private Call (with Floor control) to any MCPTT User for which the MCPTT User is authorized.
+[R-5.6.3-007] The MCPTT Service shall require that the called MCPTT User accepts a Manual Commencement Private Call (with Floor control) setup request before the call proceeds.
+[R-5.6.3-008] The MCPTT Service shall provide a means for an MCPTT User to accept a Manual Commencement Private Call (with Floor control) request from another MCPTT User.
+[R-5.6.3-009] The MCPTT Service shall provide a means by which an MCPTT User initiates an Automatic Commencement Private Call (with Floor control) to any MCPTT User for which the MCPTT User is authorized.
+[R-5.6.3-010] The MCPTT UE shall support automatic commencement mode and manual commencement mode for Private Calls (with Floor control).
+[R-5.6.3-011] The MCPTT Service shall provide a manual commencement mode countermand by which an authorized MCPTT User may request that the invited MCPTT UE answer automatically.
+[R-5.6.3-012] The MCPTT Service shall provide a means by which the calling authorized MCPTT User is notified the called MCPTT User received the Private Call (with Floor control) request.
+[R-5.6.3-013] The MCPTT Service shall require that the called MCPTT UE acknowledge receipt of an Automatic Commencement Private Call (with Floor control) setup request before the audio transmission proceeds.
+[R-5.6.3-014] The MCPTT Service shall provide a mechanism for an authorized MCPTT User to transfer an ongoing MCPTT Private Call (with Floor control) to another MCPTT user.
+[R-5.6.3-015] The MCPTT Service shall provide a mechanism for an authorized MCPTT User to configure forwarding of incoming MCPTT Private Calls (with Floor control) to another MCPTT user in the following situations:
+-	If the MCPTT User is not reachable
+-	If the incoming private call is a call with manual commencement mode and the MCPTT User does not answer within a configured period
+-	Based on manual input of the MCPTT User
+5.6.4	Private Call (with Floor control) termination
+NOTE 1:	The requirements in this subclause should mirror the requirements in 6.7.5 for Private Call (without Floor control).
+[R-5.6.4-001] The MCPTT Service shall provide a mechanism for an MCPTT User to reject an MCPTT Private Call (with Floor control).
+[R-5.6.4-002] The MCPTT Service shall provide a means by which an authorized MCPTT User ignores a Manual Commencement Private Call (with Floor control) request from another MCPTT User.
+NOTE 2:	Ignoring a Manual Commencement Private Call (with Floor control) results in no indication of the reason for call failure being sent to the calling MCPTT User.
+[R-5.6.4-003] The MCPTT Service shall provide a means by which an MCPTT User ends a Private Call (with Floor control) in which the MCPTT User is a Participant.
+5.6.5	Private Call (with Floor control) administration
+NOTE:	The requirements in this subclause should mirror requirements in 6.7.2 for Private Call (without Floor control), except [R-5.6.5-005] which is specific to Private Call with Floor control.
+[R-5.6.5-001] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to configure which MCPTT Users, within their authority, are authorized to place a Manual Commencement Private Call (with Floor control).
+[R-5.6.5-002] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to configure which MCPTT Users, within their authority, are authorized to place an Automatic Commencement Private Call (with Floor control).
+[R-5.6.5-003] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to configure for a particular authorized MCPTT User, a set of MCPTT Users under the same authority to which an MCPTT Private Call (with Floor control) can be made.
+[R-5.6.5004] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to configure the maximum duration for MCPTT Private Calls (with Floor control) for MCPTT Users within their authority.
+[R-5.6.5-005] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to configure a timeout value in which an MCPTT Private Call (with Floor control) without a transmitting or receiving MCPTT User ends, for MCPTT Users within their authority.
+[R-5.6.5-006] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to configure whether an MCPTT User, within their authority, that is a called party in an MCPTT Private Call (with Floor control), may restrict providing the reason why an MCPTT Private Call (with Floor control) setup has failed to the calling MCPTT User.
+5.7	MCPTT priority requirements
+5.7.1	Overview
+MCPTT Emergency Group Call and MCPTT Imminent Peril group call are MCPTT Group Calls that provide the MCPTT User elevated priority towards obtaining resources of the MCPTT system. The MCPTT Emergency Private Call similarly provides elevated priority to resources of the MCPTT system. The MCPTT Emergency Alert provides a notification of an MCPTT Emergency situation from an MCPTT UE, regardless if the user is signed in with the MCPTT Service or not.
+The MCPTT Emergency Alert is initiated from an MCPTT UE to inform the MCPTT Service of the user's immediate need of assistance due to the user's personal, life-threatening situation. If the user is not properly authenticated, he is treated as a temporary MCPTT User with limited permissions. The user initiates this notification by actuating a user interface on the MCPTT UE. The notification to the MCPTT Service includes the MCPTT User's ID, potentially an MCPTT Group ID, the user's Mission Critical Organization name and the most current location available for the user's MCPTT UE.
+The user profile/group configuration determines which MCPTT Group ID is used, if any. If the user profile indicates that a dedicated (i.e., not used for everyday traffic) MCPTT Emergency Group is to be used, then the MCPTT Emergency call traffic moves to a different group. MCPTT Users that support MCPTT Emergency situations are required to monitor the dedicated MCPTT Emergency Group(s) for call activity. If the user profile indicates that the selected (i.e., currently active) MCPTT Group is to be used, then its Group ID is used, unless no group is selected.
+After the MCPTT User has initiated an MCPTT Emergency Alert, MCPTT Emergency Private Call or MCPTT Emergency Group Call, the MCPTT User is considered to be in the MCPTT Emergency State. The user remains in the MCPTT Emergency State until the MCPTT User cancels the MCPTT Emergency State.
+An MCPTT Group Call started by an MCPTT User while in the MCPTT Emergency State or previously started but followed by an MCPTT Emergency Alert becomes an MCPTT Emergency Group Call. The MCPTT Group ID used for the MCPTT Emergency Group Call is the same MCPTT Group ID included in the MCPTT Emergency Alert. An MCPTT User or dispatcher might initiate an MCPTT Emergency Group Call without an MCPTT Emergency Alert. The start of an MCPTT Emergency Group Call starts an In-progress Emergency condition for the MCPTT Group. Any subsequent MCPTT Group Call made by any MCPTT Group Member of an MCPTT Group which has an In-progress Emergency is treated as an MCPTT Emergency Group Call. MCPTT Emergency Group priority is removed when the In-progress Emergency for the group is cancelled.
+An MCPTT Private Call started by an MCPTT User while in the MCPTT Emergency State becomes an MCPTT Emergency Private Call.
+MCPTT Imminent Peril group call is differentiated from MCPTT Emergency Group Call based on for whom the assistance is required. The MCPTT Emergency Group Call is initiated by an MCPTT User for assistance for the MCPTT Emergency condition involving that user. The MCPTT Imminent Peril group call is initiated by an MCPTT User for assistance to other MCPTT Users or persons of the general public observed to be in trouble and may soon need assistance.
+There is no MCPTT Imminent Peril Alert and no MCPTT Imminent Peril State for MCPTT Users. The granting of an MCPTT Imminent Peril group call starts an In-progress Imminent Peril condition for the MCPTT Group. Any subsequent MCPTT Group Call made by any MCPTT Group Member of an MCPTT Group which has an In-progress Imminent Peril condition is treated as an MCPTT Imminent Peril group call. MCPTT Imminent Peril Group priority is removed when the In-progress Imminent Peril for the group is cancelled.
+5.7.2	Call types based on priorities
+5.7.2.1	MCPTT Emergency Group Call
+5.7.2.1.1	MCPTT Emergency Group Call requirements
+[R-5.7.2.1.1-001] Void
+[R-5.7.2.1.1-002] Void
+[R-5.7.2.1.1-003] Void
+[R-5.7.2.1.1-004] Void
+[R-5.7.2.1.1-005] Void
+[R-5.7.2.1.1-006] Void
+[R-5.7.2.1.1-007] Void
+[R-5.7.2.1.1-008] Void
+[R-5.7.2.1.1-009] Void
+[R-5.7.2.1.1-010] Void
+[R-5.7.2.1.1-011] Void
+[R-5.7.2.1.1-012] Void
+[R-5.7.2.1.1-013] Void
+[R-5.7.2.1.1-014] Void
+5.7.2.1.2		MCPTT Emergency Group Call cancellation requirements
+[R-5.7.2.1.2-001] Void
+[R-5.7.2.1.2-002] Void
+[R-5.7.2.1.2-003] Void
+[R-5.7.2.1.2-004] Void
+[R-5.7.2.1.2-005] Void
+5.7.2.2	Imminent Peril group call
+5.7.2.2.1	Imminent Peril group call requirements
+[R-5.7.2.2.1-001] Void
+[R-5.7.2.2.1-002] Void
+[R-5.7.2.2.1-003] Void
+[R-5.7.2.2.1-004] Void
+[R-5.7.2.2.1-005] Void
+[R-5.7.2.2.1-006] Void
+[R-5.7.2.2.1-007] Void
+[R-5.7.2.2.1-008] Void
+[R-5.7.2.2.1-009] Void
+5.7.2.2.2	Imminent Peril group call cancellation requirements
+[R-5.7.2.2.2-001] Void
+[R-5.7.2.2.2-002] Void
+[R-5.7.2.2.2-003] Void
+[R-5.7.2.2.2-004] Void
+5.7.2.3	MCPTT Emergency Private Call (with Floor control)
+5.7.2.3.1	MCPTT Emergency Private Call (with Floor control) requirements
+[R-5.7.2.3.1-001] The MCPTT Service shall support MCPTT Emergency Private Calls (with Floor control) from authorized MCPTT Users.
+NOTE:	This functionality out of network relies on the MCPTT User being called being within ProSe Communication range. For this reason this functionality is more likely to be used on the network.
+[R-5.7.2.3.1-002] When an MCPTT User initiates an MCPTT Emergency Private Call (with Floor control) this may trigger an MCPTT Emergency Alert for that MCPTT User.
+[R-5.7.2.3.1-003] When an MCPTT User initiates an MCPTT Emergency Private Call (with Floor control) this shall put that MCPTT User into an MCPTT Emergency State.
+5.7.2.3.2	MCPTT Emergency Private Call (with Floor control) cancellation requirements
+[R-5.7.2.3.2-001] The MCPTT Service shall support cancellation of the MCPTT Emergency priority of an MCPTT Emergency Private Call (with Floor control) by an authorized MCPTT User.
+[R-5.7.2.3.2-002] The MCPTT Service shall support cancellation of the MCPTT Emergency priority of an MCPTT Emergency Private Call (with Floor control) when criteria established by the MCPTT Administrator are met (e.g., timeout).
+[R-5.7.2.3.2-003] The MCPTT Service shall support an MCPTT User cancelling their own MCPTT Emergency State.
+5.7.2.4	MCPTT Emergency Alert
+5.7.2.4.1	MCPTT Emergency Alert requirements
+[R-5.7.2.4.1-001] Void
+[R-5.7.2.4.1-002] Void
+[R-5.7.2.4.1-003] Void
+[R-5.7.2.4.1-004] Void
+[R-5.7.2.4.1-005] Void
+[R-5.7.2.4.1-006] Void
+[R-5.7.2.4.1-007] Void
+[R-5.7.2.4.1-008] Void
+[R-5.7.2.4.1-009] Void
+[R-5.7.2.4.1-010] Void
+[R-5.7.2.4.1-011] Void
+[R-5.7.2.4.1-012] Void
+5.7.2.4.2	MCPTT Emergency Alert cancellation requirements
+[R-5.7.2.4.2-001] Void
+[R-5.7.2.4.2-002] Void
+[R-5.7.2.4.2-003] Void
+5.8	User ID
+[R-5.8-001] Void
+[R-5.8-002] Void
+[R-5.8-003] Void
+5.9	MCPTT UE management
+[R-5.9-001] Void
+[R-5.9-002] Void
+5.10	MCPTT User Profile
+[R-5.10-001] Void
+[R-5.10-002] Void
+5.11	Support for multiple devices
+[R-5.11-001] Void
+[R-5.11-002] Void
+5.12	Location
+[R-5.12-001] Void
+[R-5.12-002] Void
+[R-5.12-003] Void
+[R-5.12-004] Void
+[R-5.12-005] Void
+[R-5.12-006] Void
+[R-5.12-007] Void
+[R-5.12-008] Void
+[R-5.12-009] Void
+[R-5.12-010] Void
+[R-5.12-011] The MCPTT Service shall provide a means for an MCPTT UE to send a Location information update whenever the MCPTT User initiates an MCPTT Imminent Peril Call.
+[R-5.12-012] Void
+[R-5.12-013] Void
+[R-5.12-014] Void
+[R-5.12-015] Void
+5.13	Security
+[R-5.13-001] Void
+[R-5.13-002] Void
+[R-5.13-003] Void
+[R-5.13-004] Void
+[R-5.13-005] Void
+[R-5.13-006] Void
+[R-5.13-007] Void
+[R-5.13-008] Void
+[R-5.13-009] Void
+[R-5.13-010] Void
+[R-5.13-011] Void
+[R-5.13-012] Void
+[R-5.13-013] Void
+5.14	Audio / voice quality
+[R-5.14-001] Void
+[R-5.14-002] MOS-LQO shall achieve the noise reduction performance of TIA-102.BABG [10] Table 3-1.
+[R-5.14-003] MOS-LQO shall achieve a noise reduction performance for the 3GPP Adaptive Multi-Rate Wide Band codec (AMR-WB TS
+[11] and TS
+[12] that is equal to or greater than that specified for the P25 full rate and half rate voice codecs in TIA-102. BABG [10].
+5.15	Interactions between MCPTT Group calls and MCPTT Private Calls (with Floor control)
+[R-5.15-001] The MCPTT Service shall allow an MCPTT UE to be transmitting in one MCPTT Group Call while simultaneously receiving transmissions from one or more MCPTT Private Calls (with Floor control).
+[R-5.15-002] The MCPTT Service shall allow an MCPTT UE to be receiving or transmitting in one MCPTT Private Call (with Floor control) while simultaneously receiving transmissions from one or more MCPTT Group Calls.
+[R-5.15-003] The MCPTT Service shall allow an MCPTT UE to be receiving one or more MCPTT Group Calls while simultaneously receiving transmissions from one or more MCPTT Private Calls (with Floor control).
+5.16	Relay requirements
+[R-5.16-001] Void
+[R-5.16-002] Void
+[R-5.16-003] Void
+5.17	Gateway requirements
+[R-5.17-001] Void
+5.18	Control and management by Mission Critical Organizations
+5.18.1	Overview
+Subclause 5.18 contains general requirements for management of the MCPTT Service by Mission Critical Organizations sharing the same MCPTT system, and more specific requirements pertaining to management controls and operational visibility, and to management of security services.
+5.18.2	General requirements
+[R-5.18.2-001] Void
+[R-5.18.2-002] Void
+[R-5.18.2-003] Void
+[R-5.18.2-004] Void
+[R-5.18.2-005] Void
+5.18.3	Operational visibility for Mission Critical Organizations
+[R-5.18.3-001] Void
+5.19	General Administrative
+groups and users
+[R-5.19-001] Void
+[R-5.19-002] Void
+[R-5.19-003] Void
+[R-5.19-004] Void
+[R-5.19-005] Void
+[R-5.19-006] Void
+[R-5.19-007] Void
+[R-5.19-008] Void
+6	MCPTT Service requirements specific to on-network use
+6.1	General administrative
+groups and users
+[R-6.1-001] Void
+[R-6.1-002] Void
+[R-6.1-003] Void
+[R-6.1-004] Void
+[R-6.1-005] Void
+[R-6.1-006] Void
+[R-6.1-007] Void
+6.2	MCPTT calls
+6.2.1	Commencement modes for MCPTT Group calls
+[R-6.2.1-001] The MCPTT Service shall be capable of allowing an MCPTT Group call setup request to proceed without prior acknowledgement by any MCPTT User of that MCPTT Group.
+[R-6.2.1-001a] The MCPTT Service shall be capable of allowing an MCPTT Group Call setup request to proceed only if a minimum number of MCPTT Group Members are currently affiliated.
+[R-6.2.1-001b] The MCPTT Service shall be capable of allowing an MCPTT Group Call setup request to proceed only if specific MCPTT Group Member(s) are currently affiliated.
+[R-6.2.1-002] An MCPTT User currently affiliated to an MCPTT Group shall acknowledge receipt of an MCPTT Group call setup request, if requested to do so by the MCPTT Service.
+[R-6.2.1-003] The MCPTT User's acknowledgement may require direct interaction of the MCPTT UE with the human user, or may be automatically executed by the MCPTT UE, in accordance with policy established by an MCPTT Administrator.
+[R-6.2.1-004] The MCPTT Service shall be capable of requiring that a minimum number of Affiliated MCPTT Group Members acknowledges receipt of the MCPTT Group call setup request before the audio transmission proceeds.
+[R-6.2.1-005] The MCPTT Service shall be capable of requiring that specific MCPTT Users acknowledge receipt of the MCPTT Group call setup request before the audio transmission proceeds, regardless of the affiliation state of those users.
+NOTE 1:	In this case the MCPTT Service affiliates the specific MCPTT Users who are not currently affiliated to the target MCPTT Group and then returns them to their previous affiliation state when the transmission ends.
+[R-6.2.1-006] The MCPTT Service shall be capable of requiring that all MCPTT Users that are both affiliated to the MCPTT Group and in a given geographical area acknowledge receipt of an MCPTT Group call setup request before the audio transmission proceeds.
+[R-6.2.1-007] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to determine the subset of Affiliated MCPTT Group Members that shall acknowledge receipt of the MCPTT Group call setup request before the audio transmission proceeds.
+NOTE 2:	In the following requirements, the term, "MCPTT Group Call setup request requires acknowledgement" is used when one or more of the acknowledgement conditions defined above (i.e., [R-6.2.1-004], [R-6.2.1-005], [R-6.2.1-006], and/or [R-6.2.1-007]) applies.
+[R-6.2.1-008] If an MCPTT Group Call setup request requires acknowledgement from Affiliated MCPTT Group Members, and the required MCPTT Group Members do not acknowledge the call setup within a configured time (the "acknowledged call setup timeout"), the MCPTT Service may proceed with the call and then may notify the initiating MCPTT User that the acknowledgements did not include all required members.
+[R-6.2.1-009] If an MCPTT Group Call setup request requires acknowledgement from Affiliated MCPTT Group Members, and the required MCPTT Group Members do not acknowledge the call setup within a configured time, the MCPTT Service may abandon the call and then may notify the initiating MCPTT User that the acknowledgements did not include all required members.
+[R-6.2.1-010] If an MCPTT Group Call setup request requires acknowledgement from Affiliated MCPTT Group Members, the initiating MCPTT User shall at any time have the option of allowing the call to proceed regardless of the state of the acknowledgements (i.e., to "convert" the call to an unacknowledged call).
+[R-6.2.1-010a] If an MCPTT Group Call setup request requires acknowledgement from Affiliated MCPTT Group Members, and the required MCPTT Group Members did not acknowledge the call setup within a configured time, the MCPPT Service shall be able to provide the list of MCPTT Group Members who did not acknowledge the call to the initiating MCPTT User.
+[R-6.2.1-011] If an MCPTT Group Call setup request requires acknowledgement from Affiliated MCPTT Group Members, the acknowledged call setup timeout shall be established by an MCPTT Administrator.
+[R-6.2.1-012] If an MCPTT Group Call setup request requires acknowledgement from Affiliated MCPTT Group Members, the behaviour in response to the expiration of the acknowledged call setup timeout shall be established by an MCPTT Administrator.
+[R-6.2.1-013] If an MCPTT Group Call setup request requires acknowledgement from Affiliated MCPTT Group Members, the MCPTT Service shall support an indefinite (i.e., infinite) call setup timeout.
+[R-6.2.1-014] If the MCPTT Service has knowledge that some affiliated members of a group can not be Participants in an unacknowledged MCPTT Group Call, the MCPTT Service shall provide an indication to the requester that the call is proceeding without all affiliated members, and shall provide the list of the missing members based on policy established by the MCPTT Administrator.
+[R-6.2.1-015] If MCPTT User(s) are excluded from an MCPTT call as there is insufficient capacity to support their participation the MCPTT Service shall ensure that the MCPTT User(s) receive a notification that they have been excluded from the call for reasons of lack of capacity.
+6.2.2	Queuing
+[R-6.2.2-001] Void
+[R-6.2.2-002] Void
+[R-6.2.2-003] Void
+[R-6.2.2-004] Void
+[R-6.2.2-005] Void
+[R-6.2.2-006] Void
+6.2.3	Floor control
+6.2.3.1	General aspects
+[R-6.2.3.1-001] The Floor control functionality in an MCPTT Service shall determine at a point in time which Participant(s) are allowed to transmit to other Participant(s).
+[R-6.2.3.1-002] Receiving Participant(s) shall receive audio from one transmitting Participant. The only exception is if an MCPTT Group is configured to allow simultaneous Transmitting MCPTT Group Members in override.
+[R-6.2.3.1-003] The MCPTT Service shall provide a mechanism for the MCPTT Administrator to configure the number (maximum of N9) of simultaneous audios received by an MCPTT User in a single MCPTT Group.
+6.2.3.2	Requesting permission to transmit
+[R-6.2.3.2-001] An authorized Participant shall be able to request to transmit to an MCPTT Group or an individual Participant.
+[R-6.2.3.2-002] At call setup the MCPTT Service shall provide a notification, for example audio and/or visual, to the MCPTT Group Member attempting to transmit that there are no other Group Members who have affiliated to the MCPTT Group.
+[R-6.2.3.2-003] The Floor control functionality shall determine the transmitting Participant(s) when there are simultaneous requests for permission to transmit within the same call.
+[R-6.2.3.2-004] Following an MCPTT Request for permission to transmit on the Selected MCPTT Group, the Affiliated MCPTT Group Member that made and was granted the request shall be given an indication of being allowed to transmit.
+[R-6.2.3.2-005] Following an MCPTT Request for permission to transmit on the Selected MCPTT Group, an Affiliated MCPTT Group Member that made and was not granted the request shall be given an indication that permission to transmit was rejected or queued.
+[R-6.2.3.2-006] The depth of the Floor control queue shall be configurable.
+[R-6.2.3.2-007] Following an MCPTT Private Call (with Floor control) request for permission to transmit, the MCPTT User that is allowed to transmit shall be given an indication that the user is allowed to transmit to the targeted MCPTT User.
+[R-6.2.3.2-008] Following an MCPTT Private Call (with Floor control) request for permission to transmit, an MCPTT User that is not allowed to transmit shall be given an indication that the permission to transmit was rejected or queued.
+[R-6.2.3.2-009] The MCPTT Service shall provide an indication to receiving Participants that the transmitting Participant is starting to transmit.
+[R-6.2.3.2-010] The MCPTT Service shall provide a mechanism for an MCPTT Participant to remove its MCPTT Request from the Floor control queue.
+[R-6.2.3.2-011] The MCPTT Service shall provide a mechanism for removal (i.e., request accepted, request denied, or expiration of a timer) of an MCPTT Request from the Floor control queue.
+[R-6.2.3.2-012] The MCPTT Service shall provide a mechanism for the MCPTT Administrator to configure the parameter(s) of the Floor control queue for an MCPTT Group (i.e., timer).
+6.2.3.3	Override
+6.2.3.3.1	General aspects
+[R-6.2.3.3.1-001] The MCPTT Service shall enable MCPTT Administrators to create a priority hierarchy for determining what Participants, Participant types, and urgent transmission types shall be granted a request to override an active MCPTT transmission.
+[R-6.2.3.3.1-002] The MCPTT Service shall enable an MCPTT Administrator to configure which MCPTT Group transmission a Participant(s) receives, overriding and/or overridden for cases where an authorized Participant overrides an MCPTT transmission.
+[R-6.2.3.3.1-003] The MCPTT Service shall enable the MCPTT Administrator to configure the MCPTT Group to allow only the overriding Participant to transmit or to allow both the overriding and overridden Participant to transmit.
+[R-6.2.3.3.1-004] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to configure MCPTT Private Calls (with Floor control) to allow only the overriding Participant to transmit or to allow both the overriding and overridden Participant to transmit.
+[R-6.2.3.3.1-005] The priority hierarchy used for granting a request to override an active MCPTT transmission shall contain at least four (4) levels.
+[R-6.2.3.3.1-006] The transmitting Participant shall be determined by the relative Floor control priorities of the Participants and Call type based on priority (e.g MCPTT Emergency).
+[R-6.2.3.3.1-007] The MCPTT Service shall provide a mechanism for Participants, to override an active MCPTT transmission of a transmitting Participant when the priority level of the overriding Participant or Call type based on priority (e.g MCPTT Emergency) are ranked higher than the priority level of the transmitting Participant or Call type based on priority.
+[R-6.2.3.3.1-008] If an authorized Participant overrides an MCPTT transmission, the MCPTT Service shall provide a means of notifying the overridden Participant(s) that the transmission has been overridden.
+6.2.3.3.2	Override
+one transmitting Participant
+[R-6.2.3.3.2-001] If the MCPTT Group has been configured to only allow the overriding transmitting Participant, the MCPTT Service shall revoke the transmit permission of the overridden transmitting Participant.
+6.2.3.3.3	Override
+simultaneously Transmitting MCPTT Group Members
+[R-6.2.3.3.3-001] If the MCPTT Group has been configured to allow both overriding and overridden transmitting Participants, authorized receiving Participants shall be enabled to listen to both the overriding and overridden Participant transmissions, dependent on configuration.
+[R-6.2.3.3.3-002] The MCPTT Service shall allow successive overrides of an MCPTT Group Call when the request to override is made by an MCPTT User having a higher Floor control priority than the currently transmitting Participants.
+[R-6.2.3.3.3-003] In the case of successive overrides, the MCPTT Service shall enable only two transmissions, one overriding transmission, from the highest priority MCPTT User, and one overridden transmission, chosen from among the two overridden Participants based upon configured rule(s). (i.e., this could be based simply on priority of user, it could be based on a policy that an overridden MCPTT Emergency transmission shall remain as the overridden transmission or a rule could be established that the MCPTT system shall not allow two dispatchers to be both the overriding and overridden transmitters.).
+6.2.3.4	Terminating permission to transmit
+[R-6.2.3.4-001] The MCPTT Service shall enable an authorized MCPTT User to terminate the permission to transmit of a transmitting Participant at any time.
+[R-6.2.3.4-002] A transmitting Participant shall be able to indicate to the MCPTT Service that the Participant no longer wants to transmit.
+NOTE:	In this case audio stops being transmitted to the receiver Participant(s) until an authorized Participant sends a subsequent request for permission to transmit.
+[R-6.2.3.4-003] The MCPTT Service shall provide an indication to receiving Participants that the transmitting Participant has finished transmitting.
+6.2.3.5	Transmit time limit
+[R-6.2.3.5-001] The MCPTT Service shall enable an MCPTT Administrator to configure the limit for the length of time that a Participant transmits from a single request to transmit.
+[R-6.2.3.5-002] The Floor control functionality shall have a configurable limit for the length of time that a Participant transmits from a single request to transmit.
+[R-6.2.3.5-003] The Floor control functionality shall provide an indication to the transmitting Participant that the Participant is within a configurable amount of time before his transmit time limit is reached.
+[R-6.2.3.5-004] The Floor control functionality shall provide an indication to the transmitting Participant that the Participant's transmit time limit has been reached.
+[R-6.2.3.5-005] The Floor control functionality shall remove the permission to transmit from the transmitting Participant when the Participant's transmit time limit has been reached.
+6.2.3.6	Audio cut-in on designated MCPTT Groups
+6.2.3.6.1	Overview
+The audio cut-in feature applies to specially designated MCPTT Groups and results in Floor control for that group allowing any participant within the MCPTT Group to interrupt any other participant. In particular the audio cut-in feature means that the last Participant to request the floor is assigned the floor immediately and there is only ever one talker on the call at a particular point in time. Audio cut-in is often used for teams escorting VIPs where timeliness is essential to allow teams to react as quickly as possible.
+Other than the difference in floor control logic, the MCPTT Groups configured to support audio cut-in behave in the same way as other MCPTT Groups with group management, affiliation, selection of a group, requesting the floor, the notifications received related to Floor control etc working in the same way.
+6.2.3.6.2		Requirements
+[R-6.2.3.6.2-001] The MCPTT Group shall be configurable to allow audio cut-in.
+1:	MCPTT Groups configured for audio cut-in behave in the same way as MCPTT Groups not configured for audio cut-in in all other respects other than the Floor control logic described in this sub-clause.
+[R-6.2.3.6.2-002] When an MCPTT Group has been configured to support audio cut-in, the Floor control functionality shall give the floor to the MCPTT Group Member that has selected that MCPTT Group and made the most recent request to transmit in that MCPTT Group.
+2:	Requests to transmit that are received simultaneously will be addressed by manufacturer implementation.
+[R-6.2.3.6.2-003] When an MCPTT Group has been configured to support audio cut-in the Floor control functionality shall restrict the number of talkers in the group to one.
+[R-6.2.3.6.2-004] When an MCPTT Group has been designated to support audio cut-in the MCPTT Group shall not support any form of floor control queuing and associated functionality.
+[R-6.2.3.6.2-005] When the current talker is interrupted by a request to transmit on an MCPTT Group supporting audio cut-in, the talk request of the interrupted talker shall end.
+3:	The interrupted talker must make a new request to transmit in order to transmit again.
+[R-6.2.3.6.2-006] Void
+[R-6.2.3.6.2-007] Void
+6.2.3.6.3	Requesting permission to transmit
+[R-6.2.3.6.3-001] An authorized Participant shall be able to request to transmit to an MCPTT Group configured to support audio cut-in.
+[R-6.2.3.6.3-002] At call setup the MCPTT Service shall provide a notification, for example audio and/or visual, to the MCPTT Group Member attempting to transmit that there are no other Group Members who have affiliated to the MCPTT Group configured to support audio cut-in.
+[R-6.2.3.6.3-003] Following an MCPTT Request for permission to transmit on the Selected MCPTT Group configured to support audio cut-in, the Affiliated MCPTT Group Member that made and was granted the request shall be given an indication of being allowed to transmit.
+[R-6.2.3.6.3-004] The MCPTT Service shall provide an indication to receiving Participants that the transmitting Participant is starting to transmit on a group configured for audio cut-in.
+6.2.3.6.4	Terminating permission to transmit
+[R-6.2.3.6.4-001] The MCPTT Service shall enable an authorized MCPTT User to terminate the permission to transmit of a transmitting Participant at any time on a group configured for audio cut-in.
+[R-6.2.3.6.4-002] A transmitting Participant shall be able to indicate to the MCPTT Service that the Participant no longer wants to transmit on a group configured for audio cut-in.
+NOTE:	In this case audio stops being transmitted to the receiver Participant(s) until an authorized Participant sends a subsequent request for permission to transmit.
+[R-6.2.3.6.4-003] The MCPTT Service shall provide an indication to receiving Participants that the transmitting Participant has finished transmitting on a group configured for audio cut-in.
+6.2.3.6.5	Transmit time limit
+[R-6.2.3.6.5-001] The MCPTT Service shall enable an MCPTT Administrator to configure the limit for the length of time that a Participant transmits from a single request to transmit on a group configured for audio cut-in.
+[R-6.2.3.6.5-002] The Floor control functionality for a group configured for audio cut-in shall have a configurable limit for the length of time that a Participant transmits from a single request to transmit.
+[R-6.2.3.6.5-003] The Floor control functionality for a group configured for audio cut-in shall provide an indication to the transmitting Participant that the Participant is within a configurable amount of time before his transmit time limit is reached.
+[R-6.2.3.6.5-004] The Floor control functionality for a group configured for audio cut-in shall provide an indication to the transmitting Participant that the Participant's transmit time limit has been reached.
+[R-6.2.3.6.5-005] The Floor control functionality for a group configured for audio cut-in shall remove the permission to transmit from the transmitting Participant when the Participant's transmit time limit has been reached.
+6.2.3.7	MCPTT Groups configured for multi-talker control
+6.2.3.7.1	Overview
+The multi-talker control applies to designated MCPTT Groups and results in allowing several Participants talking simultaneously within the MCPTT Group. For example, Multi-talker control is used by railway communication e.g. during shunting operation.
+Except for Floor control as specified in clauses 6.2.3.1, 6.2.3.2, 6.2.3.3 and 6.2.3.6 all other requirements specified in 6.2.3 floor control are applicable to all types of MCPTT Groups configured to support multi-talker control
+When an MCPTT Group is configured for multi-talker control, the requirements listed below apply.
+NOTE:	All requirements for MCPTT Groups in clause 6.2.3.7 apply to all forms of MCPTT Groups (e.g., MCPTT Ad hoc Groups).
+6.2.3.7.2	General aspects
+[R-6.2.3.7.2-001] An MCPTT Group shall be configurable to allow multi-talker control.
+[R-6.2.3.7.2-002] The MCPTT Service shall provide a mechanism for multiple MCPTT Users to talk simultaneously in an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.2-003] The MCPTT Service shall determine which Participant(s) are allowed to transmit to all other Participant(s) in an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.2-004] The MCPTT Service shall support all Participant(s) to receive audio from all other Participant(s) that are transmitting in an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.2-005] The MCPTT Service shall provide a mechanism for the MCPTT Administrator to configure the maximum number of simultaneous talkers in an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.2-006] The MCPTT Service shall allow an authorized MCPTT User to change the maximum number of simultaneous talkers at any time during a group call in an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.2-007] The MCPTT Service shall allow an authorized MCPTT User to change the priority hierarchy of simultaneous talkers at any time during a group call in an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.2-008] In case the maximum number of simultaneous talkers is reduced by an authorized MCPTT User, the permission to talk will be revoked, until the new maximum number of simultaneous talkers is met.
+NOTE:	The selection of the participants for revoking the permission to talk is left for implementation.
+6.2.3.7.3	Requesting permission to transmit
+[R-6.2.3.7.3-001] The MCPTT Service shall enable authorized Participants to request to transmit to an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.3-002] At call setup the MCPTT Service shall provide a notification, for example audio and/or visual, to the MCPTT Group Member attempting to transmit that there are no other Group Members who have affiliated to the MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.3-003] The MCPTT Service shall determine the transmitting Participant(s) when there are simultaneous requests for permission to transmit within the same call for an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.3-004] Following an MCPTT Request for permission to transmit on the Selected MCPTT Group configured for multi-talker control the MCPTT Service shall provide an Affiliated MCPTT Group Member that made and was granted the request an indication of being allowed to transmit.
+[R-6.2.3.7.3-004a] Following an MCPTT Request for permission to transmit on the Selected MCPTT Group configured for multi-talker control the MCPTT Service shall provide an Affiliated MCPTT Group Member that made and was denied the request, the reason for denial.
+[R-6.2.3.7.3-004b] Following an MCPTT Request for permission to transmit on the Selected MCPTT Group configured for multi-talker control the MCPTT Service shall provide an Affiliated MCPTT Group Member that made and was queued the request, the position in the queue.
+NOTE:	The queueing mechanism is left for implementation.
+[R-6.2.3.7.3-005] Once in the queue, the MCPTT service shall provide to an Affiliated MCPTT Group Member, the position in the queue on demand.
+6.2.3.7.4	Override
+6.2.3.7.4.1	General aspects
+[R-6.2.3.7.4.1-001] If the number of MCPTT Users requesting the permission to talk exceeds the maximum number of simultaneous talkers in an MCPTT Group configured for multi-talker control, the MCPTT Service shall apply the override mechanism.
+[R-6.2.3.7.4.1-002] The MCPTT Service shall enable MCPTT Administrators to create a priority hierarchy for determining what Participants, Participant types (e.g., dispatcher) and urgent transmission types shall be granted a request to override an active MCPTT transmission on an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.4.1-003] The priority hierarchy used for granting a request to override an active MCPTT transmission on a group configured for multi-talker control shall contain at least four (4) levels.
+[R-6.2.3.7.4.1-004] The transmitting Participant on an MCPTT Group a group configured for multi-talker control shall be determined by the relative priorities of the Participants and Call type based on priority (e.g., MCPTT Emergency).
+[R-6.2.3.7.4.1-005] Transmission requests of Participants with insufficient relative priority shall be rejected.
+[R-6.2.3.7.4.1-006] The MCPTT Service shall provide a mechanism for Participants, to override an active MCPTT transmission of a transmitting Participant when the priority level of the overriding Participant or Call type based on priority (e.g., MCPTT Emergency) are ranked higher than the priority level of the transmitting Participant or Call type based on priority for an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.4.1-007] If an authorized Participant overrides an MCPTT transmission, the MCPTT Service shall provide a means of notifying the overridden Participant(s) that the transmission has been overridden for an MCPTT Group configured for multi-talker control.
+[R-6.2.3.7.4.1-008] The MCPTT Service shall revoke the transmit permission of the overridden transmitting Participant on an MCPTT Group configured for multi-talker control.
+6.2.4	Call termination
+[R-6.2.4-001] If a Participant of an MCPTT Group call is pre-empted, the MCPTT Service shall terminate the call or continue the call with an indication to the transmitting Participant that one or more receiving Participants was pre-empted.
+[R-6.2.4-002] If MCPTT User(s) are pre-empted from an ongoing MCPTT call as there is insufficient capacity to support their ongoing participation, the MCPTT Service shall ensure that the MCPTT User(s) receive a notification that they have been removed from the call for reasons of lack of capacity.
+[R-6.2.4-003] The MCPTT Service shall terminate a call after the Hang Time expires.
+[R-6.2.4-004] Void
+[R-6.2.4-005] The MCPTT Service shall provide an indication to the Participants that the call is within a configurable amount of time before the call time limit is reached.
+[R-6.2.4-006] The MCPTT Service shall release the call when the call time limit has been reached.
+[R-6.2.4-007] The MCPTT Service shall provide an indication to the Participants that the call time limit has been reached.
+[R-6.2.4-008] The MCPTT Service shall release an MCPTT Group call if any of the termination conditions are met (e.g., last Participant leaving, second last Participant leaving, initiator leaving) or the minimum number of Affiliated MCPTT Group Members are not present.
+6.3	General requirements
+[R-6.3-001] Void
+[R-6.3-002] Void
+[R-6.3-003] Void
+[R-6.3-004] Void
+6.4	General group call
+6.4.1	General aspects
+[R-6.4.1-001] Void
+6.4.2	Group status/information
+[R-6.4.2-001] Void
+[R-6.4.2-002] Void
+[R-6.4.2-003] Void
+[R-6.4.2-004] Void
+[R-6.4.2-005] Void
+[R-6.4.2-006] Void
+[R-6.4.2-007] Void
+6.4.3	Identification
+[R-6.4.3-001] Void
+[R-6.4.3-002] Void
+6.4.4	Membership/affiliation
+[R-6.4.4-001] Void
+[R-6.4.4-002] Void
+6.4.5	Membership/affiliation list
+[R-6.4.5-001] Void
+[R-6.4.5-002] Void
+[R-6.4.5-003] Void
+[R-6.4.5-004] Void
+[R-6.4.5-005] Void
+[R-6.4.5-006] Void
+[R-6.4.5-007] Void
+[R-6.4.5-008] Void
+6.4.6	Authorized user remotely changes another MCPTT User's affiliated and/or Selected MCPTT Group(s)
+6.4.6.1	Mandatory change
+[R-6.4.6.1-001] Void
+[R-6.4.6.1-002] Void
+[R-6.4.6.1-003] Void
+[R-6.4.6.1-004] Void
+6.4.6.2	Negotiated change
+[R-6.4.6.2-001] Void
+[R-6.4.6.2-002] Void
+[R-6.4.6.2-003] Void
+[R-6.4.6.2-004] Void
+[R-6.4.6.2-005] Void
+[R-6.4.6.2-006] Void
+6.4.7	Prioritization
+[R-6.4.7-001] Void
+[R-6.4.7-002] Void
+[R-6.4.7-003] Void
+[R-6.4.7-004] Void
+6.4.8	Relay requirements
+[R-6.4.8-001] Void
+6.4.9	Administrative
+[R-6.4.9-001] Void
+[R-6.4.9-002] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to set a predefined time period (Hang Time) without any traffic in MCPTT calls (with Floor control), after which the MCPTT calls shall terminate.
+[R-6.4.9-003] Void
+[R-6.4.9-004] Void
+[R-6.4.9-005] Void
+[R-6.4.9-006] Void
+[R-6.4.9-007] Void
+6.5	Broadcast group
+6.5.1	General Broadcast Group Call
+[R-6.5.1-001] Void
+[R-6.5.1-002] Void
+6.5.2	Group-Broadcast Group (e.g., announcement group)
+[R-6.5.2-001] Void
+6.5.3	User-Broadcast Group (e.g., System Call)
+[R-6.5.3-001] Void
+6.6	Dynamic group management (i.e., dynamic regrouping)
+6.6.1	General dynamic regrouping
+[R-6.6.1-001] Void
+[R-6.6.1-002] Void
+[R-6.6.1-003] Void
+[R-6.6.1-004] Void
+[R-6.6.1-005] Void
+[R-6.6.1-006] Void
+6.6.2	Group Regrouping
+6.6.2.1	Service description
+Group Regrouping enables dispatchers or any authorized user to temporarily combine MCPTT Groups. A dispatcher uses Group Regrouping for different reasons.
+Due to an incident in an area it can be necessary to temporarily enable MCPTT Users from different MCPTT Groups to communicate to each other to coordinate. After the incident the dispatcher cancels the Group Regrouping and the MCPTT Users continue with their original configured MCPTT Groups.
+During quiet periods control room managers can decide to combine MCPTT Groups and handle their operations and communications with one dispatcher. In the busier period the Group Regrouping is cancelled and the MCPTT Groups are handled by separate dispatchers.
+6.6.2.2	Requirements
+[R-6.6.2.2-001] Void
+[R-6.6.2.2-002] Void
+[R-6.6.2.2-003] Void
+[R-6.6.2.2-004] Void
+[R-6.6.2.2-005] Void
+[R-6.6.2.2-006] Void
+[R-6.6.2.2-007] Void
+6.6.3	Temporary Group-Broadcast Group
+[R-6.6.3-001] Void
+[R-6.6.3-002] Void
+6.6.4	User regrouping
+6.6.4.1	Service description
+In the operational MCPTT environment most tasks are covered by standard procedures and communication structures and MCPTT Users can easily access the MCPTT Groups to handle their tasks.
+Exceptionally it could happen that there is an urgent need for a dedicated set of individual MCPTT Users to communicate in an MCPTT Group, but that this is not foreseen in the communication structure. This could be due to extreme conditions or due to a cooperation that is outside normal procedures.
+User Regrouping enables dispatchers or authorized users to instantaneously provide a dedicated MCPTT Group to these MCPTT Users to enable the required communication. Depending on configuration the MCPTT Users could be automatically affiliated to this MCPTT Group. After the operation this MCPTT Group is removed by the dispatcher or authorized user.
+6.6.4.2	Requirements
+[R-6.6.4.2-001] Void
+[R-6.6.4.2-002] Void
+[R-6.6.4.2-003] Void
+[R-6.6.4.2-004] Void
+[R-6.6.4.2-005] Void
+6.7	Private Call
+6.7.0	Overview
+Private Calls can use Floor control or not. Private Calls (without Floor control) are only supported on network, whereas Private Calls (with Floor control) are supported both on and off network. Private Calls (without Floor contol) are intended to have the same functionality as specified for Private Calls (with Floor control) in subclauses 5.6.2, 5.6.3, 5.6.4, 5.6.5. Comparable requirements are included in subclauses 6.7.1, 6.7.2, 6.7.4 and 6.7.5, with the exception of R-5.6.5-005, which is specific to Private Calls (with Floor control).
+6.7.1	General requirements
+[R-6.7.1-001] The on-network MCPTT Service shall support two types of Private Calls, one which uses Floor control and one which does not.
+NOTE:	An MCPTT Private Call (without Floor control) is effectively a full voice duplex call between two users.
+[R-6.7.1-002] Void
+[R-6.7.1-003] Void
+[R-6.7.1-004] Void
+[R-6.7.1-005] Void
+[R-6.7.1-006] Void
+[R-6.7.1-007] Void
+[R-6.7.1-008] Void
+[R-6.7.1-009] Void
+[R-6.7.1-010] The MCPTT Service shall provide a mechanism by which specified Participants or Participant types (e.g., dispatch) have the ability to override an active PTT transmission of the other Participant in the Private Call.
+[R-6.7.1-011] Void
+[R-6.7.1-012] The MCPTT Service shall provide the status (e.g., ringing, accepted, rejected, active) of an MCPTT Private Call (without Floor control) to the relevant MCPTT User that is a Participant of the MCPTT Private Call (without Floor control).
+[R-6.7.1-013] The MCPTT Service shall provide a mechanism for an authorized MCPTT User that is a called party in an MCPTT Private Call (without Floor control), to restrict providing the reason why an MCPTT Private Call (without Floor control) setup has failed to the calling MCPTT User.
+[R-6.7.1-014] Void
+6.7.2	Administrative
+[R-6.7.2-001] Void
+[R-6.7.2-002] Void
+[R-6.7.2-003] Void
+[R-6.7.2-004] Void
+[R-6.7.2-005] Void
+[R-6.7.2-006] Void
+[R-6.7.2-007] Void
+[R-6.7.2-008] Void
+6.7.3	Prioritization
+[R-6.7.3-001] Void
+[R-6.7.3-002] Void
+[R-6.7.3-003] Void
+[R-6.7.3-004] Void
+[R-6.7.3-005] Void
+[R-6.7.3-006] Void
+[R-6.7.3-007] Void
+6.7.4	Private Call (without Floor control) commencement requirements
+[R-6.7.4-001] The MCPTT Service shall support Call Commencement Modes for Private Calls (without Floor control), which determine the conditions under which Private Calls (without Floor control) are set up.
+[R-6.7.4-002] The MCPTT Service shall provide a mechanism for an MCPTT User to cancel an MCPTT Private Call (without Floor control) prior to the call setup.
+[R-6.7.4-003] The MCPTT Service shall provide a means by which an authorized MCPTT User initiates an MCPTT Private Call (without Floor control).
+[R-6.7.4-004] Void
+[R-6.7.4-005] The MCPTT Service shall provide a means by which an MCPTT User initiates a Manual Commencement Private Call (without Floor control) to any MCPTT User for which the MCPTT User is authorized.
+[R-6.7.4-006] The MCPTT Service shall require that the called MCPTT User accepts a Manual Commencement Private Call (without Floor control) setup request before the call proceeds.
+[R-6.7.4-007] The MCPTT Service shall provide a means for an MCPTT User to accept a Manual Commencement Private Call (without Floor control) request from another MCPTT User.
+[R-6.7.4-008] Void
+[R-6.7.4-009] The MCPTT UE shall support automatic commencement mode and manual commencement mode for Private Calls (without Floor control).
+[R-6.7.4-010]The MCPTT Service shall provide a manual commencement mode countermand by which an authorized MCPTT User may request that the invited MCPTT UE answers automatically.
+[R-6.7.4-011] Void
+[R-6.7.4-012] The MCPTT Service shall require that the called MCPTT UE acknowledge receipt of an Automatic Commencement Private Call (without Floor control) setup request before the audio transmission proceeds.
+[R-6.7.4-013] The MCPTT Service shall provide a first-to-answer commencement mode by allowing the originating user to indicate multiple potential target recipients for a Private Call (without Floor control) and shall ensure that the call is established only to the first answering user.
+NOTE:	Attention needs to be given to prevent undesired outcomes caused, for example, by automatic answer or divert to voicemail.
+[R-6.7.4-014] When a receiving user answers a first-to-answer Private Call (without Floor control) the MCPTT Service shall remove all other receiving users from that call.
+[R-6.7.4-015] The MCPTT Service shall provide a mechanism for an authorized MCPTT User to transfer an ongoing MCPTT Private Call (without Floor control) to another MCPTT user.
+[R-6.7.4-016] The MCPTT Service shall provide a mechanism for an authorized MCPTT User to configure forwarding of incoming MCPTT Private Calls (without Floor control) to another MCPTT user in the following situations:
+-	If the MCPTT User is not reachable
+-	If the incoming private call is a call with manual commencement mode and the MCPTT User does not answer within a configured period
+-	Based on manual input of the MCPTT User
+6.7.4a	Private Call (with Floor control) commencement requirements
+[R-6.7.4a-001] The MCPTT Service shall provide a first-to-answer commencement mode by allowing the originating user to indicate multiple potential target recipients for a Private Call (with Floor control) and shall ensure that the call is established only to the first answering user.
+NOTE:	Attention needs to be given to prevent undesired outcomes caused, for example, by automatic answer or divert to voicemail.
+[R-6.7.4a-002] When a receiving user answers a first-to-answer Private Call (with Floor control) the MCPTT Service shall remove all other receiving users from that call.
+6.7.5	Private Call (without Floor control) termination
+[R-6.7.5-001] Void
+[R-6.7.5-002] The MCPTT Service shall provide a means by which an authorized MCPTT User ignores a Manual Commencement Private Call (without Floor control) request from another MCPTT User.
+NOTE:	Ignoring a Manual Commencement Private Call (without Floor control) results in no indication of the reason for call failure being sent to the calling MCPTT User.
+[R-6.7.5-003] Void
+6.7.6	Call back request requirements
+[R-6.7.6-001] The MCPTT Service shall provide a mechanism (i.e., MCPTT Private Call call back request) for the calling party of an MCPTT Private Call to request that the called party (at earliest convenience) place a call to the calling party.
+[R-6.7.6-002] The MCPTT Service shall provide a mechanism for the calling party of an MCPTT Private Call to assign an urgency indication (i.e., low, normal, urgent) to any call back request.
+[R-6.7.6-003] The MCPTT Service shall provide an MCPTT UE receiving an MCPTT Private Call call back request with an indication of the assigned call back urgency assigned by the calling party.
+[R-6.7.6-004] The MCPTT Service shall provide a mechanism for an MCPTT User to cancel a call back request.
+[R-6.7.6-005] The MCPTT Service shall provide an MCPTT UE receiving an MCPTT Private Call call back request with an indication of which MCPTT User called and when.
+6.8	MCPTT priority requirements
+6.8.1	General
+[R-6.8.1-001] Void
+[R-6.8.1-002] The MCPTT Service shall provide an access control mechanism to support multiple Access Priorities to prioritize MCPTT MO call initiation attempts, depending on their access priorities.
+[R-6.8.1-003] Void
+[R-6.8.1-004] Void
+[R-6.8.1-005] Void
+[R-6.8.1-006] Void
+[R-6.8.1-007] Void
+[R-6.8.1-008] Void
+[R-6.8.1-009] Void
+[R-6.8.1-010] Void
+[R-6.8.1-011] Void
+[R-6.8.1-012] Void
+[R-6.8.1-013] Void
+[R-6.8.1-014] Void
+[R-6.8.1-015] Void
+[R-6.8.1-016] Void
+[R-6.8.1-017] Void
+6.8.2	3GPP system access controls
+[R-6.8.2-001] Void
+6.8.3	3GPP system admission controls
+[R-6.8.3-001] Void
+6.8.4	3GPP system scheduling controls
+[R-6.8.4-001] Void
+6.8.5	UE access controls
+[R-6.8.5-001] Void
+6.8.6	Application layer priorities
+6.8.6.1	Overview
+Dispatchers from different critical communication organizations access the same networks and network resources. Depending on the event, the priority is given to an organization and/or a group rather than to another. For instance, in case of a fire priority is given to the fire brigades dealing with it, while in case of a criminal arrest priority is given to the police officers in charge of the arrest.
+6.8.6.2	Requirements
+[R-6.8.6.2-001] Void
+[R-6.8.6.2-002] Void
+[R-6.8.6.2-003] Void
+[R-6.8.6.2-004] The MCPTT system may stop already established MCPTT calls with the capability to be pre-empted and a lower application layer priority to allow a new MCPTT call with pre-emption capability enabled for pre-emption to be established.
+[R-6.8.6.2-005] Void
+[R-6.8.6.2-006] Void
+6.8.7	Call types based on priorities
+6.8.7.1	MCPTT Emergency Group Call requirements
+[R-6.8.7.1-001] Void
+[R-6.8.7.1-002] Void
+[R-6.8.7.1-003] Void
+[R-6.8.7.1-004] Void
+6.8.7.2	MCPTT Emergency Private Call (with Floor control) requirements
+[R-6.8.7.2-001] The MCPTT Service shall ensure that MCPTT Emergency Private Calls (with Floor control) have the highest priority over all other MCPTT Private Calls.
+[R-6.8.7.2-002] The MCPTT Service shall be capable of requesting increased priority for the Participants of an MCPTT Emergency Private Call.
+[R-6.8.7.2-003] The MCPTT Service shall be capable of changing a Private Call (with Floor control) in progress to an MCPTT Emergency Private Call (with Floor control).
+[R-6.8.7.2-004] MCPTT Emergency Private Calls (with Floor control), including their content and signalling, shall have pre-emptive priority over all other types of MCPTT calls, except System Calls, MCPTT Emergency Group Calls and other MCPTT Emergency Private Calls (with Floor control).
+6.8.7.3	Imminent Peril group call requirements
+[R-6.8.7.3-001] Void
+[R-6.8.7.3-002] Void
+[R-6.8.7.3-003] Void
+6.8.7.4	MCPTT Emergency Alert
+6.8.7.4.1	Requirements
+[R-6.8.7.4.1-001] Void
+[R-6.8.7.4.1-002] Void
+[R-6.8.7.4.1-003] Void
+[R-6.8.7.4.1-004] Void
+[R-6.8.7.4.1-005] Void
+[R-6.8.7.4.1-006] Void
+6.8.7.4.2	MCPTT Emergency Alert cancellation requirements
+[R-6.8.7.4.2-001] Void
+[R-6.8.7.4.2-002] Void
+6.9	IDs and aliases
+[R-6.9-001] Void
+[R-6.9-002] Void
+[R-6.9-003] Void
+[R-6.9-004] Void
+6.10	User Profile management
+[R-6.10-001] Void
+[R-6.10-002] Void
+[R-6.10-003] Void
+[R-6.10-004] Void
+6.11	Support for multiple devices
+[R-6.11-001] Void
+[R-6.11-002] Void
+[R-6.11-003] Void
+6.12	Location
+[R-6.12-001] Void
+[R-6.12-002] Void
+[R-6.12-003] Void
+[R-6.12-004] Void
+[R-6.12-005] Void
+[R-6.12-006] Void
+[R-6.12-007] Void
+6.13	Security
+6.13.1	Overview
+Security covers areas designed to protect the confidentiality, integrity, and availability of information that is processed, stored, and transmitted. The security requirements listed here cover the areas of cryptographic protocols, authentication, access control, and regulatory issues.
+6.13.2	Cryptographic protocols
+[R-6.13.2-001] Void
+[R-6.13.2-002] Void
+[R-6.13.2-003] Void
+6.13.3	Authentication
+[R-6.13.3-001] Void
+6.13.4	Access control
+[R-6.13.4-001] Void
+[R-6.13.4-002] Void
+[R-6.13.4-003] Void
+[R-6.13.4-004] Void
+[R-6.13.4-005] Void
+[R-6.13.4-006] Void
+[R-6.13.4-007] Void
+[R-6.13.4-008] Void
+[R-6.13.4-009] Void
+[R-6.13.4-010] Void
+6.13.5	Regulatory issues
+[R-6.13.5-001] Void
+6.14	Interactions for MCPTT Group Calls and MCPTT Private Calls
+[R-6.14-001] Void
+[R-6.14-002] Void
+[R-6.14-003] The MCPTT Service shall only allow an MCPTT User to participate in one MCPTT Private Call (without Floor control) at a time.
+6.15	Audio MCPTT call performance
+6.15.1	General overview
+Meeting the KPIs defined in the following subclauses is based on a number of factors, including the selection of appropriate protocols, minimizing messaging, the backhaul technology used, and appropriate configuration of the deployed network. The corresponding requirements are intended to convey the resulting KPIs when all of those factors are taken into account. For example, where there is significant backhaul delay, that delay is expected to be added to the KPIs.
+6.15.2	General requirements
+[R-6.15.2-001] The architecture and protocols providing the MCPTT Service shall be designed in a way to eventually allow a deployed network to meet the KPIs specified hereafter (subclause 6.15.3.2 and subclause 6.15.4.2).
+6.15.3	MCPTT access time and mouth-to-ear latency
+6.15.3.1	General overview
+For MCPTT Users, one of the most important performance criteria is the MCPTT Access time (KPI 1). The MCPTT Access time is defined as the time between when an MCPTT User request to speak (normally by pressing the MCPTT control on the MCPTT UE) and when this user gets a signal to start speaking. This time does not include confirmations from receiving users.
+The MCPTT Access time (KPI 1) does not include the time for an MCPTT User to affiliate to the group. This is a common scenario within public safety, meaning that affiliations to MCPTT Groups are long lived during several working hours. KPI 1 is applicable in both an MCPTT Group call setup request and subsequent MCPTT Requests that are part of the same call. KPI 1 for subsequent MCPTT Requests might take a slightly shorter time than the first MCPTT setup request of the same call due to its potential need of resource allocation in terms of bearer establishment. However from an end user perspective there is no need to differentiate required performance for an MCPPT Group call setup request and subsequent MCPTT Requests.
+The End-to-end MCPTT Access time (KPI 2) is defined as the time between when an MCPTT User requests to speak (normally by pressing the MCPTT control on the MCPTT UE) and when this user gets a signal to start speaking, including MCPTT call establishment (if applicable) and possibly acknowledgement from first receiving user before voice can be transmitted. Group calls can be set up with or without acknowledgements from receiving users.
+For MCPTT Private Calls (with Floor control), end-to-end MCPTT Access time (also KPI 2) is measured from the initiating client
+s Private call request to reception of either a Private Call response for automatic commencement or the MCPTT ringing indication for manual commencement. End-to-end access time for both automatic and manual commencement private calls (KPI 2) is shown in Figure 6.15.3.1.1.
+NOTE:	The End-to-end MCPTT Access time (KPI 2) is not applicable for an MCPTT Group transmission call setup when no acknowledgement is requested from any Affiliated MCPTT Group Member.
+The Mouth-to-ear latency (KPI 3) is the time between an utterance by the transmitting user, and the playback of the utterance at the receiving user's speaker. Figure 6.15.3.1.1 illustrates the MCPTT Access time and Mouth-to-ear latency.
+EMBED Visio.Drawing.11
+Figure 6.15.3.1.1: Illustration of MCPTT access time and mouth-to-ear latency
+6.15.3.2 	Requirements
+[R-6.15.3.2-001] KPI 1, KPI 2, and KPI 3 should be measured where there is negligible backhaul delay.
+[R-6.15.3.2-002] The MCPTT Service shall provide the MCPTT Access time and Mouth-to-ear latency specified in this subclause to all MCPTT Users related to an MCPTT call regardless of call type (e.g., group, Private Call), group size and/or user density.
+NOTE:	This ensures that all MCPTT Users experience the same performance regardless of whether the audio is transferred over unicast or multicast delivery.
+[R-6.15.3.2-003] The MCPTT Service shall be capable of providing the performance specified herein for all Affiliated MCPTT Group Members in the Group Call when there is not a transcoder in the bearer path.
+[R-6.15.3.2-004] The MCPTT Service shall be capable of providing the performance specified herein for all Participants in a Private Call when there is not a transcoder in the bearer path.
+[R-6.15.3.2-005] The KPIs defined in this subclause shall apply in an 3GPP network under traffic load not exceeding 70% of each network nodes capacity.
+[R-6.15.3.2-006] On networks with QOS services, the KPIs defined in this subclause shall apply when the total sector loading of the serving sector by MCPTT Users with equal or greater priority than the subject MCPTT User is less than 70%.
+[R-6.15.3.2-007] The KPIs defined in this subclause shall apply to group calls when the transmitting MCPTT User is connected to the MCPTT Service and has selected an MCPTT Group.
+[R-6.15.3.2-008] The KPIs defined in this subclause shall apply to group calls when the receiving MCPTT User is connected to the MCPTT Service and affiliated with the MCPTT Group.
+[R-6.15.3.2-009] The KPIs defined in this subclause shall apply to Automatic Commencement Private Calls when both the transmitting and receiving MCPTT Users are connected to the MCPTT Service.
+[R-6.15.3.2-010]  Void
+[R-6.15.3.2-011] When there are transcoding functions in the bearer path of the MCPTT Service, the performance provided by the MCPTT Service shall be no more than 40 ms greater than the performance specified herein when there are no transcoding functions in the bearer path.
+[R-6.15.3.2-012] For group calls where no acknowledgement is requested from affiliated MCPTT group members, the MCPTT Service shall provide an MCPTT Access time (KPI 1) less than 300 ms for 95% of all MCPTT Request.
+[R-6.15.3.2-012a] For group and private calls where the call is already established, the MCPTT Service shall provide an MCPTT Access time (KPI 1) less than 300 ms for 95% of all MCPTT PTT Requests.
+[R-6.15.3.2-013] For MCPTT Emergency Group Calls and Imminent Peril Calls the MCPTT Service shall provide an MCPTT Access time (KPI 1) less than 300 ms for 99% of all MCPTT Requests.
+[R-6.15.3.2-014] For group calls where
+automatic acknowledgement is requested from
+the UEs of the affiliated MCPTT group members, the MCPTT Service shall provide an End-to-end MCPTT Access time (KPI 2) less than 1000 ms for users under coverage of the same network.
+[R-6.15.3.2-015] The MCPTT Service shall provide a Mouth-to-ear latency (KPI 3) that is less than 300 ms for 95% of all voice bursts.
+[R-6.15.3.2-016] There shall be no (0 ms) initial lost audio at receiving user.
+[R-6.15.3.2-017] There shall be no (0 ms) trailing lost audio at the end of the voice burst at receiving user. [R-6.15.3.2-018] The KPIs defined in this subclause shall apply to Manual Commencement Private Calls when both the transmitting and receiving MCPTT Users are connected to the MCPTT Service.
+[R-6.15.3.2-019] The MCPTT Service shall provide private call End-to-end MCPTT Access time (KPI 2) equal to or less than 1000 ms for users under coverage of the same network when the MCPTT private call is setup in the Manual Commencement mode.
+[R-6.15.3.2-020] The MCPTT Service shall provide private call End-to-end MCPTT Access time (KPI 2) equal to or less than 1000 ms for users under coverage of the same network when the MCPTT private call is setup in the Automatic Commencement mode.
+6.15.4	Late call entry performance
+6.15.4.1	General overview
+An MCPTT User is able to join or leave already ongoing MCPTT Group calls. Late call entry is the activity when an Affiliated MCPTT Group Member joins an MCPTT Group call in which other Affiliated MCPTT Group Members are already active. The Late call entry time (KPI 4) is the time to enter an ongoing MCPTT Group call measured from the time that a user decides to monitor such an MCPTT Group Call, to the time when the MCPTT UE's speaker starts to play the audio. The performance requirements for Late call entry time only applies to when there is ongoing voice transmitted at the time the MCPTT User joins the call.
+In a Late call entry there might be an initial lost audio of the voice burst sent to the new Receiving MCPTT Group Member. Figure 6.15.4.1.1 illustrates the Late call entry time.
+Figure 6.15.4.1.1: Illustration of Late call entry time
+6.15.4.2	Requirements
+[R-6.15.4.2-001] The KPIs in this subclause shall apply for terrestrial use only, and when users are under coverage of the same network.
+NOTE: 	Terrestrial use refers to using terrestrial 3GPP access, e.g. not using satellite 3GPP access. It includes support of air-to-ground scenarios, such as communication with MCPTT users in helicopters, fixed wing aircraft or other crewed aerial vehicles.
+[R-6.15.4.2-002] The KPIs defined in this subclause shall apply in an 3GPP network under traffic load not exceeding 70% of each network nodes capacity.
+[R-6.15.4.2-002a] The KPIs defined in this subclause shall apply to MCPTT users who have affiliated or have been affiliated by the network and are now performing late call entry due to activity on the affiliated group.
+NOTE:	Cases of UE mobility, or loss of coverage and re-establishment, are not covered.
+[R-6.15.4.2-003] The maximum Late call entry time (KPI 4a) for calls without application layer encryption within one MCPTT system shall be less than 150 ms for 95% of all Late call entry requests.
+[R-6.15.4.2-004] The maximum Late call entry time (KPI 4b) for application layer encrypted calls within one MCPTT system should meet the requirements for KPI 4 for unencrypted calls.
+[R-6.15.4.2-005] The maximum Late call entry time (KPI 4b) for application layer encrypted calls within one MCPTT system shall be less than 350 ms for 95% of all Late Call Entries into encrypted calls.
+[R-6.15.4.2-006] The Late call entry Time for encrypted calls interworking with other non-3GPP PTT systems should meet the requirements for KPI 4b for application layer encrypted calls within one MCPTT system.
+NOTE:	Additional delay deriving from the non-3GPP PTT system is not included in this KPI.
+[R-6.15.4.2-007] The additional Late call entry Time for an MCPTT UE late entering an application layer encrypted call interworking with other non-3GPP PTT systems shall not exceed the difference in the encrypted and unencrypted Late call entry Times for the interworking system.
+6.15.5	Audio / voice quality
+[R-6.15.5-001] The MCPTT UE shall support at least one mandatory 3GPP voice codec.
+NOTE 1:	The UE implementation could include other non-3GPP voice codecs, e.g., TETRA voice codecs, P25 voice codecs [4].
+NOTE 2:	Refer to [R-6.4.9-006], which enables an MCPTT Administrator to set the preferred voice codec for an MCPTT Group.
+[R-6.15.5-002] When an MCPTT call is within one MCPTT system the average MOS-LQO shall be greater than or equal to 3.0 measured according to the ITU standard Perceptual Evaluation of Speech Quality (PESQ) as defined in P.862 [7] and P.862.1 [8].
+[R-6.15.5-003] When an MCPTT call involves interworking with other non-3GPP PTT systems the average MOS-LQO shall be greater than or equal to 2.7 measured according to the ITU standard PESQ as defined in P.862 [7] and P.862.1 [8].
+[R-6.15.5-004] When an MCPTT call is within one MCPTT system the average MOS-LQO shall be greater than or equal to 3.0 measured according to the ITU standard Perceptual Objective Listening Quality Assessment (POLQA) as defined in P.863 [9].
+[R-6.15.5-005] When an MCPTT call involves interworking with other non-3GPP PTT systems the average MOS LQO shall be greater than or equal to 2.7 measured according to the ITU standard POLQA as defined in P.863 [9].
+6.15.6	Radio Resource Efficiency Performance
+[R-6.15.6-001] Void
+[R-6.15.6-002] Void
+6.16	Additional services for MCPTT calls
+6.16.1	Discreet listening capabilities
+[R-6.16.1-001] Void
+6.16.2	Ambient listening
+6.16.2.1	Overview of ambient listening
+Ambient Listening is a feature that allows an authorized MCPTT User, typically a dispatcher, to cause an MCPTT UE to initiate a call which results in no indication on the MCPTT UE that it is transmitting. Ambient Listening can be initiated by an authorized MCPTT User who wants to be listened to by another remote authorized MCPTT User or can be initiated by a remote authorized MCPTT User who wants to listen to another MCPTT User. The purpose of this feature allows a dispatcher to listen to activities at the Location of the remote MCPTT UE to find out what is happening around that MCPTT UE without providing an indication to the MCPTT User or people around the user (whom the MCPTT User does not want to make aware of this action) that this is happening. This type of call is different from other types of call, as for Ambient Listening audio is only transmitted to one party in the call (i.e., a dispatcher or an authorized MCPTT User that is acting in a similar role to a dispatcher).
+This is used for stolen MCPTT UEs, monitoring officers, officer safety and particular operations, where it is important that the MCPTT UE does not indicate what is happening.
+6.16.2.2	Ambient listening requirements
+6.16.2.2.1	General Ambient Listening requirements
+[R-6.16.2.2.1-001] Void
+[R-6.16.2.2.1-002] Void
+[R-6.16.2.2.1-003] Void
+[R-6.16.2.2.1-004] The MCPTT Service shall either shall terminate Ambient Listening if the MCPTT User being listened to starts to transmit or receive an MCPTT Private Call or an MCPTT Group Call or shall execute one of the two following options..
+NOTE:	An authorized MCPTT User could initiate Discreet Listening at this point if needed.
+[R-6.16.2.2.1-005] The MCPTT service shall pause an Ambient Listening call if the MCPTT User being listened to starts to transmit or receive in an MCPTT Private Call or an MCPTT Group Call and resume the paused Ambient Listening call once the interrupting call that caused the pause has concluded.
+[R-6.16.2.2.1-006] The MCPTT service shall continue the ambient listening call without pause or termination, in parallel with a transmission or reception of an MCPTT Private Call or an MCPTT Group Call, if the MCPTT service allows two parallel calls.
+6.16.2.2.2	Remotely initiated Ambient Listening requirements
+[R-6.16.2.2.2-001] Void
+[R-6.16.2.2.2-002] Void
+6.16.2.2.3	Locally initiated Ambient Listening requirements
+[R-6.16.2.2.3-001] Void
+[R-6.16.2.2.3-002] Void
+6.16.3	Remotely initiated MCPTT call
+6.16.3.1	Overview
+A Remotely initiated MCPTT Call is a feature that allows an authorized user, typically a dispatcher, to cause a remote MCPTT UE to initiate a call by itself, without its user explicitly initiating the call by depressing the PTT switch. The purpose of this feature allows the dispatcher to listen to activities at the Location of the remote MCPTT UE to find out what is happening around that MCPTT UE. This feature is also known as "Remote Unit Monitoring" in P25 systems.
+There are two typical use cases for this feature.
+The first one is the case where a user could have been incapacitated. This could be both accidentally, say a traffic accident, or deliberately, for example a violent attack. In both cases it would be necessary to remotely open the microphone of the MCPTT UE in order to allow another user or a group of users to listen to what is happening to prepare assistance. The communication that is set up is either a Private Call or a Group Call, and the call could optionally be visible to the remote MCPTT UE's user.
+The second one is the case of a stolen MCPTT UE. Here it is just necessary to activate the radio so that a dispatcher can listen to any background noise or speech in order to make an analysis of the situation. In this situation, the initiation of the call from the remote MCPTT UE, typically a Private Call in that case, is not visible by that MCPTT UE's user.
+Other use cases, such as undercover operations, discreet surveillance of users or investigations, could exist depending on the missions of the critical communications users and on legislations.
+The behaviour of the remotely initiated Call is not different from a normal call initiated by the local user. The same rules for resource allocation and interactions with other services apply, but the initiator of the feature can have the capability to request a pre-emptive or high priority for that Call to ensure it is set up even in case of resource congestion or to limit disturbance by other services.
+6.16.3.2	Requirements
+[R-6.16.3.2-001] Void
+[R-6.16.3.2-002] Void
+[R-6.16.3.2-003] Void
+[R-6.16.3.2-004] Void
+6.16.4	Recording and audit requirements
+[R-6.16.4-001] Void
+[R-6.16.4-002] Void
+[R-6.16.4-003] Void
+[R-6.16.4-004] Void
+[R-6.16.4-005] Void
+[R-6.16.4-006] Void
+[R-6.16.4-007] Void
+[R-6.16.4-008] Void
+[R-6.16.4-009] Void
+[R-6.16.4-010] Void
+6.17	Interaction with telephony services
+[R-6.17-001] Void
+[R-6.17-002] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to configure the interaction between telephony calls and MCPTT calls for an MCPTT User.
+[R-6.17-003] Void
+6.18	Interworking
+6.18.1	Non-3GPP access
+[R-6.18.1-001] Void
+6.18.2	Interworking between MCPTT systems
+[R-6.18.2-001] Void
+[R-6.18.2-002] Void
+[R-6.18.2-003] Void
+[R-6.18.2-004] Void
+[R-6.18.2-005] Void
+[R-6.18.2-006] Void
+[R-6.18.2-007] Void
+6.18.3	Interworking with non-3GPP PTT systems
+6.18.3.1	Overview
+Mission critical users currently employ a wide range of narrowband mission critical Push To Talk services. Project 25 (governed by the TIA-102 standards) and TETRA (governed by ETSI standards) are digital public safety grade PTT systems. In addition, "legacy" or "conventional FM" systems are common throughout the world. These systems provide PTT and related services that are analogous to those provided by MCPTT, including group calls, Private Calls, broadcast calls, dynamic group management and other services.
+The MCPTT Service is intended to interwork with these non-3GPP PTT systems.
+6.18.3.2	Project 25
+[R-6.18.3.2-001] The MCPTT Service shall enable interworking with non-3GPP PTT Systems that are compliant with the TIA-102 (P25) standards.
+[R-6.18.3.2-002] Interworking between the MCPTT Service and P25 shall be capable of interworking with a multiplicity of independently administered Project 25 Radio Frequency Subsystems (RFSS).
+[R-6.18.3.2-003] Interworking between the MCPTT Service and P25 shall support interoperable MCPTT Group Calls between MCPTT Users and P25 subscriber units and consoles.
+[R-6.18.3.2-004] Interworking between the MCPTT Service and P25 shall support interoperable MCPTT Emergency Group Calls and P25 emergency calls.
+[R-6.18.3.2-005] Interworking between the MCPTT Service and P25 shall support end-to-end encrypted MCPTT Group Calls between MCPTT Users and P25 subscriber units and consoles.
+[R-6.18.3.2-006] Interworking between the MCPTT Service and P25 shall provide a means for an authorized user to initiate an override of a PTT Group call between MCPTT Users and P25 subscriber units and consoles.
+[R-6.18.3.2-007] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to authorize an MCPTT User to be able to initiate an override of a PTT Group call between MCPTT Users and P25 subscriber units and consoles.
+[R-6.18.3.2-008] Interworking between the MCPTT Service and P25 shall provide a means for an authorized P25 subscriber units and consoles to initiate an override of a PTT Group call between MCPTT Users and P25 subscriber units and consoles.
+[R-6.18.3.2-009] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to authorize a P25 subscriber unit or P25 console to be able to initiate an override of a PTT Group call between MCPTT Users and P25 subscriber units and consoles.
+[R-6.18.3.2-010] Interworking between the MCPTT Service and P25 shall support Group Regrouping that includes both MCPTT Groups and P25 groups.
+[R-6.18.3.2-011] Interworking between the MCPTT Service and P25 shall support User Regrouping that includes both MCPTT Users and P25 subscriber units.
+[R-6.18.3.2-012] Interworking between the MCPTT Service and P25 shall support interworking of Group-Broadcast Group Calls and P25 announcement group calls.
+[R-6.18.3.2-013] Interworking between the MCPTT Service and P25 shall support interoperable User IDs and P25 subscriber IDs.
+[R-6.18.3.2-014] Interworking between the MCPTT Service and P25 shall support interoperable PTT Private Calls (with Floor control) between an MCPTT User and a P25 subscriber unit or console.
+[R-6.18.3.2-015] Interworking between the MCPTT Service and P25 shall provide a mechanism to reconcile the Private Call (with Floor control) commencement mode between an MCPTT User and a P25 subscriber unit or console.
+[R-6.18.3.2-016] Interworking between the MCPTT Service and P25 shall support end-to-end encrypted PTT Private Calls (with Floor control) between an MCPTT User and a P25 subscriber unit or console.
+[R-6.18.3.2-017] Interworking between the MCPTT Service and P25 shall support a means of reconciling codecs between interoperable calls.
+[R-6.18.3.2-018] Interworking between the MCPTT Service and P25 shall support conveyance of Losing audio from P25 subscriber units and consoles to authorized MCPTT Users.
+[R-6.18.3.2-019] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to authorize MCPTT Users to be able to receive Losing audio from P25 subscribers units and consoles.
+[R-6.18.3.2-020] For Private Calls (with Floor control) interworking between the MCPTT Service and non-3GPP PTT systems that do not support Private Call override (e.g., Project 25 Phase 1 systems), the Participant attempting to override shall be notified that the override can not be accomplished.
+[R-6.18.3.2-021] For Private Call (with Floor control) interworking, between the MCPTT Service and non-3GPP PTT systems that do support Private Call override (e.g., Project 25 Phase 2 systems), the MCPTT Service shall provide a mechanism for Participants to override an active MCPTT transmission of a transmitting Participant when the priority level of the overriding Participant is ranked higher than the priority level of the transmitting Participant.
+6.18.3.3	TETRA
+[R-6.18.3.3-001] The MCPTT Service shall enable interworking with non-3GPP PTT Systems that are compliant with the ETSI TETRA standards.
+[R-6.18.3.3-002] Interworking between the MCPTT Service and TETRA shall be capable of interworking with a multiplicity of independently administered TETRA systems (Switching and management Infrastructures).
+[R-6.18.3.3-003] Interworking between the MCPTT Service and TETRA shall support interoperable MCPTT Group Calls between MCPTT Users and TETRA mobile stations and consoles.
+[R-6.18.3.3-004] Interworking between the MCPTT Service and TETRA shall support interoperable MCPTT Emergency Group Calls and TETRA emergency calls.
+[R-6.18.3.3-005] Interworking between the MCPTT Service and TETRA shall support end-to-end encrypted MCPTT Group Calls between MCPTT Users supporting the TETRA voice codec and end-to-end encryption and TETRA mobile stations and consoles.
+[R-6.18.3.3-006] Interworking between the MCPTT Service and TETRA shall provide a means for an authorized user to initiate an override of a PTT Group call between MCPTT Users and TETRA mobile stations and consoles.
+[R-6.18.3.3-007] Interworking between the MCPTT Service and TETRA shall provide a means for an authorized TETRA mobile station or console to initiate an override of a PTT Group call between MCPTT Users and TETRA mobile stations and consoles.
+[R-6.18.3.3-008] Interworking between the MCPTT Service and TETRA shall support Group Regrouping that includes both MCPTT Groups and TETRA groups.
+[R-6.18.3.3-009] Interworking between the MCPTT Service and TETRA shall support User Regrouping that includes both MCPTT Users and TETRA mobile stations.
+[R-6.18.3.3-010] Interworking between the MCPTT Service and TETRA shall support interoperable User IDs and TETRA IDs.
+[R-6.18.3.3-011] Interworking between the MCPTT Service and TETRA shall support interoperable PTT Private Calls between an MCPTT User and a TETRA mobile station or console.
+[R-6.18.3.3-012] Interworking between the MCPTT Service and TETRA shall support end-to-end encrypted PTT Private Calls between an MCPTT User supporting TETRA codec and encryption and a TETRA mobile station or console.
+[R-6.18.3.3-013] Interworking between the MCPTT Service and TETRA shall support a means of reconciling codecs between interoperable calls when not end-to-end encrypted.
+[R-6.18.3.3-014] For Private Call (with Floor control) interworking, between the MCPTT Service and non-3GPP PTT systems that do support Private Call override, the MCPTT Service shall provide a mechanism for Participants to override an active MCPTT transmission of a transmitting Participant when the priority level of the overriding Participant is ranked higher than the priority level of the transmitting Participant.
+6.18.3.4	Legacy land mobile radio
+[R-6.18.3.4-001] The MCPTT Service shall enable interworking with legacy Land Mobile Radio systems that are compliant with the TIA-603-D
+[3] Standard.
+[R-6.18.3.4-002] Interworking between the MCPTT Service and TIA-603 systems shall be capable of interworking with a multiplicity of independently administered systems based on the TIA-603-D
+[3] Standard.
+[R-6.18.3.4-003] Interworking between the MCPTT Service and TIA-603 systems shall support interoperable PTT Group calls between MCPTT Users and TIA-603 subscriber units and consoles.
+[R-6.18.3.4-004] Interworking between the MCPTT Service and TIA-603 systems shall provide a mechanism for an authorized MCPTT User to initiate an override within a PTT Group call that has both MCPTT Users and TIA 603 subscriber units and consoles.
+[R-6.18.3.4-005] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to authorize an MCPTT User to be able to initiate an override of a PTT Group call between MCPTT Users and TIA-603 subscriber units and consoles.
+[R-6.18.3.4-006] Interworking between the MCPTT Service and TIA-603 systems shall provide a mechanism for an authorized TIA-603 subscriber unit or console to initiate an override within a PTT Group call that has both MCPTT Users and TIA 603 subscriber units and consoles.
+[R-6.18.3.4-007] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to authorize a TIA-603 subscriber unit or TIA-603 console to be able to initiate an override of a PTT Group call between MCPTT Users and TIA-603 subscriber units and consoles.
+[R-6.18.3.4-008] Interworking between the MCPTT Service and TIA-603 systems shall support interoperable PTT Private Calls (with Floor control) between MCPTT Users and TIA-603 subscriber units or consoles.
+[R-6.18.3.4-009] Interworking between the MCPTT Service and TIA-603 systems shall support a means of reconciling codecs between interoperable calls.
+[R-6.18.3.4-010] Interworking between the MCPTT Service and TIA-603 systems shall support conveyance of Losing audio from TIA 603 subscribers units and consoles to suitably privileged MCPTT Users.
+[R-6.18.3.4-011] The MCPTT Service shall provide a mechanism for an MCPTT Administrator to authorize MCPTT Users to be able to receive Losing audio from TIA-603 subscribers units and consoles.
+6.18.3.5	Void
+6.18.4	GSM-R
+6.18.4.1	Overview
+GSM-R, governed by 3GPP standards, is widely and globally used for rail communication. GSM-R offers capabilities analogous to those provided by MCPTT, including group calls, point-to point calls, broadcast calls, dynamic group management and the bearer service for train safety applications.
+6.18.4.2	Requirements
+[R-6.18.4.2-001]  Void
+[R-6.18.4.2-002] Void
+[R-6.18.4.2-002a]  Void
+[R-6.18.4.2-002b]  Void
+[R-6.18.4.2-003] The MCPTT Service shall enable interworking between Ad hoc Group Calls and Advanced Speech Call Items used in GSM-R.
+NOTE: The impact on GSM-R needs to be minimised.
+[R-6.18.4.2-004] Interworking between the MCPTT Service and GSM-R shall support interoperable PTT Private Calls between an MCPTT User and a GSM-R mobile station or controller terminal.
+[R-6.18.4.2-005] Interworking between the MCPTT Service and GSM-R voice services shall support a means of reconciling codecs.
+6.19	MCPTT coverage extension using ProSe UE-to-Network Relays
+[R-6.19-001] Void
+[R-6.19-002] Void
+[R-6.19-003] Void
+[R-6.19-004] Void
+[R-6.19-005] Void
+[R-6.19-006] Void
+6.20 	Ad hoc Group calls
+6.20.1	Call forwarding for Ad hoc Group calls
+[R-6.20.1-001] The MCPTT Service shall provide a mechanism for an authorized MCPTT User, receiving an Ad hoc Group call, based on its MCPTT user Identity or its associated functional alias to configure the forwarding of an incoming Ad hoc Group call, to another MCPTT user in the following situations:
+-	If the receiving MCPTT User is not reachable (e.g., out of coverage)
+-	If the incoming Ad hoc Group call is a call with manual commencement mode and the receiving MCPTT User does not answer within a configured period of time
+-	If the receiving MCPTT User rejects an incoming call (in manual commencement mode)
+[R-6.20.1-002] The MCPTT Service shall provide a mechanism to inform the initiator of the Ad hoc Group call that the call has been successfully forwarded to another MCPTT user by providing the MCPTT user Identity and/or associated functional alias of the forwarding target.
+7	MCPTT Service requirements specific to off-network use
+7.1	Off-network Push To Talk overview
+The MCPTT Service while operating in off-network mode comprises a set or collection of functions necessary to provide Mission Critical Push To Talk (MCPTT) using a ProSe direct (UE-to-UE) Communication path (ProSe direct communication path) for transport. The ProSe direct communication path does not traverse the network infrastructure.
+Users operating off the network are either out of network coverage (not served by a 3GPP network) (e.g., in a remote mountain area fighting a forest fire 20 miles from the nearest network) or have selected a ProSe direct communication path for MCPTT while in network coverage. MCPTT Users operating off the network need to be in ProSe direct communication range in order to communicate.
+NOTE 1:	While the network is likely to be a primary, reliable transport of MCPTT communications, there are many situations where MCPTT communications are needed in areas where the network is not available, or coverage is not reliable.
+MCPTT Users outside of the coverage of the fixed network might be first responders in a rural area assisting in a response to a plane crash, fire fighters in a remote mountain area fighting a forest fire or police officers inside a residence responding to a domestic issue. Off-network MCPTT communications are expected to be immediately accessible to users in the absence of the network.
+MCPTT Users in network coverage might be working in a confined area, such as fire fighters fighting a structure fire where direct UE-to-UE communication is more desirable and reliable. Users can communicate directly with one another without having to overcome the resistance of a building and distance to the nearest base station to communicate with other members of their team inside the building that are nearby.
+To operate off the network, an MCPTT UE is capable of automatically switching to a ProSe direct communication path for use of MCPTT when detecting an off-network (out of coverage) condition. In addition a mechanism is provided for an authorized user to select (manually switch to) a ProSe direct communication path for use of off-network MCPTT communications (e.g., while in network coverage).
+When operating off the network, the MCPTT Service is provided by the MCPTT application on the UE as compared to operations on the network, where the MCPTT Application on the UE interacts with an MCPTT server and the network to provide the MCPTT Service.
+NOTE 2:	For MCPTT UEs that have selected a ProSe Direct Communication path for use of MCPTT while in network coverage, signalling with the network and MCPTT Service might be available (e.g., radio resource allocation, MCPTT User Profile management updates and cryptographic key management updates), while the MCPTT User transmissions would be direct between the MCPTT UEs (e.g., not traversing the network).
+The Off-Network MCPTT Service builds upon ProSe enablers to establish, maintain and terminate the signalling and communication path(s) among the off-network users. To the extent feasible, it is expected that the end user's experience is similar regardless if the MCPTT Service is used with a 3GPP network or based on the use of a ProSe direct communication path.
+The Off-Network MCPTT Service is intended to support communication between a group of users (a group call), where each user has the ability to gain access to the permission to talk in an arbitrated manner. However, the MCPTT Service also supports Private Calls between pairs of users.
+When operating off the network the MCPTT Service allows users to request the permission to talk (transmit voice/audio) and provides a deterministic mechanism to arbitrate between requests that are in contention (i.e., Floor control).
+The Off-Network MCPTT Service provides a means for a user with higher priority (e.g., MCPTT Emergency condition) to override (interrupt) the current talker. The Off-Network MCPTT Service also supports a mechanism to limit the time a user talks (hold the floor) thus permitting users of the same or lower priority a chance to gain the floor.
+The Off-Network MCPTT Service provides the means for a user to monitor activity on a number of separate calls and enables the user to switch focus to a chosen call. An Off-Network MCPTT Service user might join an already established MCPTT Group call (Late call entry). In addition the Off-Network MCPTT Service supports User IDs, aliases and user Location determination features.
+For operation off the network (e.g., when out of network coverage), an MCPTT UE is (pre-)provisioned by an MCPTT Administrator and/or authorized user with the following in order to use MCPTT:
+An MCPTT User Profile associated with each of the intended MCPTT Users of the MCPTT UE that might be used for off-network operation;
+An alphanumeric identifier (with a minimum length of N3) (i.e., alias) for each MCPTT User;
+A number of off-network MCPTT Groups for use by the MCPTT User;
+An alphanumeric identifier (i. e., alias) for the authorized off-network MCPTT Groups;
+A Mission Critical Organization name if available, associated with each of the intended MCPTT Users or Administrator;
+A number of off-network MCPTT Users for Private Call for which the MCPTT User is authorized;
+Authentication and end to end security keys.
+NOTE 3:	MCPTT UEs can be provisioned for off-network use by either configuration outside of network coverage or by attaching to the network.
+An MCPTT UE operating off the network is capable of transmitting the talker Location information, User ID, alias(es), off-network MCPTT Group ID, group alias and, if available, Mission Critical Organization name of the user who is talking (i.e., whose UE is transmitting) to all other users in a call including MCPTT UEs operating off the network that are late entering a call in progress.
+The Off-Network MCPTT Service uses the capabilities defined in ProSe TS
+[5], including the ProSe Relay capabilities defined in ProSe TS
+[5] and GCSE_LTE TS
+NOTE 4:	As indicated in TS
+[5] use of a ProSe Direct Communication path outside of network coverage is only applicable for Public Safety ProSe enabled UEs. For non-Public Safety ProSe enabled UEs the selection of the most appropriate communication path (ProSe Communication path (direct or routed via local basestation) or 3GPP network path) is under network control and based on operator preferences.
+MCPTT Service requirements specific to off-network use are defined in clause 7. Common MCPTT service requirements defined in clause 5 apply whether the MCPTT Service is in use on the network or off the network.
+7.2	General off-network MCPTT requirements
+[R-7.2-001] Void
+[R-7.2-002] Void
+[R-7.2-003] Void
+[R-7.2-004] Void
+[R-7.2-005] Void
+7.3	Floor control
+7.3.1	General aspects
+[R-7.3.1-001] The off-network Floor control functionality in an MCPTT Service shall determine at a point in time which off-network Participant(s) are allowed to transmit to other off-network Participants.
+[R-7.3.1-002] The off-network Floor control functionality in an MCPTT Service shall determine at a point in time which received transmission(s) from off-network Participant(s) shall be presented to the receiving off-network Participant(s).
+7.3.2	Requesting permission to transmit
+[R-7.3.2-001] A Participant in an off-network MCPTT Group call, with the authority to transmit, shall be able to request to transmit to the off-network MCPTT Group.
+[R-7.3.2-002] The off-network Floor control functionality shall have a mechanism for resolving simultaneous requests for permission to transmit within the same call.
+[R-7.3.2-003] Following an MCPTT Request for permission to transmit, the Affiliated MCPTT Group Member that is allowed to transmit shall be given an indication that the member is allowed to transmit on the member's Selected MCPTT Group.
+[R-7.3.2-004] Following an MCPTT Request for permission to transmit, an Affiliated MCPTT Group Member that is not allowed to transmit on the Selected MCPTT Group shall be given an indication that permission to transmit was rejected or queued.
+[R-7.3.2-005] Following an MCPTT Private Call (with Floor control) request for permission to transmit, the MCPTT User that is allowed to transmit shall be given an indication that the user is allowed to transmit to the targeted MCPTT User.
+[R-7.3.2-006] Following an MCPTT Private Call (with Floor control) request for permission to transmit, an MCPTT User that is not allowed to transmit shall be given an indication that the permission to transmit was rejected.
+7.3.3	Override
+[R-7.3.3-001] An MCPTT UE shall be pre-provisioned by an MCPTT Administrator and/or authorized user with the necessary information in order that Floor control override may operate during off-network MCPTT.
+[R-7.3.3-002] The MCPTT Service shall provide a mechanism for MCPTT Administrators to create a priority hierarchy for determining what Participants, Participant types, and urgent transmission types, when operating off the network, be granted a request to override an active off-network MCPTT transmission.
+[R-7.3.3-003] The priority hierarchy used for granting a request to override an active MCPTT transmission shall contain at least four (4) levels.
+[R-7.3.3-004] The MCPTT Service shall provide a mechanism for Participants, to override an active MCPTT transmission of a transmitting Participant when the priority level of the overriding Participant or call type are ranked higher than the priority level of the transmitting Participant or call type.
+[R-7.3.3-005] If an authorized Participant overrides an MCPTT transmission, the MCPTT Service shall provide a means of notifying the overridden Participant(s) that the transmission has been overridden.
+[R-7.3.3-006] The MCPTT Service shall provide a mechanism to enable an MCPTT Administrator to configure which MCPTT Group transmission a Participant(s) receives, overriding and/or overridden for cases where an authorized Participant overrides an off-network MCPTT transmission. This mechanism, at the receiving Participant, shall also determine which transmission should be presented to the MCPTT User when an unauthorized transmission override has occurred due to a failure of transmit Floor control (e.g., due to the best effort nature of ProSe direct communication).
+[R-7.3.3-007] If the MCPTT Group has been configured to only allow the overriding transmitting Participant to transmit, the MCPTT Service shall revoke the transmit permission of the overridden transmitting Participant.
+[R-7.3.3-008] If the MCPTT Group has been configured to allow both overriding and overridden transmitting Participants to transmit, the MCPTT Service shall provide a mechanism for authorized receiving Participants to be able to listen to both the overriding transmission and any overridden Participant transmissions, dependent on configuration.
+7.3.4	Terminating permission to transmit
+[R-7.3.4-001] A transmitting Participant shall be able to indicate to the Off-Network MCPTT Service that the Participant no longer wants to transmit.
+[R-7.3.4-002] The MCPTT Service shall provide an indication to receiving Participants that the transmitting Participant has finished transmitting.
+7.3.5	Transmit time limit
+[R-7.3.5-001] An MCPTT UE shall be pre-provisioned by an MCPTT Administrator and/or authorized user with the necessary information in order that a transmit time limit function may operate during off-network MCPTT.
+[R-7.3.5-002] The MCPTT Service shall enable an MCPTT Administrator to configure the limit for the length of time that a Participant transmits from a single request to transmit.
+[R-7.3.5-003] The Floor control functionality shall have a configurable limit for the length of time that a Participant transmits from a single request to transmit.
+[R-7.3.5-004] The Floor control functionality shall provide an indication to the transmitting Participant that the Participant is within a configurable amount of time before his transmit time limit is reached.
+[R-7.3.5-005] The Floor control functionality shall provide an indication to the transmitting Participant that the Participant's transmit time limit has been reached.
+[R-7.3.5-006] The Floor control functionality shall remove the permission to transmit from the transmitting Participant when the Participant's transmit time limit has been reached.
+7.4	Call Termination
+[R-7.4-001] The MCPTT Service when operating off the network shall terminate a call after a period of inactivity.
+[R-7.4-002] The MCPTT Service when operating off the network shall provide a mechanism for an MCPTT Administrator to preconfigure the inactivity timer.
+[R-7.4-003] Void
+[R-7.4-004] Void
+[R-7.4-005] Void
+[R-7.4-006] Void
+7.5	Broadcast Group
+[R-7.5-001] Void
+[R-7.5-002] Void
+7.6	Dynamic group management (i.e., dynamic regrouping)
+NOTE:	No specific off-network MCPTT requirements for dynamic group management have been identified.
+7.7	MCPTT priority requirements
+[R-7.7-001] Void
+[R-7.7-002] The Off-Network MCPTT Service shall pass these attributes to the ProSe transport layer for the purposes of prioritizing the associated user data.
+[R-7.7-003] Void
+7.8	Call types based on priorities
+7.8.1	MCPTT Emergency Group Call requirements
+[R-7.8.1-001] Void
+[R-7.8.1-002] Void
+[R-7.8.1-003] Void
+7.8.2	MCPTT Emergency Group Call cancellation requirements
+[R-7.8.2-001] Void
+7.8.3	Imminent Peril Call
+7.8.3.1		Imminent Peril group call requirements
+[R-7.8.3.1-001] Void
+[R-7.8.3.1-002] Void
+[R-7.8.3.1-003] Void
+[R-7.8.3.1-004] Void
+[R-7.8.3.1-005] Void
+7.8.3.2 	Imminent Peril group call cancellation requirements
+[R-7.8.3.2-001] Void
+[R-7.8.3.2-002] Void
+7.9	Location
+[R-7.9-001] Void
+7.10	Security
+[R-7.10-001] Void
+[R-7.10-002] Void
+7.11	Audio MCPTT Call performance
+7.11.1	MCPTT Access time and Mouth-to-ear latency
+7.11.1.1	General overview
+For MCPTT Users, one of the most important performance criteria is the MCPTT Access time (KPI 1). The MCPTT Access time is defined as the time between when an MCPTT User requests to speak (normally by pressing the MCPTT control on the UE) and when this user gets a signal to start speaking. This time does not include confirmations from receiving users.
+The Mouth-to-ear latency (KPI 3) is the time between an utterance by the transmitting user, and the playback of the utterance at the receiving user's speaker. Figure 7.11.1.1.1 illustrates the MCPTT Access time and Mouth-to-ear latency.
+Figure 7.11.1.1-1: Illustration of MCPTT Access time and Mouth-to-ear latency
+7.11.1.2	Requirements
+NOTE:	The MCPTT Access time and Mouth-to-ear latency for off-network use is FFS.
+7.11.2	Late call entry performance
+7.11.2.1	General overview
+An MCPTT User is able to join or leave an already ongoing MCPTT Group Call. Late call entry is the activity when an Affiliated MCPTT Group Member joins an MCPTT Group Call in which other Affiliated MCPTT Group Members are already active. The Late call entry time (KPI 4) is the time to enter an ongoing MCPTT Group Call measured from the time that the user decides to monitor such an MCPTT Group Call, to the time when the UE's speaker starts to play the audio. The performance requirements for Late call entry time only applies to when there is ongoing voice transmitted at the time the MCPTT User joins the call.
+In a Late call entry there might be an initial lost audio of the voice burst sent to the new Receiving MCPTT Group Member.
+7.11.2.2	Requirements
+NOTE:	The Late call entry time (KPI 4) for off-network use is FFS.
+7.11.3	Audio / Voice quality
+[R-7.11.3-001] Void
+7.12	Off-network MCPTT operations
+[R-7.12-001] Void
+[R-7.12-002] Void
+[R-7.12-003] Void
+7.13	Off-network UE functionality
+[R-7.13-001] Void
+[R-7.13-002] Void
+[R-7.13-003] Void
+[R-7.13-004] Off-network MCPTT UEs shall support a minimum number of (N8) simultaneous off-network MCPTT calls.
+7.14	Switching to off-network MCPTT
+[R-7.14-001] Void
+[R-7.14-002] Void
+[R-7.14-003] Void
+7.15	Off-network recording and audit requirements
+[R-7.15-001] Void
+[R-7.15-002] Void
+7.16	Off-network UE-to-UE Relay
+7.16.1	Private Calls
+[R-7.16.1-001] Void
+[R-7.16.1-002] Void
+[R-7.16.1-003] Void
+7.16.2	Group Calls
+[R-7.16.2-001] Void
+[R-7.16.2-002] Void
+Annex A (informative):
+Table A.1: List of variables
+Number of levels of group hierarchy
+Number of levels of user hierarchy
+MCPTT Access time
+End-to-end MCPTT Access time
+Mouth-to-ear latency
+Maximum Late call entry time (without application layer encryption)
+Maximum Late call entry time (with application layer encryption)
+Number of receiving members present for an MCPTT Group.
+Total number of MCPTT Groups that an MCPTT User can be affiliated to simultaneously
+Minimum length of alphanumeric identifiers (i.e., Alias ID)
+5.8, 6.4.3, 7.1, and 7.2
+Number of simultaneous MCPTT Group calls received by a UE
+Total number of MCPTT Group transmissions that a UE can receive
+Number of simultaneous MCPTT Group calls received by a user
+Total number of MCPTT Group transmissions that a user can receive
+Minimum number of simultaneous off-network MCPTT calls supported by an off-network MCPTT UE.
+Maximum number of simultaneous audios received by an MCPTT User in a single MCPTT Group
+Total number of MCPTT Private Calls (with Floor control) in which a UE simultaneously participates
+Total number of MCPTT Group Members of an MCPTT Group
+Annex A1 (Informative):
+MCPTT Requirements for MCCoRe
+This table provides an exhaustive list of those requirements in 3GPP TS 22.179 that have been mapped to MCCoRe.
+5 MCPTT Service Requirements common for on the network and off the network
+5.1 General Group call requirements
+5.1.1 General Aspects
+R-5.1.1-001
+ivate Call (with Floor control) commencement requirements
+5.6.4 Private Call (with Floor control) termination
+5.6.5 Private Call (with Floor control) administration
+5.7 MCPTT priority requirements
+5.7.1 Overview
+5.7.2 Call types based on priorities
+5.7.2.1 MCPTT Emergency Group Call
+5.7.2.1.1 MCPTT Emergency Group Call requirements
+R-5.7.2.1.1-002
+R-6.2.2-006
+6.2.3 Floor control
+6.2.3.1 General aspects
+6.2.3.2 Requesting permission to transmit
+6.2.3.3 Override
+6.2.3.3.1 General aspects
+6.2.3.3.2 Override
+one transmitting Participant
+6.2.3.3.3 Override
+simultaneously Transmitting MCPTT Group Members
+6.2.3.4 Terminating permission to transmit
+6.2.3.5 Transmit time limit
+6.2.3.6 Audio cut-in designated MCPTT Groups
+6.2.3.6.1 Overview
+6.2.3.6.2 Requirements
+6.2.3.6.3 Requesting permission to transmit
+6.2.3.6.4 Terminating permission to transmit
+6.2.3.6.5 Transmit time limit
+6.2.3.7 MCPTT Groups designated for multi-talker control
+6.2.3.7.1 Overview
+6.2.3.7.2 General Aspects
+6.2.3.7.3 Requesting permission to transmit
+6.2.3.7.3 Requesting permission to transmit
+6.2.3.7.4 Override
+6.2.3.7.4.1 General Aspects
+6.2.4 Call termination
+6.3 General requirements
+6.7.1 General Requirements
+R-6.7.1-002 ( R-6.7.2-001
+R-6.7.1-003 ( R-6.7.2-002
+R-6.7.1-004 ( R-6.7.2-003
+R-6.7.1-011 ( R-6.7.2-004
+R-6.7.1-014 ( R-6.7.2-005
+6.7.2 Administrative
+R-6.7.2-001 ( R-6.7.3-001
+R-6.7.2-002 ( R-6.7.3-002
+R-6.7.2-003 ( R-6.7.3-003
+R-6.7.2-004 ( R-6.7.3-004
+R-6.7.2-005 ( R-6.7.3-005
+R-6.7.2-006 ( R-6.7.3-006
+R-6.7.2-007 ( R-6.7.3-007
+R-6.7.2-008 ( R-6.7.3-008
+6.7.3 Prioritization
+R-6.7.3-001 ( R-6.7.4-001
+R-6.7.3-002 ( R-6.7.4-002
+R-6.7.3-003 ( R-6.7.4-003
+R-6.7.3-004 ( R-6.7.4-004
+R-6.7.3-005 ( R-6.7.4-005
+R-6.7.3-006 ( R-6.7.4-006
+R-6.7.3-007 ( R-6.7.4-007
+6.7.4 Private Call (without Floor control) commencement requirements
+R-6.7.4-004 ( R-6.7.5-001
+R-6.7.4-008 (
+R-6.7.5-002
+R-6.7.4-011 ( R-6.7.5-003
+6.7.4a Private Call (with Floor control) commencement requirements
+6.7.5 Private Call (without Floor control) termination
+R-6.7.5-001 ( R-6.7.6-001
+R-6.7.5-003 ( R-6.7.6-002
+6.7.6 Call back request requirements
+6.8 MCPTT Priority Req
+Ambient Listening Requirements
+R-6.16.2.2.1-001 ( R-6.15.2.2.1-001
+R-6.16.2.2.1-002 ( R-6.15.2.2.1-002
+R-6.16.2.2.1-003 ( R-6.15.2.2.1-003
+6.16.2.2.2 Remotely initiated ambient listening requirements
+R-6.16.2.2.2-001 ( R-6.15.2.2.2-001
+R-6.16.2.2.2-002 ( R-6.15.2.2.2-002
+6.16.2.2.3 Locally initiated ambient listening requirements
+R-6.16.2.2.3-001 ( R-6.15.2.2.3-001
+R-6.16.2.2.3-002 ( R-6.15.2.2.3-002
+6.16.3 Remotely initiated MCPTT call
+6.16.3.1 Overview
+6.16.3.2 Requirements
+iaiii]iYRiN
+}r}}r}}r}}r}g
+ym[ymymyym[y
+7.11 Audio MCPTT Call performance
+7.11.1 MCPTT Access time and Mouth-to-ear latency
+7.11.1.1 General overview
+7.11.1.2 Requirements
+7.11.2 Late call entry performance
+7.11.2.1 General overview
+7.11.2.2 Requirements
+7.11.3 Audio/voice quality
+7.12 Off-network MCPTT operations
+The MCPTT Service might support an authorized MCPTT UE to be an MCPTT member of at least 5,000 MCPTT Groups.
+The MCPTT Service might support a minimum of 500,000 MCPTT Groups.
+The MCPTT Service might support MCPTT Group membership from two MCPTT Users to all the MCPTT Users signed on the MCPTT system.
+The MCPTT Service might support an MCPTT Group Call where all the Participants are located in one cell of the MCPTT system.
+The MCPTT Service might support an MCPTT Group Call with one or more Participants located in every cell of the MCPTT system.
+The MCPTT Service might support a range of 36 to 150 simultaneous MCPTT Group Calls in every cell of the MCPTT system per regional regulatory requirement.
+The MCPTT Service might support a minimum of 2000 MCPTT Users within an MCPTT Group or a combination of different MCPTT Groups, in every cell of the MCPTT system.
+NOTE:	The concurrent number of Participants in a cell is subject to radio capacity limitation in a cell per operator policy.
+Annex D (informative):
+Change history
+Change history
+Subject/Comment
+Raised by MCC to version 13.0.0 following SA's approval
+Correction of Figure 4.6.1-1 (previously corrupted) and of some typos, including: consistent use of capital and spaces instead of hyphens in "Push To Talk", removal of the requirement numbering for the three paragraph of sections 6.6.2.1 and 6.6.4.1 since they are not requirements
+Replacement of Home and Visited by Primary and Partner
+Completion of application of S1-144278
+Clarification of number and types of Private Calls
+Completion of application of S1-144570
+Improper use of 'emergency'
+Correct use of MCPTT terminology
+Clarifying KPI requirement
+Wording correction
+Change the title of TS 22.179 to align with MCPTT WID and agreed contribution S1-144232
+Changing Ues to UEs
+Editorial clean ups
+Correction of type of Private Calls supported in for both on and off the network use.
+Clarification of dedicated MCPTT Group type used for Imminent Peril Group call communication by MCPTT User
+Replacement of personality management with user profile management
+Modify text in first sentence of third paragraph for clause 7.1 Off-Network Push-to-Talk overview.
+Replacement of clause 5.14 title Audio/ video quality with Audio/ voice quality.
+Convert 2nd sentence of 5th requirement in clause 6.2.4 Call Termination into a new requirement
+Move two requirements from clause 6.1 General Administrative -groups and users into common clause 5.19 General Administrative -groups and users.
+Charging for MCPTT usage
+Reinstatement of MCPTT User Profile
+Fix improper multiple requirements
+Remove implementation-specific requirement for default value
+CR- to clarify requirements in 6.4.9 and 6.2.4.
+CR to clarify what call type refers to in 6.2.3.3.1
+Separation of supplementary service, callback, requirements
+Clarification on the update and use of codecs in MCPTT
+Clarification on Broadcast Groups Off-Network Requirement R-7.5-002
+Edits, formatting, and style corrections
+MCPTT Emergency Group Call correction
+KPI 4 when MBMS is used
+Mission Critical Push to Talk over LTE Realignment (MCPTT-R)
+MCImp-MCPTTR
+Inclusion of
+first-to-answer
+commencement mode for private calls
+Introduction of Audio cut-in requirements in MCPTT
+MCImp-MCPTTR
+Mission Critical Push to Talk over LTE for Realignment (MCPTT-R)
+Remove definitions for participant and participant type in MCPTT TS 22.179 that are being added to MCCoRe TS 22.280.
+MCImp-MCPTTR
+In MCPTT TS 22.179 Provide editorial changes to sub-clause 6.6.2.2.
+MCImp-MCPTTR
+Remove definition for Mission Critical Organization in MCPTT TS 22.179 that was added to MCCoRe TS 22.280 as a common definition.
+MCImp-MCPTTR
+Clarifications and corrections to audio cut-in
+MCImp-MCPTTR
+HYPERLINK "http://www.3gpp.org/ftp/tsg_sa/WG1_Serv/TSGS1_76_Tenerife/Docs/S1-163011.zip"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=623"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Release/ReleaseDetails.aspx?releaseId=189"
+Editorial change to MCPTT TS 22.179 sub-clause 6.2.3.6.2
+HYPERLINK "http://portal.3gpp.org/desktopmodules/WorkItem/WorkItemDetails.aspx?workitemId=700029"
+MCImp-MCPTTR
+HYPERLINK "http://www.3gpp.org/ftp/tsg_sa/WG1_Serv/TSGS1_76_Tenerife/Docs/S1-163012.zip"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=623"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Release/ReleaseDetails.aspx?releaseId=189"
+Editorial changes to Annex A1 sub-clause 6.2.3.6
+HYPERLINK "http://portal.3gpp.org/desktopmodules/WorkItem/WorkItemDetails.aspx?workitemId=700029"
+MCImp-MCPTTR
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Release/ReleaseDetails.aspx?releaseId=190"
+HYPERLINK "http://www.3gpp.org/ftp/tsg_sa/WG1_Serv/TSGS1_78_Porto/docs/S1-172430.zip"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=623"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Release/ReleaseDetails.aspx?releaseId=190"
+multi-talker group call
+HYPERLINK "http://portal.3gpp.org/desktopmodules/WorkItem/WorkItemDetails.aspx?workitemId=750007"
+Clarify MCPTT group in 6.2.3.7
+Correction on behavior of groups configured for multi talker control wrt groups using public safety floor control
+Removing 'over LTE' from the title of the specification
+Updates to the wording in the specification to clarify that the requirements are applicable from LTE onwards
+Addition of requirement on interworking with SCP in GSM-R
+HYPERLINK "http://www.3gpp.org/ftp/tsg_sa/WG1_Serv/TSGS1_81_Fukuoka/docs/S1-180433.zip"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=623"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Release/ReleaseDetails.aspx?releaseId=191"
+Adding more functionality to interworking between FRMCS and GSM-R
+HYPERLINK "http://portal.3gpp.org/desktopmodules/WorkItem/WorkItemDetails.aspx?workitemId=760054"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=623"
+HYPERLINK "http://www.3gpp.org/ftp/tsg_sa/WG1_Serv/TSGS1_82_Dubrovnik/Docs/S1-181707.zip"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=623"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Release/ReleaseDetails.aspx?releaseId=191"
+Interworking between MCX Service system and GSM-R
+HYPERLINK "http://portal.3gpp.org/desktopmodules/WorkItem/WorkItemDetails.aspx?workitemId=760054"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=623"
+HYPERLINK "http://www.3gpp.org/ftp/tsg_sa/WG1_Serv/TSGS1_82_Dubrovnik/Docs/S1-181708.zip"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=623"
+HYPERLINK "http://portal.3gpp.org/desktopmodules/Release/ReleaseDetails.aspx?releaseId=191"
+Adding functionality to 22.179 to support assured voice communication
+HYPERLINK "http://portal.3gpp.org/desktopmodules/WorkItem/WorkItemDetails.aspx?workitemId=760054"
+Enhancement for
+interworking of group communication between FRMCS and GSM-R
+Application of MCPTT to maritime usage
+Change history
+Subject/Comment
+New version
+Addition of new Group Call Commencement Modes
+Move interworking of functional alias from MCPTT to MCCoRe TS, MCPTT part
+Add forwarding for private calls
+Group and Private call setup KPIs
+Clarification on use of MCPTT Late call entry KPIs
+CR 0076r2 in SP-230529 creates Rel-19 from Rel-17. Version 18.0.0 is a technical-content duplicate of v.17.1.0. created for administrative reasons.
+Usage of multi-talker control for Ad hoc Group Emergency Voice Communications
+Enhancement of multi-talker control
+Enhancement of multi-talker control due to updates of FRMCS functional requirements
+Enhancement of interworking with GSM-R using Ad hoc Group Calls
+Ambient listening requirements pause and resume operation
+Call forwarding for Ad hoc Group calls
+styleref ZA
+3GPP TS 22.179 V20.0.0 (2025-03)
+styleref ZGSM
+YYYHHHiiiEEE
+cmPPJCmp0712
+77s|KsG^_7?O
+.U&8A`4}(B9
+99U+t>Klg@i
+mE\7`h$8xqDj
+/[fvZ_J\@F)
+XRiQfj~v~N??
+6_jXw$8I_=,vv
+;Iaqd;,	hy3
+sbPT^==YYTMC
+b<P"y'o;{]c
+K3c.)a49es',
+ojfk.4%!IpU
+MY<~UM[-A$:m
+oS-=<XsZzwU
+0@)Iqh.{(SP
+a.I<Uf"pc!Vc
+D*1GL=Exfm@ij
+M/&+p(KrTnD
+RL~Q8uE[!sp
+Microsoft Visio Drawing
+Visio 11.0 Shapes
+Visio.Drawing.11
+Visio (TM) Drawing
+M, ca o. 'o
+!Uai i[ n8  k WA
+/&/8/J/\/n/
+?(?:?L?YOp?@
+Microsoft Visio
+_PID_LINKBASE
+_VPID_ALTERNATENAMES
+Microsoft Visio 2003-2010 Drawing
+Visio 11.0 Shapes
+Visio.Drawing.11
+Visio (TM) Drawing
+!a[ iM un*  ] A
+@M[@c<0oN]@o
+!a[ iM un*  ] A
+A10c/0n30jP1l522
+l!D$A8CQ@?O
+&"+R:M cM i
+?*?<?N?`?r?`
+O+O=OOO@aOsO
+Tim Woodward
+888@@@@@@EPP
+@@@@@@@@@@@@@@@@@@..-
+W8"W8"W8"W8"W8"P1
+@@@@@@@@@@@@@@@@@@@@@@@@PPP
+Motorola Solutions, Inc
+Dynamic connector
+Rectangle.7
+_PID_LINKBASE
+_VPID_ALTERNATENAMES
+BuildNumberCreated
+BuildNumberEdited
+3GPP TS 22.179
+Mission Critical Push To Talk (MCPTT) over LTE; Stage 1 (Release 13)
+MCC Support
+3gpp_70.dot
+Microsoft Office Word
+s>|{>||>|}>
+[Content_Types].xml
+_rels/.rels
+theme/theme/themeManager.xml
+theme/theme/theme1.xml
+theme/theme/_rels/themeManager.xml.rels
+[Content_Types].xmlPK
+_rels/.relsPK
+theme/theme/themeManager.xmlPK
+theme/theme/theme1.xmlPK
+theme/theme/_rels/themeManager.xml.relsPK
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:clrMap xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><b:Sources SelectedStyle="\APA.XSL" StyleName="APA" xmlns:b="http://schemas.openxmlformats.org/officeDocument/2006/bibliography" xmlns="http://schemas.openxmlformats.org/officeDocument/2006/bibliography"></b:Sources>
+3GPP TS 22.179
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ds:datastoreItem ds:itemID="{7F78F714-D44A-4428-8B5C-62C57CECBF9A}" xmli
+ns:ds="http://schemas.openxmlformats.org/officeDocument/2006/customXml"><ds:schemaRefs><ds:schemaRef ds:uri="http://schemas.openxmlformats.org/officeDocument/2006/bibliography"/></ds:schemaRefs></ds:datastoreItem>
+Microsoft Word 97-2003 Document
+Word.Document.8
+3GPP TS 22.179
+_PID_HLINKS

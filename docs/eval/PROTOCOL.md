@@ -10,10 +10,10 @@
 
 Un **point de décision** est une question d'architecture ouverte à la lecture de l'étape 1, tranchée explicitement en étape 2, portant sur un choix entre au moins deux possibilités défendables, et ayant un effet sur la structure du système (entité, interface, procédure, ou répartition de responsabilité).
 
-### Exclusions
-- Reformulations purement textuelles des exigences d'étape 1.
-- Détails de protocole de niveau 3 (champs de paquets, encodage binaire TS 24.380).
-- Choix de nommage ou d'étiquettes.
+### 1.1 Méthodologie d'Attribution Historique via l'Annexe « Change History »
+Pour déterminer à quelle release chaque décision d'architecture a été tranchée (graduation historique), le pilote exploite le tableau d'annexe **« Change History »** présent dans la dernière version de chaque document (`TS 22.179`, `TS 23.179`, `TS 23.280`, `TS 23.379`, `TS 24.380`).
+
+> **Limite méthodologique assumée du pilote :** Les entrées du tableau Change History sont parfois laconiques (ex: *« inclusion of agreed CR »*). L'attribution à une release peut donc être parfois approximative. Le diff systématique entre toutes les versions téléchargées reste la méthode rigoureuse pour l'étude complète. Pour ce pilote décisionnel, ce compromis est acceptable et assumé.
 
 ---
 

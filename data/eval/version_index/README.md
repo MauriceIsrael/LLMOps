@@ -1,0 +1,1 @@
+Index des versions publiées des spécifications 3GPP (3GPP FTP archive listings) indiquant les fichiers ZIP publiés, dates de publication et codes de release (13 -> d, 14 -> e, 15 -> f, 16 -> g, 17 -> h).

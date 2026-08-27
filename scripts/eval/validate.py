@@ -91,7 +91,7 @@ def check_sources(project_root: Path) -> list[str]:
 
     for entry in spec_entries:
         filename = entry["filename"]
-        declared_hash = entry["sha256"]
+        declared_hash = entry["sha256"].strip("` ").strip()
 
         file_path = None
         for dir_rel in config.get("source_directories", []):
