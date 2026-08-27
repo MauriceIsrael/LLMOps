@@ -47,6 +47,8 @@ steps:
       - '--memory=512Mi'
       - '--set-env-vars'
       - 'GRAPH_BACKEND=ladybug,LLMOPS_TRANSPORT=sse,LLMOPS_PLANE=knowledge'
+      - '--set-secrets'
+      - 'SERVER_TOKEN=llmops-demo-token:latest'
       - '--port'
       - '8000'
 

@@ -19,6 +19,17 @@ jobs:
             exit 1
           fi
 
+      - name: Check Demo Token Consistency in Documentation
+        run: |
+          TOKEN="demo-public-2026-08"
+          for file in README.md README.fr.md docs/user_manual.md docs/renderer_integration.md; do
+            if ! grep -q "$TOKEN" "$file"; then
+              echo "ERROR: Demo token '$TOKEN' missing from $file!"
+              exit 1
+            fi
+          done
+          echo "✅ Public demo token consistency verified across documentation."
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

@@ -134,3 +134,17 @@ This document tracks the execution progress, audit findings, deferred items, and
 - None.
 
 ---
+
+## Workorder Public Demo — Lot D : Rendre le déploiement reproductible (Completed)
+
+### 1. Accomplished Actions
+- **Secret Manager Deployment Integration (D.1)**: Configured `cloudbuild.yaml` to inject `SERVER_TOKEN` secret mapping (`--set-secrets=SERVER_TOKEN=llmops-demo-token:latest`) into GCP Cloud Run deployments. Documented Secret Manager setup and private deployment token rules in `docs/deployment.md`.
+- **CI Token Consistency Enforcement (D.2)**: Added automated step to `.github/workflows/ci.yml` asserting that the active public demo token string (`demo-public-2026-08`) is present across all public documentation files (`README.md`, `README.fr.md`, `docs/user_manual.md`, `docs/renderer_integration.md`). Documented 3-step token rotation procedure in `docs/deployment.md`.
+
+### 2. Noticed but Deferred / Action Required
+- None.
+
+### 3. Discrepancies with Workorder Spec
+- None.
+
+---
