@@ -19,15 +19,18 @@ from pathlib import Path
 CONFIG_PATH = Path(__file__).parent / "eval_config.json"
 
 
-def get_latest_zip_url_from_index(html_content: str, spec_num: str) -> str | None:
-    # Look for zip filenames like 22179-*.zip, 23179-*.zip, 23280-*.zip, 23379-*.zip, 24380-*.zip
-    pattern = rf'href=["\'](https?://[^"\']*/{spec_num}-[^"\']+\.zip|/[^"\']*/{spec_num}-[^"\']+\.zip|{spec_num}-[^"\']+\.zip)["\']'
+def get_latest_zip_url_from_index(html_content: str, spec_num: str, rel_prefix: str | None = None) -> str | None:
+    # Look for zip filenames like 22179-d*.zip or 23179-*.zip
+    if rel_prefix:
+        pattern = rf'href=["\'](https?://[^"\']*/{spec_num}-{rel_prefix}[^"\']+\.zip|/[^"\']*/{spec_num}-{rel_prefix}[^"\']+\.zip|{spec_num}-{rel_prefix}[^"\']+\.zip)["\']'
+    else:
+        pattern = rf'href=["\'](https?://[^"\']*/{spec_num}-[^"\']+\.zip|/[^"\']*/{spec_num}-[^"\']+\.zip|{spec_num}-[^"\']+\.zip)["\']'
     matches = re.findall(pattern, html_content, re.IGNORECASE)
 
     if not matches:
         return None
 
-    # Pick the last match (chronologically latest published version in 3GPP archive)
+    # Pick the last match (chronologically latest published version for that release prefix)
     last_match = matches[-1]
     if last_match.startswith("http"):
         return last_match
@@ -44,14 +47,19 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     target_specs = [
-        ("TS 22.179", "22179", "https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/"),
-        ("TS 23.179", "23179", "https://www.3gpp.org/ftp/Specs/archive/23_series/23.179/"),
-        ("TS 23.280", "23280", "https://www.3gpp.org/ftp/Specs/archive/23_series/23.280/"),
-        ("TS 23.379", "23379", "https://www.3gpp.org/ftp/Specs/archive/23_series/23.379/"),
-        ("TS 24.380", "24380", "https://www.3gpp.org/ftp/Specs/archive/24_series/24.380/"),
+        ("TS 22.179", "22179", "https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/", "d"),  # Rel-13 22179-d*
+        ("TS 23.179", "23179", "https://www.3gpp.org/ftp/Specs/archive/23_series/23.179/", "d"),  # Rel-13 23179-d*
+        ("TS 23.280", "23280", "https://www.3gpp.org/ftp/Specs/archive/23_series/23.280/", None),
+        ("TS 23.379", "23379", "https://www.3gpp.org/ftp/Specs/archive/23_series/23.379/", None),
+        ("TS 24.380", "24380", "https://www.3gpp.org/ftp/Specs/archive/24_series/24.380/", None),
     ]
 
-    for doc_label, spec_num, archive_url in target_specs:
+    for item in target_specs:
+        doc_label = item[0]
+        spec_num = item[1]
+        archive_url = item[2]
+        rel_prefix = item[3]
+
         clean_name = doc_label.replace(" ", "_")
         idx_file = version_index_dir / f"{clean_name}.html"
 
@@ -69,7 +77,7 @@ def main() -> None:
                 print(f"❌ Failed to fetch index for {doc_label}: {e}")
                 continue
 
-        zip_url = get_latest_zip_url_from_index(html_content, spec_num)
+        zip_url = get_latest_zip_url_from_index(html_content, spec_num, rel_prefix)
         if not zip_url:
             print(f"⚠️ Could not find zip package URL for {doc_label} in index.")
             continue

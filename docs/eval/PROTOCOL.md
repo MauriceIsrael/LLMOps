@@ -15,6 +15,17 @@ Pour déterminer à quelle release chaque décision d'architecture a été tranc
 
 > **Limite méthodologique assumée du pilote :** Les entrées du tableau Change History sont parfois laconiques (ex: *« inclusion of agreed CR »*). L'attribution à une release peut donc être parfois approximative. Le diff systématique entre toutes les versions téléchargées reste la méthode rigoureuse pour l'étude complète. Pour ce pilote décisionnel, ce compromis est acceptable et assumé.
 
+### 1.2 Appariement Chronologique des Versions
+Pour garantir que les exigences de l'Étape 1 précèdent strictement les choix d'architecture de l'Étape 2 qu'elles alimentent, l'appariement des versions est fixe et tracé comme suit :
+
+| Volet | Spécification | Version retenue | Description & Rôle chronologique |
+|---|---|---|---|
+| **Étape 1 (Entrée)** | `TS 22.179` | `Rel-13` (`v13.3.0` / `22179-d30`) | **Exigences initiales MCPTT Rel-13.** Précède chronologiquement l'architecture de 2017. |
+| **Étape 2 (Socle)** | `TS 23.179` | `Rel-13` (`v13.5.0` / `23179-d50`) | **Architecture fonctionnelle initiale MCPTT Rel-13.** Document figé. |
+| **Étape 2 (Évolution)** | `TS 23.280` | `Rel-14+` (`v14.4.0` / `23280-k40`) | Architecture commune des services critiques (scission Rel-14+). |
+| **Étape 2 (Évolution)** | `TS 23.379` | `Rel-14+` (`v14.3.0` / `23379-k30`) | Architecture plan média et contrôle de la parole MCPTT (scission Rel-14+). |
+| **Étape 3 (Délimitation)** | `TS 24.380` | `Rel-14+` (`v14.0.0` / `24380-k00`) | Protocole de contrôle de la parole Étape 3 (utilisé uniquement pour délimiter les détails de protocole). |
+
 ---
 
 ## 2. Accord Inter-Annotateurs & Intervalle de Confiance (§5.3)

@@ -53,6 +53,37 @@ def test_sha256_mismatch_rejection(tmp_path: Path):
     assert "SHA-256 Mismatch" in errors[0]
 
 
+def test_extracted_length_mismatch_rejection(tmp_path: Path):
+    """Asserts that a discrepancy between declared length in SOURCES.md and calculated text length is rejected."""
+    sources_dir = tmp_path / "data" / "eval" / "sources"
+    sources_dir.mkdir(parents=True)
+
+    spec_file = sources_dir / "TS_22.179.txt"
+    sample_text = "Sample 3GPP specification text " * 500
+    spec_file.write_text(sample_text, encoding="utf-8")
+
+    real_hash = compute_sha256(spec_file)
+
+    extracted_dir = tmp_path / "data" / "eval" / "extracted"
+    extracted_dir.mkdir(parents=True)
+    extracted_txt = extracted_dir / "TS_22.179.txt"
+    extracted_txt.write_text(sample_text, encoding="utf-8")
+
+    manifest_dir = tmp_path / "docs" / "eval"
+    manifest_dir.mkdir(parents=True)
+
+    # Intentionally declare a wrong length (999,999 chars vs actual ~15,500 chars)
+    manifest = manifest_dir / "SOURCES.md"
+    manifest.write_text(
+        f"| Document | Filename | SHA-256 | Size | Extracted Length |\n|---|---|---|---|---|\n| TS 22.179 | TS_22.179.txt | `{real_hash}` | 15 KB | 999,999 chars |\n",
+        encoding="utf-8",
+    )
+
+    errors = check_sources(tmp_path)
+    assert len(errors) > 0
+    assert "Length Mismatch" in errors[0]
+
+
 def test_verbatim_quote_not_found_rejection(tmp_path: Path):
     """Asserts that a decision point with a verbatim quote not in the spec text is rejected."""
     extracted_dir = tmp_path / "data" / "eval" / "extracted"

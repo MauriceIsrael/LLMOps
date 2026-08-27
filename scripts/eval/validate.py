@@ -84,13 +84,17 @@ def check_sources(project_root: Path) -> list[str]:
         if line.startswith("|") and not line.startswith("| Document") and not line.startswith("|---"):
             parts = [p.strip() for p in line.split("|")[1:-1]]
             if len(parts) >= 4:
-                spec_entries.append({"doc_id": parts[0], "filename": parts[1], "sha256": parts[2], "size": parts[3]})
+                entry_data = {"doc_id": parts[0], "filename": parts[1], "sha256": parts[2], "size": parts[3]}
+                if len(parts) >= 5:
+                    entry_data["declared_length"] = parts[4]
+                spec_entries.append(entry_data)
 
     if not spec_entries:
         return ["No spec entries found in docs/eval/SOURCES.md"]
 
     for entry in spec_entries:
         filename = entry["filename"]
+        doc_id = entry["doc_id"]
         declared_hash = entry["sha256"].strip("` ").strip()
 
         file_path = None
@@ -101,17 +105,30 @@ def check_sources(project_root: Path) -> list[str]:
                 break
 
         if not file_path:
-            errors.append(f"Source file '{filename}' for {entry['doc_id']} not found on disk.")
+            errors.append(f"Source file '{filename}' for {doc_id} not found on disk.")
             continue
 
         actual_hash = compute_sha256(file_path)
         if actual_hash.lower() != declared_hash.lower():
             errors.append(f"SHA-256 Mismatch for '{filename}': declared {declared_hash}, calculated {actual_hash}.")
 
-        if file_path.suffix.lower() in (".txt", ".json"):
-            content = file_path.read_text(encoding="utf-8")
-            if len(content) < min_len:
-                errors.append(f"Extracted text for '{filename}' is too short: {len(content)} chars (min: {min_len}).")
+        # Recalculate extracted text length and compare against SOURCES.md
+        txt_path = project_root / "data" / "eval" / "extracted" / f"{doc_id.replace(' ', '_')}.txt"
+        if txt_path.exists():
+            content = txt_path.read_text(encoding="utf-8")
+            actual_len = len(content)
+
+            if actual_len < min_len:
+                errors.append(f"Extracted text for '{filename}' is too short: {actual_len} chars (min: {min_len}).")
+
+            if "declared_length" in entry and entry["declared_length"]:
+                match_digits = re.search(r"([\d,]+)", entry["declared_length"])
+                if match_digits:
+                    declared_num = int(match_digits.group(1).replace(",", ""))
+                    if actual_len != declared_num:
+                        errors.append(
+                            f"Length Mismatch for '{doc_id}': declared in SOURCES.md ({declared_num:,} chars), calculated from text on disk ({actual_len:,} chars)."
+                        )
 
     return errors
 
