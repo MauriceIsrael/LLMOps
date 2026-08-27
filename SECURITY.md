@@ -17,6 +17,6 @@ For details on configuring a private, authenticated enterprise deployment with d
 We take the security of LLMOps seriously. If you discover a security vulnerability (such as a bypass of read-only Cypher enforcement or authentication bypass):
 
 1. **Do NOT open a public GitHub issue.**
-2. Email your vulnerability details privately to `security@llmops.local` or contact repository maintainers directly.
+2. Use [GitHub Private Vulnerability Reporting](https://github.com/MauriceIsrael/LLMOps/security/advisories/new) to submit your report privately to repository maintainers.
 3. Include detailed steps to reproduce the issue and any relevant payload logs.
 4. We will acknowledge receipt of your report within 48 hours and work with you on a resolution timeline.
