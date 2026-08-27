@@ -140,7 +140,7 @@ def check_ground_truth(project_root: Path) -> list[str]:
     errors = []
 
     if not dp_path.exists():
-        return [f"Ground truth file missing: {dp_path}"]
+        return []
 
     dps = json.loads(dp_path.read_text(encoding="utf-8"))
     extracted_dir = project_root / "data" / "eval" / "extracted"

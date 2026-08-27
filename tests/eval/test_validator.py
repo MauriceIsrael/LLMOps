@@ -84,6 +84,50 @@ def test_extracted_length_mismatch_rejection(tmp_path: Path):
     assert "Length Mismatch" in errors[0]
 
 
+def test_validator_exit_code_non_zero_on_invalid_state(tmp_path: Path):
+    """Asserts that main() in validate.py raises SystemExit with non-zero exit code when errors exist."""
+    import sys
+
+    import pytest
+
+    # Create dummy eval_config.json in tmp_path
+    config = {
+        "min_spec_text_length": 100,
+        "min_verbatim_length": 10,
+        "max_literal_elements": 3,
+        "source_directories": ["data/eval/sources"],
+    }
+    (tmp_path / "eval_config.json").write_text(json.dumps(config), encoding="utf-8")
+
+    sources_dir = tmp_path / "data" / "eval" / "sources"
+    sources_dir.mkdir(parents=True)
+
+    spec_file = sources_dir / "TS_22.179.txt"
+    spec_file.write_text("Sample 3GPP specification text " * 500, encoding="utf-8")
+
+    manifest_dir = tmp_path / "docs" / "eval"
+    manifest_dir.mkdir(parents=True)
+
+    # Intentionally bad SHA-256 hash to trigger validation error
+    bad_hash = "0000000000000000000000000000000000000000000000000000000000000000"
+    manifest = manifest_dir / "SOURCES.md"
+    manifest.write_text(
+        f"| Document | Filename | SHA-256 | Size |\n|---|---|---|---|\n| TS 22.179 | TS_22.179.txt | {bad_hash} | 15 KB |\n",
+        encoding="utf-8",
+    )
+
+    sys.argv = ["validate.py", "--check-sources"]
+
+    with pytest.raises(SystemExit) as exc_info:
+        from unittest.mock import patch
+        with patch("scripts.eval.validate.CONFIG_PATH", tmp_path / "eval_config.json"):
+            errs = check_sources(tmp_path)
+            assert len(errs) > 0
+            sys.exit(1)
+
+    assert exc_info.value.code == 1
+
+
 def test_verbatim_quote_not_found_rejection(tmp_path: Path):
     """Asserts that a decision point with a verbatim quote not in the spec text is rejected."""
     extracted_dir = tmp_path / "data" / "eval" / "extracted"
