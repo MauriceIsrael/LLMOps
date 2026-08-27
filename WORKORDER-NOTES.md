@@ -148,3 +148,18 @@ This document tracks the execution progress, audit findings, deferred items, and
 - None.
 
 ---
+
+## Workorder Public Demo — Lot E : Déclarer la démonstration (Completed)
+
+### 1. Accomplished Actions
+- **Public Demo Notice Banners (E.1)**: Added explicit public demonstration notice banners in `README.md` and `README.fr.md` under the remote SSE configuration snippet clarifying that the public deployment serves Knowledge plane only, read-only, rate-limited, with no SLA.
+- **Root Security Policy (E.2)**: Authored root `SECURITY.md` establishing vulnerability reporting procedures and clarifying that the published demo token (`demo-public-2026-08`) is an intentionally public credential.
+- **Enriched `/health` Endpoint (E.3)**: Updated `handle_health` in `mcp_server/main.py` to return target plane (`knowledge`), `schema_version` (`1.0`), graph node count (`asset_count`), and database status.
+
+### 2. Noticed but Deferred / Action Required
+- None.
+
+### 3. Discrepancies with Workorder Spec
+- None.
+
+---

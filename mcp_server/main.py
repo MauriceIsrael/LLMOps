@@ -170,14 +170,35 @@ async def run_sse_authenticated(host: str, port: int) -> None:
     """Démarre le serveur SSE FastMCP enveloppé dans le middleware d'authentification."""
 
     async def handle_health(request):
+        active_plane = os.getenv("LLMOPS_PLANE", server_config.plane).lower()
+        backend = os.getenv("GRAPH_BACKEND", "ladybug")
         try:
             from tools.adapters.kuzu_store import make_graph_store
             store = make_graph_store("data/knowledge.kuzu", read_only=True)
-            res = store.execute_cypher("RETURN 1 as ok;")
+            res = store.execute_cypher("MATCH (a:Asset) RETURN count(a) as count;")
+            asset_count = res[0]["count"] if res and isinstance(res, list) and "count" in res[0] else 0
             store.close()
-            return JSONResponse({"status": "ok", "backend": os.getenv("GRAPH_BACKEND", "ladybug"), "db_check": res}, status_code=200)
+            return JSONResponse(
+                {
+                    "status": "ok",
+                    "plane": active_plane,
+                    "schema_version": "1.0",
+                    "asset_count": asset_count,
+                    "backend": backend,
+                },
+                status_code=200,
+            )
         except Exception as e:
-            return JSONResponse({"status": "ok", "backend": os.getenv("GRAPH_BACKEND", "ladybug"), "warning": str(e)}, status_code=200)
+            return JSONResponse(
+                {
+                    "status": "ok",
+                    "plane": active_plane,
+                    "schema_version": "1.0",
+                    "backend": backend,
+                    "warning": str(e),
+                },
+                status_code=200,
+            )
 
     async def handle_sse(request):
         async with sse_transport.connect_sse(

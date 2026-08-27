@@ -27,6 +27,8 @@ Ajoutez la configuration suivante dans votre client MCP (ex: `claude_desktop_con
 }
 ```
 
+> **Avertissement Instance de Démonstration Publique :** Plan connaissances uniquement, lecture seule, taux limité, pas de SLA. Le jeton ci-dessus (`demo-public-2026-08`) est intentionnellement public et renouvelé périodiquement. Ne l'utilisez pas pour des données privées.
+
 ### 2. Connexion Locale (STDIO via Poetry)
 
 ```json
