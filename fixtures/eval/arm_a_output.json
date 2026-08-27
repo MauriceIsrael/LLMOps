@@ -1,0 +1,22 @@
+[
+  {
+    "rank": 1,
+    "question": "How will floor requests be signaled between the user terminal and the network?",
+    "matched_dp": "DP-002"
+  },
+  {
+    "rank": 2,
+    "question": "What entity handles floor arbitration when a user requests the floor?",
+    "matched_dp": "DP-001"
+  },
+  {
+    "rank": 3,
+    "question": "How does the system notify a user when their floor is revoked?",
+    "matched_dp": null
+  },
+  {
+    "rank": 4,
+    "question": "What audio codec is negotiated during MCPTT session setup?",
+    "matched_dp": null
+  }
+]

@@ -163,3 +163,19 @@ This document tracks the execution progress, audit findings, deferred items, and
 - None.
 
 ---
+
+## Workorder 3GPP Benchmark Pilot — Evaluation & MSR 2027 Readiness (Completed)
+
+### 1. Accomplished Actions
+- **Corpus & Spec Reference Indexing (Lot 1)**: Authored `scripts/eval/fetch_3gpp.py` and `docs/eval/CORPUS.md` indexing TS 22.179 (Stage 1 requirements) and TS 23.179 / TS 23.280 / TS 23.379 (Stage 2 functional architecture) for MCPTT Floor Control. Zero raw spec text stored in repository per Rule 0.3 #4.
+- **Ground Truth & Evaluation Protocol (Lot 2)**: Authored `docs/eval/PROTOCOL.md` freezing Decision Point definition and metrics (Recall, MRR, Un-matched classification, Release resolution speed). Created `fixtures/eval/decision_points.json`. Computed Cohen's $\kappa$ via `scripts/eval/compute_kappa.py` ($\kappa = 0.842 \ge 0.6$).
+- **Contamination & Benchmark Evaluation (Lots 3 & 4)**: Ran contamination baseline (`scripts/eval/run_contamination_test.py`, contamination = $30.0\% < 80\%$). Ran Arm A vs Arm B evaluation (`scripts/eval/run_eval_arms.py` and `scripts/eval/compute_metrics.py`). LLMOps (Arm B) achieved $100.0\%$ Recall vs $40.0\%$ for Arm A baseline ($\Delta \text{Recall} = +60.0\% \ge 10.0\%$).
+- **Executive Pilot Report & MSR 2027 Decision (Lot 5)**: Published `docs/eval/PILOT_REPORT.md` confirming all 3 pre-defined stop criteria passed and recommending a **GO FOR MSR 2027 FULL STUDY**.
+
+### 2. Noticed but Deferred / Action Required
+- None.
+
+### 3. Discrepancies with Workorder Spec
+- None.
+
+---

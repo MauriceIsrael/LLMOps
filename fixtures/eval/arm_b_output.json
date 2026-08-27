@@ -1,0 +1,27 @@
+[
+  {
+    "rank": 1,
+    "question": "How should floor control arbitration be topologically organized (centralized server vs peer-to-peer distributed)?",
+    "matched_dp": "DP-001"
+  },
+  {
+    "rank": 2,
+    "question": "What signaling protocol transport mechanism should carry floor request and floor grant messages in on-network mode?",
+    "matched_dp": "DP-002"
+  },
+  {
+    "rank": 3,
+    "question": "Should control plane floor arbitration and user plane audio media distribution be integrated or decoupled?",
+    "matched_dp": "DP-003"
+  },
+  {
+    "rank": 4,
+    "question": "How is floor control collision handled when operating in off-network ProSe mode without a central server?",
+    "matched_dp": "DP-004"
+  },
+  {
+    "rank": 5,
+    "question": "What signaling sequence is executed when a high-priority user overrides an active floor holder?",
+    "matched_dp": "DP-005"
+  }
+]
