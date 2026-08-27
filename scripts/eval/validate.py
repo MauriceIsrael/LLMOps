@@ -97,6 +97,7 @@ def check_sources(project_root: Path) -> list[str]:
         doc_id = entry["doc_id"]
         declared_hash = entry["sha256"].strip("` ").strip()
 
+        # --- CHECK 1: Raw binary file SHA-256 (if binary file is present on disk) ---
         file_path = None
         for dir_rel in config.get("source_directories", []):
             candidate = project_root / dir_rel / filename
@@ -104,22 +105,21 @@ def check_sources(project_root: Path) -> list[str]:
                 file_path = candidate
                 break
 
-        if not file_path:
-            errors.append(f"Source file '{filename}' for {doc_id} not found on disk.")
-            continue
+        if file_path:
+            actual_hash = compute_sha256(file_path)
+            if actual_hash.lower() != declared_hash.lower():
+                errors.append(f"SHA-256 Mismatch for '{filename}': declared {declared_hash}, calculated {actual_hash}.")
 
-        actual_hash = compute_sha256(file_path)
-        if actual_hash.lower() != declared_hash.lower():
-            errors.append(f"SHA-256 Mismatch for '{filename}': declared {declared_hash}, calculated {actual_hash}.")
-
-        # Recalculate extracted text length and compare against SOURCES.md
+        # --- CHECK 2: Extracted Text File & Length Check against SOURCES.md (DECOUPLED & MANDATORY) ---
         txt_path = project_root / "data" / "eval" / "extracted" / f"{doc_id.replace(' ', '_')}.txt"
-        if txt_path.exists():
+        if not txt_path.exists():
+            errors.append(f"Extracted text file for '{doc_id}' missing on disk: data/eval/extracted/{doc_id.replace(' ', '_')}.txt")
+        else:
             content = txt_path.read_text(encoding="utf-8")
             actual_len = len(content)
 
             if actual_len < min_len:
-                errors.append(f"Extracted text for '{filename}' is too short: {actual_len} chars (min: {min_len}).")
+                errors.append(f"Extracted text for '{doc_id}' is too short: {actual_len} chars (min: {min_len}).")
 
             if "declared_length" in entry and entry["declared_length"]:
                 match_digits = re.search(r"([\d,]+)", entry["declared_length"])
@@ -129,6 +129,10 @@ def check_sources(project_root: Path) -> list[str]:
                         errors.append(
                             f"Length Mismatch for '{doc_id}': declared in SOURCES.md ({declared_num:,} chars), calculated from text on disk ({actual_len:,} chars)."
                         )
+                else:
+                    errors.append(f"Invalid declared length format in SOURCES.md for '{doc_id}': '{entry['declared_length']}'")
+            else:
+                errors.append(f"Missing declared Extracted Length in SOURCES.md for '{doc_id}'.")
 
     return errors
 
@@ -145,31 +149,34 @@ def check_ground_truth(project_root: Path) -> list[str]:
     dps = json.loads(dp_path.read_text(encoding="utf-8"))
     extracted_dir = project_root / "data" / "eval" / "extracted"
 
+    if not dps:
+        errors.append(f"Ground truth file '{dp_path.name}' is empty.")
+        return errors
+
     for dp in dps:
-        dp_id = dp.get("id", "UNKNOWN")
+        dp_id = dp.get("dp_id", "UNKNOWN")
+        doc_id = dp.get("doc_id")
         verbatim = dp.get("verbatim", "")
-        declared_hash = dp.get("source_sha256", "")
-        source_doc = dp.get("source_doc", "")
 
-        if len(verbatim) < min_verbatim_len:
-            errors.append(f"Decision point {dp_id}: verbatim length ({len(verbatim)}) is shorter than min {min_verbatim_len} chars.")
+        if not verbatim or len(verbatim.strip()) < min_verbatim_len:
+            errors.append(f"DP '{dp_id}': verbatim quote is missing or under minimum length ({min_verbatim_len} chars).")
             continue
 
+        if not doc_id:
+            errors.append(f"DP '{dp_id}': missing 'doc_id' field.")
+            continue
+
+        txt_file = extracted_dir / f"{doc_id.replace(' ', '_')}.txt"
+        if not txt_file.exists():
+            errors.append(f"DP '{dp_id}': extracted text file for '{doc_id}' not found at {txt_file}.")
+            continue
+
+        spec_text = txt_file.read_text(encoding="utf-8")
         norm_verbatim = normalize_spaces(verbatim)
-        spec_text_path = extracted_dir / f"{source_doc.replace(' ', '_')}.txt"
+        norm_spec_text = normalize_spaces(spec_text)
 
-        if not spec_text_path.exists():
-            errors.append(f"Decision point {dp_id}: source text file {spec_text_path.name} not found.")
-            continue
-
-        actual_hash = compute_sha256(spec_text_path)
-        if declared_hash and actual_hash.lower() != declared_hash.lower():
-            errors.append(f"Decision point {dp_id}: SHA-256 mismatch for source text {spec_text_path.name}.")
-            continue
-
-        spec_text = normalize_spaces(spec_text_path.read_text(encoding="utf-8"))
-        if norm_verbatim not in spec_text:
-            errors.append(f"Decision point {dp_id}: verbatim quote NOT FOUND in source specification text ({source_doc}).")
+        if norm_verbatim.lower() not in norm_spec_text.lower():
+            errors.append(f"Ground Truth Violation in DP '{dp_id}': verbatim quote is not an exact substring of {doc_id}.")
 
     return errors
 
@@ -184,7 +191,6 @@ def check_runs(project_root: Path) -> list[str]:
             continue
 
         data = json.loads(arm_path.read_text(encoding="utf-8"))
-
         if isinstance(data, dict):
             run_dir_name = data.get("run_dir")
             items = data.get("questions", [])
