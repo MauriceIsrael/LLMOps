@@ -45,7 +45,7 @@ from mcp_server.knowledge.tools import (
     search_assets,
 )
 
-# Initialisation de l'instance FastMCP principale (par défaut plane knowledge/omnibus)
+active_plane = os.getenv("LLMOPS_PLANE", server_config.plane).lower()
 mcp = FastMCP(server_config.app_name)
 
 # Enregistrement des outils typés du plan de connaissances
@@ -59,17 +59,18 @@ mcp.tool()(get_principles_for)
 mcp.tool()(query_graph)
 mcp.tool()(get_graph_summary)
 
-# Enregistrement des outils du plan d'engagement
-mcp.tool()(get_subject)
-mcp.tool()(get_subject_trajectory)
-mcp.tool()(get_board)
-mcp.tool()(get_statements)
-mcp.tool()(get_conflicts)
-mcp.tool()(get_open_questions)
-mcp.tool()(get_diagram_graph)
-mcp.tool()(get_render_payload)
-mcp.tool()(get_dangling_references)
-mcp.tool()(get_engagement_export)
+# Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
+if active_plane != "knowledge":
+    mcp.tool()(get_subject)
+    mcp.tool()(get_subject_trajectory)
+    mcp.tool()(get_board)
+    mcp.tool()(get_statements)
+    mcp.tool()(get_conflicts)
+    mcp.tool()(get_open_questions)
+    mcp.tool()(get_diagram_graph)
+    mcp.tool()(get_render_payload)
+    mcp.tool()(get_dangling_references)
+    mcp.tool()(get_engagement_export)
 
 
 import secrets

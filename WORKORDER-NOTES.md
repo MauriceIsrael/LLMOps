@@ -106,3 +106,17 @@ This document tracks the execution progress, audit findings, deferred items, and
 - None.
 
 ---
+
+## Workorder Public Demo — Lot B : Réduire la surface au plan connaissance (Completed)
+
+### 1. Accomplished Actions
+- **Knowledge Plane Restriction (B.1)**: Updated `mcp_server/main.py` to evaluate `LLMOPS_PLANE=knowledge`. When `LLMOPS_PLANE` is set to `knowledge`, only Knowledge Plane tools (`list_assets`, `get_asset`, `get_assets`, `get_decision_trail`, `get_glossary_term`, `search_assets`, `get_principles_for`, `query_graph`, `get_graph_summary`) are registered on FastMCP. Engagement tools are excluded.
+- **Dockerfile Build Safety (B.2)**: Set `ENV LLMOPS_PLANE=knowledge` in `Dockerfile`. Removed `|| true` from `RUN poetry run python -m pipelines.ingestion.migrate_adr0015` so build fails if migration fails. Removed unnecessary `elicit publish` step. Added build assertion step verifying `Asset` node count in `data/knowledge.kuzu` is strictly greater than 0.
+
+### 2. Noticed but Deferred / Action Required
+- None.
+
+### 3. Discrepancies with Workorder Spec
+- None.
+
+---
