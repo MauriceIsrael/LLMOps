@@ -1,0 +1,37 @@
+{
+  "project_name": "LLMOps 3GPP Elicitation Benchmark",
+  "min_spec_text_length": 10000,
+  "min_verbatim_length": 40,
+  "max_literal_elements": 3,
+  "source_directories": [
+    "data/eval/sources/upload/3gpp",
+    "data/eval/sources",
+    "data/eval/extracted"
+  ],
+  "target_specifications": [
+    {
+      "doc_id": "TS 22.179",
+      "stage": 1,
+      "title": "Mission Critical Push To Talk (MCPTT) over LTE; Service requirements",
+      "url": "https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/"
+    },
+    {
+      "doc_id": "TS 23.179",
+      "stage": 2,
+      "title": "Functional architecture and information flows to support MCPTT; Stage 2",
+      "url": "https://www.3gpp.org/ftp/Specs/archive/23_series/23.179/"
+    },
+    {
+      "doc_id": "TS 23.280",
+      "stage": 2,
+      "title": "Common functional architecture for mission critical services; Stage 2",
+      "url": "https://www.3gpp.org/ftp/Specs/archive/23_series/23.280/"
+    },
+    {
+      "doc_id": "TS 23.379",
+      "stage": 2,
+      "title": "Functional architecture and information flows to support MCPTT; Stage 2",
+      "url": "https://www.3gpp.org/ftp/Specs/archive/23_series/23.379/"
+    }
+  ]
+}

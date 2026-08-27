@@ -179,3 +179,20 @@ This document tracks the execution progress, audit findings, deferred items, and
 - None.
 
 ---
+
+## Workorder v2 — Pilote du banc d'élicitation 3GPP (anti-fabrication) — Phase 0 to Phase 3 Status
+
+### 1. Accomplished Actions
+- **Purge of v1 Fake Artifacts (§0)**: Removed all synthetic hardcoded data literals, fake inter-annotator lists, and pre-matched LLM outputs from v1 commit `5838c6c`.
+- **Phase 0 — Automated Anti-Fabrication Validator (§2)**: Created `scripts/eval/eval_config.json`, `scripts/eval/validate.py`, and `tests/eval/test_validator.py`. Verified AST anti-literal limit (<=3 elements per literal), SHA-256 spec verification, verbatim exact quote substring matching, and model log directory checking. All 5 validator tests passed in `pytest`.
+- **Phase 1 — Specification Acquisition & SHA-256 Hashing (§3)**: Authored `docs/eval/ACQUISITION.md`, `scripts/eval/fetch_3gpp.py`, and `scripts/eval/extract_pdf_text.py`. Successfully acquired official 3GPP directory archives for TS 22.179, TS 23.179, TS 23.280, and TS 23.379. Generated `docs/eval/SOURCES.md` with exact SHA-256 hashes.
+- **Phase 2 — Perimeter & Extraction (§4)**: Measured extracted specification text volume and created `scripts/eval/extract_clauses.py` and `docs/eval/CORPUS.md`.
+- **Phase 3 — Frozen Protocol & Candidate CSV Handoff (§5)**: Created `docs/eval/PROTOCOL.md` freezing Decision Point definition, Cohen's $\kappa$ 95% confidence interval rules ($IC_{95\%\_lower} < 0.50 \to$ inconclusive), and both double-annotation variants. Created `annotation/candidates.csv` with candidate clauses and **THREE STRICTLY EMPTY COLUMNS** (`is_decision_point`, `question`, `verbatim`). Created `scripts/eval/compute_kappa.py` reading two separate CSV files.
+
+### 2. Noticed but Deferred / Action Required (Human Handoff §5.2)
+- **Non-Delegable Human Annotation (§5.2)**: Agent execution has stopped per §5.2 and user instructions. The user/human annotator must now fill the 3 empty columns in `annotation/candidates.csv` (and produce `annotation/annotator2.csv` or `annotation/annotator1_retest.csv`). The agent has not filled any annotation column, even as suggestions.
+
+### 3. Discrepancies with Workorder Spec
+- None.
+
+---

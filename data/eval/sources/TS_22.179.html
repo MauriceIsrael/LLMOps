@@ -1,0 +1,1011 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Directory Listing /ftp/Specs/archive/22_series/22.179/</title>
+        <style type="text/css">            
+			body{font-size:0.8em}
+            a { text-decoration: none; }
+            a:hover { text-decoration: underline; }
+            th {text-align:left;}
+            .box {float: left;  min-height: 50px;  margin: 0.5em; }
+            .after-box {  clear: left;}
+			h2 { margin-top:30px;}
+			.icon{width:22px;height:22px}
+			.myButton {
+				box-shadow:inset 0px 1px 0px 0px #a4e271;
+				background:linear-gradient(to bottom, #89c403 5%, #77a809 100%);
+				background-color:#89c403;
+				border-radius:6px;
+				border:1px solid #74b807;
+				display:inline-block;
+				cursor:pointer;
+				color:#ffffff;
+				font-family:Arial;
+				font-size:15px;
+				font-weight:bold;
+				padding:6px 24px;
+				text-decoration:none;
+				text-shadow:0px 1px 0px #528009;
+				margin-top:25px;
+			}
+			.myButton:hover {
+				background:linear-gradient(to bottom, #77a809 5%, #89c403 100%);
+				background-color:#77a809;
+			}
+			.myButton:active {
+				position:relative;
+				top:1px;
+			}
+			#dragNdrop{
+			
+				display:none;
+			
+				border:4px grey dashed;
+				width:500px;
+				padding:50px;
+				text-align: center;
+				-webkit-border-radius: 5px;
+				-moz-border-radius: 5px;
+				border-radius: 5px;
+				margin-bottom:15px;				
+			}
+			#dragNdrop:hover{
+				cursor:pointer;
+			}
+			.resultMsg{
+				font-size:20px;
+				width:40%;
+				padding: 15px;
+				margin-bottom: 20px;
+				border: 1px solid transparent;
+				border-radius: 4px;
+			}
+			.success{
+				color: #3c763d;
+				background-color: #dff0d8;
+				border-color: #d6e9c6;
+			}
+			.failure{
+				color: #a94442;
+				background-color: #f2dede;
+				border-color: #ebccd1;
+				background-repeat: no-repeat;
+				background-position: left center;
+			}
+
+        </style>
+		<script type="text/javascript">
+			function expandDnD(){
+				
+				window.location = window.location.href + "?login=1";
+				
+				var divDnD = document.getElementById("dragNdrop");
+				divDnD.style.display = "block";
+			}	
+		</script>
+    </head>
+    <body>
+        <header>
+            <div class="box">
+                <img alt="ETSI logo" width="100" src="/ftp/zIcons/main-logo-3gpp.png">
+            </div>
+            <div class="box">
+                <h2>
+                
+                        
+                        <a href="https://www.3gpp.org/">www.3gpp.org</a> /
+                        
+                        <a href="https://www.3gpp.org/ftp/">ftp</a> /
+                    
+                        <a href="https://www.3gpp.org/ftp/Specs/">Specs</a> /
+                    
+                        <a href="https://www.3gpp.org/ftp/Specs/archive/">archive</a> /
+                    
+                        <a href="https://www.3gpp.org/ftp/Specs/archive/22_series/">22_series</a> /
+                    
+                        22.179
+                    
+                    </h2>
+            </div>
+			
+            <div class="after-box">
+            </div>
+        </header>
+			
+        <form method="post" action="./" id="ctl00">
+<div class="aspNetHidden">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKLTYzMzc3NjExMA9kFgRmDxYCHgtfIUl0ZW1Db3VudAIFFgoCAQ9kFgJmDxUBLTxhIGhyZWY9Imh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC8iPmZ0cDwvYT4gL2QCAg9kFgJmDxUBNTxhIGhyZWY9Imh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy8iPlNwZWNzPC9hPiAvZAIDD2QWAmYPFQE/PGEgaHJlZj0iaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvIj5hcmNoaXZlPC9hPiAvZAIED2QWAmYPFQFLPGEgaHJlZj0iaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvMjJfc2VyaWVzLyI+MjJfc2VyaWVzPC9hPiAvZAIFD2QWAmYPFQEGMjIuMTc5ZAIBD2QWBGYPFgIfAAIhFkJmD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LTAzMS56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktMDMxLnppcA0yMjE3OS0wMzEuemlwEDIwMTQvMDIvMjcgMTA6NDAIMTkzLDIgS0JkAgEPZBYEZg8VAUU8aW5wdXQgdHlwZT0iY2hlY2tib3giIGNsYXNzPSJkb3dubG9hZElucHV0IiB2YWx1ZT0iMjIxNzktMDQwLnppcCIgLz5kAgEPFQYELnppcAxjbGFzcz0iZmlsZSJFaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvMjJfc2VyaWVzLzIyLjE3OS8yMjE3OS0wNDAuemlwDTIyMTc5LTA0MC56aXAPMjAxNC8wNS8xNiA3OjE2CDQyMyw5IEtCZAICD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LTA2MC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktMDYwLnppcA0yMjE3OS0wNjAuemlwEDIwMTQvMDcvMjIgMTQ6MTUJMTY5NiwyIEtCZAIDD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LTA3MC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktMDcwLnppcA0yMjE3OS0wNzAuemlwEDIwMTQvMDgvMjkgMjM6MDcJMzY5OCwyIEtCZAIED2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LTEwMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktMTAwLnppcA0yMjE3OS0xMDAuemlwEDIwMTQvMDkvMjIgMTE6MTAJMTUxNiwyIEtCZAIFD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LTIwMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktMjAwLnppcA0yMjE3OS0yMDAuemlwDzIwMTQvMTIvMDkgMjoxNQkxNTUyLDMgS0JkAgYPZBYEZg8VAUU8aW5wdXQgdHlwZT0iY2hlY2tib3giIGNsYXNzPSJkb3dubG9hZElucHV0IiB2YWx1ZT0iMjIxNzktMjEwLnppcCIgLz5kAgEPFQYELnppcAxjbGFzcz0iZmlsZSJFaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvMjJfc2VyaWVzLzIyLjE3OS8yMjE3OS0yMTAuemlwDTIyMTc5LTIxMC56aXAPMjAxNC8xMi8wOSAzOjAxCTMxMDUsNCBLQmQCBw9kFgRmDxUBRTxpbnB1dCB0eXBlPSJjaGVja2JveCIgY2xhc3M9ImRvd25sb2FkSW5wdXQiIHZhbHVlPSIyMjE3OS1kMDAuemlwIiAvPmQCAQ8VBgQuemlwDGNsYXNzPSJmaWxlIkVodHRwczovL3d3dy4zZ3BwLm9yZy9mdHAvU3BlY3MvYXJjaGl2ZS8yMl9zZXJpZXMvMjIuMTc5LzIyMTc5LWQwMC56aXANMjIxNzktZDAwLnppcA8yMDE0LzEyLzE5IDU6MDkJMTU1Miw1IEtCZAIID2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWQwMS56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZDAxLnppcA0yMjE3OS1kMDEuemlwEDIwMTUvMDEvMDUgMTM6MDIJMTU2OSw5IEtCZAIJD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWQxMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZDEwLnppcA0yMjE3OS1kMTAuemlwDzIwMTUvMDMvMjEgNzo1MAkxNTU2LDggS0JkAgoPZBYEZg8VAUU8aW5wdXQgdHlwZT0iY2hlY2tib3giIGNsYXNzPSJkb3dubG9hZElucHV0IiB2YWx1ZT0iMjIxNzktZDIwLnppcCIgLz5kAgEPFQYELnppcAxjbGFzcz0iZmlsZSJFaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvMjJfc2VyaWVzLzIyLjE3OS8yMjE3OS1kMjAuemlwDTIyMTc5LWQyMC56aXAQMjAxNS8wNi8zMCAxNDoyOQkxNTczLDkgS0JkAgsPZBYEZg8VAUU8aW5wdXQgdHlwZT0iY2hlY2tib3giIGNsYXNzPSJkb3dubG9hZElucHV0IiB2YWx1ZT0iMjIxNzktZDMwLnppcCIgLz5kAgEPFQYELnppcAxjbGFzcz0iZmlsZSJFaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvMjJfc2VyaWVzLzIyLjE3OS8yMjE3OS1kMzAuemlwDTIyMTc5LWQzMC56aXAQMjAxNS8xMi8xOCAxMjo0MQcxNDgyIEtCZAIMD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWUwMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZTAwLnppcA0yMjE3OS1lMDAuemlwEDIwMTYvMDMvMTggMTM6MzkJMTQ4MSw2IEtCZAIND2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWUxMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZTEwLnppcA0yMjE3OS1lMTAuemlwEDIwMTYvMDYvMjQgMTM6MTcJMTQ4OCw2IEtCZAIOD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWUyMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZTIwLnppcA0yMjE3OS1lMjAuemlwEDIwMTYvMDkvMzAgMTE6MTQJMTQ4OCwzIEtCZAIPD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWUzMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZTMwLnppcA0yMjE3OS1lMzAuemlwEDIwMTYvMTIvMTYgMTU6NTAJMTQ5MCw3IEtCZAIQD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWYwMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZjAwLnppcA0yMjE3OS1mMDAuemlwEDIwMTcvMDYvMTYgMTM6MjIJMTQ4Nyw4IEtCZAIRD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWYxMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZjEwLnppcA0yMjE3OS1mMTAuemlwEDIwMTcvMDkvMjIgMTQ6MTkJMTQ4OSwxIEtCZAISD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWYyMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZjIwLnppcA0yMjE3OS1mMjAuemlwEDIwMTgvMDEvMDUgMTE6MjcJMTQ4OSw0IEtCZAITD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWcwMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZzAwLnppcA0yMjE3OS1nMDAuemlwEDIwMTgvMDEvMDUgMTE6MzAHMTQ5MSBLQmQCFA9kFgRmDxUBRTxpbnB1dCB0eXBlPSJjaGVja2JveCIgY2xhc3M9ImRvd25sb2FkSW5wdXQiIHZhbHVlPSIyMjE3OS1nMTAuemlwIiAvPmQCAQ8VBgQuemlwDGNsYXNzPSJmaWxlIkVodHRwczovL3d3dy4zZ3BwLm9yZy9mdHAvU3BlY3MvYXJjaGl2ZS8yMl9zZXJpZXMvMjIuMTc5LzIyMTc5LWcxMC56aXANMjIxNzktZzEwLnppcBAyMDE4LzA0LzA2IDE0OjQ0CTE0OTAsNSBLQmQCFQ9kFgRmDxUBRTxpbnB1dCB0eXBlPSJjaGVja2JveCIgY2xhc3M9ImRvd25sb2FkSW5wdXQiIHZhbHVlPSIyMjE3OS1nMjAuemlwIiAvPmQCAQ8VBgQuemlwDGNsYXNzPSJmaWxlIkVodHRwczovL3d3dy4zZ3BwLm9yZy9mdHAvU3BlY3MvYXJjaGl2ZS8yMl9zZXJpZXMvMjIuMTc5LzIyMTc5LWcyMC56aXANMjIxNzktZzIwLnppcBAyMDE4LzA2LzIzIDEzOjE5BzE0OTMgS0JkAhYPZBYEZg8VAUU8aW5wdXQgdHlwZT0iY2hlY2tib3giIGNsYXNzPSJkb3dubG9hZElucHV0IiB2YWx1ZT0iMjIxNzktZzMwLnppcCIgLz5kAgEPFQYELnppcAxjbGFzcz0iZmlsZSJFaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvMjJfc2VyaWVzLzIyLjE3OS8yMjE3OS1nMzAuemlwDTIyMTc5LWczMC56aXAQMjAxOC8wOS8yMSAxMzo0NQcxNDkyIEtCZAIXD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWc0MC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZzQwLnppcA0yMjE3OS1nNDAuemlwEDIwMTgvMTIvMjEgMTU6NDAJMTQ5Miw2IEtCZAIYD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWc1MC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktZzUwLnppcA0yMjE3OS1nNTAuemlwEDIwMTkvMDMvMjkgMTU6NDAJMTQ5Miw3IEtCZAIZD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWgwMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktaDAwLnppcA0yMjE3OS1oMDAuemlwEDIwMTkvMTIvMjAgMTg6NTUJMTUxMCwyIEtCZAIaD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWgxMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktaDEwLnppcA0yMjE3OS1oMTAuemlwDzIwMjIvMDQvMDEgODoyOQkxNTE0LDEgS0JkAhsPZBYEZg8VAUU8aW5wdXQgdHlwZT0iY2hlY2tib3giIGNsYXNzPSJkb3dubG9hZElucHV0IiB2YWx1ZT0iMjIxNzktaTAwLnppcCIgLz5kAgEPFQYELnppcAxjbGFzcz0iZmlsZSJFaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvMjJfc2VyaWVzLzIyLjE3OS8yMjE3OS1pMDAuemlwDTIyMTc5LWkwMC56aXAQMjAyMy8wNi8yMyAxNDo1OAkxNDk3LDQgS0JkAhwPZBYEZg8VAUU8aW5wdXQgdHlwZT0iY2hlY2tib3giIGNsYXNzPSJkb3dubG9hZElucHV0IiB2YWx1ZT0iMjIxNzktajAwLnppcCIgLz5kAgEPFQYELnppcAxjbGFzcz0iZmlsZSJFaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvMjJfc2VyaWVzLzIyLjE3OS8yMjE3OS1qMDAuemlwDTIyMTc5LWowMC56aXAQMjAyMy8wNy8wNiAxMzo0NAkxNDk3LDkgS0JkAh0PZBYEZg8VAUU8aW5wdXQgdHlwZT0iY2hlY2tib3giIGNsYXNzPSJkb3dubG9hZElucHV0IiB2YWx1ZT0iMjIxNzktajEwLnppcCIgLz5kAgEPFQYELnppcAxjbGFzcz0iZmlsZSJFaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvMjJfc2VyaWVzLzIyLjE3OS8yMjE3OS1qMTAuemlwDTIyMTc5LWoxMC56aXAQMjAyMy8wOS8yMiAxNzowOQkxNTA4LDYgS0JkAh4PZBYEZg8VAUU8aW5wdXQgdHlwZT0iY2hlY2tib3giIGNsYXNzPSJkb3dubG9hZElucHV0IiB2YWx1ZT0iMjIxNzktajIwLnppcCIgLz5kAgEPFQYELnppcAxjbGFzcz0iZmlsZSJFaHR0cHM6Ly93d3cuM2dwcC5vcmcvZnRwL1NwZWNzL2FyY2hpdmUvMjJfc2VyaWVzLzIyLjE3OS8yMjE3OS1qMjAuemlwDTIyMTc5LWoyMC56aXAQMjAyMy8xMi8yMiAxODoxNAcxNTEwIEtCZAIfD2QWBGYPFQFFPGlucHV0IHR5cGU9ImNoZWNrYm94IiBjbGFzcz0iZG93bmxvYWRJbnB1dCIgdmFsdWU9IjIyMTc5LWozMC56aXAiIC8+ZAIBDxUGBC56aXAMY2xhc3M9ImZpbGUiRWh0dHBzOi8vd3d3LjNncHAub3JnL2Z0cC9TcGVjcy9hcmNoaXZlLzIyX3Nlcmllcy8yMi4xNzkvMjIxNzktajMwLnppcA0yMjE3OS1qMzAuemlwEDIwMjQvMDkvMjcgMTQ6NTAHMTUwMiBLQmQCIA9kFgRmDxUBRTxpbnB1dCB0eXBlPSJjaGVja2JveCIgY2xhc3M9ImRvd25sb2FkSW5wdXQiIHZhbHVlPSIyMjE3OS1rMDAuemlwIiAvPmQCAQ8VBgQuemlwDGNsYXNzPSJmaWxlIkVodHRwczovL3d3dy4zZ3BwLm9yZy9mdHAvU3BlY3MvYXJjaGl2ZS8yMl9zZXJpZXMvMjIuMTc5LzIyMTc5LWswMC56aXANMjIxNzktazAwLnppcBAyMDI1LzAzLzI4IDE2OjUzBzE1MDQgS0JkAgEPDxYCHgRUZXh0BQkzMyBpdGVtcy5kZGQh/VlWykDvXuZGy6GL3le5xRS7ASLggXYGJZBsfF7U4Q==" />
+</div>
+
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="EDC176C3" />
+</div>
+			<div id="dragNdrop">
+				<img src="/ftp/zIcons/cloud-upload.png" alt="upload" width="100" />
+				<br />Drag and drop documents here or click to upload
+				<br />
+				<div id="file-preview"></div>
+			</div>
+			
+			<div class="resultMsg failure" id="InvalidFolder" style="display:none">Invalid folder name</div>
+			
+<button id="downlaod" type="button" style="padding:6px;margin-top:0px" title="Download selected files" onclick="download(event);return false;" class="myButton">
+					Download 
+					<svg id="downloadingSVG" style="width:18px;display:none" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g><circle cx="12" cy="3" r="1"><animate id="spinner_7Z73" begin="0;spinner_tKsu.end-0.5s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="16.50" cy="4.21" r="1"><animate id="spinner_Wd87" begin="spinner_7Z73.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="7.50" cy="4.21" r="1"><animate id="spinner_tKsu" begin="spinner_9Qlc.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="19.79" cy="7.50" r="1"><animate id="spinner_lMMO" begin="spinner_Wd87.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="4.21" cy="7.50" r="1"><animate id="spinner_9Qlc" begin="spinner_Khxv.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="21.00" cy="12.00" r="1"><animate id="spinner_5L9t" begin="spinner_lMMO.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="3.00" cy="12.00" r="1"><animate id="spinner_Khxv" begin="spinner_ld6P.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="19.79" cy="16.50" r="1"><animate id="spinner_BfTD" begin="spinner_5L9t.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="4.21" cy="16.50" r="1"><animate id="spinner_ld6P" begin="spinner_XyBs.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="16.50" cy="19.79" r="1"><animate id="spinner_7gAK" begin="spinner_BfTD.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="7.50" cy="19.79" r="1"><animate id="spinner_XyBs" begin="spinner_HiSl.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><circle cx="12" cy="21" r="1"><animate id="spinner_HiSl" begin="spinner_7gAK.begin+0.1s" attributeName="r" calcMode="spline" dur="0.6s" values="1;2;1" keySplines=".27,.42,.37,.99;.53,0,.61,.73"></animate></circle><animateTransform attributeName="transform" type="rotate" dur="6s" values="360 12 12;0 12 12" repeatCount="indefinite"></animateTransform></g></svg>
+					<svg id="readyToDownloadSVG" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+					  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+					  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+					</svg>
+					</button>
+            <table style="margin-left:20px">
+                <thead>
+                  <tr>
+				  <th style="text-align:center">
+					<br>
+					<input style="" title="Select all" type="checkbox" onclick="selectAll(this.checked);"> 
+					</th>
+                    <th>&nbsp;</th>
+                    <th><a href="?sortby=name">sort by name</a>/<a href="?sortby=namerev">desc</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                    <th><a href="?sortby=date">sort by date</a>/<a href="?sortby=daterev">desc</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th> 
+                    <th><a href="?sortby=size">sort by size</a>/<a href="?sortby=sizerev">desc</a></th>
+                  </tr>
+                </thead>
+                <tbody>
+                    
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-031.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-031.zip">22179-031.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2014/02/27 10:40
+                                </td>
+                                <td>
+                                    193,2 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-040.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-040.zip">22179-040.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2014/05/16 7:16
+                                </td>
+                                <td>
+                                    423,9 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-060.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-060.zip">22179-060.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2014/07/22 14:15
+                                </td>
+                                <td>
+                                    1696,2 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-070.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-070.zip">22179-070.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2014/08/29 23:07
+                                </td>
+                                <td>
+                                    3698,2 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-100.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-100.zip">22179-100.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2014/09/22 11:10
+                                </td>
+                                <td>
+                                    1516,2 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-200.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-200.zip">22179-200.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2014/12/09 2:15
+                                </td>
+                                <td>
+                                    1552,3 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-210.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-210.zip">22179-210.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2014/12/09 3:01
+                                </td>
+                                <td>
+                                    3105,4 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-d00.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-d00.zip">22179-d00.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2014/12/19 5:09
+                                </td>
+                                <td>
+                                    1552,5 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-d01.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-d01.zip">22179-d01.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2015/01/05 13:02
+                                </td>
+                                <td>
+                                    1569,9 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-d10.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-d10.zip">22179-d10.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2015/03/21 7:50
+                                </td>
+                                <td>
+                                    1556,8 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-d20.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-d20.zip">22179-d20.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2015/06/30 14:29
+                                </td>
+                                <td>
+                                    1573,9 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-d30.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-d30.zip">22179-d30.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2015/12/18 12:41
+                                </td>
+                                <td>
+                                    1482 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-e00.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-e00.zip">22179-e00.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2016/03/18 13:39
+                                </td>
+                                <td>
+                                    1481,6 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-e10.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-e10.zip">22179-e10.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2016/06/24 13:17
+                                </td>
+                                <td>
+                                    1488,6 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-e20.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-e20.zip">22179-e20.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2016/09/30 11:14
+                                </td>
+                                <td>
+                                    1488,3 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-e30.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-e30.zip">22179-e30.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2016/12/16 15:50
+                                </td>
+                                <td>
+                                    1490,7 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-f00.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-f00.zip">22179-f00.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2017/06/16 13:22
+                                </td>
+                                <td>
+                                    1487,8 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-f10.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-f10.zip">22179-f10.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2017/09/22 14:19
+                                </td>
+                                <td>
+                                    1489,1 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-f20.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-f20.zip">22179-f20.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2018/01/05 11:27
+                                </td>
+                                <td>
+                                    1489,4 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-g00.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-g00.zip">22179-g00.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2018/01/05 11:30
+                                </td>
+                                <td>
+                                    1491 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-g10.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-g10.zip">22179-g10.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2018/04/06 14:44
+                                </td>
+                                <td>
+                                    1490,5 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-g20.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-g20.zip">22179-g20.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2018/06/23 13:19
+                                </td>
+                                <td>
+                                    1493 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-g30.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-g30.zip">22179-g30.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2018/09/21 13:45
+                                </td>
+                                <td>
+                                    1492 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-g40.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-g40.zip">22179-g40.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2018/12/21 15:40
+                                </td>
+                                <td>
+                                    1492,6 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-g50.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-g50.zip">22179-g50.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2019/03/29 15:40
+                                </td>
+                                <td>
+                                    1492,7 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-h00.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-h00.zip">22179-h00.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2019/12/20 18:55
+                                </td>
+                                <td>
+                                    1510,2 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-h10.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-h10.zip">22179-h10.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2022/04/01 8:29
+                                </td>
+                                <td>
+                                    1514,1 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-i00.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-i00.zip">22179-i00.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2023/06/23 14:58
+                                </td>
+                                <td>
+                                    1497,4 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-j00.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-j00.zip">22179-j00.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2023/07/06 13:44
+                                </td>
+                                <td>
+                                    1497,9 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-j10.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-j10.zip">22179-j10.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2023/09/22 17:09
+                                </td>
+                                <td>
+                                    1508,6 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-j20.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-j20.zip">22179-j20.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2023/12/22 18:14
+                                </td>
+                                <td>
+                                    1510 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-j30.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-j30.zip">22179-j30.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2024/09/27 14:50
+                                </td>
+                                <td>
+                                    1502 KB
+                                </td>
+                            </tr>
+                        
+                            <tr>
+							<td style="text-align:center">
+								<input type="checkbox" class="downloadInput" value="22179-k00.zip" /> 
+								</td>
+                                <td>
+                                    <img class="icon" alt="icon" src="/ftp/geticon.axd?file=.zip" /> 
+                                </td>
+                                <td style="padding-right:10px">
+                                    <a class="file" href="https://www.3gpp.org/ftp/Specs/archive/22_series/22.179/22179-k00.zip">22179-k00.zip</a> 
+								</td>
+                                <td style="padding-right:10px">
+                                    2025/03/28 16:53
+                                </td>
+                                <td>
+                                    1504 KB
+                                </td>
+                            </tr>
+                        
+                </tbody>
+            </table>
+            <hr />
+            <p>
+                <span id="FileCount">33 items.</span>
+            </p>
+        </form>	
+	<script type="text/javascript">
+		var
+			dropRegion = document.getElementById("dragNdrop"),
+			filePreviewRegion = document.getElementById("file-preview");
+
+
+		// open file selector when clicked on the drop region
+		var fakeInput = document.createElement("input");
+		fakeInput.type = "file";
+		fakeInput.multiple = true;
+		dropRegion.addEventListener('click', function() {
+			fakeInput.click();
+		});
+
+		fakeInput.addEventListener("change", function() {
+			var files = fakeInput.files;
+			handleFiles(files);
+		});
+
+
+		function preventDefault(e) {
+			e.preventDefault();
+			e.stopPropagation();
+		}
+
+		dropRegion.addEventListener('dragenter', preventDefault, false)
+		dropRegion.addEventListener('dragleave', preventDefault, false)
+		dropRegion.addEventListener('dragover', preventDefault, false)
+		dropRegion.addEventListener('drop', preventDefault, false)
+
+function scanFiles(item) {
+		  if (item.isFile) {
+			item.file(function(file) {previewAnduploadFile(file,getLocation(window.location.href).pathname + item.fullPath.replace(item.name,""))});
+			
+		  }
+		  if (item.isDirectory) {
+		    
+			if(validateFileName(item.name)){
+				var ajax2 = new XMLHttpRequest();
+				ajax2.open("GET", location.pathname + item.fullPath.replace(item.name,"") + "?createFolder=" + encodeURIComponent(item.name) , true);
+				ajax2.item = item;
+				ajax2.onreadystatechange = function(e) {
+					if (ajax2.readyState === 4) {
+						if (ajax2.status === 200) {
+						
+							let directoryReader = ajax2.item.createReader();
+							directoryReader.readEntries((entries) => {
+							  entries.forEach((entry) => {
+								scanFiles(entry);
+							  });
+							});
+							// done!
+							;
+							
+							if(ajax2.responseURL.substring(0, ajax2.responseURL.indexOf("?")) == window.location.href.split("?")[0] + "/"){
+								var bodyHtml = /<table.*?>([\s\S]*)<\/table>/.exec(ajax2.responseText)[1];
+								document.getElementsByTagName("table")[0].innerHTML = bodyHtml;
+							}
+						} else {
+							// error!
+						}
+						
+					}
+				};
+				ajax2.send();
+			}else{
+				document.getElementById("InvalidFolder").style.display = "block";
+			}
+		  }
+		}
+		function handleDrop(e) {
+			
+			var dt = e.dataTransfer,
+				files = dt.files,
+				items = dt.items;
+			for (var i = 0, len = items.length; i < len; i++) {
+				scanFiles(dt.items[i].webkitGetAsEntry());
+			}
+		}
+
+		dropRegion.addEventListener('drop', handleDrop, false);
+
+
+
+		function handleFiles(files) {
+			if (window.confirm("Are you sure you want to upload?")) {
+				for (var i = 0, len = files.length; i < len; i++) {
+					previewAnduploadFile(files[i]);
+				}
+			}
+		}
+		var getLocation = function(href) {
+			var l = document.createElement("a");
+			l.href = href;
+			return l;
+		};
+		function previewAnduploadFile(file,uploadLocation = getLocation(window.location.href).pathname) {
+
+			// container
+			var imgView = document.createElement("div");
+			imgView.className = "image-view";
+			filePreviewRegion.appendChild(imgView);
+
+			// previewing image
+			var img = document.createElement("span");
+			img.innerHTML = file.name + " ";
+			imgView.appendChild(img);
+
+			// progress overlay
+			var overlay = document.createElement("progress");
+			overlay.className = "overlay";
+			imgView.appendChild(overlay);
+
+
+			// create FormData
+			var formData = new FormData();
+			formData.append(file.name, file);
+
+			// upload the image
+			
+			//var uploadLocation = getLocation(window.location.href).pathname;
+			
+
+			var ajax = new XMLHttpRequest();
+			ajax.open("POST", uploadLocation, true);
+
+			ajax.onreadystatechange = function(e) {
+				if (ajax.readyState === 4) {
+					if (ajax.status === 200) {
+						// done!
+						if(ajax.responseURL.substring(0, ajax.responseURL.indexOf("?")) == window.location.href.split("?")[0] + "/"){
+								var bodyHtml = /<table.*?>([\s\S]*)<\/table>/.exec(ajax.responseText)[1];
+								document.getElementsByTagName("table")[0].innerHTML = bodyHtml;
+							}
+						
+					} else {
+						// error!
+					}
+				}
+			}
+
+			ajax.upload.onprogress = function(e) {
+
+				var perc = (e.loaded / e.total * 100) || 100;
+
+				overlay.value = perc;
+				overlay.max=100;
+			}
+
+			ajax.send(formData);
+			
+
+		}
+		function uploadFolder(event){
+			document.getElementById("InvalidFolder").style.display = "none";
+			event.preventDefault();
+			if(validateFileName(document.getElementById("folderName").value)){
+				var ajax = new XMLHttpRequest();
+				ajax.open("GET", location.pathname + "?createFolder=" + encodeURIComponent(document.getElementById("folderName").value) , true);
+				ajax.onreadystatechange = function(e) {
+					if (ajax.readyState === 4) {
+						if (ajax.status === 200) {
+							//TODO
+							if(ajax.responseText == "Success"){
+								window.location.reload();
+							}
+						} else {
+							// error!
+						}
+					}
+				}
+				ajax.send();
+				return false;
+			}else{
+				document.getElementById("InvalidFolder").style.display = "block";
+				return false;
+			}
+		}
+		function changeFolderPermissions(){
+			var r = confirm("You are about to change the permissions for this folder.");
+			if (r == true) {
+				var ajax = new XMLHttpRequest();
+				ajax.open("GET", location.pathname + "?changeFolderPermissions=1&t=" + Date.now() , true);
+				ajax.onreadystatechange = function(e) {
+					if (ajax.readyState === 4) {
+						if (ajax.status === 200) {
+							// done!
+							var bodyHtml = /<body.*?>([\s\S]*)<\/body>/.exec(ajax.responseText)[1];
+							document.getElementsByTagName("body")[0].innerHTML = bodyHtml;
+							var element = document.getElementById("enableUploads");
+							document.getElementById("dragNdrop").style.display = "block";
+							if(typeof(element) != 'undefined' && element != null){
+								document.getElementById("dragNdrop").style.display = "none";
+							}
+						} else {
+							// error!
+						}
+					}
+				}
+				ajax.send();
+			} 
+			return false;
+		}
+		function validateFileName(text) { 
+			var re = /[<>:"\/\\|?*\x00-\x1F]|^(?:aux|con|clock\$|nul|prn|com[1-9]|lpt[1-9])$/i;
+		    if(!re.test(text)) {
+			  return true;
+			}
+			return false;
+		}
+		function download(){
+			document.getElementById("readyToDownloadSVG").style.display = "none";
+			document.getElementById("downloadingSVG").style.display = "inline";
+			var filesInputs = document.getElementsByClassName("downloadInput");
+			if (filesInputs.length == 1){
+				window.location = document.location.protocol + '//' + document.location.host + document.location.pathname + "/" + filesInputs[i].value;
+			}
+			var filesToDownload = [];
+			for(var i=0;i<filesInputs.length;i++){
+				if(filesInputs[i].checked){
+					filesToDownload.push(filesInputs[i].value);
+				}
+			}
+			
+			fetch(location.pathname + "?download=multiple", {
+			  method: "POST",
+			  headers: {
+				"Content-Type": "application/json"
+			  },
+			  body: JSON.stringify(filesToDownload)
+			})
+			.then(response => response.blob())
+			.then(blob => {
+			  const url = window.URL.createObjectURL(blob);
+			  const a = document.createElement("a");
+			  a.href = url;
+			  a.download = "download.zip";  // Set desired file name
+			  document.body.appendChild(a);
+			  a.click();
+			  a.remove();
+			  document.getElementById("downloadingSVG").style.display = "none";
+			  document.getElementById("readyToDownloadSVG").style.display = "inline";
+			});
+		}
+		function selectAll(checked){
+			const checkboxes = document.querySelectorAll('.downloadInput');
+			checkboxes.forEach(checkbox => {
+			  checkbox.checked = checked;
+			});
+		}
+	</script>		
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon='{"version":"2024.11.0","token":"6a7b6b1edc1540459115b0dcb49eb867","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>

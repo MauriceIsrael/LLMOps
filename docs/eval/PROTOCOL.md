@@ -1,53 +1,53 @@
-# 3GPP Elicitation Benchmark Evaluation Protocol & Frozen Metrics
+# 3GPP Elicitation Benchmark Evaluation Protocol & Frozen Metrics (v2)
 
 > **Protocol Status:** FROZEN  
 > **Freeze Date:** 2026-08-27  
-> **Rule 0.3 Invariant:** This protocol, its metrics, thresholds, and prompt templates are frozen prior to running model generation. Any post-freeze modifications must be explicitly dated and justified in this document.
+> **Workorder:** v2 Anti-Fabrication Protocol  
 
 ---
 
-## 1. Definition of an Architectural "Decision Point" (§2.1)
+## 1. Définition d'un Point de Décision Architectural (§5.1)
 
-An architectural **Decision Point** is an architectural question that was open upon reading Stage 1 service requirements and receives an explicit structural choice in Stage 2 specifications.
+Un **point de décision** est une question d'architecture ouverte à la lecture de l'étape 1, tranchée explicitement en étape 2, portant sur un choix entre au moins deux possibilités défendables, et ayant un effet sur la structure du système (entité, interface, procédure, ou répartition de responsabilité).
 
-### Criteria for Inclusion
-To qualify as a Decision Point, an item MUST satisfy all three properties:
-1. **Defendable Alternatives:** It represents a choice between at least two defendable architectural options (e.g. centralized vs distributed, unicast vs multicast, dedicated vs shared bearer).
-2. **Textual Trace in Stage 2:** An explicit statement or structural decision resolving the choice is present in the Stage 2 specification.
-3. **Structural System Impact:** The decision directly impacts system structure (entity responsibilities, interface boundaries, protocols, or state machines).
-
-### Exclusions (What is NOT a Decision Point)
-- Pure textual reformulations or paraphrasing of Stage 1 requirements.
-- Stage 3 low-level bit/field protocol encoding details.
-- Pure naming, term definition, or label choices.
+### Exclusions
+- Reformulations purement textuelles des exigences d'étape 1.
+- Détails de protocole de niveau 3 (champs de paquets, encodage binaire TS 24.380).
+- Choix de nommage ou d'étiquettes.
 
 ---
 
-## 2. Benchmark Metrics (§2.3, §4)
+## 2. Accord Inter-Annotateurs & Intervalle de Confiance (§5.3)
 
-Because Stage 2 specifications do not answer every open architectural question raised by Stage 1, **Precision is explicitly prohibited as a benchmark metric**.
+> **Variante retenue : à confirmer par l'humain avant exécution**
 
-1. **Primary Metric — Decision Point Recall ($R$)**:
-   $$\text{Recall} = \frac{|Q_{\text{generated}} \cap D_{\text{ground\_truth}}|}{|D_{\text{ground\_truth}}|}$$
-   Percentage of ground-truth decision points covered by at least one generated question from the arm.
+### Variante A — Second Annotateur Humain Indépendant
+- **Fichiers lus :** `annotation/annotator1.csv` et `annotation/annotator2.csv`.
+- **Rapport :** Accord inter-annotateurs ($\kappa$ de Cohen).
+- **Évaluation du critère d'arrêt 1 :** Évalué directement sur $\kappa$.
 
-2. **Secondary Metric — Mean Reciprocal Rank (MRR)**:
-   $$\text{MRR} = \frac{1}{|D|} \sum_{i=1}^{|D|} \frac{1}{\text{rank}_i}$$
-   Measures question sequencing quality: the rank position of the first generated question that correctly matches ground-truth decision point $i$.
+### Variante B — Test-Retest à 15 Jours d'Intervalle (Même Annotateur)
+- **Fichiers lus :** `annotation/annotator1.csv` et `annotation/annotator1_retest.csv`.
+- **Rapport :** Stabilité intra-annotateur (et non accord inter-annotateurs).
+- **Évaluation du critère d'arrêt 1 :** Marqué **« non évaluable »** (plutôt que « passé »).
 
-3. **Tertiary Metric — Un-Matched Question Classification**:
-   For un-matched questions, a manual sample of 20 questions per arm is classified into three categories:
-   - **Category 1 (Addressed Elsewhere):** Tranchée en Étape 3, autre spécification ou release ultérieure.
-   - **Category 2 (Legitimately Open):** Question légitimement ouverte mais non tranchée par la norme 3GPP.
-   - **Category 3 (Off-Topic / Irrelevant):** Hors sujet ou non pertinente.
+### Calcul de l'Intervalle de Confiance à 95 %
+Pour le coefficient $\kappa$ calculé sur $N$ items avec une erreur type $SE(\kappa) = \sqrt{\frac{p_o(1-p_o)}{N(1-p_e)^2}}$, l'intervalle de confiance à 95 % est :
+$$IC_{95\%}(\kappa) = \kappa \pm 1,96 \times SE(\kappa)$$
 
-4. **Exploratory Metric — Recall by Release Resolution Speed**:
-   Recall broken down by the release where the decision was first resolved (Rel-13 immediate vs Rel-14+ multi-release resolution).
+> **Règle absolue :** Si la borne basse de l'intervalle de confiance à 95 % est inférieure à 0,50 ($IC_{95\%\_lower} < 0,50$), le résultat est **non concluant** (ni succès ni échec).
 
 ---
 
-## 3. Pre-Defined Stop Criteria (§0.2)
+## 3. Critères d'Arrêt Pré-Définis (§0.2)
 
-1. **Stop Criterion 1 — Ill-defined task:** Inter-annotator (or test-retest) agreement $\kappa < 0.6$ on the double-annotated sample.
-2. **Stop Criterion 2 — Insufficient gap:** Absolute recall advantage of Arm B over Arm A is less than 10 percentage points ($\Delta \text{Recall} < 0.10$).
-3. **Stop Criterion 3 — Unacceptable contamination:** Baseline model reproduces Stage 2 architecture from memory without Stage 1 input.
+1. **Critère d'Arrêt 1 — Tâche mal définie :** $\kappa < 0,60$ (ou $IC_{95\%\_lower} < 0,50$). Si la variante test-retest est choisie, ce critère est noté **« non évaluable »**.
+2. **Critère d'Arrêt 2 — Absence d'écart :** Rappel du bras B ne dépasse pas celui du bras A d'au moins 10 points en valeur absolue ($\Delta \text{Rappel} < 10\%$).
+
+---
+
+## 4. Métriques du Banc
+
+1. **Rappel des points de décision ($R$) :** La précision est strictement interdite (l'étape 2 ne répond pas à tout).
+2. **Mean Reciprocal Rank (MRR) :** Rang du premier appariement correct.
+3. **Classification des non-appariés :** Échantillon de 20 questions non appariées classées en 3 catégories (traitée ailleurs, légitimement ouverte, hors sujet).

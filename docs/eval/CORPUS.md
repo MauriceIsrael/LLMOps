@@ -1,39 +1,29 @@
-# 3GPP Benchmark Corpus Definition & Filtering Report
+# 3GPP Benchmark Corpus Specification (v2 Anti-Fabrication Protocol)
 
-This document defines the functional perimeter, specification documents, releases, and clause filtering criteria for the LLMOps 3GPP benchmark pilot.
-
-Per **Rule 0.3 #4**, raw specification texts are not stored in the repository. Only stable 3GPP references (specification number, release, version, clause ID) and derived annotations are versioned under `fixtures/eval/corpus_clauses.json`.
+Per **Workorder v2 §4**, raw 3GPP PDF specifications remain un-tracked in `.gitignore`. Only SHA-256 hashes, file sizes, and extracted clause manifests are versioned under `docs/eval/SOURCES.md`.
 
 ---
 
-## 1. Functional Perimeter
+## 1. Selected Functional Perimeter
 
-- **Primary Selected Perimeter:** **MCPTT Floor Control** (Mission Critical Push To Talk over LTE).
-- **Justification:** Narrow, well-demarcated functional perimeter with explicit Stage 1 service requirements, explicit Stage 2 architectural entities/procedures, and a multi-release evolution history (Rel-13 through Rel-17).
-
----
-
-## 2. Target Specifications & Depth
-
-| Stage | Document ID | Title | Releases Included | Role in Benchmark |
-|---|---|---|---|---|
-| **Stage 1** | `TS 22.179` | Mission Critical Push To Talk (MCPTT) over LTE; Service requirements | Rel-13, Rel-14, Rel-15, Rel-16, Rel-17 | **Benchmark Input** (Supplied to both Arm A and Arm B) |
-| **Stage 2** | `TS 23.179` | Functional architecture and information flows to support MCPTT (Rel-13 initial) | Rel-13 | **Ground Truth Baseline** (Initial joint architecture) |
-| **Stage 2** | `TS 23.280` | Common functional architecture for mission critical services (Rel-14+) | Rel-14, Rel-15, Rel-16, Rel-17 | **Ground Truth Baseline** (Split common architecture) |
-| **Stage 2** | `TS 23.379` | Mission Critical Push To Talk (MCPTT) media plane control (Rel-14+) | Rel-14, Rel-15, Rel-16, Rel-17 | **Ground Truth Baseline** (Split MCPTT architecture) |
-| *Stage 3* | `TS 24.380` | MCPTT Floor Control Protocol | *Excluded* | Informational only; excluded from ground truth per §2.3. |
+- **Primary Functional Perimeter:** **MCPTT Floor Control** (Mission Critical Push To Talk over LTE).
+- **Target Specifications:**
+  - Stage 1: `TS 22.179` (Service Requirements)
+  - Stage 2: `TS 23.179` (Rel-13 Initial Architecture), `TS 23.280` (Rel-14+ Common Architecture), `TS 23.379` (Rel-14+ MCPTT Architecture)
 
 ---
 
-## 3. Retained Clause Volume & Filtering Criteria
+## 2. Source Documents Status & Hashing
 
-- **Filtering Keyword Criteria:** Clauses tagged under topic `floor_control` referencing floor request, floor grant, floor preemption, floor revoking, floor queueing, and off-network ProSe floor arbitration.
-- **Indexed Volume (`fixtures/eval/corpus_clauses.json`):**
-  - **Stage 1 Requirement Clauses:** 5 key requirement clauses.
-  - **Stage 2 Decision Points:** 5 architectural decision points across Rel-13, Rel-14, and Rel-15.
+| Document ID | Filename | SHA-256 Checksum | Extracted Length |
+|---|---|---|---|
+| **TS 22.179** | `TS_22.179.html` | `4df0b72be57ffd283415af450504985d5a342cebb187e52b73b96e88097263fc` | 1,719 chars |
+| **TS 23.179** | `TS_23.179.html` | `75c26c1226b7e5397c4d800203ce20be36ed09b38225f212d6f45a15b65c2777` | 1,039 chars |
+| **TS 23.280** | `TS_23.280.html` | `8469d07291fc1fe09acf9408050d98d36f9735f583e87d66248adce4afce290d` | 3,641 chars |
+| **TS 23.379** | `TS_23.379.html` | `5b8db2a860e5efa2fa2d97313dc6481499b599f6b92c91db5438485456708e8e` | 3,518 chars |
 
 ---
 
-## 4. Architectural Evolution Note
+## 3. Candidate Annotation File
 
-The structural decomposition of `TS 23.179` (Rel-13 single document) into `TS 23.280` (Common Architecture) and `TS 23.379` (MCPTT Media/Floor Plane) in Rel-14 represents a major, traceable architectural decision. This evolution is retained in the evaluation perimeter.
+The candidate clauses have been extracted into `annotation/candidates.csv`. The three annotation columns (`is_decision_point`, `question`, `verbatim`) are strictly empty for human annotation.
