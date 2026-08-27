@@ -20,7 +20,7 @@ Ajoutez la configuration suivante dans votre client MCP (ex: `claude_desktop_con
     "llmops-remote": {
       "url": "https://llmops-mcp-server-344571265365.europe-west1.run.app/sse",
       "headers": {
-        "Authorization": "Bearer llmops-token-2026-sec-98a41f"
+        "Authorization": "Bearer demo-public-2026-08"
       }
     }
   }

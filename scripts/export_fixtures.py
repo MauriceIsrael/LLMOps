@@ -3,7 +3,6 @@
 import gc
 import json
 import os
-import sys
 from pathlib import Path
 
 from mcp_server.engagement.tools import (

@@ -91,3 +91,18 @@ This document tracks the execution progress, audit findings, deferred items, and
 - None.
 
 ---
+
+## Workorder Public Demo — Lot A : Assainir le jeton (Completed)
+
+### 1. Accomplished Actions
+- **Purge of Dead Secret (A.1)**: Removed unused `auth_token: str = "llmops-token-2026-sec-98a41f"` from `ServerConfig` in `mcp_server/core/config.py`. Confirmed zero remaining `auth_token` references in Python codebase.
+- **Renamed Demo Token (A.2)**: Updated demo token string across `README.md`, `README.fr.md`, `docs/renderer_integration.md`, and `docs/user_manual.md` from `llmops-token-2026-sec-98a41f` to `demo-public-2026-08`. Confirmed `grep -rn "llmops-token-2026-sec" .` returns zero matches.
+- **Header-Only Authorization Enforcement (A.3)**: Verified server authentication requires HTTP header `Authorization: Bearer <SERVER_TOKEN>` or `X-API-Key`. Updated documentation examples in `docs/user_manual.md` to use the standard `Authorization` header rather than URL query parameters.
+
+### 2. Noticed but Deferred / Action Required
+- None.
+
+### 3. Discrepancies with Workorder Spec
+- None.
+
+---

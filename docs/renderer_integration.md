@@ -190,7 +190,7 @@ Pour un renderer Web en Javascript/TypeScript (React, Vue, Web Component), conne
 
 ```typescript
 // Exemple de connexion SSE en TypeScript / Web
-const token = "llmops-token-2026-sec-98a41f";
+const token = "demo-public-2026-08";
 const sseUrl = `https://llmops-mcp-server-344571265365.europe-west1.run.app/sse?token=${token}`;
 
 const eventSource = new EventSource(sseUrl);

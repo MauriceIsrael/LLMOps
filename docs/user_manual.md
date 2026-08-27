@@ -67,7 +67,7 @@ poetry run visualize
 
 ### Visualiseur Web GCP Cloud Run en direct
 
-`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`
+`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=demo-public-2026-08`
 
 ---
 
@@ -125,7 +125,10 @@ Transmettez simplement cet extrait de configuration à vos collègues pour qu'il
 {
   "mcpServers": {
     "llmops-architecture-kb": {
-      "url": "https://llmops-mcp-server-344571265365.europe-west1.run.app/sse?token=llmops-token-2026-sec-98a41f"
+      "url": "https://llmops-mcp-server-344571265365.europe-west1.run.app/sse",
+      "headers": {
+        "Authorization": "Bearer demo-public-2026-08"
+      }
     }
   }
 }
@@ -138,7 +141,7 @@ Transmettez simplement cet extrait de configuration à vos collègues pour qu'il
 ### Option 2 : Partager le Visualiseur Web Interactif du Graphe
 
 Transmettez ce lien direct à vos collègues pour qu'ils explorent la base de connaissances sans rien installer :
-`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=llmops-token-2026-sec-98a41f`
+`https://llmops-mcp-server-344571265365.europe-west1.run.app/visualize?token=demo-public-2026-08`
 
 ---
 

@@ -20,7 +20,6 @@ class ServerConfig(BaseSettings):
     engagements_dir: Path = Path("data/engagements")
     engagement: str | None = "nordwave-mcx-2027"
     app_name: str = "LLMOps Architecture KB"
-    auth_token: str = "llmops-token-2026-sec-98a41f"
     host: str = "0.0.0.0"
     port: int = 8000
     dataset: str = "kuzu://data/knowledge.kuzu"
