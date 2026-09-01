@@ -1,4 +1,4 @@
-<!-- elicit:nordwave-mcx-2027:C-0001:conflict:sha=34d1b5 -->
+<!-- elicit:nordwave-mcx-2027:C-0001:conflict:sha=dbefd2 -->
 ### ⚠️ Registre de Conflit d'Architecture — C-0001
 
 **Sujet & Prédicat Contestés :** `floor-control` · `has_property / depends_on`
@@ -8,7 +8,7 @@
 - **Énoncé `S-0034`** par Amina Duarte (Rôle : `mcx-service-architect`) le  :
   - Valeur proposé : `arbitration terminates in the MC service layer, at the site` (Confiance : `designed`)
   - *Verbatim :* ""
-- **Énoncé `S-0005`** par Rui Vasconcelos (Rôle : `mobile-core-architect`) le  :
+- **Énoncé `S-0003`** par Rui Vasconcelos (Rôle : `mobile-core-architect`) le  :
   - Valeur proposé : `depends on a committed priority and pre-emption profile in the core` (Confiance : `designed`)
   - *Verbatim :* ""
 

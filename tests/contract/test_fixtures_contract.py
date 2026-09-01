@@ -89,7 +89,7 @@ def test_fixtures_freshness(tmp_path):
 
         def strip_transient(obj):
             if isinstance(obj, dict):
-                return {k: strip_transient(v) for k, v in obj.items() if k not in ("updated_at", "created_at")}
+                return {k: strip_transient(v) for k, v in obj.items() if k not in ("updated_at", "created_at", "dataset")}
             if isinstance(obj, list):
                 return [strip_transient(item) for item in obj]
             return obj

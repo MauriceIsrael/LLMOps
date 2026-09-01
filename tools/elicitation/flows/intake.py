@@ -263,7 +263,6 @@ def persist_node(state: IntakeState) -> dict[str, Any]:
     if q_id:
         repo.update_question_status(q_id, "confirmed")
 
-    repo.close()
     return {"persisted_statement_ids": persisted_ids}
 
 
@@ -303,7 +302,6 @@ def check_node(state: IntakeState) -> dict[str, Any]:
                 }
             )
 
-    db_client.close()
     return {"detected_conflicts": detected_conflicts}
 
 
@@ -319,7 +317,6 @@ def raise_conflicts_node(state: IntakeState) -> dict[str, Any]:
         cid = repo.save_conflict(conf, conf["statement_ids"])
         conflict_ids.append(cid)
 
-    repo.close()
     return {"created_conflict_ids": conflict_ids}
 
 

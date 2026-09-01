@@ -108,7 +108,7 @@ def export_sealed_snapshot(
     # 3. Glossary
     try:
         raw_glossary = client.execute_cypher(
-            "MATCH (g:GlossaryTerm) RETURN g.term as term, g.definition as definition, g.context as context;"
+            "MATCH (g:GlossaryTerm) RETURN g.term as term, g.definition as definition;"
         )
     except Exception:
         raw_glossary = []

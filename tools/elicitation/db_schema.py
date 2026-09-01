@@ -13,17 +13,17 @@ class ElicitationSchemaInitializer:
         graph_store: GraphStore | None = None,
     ) -> None:
         self.db_path = str(db_path)
-        self.graph_store = graph_store or make_graph_store(db_path=self.db_path, read_only=False)
-        self.init_schema()
+        gs = graph_store or make_graph_store(db_path=self.db_path, read_only=False)
+        self.init_schema(gs)
 
-    def init_schema(self) -> None:
+    def init_schema(self, graph_store: GraphStore) -> None:
         """Crée les tables de nœuds et de relations d'élicitation si elles n'existent pas."""
-        tables_res = self.graph_store.execute_cypher("CALL show_tables() RETURN name;")
+        tables_res = graph_store.execute_cypher("CALL show_tables() RETURN name;")
         table_names = [str(r["name"]) for r in tables_res if r and "name" in r]
 
         # 1. Table Subject
         if "Subject" not in table_names:
-            self.graph_store.execute_cypher(
+            graph_store.execute_cypher(
                 """
                 CREATE NODE TABLE Subject (
                     id STRING,
@@ -39,14 +39,14 @@ class ElicitationSchemaInitializer:
             )
         else:
             try:
-                self.graph_store.execute_cypher("ALTER TABLE Subject ADD origin STRING DEFAULT 'declared';")
+                graph_store.execute_cypher("ALTER TABLE Subject ADD origin STRING DEFAULT 'declared';")
             except Exception:
                 pass
 
 
         # 2. Table Statement
         if "Statement" not in table_names:
-            self.graph_store.execute_cypher(
+            graph_store.execute_cypher(
                 """
                 CREATE NODE TABLE Statement (
                     id STRING,
@@ -69,17 +69,17 @@ class ElicitationSchemaInitializer:
             )
         else:
             try:
-                self.graph_store.execute_cypher("ALTER TABLE Statement ADD subject STRING DEFAULT '';")
+                graph_store.execute_cypher("ALTER TABLE Statement ADD subject STRING DEFAULT '';")
             except Exception:
                 pass
             try:
-                self.graph_store.execute_cypher("ALTER TABLE Statement ADD based_on STRING DEFAULT '[]';")
+                graph_store.execute_cypher("ALTER TABLE Statement ADD based_on STRING DEFAULT '[]';")
             except Exception:
                 pass
 
         # 3. Table Question
         if "Question" not in table_names:
-            self.graph_store.execute_cypher(
+            graph_store.execute_cypher(
                 """
                 CREATE NODE TABLE Question (
                     id STRING,
@@ -99,13 +99,13 @@ class ElicitationSchemaInitializer:
             )
         else:
             try:
-                self.graph_store.execute_cypher("ALTER TABLE Question ADD level STRING DEFAULT '';")
+                graph_store.execute_cypher("ALTER TABLE Question ADD level STRING DEFAULT '';")
             except Exception:
                 pass
 
         # 4. Table Conflict
         if "Conflict" not in table_names:
-            self.graph_store.execute_cypher(
+            graph_store.execute_cypher(
                 """
                 CREATE NODE TABLE Conflict (
                     id STRING,
@@ -121,13 +121,13 @@ class ElicitationSchemaInitializer:
             )
         else:
             try:
-                self.graph_store.execute_cypher("ALTER TABLE Conflict ADD origin STRING DEFAULT 'declared';")
+                graph_store.execute_cypher("ALTER TABLE Conflict ADD origin STRING DEFAULT 'declared';")
             except Exception:
                 pass
 
         # 5. Table Uncertainty
         if "Uncertainty" not in table_names:
-            self.graph_store.execute_cypher(
+            graph_store.execute_cypher(
                 """
                 CREATE NODE TABLE Uncertainty (
                     id STRING,
@@ -141,13 +141,13 @@ class ElicitationSchemaInitializer:
 
         # 6. Tables de Relations
         if "ABOUT" not in table_names:
-            self.graph_store.execute_cypher("CREATE REL TABLE ABOUT (FROM Statement TO Subject);")
+            graph_store.execute_cypher("CREATE REL TABLE ABOUT (FROM Statement TO Subject);")
 
         if "ANSWERS" not in table_names:
-            self.graph_store.execute_cypher("CREATE REL TABLE ANSWERS (FROM Statement TO Question);")
+            graph_store.execute_cypher("CREATE REL TABLE ANSWERS (FROM Statement TO Question);")
 
         if "TARGETS" not in table_names:
-            self.graph_store.execute_cypher("CREATE REL TABLE TARGETS (FROM Question TO Subject);")
+            graph_store.execute_cypher("CREATE REL TABLE TARGETS (FROM Question TO Subject);")
 
         if "INVOLVES" not in table_names:
-            self.graph_store.execute_cypher("CREATE REL TABLE INVOLVES (FROM Conflict TO Statement);")
+            graph_store.execute_cypher("CREATE REL TABLE INVOLVES (FROM Conflict TO Statement);")

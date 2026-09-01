@@ -35,7 +35,7 @@ poetry run elicit answer Q-0001 --author alice --role cloud-architect --text "No
 # Alice confirme les énoncés extraits dans un NOUVEAU processus
 poetry run elicit confirm Q-0001 --accept
 ```
-*L'énoncé de certitude `verified` d'Alice est enregistré dans Kùzu DB.*
+*L'énoncé de certitude `verified` d'Alice est enregistré dans LadybugDB.*
 
 ---
 
@@ -89,7 +89,7 @@ poetry run pytest tests/unit/test_elicitation.py -v
 
 ### Ce qui a été difficile :
 1. **Durabilité LangGraph hors mémoire** : Garantir la persistance de l'interruption `interrupt` avec `SqliteSaver` entre deux processus Python distincts a exigé une sérialisation stricte de l'état `IntakeState`.
-2. **Isolement des transactions Kùzu DB** : La gestion des verrous et de l'ouverture en écriture `read_only=False` de Kùzu DB nécessitait une libération explicite des connexions lors des transitions de processus.
+2. **Isolement des transactions LadybugDB** : La gestion des verrous et de l'ouverture en écriture `read_only=False` de LadybugDB nécessitait une libération explicite des connexions lors des transitions de processus.
 
 ### Ce que nous modifierions pour la mise en production :
 1. **Webhooks Mailbox** : Remplacer `FileMailbox` par `GitHubIssuesMailbox` en écoutant les Webhooks d'issues GitHub/GitLab pour rendre la saisie des experts 100 % asynchrone sur leurs outils quotidiens.

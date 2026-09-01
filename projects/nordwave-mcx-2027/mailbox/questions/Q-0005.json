@@ -1,8 +1,8 @@
 {
   "id": "Q-0005",
   "engagement": "nordwave-mcx-2027",
-  "question": "Which mapping per talkgroup class, committed end to end?\nPattern proposé : PAT-006 Vendor boundary through northbound interface (Quand ne pas utiliser : Ne pas utiliser si le fournisseur supporte un accès direct modèle.)",
-  "why_it_matters": "La section 5.3 (5.3) ne contient aucun énoncé d'architecture.",
+  "question": "Where does floor arbitration terminate, and what was ruled out?\nPattern proposé : PAT-006 Vendor boundary through northbound interface (Quand ne pas utiliser : Ne pas utiliser si le fournisseur supporte un accès direct modèle.)",
+  "why_it_matters": "La section 4.3 (4.3) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mobile-core-architect"
+  "routed_to": "mcx-service-architect"
 }

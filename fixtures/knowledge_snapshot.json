@@ -6,7 +6,7 @@
     "knowledge": {
       "dataset": "data/knowledge.kuzu",
       "node_counts": {
-        "Asset": 47,
+        "Asset": 46,
         "GlossaryTerm": 10
       }
     },

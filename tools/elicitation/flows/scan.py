@@ -468,7 +468,6 @@ def dispatch_node(state: ScanState) -> dict[str, Any]:
         repo.update_question_status(q["id"], "sent")
         dispatched.append({"id": q["id"], "ref": ref})
 
-    repo.close()
     return {"dispatched": dispatched, "counts_summary": state.get("counts_summary", {})}
 
 

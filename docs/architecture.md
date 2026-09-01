@@ -2,14 +2,6 @@
 
 ## 1. Vue d'Ensemble & Objectifs
 
-Cette plateforme a pour but d'élaborer et de faire évoluer de manière déterministe et collaborative des documents d'architecture système (ADRs, principes, cadrage, compromis, dépendances, risques) en combinant un dossier documentaire Markdown structuré, un **Graphe de Connaissances LadybugDB / Kùzu DB**, et un **Moteur d'Élicitation Collaboratif (LangGraph)** exposé via **FastMCP** (Model Context Protocol).
-
-### Problèmes résolus
-1. **Destruction de la logique système par RAG naïf** : Le chunking textuel classique détruit les liaisons logiques essentielles (ex: une décision `SUPERSEDES` une autre, ou l'explication d'un compromis d'arbitrage).
-2. **Spéculation et inventions du LLM** : En l'absence de garde-fous symboliques, un LLM invente des paramètres ou passe sous silence des manques cruciaux.
-3. **Collaboration désordonnée multi-acteurs** : Sans modèle formalisé, les contributions de plusieurs architectes se chevauchent, génèrent des contradictions invisibles ou font avancer prématurément des détails techniques avant le cadrage.
-
-### Solution Neuro-Symbolique & Élicitatoire
 - **Couche Symbolique & Persistance Dual-Backend :** Graphe de connaissances géré par **LadybugDB** (avec rétrocompatibilité Kùzu DB), garantissant l'intégrité typée des entités (`Asset`, `Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`) et de leurs relations.
 - **Moteur d'Élicitation Collaboratif (LangGraph) :** Orchestration de flux d'état (Scan, Intake, Assembly, Harvest) pilotant un **Level Gate de maturité** (`L0_named` → `L4_specified`), la détection automatique de contradictions, la gestion de conflits déclarés/détectés et l'arbitrage traçable.
 - **Persistance Inter-Processus :** Checkpointer SQLite permettant d'interrompre une session d'élicitation et de la reprendre des jours plus tard depuis un process distant.
@@ -45,12 +37,12 @@ flowchart TB
     end
 
     subgraph Storage_Layer ["Persistance"]
-        KUZU[("Kùzu Embedded Graph DB")]
+        LADYBUG[("LadybugDB Embedded Graph DB")]
         SQLITE[("SQLite Checkpoint DB")]
     end
 
     subgraph MCP_Layer ["Exposition FastMCP"]
-        KC["Kùzu Client Thread-Safe"]
+        LC["LadybugDB Client Thread-Safe"]
         AT["Asset Tools"]
         GT["Graph & Cypher Tools"]
         FSERV["FastMCP Server Engine"]
@@ -65,18 +57,18 @@ flowchart TB
     Data_Layer --> MP
     MP --> LE
     LE --> GL
-    GL --> KUZU
+    GL --> LADYBUG
 
-    SCAN --> KUZU
-    INTAKE --> KUZU
+    SCAN --> LADYBUG
+    INTAKE --> LADYBUG
     INTAKE <--> CHK
     CHK <--> SQLITE
-    ASSEMBLE --> KUZU
-    HARVEST --> KUZU
+    ASSEMBLE --> LADYBUG
+    HARVEST --> LADYBUG
 
-    KUZU <--> KC
-    KC --> AT
-    KC --> GT
+    LADYBUG <--> LC
+    LC --> AT
+    LC --> GT
     AT --> FSERV
     GT --> FSERV
     FSERV <--> AGENT
@@ -86,9 +78,9 @@ flowchart TB
 
 ---
 
-## 3. Schéma du Graphe de Connaissances (Ontologie Kùzu DB)
+## 3. Schéma du Graphe de Connaissances (Ontologie LadybugDB)
 
-Le graphe est modélisé dans Kùzu DB avec des Nœuds et des Relations typés pour la base de connaissances et l'élicitation.
+Le graphe est modélisé dans LadybugDB avec des Nœuds et des Relations typés pour la base de connaissances et l'élicitation.
 
 ```mermaid
 erDiagram
@@ -141,7 +133,7 @@ Chaque étape du processus d'élicitation est un nœud réutilisable et testable
 Dans un scénario réel, un architecte répond à une question d'élicitation trois jours après son émission. LangGraph permet de mettre le graphe d'exécution en **pause explicite** (`paused` / `Command(resume=...)`) et de sauvegarder l'état complet dans un **Checkpointer SQLite** (`get_sqlite_checkpointer`). La conversation peut alors être reprise depuis un processus Python ou un conteneur complètement indépendant en fournissant simplement le `thread_id`.
 
 ### 4.3 Isolation et Séparation des Responsabilités
-LangGraph empêche le LLM de contrôler directement la logique métier. Le LLM intervient uniquement pour extraire ou reformuler du texte au sein d'un nœud isolé, tandis que LangGraph contrôle la progression des niveaux de maturité (`Level Gate`), la mise à jour des graphes dans Kùzu DB et la génération des manques.
+LangGraph empêche le LLM de contrôler directement la logique métier. Le LLM intervient uniquement pour extraire ou reformuler du texte au sein d'un nœud isolé, tandis que LangGraph contrôle la progression des niveaux de maturité (`Level Gate`), la mise à jour des graphes dans LadybugDB et la génération des manques.
 
 ---
 
@@ -155,11 +147,11 @@ flowchart LR
         MD_FILE["Fichier Markdown (ADR / Glossaire / Principe)"]
         PARSER["Markdown & YAML Parser (pyyaml)"]
         EXTRACTOR["LlamaIndex PropertyGraphExtractor"]
-        KUZU_LOADER["Kùzu Batch Loader (Cypher MERGE)"]
+        LADYBUG_LOADER["LadybugDB Batch Loader (Cypher MERGE)"]
         
         MD_FILE --> PARSER
         PARSER -->|"Frontmatter YAML + Sections"| EXTRACTOR
-        EXTRACTOR -->|"Triplets (Sujet -> Rel -> Objet)"| KUZU_LOADER
+        EXTRACTOR -->|"Triplets (Sujet -> Rel -> Objet)"| LADYBUG_LOADER
     end
 
     subgraph Step2 ["2. Parsing des Réponses (Intake)"]
@@ -213,7 +205,7 @@ Chaque sujet d'architecture (`Subject`) possède une maturité observable qui pr
 > **Règle du Level Gate :** Le détecteur de manques (`detect_gaps_node`) retient (`held_premature: True`) les questions exigeant un niveau supérieur (ex: `L3_decided` ou `L4_specified`) tant que le sujet concerné n'a pas atteint le niveau requis. Cela évite d'engorger la réflexion avec des détails prématurés.
 
 ### 6.2 Détection de Manques et Décomposition Générative (`scan.py`)
-- **Éradication des sujets fantômes :** Le scan interroge Kùzu DB dynamiquement via `get_subjects_maturity_board()` pour ne scanner que les sujets **réellement nés dans le graphe**.
+- **Éradication des sujets fantômes :** Le scan interroge LadybugDB dynamiquement via `get_subjects_maturity_board()` pour ne scanner que les sujets **réellement nés dans le graphe**.
 - **Effet Génératif de la Décomposition :** Lorsqu'un sujet parent (ex: `mcx-services`) atteint `L2_decomposed`, il matérialise ses sous-sujets (`group-management`, `floor-control`, `media-distribution`, `lmr-interworking`) à `L0_named`. Ces nouveaux sujets engendrent immédiatement leurs propres questions de cadrage et leurs manques retenus par le Level Gate.
 
 ### 6.3 Conflits Déclarés vs Détectés (`intake.py` & `repository.py`)
@@ -234,7 +226,7 @@ L'arbitrage d'un conflit par un architecte référent (Sofia) ne se limite pas �
 ### 6.6 Ingestion Documentaire Spécifiée (`SPEC-DOCUMENT-INGESTION.md`)
 - **Pipeline d'ingestion de livrables et drafts :** Lit et découpe les documents d'architecture `.md` selon leurs titres de sections (`1.1`, `4.1`, `5.4`).
 - **Extraction sémantique d'énoncés :** Chaque section est parsée pour en extraire les énoncés (`Statement`) avec leur niveau de confiance (`designed`, `stated-by-client`, `assumed`).
-- **Rapprochement Cypher avec Kùzu DB :** Les énoncés extraits sont rattachés aux sujets (`ABOUT`) et au blueprint (`requires`), permettant la réconciliation automatique des manques de la base.
+- **Rapprochement Cypher avec LadybugDB :** Les énoncés extraits sont rattachés aux sujets (`ABOUT`) et au blueprint (`requires`), permettant la réconciliation automatique des manques de la base.
 
 ### 6.7 Workflow de Contributions Externes (`contribution.py`)
 - **Gestion des apports externes :** Permet à un intervenant externe de soumettre un retour d'expérience ou une contrainte terrain (`elicit contribute`).
@@ -304,7 +296,7 @@ sequenceDiagram
     box GCP Cloud Run (Serverless Europe-West1)
         participant MCP as Serveur FastMCP (FastAPI/Uvicorn)
         participant SM as GCP Secret Manager
-        participant KUZU as Kùzu Graph DB (Lecture Seule)
+        participant LADYBUG as LadybugDB Graph DB (Lecture Seule)
     end
     participant OAI as OpenAI API (Embeddings / LLM)
 
@@ -318,8 +310,8 @@ sequenceDiagram
         note over MCP,SM: Résolution des secrets & interrogation du graphe
         MCP->>SM: Récupération sécurisée de OPENAI_API_KEY (IAM Role)
         SM-->>MCP: Clé API déchiffrée en mémoire conteneur
-        MCP->>KUZU: Exécution requête Cypher / Lecture documentaire
-        KUZU-->>MCP: Résultats typés (Entités, ADRs, Principes, Dépendances)
+        MCP->>LADYBUG: Exécution requête Cypher / Lecture documentaire
+        LADYBUG-->>MCP: Résultats typés (Entités, ADRs, Principes, Dépendances)
     end
 
     opt Appel facultatif à OpenAI (Extraction sémantique ou Évaluations)

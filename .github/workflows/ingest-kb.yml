@@ -26,12 +26,17 @@ jobs:
       - name: Run ADR-0015 KB Ingestion & Migration Pipeline
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: poetry run python -m pipelines.ingestion.migrate_adr0015
+          GRAPH_BACKEND: ladybug
+        run: |
+          poetry run python -m pipelines.ingestion.migrate_adr0015
+          poetry run python scripts/export_sealed_snapshot.py
 
-      - name: Upload Kùzu DB Artifacts
+      - name: Upload Ladybug DB & Snapshot Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kuzu-db-artifacts
+          name: ladybug-db-artifacts
           path: |
             data/knowledge.kuzu
             data/engagements
+            fixtures/sealed_snapshot.json
+            data/snapshots

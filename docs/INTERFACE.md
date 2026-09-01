@@ -119,5 +119,5 @@ All FastMCP tools return a **standardized JSON envelope**:
 ## 🎨 6. Complementary Documentation
 
 - 🎨 **[Third-Party Integration Guide](THIRD-PARTY-INTEGRATION-GUIDE.md)**: Full guide to writing custom renderers (DOCX, PPTX, Web UI) without running the server.
-- 📊 **[Graph Schema Specification (SCHEMA.md)](SCHEMA.md)**: Automatically generated Kùzu DB table & property schemas.
+- 📊 **[Graph Schema Specification (SCHEMA.md)](SCHEMA.md)**: Automatically generated LadybugDB table & property schemas.
 - 📖 **[Software Architecture Specification (architecture.md)](architecture.md)**: ADR-0014 and ADR-0015 dual-plane specification.

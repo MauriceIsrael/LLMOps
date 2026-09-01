@@ -1,8 +1,8 @@
 {
-  "snapshot_id": "snapshot-2026-09-01-06f3455",
-  "created_at": "2026-09-01T21:13:26Z",
-  "source_revision": "06f345557ca862ec686671156c3f1e23fdd996b9",
-  "payload_sha256": "sha256:78f44f4941dab54d04d627340148493a41c08ea2054057d2608c3af104e9695f",
+  "snapshot_id": "snapshot-2026-09-01-67b8ff9",
+  "created_at": "2026-09-01T22:11:25Z",
+  "source_revision": "67b8ff929d2bf380985702f7a68eb76bd2538c24",
+  "payload_sha256": "sha256:fc538de5bdc64546fb707471a02912ee8249240055cddb18806c146aee4bbb9b",
   "schema_version": "1.0",
   "applicability_index": {
     "TPL-getting-started": {
@@ -581,13 +581,6 @@
       ],
       "rules": [
         "rule:tpl-hla-section-map"
-      ]
-    },
-    "PAT-AUTH-001": {
-      "domains": [],
-      "phases": [],
-      "rules": [
-        "rule:pat-auth-001"
       ]
     }
   },
@@ -1345,26 +1338,6 @@
       "superseded_by": []
     },
     {
-      "id": "PAT-AUTH-001",
-      "typed_id": "pattern:PAT-AUTH-001",
-      "title": "Pattern Auth mTLS OAuth2 RSA-4096",
-      "type": null,
-      "status": null,
-      "confidence": "assumed",
-      "domain": null,
-      "phase": null,
-      "owner": null,
-      "last_reviewed": null,
-      "provenance": {
-        "document": "PAT-AUTH-001.md",
-        "version": "1.0",
-        "section": "architecture",
-        "text_sha256": "5fde7b4ff99317dc03d9cdef724790e2b11d9f99b2667bfefb6c96059ad50f74"
-      },
-      "supersedes": [],
-      "superseded_by": []
-    },
-    {
       "id": "QST-cloud-platform",
       "typed_id": "questionnaire:QST-cloud-platform",
       "title": "Container platform, observability and assistant \u2014 framing",
@@ -1545,5 +1518,46 @@
       "superseded_by": []
     }
   ],
-  "glossary": []
+  "glossary": [
+    {
+      "term": "Break-glass",
+      "definition": "procedure allowing critical recovery actions when the management platform itself is unavailable."
+    },
+    {
+      "term": "Claims register",
+      "definition": "bid artefact recording the evidence level behind every statement made in a proposal."
+    },
+    {
+      "term": "Closed loop",
+      "definition": "chain from detection to remediation. *Supervised* when a human approval gates the action."
+    },
+    {
+      "term": "Drift",
+      "definition": "difference between the observed configuration of an asset and its intended configuration."
+    },
+    {
+      "term": "Fallback plan",
+      "definition": "pre-validated configuration applied to recover from a known degraded condition; bound to the baseline it assumes."
+    },
+    {
+      "term": "Harvest",
+      "definition": "timeboxed end-of-phase session that returns field experience into this base."
+    },
+    {
+      "term": "Northbound interface",
+      "definition": "vendor-exposed management interface through which an external system operates a domain without bypassing its element manager."
+    },
+    {
+      "term": "Service plane / infrastructure plane",
+      "definition": "the two observation planes: signals contributing to a delivered service, and signals describing the hosting platform."
+    },
+    {
+      "term": "Shadow environment",
+      "definition": "isolated environment receiving duplicated production telemetry, able to evaluate rules but not to act."
+    },
+    {
+      "term": "Source of truth",
+      "definition": "the system that holds the intended state; for configuration, a version control repository."
+    }
+  ]
 }
