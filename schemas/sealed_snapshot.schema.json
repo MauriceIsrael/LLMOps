@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SealedSnapshotEnvelope",
+  "description": "Standardized sealed snapshot format emitted by LLMOps Knowledge Hub for client suites (Architecture Studio) and third-party renderers.",
+  "type": "object",
+  "properties": {
+    "snapshot_id": {
+      "type": "string",
+      "description": "Unique identifier of the snapshot (e.g. snapshot-2026-09-01-06f3455)."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC creation timestamp."
+    },
+    "source_revision": {
+      "type": "string",
+      "description": "Source Git commit hash or repository release tag."
+    },
+    "payload_sha256": {
+      "type": "string",
+      "description": "SHA-256 canonical hex checksum of the data payload."
+    },
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0"]
+    },
+    "applicability_index": {
+      "type": "object",
+      "description": "Context index mapping assets to architectural domains, phases, and rules.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "domains": { "type": "array", "items": { "type": "string" } },
+          "phases": { "type": "array", "items": { "type": "string" } },
+          "rules": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "typed_id": { "type": "string" },
+          "title": { "type": "string" },
+          "type": { "type": "string" },
+          "status": { "type": "string" },
+          "confidence": {
+            "type": "string",
+            "enum": ["assumed", "designed", "stated-by-client", "vendor-stated", "verified"]
+          },
+          "domain": { "type": "string" },
+          "phase": { "type": "string" },
+          "owner": { "type": "string" },
+          "vendor": { "type": "string" },
+          "last_reviewed": { "type": "string" },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "document": { "type": "string" },
+              "version": { "type": "string" },
+              "section": { "type": "string" },
+              "text_sha256": { "type": "string" }
+            }
+          },
+          "supersedes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" }
+              },
+              "required": ["id"]
+            }
+          },
+          "superseded_by": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" }
+              },
+              "required": ["id"]
+            }
+          }
+        },
+        "required": ["id", "typed_id", "title", "confidence", "status"]
+      }
+    },
+    "glossary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "term": { "type": "string" },
+          "definition": { "type": "string" },
+          "context": { "type": "string" }
+        },
+        "required": ["term", "definition"]
+      }
+    }
+  },
+  "required": [
+    "snapshot_id",
+    "created_at",
+    "source_revision",
+    "payload_sha256",
+    "schema_version",
+    "applicability_index",
+    "assets",
+    "glossary"
+  ]
+}
+

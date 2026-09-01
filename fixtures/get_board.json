@@ -1,5 +1,118 @@
 {
   "status": "ok",
-  "count": 0,
-  "data": []
+  "count": 8,
+  "data": [
+    {
+      "subject": "floor-control",
+      "name": "floor-control",
+      "level": "L2_decomposed",
+      "origin": "discovered",
+      "days_at_level": 0,
+      "updated_at": "2026-09-01T22:51:50.874204",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "group-management",
+      "name": "group-management",
+      "level": "L0_named",
+      "origin": "discovered",
+      "days_at_level": 0,
+      "updated_at": "2026-09-01T22:51:50.874204",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "lmr-interworking",
+      "name": "lmr-interworking",
+      "level": "L0_named",
+      "origin": "discovered",
+      "days_at_level": 0,
+      "updated_at": "2026-09-01T22:51:50.874204",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "mcx-services",
+      "name": "mcx-services",
+      "level": "L2_decomposed",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-01T22:51:50.874204",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "media-distribution",
+      "name": "media-distribution",
+      "level": "L0_named",
+      "origin": "discovered",
+      "days_at_level": 0,
+      "updated_at": "2026-09-01T22:51:50.874204",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "mobile-core",
+      "name": "mobile-core",
+      "level": "L1_framed",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-01T22:51:50.874204",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "synthetic-subject",
+      "name": "synthetic-subject",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-01T22:51:50.874204",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "transport",
+      "name": "transport",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-01T22:51:50.874204",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    }
+  ]
 }

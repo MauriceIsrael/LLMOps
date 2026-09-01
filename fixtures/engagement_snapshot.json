@@ -3,23 +3,514 @@
   "count": 1,
   "data": {
     "engagement": "nordwave-mcx-2027",
-    "board": [],
+    "board": [
+      {
+        "subject": "floor-control",
+        "name": "floor-control",
+        "level": "L2_decomposed",
+        "origin": "discovered",
+        "days_at_level": 0,
+        "updated_at": "2026-09-01T22:51:50.626081",
+        "is_stalled": false,
+        "open_question_ref": null,
+        "assigned_role": null,
+        "dependent_sections": [
+          "5.2"
+        ]
+      },
+      {
+        "subject": "group-management",
+        "name": "group-management",
+        "level": "L0_named",
+        "origin": "discovered",
+        "days_at_level": 0,
+        "updated_at": "2026-09-01T22:51:50.626081",
+        "is_stalled": false,
+        "open_question_ref": null,
+        "assigned_role": null,
+        "dependent_sections": [
+          "5.2"
+        ]
+      },
+      {
+        "subject": "lmr-interworking",
+        "name": "lmr-interworking",
+        "level": "L0_named",
+        "origin": "discovered",
+        "days_at_level": 0,
+        "updated_at": "2026-09-01T22:51:50.626081",
+        "is_stalled": false,
+        "open_question_ref": null,
+        "assigned_role": null,
+        "dependent_sections": [
+          "5.2"
+        ]
+      },
+      {
+        "subject": "mcx-services",
+        "name": "mcx-services",
+        "level": "L2_decomposed",
+        "origin": "blueprint",
+        "days_at_level": 0,
+        "updated_at": "2026-09-01T22:51:50.626081",
+        "is_stalled": false,
+        "open_question_ref": null,
+        "assigned_role": null,
+        "dependent_sections": [
+          "5.2"
+        ]
+      },
+      {
+        "subject": "media-distribution",
+        "name": "media-distribution",
+        "level": "L0_named",
+        "origin": "discovered",
+        "days_at_level": 0,
+        "updated_at": "2026-09-01T22:51:50.626081",
+        "is_stalled": false,
+        "open_question_ref": null,
+        "assigned_role": null,
+        "dependent_sections": [
+          "5.2"
+        ]
+      },
+      {
+        "subject": "mobile-core",
+        "name": "mobile-core",
+        "level": "L1_framed",
+        "origin": "blueprint",
+        "days_at_level": 0,
+        "updated_at": "2026-09-01T22:51:50.626081",
+        "is_stalled": false,
+        "open_question_ref": null,
+        "assigned_role": null,
+        "dependent_sections": [
+          "5.2"
+        ]
+      },
+      {
+        "subject": "synthetic-subject",
+        "name": "synthetic-subject",
+        "level": "L0_named",
+        "origin": "blueprint",
+        "days_at_level": 0,
+        "updated_at": "2026-09-01T22:51:50.626081",
+        "is_stalled": false,
+        "open_question_ref": null,
+        "assigned_role": null,
+        "dependent_sections": [
+          "5.2"
+        ]
+      },
+      {
+        "subject": "transport",
+        "name": "transport",
+        "level": "L0_named",
+        "origin": "blueprint",
+        "days_at_level": 0,
+        "updated_at": "2026-09-01T22:51:50.626081",
+        "is_stalled": false,
+        "open_question_ref": null,
+        "assigned_role": null,
+        "dependent_sections": [
+          "5.2"
+        ]
+      }
+    ],
     "render_payload": {
       "engagement": "nordwave-mcx-2027",
-      "status": "final",
-      "is_provisional": false,
-      "maturity_board": [],
-      "active_statements": [],
-      "open_conflicts": [],
-      "uncertainties": [],
-      "unripe_subjects": []
+      "status": "provisional",
+      "is_provisional": true,
+      "maturity_board": [
+        {
+          "subject": "floor-control",
+          "name": "floor-control",
+          "level": "L2_decomposed",
+          "origin": "discovered",
+          "days_at_level": 0,
+          "updated_at": "2026-09-01T22:51:50.679417",
+          "is_stalled": false,
+          "open_question_ref": null,
+          "assigned_role": null,
+          "dependent_sections": [
+            "5.2"
+          ]
+        },
+        {
+          "subject": "group-management",
+          "name": "group-management",
+          "level": "L0_named",
+          "origin": "discovered",
+          "days_at_level": 0,
+          "updated_at": "2026-09-01T22:51:50.679417",
+          "is_stalled": false,
+          "open_question_ref": null,
+          "assigned_role": null,
+          "dependent_sections": [
+            "5.2"
+          ]
+        },
+        {
+          "subject": "lmr-interworking",
+          "name": "lmr-interworking",
+          "level": "L0_named",
+          "origin": "discovered",
+          "days_at_level": 0,
+          "updated_at": "2026-09-01T22:51:50.679417",
+          "is_stalled": false,
+          "open_question_ref": null,
+          "assigned_role": null,
+          "dependent_sections": [
+            "5.2"
+          ]
+        },
+        {
+          "subject": "mcx-services",
+          "name": "mcx-services",
+          "level": "L2_decomposed",
+          "origin": "blueprint",
+          "days_at_level": 0,
+          "updated_at": "2026-09-01T22:51:50.679417",
+          "is_stalled": false,
+          "open_question_ref": null,
+          "assigned_role": null,
+          "dependent_sections": [
+            "5.2"
+          ]
+        },
+        {
+          "subject": "media-distribution",
+          "name": "media-distribution",
+          "level": "L0_named",
+          "origin": "discovered",
+          "days_at_level": 0,
+          "updated_at": "2026-09-01T22:51:50.679417",
+          "is_stalled": false,
+          "open_question_ref": null,
+          "assigned_role": null,
+          "dependent_sections": [
+            "5.2"
+          ]
+        },
+        {
+          "subject": "mobile-core",
+          "name": "mobile-core",
+          "level": "L1_framed",
+          "origin": "blueprint",
+          "days_at_level": 0,
+          "updated_at": "2026-09-01T22:51:50.679417",
+          "is_stalled": false,
+          "open_question_ref": null,
+          "assigned_role": null,
+          "dependent_sections": [
+            "5.2"
+          ]
+        },
+        {
+          "subject": "synthetic-subject",
+          "name": "synthetic-subject",
+          "level": "L0_named",
+          "origin": "blueprint",
+          "days_at_level": 0,
+          "updated_at": "2026-09-01T22:51:50.679417",
+          "is_stalled": false,
+          "open_question_ref": null,
+          "assigned_role": null,
+          "dependent_sections": [
+            "5.2"
+          ]
+        },
+        {
+          "subject": "transport",
+          "name": "transport",
+          "level": "L0_named",
+          "origin": "blueprint",
+          "days_at_level": 0,
+          "updated_at": "2026-09-01T22:51:50.679417",
+          "is_stalled": false,
+          "open_question_ref": null,
+          "assigned_role": null,
+          "dependent_sections": [
+            "5.2"
+          ]
+        }
+      ],
+      "active_statements": [
+        {
+          "id": "S-0001",
+          "section": "4.1",
+          "subject": "mcx-services",
+          "subject_direct": "mcx-services",
+          "predicate": "is_constrained_by",
+          "value": "3GPP MC service layer boundary",
+          "unit": null,
+          "author": "amina",
+          "role": "mcx-service-architect",
+          "confidence": "designed",
+          "verbatim": "The MCX layer delivers group voice, data and video to dispatchers and field teams, and it has to keep delivering group voice when almost nothing else works. Our boundary is the 3GPP MC service layer: group and affiliation management, floor control, media distribution, and the interworking function towards the legacy LMR fleet, which stays for four more years. Everything below - bearers, QoS, slices - belongs to the core team.  What must survive is talkgroup communication inside an isolated site: if the transport to the national data centres is cut, a site must keep serving its local talkgroups. That is a hard requirement from the customer, and I do not yet know whether the platform we shortlist can do it without a local instance.",
+          "status": "active",
+          "based_on": []
+        },
+        {
+          "id": "S-0002",
+          "section": "4.1",
+          "subject": "mcx-services",
+          "subject_direct": "mcx-services",
+          "predicate": "has_property",
+          "value": "group voice must survive site isolation from national data centres",
+          "unit": null,
+          "author": "amina",
+          "role": "mcx-service-architect",
+          "confidence": "stated-by-client",
+          "verbatim": "The MCX layer delivers group voice, data and video to dispatchers and field teams, and it has to keep delivering group voice when almost nothing else works. Our boundary is the 3GPP MC service layer: group and affiliation management, floor control, media distribution, and the interworking function towards the legacy LMR fleet, which stays for four more years. Everything below - bearers, QoS, slices - belongs to the core team.  What must survive is talkgroup communication inside an isolated site: if the transport to the national data centres is cut, a site must keep serving its local talkgroups. That is a hard requirement from the customer, and I do not yet know whether the platform we shortlist can do it without a local instance.",
+          "status": "active",
+          "based_on": []
+        },
+        {
+          "id": "S-0003",
+          "section": "5.1",
+          "subject": "mobile-core",
+          "subject_direct": "mobile-core",
+          "predicate": "has_property",
+          "value": "dedicated 5G standalone core, 2 sites active-active, reserved slicing",
+          "unit": null,
+          "author": "rui",
+          "role": "mobile-core-architect",
+          "confidence": "designed",
+          "verbatim": "A dedicated 5G standalone core, national, two sites active-active, with a slice reserved for the mission-critical service.",
+          "status": "active",
+          "based_on": []
+        },
+        {
+          "id": "S-0004",
+          "section": "4.1",
+          "subject": "mcx-services",
+          "subject_direct": "mcx-services",
+          "predicate": "decomposes_into",
+          "value": "group-management, floor-control, media-distribution, lmr-interworking",
+          "unit": null,
+          "author": "amina",
+          "role": "mcx-service-architect",
+          "confidence": "designed",
+          "verbatim": "Four parts. Group and affiliation management, which is mostly a data problem and talks to the subscriber database. Floor control, which is the latency-critical one and the reason people will judge the system. Media distribution, where the question is unicast versus multicast on the radio side. And the LMR interworking function, which is a gateway to a vendor system we do not control.",
+          "status": "active",
+          "based_on": []
+        },
+        {
+          "id": "S-0005",
+          "section": "4.3",
+          "subject": "floor-control",
+          "subject_direct": "floor-control",
+          "predicate": "has_property",
+          "value": "floor arbitration terminates in the MC service layer at the site",
+          "unit": null,
+          "author": "amina",
+          "role": "mcx-service-architect",
+          "confidence": "designed",
+          "verbatim": "arbitration terminates in the MC service layer, at the site",
+          "status": "under_review",
+          "based_on": []
+        },
+        {
+          "id": "S-0006",
+          "section": "4.3",
+          "subject": "floor-control",
+          "subject_direct": "floor-control",
+          "predicate": "depends_on",
+          "value": "depends on a committed priority and pre-emption profile in the core",
+          "unit": null,
+          "author": "rui",
+          "role": "mobile-core-architect",
+          "confidence": "designed",
+          "verbatim": "depends on a committed priority and pre-emption profile in the core",
+          "status": "under_review",
+          "based_on": []
+        },
+        {
+          "id": "S-0007",
+          "section": "4.4",
+          "subject": "media-distribution",
+          "subject_direct": "media-distribution",
+          "predicate": "has_property",
+          "value": "multicast on the radio side",
+          "unit": null,
+          "author": "amina",
+          "role": "mcx-service-architect",
+          "confidence": "designed",
+          "verbatim": "multicast on the radio side",
+          "status": "active",
+          "based_on": []
+        },
+        {
+          "id": "S-0008",
+          "section": "4.4",
+          "subject": "media-distribution",
+          "subject_direct": "media-distribution",
+          "predicate": "has_property",
+          "value": "unicast only, multicast deferred",
+          "unit": null,
+          "author": "rui",
+          "role": "mobile-core-architect",
+          "confidence": "designed",
+          "verbatim": "unicast only, multicast deferred",
+          "status": "active",
+          "based_on": []
+        },
+        {
+          "id": "S-0009",
+          "section": "4.5",
+          "subject": "lmr-interworking",
+          "subject_direct": "lmr-interworking",
+          "predicate": "depends_on",
+          "value": "On release 23.4 the element manager's bulk configuration export is capped at 2 000 managed objects per request and rejects concurrent exports on the same node. In practice a full export of a core node takes three passes. Anyone planning a nightly backup of the whole estate through that interface should size for that, and should not assume the documented figure of 10 000.",
+          "unit": null,
+          "author": "external:m.okonkwo",
+          "role": "architect",
+          "confidence": "observed",
+          "verbatim": "On release 23.4 the element manager's bulk configuration export is capped at 2 000 managed objects per request and rejects concurrent exports on the same node. In practice a full export of a core node takes three passes. Anyone planning a nightly backup of the whole estate through that interface should size for that, and should not assume the documented figure of 10 000.",
+          "status": "active",
+          "based_on": []
+        }
+      ],
+      "open_conflicts": [
+        {
+          "id": "C-0002",
+          "kind": "contradiction",
+          "detail": "Contradiction automatique d\u00e9tect\u00e9e entre S-0007 et S-0008 sur media-distribution (has_property)",
+          "status": "open",
+          "origin": "detected",
+          "resolution": "",
+          "arbitrated_by": ""
+        }
+      ],
+      "uncertainties": [
+        {
+          "id": "U-0001",
+          "text": "I do not yet know whether the platform we shortlist can do it without a local instance",
+          "subject": "mcx-services"
+        }
+      ],
+      "unripe_subjects": [
+        "floor-control",
+        "group-management",
+        "lmr-interworking",
+        "mcx-services",
+        "media-distribution",
+        "mobile-core",
+        "synthetic-subject",
+        "transport"
+      ]
     },
     "diagram_graph": {
       "engagement": "nordwave-mcx-2027",
       "format": "mermaid",
-      "nodes": [],
-      "edges": [],
-      "mermaid": "flowchart TD"
+      "nodes": [
+        {
+          "id": "floor-control",
+          "label": "floor-control",
+          "type": "Subject",
+          "level": "L2_decomposed"
+        },
+        {
+          "id": "group-management",
+          "label": "group-management",
+          "type": "Subject",
+          "level": "L0_named"
+        },
+        {
+          "id": "lmr-interworking",
+          "label": "lmr-interworking",
+          "type": "Subject",
+          "level": "L0_named"
+        },
+        {
+          "id": "mcx-services",
+          "label": "mcx-services",
+          "type": "Subject",
+          "level": "L2_decomposed"
+        },
+        {
+          "id": "media-distribution",
+          "label": "media-distribution",
+          "type": "Subject",
+          "level": "L0_named"
+        },
+        {
+          "id": "mobile-core",
+          "label": "mobile-core",
+          "type": "Subject",
+          "level": "L1_framed"
+        },
+        {
+          "id": "synthetic-subject",
+          "label": "synthetic-subject",
+          "type": "Subject",
+          "level": "L0_named"
+        },
+        {
+          "id": "transport",
+          "label": "transport",
+          "type": "Subject",
+          "level": "L0_named"
+        }
+      ],
+      "edges": [
+        {
+          "id": "S-0001",
+          "source": "mcx-services",
+          "target": "3GPP MC service layer boundary",
+          "predicate": "is_constrained_by"
+        },
+        {
+          "id": "S-0002",
+          "source": "mcx-services",
+          "target": "group voice must survive site isolation from national data centres",
+          "predicate": "has_property"
+        },
+        {
+          "id": "S-0003",
+          "source": "mobile-core",
+          "target": "dedicated 5G standalone core, 2 sites active-active, reserved slicing",
+          "predicate": "has_property"
+        },
+        {
+          "id": "S-0004",
+          "source": "mcx-services",
+          "target": "group-management, floor-control, media-distribution, lmr-interworking",
+          "predicate": "decomposes_into"
+        },
+        {
+          "id": "S-0005",
+          "source": "floor-control",
+          "target": "floor arbitration terminates in the MC service layer at the site",
+          "predicate": "has_property"
+        },
+        {
+          "id": "S-0006",
+          "source": "floor-control",
+          "target": "depends on a committed priority and pre-emption profile in the core",
+          "predicate": "depends_on"
+        },
+        {
+          "id": "S-0007",
+          "source": "media-distribution",
+          "target": "multicast on the radio side",
+          "predicate": "has_property"
+        },
+        {
+          "id": "S-0008",
+          "source": "media-distribution",
+          "target": "unicast only, multicast deferred",
+          "predicate": "has_property"
+        },
+        {
+          "id": "S-0009",
+          "source": "lmr-interworking",
+          "target": "On release 23.4 the element manager's bulk configuration export is capped at 2 000 managed objects per request and rejects concurrent exports on the same node. In practice a full export of a core node takes three passes. Anyone planning a nightly backup of the whole estate through that interface should size for that, and should not assume the documented figure of 10 000.",
+          "predicate": "depends_on"
+        }
+      ],
+      "mermaid": "flowchart TD\n    floor-control[\"floor-control (L2_decomposed)\"]\n    group-management[\"group-management (L0_named)\"]\n    lmr-interworking[\"lmr-interworking (L0_named)\"]\n    mcx-services[\"mcx-services (L2_decomposed)\"]\n    media-distribution[\"media-distribution (L0_named)\"]\n    mobile-core[\"mobile-core (L1_framed)\"]\n    synthetic-subject[\"synthetic-subject (L0_named)\"]\n    transport[\"transport (L0_named)\"]\n    node_t_0[\"3GPP MC service layer boundary\"]\n    mcx-services -->|\"is_constrained_by\"| node_t_0\n    node_t_1[\"group voice must survive site isolation from na\u2026\"]\n    mcx-services -->|\"has_property\"| node_t_1\n    node_t_2[\"dedicated 5G standalone core, 2 sites active-ac\u2026\"]\n    mobile-core -->|\"has_property\"| node_t_2\n    node_t_3[\"group-management, floor-control, media-distribu\u2026\"]\n    mcx-services -->|\"decomposes_into\"| node_t_3\n    node_t_4[\"floor arbitration terminates in the MC service \u2026\"]\n    floor-control -->|\"has_property\"| node_t_4\n    node_t_5[\"depends on a committed priority and pre-emption\u2026\"]\n    floor-control -->|\"depends_on\"| node_t_5\n    node_t_6[\"multicast on the radio side\"]\n    media-distribution -->|\"has_property\"| node_t_6\n    node_t_7[\"unicast only, multicast deferred\"]\n    media-distribution -->|\"has_property\"| node_t_7\n    node_t_8[\"On release 23.4 the element manager's bulk conf\u2026\"]\n    lmr-interworking -->|\"depends_on\"| node_t_8"
     }
   }
 }

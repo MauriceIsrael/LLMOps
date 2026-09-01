@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SuggestionCatalogContract",
+  "description": "Contract for Architecture Studio SuggestionCatalogPort to receive architecture pattern suggestions from Knowledge Hub without mutating project models.",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["ok", "no_suggestions", "invalid_argument", "error"]
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "object",
+          "properties": {
+            "issue_kind": { "type": "string" },
+            "domain": { "type": "string" },
+            "context_tags": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": ["issue_kind"]
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pattern_id": { "type": "string" },
+              "typed_id": { "type": "string" },
+              "title": { "type": "string" },
+              "summary": { "type": "string" },
+              "applicability": { "type": "string" },
+              "confidence": { "type": "string" },
+              "external_ref": { "type": "string" },
+              "trade_offs": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "required": ["pattern_id", "typed_id", "title", "confidence", "external_ref"]
+          }
+        }
+      },
+      "required": ["context", "suggestions"]
+    }
+  },
+  "required": ["status", "count", "data"]
+}
+

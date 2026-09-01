@@ -9,11 +9,14 @@ env/
 venv/
 ENV/
 
-# Kùzu DB & local storage
+# Graph DB & local storage
 data/kuzu_db/
 data/knowledge.kuzu/
+data/knowledge.lbug
 data/engagements/
 !data/engagements/nordwave-mcx-2027.kuzu
+data/snapshots/*
+!data/snapshots/latest.json
 *.kuzu
 *.lbug
 *.kz

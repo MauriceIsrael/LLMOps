@@ -248,3 +248,86 @@ from the knowledge base the day an asset is corrected. Do not render `assumed`
 or `stated-by-client` content with the same assertiveness as `verified` content
 in your output template — this is the one rule in this guide that is not
 negotiable, because it is the entire reason the confidence field exists.
+
+---
+
+## 8. Consuming the Sealed Snapshot (Zero-Latency & Web Client Suites)
+
+For client applications like *Architecture Studio* or decoupled frontend suites that require zero network latency and offline resilience, consume the **Sealed Snapshot** (`fixtures/sealed_snapshot.json` or `GET /snapshot/latest`):
+
+```typescript
+import snapshot from "./fixtures/sealed_snapshot.json";
+// or: const res = await fetch("https://<host>/snapshot/latest");
+
+// 1. Verify snapshot seal
+console.log(`Snapshot: ${snapshot.snapshot_id} (checksum: ${snapshot.payload_sha256})`);
+
+// 2. Lookup typed identifiers (type:slug format)
+const adr14 = snapshot.assets.find(a => a.typed_id === "decision:ADR-0014");
+
+// 3. Query the applicability index
+const rules = snapshot.applicability_index["ADR-0014"].rules;
+```
+
+---
+
+## 9. Implementing the `SuggestionCatalogPort` (Architecture Studio)
+
+To connect *Architecture Studio*'s hexagonal `SuggestionCatalogPort` to the Knowledge Hub:
+
+```typescript
+import { SuggestionCatalogPort, SuggestionCatalogContext, PatternSuggestion, ResponseEnvelope } from "../schemas/types";
+import snapshot from "./fixtures/sealed_snapshot.json";
+
+export class KnowledgeHubSuggestionAdapter implements SuggestionCatalogPort {
+  async getSuggestions(context: SuggestionCatalogContext): Promise<ResponseEnvelope<{
+    context: SuggestionCatalogContext;
+    suggestions: PatternSuggestion[];
+  }>> {
+    const issue = context.issue_kind.toLowerCase();
+    const domain = (context.domain || "").toLowerCase();
+
+    // Match patterns from sealed snapshot in memory (0 network latency)
+    const matches = snapshot.assets
+      .filter(a => a.type === "pattern" || a.id.startsWith("PAT-") || a.id.startsWith("P-"))
+      .filter(a => {
+        const text = `${a.title} ${a.summary || ""} ${a.body || ""}`.toLowerCase();
+        return text.includes(issue) || (domain && text.includes(domain));
+      })
+      .slice(0, 5)
+      .map(a => ({
+        pattern_id: a.id,
+        typed_id: a.typed_id || `pattern:${a.id}`,
+        title: a.title,
+        summary: a.summary || a.title,
+        applicability: `Recommended for ${context.issue_kind}`,
+        confidence: a.confidence,
+        external_ref: `KH:${a.id}@v${a.version || "1.0.0"}`,
+        trade_offs: ["Requires local project qualification"],
+      }));
+
+    return {
+      status: "ok",
+      count: matches.length,
+      data: {
+        context,
+        suggestions: matches,
+      },
+    };
+  }
+}
+```
+
+### Graceful Degradation Rule
+If the Knowledge Hub is offline or unreachable, the fallback adapter returns `[]` with status `"ok"`. Architecture Studio continues functioning normally.
+
+---
+
+## 10. Epistemic Mapping & Frozen HLD Citations
+
+When referencing Knowledge Hub assets inside formal High-Level Design (HLD) baselines:
+* Always use the canonical format: `ExternalRef { system: "KH", id: "P-002", version: "1.0.0" }`.
+* Never assert a `verified` doctrine as a project Fact without local proof in Architecture Studio.
+* Refer to [docs/EPISTEMIC-ALIGNMENT.md](EPISTEMIC-ALIGNMENT.md) for full mapping rules.
+
+

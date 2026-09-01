@@ -249,3 +249,27 @@ def test_get_engagement_export_returns_all():
     assert "render_payload" in data
     assert "diagram_graph" in data
 
+
+# --- French Character & Cypher Parameterization Non-Regression Tests ---
+
+def test_search_assets_french_apostrophe():
+    """Verify search_assets handles queries with French apostrophes without Cypher syntax errors."""
+    res1 = kb_tools.search_assets("l'AMF")
+    assert res1.get("status") == "ok"
+
+    res2 = kb_tools.search_assets("sûreté d'exploitation")
+    assert res2.get("status") == "ok"
+
+
+def test_get_glossary_term_french_apostrophe():
+    """Verify get_glossary_term handles terms with apostrophes without Cypher syntax errors."""
+    res = kb_tools.get_glossary_term("l'arbitrage")
+    assert res.get("status") in ("ok", "not_found")
+
+
+def test_list_assets_parameterized_filters():
+    """Verify list_assets handles domain and phase filters with special characters."""
+    res = kb_tools.list_assets(domain="l'automatisation", phase="BUILD")
+    assert res.get("status") == "ok"
+
+

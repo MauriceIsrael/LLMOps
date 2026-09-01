@@ -1,4 +1,4 @@
-<!-- elicit:demo-2026:Q-0001:question:sha=3c5834 -->
+<!-- elicit:demo-2026:Q-0001:question:sha=08b91a -->
 ### Quelle est la configuration de stockage du cluster de management pour la section 5.2 ?
 
 **Why this matters**

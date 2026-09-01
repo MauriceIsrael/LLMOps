@@ -4,27 +4,32 @@ This document is the official technical contract specification for the **FastMCP
 
 ---
 
-## 🎯 1. Architecture Overview & Plane Separation
+## 🎯 1. Architecture Overview & The 4 Integration Surfaces
 
-The MCP server is split into two independent entities to guarantee physical isolation between reusable enterprise knowledge and dynamic project data:
+LLMOps provides **four distinct surfaces of integration** to accommodate both agentic workflows and decoupled client applications (e.g. *Architecture Studio*):
 
-1. **Knowledge Server (`mcp_server/main_knowledge.py`)**: Serves reusable architecture assets (`Asset`, `GlossaryTerm`, `SUPERSEDES`, `REQUIRES`, `DEFINES`).
-2. **Engagement Server (`mcp_server/main_engagement.py`)**: Serves per-project dynamic state (`Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`).
-
-```mermaid
-graph LR
-    Client["Third-Party Client / Renderer / AI Agent"]
-    Client -->|MCP SSE / STDIO| KB["Knowledge Server (mcp_server/main_knowledge.py)"]
-    Client -->|MCP SSE / STDIO| ENG["Engagement Server (mcp_server/main_engagement.py)"]
-    KB --> DB1[("data/knowledge.kuzu")]
-    ENG --> DB2[("data/engagements/<id>.kuzu")]
 ```
+1. Sealed Snapshot Channel (Offline JSON File / HTTP GET /snapshot/latest)
+   ↳ Zero-latency, sealed snapshot with sha256 checksum, type:slug identifiers, and applicability index.
+2. FastMCP Server (SSE / STDIO via JSON-RPC 2.0)
+   ↳ Interactive tool surface for LLM agents, Antigravity, Claude Desktop, and Cursor.
+3. Python SDK (mcp_server.renderer_interface.RendererClient)
+   ↳ Direct typed Python client for local renderers and scripts.
+4. CLI Import Gateway (poetry run elicit import)
+   ↳ Validated JSON payload ingestion enforcing controlled domain predicate vocabularies.
+```
+
+### 🔒 Guarantee: 100% Deterministic Core
+- Zero server-side model calls in `tools/elicitation/`.
+- Level gate progression (`L0_named` → `L4_specified`), contradiction detection, and conflict tracking are implemented via deterministic, parameterized Cypher and symbolic logic.
+- An elicitation session is strictly replayable and auditable.
 
 ---
 
 ## 🌐 2. Transports, Endpoints & Authentication
 
-- **Recommended Transport:** HTTP SSE (`Server-Sent Events`) at endpoint `/sse`.
+- **Recommended Transport for Agents:** HTTP SSE (`Server-Sent Events`) at endpoint `/sse`.
+- **Static / Web Application Channel:** `GET /snapshot/latest` and `GET /snapshot/{snapshot_id}` with `ETag` and `Cache-Control` headers.
 - **STDIO Transport (Local Agents):** `poetry run mcp-server-knowledge` and `poetry run mcp-server-engagement`.
 - **Public Production Endpoint (GCP Cloud Run):** `https://llmops-mcp-server-344571265365.europe-west1.run.app/sse`
 - **HTTP Authentication (Bearer Token):**
@@ -32,7 +37,7 @@ graph LR
   - Requests must supply the token in HTTP header: `Authorization: Bearer <SERVER_TOKEN>` (or `X-API-Key: <SERVER_TOKEN>`).
   - Constant-time verification (`secrets.compare_digest`) returns `HTTP 401 Unauthorized` if invalid or missing.
 - **Connection Safety & Semantics:**
-  - Read-Only connection on the underlying Kùzu DB / LadybugDB graph databases in production.
+  - Read-Only connection on the underlying LadybugDB graph databases in production.
   - Any Cypher write attempt (`CREATE`, `SET`, `DELETE`) via public read tools is rejected at driver level.
 
 ---
@@ -74,34 +79,37 @@ All FastMCP tools return a **standardized JSON envelope**:
 
 ---
 
-## 📚 4. Knowledge Server Tools Summary
+## 📚 4. Knowledge Server Tools Catalog (11 Tools)
 
 | Tool Name | Description | Key Parameters |
 |---|---|---|
-| `list_assets` | List architecture asset metadata | `type`, `phase`, `domain`, `status` |
-| `get_asset` | Retrieve single asset with full content | `id` |
-| `get_assets` | Batch retrieve multiple assets by ID list | `ids` |
-| `search_assets` | Hybrid search across assets and graph | `query`, `filters` |
-| `get_principles_for` | Fetch active architecture principles | `phase`, `domain` |
-| `get_decision_trail` | History trail of an ADR (`SUPERSEDES`) | `id` |
-| `get_glossary_term` | Fetch canonical term definition | `term` |
+| `list_assets` | List architecture asset metadata with optional status, phase, type or domain filters | `type`, `phase`, `domain`, `status` |
+| `get_asset` | Retrieve single asset with full content and metadata | `id` |
+| `get_assets` | Batch retrieve multiple assets by ID list in a single call | `ids` |
+| `search_assets` | Parameterized search across assets, titles, and identifiers | `query`, `filters` |
+| `get_principles_for` | Fetch active architecture principles applicable to a domain or phase | `phase`, `domain` |
+| `get_decision_trail` | Supersession history trail of an ADR (`SUPERSEDES` chain) | `id` |
+| `get_glossary_term` | Fetch canonical definition for an architecture glossary term | `term` |
+| `get_knowledge_analytics` | Knowledge base volume indicators, relations count, and lifecycle stats | *(none)* |
+| `get_domain_prominence_report` | Domain gravity, cross-domain dependencies, and prominence score report | *(none)* |
 | `query_graph` | Execute read-only Cypher query on knowledge graph | `cypher_query` |
 | `get_graph_summary` | Graph summary node/rel counts and schema version | *(none)* |
 
 ---
 
-## 🚀 5. Engagement Server Tools Summary
+## 🚀 5. Engagement Server Tools Catalog (12 Tools)
 
 | Tool Name | Description | Key Parameters |
 |---|---|---|
-| `get_subject` | Subject maturity state | `engagement`, `subject` |
-| `get_subject_trajectory` | Maturity timeline history | `engagement`, `subject` |
-| `get_board` | Per-subject maturity board | `engagement` |
-| `get_statements` | Active architectural statements | `engagement` |
-| `get_conflicts` | Open architecture conflicts | `engagement` |
-| `get_open_questions` | Open elicitation questions | `engagement` |
-| `get_diagram_graph` | Structured graph & Mermaid code string | `engagement`, `format` |
-| `get_render_payload` | Complete render payload for offline renderers | `engagement` |
+| `get_subject` | Subject maturity state and associated active statements count | `engagement`, `subject` |
+| `get_subject_trajectory` | Maturity timeline history and questions answered for a subject | `engagement`, `subject` |
+| `get_board` | Per-subject maturity board (`L0_named` to `L4_specified`) and staleness | `engagement` |
+| `get_statements` | Active architectural statements with confidence and attribution | `engagement`, `subject` |
+| `get_conflicts` | Open and arbitrated architecture conflicts (`contradiction`, `principle_violation`, `stale_basis`) | `engagement`, `status` |
+| `get_open_questions` | Open elicitation questions routed to specific roles | `engagement`, `role` |
+| `get_diagram_graph` | Structured component graph and Mermaid flowchart syntax string | `engagement`, `format` |
+| `get_render_payload` | Complete render payload (`is_provisional`, `unripe_subjects`, `open_conflicts`) | `engagement` |
+| `get_dangling_references` | Unresolved citations cited by statements but absent from knowledge plane | `engagement` |
 | `get_engagement_export` | Single bulk export payload for third-party tools | `engagement` |
 | `query_graph` | Execute read-only Cypher query on engagement graph | `cypher_query`, `engagement` |
 | `get_graph_summary` | Graph summary node/rel counts and schema version | *(none)* |
@@ -112,4 +120,4 @@ All FastMCP tools return a **standardized JSON envelope**:
 
 - 🎨 **[Third-Party Integration Guide](THIRD-PARTY-INTEGRATION-GUIDE.md)**: Full guide to writing custom renderers (DOCX, PPTX, Web UI) without running the server.
 - 📊 **[Graph Schema Specification (SCHEMA.md)](SCHEMA.md)**: Automatically generated Kùzu DB table & property schemas.
-- 📖 **[Software Architecture Specification (architecture.md)](architecture.md)**: ADR-0014 and ADR-0015 specification.
+- 📖 **[Software Architecture Specification (architecture.md)](architecture.md)**: ADR-0014 and ADR-0015 dual-plane specification.

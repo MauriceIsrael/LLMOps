@@ -2,8 +2,22 @@
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any
+
+# Ensure root directory is in sys.path when script is executed directly
+ROOT_DIR = Path(__file__).parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from tools.elicitation.config import (
+    CONFIDENCE_LEVELS,
+    CONFLICT_KINDS,
+    GAP_TYPES,
+    STATEMENT_STATUSES,
+    SUBJECT_LEVELS,
+)
 
 
 def generate_envelope_schema() -> dict[str, Any]:
@@ -34,84 +48,165 @@ def generate_envelope_schema() -> dict[str, Any]:
 
 
 def generate_typescript_types() -> str:
-    return """/**
+    conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
+    subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
+    conflict_kinds_union = " | ".join(f'"{k}"' for k in sorted(CONFLICT_KINDS))
+    gap_types_union = " | ".join(f'"{g}"' for g in sorted(GAP_TYPES))
+    stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
+
+    return f"""/**
  * LLMOps MCP Tool Response Contract (schema_version: "1.0")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
 export type EnvelopeStatus = "ok" | "not_found" | "invalid_argument" | "error" | "unauthorized";
 
-export interface ResponseEnvelope<T = any> {
+export type ConfidenceLevel = {conf_union};
+
+export type SubjectMaturityLevel = {subj_levels_union};
+
+export type ConflictKind = {conflict_kinds_union};
+
+export type GapType = {gap_types_union};
+
+export type StatementStatus = {stmt_statuses_union};
+
+export interface ResponseEnvelope<T = any> {{
   status: EnvelopeStatus;
   count: number;
   data: T;
   reason?: string;
-}
+}}
 
-export interface Asset {
+export interface AssetProvenance {{
+  document?: string;
+  version?: string;
+  section?: string;
+  text_sha256?: string;
+}}
+
+export interface Asset {{
   id: string;
+  typed_id?: string;
   title: string;
   kind?: string;
   type?: string;
-  status: string;
-  confidence: "verified" | "vendor-stated" | "assumed";
+  status: "active" | "superseded" | string;
+  confidence: ConfidenceLevel;
   domain?: string;
   phase?: string;
   owner?: string;
+  vendor?: string;
   last_reviewed?: string;
   path?: string;
+  source_path?: string;
   content?: string;
-}
+  provenance?: AssetProvenance;
+  supersedes?: Array<{{ id: string; title?: string }}>;
+  superseded_by?: Array<{{ id: string; title?: string }}>;
+}}
 
-export interface Statement {
+export interface Statement {{
   id: string;
   subject: string;
   predicate: string;
   value: string;
-  confidence: "verified" | "designed" | "stated-by-client" | "assumed";
+  confidence: ConfidenceLevel;
   author?: string;
   role?: string;
-  status: "active" | "contested" | "under_review";
-  based_on?: Array<{ id: string }>;
-}
+  status: StatementStatus;
+  verbatim?: string;
+  section?: string;
+  based_on?: Array<{{ id: string; resolved?: boolean; note?: string }}>;
+}}
 
-export interface SubjectBoardItem {
-  id: string;
+export interface SubjectBoardItem {{
+  id?: string;
   subject: string;
-  level: "L0_named" | "L1_framed" | "L2_decomposed" | "L3_decided" | "L4_specified";
-  active_statements_count: number;
+  name?: string;
+  level: SubjectMaturityLevel;
+  origin?: "blueprint" | "discovered" | string;
+  active_statements_count?: number;
+  days_at_level?: number;
+  is_stalled?: boolean;
   stalled?: boolean;
-}
+  updated_at?: string;
+}}
 
-export interface Conflict {
+export interface Conflict {{
   id: string;
-  kind: string;
+  kind: ConflictKind;
   detail: string;
   status: "open" | "arbitrated";
   origin: "declared" | "detected";
-}
+  statement_ids?: string[];
+  resolution?: string;
+  arbitrated_by?: string;
+}}
 
-export interface RenderPayload {
+export interface Uncertainty {{
+  id: string;
+  text: string;
+  author?: string;
+  role?: string;
+}}
+
+export interface RenderPayload {{
   engagement: string;
-  status: "COMPLETE" | "PROVISIONAL";
+  status: "provisional" | "final";
   is_provisional: boolean;
   active_statements: Statement[];
   open_conflicts: Conflict[];
-  unripe_subjects: SubjectBoardItem[];
+  uncertainties?: Uncertainty[];
+  unripe_subjects: string[];
   maturity_board: SubjectBoardItem[];
-}
+}}
 
-export interface GraphSummary {
+export interface SealedSnapshotEnvelope {{
+  snapshot_id: string;
+  created_at: string;
+  source_revision: string;
+  payload_sha256: string;
   schema_version: "1.0";
-  knowledge: {
-    dataset: string;
-    node_counts: Record<string, number>;
-  };
-  engagements: Array<{
+  applicability_index: Record<string, {{ rules?: string[]; layers?: string[]; domains?: string[] }}>;
+  assets: Asset[];
+  glossary: Array<{{ term: string; definition: string; context?: string }}>;
+  engagements?: Array<{{
     id: string;
-    node_counts: Record<string, number>;
-  }>;
-}
+    render_payload: RenderPayload;
+  }}>;
+}}
+
+export interface ExternalRef {{
+  system: "KH" | "AS" | string;
+  id: string;
+  version: string;
+  sha256?: string;
+}}
+
+export interface PatternSuggestion {{
+  pattern_id: string;
+  typed_id: string;
+  title: string;
+  summary: string;
+  applicability: string;
+  confidence: ConfidenceLevel;
+  external_ref: string;
+  trade_offs?: string[];
+}}
+
+export interface SuggestionCatalogContext {{
+  issue_kind: "SPOF" | "LATENCY_RISK" | "SECURITY_ISOLATION" | "RESILIENCE" | string;
+  domain?: string;
+  context_tags?: string[];
+}}
+
+export interface SuggestionCatalogPort {{
+  getSuggestions(context: SuggestionCatalogContext): Promise<ResponseEnvelope<{{
+    context: SuggestionCatalogContext;
+    suggestions: PatternSuggestion[];
+  }}>>;
+}}
 """
 
 
@@ -133,3 +228,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
     os._exit(0)
+

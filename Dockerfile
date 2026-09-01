@@ -24,6 +24,9 @@ COPY mcp_server ./mcp_server
 COPY pipelines ./pipelines
 COPY tools ./tools
 COPY data ./data
+COPY schemas ./schemas
+COPY fixtures ./fixtures
+COPY scripts ./scripts
 
 RUN poetry install --no-interaction --no-ansi --only-root
 
@@ -36,6 +39,7 @@ ENV HOST=0.0.0.0
 
 # Ingestion et migration déterministe de la base de connaissances (Knowledge Plane)
 RUN poetry run python -m pipelines.ingestion.migrate_adr0015
+RUN poetry run python scripts/export_sealed_snapshot.py
 RUN poetry run python -c "import os; from mcp_server.knowledge.tools import get_graph_summary; res = get_graph_summary(); count = res.get('data', {}).get('knowledge', {}).get('node_counts', {}).get('Asset', 0); print(f'✅ Build Verification — Knowledge Asset Count: {count}'); assert count > 0, f'Asset count is {count}'; os._exit(0)"
 
 EXPOSE 8000

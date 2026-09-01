@@ -31,6 +31,13 @@ class ArchitectureGraphExtractor:
         domain_val = parsed_doc.get("domain", [])
         domain_str = ",".join(domain_val) if isinstance(domain_val, list) else str(domain_val)
 
+        import hashlib
+
+        raw_markdown = parsed_doc.get("raw_body", "")
+        raw_sha256 = hashlib.sha256(raw_markdown.encode("utf-8")).hexdigest()
+        version_val = str(parsed_doc.get("frontmatter", {}).get("version", "1.0.0"))
+        external_ref_val = f"KH:{doc_id}@v{version_val}"
+
         # Nœud Principal de l'Asset
         main_node = EntityNode(
             name=doc_id,
@@ -46,6 +53,10 @@ class ArchitectureGraphExtractor:
                 "last_reviewed": last_reviewed,
                 "owner": parsed_doc.get("owner", ""),
                 "source_path": parsed_doc.get("source_path", ""),
+                "version": version_val,
+                "markdown_content": raw_markdown,
+                "sha256": raw_sha256,
+                "external_ref": external_ref_val,
             },
         )
         nodes.append(main_node)

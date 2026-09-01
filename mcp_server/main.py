@@ -226,6 +226,31 @@ async def run_sse_authenticated(host: str, port: int) -> None:
         html_content = Path(temp_html_path).read_text(encoding="utf-8")
         return HTMLResponse(content=html_content)
 
+    async def handle_snapshot_latest(request):
+        from pathlib import Path
+        latest_file = Path("data/snapshots/latest.json")
+        if not latest_file.exists():
+            latest_file = Path("fixtures/sealed_snapshot.json")
+        if not latest_file.exists():
+            from scripts.export_sealed_snapshot import export_sealed_snapshot
+            snapshot_data = export_sealed_snapshot()
+            return JSONResponse(snapshot_data, headers={"Cache-Control": "public, max-age=3600"})
+        import json
+        data = json.loads(latest_file.read_text(encoding="utf-8"))
+        etag = data.get("payload_sha256", "")
+        return JSONResponse(data, headers={"ETag": etag, "Cache-Control": "public, max-age=3600"})
+
+    async def handle_snapshot_by_id(request):
+        import json
+        from pathlib import Path
+
+        snap_id = request.path_params.get("snapshot_id", "")
+        snap_file = Path("data/snapshots") / f"{snap_id}.json"
+        if not snap_file.exists():
+            return JSONResponse({"error": f"Snapshot '{snap_id}' not found"}, status_code=404)
+        data = json.loads(snap_file.read_text(encoding="utf-8"))
+        etag = data.get("payload_sha256", "")
+        return JSONResponse(data, headers={"ETag": etag, "Cache-Control": "public, max-age=86400"})
 
     starlette_app = Starlette(
         debug=settings.DEBUG,
@@ -234,6 +259,8 @@ async def run_sse_authenticated(host: str, port: int) -> None:
             Route("/sse", endpoint=handle_sse),
             Route("/messages", endpoint=handle_messages, methods=["POST"]),
             Route("/visualize", endpoint=handle_visualize, methods=["GET"]),
+            Route("/snapshot/latest", endpoint=handle_snapshot_latest, methods=["GET"]),
+            Route("/snapshot/{snapshot_id}", endpoint=handle_snapshot_by_id, methods=["GET"]),
         ],
         middleware=[Middleware(AuthMiddleware)],
     )

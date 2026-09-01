@@ -54,7 +54,7 @@ def discover_engagements(base_dir: Path | str | None = None) -> list[dict[str, A
     return sorted(discovered, key=lambda x: x["id"])
 
 
-class ReadOnlyKuzuClient:
+class ReadOnlyLadybugClient:
     """Read-only driver wrapper around graph DB connections implementing GraphStore protocol."""
 
     _read_db_cache: dict[str, Any] = {}
@@ -62,8 +62,8 @@ class ReadOnlyKuzuClient:
     @classmethod
     def get_read_database(cls, db_path: str | Path) -> Any:
         db_path_str = str(db_path)
-        from mcp_server.db.kuzu_client import KuzuClient
-        return KuzuClient.get_database(db_path_str)
+        from mcp_server.db.ladybug_client import LadybugClient
+        return LadybugClient.get_database(db_path_str)
 
     def __init__(self, db_path: Path | str | None = None, max_rows: int = 1000):
         self.db_path = str(db_path or server_config.knowledge_db_path)
@@ -116,7 +116,11 @@ class ReadOnlyKuzuClient:
         gc.collect()
 
 
-def open_connection(scope: str | None = None, caller: str = "default_user") -> ReadOnlyKuzuClient:
+# Backward compatibility alias
+ReadOnlyKuzuClient = ReadOnlyLadybugClient
+
+
+def open_connection(scope: str | None = None, caller: str = "default_user") -> ReadOnlyLadybugClient:
     """Resolves a scope to a read-only connection.
     Order of operations:
     1. Authorisation first (before checking path existence).

@@ -50,7 +50,7 @@ def test_engagement_equivalence(tmp_path: Path):
     target_db = tmp_path / "engagement.lbug"
     dump_out = tmp_path / "engagement_dump.json"
 
-    _run_cli_script("export_graph", "--db", source_db, "--out", str(export_dir), "--backend", "kuzu")
+    _run_cli_script("export_graph", "--db", source_db, "--out", str(export_dir), "--backend", "ladybug")
     _run_cli_script("import_graph", "--dir", str(export_dir), "--db", str(target_db), "--backend", "ladybug")
     _run_cli_script("dump_graph", "--db", str(target_db), "--out", str(dump_out))
 

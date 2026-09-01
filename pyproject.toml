@@ -14,7 +14,6 @@ packages = [
 
 python = "^3.11"
 fastmcp = "^0.4.1"
-kuzu = ">=0.6.0"
 ladybug = ">=0.1.0"
 llama-index-core = ">=0.11.0"
 pydantic = "^2.7.0"

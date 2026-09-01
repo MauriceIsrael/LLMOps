@@ -1,0 +1,1549 @@
+{
+  "snapshot_id": "snapshot-2026-09-01-06f3455",
+  "created_at": "2026-09-01T21:13:26Z",
+  "source_revision": "06f345557ca862ec686671156c3f1e23fdd996b9",
+  "payload_sha256": "sha256:78f44f4941dab54d04d627340148493a41c08ea2054057d2608c3af104e9695f",
+  "schema_version": "1.0",
+  "applicability_index": {
+    "TPL-getting-started": {
+      "domains": [
+        "delivery"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:tpl-getting-started"
+      ]
+    },
+    "BLU-hla-mcx": {
+      "domains": [],
+      "phases": [],
+      "rules": [
+        "rule:blu-hla-mcx"
+      ]
+    },
+    "ADR-0001": {
+      "domains": [
+        "network-automation",
+        "cloud-platform"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0001"
+      ]
+    },
+    "ADR-0002": {
+      "domains": [
+        "network-automation"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0002"
+      ]
+    },
+    "ADR-0003": {
+      "domains": [
+        "network-automation"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0003"
+      ]
+    },
+    "ADR-0004": {
+      "domains": [
+        "network-automation",
+        "observability"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0004"
+      ]
+    },
+    "ADR-0005": {
+      "domains": [
+        "mobile-core",
+        "network-automation"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0005"
+      ]
+    },
+    "ADR-0006": {
+      "domains": [
+        "cloud-platform"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0006"
+      ]
+    },
+    "ADR-0007": {
+      "domains": [
+        "cloud-platform",
+        "network-automation"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0007"
+      ]
+    },
+    "ADR-0008": {
+      "domains": [
+        "observability"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0008"
+      ]
+    },
+    "ADR-0009": {
+      "domains": [
+        "service-management",
+        "network-automation"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0009"
+      ]
+    },
+    "ADR-0010": {
+      "domains": [
+        "ai-assistance",
+        "security"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:adr-0010"
+      ]
+    },
+    "ADR-0011": {
+      "domains": [
+        "ai-assistance",
+        "security"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:adr-0011"
+      ]
+    },
+    "ADR-0012": {
+      "domains": [
+        "observability",
+        "cloud-platform"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0012"
+      ]
+    },
+    "ADR-0013": {
+      "domains": [
+        "mcx",
+        "service-management"
+      ],
+      "phases": [
+        "BUILD"
+      ],
+      "rules": [
+        "rule:adr-0013"
+      ]
+    },
+    "EST-netdevops-telco": {
+      "domains": [
+        "delivery",
+        "network-automation"
+      ],
+      "phases": [
+        "BID"
+      ],
+      "rules": [
+        "rule:est-netdevops-telco"
+      ]
+    },
+    "TPL-glossary": {
+      "domains": [
+        "delivery"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:tpl-glossary"
+      ]
+    },
+    "TPL-mcp-spec": {
+      "domains": [
+        "ai-assistance"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:tpl-mcp-spec"
+      ]
+    },
+    "PAT-001": {
+      "domains": [
+        "network-automation"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-001"
+      ]
+    },
+    "PAT-002": {
+      "domains": [
+        "observability",
+        "network-automation"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-002"
+      ]
+    },
+    "PAT-003": {
+      "domains": [
+        "network-automation"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-003"
+      ]
+    },
+    "PAT-004": {
+      "domains": [
+        "cloud-platform",
+        "network-automation"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-004"
+      ]
+    },
+    "PAT-005": {
+      "domains": [
+        "observability"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-005"
+      ]
+    },
+    "PAT-006": {
+      "domains": [
+        "mobile-core",
+        "network-automation"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-006"
+      ]
+    },
+    "PAT-007": {
+      "domains": [
+        "ai-assistance"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-007"
+      ]
+    },
+    "P-001": {
+      "domains": [
+        "network-automation",
+        "cloud-platform"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-001"
+      ]
+    },
+    "P-002": {
+      "domains": [
+        "network-automation",
+        "security"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-002"
+      ]
+    },
+    "P-003": {
+      "domains": [
+        "network-automation"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-003"
+      ]
+    },
+    "P-004": {
+      "domains": [
+        "network-automation"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-004"
+      ]
+    },
+    "P-005": {
+      "domains": [
+        "observability",
+        "network-automation"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-005"
+      ]
+    },
+    "P-006": {
+      "domains": [
+        "network-automation"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-006"
+      ]
+    },
+    "P-007": {
+      "domains": [
+        "mobile-core",
+        "network-automation"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-007"
+      ]
+    },
+    "P-008": {
+      "domains": [
+        "observability",
+        "network-automation"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-008"
+      ]
+    },
+    "P-009": {
+      "domains": [
+        "cloud-platform",
+        "network-automation"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-009"
+      ]
+    },
+    "P-010": {
+      "domains": [
+        "service-management",
+        "network-automation"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-010"
+      ]
+    },
+    "P-011": {
+      "domains": [
+        "observability"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-011"
+      ]
+    },
+    "P-012": {
+      "domains": [
+        "ai-assistance",
+        "security"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-012"
+      ]
+    },
+    "P-013": {
+      "domains": [
+        "ai-assistance"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-013"
+      ]
+    },
+    "P-014": {
+      "domains": [
+        "ai-assistance"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-014"
+      ]
+    },
+    "P-015": {
+      "domains": [
+        "ai-assistance",
+        "security"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:p-015"
+      ]
+    },
+    "QST-cloud-platform": {
+      "domains": [
+        "cloud-platform",
+        "observability",
+        "ai-assistance"
+      ],
+      "phases": [
+        "BID",
+        "BUILD"
+      ],
+      "rules": [
+        "rule:qst-cloud-platform"
+      ]
+    },
+    "QST-core-ems": {
+      "domains": [
+        "mobile-core",
+        "network-automation"
+      ],
+      "phases": [
+        "BID",
+        "BUILD"
+      ],
+      "rules": [
+        "rule:qst-core-ems"
+      ]
+    },
+    "QST-service-management": {
+      "domains": [
+        "service-management"
+      ],
+      "phases": [
+        "BID",
+        "BUILD"
+      ],
+      "rules": [
+        "rule:qst-service-management"
+      ]
+    },
+    "RSK-netdevops-telco": {
+      "domains": [
+        "delivery",
+        "network-automation",
+        "observability",
+        "ai-assistance"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:rsk-netdevops-telco"
+      ]
+    },
+    "TPL-claims-register": {
+      "domains": [
+        "delivery"
+      ],
+      "phases": [
+        "BID"
+      ],
+      "rules": [
+        "rule:tpl-claims-register"
+      ]
+    },
+    "TPL-hla-section-map": {
+      "domains": [
+        "delivery"
+      ],
+      "phases": [
+        "BID"
+      ],
+      "rules": [
+        "rule:tpl-hla-section-map"
+      ]
+    },
+    "PAT-AUTH-001": {
+      "domains": [],
+      "phases": [],
+      "rules": [
+        "rule:pat-auth-001"
+      ]
+    }
+  },
+  "assets": [
+    {
+      "id": "ADR-0001",
+      "typed_id": "decision:ADR-0001",
+      "title": "Git as the source of truth for network and platform configuration",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation,cloud-platform",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0001.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "51dc1383979c2e2a6b07f16bcda3e241f208b105bae6315e73867677327f19ba"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0002",
+      "typed_id": "decision:ADR-0002",
+      "title": "Network source of truth and compliance engine",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0002.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "0bd18b5558fd3b64836fd210ca10d3cb43cb2dddd7bc00cfbc15ae7bdeffb67c"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0003",
+      "typed_id": "decision:ADR-0003",
+      "title": "Orchestration and approval engine",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0003.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "11400f6fcd74906221f5934af54becb792cf0d8029e2cc580f8c091cac65651c"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0004",
+      "typed_id": "decision:ADR-0004",
+      "title": "Event-driven remediation engine",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation,observability",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0004.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "d61ee63bcdb26e72e26fc0357c6121f1a74c46396cc2d689a454c028d0133b36"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0005",
+      "typed_id": "decision:ADR-0005",
+      "title": "Access the mobile core exclusively through the element manager northbound interfaces",
+      "type": "decision",
+      "status": "active",
+      "confidence": "vendor-stated",
+      "domain": "mobile-core,network-automation",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0005.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "5b27cb0c3e472a412656209237bc5e77106f90e78dd9d57277f52fb0aaa06104"
+      },
+      "supersedes": [],
+      "superseded_by": [],
+      "vendor": "core-owner-architecture"
+    },
+    {
+      "id": "ADR-0006",
+      "typed_id": "decision:ADR-0006",
+      "title": "GitOps engine for the container platform",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "cloud-platform",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0006.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "4c9b57ca3f118526ab05e6b18bc4f3f7c60d3b9174b4439487e4a9ee2b27c63f"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0007",
+      "typed_id": "decision:ADR-0007",
+      "title": "Dedicated management cluster with its own storage and southbound paths",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "cloud-platform,network-automation",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0007.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "cc07f4d3251830be6b042ae919da6a32ed7d3097e8f5a7ac463b9be633f05878"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0008",
+      "typed_id": "decision:ADR-0008",
+      "title": "Split observability: service plane and infrastructure plane",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "observability",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0008.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "f1d6d4c0a97ea1e0645949bd56543ef47e914e30b641a64734c3739c92cd6990"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0009",
+      "typed_id": "decision:ADR-0009",
+      "title": "Mastership arbitration between inventory systems",
+      "type": "decision",
+      "status": "active",
+      "confidence": "assumed",
+      "domain": "service-management,network-automation",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0009.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "7e51b0613656dad0c733e86448631f8381390a8bf4e18d10644f4f851b69c984"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0010",
+      "typed_id": "decision:ADR-0010",
+      "title": "Inference served by an external endpoint",
+      "type": "decision",
+      "status": "superseded",
+      "confidence": "vendor-stated",
+      "domain": "ai-assistance,security",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0010.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "a9717423707fb08905f32e7a1ecd5b5650cd9e769a162c1a73f757a04ed32a18"
+      },
+      "supersedes": [],
+      "superseded_by": [
+        {
+          "id": "ADR-0011",
+          "title": ""
+        }
+      ],
+      "vendor": "core-owner-architecture"
+    },
+    {
+      "id": "ADR-0011",
+      "typed_id": "decision:ADR-0011",
+      "title": "Inference served locally on general-purpose processors",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "ai-assistance,security",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0011.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "67ec18033b88786620b3b4dddf62b063e0d7d097d1338ce5de4b83488371b170"
+      },
+      "supersedes": [
+        {
+          "id": "ADR-0010",
+          "title": "Inference served by an external endpoint"
+        }
+      ],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0012",
+      "typed_id": "decision:ADR-0012",
+      "title": "Shadow environment on a separate cluster",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "observability,cloud-platform",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0012.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "d1cd8d987ad6206c58ed6bb6ca978c850ed8d9de54691e300c08d4e1cf2b1d96"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0013",
+      "typed_id": "decision:ADR-0013",
+      "title": "Subscriber and SIM provisioning excluded from the configuration chain",
+      "type": "decision",
+      "status": "active",
+      "confidence": "assumed",
+      "domain": "mcx,service-management",
+      "phase": "BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "ADR-0013.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "3a093695b9ddc8009e9b3161a1219d6a6dceb68b9c891f768cd844fecf0cb2f8"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "BLU-hla-mcx",
+      "typed_id": "asset:BLU-hla-mcx",
+      "title": "High-level solution architecture \u2014 mission-critical mobile network",
+      "type": "yaml-asset",
+      "status": "active",
+      "confidence": "verified",
+      "domain": null,
+      "phase": null,
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-27",
+      "provenance": {
+        "document": "BLU-hla-mcx.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "e6bae65219d5437860e57d997031d65a4f51d44702722ea6094a21a2d1e8d794"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "EST-netdevops-telco",
+      "typed_id": "asset:EST-netdevops-telco",
+      "title": "Effort model \u2014 network automation chain for a mission-critical telecom system",
+      "type": "estimate",
+      "status": "active",
+      "confidence": "assumed",
+      "domain": "delivery,network-automation",
+      "phase": "BID",
+      "owner": "core-owner-delivery",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "EST-netdevops-telco.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "a62a1028462103f2a2226cbae6e61c2b19e350d5711c82dd3a3870f400934da1"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-001",
+      "typed_id": "principle:P-001",
+      "title": "Generalized GitOps",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation,cloud-platform",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-001.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "e2505a26bb5ff0304b7ecf8166bab401d05b5e9b8213dd596aa4e3f7189d6044"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-002",
+      "typed_id": "principle:P-002",
+      "title": "Human in the loop",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation,security",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-002.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "f1e9457858515eb756b1cc98a7d670a7c8556cc31e75475193b100553eb4e2ad"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-003",
+      "typed_id": "principle:P-003",
+      "title": "Bounded unitary actions",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-003.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "8e88677cc577742b1709c99fac4e687af3a1adc6f27e3da484537ede5e5670a9"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-004",
+      "typed_id": "principle:P-004",
+      "title": "Graduated autonomy",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-004.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "63216100671af30973859afc71725d85034f7f2e6d795eaadefd3710ad87b1ba"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-005",
+      "typed_id": "principle:P-005",
+      "title": "Shadow validation before arming",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "observability,network-automation",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-005.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "6b21bb454989e0c2b3ab4ba5f720fd68c48776589a26ac39021225c1eabbf952"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-006",
+      "typed_id": "principle:P-006",
+      "title": "One chain, several southbound methods",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-006.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "ba33f9db30e3bef82a2f4116f5e0c0be17d08876fb86adfe711b4fcbd9bee71a"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-007",
+      "typed_id": "principle:P-007",
+      "title": "Respect the vendor boundary",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "mobile-core,network-automation",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-007.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "af0f6e427b64c7851f2e8aacb61c2bfeceb337f15cea20e27235b5f51d07c65b"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-008",
+      "typed_id": "principle:P-008",
+      "title": "The chain observes itself",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "observability,network-automation",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-008.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "1d741304871df62073ee32e0e1f0fb1453fb5050021f10f3c17ec320d648ceb1"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-009",
+      "typed_id": "principle:P-009",
+      "title": "Independent failure domain",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "cloud-platform,network-automation",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-009.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "c134abf371b53d1d6e391e6f55cb811835fe0b9272c3297e96cff8e9def2e632"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-010",
+      "typed_id": "principle:P-010",
+      "title": "One master per data domain",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "service-management,network-automation",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-010.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "9b1f3c095fe62957076f6eee358f60c7da1095b6bcbcc141c2541f069e349901"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-011",
+      "typed_id": "principle:P-011",
+      "title": "Separate observation planes, single collection layer",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "observability",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-011.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "3df8448346a17738a63a00eb7b8eae3476b6158d7df50df1c25c6514a7750163"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-012",
+      "typed_id": "principle:P-012",
+      "title": "The assistant advises, it does not act",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "ai-assistance,security",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-012.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "1069b572db48164b6c7d4c43b4fd0f4e6d407b377bee37413370cfcfa2a7a626"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-013",
+      "typed_id": "principle:P-013",
+      "title": "Assistant configuration is code",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "ai-assistance",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-013.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "6cbe6fef4fb5923bd5e44baa475a2e9a9c1988e19b4868e980c55f0d7ad0117e"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-014",
+      "typed_id": "principle:P-014",
+      "title": "The assistant is never on the critical path",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "ai-assistance",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-014.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "385813a3053053306d80c5f067135f5fc9bfc5a4083a6bf588dc92186ba79bf7"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "P-015",
+      "typed_id": "principle:P-015",
+      "title": "The model stays inside the trust boundary",
+      "type": "principle",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "ai-assistance,security",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "P-015.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "6601223074a186ac0bc56cf0b72a9e8836f1c455cece785af1c23d6f04fb090e"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-001",
+      "typed_id": "pattern:PAT-001",
+      "title": "Supervised closed loop",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "PAT-001.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "f25c9686f09da44f8cd8cfa779aeb7a675bf5b06c4ca55304ee5f4420e709de0"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-002",
+      "typed_id": "pattern:PAT-002",
+      "title": "Shadow validation of rules",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "observability,network-automation",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "PAT-002.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "7f2f5d91836ce54435f6e2d2df6b3228fe09bc4fd02542ef7df4ec75335603a2"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-003",
+      "typed_id": "pattern:PAT-003",
+      "title": "Fallback plan bound to its baseline",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-automation",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "PAT-003.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "cbbd0a1d4362d3a0f6d6da5fceadbc197620ea50035a2621146128145e83d1da"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-004",
+      "typed_id": "pattern:PAT-004",
+      "title": "Break-glass with an independent failure domain",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "cloud-platform,network-automation",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "PAT-004.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "9b7fa91e8097cc7c727f5e4cfe86107a9061ea9c27ca2e2a0f71a4b772a53a6d"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-005",
+      "typed_id": "pattern:PAT-005",
+      "title": "Two observation planes, one collection layer",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "observability",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "PAT-005.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "ea011f6e963e785a85d8bfda130c812e583d6dc57d67b0ae6d872e476cec81dc"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-006",
+      "typed_id": "pattern:PAT-006",
+      "title": "Vendor boundary through the northbound interface",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "mobile-core,network-automation",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "PAT-006.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "383ee9d03ab5b80276d04d7ec46e5e1785ab1bf773f054cfb25d85c7faaf825b"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-007",
+      "typed_id": "pattern:PAT-007",
+      "title": "Advisory assistant with prepare-only tooling",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "ai-assistance",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "PAT-007.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "aa125ff1cd0fbecbf30ee2ba651617b699a9b086b41995a6e96c91e07a0b2afd"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-AUTH-001",
+      "typed_id": "pattern:PAT-AUTH-001",
+      "title": "Pattern Auth mTLS OAuth2 RSA-4096",
+      "type": null,
+      "status": null,
+      "confidence": "assumed",
+      "domain": null,
+      "phase": null,
+      "owner": null,
+      "last_reviewed": null,
+      "provenance": {
+        "document": "PAT-AUTH-001.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "5fde7b4ff99317dc03d9cdef724790e2b11d9f99b2667bfefb6c96059ad50f74"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "QST-cloud-platform",
+      "typed_id": "questionnaire:QST-cloud-platform",
+      "title": "Container platform, observability and assistant \u2014 framing",
+      "type": "questionnaire",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "cloud-platform,observability,ai-assistance",
+      "phase": "BID,BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "QST-cloud-platform.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "01d93ddba9dbc1255715fa54bfaf44fd00a1f18c6434dbcd1f127c65c535555b"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "QST-core-ems",
+      "typed_id": "questionnaire:QST-core-ems",
+      "title": "Mobile core element manager \u2014 northbound capability audit",
+      "type": "questionnaire",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "mobile-core,network-automation",
+      "phase": "BID,BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "QST-core-ems.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "85bf6504f12a94a0e7fd86a892d0ff4bb9147c8509130d6aaea2a2bee9ec3310"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "QST-service-management",
+      "typed_id": "questionnaire:QST-service-management",
+      "title": "Service management platform \u2014 integration framing",
+      "type": "questionnaire",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "service-management",
+      "phase": "BID,BUILD",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "QST-service-management.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "e37e67db40702c873477b63670c442cc3b7779bb2e6f509c1e1d2554954a97e5"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "RSK-netdevops-telco",
+      "typed_id": "risk:RSK-netdevops-telco",
+      "title": "Risk register \u2014 network automation for mission-critical telecom",
+      "type": "risk-register",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "delivery,network-automation,observability,ai-assistance",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-delivery",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "RSK-netdevops-telco.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "d3d5157289c48c8f55c1aaec86a8148940d081c015b4be0d9a102d88a509e3a9"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "TPL-claims-register",
+      "typed_id": "template:TPL-claims-register",
+      "title": "Claims register for proposals",
+      "type": "template",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "delivery",
+      "phase": "BID",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "TPL-claims-register.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "002069567753dcf0c0a898b84702188f587371a7df885aafc62e2dcabbbd5a99"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "TPL-getting-started",
+      "typed_id": "template:TPL-getting-started",
+      "title": "Getting started \u2014 publishing and collaborating on this base",
+      "type": "template",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "delivery",
+      "phase": "BID,BUILD,RUN",
+      "owner": "maintainers",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "TPL-getting-started.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "663df7877797874a4b606d0df8cbc533aab7adf2cba7f34415369e567044cb3d"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "TPL-glossary",
+      "typed_id": "template:TPL-glossary",
+      "title": "Glossary",
+      "type": "template",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "delivery",
+      "phase": "BID,BUILD,RUN",
+      "owner": "maintainers",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "TPL-glossary.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "576e519041753488eacb810697437f299507036f2c60179caf3831ad686b6f00"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "TPL-hla-section-map",
+      "typed_id": "template:TPL-hla-section-map",
+      "title": "Mapping of knowledge assets to the high-level architecture blueprint",
+      "type": "template",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "delivery",
+      "phase": "BID",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "TPL-hla-section-map.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "e9a75866776db1454486136cad32a3af42d462c8bee154ea11a140ef8e5bd484"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "TPL-mcp-spec",
+      "typed_id": "template:TPL-mcp-spec",
+      "title": "Knowledge server specification",
+      "type": "template",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "ai-assistance",
+      "phase": "BID,BUILD,RUN",
+      "owner": "core-owner-automation",
+      "last_reviewed": "2026-07-25",
+      "provenance": {
+        "document": "TPL-mcp-spec.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "4ba3209cacb1ab2eaa261d975476dc13890d729803b0cc09ad47bb3f1945406a"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    }
+  ],
+  "glossary": []
+}

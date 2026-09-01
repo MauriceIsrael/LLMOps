@@ -15,9 +15,9 @@
         "id": "nordwave-mcx-2027",
         "dataset": "data/engagements/nordwave-mcx-2027.kuzu",
         "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
+          "Subject": 8,
+          "Statement": 9,
+          "Conflict": 2
         }
       }
     ]

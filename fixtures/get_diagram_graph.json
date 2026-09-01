@@ -1,11 +1,115 @@
 {
   "status": "ok",
-  "count": 0,
+  "count": 8,
   "data": {
     "engagement": "nordwave-mcx-2027",
     "format": "mermaid",
-    "nodes": [],
-    "edges": [],
-    "mermaid": "flowchart TD"
+    "nodes": [
+      {
+        "id": "floor-control",
+        "label": "floor-control",
+        "type": "Subject",
+        "level": "L2_decomposed"
+      },
+      {
+        "id": "group-management",
+        "label": "group-management",
+        "type": "Subject",
+        "level": "L0_named"
+      },
+      {
+        "id": "lmr-interworking",
+        "label": "lmr-interworking",
+        "type": "Subject",
+        "level": "L0_named"
+      },
+      {
+        "id": "mcx-services",
+        "label": "mcx-services",
+        "type": "Subject",
+        "level": "L2_decomposed"
+      },
+      {
+        "id": "media-distribution",
+        "label": "media-distribution",
+        "type": "Subject",
+        "level": "L0_named"
+      },
+      {
+        "id": "mobile-core",
+        "label": "mobile-core",
+        "type": "Subject",
+        "level": "L1_framed"
+      },
+      {
+        "id": "synthetic-subject",
+        "label": "synthetic-subject",
+        "type": "Subject",
+        "level": "L0_named"
+      },
+      {
+        "id": "transport",
+        "label": "transport",
+        "type": "Subject",
+        "level": "L0_named"
+      }
+    ],
+    "edges": [
+      {
+        "id": "S-0001",
+        "source": "mcx-services",
+        "target": "3GPP MC service layer boundary",
+        "predicate": "is_constrained_by"
+      },
+      {
+        "id": "S-0002",
+        "source": "mcx-services",
+        "target": "group voice must survive site isolation from national data centres",
+        "predicate": "has_property"
+      },
+      {
+        "id": "S-0003",
+        "source": "mobile-core",
+        "target": "dedicated 5G standalone core, 2 sites active-active, reserved slicing",
+        "predicate": "has_property"
+      },
+      {
+        "id": "S-0004",
+        "source": "mcx-services",
+        "target": "group-management, floor-control, media-distribution, lmr-interworking",
+        "predicate": "decomposes_into"
+      },
+      {
+        "id": "S-0005",
+        "source": "floor-control",
+        "target": "floor arbitration terminates in the MC service layer at the site",
+        "predicate": "has_property"
+      },
+      {
+        "id": "S-0006",
+        "source": "floor-control",
+        "target": "depends on a committed priority and pre-emption profile in the core",
+        "predicate": "depends_on"
+      },
+      {
+        "id": "S-0007",
+        "source": "media-distribution",
+        "target": "multicast on the radio side",
+        "predicate": "has_property"
+      },
+      {
+        "id": "S-0008",
+        "source": "media-distribution",
+        "target": "unicast only, multicast deferred",
+        "predicate": "has_property"
+      },
+      {
+        "id": "S-0009",
+        "source": "lmr-interworking",
+        "target": "On release 23.4 the element manager's bulk configuration export is capped at 2 000 managed objects per request and rejects concurrent exports on the same node. In practice a full export of a core node takes three passes. Anyone planning a nightly backup of the whole estate through that interface should size for that, and should not assume the documented figure of 10 000.",
+        "predicate": "depends_on"
+      }
+    ],
+    "mermaid": "flowchart TD\n    floor-control[\"floor-control (L2_decomposed)\"]\n    group-management[\"group-management (L0_named)\"]\n    lmr-interworking[\"lmr-interworking (L0_named)\"]\n    mcx-services[\"mcx-services (L2_decomposed)\"]\n    media-distribution[\"media-distribution (L0_named)\"]\n    mobile-core[\"mobile-core (L1_framed)\"]\n    synthetic-subject[\"synthetic-subject (L0_named)\"]\n    transport[\"transport (L0_named)\"]\n    node_t_0[\"3GPP MC service layer boundary\"]\n    mcx-services -->|\"is_constrained_by\"| node_t_0\n    node_t_1[\"group voice must survive site isolation from na\u2026\"]\n    mcx-services -->|\"has_property\"| node_t_1\n    node_t_2[\"dedicated 5G standalone core, 2 sites active-ac\u2026\"]\n    mobile-core -->|\"has_property\"| node_t_2\n    node_t_3[\"group-management, floor-control, media-distribu\u2026\"]\n    mcx-services -->|\"decomposes_into\"| node_t_3\n    node_t_4[\"floor arbitration terminates in the MC service \u2026\"]\n    floor-control -->|\"has_property\"| node_t_4\n    node_t_5[\"depends on a committed priority and pre-emption\u2026\"]\n    floor-control -->|\"depends_on\"| node_t_5\n    node_t_6[\"multicast on the radio side\"]\n    media-distribution -->|\"has_property\"| node_t_6\n    node_t_7[\"unicast only, multicast deferred\"]\n    media-distribution -->|\"has_property\"| node_t_7\n    node_t_8[\"On release 23.4 the element manager's bulk conf\u2026\"]\n    lmr-interworking -->|\"depends_on\"| node_t_8"
   }
 }

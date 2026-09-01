@@ -57,7 +57,18 @@ make demo-check
 
 **Nombres de Nœuds Attendus (`make demo-check`) :**
 - **Plan de Connaissances (`data/knowledge.kuzu`)** : `Asset`: ~46 nœuds, `GlossaryTerm`: ~10 nœuds.
-- **Plan d'Engagement (`nordwave-mcx-2027`)** : `Subject`: 8 nœuds, `Statement`: 9 nœuds, `Conflict`: 2 nœuds.
+---
+
+## Points Clés & Différenciateurs
+
+1. **Cœur Déterministe et Auditable (0 Coût LLM Serveur)**  
+   Aucun appel LLM non-déterministe côté serveur. La base est orchestrée par une base graphe typée (LadybugDB). Les règles d'élicitation, de level gate et de détection de contradictions reposent sur une logique symbolique pure.
+2. **Gestion de l'Épistémique et de la Confiance**  
+   Chaque énoncé architectural porte explicitement sa confiance (`verified`, `designed`, `vendor-stated`, `stated-by-client`, `assumed`) et son niveau de maturité (`L0_named` à `L4_specified`). Les documents générés indiquent s'ils sont provisoires (`is_provisional: true`, `unripe_subjects`, `open_conflicts`).
+3. **Isolation Physique Dual-Plane (ADR-0015)**  
+   Les connaissances transverses (`data/knowledge.lbug`) sont strictement séparées des engagements projets (`data/engagements/<id>.lbug`).
+4. **Canal d'Instantané Scellé (Sealed Snapshot)**  
+   Publication d'exports JSON scellés par SHA-256 (`fixtures/sealed_snapshot.json` ou `GET /snapshot/latest`) avec identifiants typés (`decision:ADR-0014`, `principle:P-002`) et index d'applicabilité pour une intégration résiliente et sans latence (ex. *Architecture Studio*).
 
 ---
 
@@ -65,6 +76,7 @@ make demo-check
 
 - **[Guide d'Intégration Tiers](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**
 - **[Spécification d'Interface Externe (INTERFACE.md)](docs/INTERFACE.md)**
+- **[Guide d'Alignement Épistémique (EPISTEMIC-ALIGNMENT.md)](docs/EPISTEMIC-ALIGNMENT.md)**
 - **[Spécification du Schéma Graphe (SCHEMA.md)](docs/SCHEMA.md)**
 - **[Architecture Logicielle (ADR-0014 / ADR-0015)](docs/architecture.md)**
 - **[Manuel Utilisateur](docs/user_manual.md)**

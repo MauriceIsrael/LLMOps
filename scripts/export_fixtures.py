@@ -33,6 +33,9 @@ def export_fixtures(engagement: str = "nordwave-mcx-2027", output_dir: Path | No
         filepath.write_text(json.dumps(content, indent=2, default=str) + "\n", encoding="utf-8")
         print(f"Exported fixture: {filepath.relative_to(output_dir.parent)}")
 
+    from scripts.export_sealed_snapshot import export_sealed_snapshot
+    export_sealed_snapshot(output_fixtures_path=output_dir / "sealed_snapshot.json")
+
     gc.collect()
 
 

@@ -39,13 +39,17 @@ def list_assets(
         domain: Functional or technical domain filter.
         status: Asset status ('active', 'superseded').
     """
-    conditions = [f"a.status = '{status}'"]
+    conditions = ["a.status = $status"]
+    params: dict[str, Any] = {"status": status}
     if type:
-        conditions.append(f"a.type = '{type}'")
+        conditions.append("a.type = $type")
+        params["type"] = type
     if phase:
-        conditions.append(f"a.phase CONTAINS '{phase}'")
+        conditions.append("a.phase CONTAINS $phase")
+        params["phase"] = phase
     if domain:
-        conditions.append(f"a.domain CONTAINS '{domain}'")
+        conditions.append("a.domain CONTAINS $domain")
+        params["domain"] = domain
 
     where_clause = " WHERE " + " AND ".join(conditions) if conditions else ""
     query = (
@@ -54,7 +58,7 @@ def list_assets(
         f"a.confidence as confidence, a.phase as phase, a.domain as domain, a.last_reviewed as last_reviewed;"
     )
     try:
-        data = _get_db().execute_cypher(query)
+        data = _get_db().execute_cypher(query, params)
         return ok_response(data)
     except Exception as e:
         err_str = str(e)
@@ -73,36 +77,46 @@ def get_asset(id: str) -> dict[str, Any]:
         return not_found_response(id)
 
     query = (
-        f"MATCH (a:Asset {{id: '{id}'}}) "
-        f"RETURN a.source_path as source_path, a.confidence as confidence, a.last_reviewed as last_reviewed;"
+        "MATCH (a:Asset {id: $id}) "
+        "RETURN a.id as id, a.title as title, a.type as type, a.status as status, "
+        "a.confidence as confidence, a.phase as phase, a.domain as domain, "
+        "a.last_reviewed as last_reviewed, a.owner as owner, a.source_path as source_path, "
+        "a.version as version, a.markdown_content as markdown_content, a.sha256 as sha256, "
+        "a.external_ref as external_ref;"
     )
     try:
-        res = _get_db().execute_cypher(query)
+        res = _get_db().execute_cypher(query, {"id": id})
     except Exception:
         res = []
 
-    parsed = None
+    if res and res[0] and res[0].get("id"):
+        row = res[0]
+        markdown_content = row.get("markdown_content") or ""
+        parser = MarkdownDocParser()
+        parsed = parser.parse_content(markdown_content, source_path=row.get("source_path", "")) if markdown_content else None
+        if not parsed and row.get("source_path") and Path(row["source_path"]).exists():
+            parsed = parser.parse_file(row["source_path"])
+
+        if parsed:
+            parsed["confidence"] = row.get("confidence") or parsed.get("confidence", "")
+            parsed["last_reviewed"] = row.get("last_reviewed") or parsed.get("last_reviewed", "")
+            parsed["version"] = row.get("version") or parsed.get("version", "1.0.0")
+            parsed["external_ref"] = row.get("external_ref") or f"KH:{id}@v{parsed['version']}"
+            return ok_response(parsed, count=1)
+
+    # Fallback disk search if database row missing
     parser = MarkdownDocParser()
-    if res and res[0].get("source_path") and Path(res[0]["source_path"]).exists():
-        parsed = parser.parse_file(res[0]["source_path"])
-
-    if not parsed:
-        kb_files = (
-            list(Path("data/kb").rglob("*.md"))
-            + list(Path("data/kb").rglob("*.yaml"))
-            + list(Path("data/kb").rglob("*.yml"))
-        )
-        for path in kb_files:
-            if path.stem == id or id in path.name:
-                parsed = parser.parse_file(path)
-                if parsed:
-                    break
-
-    if parsed:
-        if res and res[0]:
-            parsed["confidence"] = parsed.get("confidence") or res[0].get("confidence", "")
-            parsed["last_reviewed"] = parsed.get("last_reviewed") or res[0].get("last_reviewed", "")
-        return ok_response(parsed, count=1)
+    kb_files = (
+        list(Path("data/kb").rglob("*.md"))
+        + list(Path("data/kb").rglob("*.yaml"))
+        + list(Path("data/kb").rglob("*.yml"))
+    )
+    for path in kb_files:
+        if path.stem == id or id in path.name:
+            parsed = parser.parse_file(path)
+            if parsed:
+                parsed["external_ref"] = f"KH:{id}@v{parsed.get('version', '1.0.0')}"
+                return ok_response(parsed, count=1)
 
     return not_found_response(id)
 
@@ -136,13 +150,13 @@ def get_decision_trail(id: str) -> dict[str, Any]:
     if not id or id == "zzz-does-not-exist-9999":
         return not_found_response(id)
 
-    supersedes_query = f"""
-    MATCH (a:Asset {{id: '{id}'}})-[:SUPERSEDES]->(target:Asset)
+    supersedes_query = """
+    MATCH (a:Asset {id: $id})-[:SUPERSEDES]->(target:Asset)
     RETURN target.id as supersedes_id, target.title as supersedes_title;
     """
 
-    superseded_by_query = f"""
-    MATCH (source:Asset)-[:SUPERSEDES]->(a:Asset {{id: '{id}'}})
+    superseded_by_query = """
+    MATCH (source:Asset)-[:SUPERSEDES]->(a:Asset {id: $id})
     RETURN source.id as superseded_by_id, source.title as superseded_by_title;
     """
 
@@ -150,8 +164,8 @@ def get_decision_trail(id: str) -> dict[str, Any]:
     if current_asset.get("status") == "not_found":
         return not_found_response(id)
 
-    supersedes = _get_db().execute_cypher(supersedes_query)
-    superseded_by = _get_db().execute_cypher(superseded_by_query)
+    supersedes = _get_db().execute_cypher(supersedes_query, {"id": id})
+    superseded_by = _get_db().execute_cypher(superseded_by_query, {"id": id})
 
     payload = {
         "asset": current_asset.get("data"),
@@ -170,12 +184,12 @@ def get_glossary_term(term: str) -> dict[str, Any]:
     if not term or term == "zzz-does-not-exist-9999":
         return not_found_response(term)
 
-    query = f"""
+    query = """
     MATCH (g:GlossaryTerm)
-    WHERE g.term CONTAINS '{term}' OR '{term}' CONTAINS g.term
+    WHERE g.term CONTAINS $term OR $term CONTAINS g.term
     RETURN g.term as term, g.definition as definition;
     """
-    res = _get_db().execute_cypher(query)
+    res = _get_db().execute_cypher(query, {"term": term})
     if res and "error" not in res[0]:
         return ok_response(res[0], count=1)
     return not_found_response(term)
@@ -200,9 +214,9 @@ def search_assets(query: str, filters: dict[str, Any] | None = None) -> dict[str
     """
     if not query or query == "zzz-does-not-exist-9999":
         return ok_response([])
-    cypher_q = f"MATCH (a:Asset) WHERE a.title CONTAINS '{query}' OR a.id CONTAINS '{query}' RETURN a.id as id, a.title as title, a.type as type;"
+    cypher_q = "MATCH (a:Asset) WHERE a.title CONTAINS $query OR a.id CONTAINS $query RETURN a.id as id, a.title as title, a.type as type;"
     try:
-        data = _get_db().execute_cypher(cypher_q)
+        data = _get_db().execute_cypher(cypher_q, {"query": query})
         return ok_response(data)
     except Exception as e:
         return error_response(str(e))

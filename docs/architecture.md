@@ -245,30 +245,34 @@ L'arbitrage d'un conflit par un architecte référent (Sofia) ne se limite pas �
 - **Assemblage (`assemble.py`) :** Recompose le document d'architecture global (`document.md`). Le document reste marqué **`provisional`** tant qu'au moins un sujet n'a pas atteint la maturité requise (`L3_decided`) ou qu'un conflit reste ouvert.
 - **Récolte (`harvest.py`) :** Identifie les solutions et décompositions généralisables pour proposer des candidats de motifs d'architecture (`Pattern`) destinés à être réutilisés dans la base de connaissances globale.
 
+### 6.9 Connecteurs Asynchrones & Boîte aux Lettres (`mailbox/`)
+- **Routage asynchrone d'experts :** L'adaptateur GitHub (`tools/elicitation/mailbox/adapters/github_adapter.py`) permet de router des questions d'élicitation sous forme d'Issues GitHub et de dépouiller les commentaires pour en extraire des réponses structurées.
+- **Périmètre contractuel :** Ce connecteur est un mécanisme asynchrone d'interaction humaine hors contrat applicatif. Le Knowledge Hub n'écrit dans aucun système de la suite cliente (*Architecture Studio*).
+
 ---
 
 ## 7. Architecture des Serveurs FastMCP, Séparation Physique & ADR-0015
 
-Conformément à l'**ADR-0015**, la plateforme repose sur une séparation physique stricte des bases de données graphiques Kùzu DB :
+Conformément à l'**ADR-0015**, la plateforme repose sur une séparation physique stricte des bases de données graphiques embarquées LadybugDB :
 
 ### 7.1 Disposition Physique des Fichiers (Layout ADR-0015)
 ```
 data/
-  knowledge.kuzu                   # Base Connaissances Réutilisable (Asset, GlossaryTerm, SUPERSEDES)
+  knowledge.lbug                   # Base Connaissances Réutilisable (Asset, GlossaryTerm, SUPERSEDES)
   engagements/
-    nordwave-mcx-2027.kuzu         # Base Engagement Projet (Subject, Statement, Question, Conflict)
-    <engagement-id>.kuzu           # Base dédiée par projet client
+    nordwave-mcx-2027.lbug         # Base Engagement Projet (Subject, Statement, Question, Conflict)
+    <engagement-id>.lbug           # Base dédiée par projet client
 ```
 
 ### 7.2 Découverte Dynamique & Routage des Connexions (`open_connection`)
-- **Découverte Automatique (`discover_engagements`)** : Les bases d'engagement sont découvertes dynamiquement par scan du répertoire `data/engagements/*.kuzu`.
+- **Découverte Automatique (`discover_engagements`)** : Les bases d'engagement sont découvertes dynamiquement par scan du répertoire `data/engagements/*.lbug` (et compatibilité `.kuzu`).
 - **Routage & Sûreté des Connexions (`open_connection`)** :
   1. **Autorisation en premier** (`authorise(caller, scope)` est appelé avant toute résolution de fichier).
   2. **Validation d'identifiant** : Format contraint à `[a-z0-9-]+` (rejet de `/`, `\`, `..`).
-  3. **Connexion en lecture seule** : Pool de connexions Kùzu DB en lecture seule.
+  3. **Connexion en lecture seule** : Pool de connexions LadybugDB en lecture seule.
 
 ### 7.3 Instantanés Atomiques & Publication (`elicit publish`)
-L'enregistrement et la publication d'un graphe d'engagement s'effectuent par instantanés atomiques (`elicit publish --engagement <id>`) depuis l'espace de travail vers `data/engagements/<id>.kuzu`. Les opérations d'écriture du moteur d'élicitation et de lecture du serveur MCP sont ainsi strictement isolées.
+L'enregistrement et la publication d'un graphe d'engagement s'effectuent par instantanés atomiques (`elicit publish --engagement <id>`) depuis l'espace de travail vers `data/engagements/<id>.lbug`. Les opérations d'écriture du moteur d'élicitation et de lecture du serveur MCP sont ainsi strictement isolées.
 
 ### 7.4 Spécification du Schéma (`docs/SCHEMA.md`)
 La structure du schéma graphique pour chaque plan est documentée de manière automatisée dans [docs/SCHEMA.md](SCHEMA.md) via l'outil `generate_schema_doc.py`.
