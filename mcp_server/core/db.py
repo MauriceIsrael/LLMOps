@@ -87,23 +87,12 @@ class ReadOnlyLadybugClient:
         if self.max_rows and not re.search(r"\bLIMIT\b", query_to_exec, re.IGNORECASE):
             query_to_exec = f"{query_to_exec} LIMIT {self.max_rows}"
 
-        def _run_query():
-            store = make_graph_store(self.db_path, read_only=True)
-            try:
-                return store.execute_cypher(query_to_exec, params)
-            finally:
-                store.close()
-
-        import concurrent.futures
+        store = make_graph_store(self.db_path, read_only=True)
         try:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(_run_query)
-                results = future.result(timeout=15.0)
-                if self.max_rows and len(results) > self.max_rows:
-                    return results[: self.max_rows]
-                return results
-        except concurrent.futures.TimeoutError:
-            raise TimeoutError("Cypher query execution exceeded safety timeout of 15 seconds.")
+            results = store.execute_cypher(query_to_exec, params)
+            if self.max_rows and len(results) > self.max_rows:
+                return results[: self.max_rows]
+            return results
         except PermissionError:
             raise
         except Exception as e:

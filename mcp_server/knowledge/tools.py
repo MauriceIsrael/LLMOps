@@ -255,8 +255,8 @@ def get_graph_summary() -> dict[str, Any]:
         terms = []
 
     kb_counts = {
-        "Asset": assets[0]["count"] if assets else 0,
-        "GlossaryTerm": terms[0]["count"] if terms else 0,
+        "Asset": next(iter(assets[0].values())) if assets and isinstance(assets[0], dict) and assets[0] else 0,
+        "GlossaryTerm": next(iter(terms[0].values())) if terms and isinstance(terms[0], dict) and terms[0] else 0,
     }
 
     discovered = discover_engagements()
