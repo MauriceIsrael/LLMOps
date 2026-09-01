@@ -1,7 +1,6 @@
-.venv
 .git
 .gitignore
-.github
+.venv
 node_modules
 apps/kb-client-app/node_modules
 apps/kb-client-app/.svelte-kit
@@ -14,3 +13,9 @@ __pycache__
 .pytest_cache
 .coverage
 htmlcov
+*.wal
+*.shadow
+*.lock
+*.kz
+*.hindex
+*.lbug

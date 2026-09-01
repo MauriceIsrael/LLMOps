@@ -27,12 +27,27 @@ class LadybugGraphStore(GraphStore):
             except Exception:
                 cls._db_cache.pop(cache_key, None)
 
-        db = lb.Database(
-            db_path,
-            buffer_pool_size=64 * 1024 * 1024,
-            max_db_size=1024 * 1024 * 1024,
-            read_only=read_only,
-        )
+        try:
+            db = lb.Database(
+                db_path,
+                buffer_pool_size=64 * 1024 * 1024,
+                max_db_size=1024 * 1024 * 1024,
+                read_only=False,
+            )
+        except Exception as e:
+            if "wal" in str(e).lower() or "record type" in str(e).lower():
+                wal_file = Path(f"{db_path}.wal")
+                if wal_file.exists():
+                    wal_file.unlink()
+                db = lb.Database(
+                    db_path,
+                    buffer_pool_size=64 * 1024 * 1024,
+                    max_db_size=1024 * 1024 * 1024,
+                    read_only=False,
+                )
+            else:
+                raise
+
         cls._db_cache[cache_key] = db
         return db
 
@@ -88,6 +103,7 @@ class LadybugGraphStore(GraphStore):
             except Exception:
                 pass
             self.db = None
+        LadybugGraphStore.clear_cache(self.db_path)
         gc.collect()
 
     def __enter__(self) -> "LadybugGraphStore":

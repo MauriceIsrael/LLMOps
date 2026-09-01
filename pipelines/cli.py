@@ -59,18 +59,22 @@ def ingest(
     total_nodes = 0
     total_rels = 0
 
-    for file_path in track(all_files, description="Ingestion en cours..."):
-        try:
-            parsed_doc = parser.parse_file(file_path)
-            if not parsed_doc:
-                continue
-            nodes, rels = extractor.extract_nodes_and_relations(parsed_doc)
-            loader.load_doc_nodes_and_rels(nodes, rels)
-            total_nodes += len(nodes)
-            total_rels += len(rels)
-        except Exception as e:
-            console.print(f"[bold yellow]⚠️ Erreur lors du traitement de {file_path.name} : {e}[/bold yellow]")
-
+    try:
+        for file_path in track(all_files, description="Ingestion en cours..."):
+            try:
+                parsed_doc = parser.parse_file(file_path)
+                if not parsed_doc:
+                    continue
+                nodes, rels = extractor.extract_nodes_and_relations(parsed_doc)
+                loader.load_doc_nodes_and_rels(nodes, rels)
+                total_nodes += len(nodes)
+                total_rels += len(rels)
+            except Exception as e:
+                console.print(f"[bold yellow]⚠️ Erreur lors du traitement de {file_path.name} : {e}[/bold yellow]")
+    finally:
+        loader.store.close()
+        from tools.adapters.ladybug_store import LadybugGraphStore
+        LadybugGraphStore.clear_cache(loader.db_path)
 
     console.print(
         f"[bold green]✅ Ingestion terminée avec succès ![/bold green]\n"

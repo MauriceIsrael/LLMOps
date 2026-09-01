@@ -26,12 +26,27 @@ class LadybugClient:
             except Exception:
                 cls._db_cache.pop(db_path, None)
 
-        db = ladybug.Database(
-            db_path,
-            buffer_pool_size=64 * 1024 * 1024,
-            max_db_size=1024 * 1024 * 1024,
-            read_only=False,
-        )
+        try:
+            db = ladybug.Database(
+                db_path,
+                buffer_pool_size=64 * 1024 * 1024,
+                max_db_size=1024 * 1024 * 1024,
+                read_only=False,
+            )
+        except Exception as e:
+            if "wal" in str(e).lower() or "record type" in str(e).lower():
+                wal_file = Path(f"{db_path}.wal")
+                if wal_file.exists():
+                    wal_file.unlink()
+                db = ladybug.Database(
+                    db_path,
+                    buffer_pool_size=64 * 1024 * 1024,
+                    max_db_size=1024 * 1024 * 1024,
+                    read_only=False,
+                )
+            else:
+                raise
+
         cls._db_cache[db_path] = db
         return db
 
