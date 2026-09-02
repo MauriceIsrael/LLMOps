@@ -302,6 +302,7 @@ def check_node(state: IntakeState) -> dict[str, Any]:
                 }
             )
 
+    db_client.close()
     return {"detected_conflicts": detected_conflicts}
 
 

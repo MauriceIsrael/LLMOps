@@ -64,17 +64,11 @@ class LadybugClient:
 
     @classmethod
     def clear_cache(cls, db_path: str | None = None) -> None:
-        if db_path:
-            p_str = str(db_path)
-            keys_to_del = [k for k in cls._db_cache if p_str in k or k in p_str]
-            for k in keys_to_del:
-                db = cls._db_cache.pop(k, None)
-                del db
+        if db_path and db_path in cls._db_cache:
+            cls._db_cache.pop(db_path, None)
         else:
             cls._db_cache.clear()
-        import gc
-        for _ in range(3):
-            gc.collect()
+        gc.collect()
 
     def execute_cypher(
         self, query: str, params: dict[str, Any] | None = None

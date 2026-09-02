@@ -17,7 +17,7 @@ graph LR
     SubGraph["Moteur de Rendu (UI / React / PDF / Mermaid)"]
     SubGraph -->|JSON-RPC via MCP (SSE / STDIO)| FastMCP["Serveur FastMCP (mcp_server)"]
     SubGraph -->|Import Python Direct| SDK["RendererClient (renderer_interface.py)"]
-    FastMCP --> Repo["ElicitationRepository & LadybugDB"]
+    FastMCP --> Repo["ElicitationRepository & Kùzu DB"]
     SDK --> Repo
 ```
 

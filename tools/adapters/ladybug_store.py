@@ -55,20 +55,18 @@ class LadybugGraphStore(GraphStore):
     @classmethod
     def clear_cache(cls, db_path: str | None = None) -> None:
         if db_path:
-            p_str = str(db_path)
-            keys_to_del = [k for k in cls._db_cache if p_str in k or k in p_str]
+            keys_to_del = [k for k in cls._db_cache if k.startswith(str(db_path))]
             for k in keys_to_del:
                 db = cls._db_cache.pop(k, None)
                 del db
-            conn_keys = [k for k in cls._conn_cache if p_str in k or k in p_str]
+            conn_keys = [k for k in cls._conn_cache if k.startswith(str(db_path))]
             for k in conn_keys:
                 conn = cls._conn_cache.pop(k, None)
                 del conn
         else:
             cls._db_cache.clear()
             cls._conn_cache.clear()
-        for _ in range(3):
-            gc.collect()
+        gc.collect()
 
     def __init__(self, db_path: str | Path, read_only: bool = False) -> None:
         p = Path(db_path)
@@ -83,15 +81,12 @@ class LadybugGraphStore(GraphStore):
         self.read_only = read_only
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 
-    @property
-    def db(self) -> Any:
-        return self.get_database(self.db_path, read_only=self.read_only)
-
-    @property
-    def conn(self) -> Any:
-        if self.db_path not in self._conn_cache:
-            self._conn_cache[self.db_path] = lb.Connection(self.db)
-        return self._conn_cache[self.db_path]
+        self.db = self.get_database(self.db_path, read_only=self.read_only)
+        if self.db_path in self._conn_cache:
+            self.conn = self._conn_cache[self.db_path]
+        else:
+            self.conn = lb.Connection(self.db)
+            self._conn_cache[self.db_path] = self.conn
 
     def execute_cypher(
         self, query: str, params: dict[str, Any] | None = None
@@ -106,8 +101,20 @@ class LadybugGraphStore(GraphStore):
         return results
 
     def close(self) -> None:
-        """Routine close does not purge shared process-level database cache."""
-        pass
+        if hasattr(self, "conn") and self.conn is not None:
+            try:
+                del self.conn
+            except Exception:
+                pass
+            self.conn = None
+        if hasattr(self, "db") and self.db is not None:
+            try:
+                del self.db
+            except Exception:
+                pass
+            self.db = None
+        LadybugGraphStore.clear_cache(self.db_path)
+        gc.collect()
 
     def __enter__(self) -> "LadybugGraphStore":
         return self

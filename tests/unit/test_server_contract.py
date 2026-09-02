@@ -77,11 +77,11 @@ def test_discovery_reports_filesystem(tmp_path):
 
 # --- F2: Connection Routing & Order of Operations ---
 
-def test_authorise_before_resolution_ordering(tmp_path, monkeypatch):
+def test_authorise_before_resolution_ordering(tmp_path):
     """F2 — Authorisation runs before file resolution. Unauthorised and unknown engagements are indistinguishable."""
     eng_dir = tmp_path / "engagements"
     eng_dir.mkdir(parents=True, exist_ok=True)
-    monkeypatch.setattr(server_config, "engagements_dir", eng_dir)
+    server_config.engagements_dir = eng_dir
 
     # 1. Authorisation first
     with pytest.raises(Unauthorised):

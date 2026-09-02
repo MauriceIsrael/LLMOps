@@ -15,7 +15,7 @@ def test_end_to_end_3_architects_scenario(tmp_path):
     """Déroule le scénario complet entre Alice (cloud-architect), Bob (storage-expert) et Charlie (chief-architect)."""
     db_path = tmp_path / "kuzu_db"
     engagement = "test-3-arch"
-    ElicitationRepository(db_path=db_path)
+    repo = ElicitationRepository(db_path=db_path)
 
     # 1. SCAN : Détection des manques
     scan_graph = build_scan_graph()
@@ -74,8 +74,7 @@ def test_end_to_end_3_architects_scenario(tmp_path):
     assert ass_res_1["is_provisional"] is True
 
     # 7. ARBITRATE CHARLIE : Charlie conserve l'énoncé d'Alice
-    repo_charlie = ElicitationRepository(db_path=db_path)
-    repo_charlie.arbitrate_conflict(
+    repo.arbitrate_conflict(
         conflict_id=conflict_id,
         keep_statement_id=s_alice_id,
         reason="Homogénéité du stockage SAN",
@@ -83,10 +82,10 @@ def test_end_to_end_3_architects_scenario(tmp_path):
     )
 
     # Avancer la maturité des sujets à L3 pour débloquer la section readiness
-    for s_info in repo_charlie.get_subjects_maturity_board(engagement):
-        repo_charlie.advance_subject_level(s_info["subject"], "L3_decided", engagement=engagement)
-    repo_charlie.close()
-    del repo_charlie
+    for s_info in repo.get_subjects_maturity_board(engagement):
+        repo.advance_subject_level(s_info["subject"], "L3_decided", engagement=engagement)
+    repo.close()
+    del repo
     import gc
     gc.collect()
 

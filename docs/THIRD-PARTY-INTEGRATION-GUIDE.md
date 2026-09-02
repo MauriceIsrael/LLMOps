@@ -116,7 +116,7 @@ There is no `create_statement` or `submit_answer` MCP tool, and there should not
 
 1. **CLI Import Gateway (`poetry run elicit import`) (Recommended)**: Import a JSON payload (`schemas/import.schema.json`) into an engagement database via `poetry run elicit import --engagement <id> <file.json> [--dry-run]`. It validates predicates against the domain vocabulary and passes through the repository pipeline.
 2. **Elicitation Engine**: Run our elicitation CLI (`poetry run elicit scan` / `answer` / `confirm`) against your own project and let it build the graph through its own confirmation flow.
-3. **Direct LadybugDB Database Population**: Populate an engagement LadybugDB database directly following the schema in §3.3. This option is faster but transfers data validation responsibility to the integrator.
+3. **Direct Kùzu Database Population**: Populate an engagement Kùzu database directly following the schema in §3.3. This option is faster but transfers data validation responsibility to the integrator.
 
 ### 3.3 The engagement schema, reverse-engineered from live responses
 

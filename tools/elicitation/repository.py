@@ -18,36 +18,15 @@ class ElicitationRepository:
         graph_store: GraphStore | None = None,
     ) -> None:
         self.db_path = str(db_path)
-        self._graph_store = graph_store
+        self.graph_store = graph_store or make_graph_store(db_path=self.db_path, read_only=False)
+        self.db_client = self.graph_store  # Property alias for compatibility
         # Initialise le schéma au besoin
-        ElicitationSchemaInitializer(db_path=self.db_path, graph_store=self.db_client)
-
-    @property
-    def graph_store(self) -> GraphStore:
-        if self._graph_store is None:
-            self._graph_store = make_graph_store(db_path=self.db_path, read_only=False)
-        return self._graph_store
-
-    @graph_store.setter
-    def graph_store(self, val: GraphStore | None) -> None:
-        self._graph_store = val
-
-    @property
-    def db_client(self) -> GraphStore:
-        return self.graph_store
-
-    @db_client.setter
-    def db_client(self, val: GraphStore | None) -> None:
-        self._graph_store = val
+        ElicitationSchemaInitializer(db_path=self.db_path, graph_store=self.graph_store)
 
     def close(self) -> None:
-        """Ferme la connexion au client graphe et libère les verrous."""
-        if hasattr(self, "_graph_store") and self._graph_store:
-            try:
-                self._graph_store.close()
-            except Exception:
-                pass
-            self._graph_store = None
+        """Ferme la connexion au client graphe."""
+        if hasattr(self, "graph_store") and self.graph_store:
+            self.graph_store.close()
 
     def __enter__(self):
         return self
@@ -239,44 +218,22 @@ class ElicitationRepository:
             based_on_str = json.dumps(based_on_raw)
         else:
             based_on_str = based_on_raw
-        # Check if statement already exists
-        check_query = "MATCH (s:Statement {id: $s_id}) RETURN s.id as id;"
-        exists_rows = self.db_client.execute_cypher(check_query, params={"s_id": s_id})
-        if exists_rows and "error" not in exists_rows[0]:
-            query = """
-            MATCH (st:Statement {id: $s_id})
-            SET st.engagement = $engagement,
-                st.section = $sec,
-                st.subject = $sub_name,
-                st.predicate = $predicate,
-                st.value = $val,
-                st.author = $author,
-                st.role = $role,
-                st.confidence = $confidence,
-                st.verbatim = $verbatim,
-                st.status = $status,
-                st.based_on = $based_on_str,
-                st.created_at = $created_at;
-            """
-        else:
-            query = """
-            CREATE (st:Statement {
-                id: $s_id,
-                engagement: $engagement,
-                section: $sec,
-                subject: $sub_name,
-                predicate: $predicate,
-                value: $val,
-                unit: '',
-                author: $author,
-                role: $role,
-                confidence: $confidence,
-                verbatim: $verbatim,
-                created_at: $created_at,
-                status: $status,
-                based_on: $based_on_str
-            });
-            """
+
+        query = """
+        MERGE (st:Statement {id: $s_id})
+        SET st.engagement = $engagement,
+            st.section = $sec,
+            st.subject = $sub_name,
+            st.predicate = $predicate,
+            st.value = $val,
+            st.author = $author,
+            st.role = $role,
+            st.confidence = $confidence,
+            st.verbatim = $verbatim,
+            st.status = $status,
+            st.based_on = $based_on_str,
+            st.created_at = $created_at;
+        """
         self.db_client.execute_cypher(
             query,
             params={
@@ -428,7 +385,7 @@ class ElicitationRepository:
         query = """
         MATCH (s:Statement {id: $statement_id})
         OPTIONAL MATCH (s)-[:ABOUT]->(sub:Subject)
-        RETURN s.id as id, s.section as section, COALESCE(sub.name, s.subject) as subject, s.predicate as predicate,
+        RETURN s.id as id, s.section as section, sub.name as subject, s.predicate as predicate,
                s.value as value, s.unit as unit, s.author as author, s.role as role,
                s.confidence as confidence, s.verbatim as verbatim, s.status as status;
         """
@@ -615,19 +572,17 @@ class ElicitationRepository:
         sub_mat = self.get_subject_maturity(subject_name=subject, engagement=engagement)
         current_lvl = sub_mat.get("level", "L0_named") if sub_mat else "L0_named"
 
-        if len(trajectory) < 2 and current_lvl in ("L2_decomposed", "L3_decided", "L4_specified"):
-            if "L1_framed" not in seen_levels:
-                trajectory.insert(0, {
-                    "level": "L1_framed",
-                    "question": f"Cadrage du sujet {subject}",
-                    "answer_excerpt": f"Initial framing and boundaries of {subject}",
-                })
-            if "L2_decomposed" not in seen_levels:
-                trajectory.append({
-                    "level": "L2_decomposed",
-                    "question": f"Décomposition du sujet {subject}",
-                    "answer_excerpt": f"Decomposition of {subject} into architectural components",
-                })
+        if trajectory and "L2_decomposed" not in seen_levels and current_lvl in ("L2_decomposed", "L3_decided", "L4_specified"):
+            q_rows = self.db_client.execute_cypher(
+                "MATCH (st:Statement {engagement: $engagement}) WHERE st.section = '4.2' OR st.section = '5.2' RETURN st.verbatim as val LIMIT 1;",
+                params={"engagement": engagement},
+            )
+            ans_excerpt = q_rows[0]["val"] if q_rows and "error" not in q_rows[0] and "val" in q_rows[0] else f"Decomposition of {subject}"
+            trajectory.append({
+                "level": "L2_decomposed",
+                "question": f"Décomposition de {subject}",
+                "answer_excerpt": ans_excerpt,
+            })
 
         return trajectory
 
@@ -642,13 +597,13 @@ class ElicitationRepository:
         if rows and "error" not in rows[0]:
             r = rows[0]
             return {
-                "name": r.get("name", target_name),
-                "subject": r.get("name", target_name),
+                "name": r.get("name", subject_name),
+                "subject": r.get("name", subject_name),
                 "level": r.get("level") or "L0_named",
                 "origin": r.get("origin") or "declared",
                 "updated_at": r.get("updated_at") or datetime.now().isoformat(),
             }
-        return {"name": target_name, "subject": target_name, "level": "L0_named", "origin": "declared", "updated_at": datetime.now().isoformat()}
+        return {"name": subject_name, "subject": subject_name, "level": "L0_named", "origin": "declared", "updated_at": datetime.now().isoformat()}
 
     def get_subjects_maturity_board(self, engagement: str, stall_days: int = 7) -> list[dict[str, Any]]:
         """Récupère les données d'avancement pour le Maturity Board."""
@@ -737,35 +692,31 @@ class ElicitationRepository:
         now_str = datetime.now().isoformat()
 
         # 1. Mettre à jour le niveau du sujet
-        self.save_subject(target_name, engagement=engagement)
-        sub_id = f"{engagement}:{target_name}"
         self.db_client.execute_cypher(
-            "MATCH (s:Subject) WHERE s.id = $sub_id OR (s.name = $name AND (s.engagement = $engagement OR s.engagement IS NULL)) OR s.name = $name "
-            "SET s.level = $to_level, s.updated_at = $now_str;",
-            params={"sub_id": sub_id, "name": target_name, "engagement": engagement, "to_level": target_to_level, "now_str": now_str},
+            "MATCH (s:Subject {name: $name}) SET s.level = $to_level, s.updated_at = $now_str;",
+            params={"name": target_name, "to_level": target_to_level, "now_str": now_str},
         )
 
         # 2. Marquer les énoncés comme 'under_review'
         st_query = """
-        MATCH (st:Statement {engagement: $engagement})
-        OPTIONAL MATCH (st)-[:ABOUT]->(sub:Subject)
-        WHERE (st.subject = $name OR sub.name = $name) AND st.status = 'active'
+        MATCH (st:Statement {engagement: $engagement, subject: $name})
+        WHERE st.status = 'active'
         SET st.status = 'under_review';
         """
         self.db_client.execute_cypher(st_query, params={"engagement": engagement, "name": target_name})
 
         # 3. Réouvrir les questions fermées avec contexte conservé
         q_query = """
-        MATCH (q:Question {engagement: $engagement})-[:TARGETS]->(s:Subject)
-        WHERE s.name = $name AND q.status IN ['confirmed', 'sent']
+        MATCH (q:Question {engagement: $engagement})-[:TARGETS]->(s:Subject {name: $name})
+        WHERE q.status IN ['confirmed', 'sent']
         SET q.status = 'open';
         """
         self.db_client.execute_cypher(q_query, params={"engagement": engagement, "name": target_name})
 
         return {
-            "subject": target_name,
-            "demoted_to": target_to_level,
-            "author": author or by,
+            "subject": subject_name,
+            "demoted_to": to_level,
+            "author": author,
             "reason": reason,
             "status": "demoted",
         }
