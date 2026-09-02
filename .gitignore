@@ -34,6 +34,7 @@ htmlcov/
 # Generated Artifacts & Local Projects
 artifacts/
 projects/
+data/project/
 Arborescence exemple/
 
 # Environment variables

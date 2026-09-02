@@ -10,7 +10,7 @@ and can trigger immediate gap detection (elicit scan).
 import argparse
 import re
 import sys
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # noqa: N817
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -197,10 +197,9 @@ class DocumentExtractor:
 
 class BlueprintMapper:
     """Associe intelligemment les sections extraites aux exigences du Blueprint d'architecture."""
-
     def __init__(self, blueprint_path: Path | str) -> None:
         self.blueprint_path = Path(blueprint_path)
-        with open(self.blueprint_path, "r", encoding="utf-8") as f:
+        with open(self.blueprint_path, encoding="utf-8") as f:
             self.blueprint_data = yaml.safe_load(f)
         self.bp_sections = self.blueprint_data.get("sections", [])
 
@@ -239,38 +238,32 @@ class BlueprintMapper:
 
         # 2. Table de synonymes conceptuels NetDevOps & Télécom
         synonyms_rules = [
-            # Scope & Drivers
             (["purpose", "scope", "boundaries", "structuring assumptions"], "1.2"),
             (["executive summary", "value proposition"], "1.1"),
             (["business drivers", "operational directives"], "1.3"),
             (["principles", "architecture principles"], "1.4"),
             (["functional requirements", "use case", "scenarios"], "2.2"),
             (["non-functional requirements", "sla", "kpi"], "2.3"),
-            # Service & MCX
             (["sim", "esim", "lifecycle"], "3.5"),
             (["floor control", "arbitration"], "3.2"),
             (["group management", "affiliation"], "3.3"),
             (["mcx services", "mission-critical services"], "3.1"),
-            # Infra & Platform
             (["rancher", "container platform", "hosting domains", "virtualization", "compute"], "4.4"),
             (["transport", "ip transport", "underlay", "flow matrix", "physical view"], "4.3"),
             (["mobile core", "ericsson dedicated"], "4.2"),
             (["high availability", "resilience", "break-glass", "failure-domain"], "5.2"),
             (["disaster recovery", "backup"], "5.3"),
-            # Security & Compliance
             (["security posture", "security and compliance", "zero-trust", "principles & zero-trust"], "7.1"),
             (["iam", "identity", "authentication", "access management"], "7.2"),
             (["cryptography", "encryption", "chiffrement", "kms"], "7.3"),
             (["threat protection", "hardening", "regulatory compliance"], "7.4"),
             (["soc", "csirt", "incident response"], "7.5"),
-            # Observability & Dark NOC
             (["observability architecture", "dark noc", "operational vision"], "8.1"),
             (["service plane", "infrastructure plane", "observation planes"], "8.1.1"),
             (["ai assistance", "build profile", "agentic ai in build"], "8.2"),
             (["run profile", "autonomous agent capabilities in run"], "8.3"),
             (["guardrails", "execution guardrails", "single source of truth", "sot", "operational patterns"], "8.4"),
             (["auditing", "traceability", "non-repudiation"], "8.5"),
-            # Delivery & OSS
             (["delivery plan", "phasing"], "10.1"),
             (["servicenow", "service management", "inventory", "orders"], "9.1"),
             (["ericsson enm", "enm integration"], "9.2"),
@@ -423,7 +416,7 @@ def main():
 
     # 4. Déclenchement facultatif du Scan de Manques (elicit scan)
     if args.scan:
-        console.print(f"\n[bold yellow]🔎 Lancement automatique de l'analyse des manques d'architecture...[/bold yellow]")
+        console.print("\n[bold yellow]🔎 Lancement automatique de l'analyse des manques d'architecture...[/bold yellow]")
         from tools.elicitation.flows.scan import build_scan_graph
 
         scan_graph = build_scan_graph()

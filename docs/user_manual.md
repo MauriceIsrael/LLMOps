@@ -170,3 +170,32 @@ Vos collègues n'ont **rien à installer** sur leur poste. Ils répondent direct
    - Alice écrit un commentaire `/answer ...` puis `/confirm`.
    - Bob écrit un commentaire `/answer ...` pour proposer une alternative.
    - Charlie résout le conflit en commentant `/arbitrate keep S-0001 --reason "..."`.
+
+---
+
+## 6. Ingestion de Solutions Externes (DOCX, PDF, Markdown) & Audit Automatisé
+
+Vous pouvez confronter n'importe quel dossier d'architecture existant (dossier Word `.docx`, spécification PDF ou fichier Markdown) au Blueprint de référence et aux contrôles réglementaires (NIS2, 3GPP) :
+
+```bash
+# Ingestion et analyse des manques (gaps G1 à G4) en une seule commande :
+poetry run python scripts/ingest_solution_doc.py data/project/netdevops/netdevops_mcx_architecture_document_v1.3.docx --engagement netdevops-2026 --scan
+```
+
+### Ce que produit cette commande :
+1. **Extraction structurée** : Découpage automatique des chapitres, paragraphes et tableaux sans dépendance externe requise pour Word.
+2. **Alignement Blueprint** : Rapprochement de chaque section avec les attendus formels et les exigences de sécurité (ex: NIS2 Article 21).
+3. **Génération du Dossier** : Création du draft d'architecture dans `projects/<engagement>/draft.md`.
+4. **Scan des Lacunes** : Détection immédiate des sections vides (G1), sujets non cadrés (G2), paramètres non spécifiés (G3) et contrôles de conformité non satisfaits (G4).
+
+---
+
+## 7. Script de Publication Automatisée sur GCP Cloud Run
+
+Pour déployer en toute sécurité une nouvelle version du serveur FastMCP sur Google Cloud Run :
+
+```bash
+./scripts/deploy_gcp.sh
+```
+
+Le script vérifie la propreté Git, exécute les vérifications de pré-vol locales (Ruff & tests de contrat), soumet le build Docker allégé à Cloud Build, et effectue un health check automatique sur l'URL de production.

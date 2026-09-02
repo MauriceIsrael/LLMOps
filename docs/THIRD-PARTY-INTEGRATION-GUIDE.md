@@ -27,10 +27,10 @@ yourself because the server does not yet provide it.
 ## 1. The two things you connect to
 
 ```
-knowledge server   →  data/knowledge.kuzu        principles, decisions, patterns,
-                                                   questionnaires, glossary
-engagement server  →  data/engagements/<id>.kuzu  subjects, statements, questions,
-                                                   conflicts, per project
+knowledge server   →  data/knowledge.lbug (or .kuzu)        principles, decisions, patterns,
+                                                            questionnaires, glossary, compliance
+engagement server  →  data/engagements/<id>.lbug (or .kuzu) subjects, statements, questions,
+                                                            conflicts, per project
 ```
 
 They are two physically separate databases reached through one MCP endpoint.
@@ -108,15 +108,19 @@ declared one. The maturity board is genuinely rich: level, origin
 (`blueprint` vs `discovered`), staleness (`days_at_level`, `is_stalled`) and
 which document sections depend on each subject.
 
-### 3.2 Write path — 3 options available for integrators
+### 3.2 Write path — 4 options available for integrators
 
 There is no `create_statement` or `submit_answer` MCP tool, and there should not be one: every write on our side goes through a human confirmation step or validation pipeline, which is precisely the guarantee that makes the base trustworthy.
 
-**Three integration paths exist today:**
+**Four integration paths exist today:**
 
-1. **CLI Import Gateway (`poetry run elicit import`) (Recommended)**: Import a JSON payload (`schemas/import.schema.json`) into an engagement database via `poetry run elicit import --engagement <id> <file.json> [--dry-run]`. It validates predicates against the domain vocabulary and passes through the repository pipeline.
-2. **Elicitation Engine**: Run our elicitation CLI (`poetry run elicit scan` / `answer` / `confirm`) against your own project and let it build the graph through its own confirmation flow.
-3. **Direct Kùzu Database Population**: Populate an engagement Kùzu database directly following the schema in §3.3. This option is faster but transfers data validation responsibility to the integrator.
+1. **Automated Solution Document Ingestion Gateway (`scripts/ingest_solution_doc.py`) (New & Recommended for existing HLDs)**: Parse an existing solution document (.docx, .pdf, .md), project its chapters automatically onto an architectural Blueprint, generate `projects/<engagement>/draft.md`, and execute the gap detection engine (`--scan`).
+   ```bash
+   poetry run python scripts/ingest_solution_doc.py path/to/solution.docx --engagement your-project --scan
+   ```
+2. **CLI Import Gateway (`poetry run elicit import`)**: Import a structured JSON payload (`schemas/import.schema.json`) into an engagement database via `poetry run elicit import --engagement <id> <file.json> [--dry-run]`. It validates predicates against the domain vocabulary and passes through the repository pipeline.
+3. **Elicitation Engine**: Run our elicitation CLI (`poetry run elicit scan` / `answer` / `confirm`) against your own project and let it build the graph through its own confirmation flow.
+4. **Direct LadybugDB Database Population**: Populate an engagement LadybugDB database directly following the schema in §3.3. This option is faster for programmatic integrations but transfers data validation responsibility to the integrator.
 
 ### 3.3 The engagement schema, reverse-engineered from live responses
 
@@ -329,5 +333,56 @@ When referencing Knowledge Hub assets inside formal High-Level Design (HLD) base
 * Always use the canonical format: `ExternalRef { system: "KH", id: "P-002", version: "1.0.0" }`.
 * Never assert a `verified` doctrine as a project Fact without local proof in Architecture Studio.
 * Refer to [docs/EPISTEMIC-ALIGNMENT.md](EPISTEMIC-ALIGNMENT.md) for full mapping rules.
+
+---
+
+## 11. Compliance & Regulatory Frameworks Tools (NIS2, 3GPP & Beyond)
+
+The Knowledge Hub integrates external regulatory security frameworks as first-class graph entities (`Control` nodes) linked to Architecture Principles and Assets:
+
+```python
+# 1. List supported regulatory frameworks and their active versions
+mcp.call("list_frameworks", {})
+# {"status": "ok", "data": [{"framework": "NIS2", "version": "2022/2555", "controls_count": 10}, ...]}
+
+# 2. List specific controls for a framework
+mcp.call("list_controls", {"framework": "NIS2"})
+# Returns controls NIS2-ART21-2A to 2J with title, section and description
+
+# 3. Get end-to-end compliance trail for a specific control
+mcp.call("get_compliance_trail", {"control_id": "NIS2-ART21-2A"})
+# Returns the full lineage: Control <-[:SATISFIES]- Principle -[:REQUIRES]-> Asset (ADR)
+
+# 4. Generate the Compliance Matrix for a project engagement
+mcp.call("get_compliance_matrix", {"framework": "NIS2", "engagement": "your-project"})
+# Returns coverage status for every control: "covered" (with satisfying statement) or "gap"
+```
+
+### Gap G4: Unaddressed Compliance Control
+When running `elicit scan`, any control declared in the Blueprint but not backed by an active statement generates a `G4_unaddressed_compliance_control` gap, prompting security architects to decide and specify the mitigation.
+
+---
+
+## 12. Blueprint Governance & Continuous Improvement Cycle (Harvest Loop)
+
+The Blueprint defines the **"What"** (the corporate architecture standard, mandatory sections, gates and regulatory targets), while each project engagement decides the **"How"** (the technical choices, vendors, and local parameters).
+
+```mermaid
+flowchart LR
+    OWNER["Corporate Architecture Board (Owner)"] -->|"Governs & Versions (SUPERSEDES)"| BP["Blueprint (Corporate Standard)"]
+    BP -->|"Exigences & Controls"| ENG["Project Engagement (Local Team)"]
+    ENG -->|"Harvest Flow (Promotion Candidates)"| OWNER
+```
+
+### A. Extending the Blueprint Locally (`added_by_engagement: true`)
+If a project needs custom sections that the corporate blueprint does not provide, it can declare them in its draft with `added_by_engagement: true`. They will be tracked and scanned in the project's local engagement database without affecting other projects.
+
+### B. The Continuous Improvement Loop (Harvest Flow)
+When a project successfully establishes a new reusable pattern or section (e.g. NetDevOps closed-loop automation, Shadow pipeline):
+1. The project triggers `poetry run elicit harvest --engagement <id>`.
+2. The engine analyzes the engagement graph and yields `promotion_candidates`.
+3. The Corporate Architecture Board reviews candidates for cross-program relevance.
+4. Upon approval, the official Blueprint is incremented (`version: 2` → `version: 3`) with a `SUPERSEDES` relation.
+5. All future projects and connected MCP clients automatically benefit from the updated standard.
 
 
