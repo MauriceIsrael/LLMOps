@@ -115,7 +115,53 @@ def export_sealed_snapshot(
 
     glossary = sorted(raw_glossary, key=lambda x: x.get("term", ""))
 
-    # 4. Build enriched asset list and applicability index
+    # 4. Regulatory Controls & Compliance Index
+    try:
+        raw_controls = client.execute_cypher(
+            "MATCH (c:Control) "
+            "OPTIONAL MATCH (a:Asset)-[:IMPLEMENTS]->(c) "
+            "RETURN c.id as id, c.framework as framework, c.version as version, c.title as title, "
+            "c.domain as domain, c.severity as severity, c.status as status, c.target_entities as target_entities, "
+            "c.external_ref as external_ref, collect(a.id) as implementing_assets;"
+        )
+    except Exception:
+        raw_controls = []
+
+    frameworks_map: dict[str, Any] = {}
+    compliance_index: dict[str, dict[str, Any]] = {}
+    controls_list = []
+
+    for ctrl in raw_controls:
+        cid = ctrl["id"]
+        fw = ctrl.get("framework") or "UNKNOWN"
+        ver = ctrl.get("version") or "1.0.0"
+        title = ctrl.get("title") or cid
+        impl = sorted([a for a in (ctrl.get("implementing_assets") or []) if a])
+
+        frameworks_map.setdefault(fw, {"framework": fw, "version": ver, "controls_count": 0})
+        frameworks_map[fw]["controls_count"] += 1
+
+        ctrl_entry = {
+            "id": cid,
+            "framework": fw,
+            "version": ver,
+            "title": title,
+            "domain": ctrl.get("domain"),
+            "severity": ctrl.get("severity") or "mandatory",
+            "implemented_by": impl,
+        }
+        controls_list.append(ctrl_entry)
+
+        compliance_index.setdefault(fw, {})[cid] = {
+            "title": title,
+            "version": ver,
+            "severity": ctrl.get("severity") or "mandatory",
+            "implemented_by": impl,
+        }
+
+    controls_list.sort(key=lambda x: x["id"])
+
+    # 5. Build enriched asset list and applicability index
     enriched_assets = []
     applicability_index: dict[str, dict[str, list[str]]] = {}
 
@@ -182,11 +228,14 @@ def export_sealed_snapshot(
 
     enriched_assets.sort(key=lambda x: x["id"])
 
-    # 5. Build sealed snapshot payload
+    # 6. Build sealed snapshot payload
     payload_data = {
         "applicability_index": applicability_index,
         "assets": enriched_assets,
         "glossary": glossary,
+        "frameworks": sorted(list(frameworks_map.values()), key=lambda x: x["framework"]),
+        "controls": controls_list,
+        "compliance_index": compliance_index,
     }
 
     # Canonical serialization to compute checksum

@@ -200,6 +200,29 @@ def detect_gaps_node(state: ScanState) -> dict[str, Any]:
             gap = evaluate(section, req, levels.get(req.subject), section.id in with_statements)
             gap_objects.append(gap)
 
+        # Évaluation des contrôles de conformité réglementaire (NIS2, 3GPP, etc.)
+        for ctrl_id in getattr(section, "compliance_controls", []):
+            if not repo.is_control_covered(engagement=engagement, control_id=ctrl_id):
+                primary_subj = section.requires[0].subject if section.requires else f"compliance:{ctrl_id}"
+                curr_lvl = levels.get(primary_subj)
+                ctrl_hold = gate(curr_lvl, "L3_decided")
+                ctrl_status = "held_premature" if ctrl_hold else "dispatchable"
+                gap_objects.append(
+                    Gap(
+                        gap_type="G4_unaddressed_compliance_control",
+                        section=section.id,
+                        subject=primary_subj,
+                        required_level="L3_decided",
+                        current_level=curr_lvl,
+                        status=ctrl_status,
+                        hold_reason=ctrl_hold,
+                        blocking=section.unlocks,
+                        blocking_count=len(section.unlocks),
+                        routes_to=getattr(section, "routes_to", "security-architect"),
+                        must_answer=f"Conformité réglementaire requise : comment l'architecture de '{primary_subj}' garantit-elle le contrôle {ctrl_id} pour '{section.title}' ?",
+                    )
+                )
+
     gaps_dicts = [g.to_dict() for g in gap_objects]
 
     # Génération dynamique des manques de décomposition L2 pour tous les sujets à L1_framed
@@ -274,6 +297,24 @@ def enrich_node(state: ScanState) -> dict[str, Any]:
                     "when_not_to_use": "Ne pas utiliser si le fournisseur supporte un accès direct modèle.",
                 }
             ]
+        elif sub_name.startswith("compliance:"):
+            ctrl_id = sub_name.split(":", 1)[1]
+            try:
+                from mcp_server.knowledge.tools import get_compliance_trail
+                trail_res = get_compliance_trail(ctrl_id)
+                if trail_res and trail_res.get("status") == "ok":
+                    pats = trail_res.get("data", {}).get("implementing_patterns", [])
+                    if pats:
+                        gap["candidate_patterns"] = [
+                            {
+                                "id": p["id"],
+                                "name": f"{p['id']} {p['title']}",
+                                "when_not_to_use": "Vérifier les critères d'acceptation du contrôle réglementaire.",
+                            }
+                            for p in pats
+                        ]
+            except Exception:
+                pass
 
         # Prior answer via parameterised query (D8)
         prior_rows = repo.db_client.execute_cypher(
@@ -364,7 +405,9 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
         if not is_existing and (cur_role_open >= max_open_per_role or new_count >= max_new_per_scan):
             gap["status"] = "held_queued"
             gap["held_queued"] = True
-            gap["held_reason"] = f"held (queued) at position {len(queued_gaps) + 1} for role {routed}"
+            reason = f"held (queued) at position {len(queued_gaps) + 1} for role {routed}"
+            gap["held_reason"] = reason
+            gap["hold_reason"] = reason
             queued_gaps.append(gap)
             continue
 
@@ -385,6 +428,12 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
             why = f"Le sujet {sub} a atteint L1_framed et doit être décomposé en sous-domaines."
             shape = "decomposition"
             q_level = "L2_decomposed"
+        elif gap.get("gap_type") == "G4_unaddressed_compliance_control":
+            sec_name = gap.get("section_name", sec)
+            q_text = gap.get("must_answer") or f"Comment l'architecture garantit-elle le contrôle {sub} pour la section {sec} ({sec_name}) ?"
+            why = f"Exigence réglementaire obligatoire : le contrôle {sub} n'est pas encore couvert par un énoncé ou une décision active."
+            shape = "compliance_decision"
+            q_level = "L3_decided"
         else:
             sec_name = gap.get("section_name", sec)
             q_text = gap.get("must_answer") or f"Quelle est l'architecture de la section {sec} ({sec_name}) ?"

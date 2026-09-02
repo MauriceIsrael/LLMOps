@@ -373,3 +373,202 @@ def get_domain_prominence_report() -> dict[str, Any]:
     }
     return ok_response(payload, count=1)
 
+
+def list_frameworks() -> dict[str, Any]:
+    """List regulatory and security frameworks embedded in the knowledge base along with their versions and control counts."""
+    kb_client = _get_db()
+    try:
+        query = """
+        MATCH (c:Control)
+        RETURN c.framework as framework, c.version as version, count(c) as control_count;
+        """
+        rows = kb_client.execute_cypher(query)
+        meta = {
+            "NIS2": {
+                "title": "Directive (UE) 2022/2555 (NIS 2)",
+                "jurisdiction": "EU",
+                "description": "Mesures de gestion des risques de cybersécurité pour les entités essentielles et importantes.",
+            },
+            "3GPP": {
+                "title": "3GPP Security Specifications (TS 33.179 / TS 33.501)",
+                "jurisdiction": "International",
+                "description": "Sécurité des services de communication critique (MCX) et de l'architecture SBA 5G.",
+            },
+        }
+        res = []
+        for r in rows:
+            fw = r.get("framework", "")
+            info = meta.get(fw, {"title": fw, "jurisdiction": "Unknown", "description": ""})
+            res.append({
+                "framework": fw,
+                "version": r.get("version", "1.0.0"),
+                "title": info["title"],
+                "jurisdiction": info["jurisdiction"],
+                "description": info["description"],
+                "control_count": r.get("control_count", 0),
+            })
+        return ok_response(res, count=len(res))
+    except Exception as e:
+        return error_response(str(e))
+
+
+def list_controls(
+    framework: str | None = None,
+    domain: str | None = None,
+    severity: str | None = None,
+) -> dict[str, Any]:
+    """List security and compliance controls with optional filtering by framework, domain, or severity.
+
+    Args:
+        framework: Framework code filter (e.g. 'NIS2', '3GPP').
+        domain: Security domain filter (e.g. 'resilience', 'cryptography', 'supply-chain').
+        severity: Severity level ('mandatory', 'recommended').
+    """
+    conditions = []
+    params: dict[str, Any] = {}
+    if framework:
+        conditions.append("c.framework = $framework")
+        params["framework"] = framework
+    if domain:
+        conditions.append("c.domain CONTAINS $domain")
+        params["domain"] = domain
+    if severity:
+        conditions.append("c.severity = $severity")
+        params["severity"] = severity
+
+    where_clause = " WHERE " + " AND ".join(conditions) if conditions else ""
+    query = (
+        f"MATCH (c:Control){where_clause} "
+        f"OPTIONAL MATCH (a:Asset)-[:IMPLEMENTS]->(c) "
+        f"RETURN c.id as id, c.framework as framework, c.version as version, c.title as title, "
+        f"c.domain as domain, c.severity as severity, c.status as status, c.target_entities as target_entities, "
+        f"c.external_ref as external_ref, collect(a.id) as implemented_by;"
+    )
+    try:
+        rows = _get_db().execute_cypher(query, params)
+        return ok_response(rows, count=len(rows))
+    except Exception as e:
+        return error_response(str(e))
+
+
+def get_compliance_trail(control_id: str) -> dict[str, Any]:
+    """Retrieve full compliance traceability for a specific control: regulatory text, criteria, and implementing patterns/principles/ADRs.
+
+    Args:
+        control_id: The control identifier (e.g. 'NIS2-ART21-2C', '3GPP-TS33179-KMS').
+    """
+    if not control_id or not isinstance(control_id, str):
+        return invalid_argument_response("control_id must be a non-empty string.")
+
+    kb_client = _get_db()
+    try:
+        ctrl_res = kb_client.execute_cypher(
+            "MATCH (c:Control {id: $id}) RETURN c.id as id, c.framework as framework, c.version as version, "
+            "c.title as title, c.domain as domain, c.severity as severity, c.external_ref as external_ref, "
+            "c.target_entities as target_entities, c.markdown_content as markdown_content;",
+            {"id": control_id},
+        )
+        if not ctrl_res:
+            return not_found_response(f"Control '{control_id}' not found.")
+
+        ctrl = ctrl_res[0]
+
+        impl_res = kb_client.execute_cypher(
+            """
+            MATCH (a:Asset)-[:IMPLEMENTS]->(c:Control {id: $id})
+            RETURN a.id as id, a.title as title, a.type as type, a.confidence as confidence, a.status as status;
+            """,
+            {"id": control_id},
+        )
+
+        patterns = [a for a in impl_res if a.get("type") == "pattern"]
+        principles = [a for a in impl_res if a.get("type") == "principle"]
+        decisions = [a for a in impl_res if a.get("type") in ("decision", "adr")]
+        others = [a for a in impl_res if a.get("type") not in ("pattern", "principle", "decision", "adr")]
+
+        trail = {
+            "control": ctrl,
+            "implementing_patterns": patterns,
+            "governing_principles": principles,
+            "candidate_decisions": decisions,
+            "other_assets": others,
+            "total_coverage": len(impl_res),
+        }
+        return ok_response(trail, count=1)
+    except Exception as e:
+        return error_response(str(e))
+
+
+def get_compliance_matrix(engagement: str, framework: str) -> dict[str, Any]:
+    """Evaluate compliance coverage of an engagement project against a regulatory framework.
+
+    Args:
+        engagement: Engagement identifier (e.g. 'nordwave-mcx-2027').
+        framework: Regulatory framework code (e.g. 'NIS2', '3GPP').
+    """
+    kb_client = _get_db()
+    try:
+        ctrls = kb_client.execute_cypher(
+            "MATCH (c:Control {framework: $fw}) "
+            "OPTIONAL MATCH (a:Asset)-[:IMPLEMENTS]->(c) "
+            "RETURN c.id as id, c.title as title, c.severity as severity, collect(a.id) as implementing_assets;",
+            {"fw": framework},
+        )
+        if not ctrls:
+            return not_found_response(f"No controls found for framework '{framework}'.")
+
+        eng_conn = open_connection(scope=engagement)
+        stmt_rows = eng_conn.execute_cypher(
+            "MATCH (s:Statement {status: 'active'}) "
+            "RETURN s.id as id, s.value as value, s.verbatim as verbatim, s.subject as subject, s.predicate as predicate, "
+            "s.based_on as based_on, s.confidence as confidence;"
+        )
+
+        matrix = []
+        covered_count = 0
+        for c in ctrls:
+            c_id = c["id"]
+            impl_assets = set(c.get("implementing_assets") or [])
+            matching_statements = []
+            for stmt in stmt_rows:
+                based_on = str(stmt.get("based_on") or "")
+                val = str(stmt.get("value") or "")
+                verb = str(stmt.get("verbatim") or "")
+                if c_id in based_on or c_id in val or c_id in verb or any(a in based_on for a in impl_assets):
+                    matching_statements.append({
+                        "statement_id": stmt["id"],
+                        "subject": stmt["subject"],
+                        "value": val,
+                        "confidence": stmt["confidence"],
+                    })
+
+            status = "covered" if matching_statements else "unaddressed"
+            if status == "covered":
+                covered_count += 1
+
+            matrix.append({
+                "control_id": c_id,
+                "title": c["title"],
+                "severity": c["severity"],
+                "status": status,
+                "implementing_kb_assets": list(impl_assets),
+                "satisfying_statements": matching_statements,
+            })
+
+        total = len(ctrls)
+        coverage_pct = round((covered_count / total) * 100, 1) if total > 0 else 0.0
+
+        summary = {
+            "engagement": engagement,
+            "framework": framework,
+            "total_controls": total,
+            "covered_controls": covered_count,
+            "unaddressed_controls": total - covered_count,
+            "coverage_percentage": coverage_pct,
+            "matrix": matrix,
+        }
+        return ok_response(summary, count=1)
+    except Exception as e:
+        return error_response(str(e))
+
+

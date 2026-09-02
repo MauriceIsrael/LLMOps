@@ -13,8 +13,8 @@ class ElicitationSchemaInitializer:
         graph_store: GraphStore | None = None,
     ) -> None:
         self.db_path = str(db_path)
-        gs = graph_store or make_graph_store(db_path=self.db_path, read_only=False)
-        self.init_schema(gs)
+        self.graph_store = graph_store or make_graph_store(db_path=self.db_path, read_only=False)
+        self.init_schema(self.graph_store)
 
     def init_schema(self, graph_store: GraphStore) -> None:
         """Crée les tables de nœuds et de relations d'élicitation si elles n'existent pas."""

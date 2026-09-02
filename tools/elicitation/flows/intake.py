@@ -242,6 +242,7 @@ def persist_node(state: IntakeState) -> dict[str, Any]:
         st["status"] = "active"
         sid = repo.save_statement(st)
         persisted_ids.append(sid)
+        print(f"DEBUG PERSIST_NODE JUST SAVED {sid}: {repo.get_statement(sid)}")
 
     uncs = state.get("uncertainties", [])
     print(f"\nDEBUG PERSIST_NODE UNCERTAINTIES: {uncs}\n")

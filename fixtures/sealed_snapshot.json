@@ -1,8 +1,8 @@
 {
-  "snapshot_id": "snapshot-2026-09-01-67b8ff9",
-  "created_at": "2026-09-01T22:11:25Z",
-  "source_revision": "67b8ff929d2bf380985702f7a68eb76bd2538c24",
-  "payload_sha256": "sha256:fc538de5bdc64546fb707471a02912ee8249240055cddb18806c146aee4bbb9b",
+  "snapshot_id": "snapshot-2026-09-02-452c9f4",
+  "created_at": "2026-09-02T20:26:15Z",
+  "source_revision": "452c9f4489584f3bf8f0cb7fb59af3b348562018",
+  "payload_sha256": "sha256:5991f7be93e016a8cce2cbaf26764cca3dba5670c312045c05bbeb4c74d24626",
   "schema_version": "1.0",
   "applicability_index": {
     "TPL-getting-started": {
@@ -1518,46 +1518,314 @@
       "superseded_by": []
     }
   ],
-  "glossary": [
+  "glossary": [],
+  "frameworks": [
     {
-      "term": "Break-glass",
-      "definition": "procedure allowing critical recovery actions when the management platform itself is unavailable."
+      "framework": "3GPP",
+      "version": "Rel-18",
+      "controls_count": 5
     },
     {
-      "term": "Claims register",
-      "definition": "bid artefact recording the evidence level behind every statement made in a proposal."
-    },
-    {
-      "term": "Closed loop",
-      "definition": "chain from detection to remediation. *Supervised* when a human approval gates the action."
-    },
-    {
-      "term": "Drift",
-      "definition": "difference between the observed configuration of an asset and its intended configuration."
-    },
-    {
-      "term": "Fallback plan",
-      "definition": "pre-validated configuration applied to recover from a known degraded condition; bound to the baseline it assumes."
-    },
-    {
-      "term": "Harvest",
-      "definition": "timeboxed end-of-phase session that returns field experience into this base."
-    },
-    {
-      "term": "Northbound interface",
-      "definition": "vendor-exposed management interface through which an external system operates a domain without bypassing its element manager."
-    },
-    {
-      "term": "Service plane / infrastructure plane",
-      "definition": "the two observation planes: signals contributing to a delivered service, and signals describing the hosting platform."
-    },
-    {
-      "term": "Shadow environment",
-      "definition": "isolated environment receiving duplicated production telemetry, able to evaluate rules but not to act."
-    },
-    {
-      "term": "Source of truth",
-      "definition": "the system that holds the intended state; for configuration, a version control repository."
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "controls_count": 10
     }
-  ]
+  ],
+  "controls": [
+    {
+      "id": "3GPP-TS33179-AFFILIATION",
+      "framework": "3GPP",
+      "version": "Rel-18",
+      "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
+      "domain": "mcx-security,iam,identity",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "3GPP-TS33179-ISOLATED",
+      "framework": "3GPP",
+      "version": "Rel-18",
+      "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
+      "domain": "mcx-security,resilience,isolated-operation",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0007",
+        "PAT-004"
+      ]
+    },
+    {
+      "id": "3GPP-TS33179-KMS",
+      "framework": "3GPP",
+      "version": "Rel-18",
+      "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
+      "domain": "mcx-security,cryptography,key-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "3GPP-TS33501-SBI",
+      "framework": "3GPP",
+      "version": "Rel-18",
+      "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
+      "domain": "5g-security,api-security,sba",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0005",
+        "PAT-006"
+      ]
+    },
+    {
+      "id": "3GPP-TS33501-SEPP",
+      "framework": "3GPP",
+      "version": "Rel-18",
+      "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
+      "domain": "5g-security,roaming,boundary-protection",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART21-2A",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Politiques d'analyse des risques et s\u00e9curit\u00e9 des syst\u00e8mes d'information",
+      "domain": "security-governance,risk-management",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-001"
+      ]
+    },
+    {
+      "id": "NIS2-ART21-2B",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Gestion et traitement des incidents de s\u00e9curit\u00e9",
+      "domain": "incident-response,observability",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-002",
+        "PAT-001"
+      ]
+    },
+    {
+      "id": "NIS2-ART21-2C",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Continuit\u00e9 des activit\u00e9s, sauvegardes immuables et reprise apr\u00e8s sinistre",
+      "domain": "resilience,disaster-recovery,backup-management",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0007",
+        "P-009",
+        "PAT-003",
+        "PAT-004"
+      ]
+    },
+    {
+      "id": "NIS2-ART21-2D",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "S\u00e9curit\u00e9 de la cha\u00eene d'approvisionnement et relations avec les fournisseurs",
+      "domain": "supply-chain,vendor-management",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0005",
+        "P-007",
+        "PAT-006"
+      ]
+    },
+    {
+      "id": "NIS2-ART21-2E",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "S\u00e9curit\u00e9 de l'acquisition, du d\u00e9veloppement et de la maintenance des SI",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-005",
+        "PAT-002"
+      ]
+    },
+    {
+      "id": "NIS2-ART21-2F",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Politiques et proc\u00e9dures d'\u00e9valuation de l'efficacit\u00e9 des mesures de s\u00e9curit\u00e9",
+      "domain": "audit,compliance-evaluation",
+      "severity": "mandatory",
+      "implemented_by": [
+        "PAT-005"
+      ]
+    },
+    {
+      "id": "NIS2-ART21-2G",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Pratiques de base en cyber-hygi\u00e8ne et formation en cybers\u00e9curit\u00e9",
+      "domain": "cyber-hygiene,training",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART21-2H",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Cryptographie, chiffrement et s\u00e9curit\u00e9 de l'intelligence artificielle",
+      "domain": "cryptography,ai-security",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-015",
+        "PAT-007"
+      ]
+    },
+    {
+      "id": "NIS2-ART21-2I",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "S\u00e9curit\u00e9 des ressources humaines, contr\u00f4le d'acc\u00e8s et gestion des actifs",
+      "domain": "iam,asset-management",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-010"
+      ]
+    },
+    {
+      "id": "NIS2-ART21-2J",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Authentification multifacteur (MFA) et communications s\u00e9curis\u00e9es",
+      "domain": "iam,mfa,secure-communications",
+      "severity": "mandatory",
+      "implemented_by": [
+        "PAT-004"
+      ]
+    }
+  ],
+  "compliance_index": {
+    "3GPP": {
+      "3GPP-TS33179-ISOLATED": {
+        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "PAT-004"
+        ]
+      },
+      "3GPP-TS33501-SBI": {
+        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "PAT-006"
+        ]
+      },
+      "3GPP-TS33179-KMS": {
+        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "3GPP-TS33179-AFFILIATION": {
+        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "3GPP-TS33501-SEPP": {
+        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      }
+    },
+    "NIS2": {
+      "NIS2-ART21-2B": {
+        "title": "Gestion et traitement des incidents de s\u00e9curit\u00e9",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-002",
+          "PAT-001"
+        ]
+      },
+      "NIS2-ART21-2D": {
+        "title": "S\u00e9curit\u00e9 de la cha\u00eene d'approvisionnement et relations avec les fournisseurs",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "P-007",
+          "PAT-006"
+        ]
+      },
+      "NIS2-ART21-2J": {
+        "title": "Authentification multifacteur (MFA) et communications s\u00e9curis\u00e9es",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "PAT-004"
+        ]
+      },
+      "NIS2-ART21-2A": {
+        "title": "Politiques d'analyse des risques et s\u00e9curit\u00e9 des syst\u00e8mes d'information",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-001"
+        ]
+      },
+      "NIS2-ART21-2E": {
+        "title": "S\u00e9curit\u00e9 de l'acquisition, du d\u00e9veloppement et de la maintenance des SI",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-005",
+          "PAT-002"
+        ]
+      },
+      "NIS2-ART21-2H": {
+        "title": "Cryptographie, chiffrement et s\u00e9curit\u00e9 de l'intelligence artificielle",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-015",
+          "PAT-007"
+        ]
+      },
+      "NIS2-ART21-2G": {
+        "title": "Pratiques de base en cyber-hygi\u00e8ne et formation en cybers\u00e9curit\u00e9",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART21-2C": {
+        "title": "Continuit\u00e9 des activit\u00e9s, sauvegardes immuables et reprise apr\u00e8s sinistre",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "P-009",
+          "PAT-003",
+          "PAT-004"
+        ]
+      },
+      "NIS2-ART21-2F": {
+        "title": "Politiques et proc\u00e9dures d'\u00e9valuation de l'efficacit\u00e9 des mesures de s\u00e9curit\u00e9",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "PAT-005"
+        ]
+      },
+      "NIS2-ART21-2I": {
+        "title": "S\u00e9curit\u00e9 des ressources humaines, contr\u00f4le d'acc\u00e8s et gestion des actifs",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-010"
+        ]
+      }
+    }
+  }
 }

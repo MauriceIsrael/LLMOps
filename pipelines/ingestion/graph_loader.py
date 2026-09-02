@@ -74,6 +74,34 @@ class LadybugGraphLoader:
         if "DEFINES" not in table_names:
             self.store.execute_cypher("CREATE REL TABLE DEFINES (FROM Asset TO GlossaryTerm);")
 
+        if "Control" not in table_names:
+            self.store.execute_cypher(
+                """
+                CREATE NODE TABLE Control (
+                    id STRING,
+                    framework STRING,
+                    version STRING,
+                    title STRING,
+                    domain STRING,
+                    severity STRING,
+                    status STRING,
+                    target_entities STRING,
+                    external_ref STRING,
+                    markdown_content STRING,
+                    PRIMARY KEY (id)
+                );
+                """
+            )
+        else:
+            for col in ("framework", "version", "domain", "severity", "target_entities", "external_ref", "markdown_content"):
+                try:
+                    self.store.execute_cypher(f"ALTER TABLE Control ADD {col} STRING;")
+                except Exception:
+                    pass
+
+        if "IMPLEMENTS" not in table_names:
+            self.store.execute_cypher("CREATE REL TABLE IMPLEMENTS (FROM Asset TO Control);")
+
     def load_doc_nodes_and_rels(self, nodes: list[Any], relations: list[Any]) -> None:
         """Inserts nodes and relations into the graph database using parameterized Cypher."""
         for node in nodes:
@@ -85,6 +113,45 @@ class LadybugGraphLoader:
                 definition = str(props.get("definition", ""))
                 query = "MERGE (g:GlossaryTerm {term: $term}) SET g.definition = $definition;"
                 self.store.execute_cypher(query, {"term": term, "definition": definition})
+            elif label == "CONTROL":
+                doc_id = str(props.get("id", ""))
+                title = str(props.get("title", ""))
+                framework = str(props.get("framework", ""))
+                version = str(props.get("version", "1.0.0"))
+                domain = str(props.get("domain", ""))
+                severity = str(props.get("severity", "mandatory"))
+                status = str(props.get("status", "active"))
+                target_entities = str(props.get("target_entities", ""))
+                external_ref = str(props.get("external_ref", f"{framework}:{doc_id}"))
+                markdown_content = str(props.get("markdown_content", ""))
+
+                query = """
+                MERGE (c:Control {id: $id})
+                SET c.title = $title,
+                    c.framework = $framework,
+                    c.version = $version,
+                    c.domain = $domain,
+                    c.severity = $severity,
+                    c.status = $status,
+                    c.target_entities = $target_entities,
+                    c.external_ref = $external_ref,
+                    c.markdown_content = $markdown_content;
+                """
+                self.store.execute_cypher(
+                    query,
+                    {
+                        "id": doc_id,
+                        "title": title,
+                        "framework": framework,
+                        "version": version,
+                        "domain": domain,
+                        "severity": severity,
+                        "status": status,
+                        "target_entities": target_entities,
+                        "external_ref": external_ref,
+                        "markdown_content": markdown_content,
+                    },
+                )
             else:
                 doc_id = str(props.get("id", ""))
                 title = str(props.get("title", ""))
@@ -150,6 +217,9 @@ class LadybugGraphLoader:
                 self.store.execute_cypher(query, {"src": src, "tgt": tgt})
             elif lbl == "DEFINES":
                 query = "MATCH (a:Asset {id: $src}), (g:GlossaryTerm {term: $tgt}) MERGE (a)-[:DEFINES]->(g);"
+                self.store.execute_cypher(query, {"src": src, "tgt": tgt})
+            elif lbl == "IMPLEMENTS":
+                query = "MATCH (a:Asset {id: $src}), (c:Control {id: $tgt}) MERGE (a)-[:IMPLEMENTS]->(c);"
                 self.store.execute_cypher(query, {"src": src, "tgt": tgt})
 
 

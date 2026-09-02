@@ -720,3 +720,22 @@ class ElicitationRepository:
             "reason": reason,
             "status": "demoted",
         }
+
+    def is_control_covered(self, engagement: str, control_id: str) -> bool:
+        """Vérifie si un contrôle de conformité est couvert par au moins un énoncé actif."""
+        query = (
+            "MATCH (s:Statement {status: 'active'}) "
+            "WHERE (s.engagement = $engagement OR s.engagement = 'default') "
+            "RETURN s.based_on as based_on, s.value as value, s.verbatim as verbatim;"
+        )
+        try:
+            rows = self.db_client.execute_cypher(query, params={"engagement": engagement})
+            for r in rows:
+                b = str(r.get("based_on") or "")
+                v = str(r.get("value") or "")
+                verb = str(r.get("verbatim") or "")
+                if control_id in b or control_id in v or control_id in verb:
+                    return True
+            return False
+        except Exception:
+            return False

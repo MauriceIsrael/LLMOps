@@ -5,6 +5,9 @@ status: active
 confidence: verified
 owner: core-owner-architecture
 last_reviewed: 2026-07-27
+compliance_targets:
+  - NIS2
+  - 3GPP
 derived_from:
   - HLA_Mission_Critical_Mobile_Network_Structure.docx — 44 subsections, titles verbatim
   - the NetDevOps and Dark NOC architecture designed for the same system
@@ -393,6 +396,8 @@ sections:
 - id: '7.1'
   title: Security Principles & Zero-Trust Architecture
   must_answer: Which zones exist, what may cross between them, and which crossings are structurally prohibited?
+  compliance_controls:
+  - NIS2-ART21-2A
   requires:
   - subject: security-posture
     level: L2_decomposed
@@ -406,6 +411,10 @@ sections:
 - id: '7.2'
   title: Identity, Authentication & Access Management (IAM)
   must_answer: Which operational profiles exist, who approves what, and how are credentials held and rotated?
+  compliance_controls:
+  - NIS2-ART21-2I
+  - NIS2-ART21-2J
+  - 3GPP-TS33179-AFFILIATION
   requires:
   - subject: security-posture
     level: L3_decided
@@ -415,6 +424,9 @@ sections:
 - id: '7.3'
   title: End-to-End Cryptography & Privacy
   must_answer: How are identifiers protected in transit, at rest and in duplicated flows?
+  compliance_controls:
+  - NIS2-ART21-2H
+  - 3GPP-TS33179-KMS
   requires:
   - subject: security-posture
     level: L3_decided
@@ -425,6 +437,9 @@ sections:
 - id: '7.4'
   title: Threat Protection & Regulatory Compliance
   must_answer: Which hardening baselines apply, and how is compliance evidence produced continuously?
+  compliance_controls:
+  - NIS2-ART21-2E
+  - NIS2-ART21-2F
   requires:
   - subject: automation-chain
     level: L3_decided
@@ -437,6 +452,8 @@ sections:
 - id: '7.5'
   title: SOC & CSIRT Operational Boundaries & Incident Response Model
   must_answer: How is a security event detected, escalated and recorded, and by whom?
+  compliance_controls:
+  - NIS2-ART21-2B
   requires:
   - subject: observation
     level: L3_decided

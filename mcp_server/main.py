@@ -36,11 +36,15 @@ from mcp_server.engagement.tools import (
 from mcp_server.knowledge.tools import (
     get_asset,
     get_assets,
+    get_compliance_matrix,
+    get_compliance_trail,
     get_decision_trail,
     get_glossary_term,
     get_graph_summary,
     get_principles_for,
     list_assets,
+    list_controls,
+    list_frameworks,
     query_graph,
     search_assets,
 )
@@ -58,6 +62,10 @@ mcp.tool()(search_assets)
 mcp.tool()(get_principles_for)
 mcp.tool()(query_graph)
 mcp.tool()(get_graph_summary)
+mcp.tool()(list_frameworks)
+mcp.tool()(list_controls)
+mcp.tool()(get_compliance_trail)
+mcp.tool()(get_compliance_matrix)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":

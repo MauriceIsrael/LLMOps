@@ -57,6 +57,11 @@ class ArchitectureGraphExtractor:
                 "markdown_content": raw_markdown,
                 "sha256": raw_sha256,
                 "external_ref": external_ref_val,
+                "framework": parsed_doc.get("framework", ""),
+                "severity": parsed_doc.get("severity", "mandatory"),
+                "target_entities": ",".join(parsed_doc.get("target_entities", []))
+                if isinstance(parsed_doc.get("target_entities"), list)
+                else str(parsed_doc.get("target_entities", "")),
             },
         )
         nodes.append(main_node)
@@ -106,6 +111,19 @@ class ArchitectureGraphExtractor:
                         source_id=doc_id,
                         target_id=target_id,
                         label="REQUIRES",
+                    )
+                )
+
+        implements_controls = frontmatter.get("implements_controls")
+        if implements_controls:
+            if isinstance(implements_controls, str):
+                implements_controls = [implements_controls]
+            for target_ctrl in implements_controls:
+                relations.append(
+                    Relation(
+                        source_id=doc_id,
+                        target_id=target_ctrl,
+                        label="IMPLEMENTS",
                     )
                 )
 

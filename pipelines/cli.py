@@ -59,18 +59,28 @@ def ingest(
     total_nodes = 0
     total_rels = 0
 
+    all_parsed_data: list[tuple[list[Any], list[Any]]] = []
+
     try:
-        for file_path in track(all_files, description="Ingestion en cours..."):
+        for file_path in track(all_files, description="Ingestion des nœuds..."):
             try:
                 parsed_doc = parser.parse_file(file_path)
                 if not parsed_doc:
                     continue
                 nodes, rels = extractor.extract_nodes_and_relations(parsed_doc)
-                loader.load_doc_nodes_and_rels(nodes, rels)
+                loader.load_doc_nodes_and_rels(nodes, [])
                 total_nodes += len(nodes)
-                total_rels += len(rels)
+                all_parsed_data.append((nodes, rels))
             except Exception as e:
                 console.print(f"[bold yellow]⚠️ Erreur lors du traitement de {file_path.name} : {e}[/bold yellow]")
+
+        for _, rels in track(all_parsed_data, description="Création des relations..."):
+            if rels:
+                try:
+                    loader.load_doc_nodes_and_rels([], rels)
+                    total_rels += len(rels)
+                except Exception as e:
+                    console.print(f"[bold yellow]⚠️ Erreur lors de la création des relations : {e}[/bold yellow]")
     finally:
         loader.store.close()
         from tools.adapters.ladybug_store import LadybugGraphStore

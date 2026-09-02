@@ -23,6 +23,7 @@ class BlueprintSection(BaseModel):
     min_level_final: str = "L3_decided"
     min_level_provisional: str = "L1_framed"
     informed_by: list[str] = Field(default_factory=list)
+    compliance_controls: list[str] = Field(default_factory=list)
     routes_to: str
 
     def get_requirements(self) -> list[BlueprintRequirement]:
@@ -49,6 +50,7 @@ class Blueprint(BaseModel):
     type: str = "blueprint"
     status: str = "active"
     domain: list[str] = Field(default_factory=list)
+    compliance_targets: list[str] = Field(default_factory=list)
     roots: list[BlueprintRoot] = Field(default_factory=list)
     sections: list[BlueprintSection] = Field(default_factory=list)
 

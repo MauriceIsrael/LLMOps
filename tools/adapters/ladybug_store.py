@@ -17,7 +17,7 @@ class LadybugGraphStore(GraphStore):
 
     @classmethod
     def get_database(cls, db_path: str, read_only: bool = False) -> Any:
-        cache_key = f"{db_path}_{read_only}"
+        cache_key = str(Path(db_path).resolve())
         if cache_key in cls._db_cache:
             db = cls._db_cache[cache_key]
             try:
@@ -30,18 +30,18 @@ class LadybugGraphStore(GraphStore):
 
         try:
             db = lb.Database(
-                db_path,
+                cache_key,
                 buffer_pool_size=64 * 1024 * 1024,
                 max_db_size=1024 * 1024 * 1024,
                 read_only=False,
             )
         except Exception as e:
             if "wal" in str(e).lower() or "record type" in str(e).lower():
-                wal_file = Path(f"{db_path}.wal")
+                wal_file = Path(f"{cache_key}.wal")
                 if wal_file.exists():
                     wal_file.unlink()
                 db = lb.Database(
-                    db_path,
+                    cache_key,
                     buffer_pool_size=64 * 1024 * 1024,
                     max_db_size=1024 * 1024 * 1024,
                     read_only=False,
@@ -55,11 +55,12 @@ class LadybugGraphStore(GraphStore):
     @classmethod
     def clear_cache(cls, db_path: str | None = None) -> None:
         if db_path:
-            keys_to_del = [k for k in cls._db_cache if k.startswith(str(db_path))]
+            canon = str(Path(db_path).resolve())
+            keys_to_del = [k for k in cls._db_cache if k.startswith(canon)]
             for k in keys_to_del:
                 db = cls._db_cache.pop(k, None)
                 del db
-            conn_keys = [k for k in cls._conn_cache if k.startswith(str(db_path))]
+            conn_keys = [k for k in cls._conn_cache if k.startswith(canon)]
             for k in conn_keys:
                 conn = cls._conn_cache.pop(k, None)
                 del conn
@@ -69,7 +70,7 @@ class LadybugGraphStore(GraphStore):
         gc.collect()
 
     def __init__(self, db_path: str | Path, read_only: bool = False) -> None:
-        p = Path(db_path)
+        p = Path(db_path).resolve()
         if p.is_dir() or p.suffix == ".kuzu" or p.name.endswith(".kuzu"):
             # LadybugDB requires a file path, whereas legacy Kuzu used a directory.
             self.db_path = str(p / "database.lbug")
@@ -113,8 +114,6 @@ class LadybugGraphStore(GraphStore):
             except Exception:
                 pass
             self.db = None
-        LadybugGraphStore.clear_cache(self.db_path)
-        gc.collect()
 
     def __enter__(self) -> "LadybugGraphStore":
         return self

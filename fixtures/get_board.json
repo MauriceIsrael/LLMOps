@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "count": 8,
+  "count": 22,
   "data": [
     {
       "subject": "floor-control",
@@ -8,7 +8,7 @@
       "level": "L2_decomposed",
       "origin": "discovered",
       "days_at_level": 0,
-      "updated_at": "2026-09-02T00:11:25.170694",
+      "updated_at": "2026-09-02T22:26:15.054205",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -22,7 +22,7 @@
       "level": "L0_named",
       "origin": "discovered",
       "days_at_level": 0,
-      "updated_at": "2026-09-02T00:11:25.170694",
+      "updated_at": "2026-09-02T22:26:15.054205",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -36,7 +36,7 @@
       "level": "L0_named",
       "origin": "discovered",
       "days_at_level": 0,
-      "updated_at": "2026-09-02T00:11:25.170694",
+      "updated_at": "2026-09-02T22:26:15.054205",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -50,7 +50,7 @@
       "level": "L2_decomposed",
       "origin": "blueprint",
       "days_at_level": 0,
-      "updated_at": "2026-09-02T00:11:25.170694",
+      "updated_at": "2026-09-02T22:26:15.054205",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -64,7 +64,7 @@
       "level": "L0_named",
       "origin": "discovered",
       "days_at_level": 0,
-      "updated_at": "2026-09-02T00:11:25.170694",
+      "updated_at": "2026-09-02T22:26:15.054205",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -78,7 +78,7 @@
       "level": "L1_framed",
       "origin": "blueprint",
       "days_at_level": 0,
-      "updated_at": "2026-09-02T00:11:25.170694",
+      "updated_at": "2026-09-02T22:26:15.054205",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -92,7 +92,7 @@
       "level": "L0_named",
       "origin": "blueprint",
       "days_at_level": 0,
-      "updated_at": "2026-09-02T00:11:25.170694",
+      "updated_at": "2026-09-02T22:26:15.054205",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -106,7 +106,203 @@
       "level": "L0_named",
       "origin": "blueprint",
       "days_at_level": 0,
-      "updated_at": "2026-09-02T00:11:25.170694",
+      "updated_at": "2026-09-02T22:26:15.054205",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "engagement-scope",
+      "name": "engagement-scope",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:20.836232",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "rancher-domain",
+      "name": "rancher-domain",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:20.866654",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "observation",
+      "name": "observation",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:20.870117",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "automation-chain",
+      "name": "automation-chain",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:20.874084",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "service-management",
+      "name": "service-management",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:20.877802",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "security-posture",
+      "name": "security-posture",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:20.881436",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "ai-assistance",
+      "name": "ai-assistance",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:20.885331",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "delivery-plan",
+      "name": "delivery-plan",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:20.888732",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "sim-esim-lifecycle",
+      "name": "sim-esim-lifecycle",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:20.892291",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "compliance:NIS2-ART21-2A",
+      "name": "compliance:NIS2-ART21-2A",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:21.274381",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "compliance:NIS2-ART21-2I",
+      "name": "compliance:NIS2-ART21-2I",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:21.315338",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "compliance:NIS2-ART21-2J",
+      "name": "compliance:NIS2-ART21-2J",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:21.332531",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "compliance:3GPP-TS33179-AFFILIATION",
+      "name": "compliance:3GPP-TS33179-AFFILIATION",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:21.348712",
+      "is_stalled": false,
+      "open_question_ref": null,
+      "assigned_role": null,
+      "dependent_sections": [
+        "5.2"
+      ]
+    },
+    {
+      "subject": "compliance:NIS2-ART21-2E",
+      "name": "compliance:NIS2-ART21-2E",
+      "level": "L0_named",
+      "origin": "blueprint",
+      "days_at_level": 0,
+      "updated_at": "2026-09-02T22:25:21.371117",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
