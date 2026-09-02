@@ -10,7 +10,7 @@
         "level": "L2_decomposed",
         "origin": "discovered",
         "days_at_level": 0,
-        "updated_at": "2026-09-02T22:26:14.231270",
+        "updated_at": "2026-09-02T23:08:59.050850",
         "is_stalled": false,
         "open_question_ref": null,
         "assigned_role": null,
@@ -24,7 +24,7 @@
         "level": "L0_named",
         "origin": "discovered",
         "days_at_level": 0,
-        "updated_at": "2026-09-02T22:26:14.231270",
+        "updated_at": "2026-09-02T23:08:59.050850",
         "is_stalled": false,
         "open_question_ref": null,
         "assigned_role": null,
@@ -38,7 +38,7 @@
         "level": "L0_named",
         "origin": "discovered",
         "days_at_level": 0,
-        "updated_at": "2026-09-02T22:26:14.231270",
+        "updated_at": "2026-09-02T23:08:59.050850",
         "is_stalled": false,
         "open_question_ref": null,
         "assigned_role": null,
@@ -52,7 +52,7 @@
         "level": "L2_decomposed",
         "origin": "blueprint",
         "days_at_level": 0,
-        "updated_at": "2026-09-02T22:26:14.231270",
+        "updated_at": "2026-09-02T23:08:59.050850",
         "is_stalled": false,
         "open_question_ref": null,
         "assigned_role": null,
@@ -66,7 +66,7 @@
         "level": "L0_named",
         "origin": "discovered",
         "days_at_level": 0,
-        "updated_at": "2026-09-02T22:26:14.231270",
+        "updated_at": "2026-09-02T23:08:59.050850",
         "is_stalled": false,
         "open_question_ref": null,
         "assigned_role": null,
@@ -80,7 +80,7 @@
         "level": "L1_framed",
         "origin": "blueprint",
         "days_at_level": 0,
-        "updated_at": "2026-09-02T22:26:14.231270",
+        "updated_at": "2026-09-02T23:08:59.050850",
         "is_stalled": false,
         "open_question_ref": null,
         "assigned_role": null,
@@ -94,7 +94,7 @@
         "level": "L0_named",
         "origin": "blueprint",
         "days_at_level": 0,
-        "updated_at": "2026-09-02T22:26:14.231270",
+        "updated_at": "2026-09-02T23:08:59.050850",
         "is_stalled": false,
         "open_question_ref": null,
         "assigned_role": null,
@@ -108,203 +108,7 @@
         "level": "L0_named",
         "origin": "blueprint",
         "days_at_level": 0,
-        "updated_at": "2026-09-02T22:26:14.231270",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "engagement-scope",
-        "name": "engagement-scope",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:20.836232",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "rancher-domain",
-        "name": "rancher-domain",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:20.866654",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "observation",
-        "name": "observation",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:20.870117",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "automation-chain",
-        "name": "automation-chain",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:20.874084",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "service-management",
-        "name": "service-management",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:20.877802",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "security-posture",
-        "name": "security-posture",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:20.881436",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "ai-assistance",
-        "name": "ai-assistance",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:20.885331",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "delivery-plan",
-        "name": "delivery-plan",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:20.888732",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "sim-esim-lifecycle",
-        "name": "sim-esim-lifecycle",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:20.892291",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "compliance:NIS2-ART21-2A",
-        "name": "compliance:NIS2-ART21-2A",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:21.274381",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "compliance:NIS2-ART21-2I",
-        "name": "compliance:NIS2-ART21-2I",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:21.315338",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "compliance:NIS2-ART21-2J",
-        "name": "compliance:NIS2-ART21-2J",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:21.332531",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "compliance:3GPP-TS33179-AFFILIATION",
-        "name": "compliance:3GPP-TS33179-AFFILIATION",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:21.348712",
-        "is_stalled": false,
-        "open_question_ref": null,
-        "assigned_role": null,
-        "dependent_sections": [
-          "5.2"
-        ]
-      },
-      {
-        "subject": "compliance:NIS2-ART21-2E",
-        "name": "compliance:NIS2-ART21-2E",
-        "level": "L0_named",
-        "origin": "blueprint",
-        "days_at_level": 0,
-        "updated_at": "2026-09-02T22:25:21.371117",
+        "updated_at": "2026-09-02T23:08:59.050850",
         "is_stalled": false,
         "open_question_ref": null,
         "assigned_role": null,
@@ -324,7 +128,7 @@
           "level": "L2_decomposed",
           "origin": "discovered",
           "days_at_level": 0,
-          "updated_at": "2026-09-02T22:26:14.427762",
+          "updated_at": "2026-09-02T23:08:59.096343",
           "is_stalled": false,
           "open_question_ref": null,
           "assigned_role": null,
@@ -338,7 +142,7 @@
           "level": "L0_named",
           "origin": "discovered",
           "days_at_level": 0,
-          "updated_at": "2026-09-02T22:26:14.427762",
+          "updated_at": "2026-09-02T23:08:59.096343",
           "is_stalled": false,
           "open_question_ref": null,
           "assigned_role": null,
@@ -352,7 +156,7 @@
           "level": "L0_named",
           "origin": "discovered",
           "days_at_level": 0,
-          "updated_at": "2026-09-02T22:26:14.427762",
+          "updated_at": "2026-09-02T23:08:59.096343",
           "is_stalled": false,
           "open_question_ref": null,
           "assigned_role": null,
@@ -366,7 +170,7 @@
           "level": "L2_decomposed",
           "origin": "blueprint",
           "days_at_level": 0,
-          "updated_at": "2026-09-02T22:26:14.427762",
+          "updated_at": "2026-09-02T23:08:59.096343",
           "is_stalled": false,
           "open_question_ref": null,
           "assigned_role": null,
@@ -380,7 +184,7 @@
           "level": "L0_named",
           "origin": "discovered",
           "days_at_level": 0,
-          "updated_at": "2026-09-02T22:26:14.427762",
+          "updated_at": "2026-09-02T23:08:59.096343",
           "is_stalled": false,
           "open_question_ref": null,
           "assigned_role": null,
@@ -394,7 +198,7 @@
           "level": "L1_framed",
           "origin": "blueprint",
           "days_at_level": 0,
-          "updated_at": "2026-09-02T22:26:14.427762",
+          "updated_at": "2026-09-02T23:08:59.096343",
           "is_stalled": false,
           "open_question_ref": null,
           "assigned_role": null,
@@ -408,7 +212,7 @@
           "level": "L0_named",
           "origin": "blueprint",
           "days_at_level": 0,
-          "updated_at": "2026-09-02T22:26:14.427762",
+          "updated_at": "2026-09-02T23:08:59.096343",
           "is_stalled": false,
           "open_question_ref": null,
           "assigned_role": null,
@@ -422,203 +226,7 @@
           "level": "L0_named",
           "origin": "blueprint",
           "days_at_level": 0,
-          "updated_at": "2026-09-02T22:26:14.427762",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "engagement-scope",
-          "name": "engagement-scope",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:20.836232",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "rancher-domain",
-          "name": "rancher-domain",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:20.866654",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "observation",
-          "name": "observation",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:20.870117",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "automation-chain",
-          "name": "automation-chain",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:20.874084",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "service-management",
-          "name": "service-management",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:20.877802",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "security-posture",
-          "name": "security-posture",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:20.881436",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "ai-assistance",
-          "name": "ai-assistance",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:20.885331",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "delivery-plan",
-          "name": "delivery-plan",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:20.888732",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "sim-esim-lifecycle",
-          "name": "sim-esim-lifecycle",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:20.892291",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "compliance:NIS2-ART21-2A",
-          "name": "compliance:NIS2-ART21-2A",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:21.274381",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "compliance:NIS2-ART21-2I",
-          "name": "compliance:NIS2-ART21-2I",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:21.315338",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "compliance:NIS2-ART21-2J",
-          "name": "compliance:NIS2-ART21-2J",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:21.332531",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "compliance:3GPP-TS33179-AFFILIATION",
-          "name": "compliance:3GPP-TS33179-AFFILIATION",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:21.348712",
-          "is_stalled": false,
-          "open_question_ref": null,
-          "assigned_role": null,
-          "dependent_sections": [
-            "5.2"
-          ]
-        },
-        {
-          "subject": "compliance:NIS2-ART21-2E",
-          "name": "compliance:NIS2-ART21-2E",
-          "level": "L0_named",
-          "origin": "blueprint",
-          "days_at_level": 0,
-          "updated_at": "2026-09-02T22:25:21.371117",
+          "updated_at": "2026-09-02T23:08:59.096343",
           "is_stalled": false,
           "open_question_ref": null,
           "assigned_role": null,
@@ -790,21 +398,7 @@
         "media-distribution",
         "mobile-core",
         "synthetic-subject",
-        "transport",
-        "engagement-scope",
-        "rancher-domain",
-        "observation",
-        "automation-chain",
-        "service-management",
-        "security-posture",
-        "ai-assistance",
-        "delivery-plan",
-        "sim-esim-lifecycle",
-        "compliance:NIS2-ART21-2A",
-        "compliance:NIS2-ART21-2I",
-        "compliance:NIS2-ART21-2J",
-        "compliance:3GPP-TS33179-AFFILIATION",
-        "compliance:NIS2-ART21-2E"
+        "transport"
       ]
     },
     "diagram_graph": {
@@ -856,90 +450,6 @@
         {
           "id": "transport",
           "label": "transport",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "engagement-scope",
-          "label": "engagement-scope",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "rancher-domain",
-          "label": "rancher-domain",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "observation",
-          "label": "observation",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "automation-chain",
-          "label": "automation-chain",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "service-management",
-          "label": "service-management",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "security-posture",
-          "label": "security-posture",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "ai-assistance",
-          "label": "ai-assistance",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "delivery-plan",
-          "label": "delivery-plan",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "sim-esim-lifecycle",
-          "label": "sim-esim-lifecycle",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "compliance:NIS2-ART21-2A",
-          "label": "compliance:NIS2-ART21-2A",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "compliance:NIS2-ART21-2I",
-          "label": "compliance:NIS2-ART21-2I",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "compliance:NIS2-ART21-2J",
-          "label": "compliance:NIS2-ART21-2J",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "compliance:3GPP-TS33179-AFFILIATION",
-          "label": "compliance:3GPP-TS33179-AFFILIATION",
-          "type": "Subject",
-          "level": "L0_named"
-        },
-        {
-          "id": "compliance:NIS2-ART21-2E",
-          "label": "compliance:NIS2-ART21-2E",
           "type": "Subject",
           "level": "L0_named"
         }
@@ -1000,7 +510,7 @@
           "predicate": "depends_on"
         }
       ],
-      "mermaid": "flowchart TD\n    floor-control[\"floor-control (L2_decomposed)\"]\n    group-management[\"group-management (L0_named)\"]\n    lmr-interworking[\"lmr-interworking (L0_named)\"]\n    mcx-services[\"mcx-services (L2_decomposed)\"]\n    media-distribution[\"media-distribution (L0_named)\"]\n    mobile-core[\"mobile-core (L1_framed)\"]\n    synthetic-subject[\"synthetic-subject (L0_named)\"]\n    transport[\"transport (L0_named)\"]\n    engagement-scope[\"engagement-scope (L0_named)\"]\n    rancher-domain[\"rancher-domain (L0_named)\"]\n    observation[\"observation (L0_named)\"]\n    automation-chain[\"automation-chain (L0_named)\"]\n    service-management[\"service-management (L0_named)\"]\n    security-posture[\"security-posture (L0_named)\"]\n    ai-assistance[\"ai-assistance (L0_named)\"]\n    delivery-plan[\"delivery-plan (L0_named)\"]\n    sim-esim-lifecycle[\"sim-esim-lifecycle (L0_named)\"]\n    compliance:NIS2-ART21-2A[\"compliance:NIS2-ART21-2A (L0_named)\"]\n    compliance:NIS2-ART21-2I[\"compliance:NIS2-ART21-2I (L0_named)\"]\n    compliance:NIS2-ART21-2J[\"compliance:NIS2-ART21-2J (L0_named)\"]\n    compliance:3GPP-TS33179-AFFILIATION[\"compliance:3GPP-TS33179-AFFILIATION (L0_named)\"]\n    compliance:NIS2-ART21-2E[\"compliance:NIS2-ART21-2E (L0_named)\"]\n    node_t_0[\"3GPP MC service layer boundary\"]\n    mcx-services -->|\"is_constrained_by\"| node_t_0\n    node_t_1[\"group voice must survive site isolation from na\u2026\"]\n    mcx-services -->|\"has_property\"| node_t_1\n    node_t_2[\"dedicated 5G standalone core, 2 sites active-ac\u2026\"]\n    mobile-core -->|\"has_property\"| node_t_2\n    node_t_3[\"group-management, floor-control, media-distribu\u2026\"]\n    mcx-services -->|\"decomposes_into\"| node_t_3\n    node_t_4[\"floor arbitration terminates in the MC service \u2026\"]\n    floor-control -->|\"has_property\"| node_t_4\n    node_t_5[\"depends on a committed priority and pre-emption\u2026\"]\n    floor-control -->|\"depends_on\"| node_t_5\n    node_t_6[\"multicast on the radio side\"]\n    media-distribution -->|\"has_property\"| node_t_6\n    node_t_7[\"unicast only, multicast deferred\"]\n    media-distribution -->|\"has_property\"| node_t_7\n    node_t_8[\"On release 23.4 the element manager's bulk conf\u2026\"]\n    lmr-interworking -->|\"depends_on\"| node_t_8"
+      "mermaid": "flowchart TD\n    floor-control[\"floor-control (L2_decomposed)\"]\n    group-management[\"group-management (L0_named)\"]\n    lmr-interworking[\"lmr-interworking (L0_named)\"]\n    mcx-services[\"mcx-services (L2_decomposed)\"]\n    media-distribution[\"media-distribution (L0_named)\"]\n    mobile-core[\"mobile-core (L1_framed)\"]\n    synthetic-subject[\"synthetic-subject (L0_named)\"]\n    transport[\"transport (L0_named)\"]\n    node_t_0[\"3GPP MC service layer boundary\"]\n    mcx-services -->|\"is_constrained_by\"| node_t_0\n    node_t_1[\"group voice must survive site isolation from na\u2026\"]\n    mcx-services -->|\"has_property\"| node_t_1\n    node_t_2[\"dedicated 5G standalone core, 2 sites active-ac\u2026\"]\n    mobile-core -->|\"has_property\"| node_t_2\n    node_t_3[\"group-management, floor-control, media-distribu\u2026\"]\n    mcx-services -->|\"decomposes_into\"| node_t_3\n    node_t_4[\"floor arbitration terminates in the MC service \u2026\"]\n    floor-control -->|\"has_property\"| node_t_4\n    node_t_5[\"depends on a committed priority and pre-emption\u2026\"]\n    floor-control -->|\"depends_on\"| node_t_5\n    node_t_6[\"multicast on the radio side\"]\n    media-distribution -->|\"has_property\"| node_t_6\n    node_t_7[\"unicast only, multicast deferred\"]\n    media-distribution -->|\"has_property\"| node_t_7\n    node_t_8[\"On release 23.4 the element manager's bulk conf\u2026\"]\n    lmr-interworking -->|\"depends_on\"| node_t_8"
     }
   }
 }

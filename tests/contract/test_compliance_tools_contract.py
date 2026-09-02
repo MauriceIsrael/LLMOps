@@ -1,11 +1,10 @@
 """Contract tests for MCP Compliance & Regulatory Tools under ADR-0015."""
 
-import pytest
 from mcp_server.knowledge.tools import (
-    list_frameworks,
-    list_controls,
-    get_compliance_trail,
     get_compliance_matrix,
+    get_compliance_trail,
+    list_controls,
+    list_frameworks,
 )
 
 

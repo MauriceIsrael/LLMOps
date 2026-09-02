@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir poetry
 COPY pyproject.toml poetry.lock* README.md ./
 
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --no-root
+    && poetry install --no-interaction --no-ansi --no-root --without dev,eval
 
 # Copie des dossiers de l'application
 COPY mcp_server ./mcp_server

@@ -1,7 +1,7 @@
 {
-  "snapshot_id": "snapshot-2026-09-02-452c9f4",
-  "created_at": "2026-09-02T20:46:04Z",
-  "source_revision": "452c9f4489584f3bf8f0cb7fb59af3b348562018",
+  "snapshot_id": "snapshot-2026-09-02-dbcb05a",
+  "created_at": "2026-09-02T21:11:02Z",
+  "source_revision": "dbcb05a098d45a3b3fc60bc84d8d1d2c6b93708c",
   "payload_sha256": "sha256:5991f7be93e016a8cce2cbaf26764cca3dba5670c312045c05bbeb4c74d24626",
   "schema_version": "1.0",
   "applicability_index": {
@@ -1701,23 +1701,60 @@
     }
   ],
   "compliance_index": {
-    "NIS2": {
-      "NIS2-ART21-2E": {
-        "title": "S\u00e9curit\u00e9 de l'acquisition, du d\u00e9veloppement et de la maintenance des SI",
-        "version": "2022/2555",
+    "3GPP": {
+      "3GPP-TS33179-AFFILIATION": {
+        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "3GPP-TS33501-SEPP": {
+        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "3GPP-TS33179-ISOLATED": {
+        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
+        "version": "Rel-18",
         "severity": "mandatory",
         "implemented_by": [
-          "P-005",
-          "PAT-002"
+          "ADR-0007",
+          "PAT-004"
         ]
       },
-      "NIS2-ART21-2H": {
-        "title": "Cryptographie, chiffrement et s\u00e9curit\u00e9 de l'intelligence artificielle",
+      "3GPP-TS33501-SBI": {
+        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "PAT-006"
+        ]
+      },
+      "3GPP-TS33179-KMS": {
+        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      }
+    },
+    "NIS2": {
+      "NIS2-ART21-2I": {
+        "title": "S\u00e9curit\u00e9 des ressources humaines, contr\u00f4le d'acc\u00e8s et gestion des actifs",
         "version": "2022/2555",
         "severity": "mandatory",
         "implemented_by": [
-          "P-015",
-          "PAT-007"
+          "P-010"
+        ]
+      },
+      "NIS2-ART21-2B": {
+        "title": "Gestion et traitement des incidents de s\u00e9curit\u00e9",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-002",
+          "PAT-001"
         ]
       },
       "NIS2-ART21-2C": {
@@ -1739,29 +1776,6 @@
           "PAT-005"
         ]
       },
-      "NIS2-ART21-2A": {
-        "title": "Politiques d'analyse des risques et s\u00e9curit\u00e9 des syst\u00e8mes d'information",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-001"
-        ]
-      },
-      "NIS2-ART21-2G": {
-        "title": "Pratiques de base en cyber-hygi\u00e8ne et formation en cybers\u00e9curit\u00e9",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "NIS2-ART21-2B": {
-        "title": "Gestion et traitement des incidents de s\u00e9curit\u00e9",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-002",
-          "PAT-001"
-        ]
-      },
       "NIS2-ART21-2D": {
         "title": "S\u00e9curit\u00e9 de la cha\u00eene d'approvisionnement et relations avec les fournisseurs",
         "version": "2022/2555",
@@ -1780,49 +1794,35 @@
           "PAT-004"
         ]
       },
-      "NIS2-ART21-2I": {
-        "title": "S\u00e9curit\u00e9 des ressources humaines, contr\u00f4le d'acc\u00e8s et gestion des actifs",
+      "NIS2-ART21-2E": {
+        "title": "S\u00e9curit\u00e9 de l'acquisition, du d\u00e9veloppement et de la maintenance des SI",
         "version": "2022/2555",
         "severity": "mandatory",
         "implemented_by": [
-          "P-010"
+          "P-005",
+          "PAT-002"
         ]
-      }
-    },
-    "3GPP": {
-      "3GPP-TS33501-SBI": {
-        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
-        "version": "Rel-18",
+      },
+      "NIS2-ART21-2H": {
+        "title": "Cryptographie, chiffrement et s\u00e9curit\u00e9 de l'intelligence artificielle",
+        "version": "2022/2555",
         "severity": "mandatory",
         "implemented_by": [
-          "ADR-0005",
-          "PAT-006"
+          "P-015",
+          "PAT-007"
         ]
       },
-      "3GPP-TS33179-KMS": {
-        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "3GPP-TS33179-ISOLATED": {
-        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
-        "version": "Rel-18",
+      "NIS2-ART21-2A": {
+        "title": "Politiques d'analyse des risques et s\u00e9curit\u00e9 des syst\u00e8mes d'information",
+        "version": "2022/2555",
         "severity": "mandatory",
         "implemented_by": [
-          "ADR-0007",
-          "PAT-004"
+          "P-001"
         ]
       },
-      "3GPP-TS33179-AFFILIATION": {
-        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "3GPP-TS33501-SEPP": {
-        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
-        "version": "Rel-18",
+      "NIS2-ART21-2G": {
+        "title": "Pratiques de base en cyber-hygi\u00e8ne et formation en cybers\u00e9curit\u00e9",
+        "version": "2022/2555",
         "severity": "mandatory",
         "implemented_by": []
       }

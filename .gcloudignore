@@ -2,11 +2,17 @@
 .git
 .gitignore
 .venv
+.env
+.env.*
 node_modules
 apps/kb-client-app/node_modules
 apps/kb-client-app/.svelte-kit
 artifacts
 projects
+tests
+fixtures/*.sqlite*
+*.sqlite*
+*.wal
 __pycache__
 *.pyc
 *.pyo

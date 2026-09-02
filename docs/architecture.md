@@ -2,7 +2,7 @@
 
 ## 1. Vue d'Ensemble & Objectifs
 
-Cette plateforme a pour but d'élaborer et de faire évoluer de manière déterministe et collaborative des documents d'architecture système (ADRs, principes, cadrage, compromis, dépendances, risques) en combinant un dossier documentaire Markdown structuré, un **Graphe de Connaissances LadybugDB / Kùzu DB**, et un **Moteur d'Élicitation Collaboratif (LangGraph)** exposé via **FastMCP** (Model Context Protocol).
+Cette plateforme a pour but d'élaborer et de faire évoluer de manière déterministe et collaborative des documents d'architecture système (ADRs, principes, cadrage, compromis, dépendances, risques) en combinant un dossier documentaire Markdown structuré, un **Graphe de Connaissances LadybugDB**, et un **Moteur d'Élicitation Collaboratif (LangGraph)** exposé via **FastMCP** (Model Context Protocol).
 
 ### Problèmes résolus
 1. **Destruction de la logique système par RAG naïf** : Le chunking textuel classique détruit les liaisons logiques essentielles (ex: une décision `SUPERSEDES` une autre, ou l'explication d'un compromis d'arbitrage).
@@ -10,10 +10,10 @@ Cette plateforme a pour but d'élaborer et de faire évoluer de manière déterm
 3. **Collaboration désordonnée multi-acteurs** : Sans modèle formalisé, les contributions de plusieurs architectes se chevauchent, génèrent des contradictions invisibles ou font avancer prématurément des détails techniques avant le cadrage.
 
 ### Solution Neuro-Symbolique & Élicitatoire
-- **Couche Symbolique & Persistance Dual-Backend :** Graphe de connaissances géré par **LadybugDB** (avec rétrocompatibilité Kùzu DB), garantissant l'intégrité typée des entités (`Asset`, `Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`) et de leurs relations.
+- **Couche Symbolique & Persistance :** Graphe de connaissances géré par **LadybugDB** (moteur graphique C++ local-first, buffer pool optimisé et requêtes Cypher ACID), garantissant l'intégrité typée des entités (`Asset`, `Control`, `Subject`, `Statement`, `Conflict`, `Question`, `Uncertainty`) et de leurs relations.
 - **Moteur d'Élicitation Collaboratif (LangGraph) :** Orchestration de flux d'état (Scan, Intake, Assembly, Harvest) pilotant un **Level Gate de maturité** (`L0_named` → `L4_specified`), la détection automatique de contradictions, la gestion de conflits déclarés/détectés et l'arbitrage traçable.
 - **Persistance Inter-Processus :** Checkpointer SQLite permettant d'interrompre une session d'élicitation et de la reprendre des jours plus tard depuis un process distant.
-- **Exposition FastMCP :** Outils typés FastMCP pour la consultation, la recherche Cypher et la restitution sous forme de tableaux et rendus visuels (Mermaid, Draw.io).
+- **Exposition FastMCP :** Outils typés FastMCP pour la consultation, la recherche Cypher, les contrôles de conformité réglementaire (NIS2, 3GPP) et la restitution sous forme de tableaux et rendus visuels (Mermaid, Draw.io).
 - **Hébergement Serverless GCP Cloud Run :** Serverless containerisé sous GCP Cloud Run avec authentification par jeton HTTP SSE (`SERVER_TOKEN`).
 
 ---
@@ -27,17 +27,18 @@ flowchart TB
         GLOSS["glossary/*.md"]
         PRINC["principles/*.md"]
         RISK["risks/*.md"]
+        CTRL["controls/**/*.md (NIS2, 3GPP)"]
         ENG["projects/*/draft.md"]
     end
 
     subgraph Ingestion_Layer ["Pipelines ETL & LlamaIndex"]
         MP["Markdown & YAML Parser"]
         LE["LlamaIndex PropertyGraphExtractor"]
-        GL["Kùzu Batch Loader"]
+        GL["Ladybug Graph Loader"]
     end
 
     subgraph Elicitation_Engine ["Moteur d'Élicitation Collaboratif - LangGraph"]
-        SCAN["Scan Flow: Détections & Level Gate"]
+        SCAN["Scan Flow: Détections, Gaps G4 & Level Gate"]
         INTAKE["Intake Flow: Saisie, Confiance & Check Node"]
         ASSEMBLE["Assembly Flow: Assemblage & Maturité"]
         HARVEST["Harvest Flow: Extraction de Patterns"]
@@ -45,14 +46,15 @@ flowchart TB
     end
 
     subgraph Storage_Layer ["Persistance"]
-        KUZU[("Kùzu Embedded Graph DB")]
+        LBUG[("LadybugDB Embedded Graph Store")]
         SQLITE[("SQLite Checkpoint DB")]
     end
 
     subgraph MCP_Layer ["Exposition FastMCP"]
-        KC["Kùzu Client Thread-Safe"]
+        LC["LadybugClient Thread-Safe"]
         AT["Asset Tools"]
         GT["Graph & Cypher Tools"]
+        CT["Compliance Tools (NIS2, 3GPP)"]
         FSERV["FastMCP Server Engine"]
     end
 
@@ -65,20 +67,22 @@ flowchart TB
     Data_Layer --> MP
     MP --> LE
     LE --> GL
-    GL --> KUZU
+    GL --> LBUG
 
-    SCAN --> KUZU
-    INTAKE --> KUZU
+    SCAN --> LBUG
+    INTAKE --> LBUG
     INTAKE <--> CHK
     CHK <--> SQLITE
-    ASSEMBLE --> KUZU
-    HARVEST --> KUZU
+    ASSEMBLE --> LBUG
+    HARVEST --> LBUG
 
-    KUZU <--> KC
-    KC --> AT
-    KC --> GT
+    LBUG <--> LC
+    LC --> AT
+    LC --> GT
+    LC --> CT
     AT --> FSERV
     GT --> FSERV
+    CT --> FSERV
     FSERV <--> AGENT
     ASSEMBLE --> RENDers
     FSERV <--> EVAL
@@ -86,9 +90,9 @@ flowchart TB
 
 ---
 
-## 3. Schéma du Graphe de Connaissances (Ontologie Kùzu DB)
+## 3. Schéma du Graphe de Connaissances (Ontologie du Graphe)
 
-Le graphe est modélisé dans Kùzu DB avec des Nœuds et des Relations typés pour la base de connaissances et l'élicitation.
+Le graphe est modélisé dans LadybugDB avec des Nœuds et des Relations typés pour la base de connaissances (Knowledge Plane) et l'élicitation (Engagement Plane).
 
 ```mermaid
 erDiagram
@@ -96,6 +100,9 @@ erDiagram
     Asset ||--o{ Asset : REQUIRES
     Asset ||--o{ GlossaryTerm : DEFINES
     Principle ||--o{ Risk : MITIGATES
+    Asset ||--o{ Control : COMPLIES_WITH
+    Principle ||--o{ Control : SATISFIES
+    Control ||--o{ Control : FRAMEWORK_VERSION
     
     Question }|--|| Subject : TARGETS
     Statement }|--|| Subject : ABOUT
@@ -106,6 +113,7 @@ erDiagram
 
 ### Types de Nœuds (Node Tables)
 - **`Asset`** : `(id STRING, title STRING, type STRING, status STRING, confidence STRING, last_reviewed STRING, path STRING, PRIMARY KEY(id))`
+- **`Control`** : `(id STRING, framework STRING, version STRING, section STRING, description STRING, PRIMARY KEY(id))`
 - **`ADR`** : `(id STRING, domain STRING, phase STRING, owner STRING, PRIMARY KEY(id))`
 - **`Principle`** : `(id STRING, statement STRING, verification_clause STRING, PRIMARY KEY(id))`
 - **`GlossaryTerm`** : `(term STRING, definition STRING, context STRING, PRIMARY KEY(term))`
@@ -121,6 +129,10 @@ erDiagram
 - **`REQUIRES`** : `FROM Asset TO Asset`
 - **`DEFINES`** : `FROM Asset TO GlossaryTerm`
 - **`MITIGATES`** : `FROM Principle TO Risk`
+- **`COMPLIES_WITH`** : `FROM Asset TO Control`
+- **`SATISFIES`** : `FROM Principle TO Control`
+- **`FRAMEWORK_VERSION`** : `FROM Control TO Control`
+- **`MITIGATES_RISK_FOR`** : `FROM Principle TO Control`
 - **`BELONGS_TO`** : `FROM Asset TO Asset`
 - **`TARGETS`** : `FROM Question TO Subject`
 - **`ABOUT`** : `FROM Statement TO Subject`
@@ -141,7 +153,7 @@ Chaque étape du processus d'élicitation est un nœud réutilisable et testable
 Dans un scénario réel, un architecte répond à une question d'élicitation trois jours après son émission. LangGraph permet de mettre le graphe d'exécution en **pause explicite** (`paused` / `Command(resume=...)`) et de sauvegarder l'état complet dans un **Checkpointer SQLite** (`get_sqlite_checkpointer`). La conversation peut alors être reprise depuis un processus Python ou un conteneur complètement indépendant en fournissant simplement le `thread_id`.
 
 ### 4.3 Isolation et Séparation des Responsabilités
-LangGraph empêche le LLM de contrôler directement la logique métier. Le LLM intervient uniquement pour extraire ou reformuler du texte au sein d'un nœud isolé, tandis que LangGraph contrôle la progression des niveaux de maturité (`Level Gate`), la mise à jour des graphes dans Kùzu DB et la génération des manques.
+LangGraph empêche le LLM de contrôler directement la logique métier. Le LLM intervient uniquement pour extraire ou reformuler du texte au sein d'un nœud isolé, tandis que LangGraph contrôle la progression des niveaux de maturité (`Level Gate`), la mise à jour des graphes dans LadybugDB et la génération des manques.
 
 ---
 
@@ -152,14 +164,14 @@ Le parsing des connaissances s'effectue en deux étapes complémentaires : l'**i
 ```mermaid
 flowchart LR
     subgraph Step1 ["1. Ingestion Documentaire (KB)"]
-        MD_FILE["Fichier Markdown (ADR / Glossaire / Principe)"]
+        MD_FILE["Fichier Markdown (ADR / Glossaire / Principe / Contrôle)"]
         PARSER["Markdown & YAML Parser (pyyaml)"]
         EXTRACTOR["LlamaIndex PropertyGraphExtractor"]
-        KUZU_LOADER["Kùzu Batch Loader (Cypher MERGE)"]
+        LBUG_LOADER["Ladybug Graph Loader (Cypher MERGE)"]
         
         MD_FILE --> PARSER
         PARSER -->|"Frontmatter YAML + Sections"| EXTRACTOR
-        EXTRACTOR -->|"Triplets (Sujet -> Rel -> Objet)"| KUZU_LOADER
+        EXTRACTOR -->|"Triplets (Sujet -> Rel -> Objet)"| LBUG_LOADER
     end
 
     subgraph Step2 ["2. Parsing des Réponses (Intake)"]
@@ -304,7 +316,7 @@ sequenceDiagram
     box GCP Cloud Run (Serverless Europe-West1)
         participant MCP as Serveur FastMCP (FastAPI/Uvicorn)
         participant SM as GCP Secret Manager
-        participant KUZU as Kùzu Graph DB (Lecture Seule)
+        participant LBUG as LadybugDB Graph Store (Lecture Seule)
     end
     participant OAI as OpenAI API (Embeddings / LLM)
 
@@ -318,8 +330,8 @@ sequenceDiagram
         note over MCP,SM: Résolution des secrets & interrogation du graphe
         MCP->>SM: Récupération sécurisée de OPENAI_API_KEY (IAM Role)
         SM-->>MCP: Clé API déchiffrée en mémoire conteneur
-        MCP->>KUZU: Exécution requête Cypher / Lecture documentaire
-        KUZU-->>MCP: Résultats typés (Entités, ADRs, Principes, Dépendances)
+        MCP->>LBUG: Exécution requête Cypher / Lecture documentaire
+        LBUG-->>MCP: Résultats typés (Entités, ADRs, Principes, Dépendances)
     end
 
     opt Appel facultatif à OpenAI (Extraction sémantique ou Évaluations)

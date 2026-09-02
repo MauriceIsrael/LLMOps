@@ -1,6 +1,7 @@
 """CLI Typer pour lancer le pipeline d'ingestion de la base de connaissances dans Kùzu DB."""
 
 from pathlib import Path
+from typing import Any
 
 import typer
 from dotenv import load_dotenv
