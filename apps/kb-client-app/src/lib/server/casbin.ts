@@ -13,14 +13,18 @@ export async function getEnforcer() {
   if (enforcer) return enforcer;
 
   const modelPath = path.resolve('prisma/model.conf');
-  const adapter = await PrismaAdapter.newAdapter(prisma);
-  
-  enforcer = await newEnforcer(modelPath, adapter);
-  
-  // Load policies from DB
-  await enforcer.loadPolicy();
-  
-  return enforcer;
+
+  try {
+    const adapter = await PrismaAdapter.newAdapter(prisma);
+    enforcer = await newEnforcer(modelPath, adapter);
+    // Load policies from DB
+    await enforcer.loadPolicy();
+    return enforcer;
+  } catch (err) {
+    console.warn('[Casbin] Fallback en mémoire actif suite à :', err instanceof Error ? err.message : err);
+    enforcer = await newEnforcer(modelPath);
+    return enforcer;
+  }
 }
 
 /**
