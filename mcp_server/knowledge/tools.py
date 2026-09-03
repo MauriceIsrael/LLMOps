@@ -73,7 +73,7 @@ def get_asset(id: str) -> dict[str, Any]:
     Args:
         id: Unique asset identifier (e.g. 'ADR-0014', 'P-002').
     """
-    if not id or id == "zzz-does-not-exist-9999":
+    if not id:
         return not_found_response(id)
 
     query = (
@@ -147,7 +147,7 @@ def get_decision_trail(id: str) -> dict[str, Any]:
     Args:
         id: Identifier of the Architecture Decision Record.
     """
-    if not id or id == "zzz-does-not-exist-9999":
+    if not id:
         return not_found_response(id)
 
     supersedes_query = """
@@ -181,7 +181,7 @@ def get_glossary_term(term: str) -> dict[str, Any]:
     Args:
         term: Name of the glossary term to look up.
     """
-    if not term or term == "zzz-does-not-exist-9999":
+    if not term:
         return not_found_response(term)
 
     query = """
@@ -212,7 +212,7 @@ def search_assets(query: str, filters: dict[str, Any] | None = None) -> dict[str
         query: Search string query.
         filters: Optional metadata filtering criteria.
     """
-    if not query or query == "zzz-does-not-exist-9999":
+    if not query:
         return ok_response([])
     cypher_q = "MATCH (a:Asset) WHERE a.title CONTAINS $query OR a.id CONTAINS $query RETURN a.id as id, a.title as title, a.type as type;"
     try:
@@ -611,6 +611,86 @@ def suggest_knowledge_improvement(
         source_engagement=source_engagement.strip() if source_engagement else None,
     )
     return ok_response(res, count=1)
+
+
+def list_skills(domain: str | None = None) -> dict[str, Any]:
+    """List canonical technical skills, expertises, and expected competencies from the knowledge base.
+
+    Args:
+        domain: Optional filter by technical domain (e.g. 'security-cryptography', 'telecom-core').
+    """
+    skills_dir = Path("data/kb/skills")
+    if not skills_dir.exists():
+        return ok_response([])
+
+    parser = MarkdownDocParser()
+    skills = []
+    for f in sorted(skills_dir.glob("*.md")):
+        doc = parser.parse_file(str(f))
+        if not doc:
+            continue
+        meta = doc.get("frontmatter", {})
+        if domain and meta.get("domain") != domain:
+            continue
+        skills.append({
+            "id": doc.get("id", f.stem),
+            "title": doc.get("title", f.stem),
+            "domain": meta.get("domain", "general"),
+            "criticality": meta.get("criticality", "medium"),
+            "status": meta.get("status", "active"),
+            "keywords": meta.get("keywords", []),
+            "description": doc.get("raw_body", "")[:300].strip(),
+        })
+
+    return ok_response(skills, count=len(skills))
+
+
+def get_skills_matrix(
+    engagement: str = "nordwave-mcx-2027",
+    blueprint_path: str = "data/kb/blueprints/BLU-hla-mcx.yaml",
+) -> dict[str, Any]:
+    """Calculate the staffing skill coverage matrix and risk index for an engagement.
+
+    Args:
+        engagement: Target engagement identifier.
+        blueprint_path: Optional path to the architecture blueprint.
+    """
+    from tools.elicitation.mailbox.roster import RosterManager
+    from tools.elicitation.models.blueprint_schema import load_blueprint
+
+    bp = load_blueprint(blueprint_path)
+    mgr = RosterManager(engagement=engagement)
+    covered = mgr.get_all_covered_skills()
+
+    required_skills_map = {}
+    all_required = set()
+    for sec in bp.sections:
+        s_skills = getattr(sec, "required_skills", [])
+        if s_skills:
+            required_skills_map[sec.id] = {
+                "title": sec.title,
+                "required_skills": s_skills,
+                "missing_skills": [s for s in s_skills if s not in covered],
+                "covered": all(s in covered for s in s_skills),
+            }
+            all_required.update(s_skills)
+
+    uncovered = all_required - covered
+    coverage_pct = round((len(all_required - uncovered) / len(all_required)) * 100, 1) if all_required else 100.0
+    risk_level = "low" if coverage_pct == 100.0 else ("moderate" if coverage_pct >= 75.0 else "high")
+
+    payload = {
+        "engagement": engagement,
+        "coverage_percentage": coverage_pct,
+        "risk_level": risk_level,
+        "total_required_skills": len(all_required),
+        "covered_skills_count": len(all_required - uncovered),
+        "missing_skills": sorted(list(uncovered)),
+        "external_contractors": mgr.external_contractors,
+        "sections": required_skills_map,
+    }
+    return ok_response(payload, count=len(required_skills_map))
+
 
 
 

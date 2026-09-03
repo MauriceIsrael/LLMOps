@@ -1,9 +1,80 @@
+members:
 - login: amina
+  name: Amina
   roles:
   - mcx-service-architect
+  skills:
+  - id: SKL-TELCO-CORE
+    level: senior
+  - id: SKL-MOB-FLEET
+    level: expert
 - login: rui
+  name: Rui
   roles:
   - mobile-core-architect
+  - transport-architect
+  skills:
+  - id: SKL-TELCO-CORE
+    level: expert
+  - id: SKL-NET-UNDERLAY
+    level: senior
+  - id: SKL-RESIL-DR
+    level: intermediate
 - login: sofia
+  name: Sofia
   roles:
   - chief-architect
+  - security-architect
+  skills:
+  - id: SKL-SEC-ZEROTRUST
+    level: expert
+  - id: SKL-AUTO-GITOPS
+    level: senior
+  - id: SKL-OBS-SOC
+    level: intermediate
+  - id: SKL-KUBE-TELCO
+    level: senior
+- login: alice
+  name: Alice
+  roles:
+  - cloud-architect
+  skills:
+  - SKL-KUBE-TELCO
+  - SKL-AUTO-GITOPS
+- login: alice-gh
+  name: Alice
+  roles:
+  - cloud-architect
+  skills:
+  - SKL-KUBE-TELCO
+  - SKL-AUTO-GITOPS
+- login: bob
+  name: Bob
+  roles:
+  - storage-expert
+  - network-architect
+  - security-architect
+  skills:
+  - SKL-NET-UNDERLAY
+  - SKL-SEC-ZEROTRUST
+  - SKL-OBS-SOC
+- login: charlie
+  name: Charlie
+  roles:
+  - chief-architect
+  - network-architect
+  skills:
+  - SKL-TELCO-CORE
+  - SKL-RESIL-DR
+- login: charlie-gh
+  name: Charlie
+  roles:
+  - chief-architect
+  - network-architect
+  skills:
+  - SKL-TELCO-CORE
+  - SKL-RESIL-DR
+external_contractors:
+- skill: SKL-CRYPTO-HSM
+  provider: Cabinet Cryptologique Thalix
+  ref: PO-2026-904

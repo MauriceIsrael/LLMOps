@@ -53,9 +53,6 @@ def get_subject(subject: str, engagement: str | None = None, db_path: str | Path
     if not subject:
         return invalid_argument_response("subject", "Parameter 'subject' is required.")
 
-    if eng == "zzz-does-not-exist-9999" or subject == "zzz-does-not-exist-9999":
-        return not_found_response(subject)
-
     try:
         repo = _get_repo(engagement=eng, db_path=db_path)
         board = repo.get_subjects_maturity_board(engagement=eng)
@@ -85,9 +82,6 @@ def get_subject_trajectory(subject: str, engagement: str | None = None, db_path:
     if not subject:
         return invalid_argument_response("subject", "Parameter 'subject' is required.")
 
-    if eng == "zzz-does-not-exist-9999" or subject == "zzz-does-not-exist-9999":
-        return ok_response([])
-
     try:
         repo = _get_repo(engagement=eng, db_path=db_path)
         trajectory = repo.get_subject_trajectory(engagement=eng, subject=subject)
@@ -108,9 +102,6 @@ def get_board(engagement: str | None = None) -> dict[str, Any]:
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
-
-    if eng == "zzz-does-not-exist-9999":
-        return ok_response([])
 
     try:
         repo = _get_repo(engagement=eng)
@@ -134,9 +125,6 @@ def get_statements(engagement: str | None = None, subject: str | None = None, se
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
-
-    if eng == "zzz-does-not-exist-9999":
-        return ok_response([])
 
     try:
         repo = _get_repo(engagement=eng)
@@ -167,9 +155,6 @@ def get_conflicts(engagement: str | None = None, status: str = "open") -> dict[s
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
 
-    if eng == "zzz-does-not-exist-9999":
-        return ok_response([])
-
     try:
         repo = _get_repo(engagement=eng)
         conflicts = repo.get_conflicts(engagement=eng, status=status)
@@ -190,9 +175,6 @@ def get_open_questions(engagement: str | None = None, role: str | None = None) -
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
-
-    if eng == "zzz-does-not-exist-9999":
-        return ok_response([])
 
     try:
         repo = _get_repo(engagement=eng)
@@ -221,9 +203,6 @@ def get_diagram_graph(
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
-
-    if eng == "zzz-does-not-exist-9999":
-        return ok_response({"nodes": [], "edges": [], "mermaid": "flowchart TD"})
 
     try:
         repo = _get_repo(engagement=eng, db_path=db_path)
@@ -277,9 +256,6 @@ def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
     authorise(caller="default_user", engagement=eng)
-
-    if eng == "zzz-does-not-exist-9999":
-        return ok_response([])
 
     try:
         repo = _get_repo(engagement=eng)

@@ -42,9 +42,11 @@ from mcp_server.knowledge.tools import (
     get_glossary_term,
     get_graph_summary,
     get_principles_for,
+    get_skills_matrix,
     list_assets,
     list_controls,
     list_frameworks,
+    list_skills,
     query_graph,
     search_assets,
     suggest_knowledge_improvement,
@@ -67,6 +69,8 @@ mcp.tool()(list_frameworks)
 mcp.tool()(list_controls)
 mcp.tool()(get_compliance_trail)
 mcp.tool()(get_compliance_matrix)
+mcp.tool()(list_skills)
+mcp.tool()(get_skills_matrix)
 mcp.tool()(suggest_knowledge_improvement)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)

@@ -1,6 +1,6 @@
 """Flux A : Scan déterministe des manques (Gaps) et émission des questions."""
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -43,17 +43,18 @@ class CountsSummary(dict):
 @dataclass
 class Gap:
     """Modèle pur d'un manque d'architecture identifié."""
-    gap_type: str            # G1_empty_section | G2_unanswered_blocking | G3_unspecified_parameter
+    gap_type: str            # G1_empty_section | G2_unanswered_blocking | G3_unspecified_parameter | G4_compliance | G5_skill
     section: str
     subject: str
     required_level: str
     current_level: str | None
-    status: str              # dispatchable | held_premature | held_queued | satisfied
+    status: str              # dispatchable | held_premature | held_queued | satisfied | unstaffed_risk
     hold_reason: str | None
     blocking: list[str]      # issu directement de section.unlocks (jamais fabriqué)
     blocking_count: int
     routes_to: str
     must_answer: str = ""
+    required_skills: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -198,6 +199,7 @@ def detect_gaps_node(state: ScanState) -> dict[str, Any]:
                 assert blk in all_section_ids or blk.split(".")[0] in all_section_ids, f"Unlock ID '{blk}' invalide pour la section {section.id}"
             
             gap = evaluate(section, req, levels.get(req.subject), section.id in with_statements)
+            gap.required_skills = list(getattr(section, "required_skills", []))
             gap_objects.append(gap)
 
         # Évaluation des contrôles de conformité réglementaire (NIS2, 3GPP, etc.)
@@ -220,6 +222,39 @@ def detect_gaps_node(state: ScanState) -> dict[str, Any]:
                         blocking_count=len(section.unlocks),
                         routes_to=getattr(section, "routes_to", "security-architect"),
                         must_answer=f"Conformité réglementaire requise : comment l'architecture de '{primary_subj}' garantit-elle le contrôle {ctrl_id} pour '{section.title}' ?",
+                        required_skills=list(getattr(section, "required_skills", [])),
+                    )
+                )
+
+        # Évaluation des compétences et expertises requises (Staffing & Skill Gaps G5)
+        sec_skills = getattr(section, "required_skills", [])
+        if sec_skills:
+            from tools.elicitation.mailbox.roster import RosterManager
+            roster_mgr = RosterManager(engagement=engagement)
+            covered_skills = roster_mgr.get_all_covered_skills()
+            uncovered_skills = [s for s in sec_skills if s not in covered_skills]
+            if uncovered_skills:
+                primary_subj = section.requires[0].subject if section.requires else f"skill:{uncovered_skills[0]}"
+                curr_lvl = levels.get(primary_subj)
+                ctrl_hold = gate(curr_lvl, "L3_decided")
+                gap_objects.append(
+                    Gap(
+                        gap_type="G5_unstaffed_skill_gap",
+                        section=section.id,
+                        subject=primary_subj,
+                        required_level="L3_decided",
+                        current_level=curr_lvl,
+                        status="held_premature" if ctrl_hold else "dispatchable",
+                        hold_reason=ctrl_hold or f"Compétence(s) manquante(s) : {', '.join(uncovered_skills)}",
+                        blocking=section.unlocks,
+                        blocking_count=len(section.unlocks),
+                        routes_to="chief-architect",
+                        must_answer=(
+                            f"Alerte Staffing & Expertise : La section {section.id} ({section.title}) requiert "
+                            f"l'expertise '{', '.join(uncovered_skills)}', non pourvue dans l'équipe. "
+                            f"Action requise : affecter un collaborateur qualifié ou contractualiser une prestation."
+                        ),
+                        required_skills=uncovered_skills,
                     )
                 )
 
@@ -398,6 +433,24 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
         sub = gap["subject"]
         routed = gap.get("routes_to") or ("service-architect" if "4." in sec else ("core-architect" if "5." in sec else "cloud-architect"))
 
+        # Best-Match Routing si le gap spécifie des compétences requises
+        sec_skills = gap.get("required_skills") or []
+        if sec_skills and gap.get("gap_type") != "G5_unstaffed_skill_gap":
+            from tools.elicitation.mailbox.roster import RosterManager
+            roster_mgr = RosterManager(engagement=engagement)
+            best_match_role = None
+            best_match_login = None
+            max_overlap = 0
+            for login, u_info in roster_mgr.users.items():
+                u_skills = set(u_info.get("skills", []))
+                overlap = len(set(sec_skills).intersection(u_skills))
+                if overlap > max_overlap:
+                    max_overlap = overlap
+                    best_match_login = login
+                    best_match_role = u_info.get("roles", [routed])[0]
+            if best_match_role and max_overlap > 0 and best_match_login:
+                routed = f"{best_match_role} ({best_match_login})"
+
         cur_role_open = role_open_counts.get(routed, 0)
         is_existing = sec in existing_by_sec
 
@@ -433,6 +486,12 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
             q_text = gap.get("must_answer") or f"Comment l'architecture garantit-elle le contrôle {sub} pour la section {sec} ({sec_name}) ?"
             why = f"Exigence réglementaire obligatoire : le contrôle {sub} n'est pas encore couvert par un énoncé ou une décision active."
             shape = "compliance_decision"
+            q_level = "L3_decided"
+        elif gap.get("gap_type") == "G5_unstaffed_skill_gap":
+            sec_name = gap.get("section_name", sec)
+            q_text = gap.get("must_answer") or f"Alerte Compétence : Quelle compétence ou assistance technique mobiliser pour la section {sec} ({sec_name}) ?"
+            why = gap.get("hold_reason") or "Compétence critique non pourvue dans l'équipe projet."
+            shape = "staffing_arbitration"
             q_level = "L3_decided"
         else:
             sec_name = gap.get("section_name", sec)

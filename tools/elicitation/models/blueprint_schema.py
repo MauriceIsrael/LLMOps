@@ -24,6 +24,7 @@ class BlueprintSection(BaseModel):
     min_level_provisional: str = "L1_framed"
     informed_by: list[str] = Field(default_factory=list)
     compliance_controls: list[str] = Field(default_factory=list)
+    required_skills: list[str] = Field(default_factory=list)
     routes_to: str
 
     def get_requirements(self) -> list[BlueprintRequirement]:

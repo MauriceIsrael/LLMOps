@@ -1,8 +1,8 @@
 {
   "id": "Q-0003",
   "engagement": "nordwave-mcx-2027",
-  "question": "What parts does the service layer break into?\nPattern proposé : PAT-006 Vendor boundary through northbound interface (Quand ne pas utiliser : Ne pas utiliser si le fournisseur supporte un accès direct modèle.)",
-  "why_it_matters": "La section 4.2 (4.2) ne contient aucun énoncé d'architecture.",
+  "question": "Which dimensions are staged, which audits gate the scope, and which decisions wait on them?",
+  "why_it_matters": "La section 10.1 (10.1) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "mcx-service-architect"
+  "routed_to": "delivery-lead"
 }

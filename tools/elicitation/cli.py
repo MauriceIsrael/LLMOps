@@ -629,6 +629,120 @@ def engagement_archive(
     console.print(f"[bold green]📦 Engagement '{valid_id}' archived successfully to {target_path}![/bold green]")
 
 
+staff_app = typer.Typer(name="staff", help="Gestion des collaborateurs et compétences du projet")
+app.add_typer(staff_app, name="staff")
+
+
+@staff_app.command(name="add-skill")
+def staff_add_skill(
+    user: str = typer.Option(..., "--user", "-u", help="Login du collaborateur"),
+    skill: str = typer.Option(..., "--skill", "-s", help="Identifiant de la compétence (ex: SKL-CRYPTO-HSM)"),
+    level: str = typer.Option("senior", "--level", "-l", help="Niveau d'expertise (novice, intermediate, senior, expert)"),
+    evidence: str = typer.Option("Attestation d'expérience / formation", "--evidence", help="Preuve d'expertise"),
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+) -> None:
+    """Ajouter une compétence vérifiée à un profil du roster."""
+    from tools.elicitation.mailbox.roster import RosterManager
+    mgr = RosterManager(engagement=engagement)
+    ok = mgr.add_skill(user, skill, level=level, evidence=evidence)
+    if ok:
+        console.print(f"[bold green]✅ Compétence '{skill}' ({level}) attribuée à '{user}' pour l'engagement '{engagement}' ![/bold green]")
+    else:
+        console.print(f"[bold yellow]⚠️ Impossible d'ajouter la compétence : utilisateur '{user}' introuvable ou compétence déjà détenue.[/bold yellow]")
+
+
+@staff_app.command(name="assign")
+def staff_assign(
+    user: str = typer.Option(..., "--user", "-u", help="Login du collaborateur"),
+    name: str | None = typer.Option(None, "--name", "-n", help="Nom complet du collaborateur"),
+    role: str = typer.Option("architect", "--role", "-r", help="Rôle principal"),
+    skills: str = typer.Option("", "--skills", "-k", help="Compétences séparées par des virgules (ex: SKL-1,SKL-2)"),
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+) -> None:
+    """Affecter un nouveau collaborateur au projet avec ses rôles et compétences."""
+    from tools.elicitation.mailbox.roster import RosterManager
+    mgr = RosterManager(engagement=engagement)
+    skill_list = [s.strip() for s in skills.split(",") if s.strip()]
+    mgr.assign_user(user, name=name, roles=[role], skills=skill_list)
+    console.print(f"[bold green]✅ Collaborateur '{user}' affecté à '{engagement}' (Rôle: {role}, Compétences: {skill_list}) ![/bold green]")
+
+
+@staff_app.command(name="contract-expertise")
+def staff_contract_expertise(
+    skill: str = typer.Option(..., "--skill", "-s", help="Identifiant de la compétence externalisée"),
+    provider: str = typer.Option(..., "--provider", "-p", help="Nom du cabinet ou prestataire"),
+    ref: str = typer.Option(..., "--ref", help="Référence du bon de commande ou contrat"),
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+) -> None:
+    """Enregistrer une prestation d'assistance technique ou expertise externe."""
+    from tools.elicitation.mailbox.roster import RosterManager
+    mgr = RosterManager(engagement=engagement)
+    mgr.contract_expertise(skill_id=skill, provider=provider, ref=ref)
+    console.print(f"[bold green]✅ Prestation enregistrée pour la compétence '{skill}' auprès de '{provider}' (Réf: {ref}) pour '{engagement}' ![/bold green]")
+
+
+@app.command(name="audit-skills")
+def audit_skills(
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    blueprint_path: str = typer.Option("data/kb/blueprints/BLU-hla-mcx.yaml", "--blueprint", "-b", help="Chemin vers le blueprint"),
+) -> None:
+    """Auditer la couverture des compétences requises par le Blueprint face aux profils de l'équipe."""
+    from rich.table import Table
+
+    from tools.elicitation.mailbox.roster import RosterManager
+    from tools.elicitation.models.blueprint_schema import load_blueprint
+
+    bp = load_blueprint(blueprint_path)
+    mgr = RosterManager(engagement=engagement)
+    covered = mgr.get_all_covered_skills()
+
+    required_skills_map: dict[str, list[str]] = {}
+    all_required: set[str] = set()
+    for sec in bp.sections:
+        s_skills = getattr(sec, "required_skills", [])
+        if s_skills:
+            required_skills_map[f"{sec.id} - {sec.title}"] = s_skills
+            all_required.update(s_skills)
+
+    if not all_required:
+        console.print("[bold yellow]Aucune compétence requise spécifiée dans ce blueprint.[/bold yellow]")
+        return
+
+    uncovered = all_required - covered
+    coverage_pct = round((len(all_required - uncovered) / len(all_required)) * 100, 1)
+
+    table = Table(title=f"🎯 Matrice de Couverture des Compétences — Engagement {engagement}")
+    table.add_column("Section Blueprint", style="cyan")
+    table.add_column("Compétences Requises", style="magenta")
+    table.add_column("Statut Couverture", style="bold")
+    table.add_column("Affectation / Prestataire", style="green")
+
+    for sec_name, skills in required_skills_map.items():
+        missing_in_sec = [s for s in skills if s not in covered]
+        if not missing_in_sec:
+            status = "[green]COUVERT[/green]"
+            holders = []
+            for s in skills:
+                for login, u in mgr.users.items():
+                    if s in u.get("skills", []):
+                        holders.append(f"{login} ({s})")
+            contractors = [f"{c['provider']} ({c['skill']})" for c in mgr.external_contractors if c.get("skill") in skills]
+            assignment = ", ".join(holders + contractors) or "Équipe interne"
+        else:
+            status = f"[red]MANQUANT ({', '.join(missing_in_sec)})[/red]"
+            assignment = "[bold red]⚠️ Non pourvu (Action requise)[/bold red]"
+        table.add_row(sec_name, ", ".join(skills), status, assignment)
+
+    console.print(table)
+
+    risk_level = "[bold green]FAIBLE[/bold green]" if coverage_pct == 100 else ("[bold yellow]MODÉRÉ[/bold yellow]" if coverage_pct >= 75 else "[bold red]CRITIQUE[/bold red]")
+    console.print(f"\n📊 [bold]Taux de couverture global :[/bold] {coverage_pct}% ({len(all_required - uncovered)}/{len(all_required)} expertises)")
+    console.print(f"⚠️ [bold]Index de risque de staffing :[/bold] {risk_level}")
+    if uncovered:
+        console.print(f"[bold red]❌ Compétences critiques à pourvoir :[/bold red] {', '.join(uncovered)}")
+        console.print("[italic dim]Utilisez 'elicit staff add-skill', 'assign' ou 'contract-expertise' pour combler ces manques.[/italic dim]")
+
+
 def main() -> None:
     app()
 
