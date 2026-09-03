@@ -16,13 +16,11 @@
 		<!-- Semi-transparent 3D plane surface -->
 		<T.Mesh rotation={[-Math.PI / 2, 0, 0]}>
 			<T.PlaneGeometry args={[30, 20]} />
-			<T.MeshStandardMaterial
+			<T.MeshBasicMaterial
 				color={color}
 				transparent={true}
-				opacity={0.12}
+				opacity={0.08}
 				side={THREE.DoubleSide}
-				roughness={0.2}
-				metalness={0.8}
 			/>
 		</T.Mesh>
 

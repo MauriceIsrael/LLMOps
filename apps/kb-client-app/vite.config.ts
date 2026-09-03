@@ -4,6 +4,11 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
+	server: {
+		watch: {
+			ignored: ['**/dev.db*', '**/.git/**', '**/tmp/**', '**/data/engagements/**']
+		}
+	},
 	optimizeDeps: {
 		// ── Dépendances lourdes (poids brut) ─────────────────────────────────────
 		// echarts (59 Mo source) et gridstack (2.1 Mo) sont pré-bundlés au

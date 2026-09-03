@@ -33,7 +33,7 @@
 	>
 		<!-- Core Node Sphere -->
 		<T.Mesh>
-			<T.SphereGeometry args={[radius, 32, 32]} />
+			<T.SphereGeometry args={[radius, 16, 16]} />
 			<T.MeshStandardMaterial
 				color={isSelected ? '#ffffff' : color}
 				emissive={color}

@@ -214,19 +214,28 @@ export class KBAdapter {
 		if (this.config.type === 'gcp') {
 			const snap = await this.fetchRemoteSnapshot();
 			if (snap?.assets && Array.isArray(snap.assets)) {
-				const domainSet = new Set<string>();
+				const domainCounts: Record<string, number> = {};
+				for (const a of snap.assets) {
+					const dom = a.domain || 'general';
+					domainCounts[dom] = (domainCounts[dom] || 0) + 1;
+				}
+
+				const topDomains = Object.entries(domainCounts)
+					.sort((a, b) => b[1] - a[1])
+					.slice(0, 6)
+					.map(([d]) => d);
+
 				const nodes: Node3D[] = [];
 
 				snap.assets.forEach((a: any, idx: number) => {
 					const dom = a.domain || 'general';
-					domainSet.add(dom);
+					const domainIdx = topDomains.indexOf(dom);
+					const y = (domainIdx >= 0 ? domainIdx : topDomains.length) * 6;
 
-					// Generate spaced 3D coordinates based on index and domain
 					const angle = (idx * 2 * Math.PI) / snap.assets.length;
-					const radius = 8 + (idx % 3) * 4;
+					const radius = 6 + (idx % 4) * 3;
 					const x = Math.round(Math.cos(angle) * radius);
 					const z = Math.round(Math.sin(angle) * radius);
-					const y = (idx % 5) * 4;
 
 					nodes.push({
 						id: a.id,
@@ -238,12 +247,12 @@ export class KBAdapter {
 						x,
 						y,
 						z,
-						degree: 5 + (idx % 6)
+						degree: 4 + (idx % 5)
 					});
 				});
 
 				return {
-					domains: Array.from(domainSet),
+					domains: topDomains,
 					nodes,
 					edges: []
 				};
