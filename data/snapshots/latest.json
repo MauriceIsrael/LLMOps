@@ -1,7 +1,7 @@
 {
-  "snapshot_id": "snapshot-2026-09-03-844c432",
-  "created_at": "2026-09-03T19:34:28Z",
-  "source_revision": "844c432216b1600a63fdee7d667abc63b224091b",
+  "snapshot_id": "snapshot-2026-09-03-9a50305",
+  "created_at": "2026-09-03T19:56:26Z",
+  "source_revision": "9a50305c8796b87530fdc79a26987dbdf0c64139",
   "payload_sha256": "sha256:24a644a2189e307edab4f9cc4d533d79968acd898e4d9666f3d8673fa4582efb",
   "schema_version": "1.0",
   "applicability_index": {
@@ -1819,19 +1819,45 @@
     }
   ],
   "compliance_index": {
+    "3GPP": {
+      "3GPP-TS33179-ISOLATED": {
+        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "PAT-004"
+        ]
+      },
+      "3GPP-TS33501-SBI": {
+        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "PAT-006"
+        ]
+      },
+      "3GPP-TS33179-KMS": {
+        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "3GPP-TS33179-AFFILIATION": {
+        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "3GPP-TS33501-SEPP": {
+        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      }
+    },
     "ISO27001": {
-      "ISO-27001-A8-01": {
-        "title": "S\u00e9curit\u00e9 des terminaux utilisateurs finaux et gestion de flotte",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "ISO-27001-A8-08": {
-        "title": "Gestion des vuln\u00e9rabilit\u00e9s techniques et veille de s\u00e9curit\u00e9",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
       "ISO-27001-A8-24": {
         "title": "Utilisation de la cryptographie et politique de gestion des cl\u00e9s",
         "version": "2022",
@@ -1850,6 +1876,18 @@
         "severity": "mandatory",
         "implemented_by": []
       },
+      "ISO-27001-A8-08": {
+        "title": "Gestion des vuln\u00e9rabilit\u00e9s techniques et veille de s\u00e9curit\u00e9",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A8-01": {
+        "title": "S\u00e9curit\u00e9 des terminaux utilisateurs finaux et gestion de flotte",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
       "ISO-27001-A8-09": {
         "title": "Gestion de la configuration et contr\u00f4le des d\u00e9rives (GitOps)",
         "version": "2022",
@@ -1858,38 +1896,6 @@
       }
     },
     "NIS2": {
-      "NIS2-ART21-2E": {
-        "title": "S\u00e9curit\u00e9 de l'acquisition, du d\u00e9veloppement et de la maintenance des SI",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-005",
-          "PAT-002"
-        ]
-      },
-      "NIS2-ART21-2H": {
-        "title": "Cryptographie, chiffrement et s\u00e9curit\u00e9 de l'intelligence artificielle",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-015",
-          "PAT-007"
-        ]
-      },
-      "NIS2-ART21-2A": {
-        "title": "Politiques d'analyse des risques et s\u00e9curit\u00e9 des syst\u00e8mes d'information",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-001"
-        ]
-      },
-      "NIS2-ART21-2G": {
-        "title": "Pratiques de base en cyber-hygi\u00e8ne et formation en cybers\u00e9curit\u00e9",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
       "NIS2-ART21-2B": {
         "title": "Gestion et traitement des incidents de s\u00e9curit\u00e9",
         "version": "2022/2555",
@@ -1915,6 +1921,38 @@
         "severity": "mandatory",
         "implemented_by": [
           "PAT-004"
+        ]
+      },
+      "NIS2-ART21-2A": {
+        "title": "Politiques d'analyse des risques et s\u00e9curit\u00e9 des syst\u00e8mes d'information",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-001"
+        ]
+      },
+      "NIS2-ART21-2G": {
+        "title": "Pratiques de base en cyber-hygi\u00e8ne et formation en cybers\u00e9curit\u00e9",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART21-2E": {
+        "title": "S\u00e9curit\u00e9 de l'acquisition, du d\u00e9veloppement et de la maintenance des SI",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-005",
+          "PAT-002"
+        ]
+      },
+      "NIS2-ART21-2H": {
+        "title": "Cryptographie, chiffrement et s\u00e9curit\u00e9 de l'intelligence artificielle",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-015",
+          "PAT-007"
         ]
       },
       "NIS2-ART21-2C": {
@@ -1945,53 +1983,15 @@
         ]
       }
     },
-    "3GPP": {
-      "3GPP-TS33501-SBI": {
-        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0005",
-          "PAT-006"
-        ]
-      },
-      "3GPP-TS33179-KMS": {
-        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "3GPP-TS33179-ISOLATED": {
-        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0007",
-          "PAT-004"
-        ]
-      },
-      "3GPP-TS33179-AFFILIATION": {
-        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "3GPP-TS33501-SEPP": {
-        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": []
-      }
-    },
     "SecNumCloud": {
-      "SNC-REQ-03": {
-        "title": "Gestion des cl\u00e9s cryptographiques sur HSM qualifi\u00e9 ANSSI",
+      "SNC-REQ-04": {
+        "title": "Isolation de l'hyperviseur et durcissement des environnements de conteneurs",
         "version": "3.2",
         "severity": "mandatory",
         "implemented_by": []
       },
-      "SNC-REQ-04": {
-        "title": "Isolation de l'hyperviseur et durcissement des environnements de conteneurs",
+      "SNC-REQ-03": {
+        "title": "Gestion des cl\u00e9s cryptographiques sur HSM qualifi\u00e9 ANSSI",
         "version": "3.2",
         "severity": "mandatory",
         "implemented_by": []
