@@ -21,6 +21,7 @@ logger = logging.getLogger("mcp_server.notifier")
 
 DEFAULT_OWNER_EMAIL = "maurice.israel@free.fr"
 DEFAULT_DISCORD_INVITE = "https://discord.gg/CQafeY6JJ"
+DEFAULT_DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1544949043631882250/NlTlNyu1u5Zr9ilw5UCeZoiUrT1nBvFG2F3ArNLg-y4NSGxN4UOPpLkzPhM90x9awKGY"
 
 
 def notify_owner_of_suggestion(
@@ -65,24 +66,37 @@ def notify_owner_of_suggestion(
     notifications_sent = ["local_archive", "cloud_logging"]
 
     # 3. Notification Webhook (Discord / Slack / ntfy.sh)
-    webhook_url = os.getenv("OWNER_NOTIFICATION_WEBHOOK") or os.getenv("NOTIFICATION_WEBHOOK_URL")
+    webhook_url = os.getenv("OWNER_NOTIFICATION_WEBHOOK") or os.getenv("NOTIFICATION_WEBHOOK_URL") or DEFAULT_DISCORD_WEBHOOK
 
-    # Si aucun webhook dédié n'est défini, on notifie également sur le canal public de veille ntfy.sh/llmops-maurice
     endpoints_to_try = []
     if webhook_url:
         endpoints_to_try.append(webhook_url)
-    
+
     # Ajout du canal push universel ntfy.sh
     endpoints_to_try.append("https://ntfy.sh/llmops-maurice")
 
     for url in endpoints_to_try:
         try:
             if "discord.com/api/webhooks" in url:
-                # Format spécifique Discord Webhook
+                # Format spécifique Discord Webhook avec Embed riche
                 discord_data = {
                     "username": "Knowledge Hub Bot",
                     "avatar_url": "https://raw.githubusercontent.com/MauriceIsrael/LLMOps/main/assets/icon.png",
-                    "content": f"📢 **Nouvelle suggestion d'amélioration pour Maurice !**\n**Titre :** {title}\n**Auteur :** {author} ({contact or 'Sans contact'})\n**Raison :** {rationale}\n**Proposition :**\n```markdown\n{suggested_change[:500]}\n```",
+                    "embeds": [
+                        {
+                            "title": f"📢 Nouvelle Suggestion d'Amélioration : {title}",
+                            "description": f"**Raison / Valeur Architecturale :**\n{rationale}\n\n**Proposition :**\n```markdown\n{suggested_change[:600]}\n```",
+                            "color": 3066993,  # Vert émeraude
+                            "fields": [
+                                {"name": "Auteur", "value": author, "inline": True},
+                                {"name": "Contact", "value": contact or "Non renseigné", "inline": True},
+                                {"name": "Engagement", "value": source_engagement or "Global KB", "inline": True},
+                                {"name": "ID Notification", "value": suggestion_id, "inline": True},
+                            ],
+                            "footer": {"text": "Knowledge Hub LLMOps • Détection & Harvest"},
+                            "timestamp": timestamp,
+                        }
+                    ],
                 }
                 req = urllib.request.Request(
                     url,

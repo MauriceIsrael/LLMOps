@@ -1,0 +1,11 @@
+{
+  "id": "SUG-20260903-FF3B4F",
+  "timestamp": "2026-09-03T19:38:23.217262+00:00",
+  "title": "Harvest REX: MCX Service Layer Decomposition (4 sub-domains)",
+  "rationale": "First occurrence of 3GPP MC service layer decomposition on mission-critical voice.",
+  "suggested_change": "Pattern ou règle candidate issue de l'engagement nordwave-mcx-2027 (decomposition). Source: decomposition.",
+  "author": "sofia (chief-architect)",
+  "contact": "maurice.israel@free.fr",
+  "source_engagement": "nordwave-mcx-2027",
+  "owner_notified": "maurice.israel@free.fr"
+}
