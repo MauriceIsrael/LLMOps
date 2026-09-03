@@ -199,3 +199,59 @@ Pour déployer en toute sécurité une nouvelle version du serveur FastMCP sur G
 ```
 
 Le script vérifie la propreté Git, exécute les vérifications de pré-vol locales (Ruff & tests de contrat), soumet le build Docker allégé à Cloud Build, et effectue un health check automatique sur l'URL de production.
+
+---
+
+## 8. Audit de Staffing & Gestion des Compétences du Projet
+
+Le système audite l'adéquation entre l'équipe mobilisée et les exigences techniques du Blueprint d'architecture :
+
+### 8.1 Auditer la couverture des compétences
+```bash
+poetry run elicit audit-skills --engagement nordwave-mcx-2027
+```
+Affiche la matrice complète de couverture, le taux global (ex: `88.9%`), les compétences critiques non pourvues, et l'**Index de risque de staffing** (*Faible / Modéré / Critique*).
+
+### 8.2 Administrer l'équipe et résoudre les manques (Gap G5)
+* **Affecter un nouveau collaborateur interne :**
+  ```bash
+  poetry run elicit staff assign --engagement nordwave-mcx-2027 --user julien --role cloud-architect --skills "SKL-KUBE-TELCO,SKL-AUTO-GITOPS"
+  ```
+* **Enregistrer une montée en compétence / certification :**
+  ```bash
+  poetry run elicit staff add-skill --engagement nordwave-mcx-2027 --user sofia --skill SKL-CRYPTO-HSM --level expert --evidence "Certification ANSSI 2026"
+  ```
+* **Contractualiser une expertise ou assistance technique externe :**
+  ```bash
+  poetry run elicit staff contract-expertise --engagement nordwave-mcx-2027 --skill SKL-CRYPTO-HSM --provider "Cabinet Cryptologique Thalix" --ref "PO-2026-904"
+  ```
+
+---
+
+## 9. Analyseur d'Appels d'Offres (RFP / CCTP) & Dream Team Matrix
+
+En phase d'avant-vente, analysez un cahier des charges client (Word `.docx`, `.pdf`, ou `.md`) pour obtenir immédiatement les compétences requises, les référentiels cibles et le profil d'équipe recommandé :
+
+```bash
+poetry run python scripts/analyze_rfp.py data/project/netdevops/netdevops_mcx_architecture_document_v1.3.docx
+```
+
+### Résultats générés :
+* **Référentiels détectés** : NIS2, SecNumCloud, 3GPP, ISO 27001.
+* **Compétences classées** : Intensité (Haute / Moyenne / Ponctuelle), séniorité attendue (Senior, Expert).
+* **Dream Team Staffing Matrix** : Rôles recommandés, charges estimées (en ETP) et missions clés.
+* **Option d'export** : `--output rapport-staffing.md` ou `.json`.
+
+---
+
+## 10. Suggestions, Harvest REX & Notifications Discord
+
+Lorsqu'un projet valide de nouvelles pratiques ou limitations constructeurs, le moissonnage REX permet de notifier instantanément le propriétaire de la base :
+
+```bash
+# Moissonner les candidats REX d'un projet et notifier Maurice sur Discord :
+poetry run elicit harvest --engagement nordwave-mcx-2027
+```
+
+Les notifications sont transmises sous forme d'**Embed riche sur Discord** (titre, auteur, contexte projet, raison et extrait Markdown de la proposition) et archivées dans `data/suggestions/`.
+

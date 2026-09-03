@@ -79,7 +79,7 @@ All FastMCP tools return a **standardized JSON envelope**:
 
 ---
 
-## 📚 4. Knowledge Server Tools Catalog (11 Tools)
+## 📚 4. Knowledge Server Tools Catalog (18 Tools)
 
 | Tool Name | Description | Key Parameters |
 |---|---|---|
@@ -92,6 +92,13 @@ All FastMCP tools return a **standardized JSON envelope**:
 | `get_glossary_term` | Fetch canonical definition for an architecture glossary term | `term` |
 | `get_knowledge_analytics` | Knowledge base volume indicators, relations count, and lifecycle stats | *(none)* |
 | `get_domain_prominence_report` | Domain gravity, cross-domain dependencies, and prominence score report | *(none)* |
+| `list_frameworks` | List supported regulatory security frameworks (NIS2, 3GPP, SecNumCloud, ISO27001) | *(none)* |
+| `list_controls` | List security controls with implementing principles and patterns | `framework` |
+| `get_compliance_trail` | Lineage trail from regulatory control to satisfying architecture assets | `control_id` |
+| `get_compliance_matrix` | Project compliance matrix and gaps for a regulatory framework | `framework`, `engagement` |
+| `list_skills` | List canonical engineering skills, domains, and criticality levels | `domain` |
+| `get_skills_matrix` | Staffing skills coverage matrix, gaps, and risk index for an engagement | `engagement`, `blueprint_path` |
+| `suggest_knowledge_improvement` | Submit external REX, candidate pattern or feedback with instant Discord dispatch | `title`, `rationale`, `suggested_change`, `author`, `contact_email`, `source_engagement` |
 | `query_graph` | Execute read-only Cypher query on knowledge graph | `cypher_query` |
 | `get_graph_summary` | Graph summary node/rel counts and schema version | *(none)* |
 

@@ -145,13 +145,13 @@
       {@const sizeProps = getSizeProps(widget.defaultSize)}
       <div 
         class="grid-stack-item"
-        gs-id={widget.id}
-        gs-x={widget.x}
-        gs-y={widget.y}
-        gs-w={widget.w || sizeProps.w}
-        gs-h={widget.h || sizeProps.h}
-        gs-min-w={sizeProps.minW}
-        gs-min-h={sizeProps.minH}
+        data-gs-id={widget.id}
+        data-gs-x={widget.x}
+        data-gs-y={widget.y}
+        data-gs-w={widget.w || sizeProps.w}
+        data-gs-h={widget.h || sizeProps.h}
+        data-gs-min-w={sizeProps.minW}
+        data-gs-min-h={sizeProps.minH}
         use:gridItem
       >
         <div class="grid-stack-item-content">

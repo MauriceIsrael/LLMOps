@@ -16,6 +16,9 @@
   import LogOut from 'lucide-svelte/icons/log-out';
   import Lightbulb from 'lucide-svelte/icons/lightbulb';
 
+  import Sparkles from 'lucide-svelte/icons/sparkles';
+  import Users from 'lucide-svelte/icons/users';
+
   import { Button } from '$lib/components/ui/button';
   import * as Sheet from '$lib/components/ui/sheet';
   import * as Avatar from '$lib/components/ui/avatar';
@@ -51,11 +54,13 @@
    * Navigation items.
    */
   const menuItems = [
-    { href: '/',         labelKey: 'nav.dashboard', icon: LayoutDashboard, adminOnly: false },
-    { href: '/explorer', labelKey: 'nav.explorer',  icon: Box,             adminOnly: false },
-    { href: '/assets',   labelKey: 'nav.assets',    icon: FileText,        adminOnly: false },
-    { href: '/ideas',    labelKey: 'nav.ideas',     icon: Lightbulb,       adminOnly: false },
-    { href: '/settings', labelKey: 'nav.settings',  icon: Settings,        adminOnly: false },
+    { href: '/',                      labelKey: 'nav.dashboard',  icon: LayoutDashboard, adminOnly: false },
+    { href: '/explorer',              labelKey: 'nav.explorer',   icon: Box,             adminOnly: false },
+    { href: '/assets',                labelKey: 'nav.assets',     icon: FileText,        adminOnly: false },
+    { href: '/governance/suggestions', labelKey: 'nav.governance', icon: Sparkles,        adminOnly: false },
+    { href: '/governance/staffing',   labelKey: 'nav.staffing',   icon: Users,           adminOnly: false },
+    { href: '/ideas',                 labelKey: 'nav.ideas',      icon: Lightbulb,       adminOnly: false },
+    { href: '/settings',              labelKey: 'nav.settings',   icon: Settings,        adminOnly: false },
   ];
 
   const adminMenuItems = [

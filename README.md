@@ -72,7 +72,13 @@ make demo-check
 3. **Dual-Plane Physical Isolation (ADR-0015)**  
    Reusable enterprise patterns (`data/knowledge.lbug`) are physically separated from per-project dynamic state (`data/engagements/<id>.lbug`). Cross-plane queries are prohibited; references resolve strictly via asset identifiers.
 4. **Sealed Snapshot Channel for Client Apps & CI/CD**  
-   Publishes canonical, hashed JSON snapshots (`fixtures/sealed_snapshot.json` or `GET /snapshot/latest`) with normalized typed identifiers (`decision:ADR-0014`, `principle:P-002`), SHA-256 payload sealing, and an applicability index for zero-latency, resilient third-party integrations (e.g., *Architecture Studio*).
+   Publishes canonical, hashed JSON snapshots (`fixtures/sealed_snapshot.json` or `GET /snapshot/latest`) with normalized typed identifiers (`decision:ADR-0014`, `principle:P-002`), SHA-256 payload sealing, and an applicability index for zero-latency, resilient third-party integrations (e.g., *Architecture Studio*, *La Suite*).
+5. **Skills Competency Meta-Model & Staffing Risk Audit (Gap G5)**  
+   Projects architecture blueprint requirements onto a formal 9-skills catalogue. Audits mobilized team coverage in real time (`elicit audit-skills`), emits `G5_unstaffed_skill_gap` alerts, and enables Best-Match question routing based on engineer expertise.
+6. **Pre-Sales RFP / CCTP Analyzer (Dream Team Staffing Matrix)**  
+   Ingests client tenders and CCTP documents (Word DOCX, PDF, Markdown), detects regulatory security targets (NIS2, SecNumCloud, 3GPP, ISO27001), and automatically sizes the target project team in ETP with recommended roles, seniorities, and missions.
+7. **Continuous Harvest & Multi-Channel Webhook Loop**  
+   Proven field patterns and REX are harvested from projects (`elicit harvest`) and instantly dispatched to the Knowledge Owner via Discord Webhooks (rich embeds) and mobile push (`ntfy.sh`) for formal governance review.
 
 ---
 

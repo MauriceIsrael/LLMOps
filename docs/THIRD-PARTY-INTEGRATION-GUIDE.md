@@ -385,4 +385,72 @@ When a project successfully establishes a new reusable pattern or section (e.g. 
 4. Upon approval, the official Blueprint is incremented (`version: 2` → `version: 3`) with a `SUPERSEDES` relation.
 5. All future projects and connected MCP clients automatically benefit from the updated standard.
 
+---
+
+## 13. Staffing & Technical Competencies (Skills Meta-Model)
+
+Third-party orchestrators, bid managers, and project management portals (such as *La Suite*) can audit team capabilities directly against project architecture requirements.
+
+### 13.1 Querying Required Competencies
+```python
+# List canonical skills defined in the Knowledge Hub
+mcp.call("list_skills", {"domain": "security-cryptography"})
+# Returns SKL-CRYPTO-HSM, SKL-SEC-ZEROTRUST with criticality, keywords and descriptions
+```
+
+### 13.2 Project Staffing Coverage Audit & Risk Scoring
+```python
+# Compute the real-time skills coverage matrix for a project engagement
+matrix = mcp.call("get_skills_matrix", {"engagement": "nordwave-mcx-2027"})
+# {
+#   "coverage_percentage": 100.0,
+#   "risk_level": "low",
+#   "total_required_skills": 9,
+#   "covered_skills_count": 9,
+#   "missing_skills": [],
+#   "external_contractors": [{"skill": "SKL-CRYPTO-HSM", "provider": "Thalix", "ref": "PO-2026-904"}],
+#   "sections": {"7.3": {"title": "Cryptography", "covered": True, ...}}
+# }
+```
+
+### 13.3 Gap G5 (Unstaffed Skill Gap)
+When running `elicit scan`, any section requiring an expertise not present in the project's mobilized team triggers an active `G5_unstaffed_skill_gap`. This alerts project leadership before architectural drift occurs.
+
+---
+
+## 14. External Contribution & REX Feedback (`suggest_knowledge_improvement`)
+
+External teams, client portals can push suggestions, amendments, or proven field patterns directly into the Knowledge Hub governance loop without direct database write access:
+
+```python
+response = mcp.call("suggest_knowledge_improvement", {
+    "title": "Limitation du bulk export sur Element Manager Ericsson (2000 objets)",
+    "rationale": "Éviter les timeouts de réconciliation GitOps sur les déploiements 5G Core massifs.",
+    "suggested_change": "Ajouter la recommandation de découpage par lots de 500 objets dans PAT-005.",
+    "author": "Antoine)",
+    "contact_email": "antoin@antoine",
+    "source_engagement": "suite-numerique-2026"
+})
+# {"status": "ok", "suggestion_id": "SUG-20260903-XXXXXX", "notifications_sent": ["local_archive", "cloud_logging", "discord_webhook", "push_ntfy"]}
+```
+
+This triggers:
+1. **Local Persistent Audit** in `data/suggestions/<id>.json`.
+2. **Instant High-Priority Notification** to the Knowledge Hub Lead via Discord Webhook Embed and mobile push (`ntfy.sh`).
+3. **Formal Governance Review**: KH owner can approve, request changes, or reject via CLI or the Web Client.
+
+---
+
+## 15. Sealed Offline Snapshot Consumption (Air-Gap & Zero Callout for "La Suite")
+
+For air-gapped sovereign infrastructures or classified client enclaves that prohibit outgoing network connections (SecNumCloud, NIS2 strict enclaves):
+
+1. **Deterministic JSON Snapshot**: Every versioned release produces an immutable snapshot file:
+   * `data/snapshots/snapshot-<date>-<git-sha>.json`
+   * `data/snapshots/latest.json`
+2. **Cryptographic Validation**:
+   * Each file is signed with its SHA-256 digest and sealed with the Git commit hash.
+3. **Zero Callout**: Third-party client tools can mount or copy this JSON file directly into their runtime environment without starting an MCP server or calling any external API. All principles, patterns, ADRs, compliance controls, and skills matrices are fully self-contained.
+
+
 

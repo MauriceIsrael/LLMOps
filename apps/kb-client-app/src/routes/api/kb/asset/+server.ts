@@ -13,6 +13,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	const kbDir = path.resolve(process.cwd(), '../../data/kb');
 	let matchedFile: string | null = null;
 
+	const targetId = id;
 	function findFile(dir: string) {
 		if (!fs.existsSync(dir)) return;
 		const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -20,7 +21,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			const fullPath = path.join(dir, entry.name);
 			if (entry.isDirectory()) {
 				findFile(fullPath);
-			} else if (entry.isFile() && (entry.name.includes(id) || entry.name === `${id}.md`)) {
+			} else if (entry.isFile() && (entry.name.includes(targetId) || entry.name === `${targetId}.md`)) {
 				matchedFile = fullPath;
 				break;
 			}

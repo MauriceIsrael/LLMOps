@@ -261,6 +261,25 @@ L'arbitrage d'un conflit par un architecte référent (Sofia) ne se limite pas �
 - **Routage asynchrone d'experts :** L'adaptateur GitHub (`tools/elicitation/mailbox/adapters/github_adapter.py`) permet de router des questions d'élicitation sous forme d'Issues GitHub et de dépouiller les commentaires pour en extraire des réponses structurées.
 - **Périmètre contractuel :** Ce connecteur est un mécanisme asynchrone d'interaction humaine hors contrat applicatif. Le Knowledge Hub n'écrit dans aucun système de la suite cliente (*Architecture Studio*).
 
+### 6.10 Méta-modèle de Compétences (Skills), Gap G5 & Best-Match Routing
+- **Catalogue Canonique des Compétences :** Les 9 expertises clés de l'ingénierie télécom et de sécurité (`SKL-CRYPTO-HSM`, `SKL-SEC-ZEROTRUST`, `SKL-TELCO-CORE`, `SKL-NET-UNDERLAY`, `SKL-AUTO-GITOPS`, `SKL-OBS-SOC`, `SKL-KUBE-TELCO`, `SKL-MOB-FLEET`, `SKL-RESIL-DR`) sont modélisées dans `data/kb/skills/`.
+- **Exigences du Blueprint :** Chaque section critique du Blueprint d'architecture déclare ses compétences indispensables (`required_skills`).
+- **Détection du Gap G5 (*Staffing & Skill Gap*) :** Lors d'un scan (`elicit scan`), le moteur confronte les besoins des sections aux profils mobilisés dans le `roster.yaml`. En cas d'expertise manquante, un Gap G5 bloque la validation de la section.
+- **Routage Dynamique Best-Match :** Lorsqu'une question d'architecture est émise, le système calcule l'intersection de compétences des ingénieurs pour router la question vers le profil ayant la plus forte affinité technique (plutôt qu'à un rôle générique).
+
+### 6.11 Audit Avant-Vente & Analyseur d'Appels d'Offres (`scripts/analyze_rfp.py`)
+- **Extraction Native DOCX / PDF / MD :** Analyse intégrale des cahiers des charges et CCTP entrants sans dépendances binaires lourdes.
+- **Détection Réglementaire Automatique :** Identification des directives applicables (NIS2, SecNumCloud, 3GPP, ISO27001).
+- **Dream Team Staffing Matrix :** Projection des exigences sur le catalogue de compétences, calcul des charges en ETP (Équivalents Temps Plein), de la séniorité requise (Senior, Expert) et formulation des fiches de postes recommandées pour remporter et sécuriser le projet.
+
+### 6.12 Notifications Multi-Canaux & Cycle de Gouvernance des REX
+- **Dispatch Multi-Canaux (`notifier.py`) :** Lorsqu'une suggestion REX ou d'amélioration de la base est émise (`suggest_knowledge_improvement` ou `elicit harvest`), elle est relayée en temps réel via :
+  1. Discord Webhook (carte Embed riche avec métadonnées, auteur, contact et extrait Markdown).
+  2. Push mobile / desktop instantané via `ntfy.sh/llmops-maurice`.
+  3. Journalisation d'alerte Cloud Logging (GCP Cloud Run).
+  4. Archivage persistant dans `data/suggestions/SUG-*.json`.
+- **Cycle d'Arbitrage de Gouvernance :** Les suggestions suivent un cycle d'approbation à 4 états (`pending_review` → `approved` / `needs_study` / `rejected`), permettant au Lead Architect (Maurice) de valider la promotion, de demander un complément d'étude technique, ou de clôturer la proposition.
+
 ---
 
 ## 7. Architecture des Serveurs FastMCP, Séparation Physique & ADR-0015
