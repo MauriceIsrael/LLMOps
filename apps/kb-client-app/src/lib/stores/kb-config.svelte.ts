@@ -26,7 +26,7 @@ class KBConfigStore {
 			id: 'gcp-prod',
 			name: 'GCP Production (Cloud Run)',
 			type: 'gcp',
-			endpoint: 'https://kb-prod-mcp-run.a.run.app',
+			endpoint: 'https://llmops-mcp-server-344571265365.europe-west1.run.app',
 			status: 'connected'
 		}
 	]);

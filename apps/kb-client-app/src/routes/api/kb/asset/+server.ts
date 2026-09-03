@@ -68,5 +68,38 @@ export const GET: RequestHandler = async ({ url }) => {
 		});
 	}
 
-	return json({ status: 'not_found', id }, { status: 44 });
+	// Fallback : recherche dans le snapshot distant GCP
+	try {
+		const token = process.env.SERVER_TOKEN || 'llmops-token-2026-sec-98a41f';
+		const gcpEndpoint = process.env.GCP_KB_ENDPOINT || 'https://llmops-mcp-server-344571265365.europe-west1.run.app';
+		const res = await fetch(`${gcpEndpoint}/snapshot/latest`, {
+			headers: { Authorization: `Bearer ${token}` }
+		});
+
+		if (res.ok) {
+			const snap = await res.json();
+			const asset = (snap.assets || []).find((a: any) => a.id === id || a.typed_id === id);
+			if (asset) {
+				return json({
+					status: 'ok',
+					data: {
+						id: asset.id,
+						title: asset.title || asset.id,
+						type: asset.type || 'decision',
+						status: asset.status || 'active',
+						confidence: asset.confidence || 'verified',
+						domain: asset.domain || 'General',
+						owner: asset.owner || 'architecture-team',
+						last_reviewed: asset.last_reviewed || '2026-09-03',
+						frontmatter: asset,
+						body: `# ${asset.title}\n\nActif synchronisé depuis l'instance distante GCP Cloud Run.\n\n- **Domaine :** ${asset.domain}\n- **Statut :** ${asset.status}\n- **Confiance :** ${asset.confidence}\n- **Propriétaire :** ${asset.owner}\n- **Phase :** ${Array.isArray(asset.phase) ? asset.phase.join(', ') : asset.phase}`
+					}
+				});
+			}
+		}
+	} catch (err) {
+		console.warn(`[API Asset] Échec fallback GCP pour ${id}:`, err);
+	}
+
+	return json({ status: 'not_found', id }, { status: 404 });
 };

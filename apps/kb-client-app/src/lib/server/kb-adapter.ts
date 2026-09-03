@@ -81,7 +81,68 @@ export class KBAdapter {
 		return null;
 	}
 
+	private static cachedRemoteSnapshot: any = null;
+	private static remoteSnapshotFetchedAt: number = 0;
+
+	private async fetchRemoteSnapshot(): Promise<any> {
+		const now = Date.now();
+		if (KBAdapter.cachedRemoteSnapshot && now - KBAdapter.remoteSnapshotFetchedAt < 60000) {
+			return KBAdapter.cachedRemoteSnapshot;
+		}
+
+		try {
+			const token = process.env.SERVER_TOKEN || 'llmops-token-2026-sec-98a41f';
+			const targetUrl = `${this.config.endpoint.replace(/\/+$/, '')}/snapshot/latest`;
+			const res = await fetch(targetUrl, {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
+
+			if (res.ok) {
+				const data = await res.json();
+				KBAdapter.cachedRemoteSnapshot = data;
+				KBAdapter.remoteSnapshotFetchedAt = now;
+				return data;
+			} else {
+				console.warn(`[KBAdapter] Requête snapshot distant (${res.status}) vers ${targetUrl}`);
+			}
+		} catch (err) {
+			console.error('[KBAdapter] Erreur connexion GCP Cloud Run:', err);
+		}
+		return null;
+	}
+
 	async fetchAnalytics(): Promise<VolumeKpiData> {
+		if (this.config.type === 'gcp') {
+			const snap = await this.fetchRemoteSnapshot();
+			if (snap?.assets && Array.isArray(snap.assets)) {
+				const typeCounts: Record<string, number> = {};
+				const statusCounts: Record<string, number> = {};
+				const confidenceCounts: Record<string, number> = {};
+
+				for (const a of snap.assets) {
+					const t = a.type || 'unknown';
+					typeCounts[t] = (typeCounts[t] || 0) + 1;
+					const s = a.status || 'active';
+					statusCounts[s] = (statusCounts[s] || 0) + 1;
+					const c = a.confidence || 'verified';
+					confidenceCounts[c] = (confidenceCounts[c] || 0) + 1;
+				}
+
+				return {
+					volume_by_type: Object.entries(typeCounts).map(([type, count]) => ({ type, count })),
+					status_breakdown: Object.entries(statusCounts).map(([status, count]) => ({ status, count })),
+					confidence_breakdown: Object.entries(confidenceCounts).map(([confidence, count]) => ({ confidence, count })),
+					glossary_count: Object.keys(snap.glossary || {}).length,
+					relations: {
+						REQUIRES: 0,
+						SUPERSEDES: 1
+					}
+				};
+			}
+		}
+
 		if (this.config.type === 'local') {
 			const localData = this.loadLocalExport();
 			if (localData?.analytics) {
@@ -115,6 +176,21 @@ export class KBAdapter {
 	}
 
 	async fetchDomainProminence(): Promise<DomainProminenceData> {
+		if (this.config.type === 'gcp') {
+			const snap = await this.fetchRemoteSnapshot();
+			if (snap?.assets && Array.isArray(snap.assets)) {
+				const domainCounts: Record<string, number> = {};
+				for (const a of snap.assets) {
+					const d = a.domain || 'general';
+					domainCounts[d] = (domainCounts[d] || 0) + 1;
+				}
+				return {
+					domain_volumes: Object.entries(domainCounts).map(([domain, count]) => ({ domain, count })),
+					cross_domain_dependencies: []
+				};
+			}
+		}
+
 		if (this.config.type === 'local') {
 			const localData = this.loadLocalExport();
 			if (localData?.prominence) {
@@ -135,6 +211,45 @@ export class KBAdapter {
 	}
 
 	async fetchLayeredGraph3D(): Promise<LayeredGraphPayload> {
+		if (this.config.type === 'gcp') {
+			const snap = await this.fetchRemoteSnapshot();
+			if (snap?.assets && Array.isArray(snap.assets)) {
+				const domainSet = new Set<string>();
+				const nodes: Node3D[] = [];
+
+				snap.assets.forEach((a: any, idx: number) => {
+					const dom = a.domain || 'general';
+					domainSet.add(dom);
+
+					// Generate spaced 3D coordinates based on index and domain
+					const angle = (idx * 2 * Math.PI) / snap.assets.length;
+					const radius = 8 + (idx % 3) * 4;
+					const x = Math.round(Math.cos(angle) * radius);
+					const z = Math.round(Math.sin(angle) * radius);
+					const y = (idx % 5) * 4;
+
+					nodes.push({
+						id: a.id,
+						title: a.title || a.id,
+						type: a.type || 'decision',
+						domain: dom,
+						status: a.status || 'active',
+						confidence: a.confidence || 'verified',
+						x,
+						y,
+						z,
+						degree: 5 + (idx % 6)
+					});
+				});
+
+				return {
+					domains: Array.from(domainSet),
+					nodes,
+					edges: []
+				};
+			}
+		}
+
 		if (this.config.type === 'local') {
 			const localData = this.loadLocalExport();
 			if (localData?.graph) {
