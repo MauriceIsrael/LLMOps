@@ -444,12 +444,36 @@ def contest(
 def harvest(
     engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement"),
     as_user: str | None = typer.Option(None, "--as", help="Usurper un utilisateur du roster (ex: --as sofia)"),
+    notify: bool = typer.Option(True, "--notify/--no-notify", help="Notifier le propriétaire du Knowledge Hub (Maurice)"),
 ) -> None:
     """Extraire le REX et proposer de nouvelles règles de manque à partir des conflits arbitrés."""
-    author, _ = resolve_impersonation(as_user, "sofia", "chief-architect", engagement)
-    console.print(f"[bold blue]🌾 REX & Harvest pour l'engagement {engagement} par {author}...[/bold blue]")
-    console.print("  - Candidate pattern: MCX service decomposition hold until 2nd engagement.")
-    console.print("  - New gap rule candidate: Subject decided at L3 with a dependency on another subject below L3.")
+    author, role = resolve_impersonation(as_user, "sofia", "chief-architect", engagement)
+    console.print(f"[bold blue]🌾 REX & Harvest pour l'engagement {engagement} par {author} ({role})...[/bold blue]")
+
+    from tools.elicitation.flows.harvest import build_harvest_graph
+    flow = build_harvest_graph()
+    state = flow.invoke({"engagement": engagement, "by": author})
+    candidates = state.get("promotion_candidates", [])
+
+    if not candidates:
+        console.print("[dim]Aucun nouveau candidat détecté pour l'instant.[/dim]")
+        return
+
+    for c in candidates:
+        console.print(f"  - [green]Candidat trouvé :[/green] [bold]{c['title']}[/bold] ({c['kind']})")
+        console.print(f"    [italic]{c['why']}[/italic]")
+        if notify:
+            from mcp_server.core.notifier import notify_owner_of_suggestion
+            notif = notify_owner_of_suggestion(
+                title=f"Harvest REX: {c['title']}",
+                rationale=c["why"],
+                suggested_change=f"Pattern ou règle candidate issue de l'engagement {engagement} ({c['kind']}). Source: {c.get('source')}.",
+                author=f"{author} ({role})",
+                contact="maurice.israel@free.fr",
+                source_engagement=engagement,
+            )
+            console.print(f"    📢 [bold cyan]Notification propriétaire envoyée :[/bold cyan] ID {notif['suggestion_id']} ({', '.join(notif['notifications_sent'])})")
+
 
 
 

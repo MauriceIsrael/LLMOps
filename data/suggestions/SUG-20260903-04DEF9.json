@@ -1,0 +1,11 @@
+{
+  "id": "SUG-20260903-04DEF9",
+  "timestamp": "2026-09-03T05:45:04.013925+00:00",
+  "title": "Harvest REX: Element manager bulk export limit (2000 objects)",
+  "rationale": "General limitation observed on vendor element manager interface.",
+  "suggested_change": "Pattern ou règle candidate issue de l'engagement nordwave-mcx-2027 (pattern). Source: external-contribution.",
+  "author": "sofia (chief-architect)",
+  "contact": "maurice.israel@free.fr",
+  "source_engagement": "nordwave-mcx-2027",
+  "owner_notified": "maurice.israel@free.fr"
+}
