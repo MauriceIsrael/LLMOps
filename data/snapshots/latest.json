@@ -1,7 +1,7 @@
 {
-  "snapshot_id": "snapshot-2026-09-03-8d5a875",
-  "created_at": "2026-09-03T05:33:04Z",
-  "source_revision": "8d5a8750b09af225cf1c452e3eaddbfb860ed8c2",
+  "snapshot_id": "snapshot-2026-09-03-35f67e8",
+  "created_at": "2026-09-03T05:34:01Z",
+  "source_revision": "35f67e8757aeeb257a668d4a6b7f87e6af739c93",
   "payload_sha256": "sha256:24a644a2189e307edab4f9cc4d533d79968acd898e4d9666f3d8673fa4582efb",
   "schema_version": "1.0",
   "applicability_index": {
@@ -1820,27 +1820,6 @@
   ],
   "compliance_index": {
     "3GPP": {
-      "3GPP-TS33179-AFFILIATION": {
-        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "3GPP-TS33501-SEPP": {
-        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "3GPP-TS33179-ISOLATED": {
-        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0007",
-          "PAT-004"
-        ]
-      },
       "3GPP-TS33501-SBI": {
         "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
         "version": "Rel-18",
@@ -1855,24 +1834,74 @@
         "version": "Rel-18",
         "severity": "mandatory",
         "implemented_by": []
+      },
+      "3GPP-TS33179-ISOLATED": {
+        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "PAT-004"
+        ]
+      },
+      "3GPP-TS33179-AFFILIATION": {
+        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "3GPP-TS33501-SEPP": {
+        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": []
+      }
+    },
+    "ISO27001": {
+      "ISO-27001-A8-08": {
+        "title": "Gestion des vuln\u00e9rabilit\u00e9s techniques et veille de s\u00e9curit\u00e9",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A8-01": {
+        "title": "S\u00e9curit\u00e9 des terminaux utilisateurs finaux et gestion de flotte",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A8-24": {
+        "title": "Utilisation de la cryptographie et politique de gestion des cl\u00e9s",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A5-15": {
+        "title": "S\u00e9curit\u00e9 de l'information dans les relations avec les fournisseurs",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A8-28": {
+        "title": "Protection et int\u00e9grit\u00e9 des enregistrements de journalisation",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A8-09": {
+        "title": "Gestion de la configuration et contr\u00f4le des d\u00e9rives (GitOps)",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
       }
     },
     "NIS2": {
-      "NIS2-ART21-2I": {
-        "title": "S\u00e9curit\u00e9 des ressources humaines, contr\u00f4le d'acc\u00e8s et gestion des actifs",
+      "NIS2-ART21-2A": {
+        "title": "Politiques d'analyse des risques et s\u00e9curit\u00e9 des syst\u00e8mes d'information",
         "version": "2022/2555",
         "severity": "mandatory",
         "implemented_by": [
-          "P-010"
-        ]
-      },
-      "NIS2-ART21-2B": {
-        "title": "Gestion et traitement des incidents de s\u00e9curit\u00e9",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-002",
-          "PAT-001"
+          "P-001"
         ]
       },
       "NIS2-ART21-2E": {
@@ -1893,19 +1922,20 @@
           "PAT-007"
         ]
       },
-      "NIS2-ART21-2A": {
-        "title": "Politiques d'analyse des risques et s\u00e9curit\u00e9 des syst\u00e8mes d'information",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-001"
-        ]
-      },
       "NIS2-ART21-2G": {
         "title": "Pratiques de base en cyber-hygi\u00e8ne et formation en cybers\u00e9curit\u00e9",
         "version": "2022/2555",
         "severity": "mandatory",
         "implemented_by": []
+      },
+      "NIS2-ART21-2B": {
+        "title": "Gestion et traitement des incidents de s\u00e9curit\u00e9",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-002",
+          "PAT-001"
+        ]
       },
       "NIS2-ART21-2D": {
         "title": "S\u00e9curit\u00e9 de la cha\u00eene d'approvisionnement et relations avec les fournisseurs",
@@ -1943,21 +1973,17 @@
         "implemented_by": [
           "PAT-005"
         ]
+      },
+      "NIS2-ART21-2I": {
+        "title": "S\u00e9curit\u00e9 des ressources humaines, contr\u00f4le d'acc\u00e8s et gestion des actifs",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-010"
+        ]
       }
     },
     "SecNumCloud": {
-      "SNC-REQ-01": {
-        "title": "Immunit\u00e9 aux lois extraterritoriales et localisation europ\u00e9enne des donn\u00e9es",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "SNC-REQ-05": {
-        "title": "Journalisation immuable et transmission en temps r\u00e9el au SOC",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
       "SNC-REQ-03": {
         "title": "Gestion des cl\u00e9s cryptographiques sur HSM qualifi\u00e9 ANSSI",
         "version": "3.2",
@@ -1981,42 +2007,16 @@
         "version": "3.2",
         "severity": "mandatory",
         "implemented_by": []
-      }
-    },
-    "ISO27001": {
-      "ISO-27001-A8-24": {
-        "title": "Utilisation de la cryptographie et politique de gestion des cl\u00e9s",
-        "version": "2022",
+      },
+      "SNC-REQ-01": {
+        "title": "Immunit\u00e9 aux lois extraterritoriales et localisation europ\u00e9enne des donn\u00e9es",
+        "version": "3.2",
         "severity": "mandatory",
         "implemented_by": []
       },
-      "ISO-27001-A8-01": {
-        "title": "S\u00e9curit\u00e9 des terminaux utilisateurs finaux et gestion de flotte",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "ISO-27001-A8-08": {
-        "title": "Gestion des vuln\u00e9rabilit\u00e9s techniques et veille de s\u00e9curit\u00e9",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "ISO-27001-A5-15": {
-        "title": "S\u00e9curit\u00e9 de l'information dans les relations avec les fournisseurs",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "ISO-27001-A8-28": {
-        "title": "Protection et int\u00e9grit\u00e9 des enregistrements de journalisation",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "ISO-27001-A8-09": {
-        "title": "Gestion de la configuration et contr\u00f4le des d\u00e9rives (GitOps)",
-        "version": "2022",
+      "SNC-REQ-05": {
+        "title": "Journalisation immuable et transmission en temps r\u00e9el au SOC",
+        "version": "3.2",
         "severity": "mandatory",
         "implemented_by": []
       }
