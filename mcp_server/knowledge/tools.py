@@ -572,3 +572,45 @@ def get_compliance_matrix(engagement: str, framework: str) -> dict[str, Any]:
         return error_response(str(e))
 
 
+def suggest_knowledge_improvement(
+    title: str,
+    rationale: str,
+    suggested_change: str,
+    author: str = "external-contributor",
+    contact_email: str | None = None,
+    source_engagement: str | None = None,
+) -> dict[str, Any]:
+    """Submit a suggestion to improve the architecture knowledge base.
+
+    The proposal will be archived, reviewed by the Knowledge Hub owner (Maurice Israel),
+    and evaluated for promotion into the enterprise standard via the Harvest loop.
+
+    Args:
+        title: Short descriptive title of the suggested knowledge improvement.
+        rationale: Why this change or pattern is needed and the architectural value it provides.
+        suggested_change: Markdown description of the proposed asset, ADR amendment, or pattern.
+        author: Name or identifier of the contributor.
+        contact_email: Optional email address to receive feedback on the review.
+        source_engagement: Optional engagement or project where this pattern was proven.
+    """
+    if not title or not title.strip():
+        return invalid_argument_response("title", "title must not be empty")
+    if not rationale or not rationale.strip():
+        return invalid_argument_response("rationale", "rationale must not be empty")
+    if not suggested_change or not suggested_change.strip():
+        return invalid_argument_response("suggested_change", "suggested_change must not be empty")
+
+    from mcp_server.core.notifier import notify_owner_of_suggestion
+
+    res = notify_owner_of_suggestion(
+        title=title.strip(),
+        rationale=rationale.strip(),
+        suggested_change=suggested_change.strip(),
+        author=author.strip(),
+        contact=contact_email.strip() if contact_email else None,
+        source_engagement=source_engagement.strip() if source_engagement else None,
+    )
+    return ok_response(res, count=1)
+
+
+

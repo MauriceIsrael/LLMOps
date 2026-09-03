@@ -1,0 +1,11 @@
+{
+  "id": "SUG-20260903-D6F674",
+  "timestamp": "2026-09-03T05:32:57.294907+00:00",
+  "title": "Intégration du contrôle SecNumCloud SNC-REQ-03 sur le KMS MCX",
+  "rationale": "Pour garantir la conformité OIV/Défense, les clés maîtresses de chiffrement doivent impérativement être gérées sur un HSM qualifié ANSSI.",
+  "suggested_change": "Amender ADR-0005 pour spécifier l utilisation d un HSM qualifié ANSSI pour le Root of Trust du KMS.",
+  "author": "Maurice Israel (Lead Architect)",
+  "contact": "maurice.israel@free.fr",
+  "source_engagement": "netdevops-mcx-2026",
+  "owner_notified": "maurice.israel@free.fr"
+}

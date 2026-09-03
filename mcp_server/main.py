@@ -47,6 +47,7 @@ from mcp_server.knowledge.tools import (
     list_frameworks,
     query_graph,
     search_assets,
+    suggest_knowledge_improvement,
 )
 
 active_plane = os.getenv("LLMOPS_PLANE", server_config.plane).lower()
@@ -66,6 +67,7 @@ mcp.tool()(list_frameworks)
 mcp.tool()(list_controls)
 mcp.tool()(get_compliance_trail)
 mcp.tool()(get_compliance_matrix)
+mcp.tool()(suggest_knowledge_improvement)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":

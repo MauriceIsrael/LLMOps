@@ -11,10 +11,12 @@ from mcp_server.knowledge.tools import (
 def test_list_frameworks_contract():
     res = list_frameworks()
     assert res["status"] == "ok"
-    assert res["count"] >= 2
+    assert res["count"] >= 4
     fws = {f["framework"] for f in res["data"]}
     assert "NIS2" in fws
     assert "3GPP" in fws
+    assert "SecNumCloud" in fws
+    assert "ISO27001" in fws
     for f in res["data"]:
         assert "title" in f
         assert "version" in f
@@ -25,7 +27,7 @@ def test_list_frameworks_contract():
 def test_list_controls_filtering():
     res_all = list_controls()
     assert res_all["status"] == "ok"
-    assert res_all["count"] >= 15
+    assert res_all["count"] >= 27
 
     res_nis2 = list_controls(framework="NIS2")
     assert res_nis2["status"] == "ok"
@@ -37,6 +39,14 @@ def test_list_controls_filtering():
     res_3gpp = list_controls(framework="3GPP")
     assert res_3gpp["status"] == "ok"
     assert res_3gpp["count"] == 5
+
+    res_snc = list_controls(framework="SecNumCloud")
+    assert res_snc["status"] == "ok"
+    assert res_snc["count"] == 6
+
+    res_iso = list_controls(framework="ISO27001")
+    assert res_iso["status"] == "ok"
+    assert res_iso["count"] == 6
 
 
 def test_get_compliance_trail():

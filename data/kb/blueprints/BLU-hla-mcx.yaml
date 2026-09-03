@@ -8,6 +8,8 @@ last_reviewed: 2026-07-27
 compliance_targets:
   - NIS2
   - 3GPP
+  - SecNumCloud
+  - ISO27001
 derived_from:
   - HLA_Mission_Critical_Mobile_Network_Structure.docx — 44 subsections, titles verbatim
   - the NetDevOps and Dark NOC architecture designed for the same system
@@ -261,6 +263,8 @@ sections:
 - id: '4.5'
   title: Enterprise Mobility Management (EMM/MDM) & Fleet Device Lifecycle
   must_answer: How is the device fleet enrolled, configured and retired?
+  compliance_controls:
+  - ISO-27001-A8-01
   requires:
   - subject: device-fleet
     level: L3_decided
@@ -323,6 +327,8 @@ sections:
   title: Compute & Telco Cloud Virtualization Platform
   must_answer: Which hosting domains exist, which are operated by the project, and where does the vendor
     boundary fall?
+  compliance_controls:
+  - SNC-REQ-04
   requires:
   - subject: rancher-domain
     level: L2_decomposed
@@ -375,6 +381,8 @@ sections:
 - id: '6.2'
   title: Disaster Recovery (DR) Strategy
   must_answer: What survives the loss of a site, and how is service restored?
+  compliance_controls:
+  - SNC-REQ-06
   requires:
   - subject: mobile-core
     level: L3_decided
@@ -398,6 +406,8 @@ sections:
   must_answer: Which zones exist, what may cross between them, and which crossings are structurally prohibited?
   compliance_controls:
   - NIS2-ART21-2A
+  - SNC-REQ-01
+  - SNC-REQ-02
   requires:
   - subject: security-posture
     level: L2_decomposed
@@ -427,6 +437,8 @@ sections:
   compliance_controls:
   - NIS2-ART21-2H
   - 3GPP-TS33179-KMS
+  - SNC-REQ-03
+  - ISO-27001-A8-24
   requires:
   - subject: security-posture
     level: L3_decided
@@ -440,6 +452,7 @@ sections:
   compliance_controls:
   - NIS2-ART21-2E
   - NIS2-ART21-2F
+  - ISO-27001-A8-08
   requires:
   - subject: automation-chain
     level: L3_decided
@@ -454,6 +467,8 @@ sections:
   must_answer: How is a security event detected, escalated and recorded, and by whom?
   compliance_controls:
   - NIS2-ART21-2B
+  - SNC-REQ-05
+  - ISO-27001-A8-28
   requires:
   - subject: observation
     level: L3_decided
@@ -511,6 +526,8 @@ sections:
 - id: '8.4'
   title: Single Source of Truth (SoT) & Agentic Automation Chain
   must_answer: Where does intended state live, how does it reach each domain, and how is deviation detected?
+  compliance_controls:
+  - ISO-27001-A8-09
   requires:
   - subject: automation-chain
     level: L2_decomposed
