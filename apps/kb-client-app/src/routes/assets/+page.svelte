@@ -13,6 +13,26 @@
 	let selectedType = $state<string>('all');
 	let selectedDomainFilter = $state<string>('all');
 
+	function getAssetTypeIcon(type: string): string {
+		switch (type?.toLowerCase()) {
+			case 'control':
+				return '🛡️';
+			case 'decision':
+			case 'adr':
+				return '⚖️';
+			case 'pattern':
+				return '🧩';
+			case 'principle':
+				return '🧭';
+			case 'template':
+				return '📋';
+			case 'skill':
+				return '🎓';
+			default:
+				return '📄';
+		}
+	}
+
 	onMount(async () => {
 		const urlId = $page.url.searchParams.get('id');
 		if (urlId) {
@@ -153,10 +173,11 @@
 							class="w-full text-left p-3.5 rounded-xl border transition-all space-y-1.5 cursor-pointer {selectedId === item.id ? 'bg-emerald-950/30 border-emerald-500/50 shadow-md text-white' : 'bg-slate-900/40 border-slate-800/80 hover:bg-slate-900 text-slate-300'}"
 						>
 							<div class="flex items-center justify-between gap-2">
-								<span class="font-mono text-xs font-bold {item.type === 'control' ? 'text-amber-400' : 'text-emerald-400'}">
-									{item.id}
+								<span class="font-mono text-xs font-bold {item.type === 'control' ? 'text-amber-400' : 'text-emerald-400'} flex items-center gap-1.5 min-w-0">
+									<span class="text-sm shrink-0" aria-hidden="true">{getAssetTypeIcon(item.type)}</span>
+									<span class="truncate">{item.id}</span>
 								</span>
-								<span class="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded {item.type === 'control' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'}">
+								<span class="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded {item.type === 'control' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'} shrink-0">
 									{item.type}
 								</span>
 							</div>

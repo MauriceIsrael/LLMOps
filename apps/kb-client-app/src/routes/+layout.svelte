@@ -54,17 +54,17 @@
    * Navigation items.
    */
   const menuItems = [
-    { href: '/',                      labelKey: 'nav.dashboard',  icon: LayoutDashboard, adminOnly: false },
-    { href: '/explorer',              labelKey: 'nav.explorer',   icon: Box,             adminOnly: false },
-    { href: '/assets',                labelKey: 'nav.assets',     icon: FileText,        adminOnly: false },
-    { href: '/governance/suggestions', labelKey: 'nav.governance', icon: Sparkles,        adminOnly: false },
-    { href: '/governance/staffing',   labelKey: 'nav.staffing',   icon: Users,           adminOnly: false },
-    { href: '/ideas',                 labelKey: 'nav.ideas',      icon: Lightbulb,       adminOnly: false },
-    { href: '/settings',              labelKey: 'nav.settings',   icon: Settings,        adminOnly: false },
+    { href: '/',                      labelKey: 'nav.dashboard',  icon: LayoutDashboard, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+    { href: '/explorer',              labelKey: 'nav.explorer',   icon: Box,             color: 'text-cyan-400',   bg: 'bg-cyan-500/10' },
+    { href: '/assets',                labelKey: 'nav.assets',     icon: FileText,        color: 'text-emerald-400',bg: 'bg-emerald-500/10' },
+    { href: '/governance/suggestions', labelKey: 'nav.governance', icon: Sparkles,        color: 'text-amber-400',  bg: 'bg-amber-500/10' },
+    { href: '/governance/staffing',   labelKey: 'nav.staffing',   icon: Users,           color: 'text-blue-400',   bg: 'bg-blue-500/10' },
+    { href: '/ideas',                 labelKey: 'nav.ideas',      icon: Lightbulb,       color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+    { href: '/settings',              labelKey: 'nav.settings',   icon: Settings,        color: 'text-slate-400',  bg: 'bg-slate-500/10' },
   ];
 
   const adminMenuItems = [
-    { href: '/admin', labelKey: 'nav.admin', icon: Shield },
+    { href: '/admin', labelKey: 'nav.admin', icon: Shield, color: 'text-rose-400', bg: 'bg-rose-500/10' },
   ];
 
   async function handleLogout() {
@@ -121,7 +121,9 @@
                      {active ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}"
               onclick={() => { sidebarOpen = false; }}
             >
-              <Icon class="h-5 w-5 shrink-0" />
+              <span class="p-1.5 rounded-lg {active ? 'bg-primary-foreground/20 text-primary-foreground' : `${item.bg} ${item.color}`} shrink-0 flex items-center justify-center">
+                <Icon class="h-4 w-4" />
+              </span>
               {$t(item.labelKey)}
             </a>
           {/each}
@@ -139,7 +141,9 @@
                        {active ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}"
                 onclick={() => { sidebarOpen = false; }}
               >
-                <Icon class="h-5 w-5 shrink-0" />
+                <span class="p-1.5 rounded-lg {active ? 'bg-primary-foreground/20 text-primary-foreground' : `${item.bg} ${item.color}`} shrink-0 flex items-center justify-center">
+                  <Icon class="h-4 w-4" />
+                </span>
                 {$t(item.labelKey, { default: 'Admin' })}
               </a>
             {/each}
@@ -229,10 +233,12 @@
           <a
             href={item.href}
             title={sidebarCollapsed ? $t(item.labelKey) : undefined}
-            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors group
+            class="flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors group
                    {active ? 'bg-primary text-primary-foreground' : 'text-foreground/80 hover:bg-muted hover:text-foreground'}"
           >
-            <Icon class="h-5 w-5 shrink-0" />
+            <span class="p-1.5 rounded-lg {active ? 'bg-primary-foreground/20 text-primary-foreground' : `${item.bg} ${item.color}`} shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Icon class="h-4 w-4" />
+            </span>
             {#if !sidebarCollapsed}
               <span class="truncate">{$t(item.labelKey)}</span>
             {/if}
@@ -253,10 +259,12 @@
             <a
               href={item.href}
               title={sidebarCollapsed ? $t(item.labelKey, { default: 'Admin' }) : undefined}
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+              class="flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors group
                      {active ? 'bg-primary text-primary-foreground' : 'text-foreground/80 hover:bg-muted hover:text-foreground'}"
             >
-              <Icon class="h-5 w-5 shrink-0" />
+              <span class="p-1.5 rounded-lg {active ? 'bg-primary-foreground/20 text-primary-foreground' : `${item.bg} ${item.color}`} shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Icon class="h-4 w-4" />
+              </span>
               {#if !sidebarCollapsed}
                 <span class="truncate">{$t(item.labelKey, { default: 'Admin' })}</span>
               {/if}
