@@ -46,7 +46,7 @@ export interface Edge3D {
 	id: string;
 	source: string;
 	target: string;
-	type: 'REQUIRES' | 'SUPERSEDES' | 'DEFINES' | 'ABOUT';
+	type: 'REQUIRES' | 'SUPERSEDES' | 'DEFINES' | 'ABOUT' | 'IMPLEMENTS';
 	sourceDomain: string;
 	targetDomain: string;
 }
@@ -73,6 +73,19 @@ export class KBAdapter {
 			const jsonPath = path.resolve(process.cwd(), '../../data/local_kb_export.json');
 			if (fs.existsSync(jsonPath)) {
 				const content = fs.readFileSync(jsonPath, 'utf-8');
+				return JSON.parse(content);
+			}
+		} catch {
+			// Fallback
+		}
+		return null;
+	}
+
+	private loadLocalSnapshot(): any {
+		try {
+			const snapPath = path.resolve(process.cwd(), '../../data/snapshots/latest.json');
+			if (fs.existsSync(snapPath)) {
+				const content = fs.readFileSync(snapPath, 'utf-8');
 				return JSON.parse(content);
 			}
 		} catch {
@@ -211,52 +224,95 @@ export class KBAdapter {
 	}
 
 	async fetchLayeredGraph3D(): Promise<LayeredGraphPayload> {
-		if (this.config.type === 'gcp') {
-			const snap = await this.fetchRemoteSnapshot();
-			if (snap?.assets && Array.isArray(snap.assets)) {
-				const domainCounts: Record<string, number> = {};
-				for (const a of snap.assets) {
-					const dom = a.domain || 'general';
-					domainCounts[dom] = (domainCounts[dom] || 0) + 1;
-				}
+		const snap = this.config.type === 'gcp'
+			? await this.fetchRemoteSnapshot()
+			: (this.loadLocalSnapshot() || this.loadLocalExport());
 
-				const topDomains = Object.entries(domainCounts)
-					.sort((a, b) => b[1] - a[1])
-					.slice(0, 6)
-					.map(([d]) => d);
+		if (snap?.assets && Array.isArray(snap.assets)) {
+			const domainCounts: Record<string, number> = {};
+			for (const a of snap.assets) {
+				const dom = a.domain || 'general';
+				domainCounts[dom] = (domainCounts[dom] || 0) + 1;
+			}
 
-				const nodes: Node3D[] = [];
+			const topDomains = Object.entries(domainCounts)
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, 5)
+				.map(([d]) => d);
 
-				snap.assets.forEach((a: any, idx: number) => {
-					const dom = a.domain || 'general';
-					const domainIdx = topDomains.indexOf(dom);
-					const y = (domainIdx >= 0 ? domainIdx : topDomains.length) * 6;
+			const complianceDomain = 'Compliance & Référentiels';
+			const displayDomains = [...topDomains, complianceDomain];
+			const complianceY = topDomains.length * 6;
 
-					const angle = (idx * 2 * Math.PI) / snap.assets.length;
-					const radius = 6 + (idx % 4) * 3;
-					const x = Math.round(Math.cos(angle) * radius);
-					const z = Math.round(Math.sin(angle) * radius);
+			const nodes: Node3D[] = [];
+			const edges: Edge3D[] = [];
 
-					nodes.push({
-						id: a.id,
-						title: a.title || a.id,
-						type: a.type || 'decision',
-						domain: dom,
-						status: a.status || 'active',
-						confidence: a.confidence || 'verified',
-						x,
-						y,
-						z,
-						degree: 4 + (idx % 5)
-					});
+			// 1. Architecture Asset Nodes
+			snap.assets.forEach((a: any, idx: number) => {
+				const dom = a.domain || 'general';
+				const domainIdx = topDomains.indexOf(dom);
+				const y = (domainIdx >= 0 ? domainIdx : topDomains.length - 1) * 6;
+
+				const angle = (idx * 2 * Math.PI) / snap.assets.length;
+				const radius = 6 + (idx % 4) * 3;
+				const x = Math.round(Math.cos(angle) * radius);
+				const z = Math.round(Math.sin(angle) * radius);
+
+				nodes.push({
+					id: a.id,
+					title: a.title || a.id,
+					type: a.type || 'decision',
+					domain: dom,
+					status: a.status || 'active',
+					confidence: a.confidence || 'verified',
+					x,
+					y,
+					z,
+					degree: 4 + (idx % 5)
+				});
+			});
+
+			// 2. Control Nodes (External Frameworks: NIS2, SecNumCloud, 3GPP, ISO27001)
+			const controls = snap.controls || [];
+			controls.forEach((c: any, idx: number) => {
+				const angle = (idx * 2 * Math.PI) / Math.max(controls.length, 1);
+				const radius = 7 + (idx % 3) * 3;
+				const x = Math.round(Math.cos(angle) * radius);
+				const z = Math.round(Math.sin(angle) * radius);
+
+				nodes.push({
+					id: c.id,
+					title: c.title || c.id,
+					type: 'control',
+					domain: c.framework || complianceDomain,
+					status: c.status || 'active',
+					confidence: 'verified',
+					x,
+					y: complianceY,
+					z,
+					degree: Array.isArray(c.implemented_by) ? c.implemented_by.length : 3
 				});
 
-				return {
-					domains: topDomains,
-					nodes,
-					edges: []
-				};
-			}
+				// 3. Edges (IMPLEMENTS) linking Assets to Regulatory Controls
+				if (Array.isArray(c.implemented_by)) {
+					c.implemented_by.forEach((aid: string) => {
+						edges.push({
+							id: `${aid}->${c.id}`,
+							source: aid,
+							target: c.id,
+							type: 'IMPLEMENTS',
+							sourceDomain: 'architecture',
+							targetDomain: c.framework || complianceDomain
+						});
+					});
+				}
+			});
+
+			return {
+				domains: displayDomains,
+				nodes,
+				edges
+			};
 		}
 
 		if (this.config.type === 'local') {

@@ -126,6 +126,7 @@
 						<option value="principle">Principe</option>
 						<option value="pattern">Pattern</option>
 						<option value="template">Modèle</option>
+						<option value="control">🛡️ Normes & Contrôles</option>
 					</select>
 				</div>
 			</div>
@@ -139,16 +140,15 @@
 				{:else}
 					{#each filteredAssets as item (item.id)}
 						<button
+							type="button"
 							onclick={() => loadAssetContent(item.id)}
-							class="w-full text-left p-3.5 rounded-xl border transition-all flex flex-col gap-1.5 {selectedId === item.id
-								? 'bg-emerald-500/10 border-emerald-500/40 text-white shadow-lg'
-								: 'bg-slate-900/40 border-slate-800/80 text-slate-300 hover:bg-slate-900 hover:border-slate-700'}"
+							class="w-full text-left p-3.5 rounded-xl border transition-all space-y-1.5 cursor-pointer {selectedId === item.id ? 'bg-emerald-950/30 border-emerald-500/50 shadow-md text-white' : 'bg-slate-900/40 border-slate-800/80 hover:bg-slate-900 text-slate-300'}"
 						>
 							<div class="flex items-center justify-between gap-2">
-								<span class="px-2 py-0.5 bg-slate-800 text-emerald-400 font-mono text-[11px] font-bold rounded">
+								<span class="font-mono text-xs font-bold {item.type === 'control' ? 'text-amber-400' : 'text-emerald-400'}">
 									{item.id}
 								</span>
-								<span class="text-[10px] uppercase font-semibold tracking-wider text-slate-400">
+								<span class="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded {item.type === 'control' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'}">
 									{item.type}
 								</span>
 							</div>
@@ -209,6 +209,56 @@
 								<span class="font-mono text-slate-200">{activeAsset.last_reviewed}</span>
 							</div>
 						</div>
+
+						<!-- Implemented Regulatory Controls (When viewing Pattern / Decision / Principle) -->
+						{#if activeAsset.implements_controls && activeAsset.implements_controls.length > 0}
+							<div class="mt-5 pt-4 border-t border-slate-800/80">
+								<div class="text-xs font-bold text-emerald-400 flex items-center gap-2 mb-2.5">
+									<span class="p-1 bg-emerald-500/20 rounded">🛡️</span>
+									<span>Exigences Réglementaires Couvertes ({activeAsset.implements_controls.length})</span>
+								</div>
+								<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+									{#each activeAsset.implements_controls as ctrl}
+										<button
+											type="button"
+											onclick={() => loadAssetContent(ctrl.id)}
+											class="p-2.5 bg-emerald-950/30 hover:bg-emerald-900/50 border border-emerald-500/30 hover:border-emerald-400 rounded-xl text-left transition-all cursor-pointer group shadow-sm"
+										>
+											<div class="flex items-center justify-between gap-2 mb-1">
+												<span class="font-mono text-xs font-bold text-emerald-300 group-hover:text-emerald-200">{ctrl.id}</span>
+												<span class="px-1.5 py-0.2 bg-emerald-500/20 text-[10px] font-semibold text-emerald-300 rounded uppercase">{ctrl.framework}</span>
+											</div>
+											<div class="text-xs text-slate-300 line-clamp-2 leading-snug">{ctrl.title}</div>
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/if}
+
+						<!-- Implementing Architecture Patterns (When viewing a Regulatory Control) -->
+						{#if activeAsset.implemented_by && activeAsset.implemented_by.length > 0}
+							<div class="mt-5 pt-4 border-t border-slate-800/80">
+								<div class="text-xs font-bold text-indigo-400 flex items-center gap-2 mb-2.5">
+									<span class="p-1 bg-indigo-500/20 rounded">🏛️</span>
+									<span>Motifs d'Architecture Implémentant ce Contrôle ({activeAsset.implemented_by.length})</span>
+								</div>
+								<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+									{#each activeAsset.implemented_by as impl}
+										<button
+											type="button"
+											onclick={() => loadAssetContent(impl.id)}
+											class="p-2.5 bg-indigo-950/30 hover:bg-indigo-900/50 border border-indigo-500/30 hover:border-indigo-400 rounded-xl text-left transition-all cursor-pointer group shadow-sm"
+										>
+											<div class="flex items-center justify-between gap-2 mb-1">
+												<span class="font-mono text-xs font-bold text-indigo-300 group-hover:text-indigo-200">{impl.id}</span>
+												<span class="px-1.5 py-0.2 bg-indigo-500/20 text-[10px] font-semibold text-indigo-300 rounded uppercase">{impl.type}</span>
+											</div>
+											<div class="text-xs text-slate-300 line-clamp-2 leading-snug">{impl.title}</div>
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/if}
 					</div>
 
 					<!-- Markdown Document Reader Card -->

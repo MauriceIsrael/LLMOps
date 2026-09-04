@@ -128,9 +128,52 @@
 						</span>
 					</div>
 
-					<h1 class="text-2xl font-extrabold text-white mb-6 leading-tight">
+					<h1 class="text-2xl font-extrabold text-white mb-4 leading-tight">
 						{assetData.title}
 					</h1>
+
+					<!-- Cross Navigation: Implemented Controls -->
+					{#if assetData.implements_controls && assetData.implements_controls.length > 0}
+						<div class="mb-6 p-4 bg-emerald-950/20 border border-emerald-500/30 rounded-xl">
+							<div class="text-xs font-bold text-emerald-400 flex items-center gap-1.5 mb-2.5">
+								<span>🛡️</span> Exigences Réglementaires Couvertes ({assetData.implements_controls.length})
+							</div>
+							<div class="flex flex-wrap gap-2">
+								{#each assetData.implements_controls as ctrl}
+									<button
+										type="button"
+										onclick={() => { searchId = ctrl.id; fetchAsset(ctrl.id); }}
+										class="px-3 py-1.5 bg-emerald-900/40 hover:bg-emerald-800/60 border border-emerald-500/40 text-emerald-200 hover:text-white rounded-lg text-xs font-mono transition-all flex items-center gap-2 cursor-pointer"
+									>
+										<span class="font-bold">{ctrl.id}</span>
+										<span class="text-slate-300 font-sans border-l border-emerald-500/30 pl-2 line-clamp-1">{ctrl.title}</span>
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
+
+					<!-- Cross Navigation: Implementing Architecture Patterns -->
+					{#if assetData.implemented_by && assetData.implemented_by.length > 0}
+						<div class="mb-6 p-4 bg-indigo-950/20 border border-indigo-500/30 rounded-xl">
+							<div class="text-xs font-bold text-indigo-400 flex items-center gap-1.5 mb-2.5">
+								<span>🏛️</span> Motifs d'Architecture Implémentant ce Contrôle ({assetData.implemented_by.length})
+							</div>
+							<div class="flex flex-wrap gap-2">
+								{#each assetData.implemented_by as impl}
+									<button
+										type="button"
+										onclick={() => { searchId = impl.id; fetchAsset(impl.id); }}
+										class="px-3 py-1.5 bg-indigo-900/40 hover:bg-indigo-800/60 border border-indigo-500/40 text-indigo-200 hover:text-white rounded-lg text-xs font-mono transition-all flex items-center gap-2 cursor-pointer"
+									>
+										<span class="font-bold">{impl.id}</span>
+										<span class="text-slate-300 font-sans border-l border-indigo-500/30 pl-2 line-clamp-1">{impl.title}</span>
+										<span class="px-1 bg-indigo-500/20 text-[10px] uppercase rounded font-sans">{impl.type}</span>
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
 
 					<!-- Parsed Markdown Body -->
 					<div class="prose prose-invert max-w-none space-y-4 text-slate-300 leading-relaxed font-sans text-sm whitespace-pre-wrap">

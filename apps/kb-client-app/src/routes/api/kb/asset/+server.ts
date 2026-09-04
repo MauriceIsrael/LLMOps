@@ -2,12 +2,35 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 import fs from 'node:fs';
 import path from 'node:path';
 
+let cachedSnapshot: any = null;
+let lastSnapshotFetch = 0;
+
+function getSnapshot(): any {
+	const now = Date.now();
+	if (cachedSnapshot && now - lastSnapshotFetch < 60000) {
+		return cachedSnapshot;
+	}
+	try {
+		const snapPath = path.resolve(process.cwd(), '../../data/snapshots/latest.json');
+		if (fs.existsSync(snapPath)) {
+			cachedSnapshot = JSON.parse(fs.readFileSync(snapPath, 'utf-8'));
+			lastSnapshotFetch = now;
+			return cachedSnapshot;
+		}
+	} catch (e) {
+		console.warn('[API Asset] Erreur lecture snapshot local:', e);
+	}
+	return null;
+}
+
 export const GET: RequestHandler = async ({ url }) => {
 	const id = url.searchParams.get('id');
 
 	if (!id) {
 		return json({ status: 'error', message: 'Asset ID is required' }, { status: 400 });
 	}
+
+	const snap = getSnapshot();
 
 	// Try to find the markdown file directly in data/kb/
 	const kbDir = path.resolve(process.cwd(), '../../data/kb');
@@ -45,9 +68,56 @@ export const GET: RequestHandler = async ({ url }) => {
 				const colonIdx = line.indexOf(':');
 				if (colonIdx > 0) {
 					const key = line.slice(0, colonIdx).trim();
-					const val = line.slice(colonIdx + 1).trim();
+					let val: any = line.slice(colonIdx + 1).trim();
+					if (val.startsWith('[') && val.endsWith(']')) {
+						val = val.slice(1, -1).split(',').map((s: string) => s.trim().replace(/^['"]|['"]$/g, ''));
+					}
 					frontmatter[key] = val;
 				}
+			}
+		}
+
+		const assetType = frontmatter.type || (id.startsWith('ADR-') ? 'decision' : id.startsWith('P-') ? 'principle' : id.startsWith('PAT-') ? 'pattern' : 'asset');
+
+		// Resolve bidirectional compliance relationships
+		let implements_controls: any[] = [];
+		let implemented_by: any[] = [];
+
+		if (snap) {
+			// If viewing a control: find who implements it
+			if (assetType === 'control' || (snap.controls || []).some((c: any) => c.id === id)) {
+				const ctrl = (snap.controls || []).find((c: any) => c.id === id);
+				const implIds = ctrl?.implemented_by || [];
+				implemented_by = implIds.map((aid: string) => {
+					const found = (snap.assets || []).find((a: any) => a.id === aid);
+					return {
+						id: aid,
+						type: found?.type || 'pattern',
+						title: found?.title || aid
+					};
+				});
+			} else {
+				// If viewing an asset: find which controls it implements
+				const rawCtrlIds: string[] = Array.isArray(frontmatter.implements_controls)
+					? frontmatter.implements_controls
+					: [];
+				
+				// Cross-reference with snap.controls
+				for (const c of snap.controls || []) {
+					if (Array.isArray(c.implemented_by) && c.implemented_by.includes(id) && !rawCtrlIds.includes(c.id)) {
+						rawCtrlIds.push(c.id);
+					}
+				}
+
+				implements_controls = rawCtrlIds.map((cid: string) => {
+					const ctrl = (snap.controls || []).find((c: any) => c.id === cid);
+					return {
+						id: cid,
+						framework: ctrl?.framework || cid.split('-')[0],
+						title: ctrl?.title || cid,
+						severity: ctrl?.severity || 'mandatory'
+					};
+				});
 			}
 		}
 
@@ -56,14 +126,16 @@ export const GET: RequestHandler = async ({ url }) => {
 			data: {
 				id: frontmatter.id || id,
 				title: frontmatter.title || id,
-				type: frontmatter.type || 'decision',
+				type: assetType,
 				status: frontmatter.status || 'active',
 				confidence: frontmatter.confidence || 'verified',
-				domain: frontmatter.domain || 'General',
+				domain: frontmatter.domain || frontmatter.framework || 'General',
 				owner: frontmatter.owner || 'architecture-team',
 				last_reviewed: frontmatter.last_reviewed || '2026-07-25',
 				frontmatter,
-				body
+				body,
+				implements_controls,
+				implemented_by
 			}
 		});
 	}
@@ -77,22 +149,50 @@ export const GET: RequestHandler = async ({ url }) => {
 		});
 
 		if (res.ok) {
-			const snap = await res.json();
-			const asset = (snap.assets || []).find((a: any) => a.id === id || a.typed_id === id);
-			if (asset) {
+			const remoteSnap = await res.json();
+			const asset = (remoteSnap.assets || []).find((a: any) => a.id === id || a.typed_id === id);
+			const ctrl = (remoteSnap.controls || []).find((c: any) => c.id === id);
+			const item = asset || ctrl;
+
+			if (item) {
+				const isControl = Boolean(ctrl);
+				const implIds = ctrl?.implemented_by || [];
+				const implemented_by = implIds.map((aid: string) => {
+					const found = (remoteSnap.assets || []).find((a: any) => a.id === aid);
+					return { id: aid, type: found?.type || 'pattern', title: found?.title || aid };
+				});
+
+				const rawCtrlIds: string[] = [];
+				for (const c of remoteSnap.controls || []) {
+					if (Array.isArray(c.implemented_by) && c.implemented_by.includes(id)) {
+						rawCtrlIds.push(c.id);
+					}
+				}
+				const implements_controls = rawCtrlIds.map((cid: string) => {
+					const foundCtrl = (remoteSnap.controls || []).find((c: any) => c.id === cid);
+					return {
+						id: cid,
+						framework: foundCtrl?.framework || cid.split('-')[0],
+						title: foundCtrl?.title || cid,
+						severity: foundCtrl?.severity || 'mandatory'
+					};
+				});
+
 				return json({
 					status: 'ok',
 					data: {
-						id: asset.id,
-						title: asset.title || asset.id,
-						type: asset.type || 'decision',
-						status: asset.status || 'active',
-						confidence: asset.confidence || 'verified',
-						domain: asset.domain || 'General',
-						owner: asset.owner || 'architecture-team',
-						last_reviewed: asset.last_reviewed || '2026-09-03',
-						frontmatter: asset,
-						body: `# ${asset.title}\n\nActif synchronisé depuis l'instance distante GCP Cloud Run.\n\n- **Domaine :** ${asset.domain}\n- **Statut :** ${asset.status}\n- **Confiance :** ${asset.confidence}\n- **Propriétaire :** ${asset.owner}\n- **Phase :** ${Array.isArray(asset.phase) ? asset.phase.join(', ') : asset.phase}`
+						id: item.id,
+						title: item.title || item.id,
+						type: isControl ? 'control' : (item.type || 'decision'),
+						status: item.status || 'active',
+						confidence: item.confidence || 'verified',
+						domain: item.domain || item.framework || 'General',
+						owner: item.owner || 'architecture-team',
+						last_reviewed: item.last_reviewed || '2026-09-03',
+						frontmatter: item,
+						body: `# ${item.title}\n\nActif synchronisé depuis l'instance distante GCP Cloud Run.\n\n- **Domaine :** ${item.domain || item.framework}\n- **Statut :** ${item.status}\n- **Confiance :** ${item.confidence}\n- **Propriétaire :** ${item.owner || 'architecture-team'}\n- **Phase :** ${Array.isArray(item.phase) ? item.phase.join(', ') : (item.phase || 'N/A')}`,
+						implements_controls,
+						implemented_by
 					}
 				});
 			}
