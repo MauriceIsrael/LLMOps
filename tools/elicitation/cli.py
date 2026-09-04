@@ -743,6 +743,68 @@ def audit_skills(
         console.print("[italic dim]Utilisez 'elicit staff add-skill', 'assign' ou 'contract-expertise' pour combler ces manques.[/italic dim]")
 
 
+@app.command(name="compliance")
+def compliance_cmd(
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement projet"),
+    framework: str = typer.Option("NIS2", "--framework", "-f", help="Référentiel réglementaire cible (NIS2, SecNumCloud, ISO27001, 3GPP)"),
+    emit_gaps: bool = typer.Option(False, "--emit-gaps", help="Émettre automatiquement des questions d'élicitation pour les contrôles non satisfaits"),
+) -> None:
+    """Audite la couverture réglementaire d'un projet face aux exigences d'un référentiel (Top-Down Compliance)."""
+    import json
+    from pathlib import Path
+    from rich.table import Table
+    from mcp_server.knowledge.tools import get_compliance_matrix
+
+    console.print(f"[bold blue]🛡️ Évaluation de conformité réglementaire pour '{engagement}' face à '{framework}'...[/bold blue]")
+    matrix_res = get_compliance_matrix(engagement=engagement, framework=framework)
+
+    if matrix_res.get("status") != "ok":
+        console.print(f"[bold red]❌ Erreur : {matrix_res.get('message', 'Échec audit')}[/bold red]")
+        return
+
+    data = matrix_res.get("data", {})
+
+    table = Table(title=f"Matrice de Conformité Réglementaire : {framework} — {engagement}")
+    table.add_column("Contrôle", style="cyan")
+    table.add_column("Intitulé de l'Exigence", style="white")
+    table.add_column("Sévérité", style="magenta")
+    table.add_column("Statut Projet", style="bold")
+    table.add_column("Assets KB Implémentant", style="green")
+
+    unaddressed = []
+    for item in data.get("matrix", []):
+        st = item["status"]
+        status_styled = "[green]COUVERT[/green]" if st == "covered" else "[red]NON COUVERT[/red]"
+        impls = ", ".join(item.get("implementing_kb_assets", [])) or "[dim]Aucun pattern KB[/dim]"
+        table.add_row(item["control_id"], item["title"], item["severity"], status_styled, impls)
+        if st != "covered":
+            unaddressed.append(item)
+
+    console.print(table)
+    pct = data.get("coverage_percentage", 0.0)
+    console.print(f"\n📊 [bold]Couverture du référentiel {framework} :[/bold] {pct}% ({data.get('covered_controls', 0)}/{data.get('total_controls', 0)} exigences)")
+
+    if unaddressed:
+        console.print(f"\n[bold yellow]⚠️ {len(unaddressed)} exigence(s) orpheline(s) détectée(s).[/bold yellow]")
+        if emit_gaps:
+            console.print("[bold cyan]📢 Émission automatique de questions d'élicitation pour les manques réglementaires...[/bold cyan]")
+            q_dir = Path(f"projects/{engagement}/mailbox/questions")
+            q_dir.mkdir(parents=True, exist_ok=True)
+            for u in unaddressed:
+                qid = f"Q-COMPL-{u['control_id']}"
+                q_file = q_dir / f"{qid}.json"
+                q_payload = {
+                    "id": qid,
+                    "section": "compliance",
+                    "routed_to": "security-officer",
+                    "control_id": u["control_id"],
+                    "framework": framework,
+                    "question": f"Comment le système garantit-il la conformité à l'exigence {u['control_id']} ({u['title']}) ?",
+                }
+                q_file.write_text(json.dumps(q_payload, indent=2, ensure_ascii=False), encoding="utf-8")
+                console.print(f"  • Question d'élicitation générée : [cyan]{qid}[/cyan] ({u['control_id']})")
+
+
 def main() -> None:
     app()
 

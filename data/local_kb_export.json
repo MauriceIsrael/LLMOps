@@ -6,10 +6,6 @@
         "count": 1
       },
       {
-        "type": "yaml-asset",
-        "count": 1
-      },
-      {
         "type": "template",
         "count": 5
       },
@@ -20,6 +16,10 @@
       {
         "type": "principle",
         "count": 15
+      },
+      {
+        "type": "yaml-asset",
+        "count": 1
       },
       {
         "type": "decision",
@@ -50,16 +50,16 @@
     ],
     "confidence_breakdown": [
       {
-        "confidence": "assumed",
-        "count": 3
-      },
-      {
         "confidence": "verified",
         "count": 51
       },
       {
         "confidence": "vendor-stated",
         "count": 2
+      },
+      {
+        "confidence": "assumed",
+        "count": 3
       }
     ],
     "glossary_count": 17,

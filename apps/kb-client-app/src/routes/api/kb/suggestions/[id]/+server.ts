@@ -1,6 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import fs from 'node:fs';
 import path from 'node:path';
+import { detectApplicableControls } from '$lib/server/compliance-matcher';
 
 const DEFAULT_DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1544949043631882250/NlTlNyu1u5Zr9ilw5UCeZoiUrT1nBvFG2F3ArNLg-y4NSGxN4UOPpLkzPhM90x9awKGY";
 
@@ -36,6 +37,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		}
 
 		let createdAssetId: string | null = null;
+		let detectedControls: string[] = [];
 
 		// Si approuvé, on génère le pattern dans data/kb/patterns/
 		if (action === 'approve') {
@@ -44,13 +46,25 @@ export const POST: RequestHandler = async ({ params, request }) => {
 				fs.mkdirSync(patternsDir, { recursive: true });
 			}
 
+			// Détection sémantique continue des contrôles réglementaires (Bottom-Up)
+			detectedControls = detectApplicableControls(
+				suggestion.title,
+				`${suggestion.rationale || ''}\n${suggestion.suggested_change || ''}`,
+				['telecom-core', 'security-architecture']
+			);
+
 			// Trouver le prochain ID de pattern (PAT-00X)
 			const existingFiles = fs.readdirSync(patternsDir).filter(f => f.startsWith('PAT-') && f.endsWith('.md'));
 			const nextNum = existingFiles.length + 1;
 			createdAssetId = `PAT-${String(nextNum).padStart(3, '0')}`;
 			suggestion.promoted_asset_id = createdAssetId;
+			suggestion.implemented_controls = detectedControls;
 
 			const newPatternPath = path.join(patternsDir, `${createdAssetId}.md`);
+			const controlsYaml = detectedControls.length > 0
+				? `\nimplements_controls: [${detectedControls.join(', ')}]`
+				: '';
+
 			const patternContent = `---
 id: ${createdAssetId}
 title: "${suggestion.title.replace(/"/g, '\\"')}"
@@ -62,7 +76,7 @@ domain: [telecom-core, security-architecture]
 owner: "${suggestion.author || 'corporate-architecture'}"
 last_reviewed: "${new Date().toISOString().slice(0, 10)}"
 source_suggestion: "${id}"
-source_engagement: "${suggestion.source_engagement || 'global'}"
+source_engagement: "${suggestion.source_engagement || 'global'}"${controlsYaml}
 ---
 
 # ${suggestion.title}
@@ -96,6 +110,20 @@ Promu automatiquement depuis le projet \`${suggestion.source_engagement || 'glob
 				reject: `❌ Proposition REJETÉE : ${suggestion.title}`,
 			};
 
+			const fields: any[] = [
+				{ name: "Auteur initial", value: suggestion.author || "Non spécifié", inline: true },
+				{ name: "Projet Source", value: suggestion.source_engagement || "Global", inline: true },
+				{ name: "Statut Actuel", value: suggestion.status.toUpperCase(), inline: true },
+			];
+
+			if (detectedControls.length > 0) {
+				fields.push({
+					name: "🛡️ Contrôles Couverts (Auto)",
+					value: detectedControls.join(", "),
+					inline: false
+				});
+			}
+
 			const discordPayload = {
 				username: "Knowledge Hub Governance",
 				avatar_url: "https://raw.githubusercontent.com/MauriceIsrael/LLMOps/main/assets/icon.png",
@@ -106,11 +134,7 @@ Promu automatiquement depuis le projet \`${suggestion.source_engagement || 'glob
 							? `**Retour du Lead Architect (${reviewer}) :**\n> ${feedback}\n\n**Proposition originale :**\n\`\`\`markdown\n${(suggestion.suggested_change || '').slice(0, 400)}\n\`\`\``
 							: (action === 'approve' ? `La proposition a été promue dans la base de connaissances sous l'identifiant actif **${createdAssetId}**.` : `La proposition a été clôturée.`),
 						color: colorMap[action],
-						fields: [
-							{ name: "Auteur initial", value: suggestion.author || "Non spécifié", inline: true },
-							{ name: "Projet Source", value: suggestion.source_engagement || "Global", inline: true },
-							{ name: "Statut Actuel", value: suggestion.status.toUpperCase(), inline: true },
-						],
+						fields: fields,
 						footer: { text: `ID: ${id} • Arbitrage Maurice Israel` },
 						timestamp: new Date().toISOString()
 					}

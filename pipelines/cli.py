@@ -121,6 +121,75 @@ def visualize_cmd(
     )
 
 
+@app.command(name="reconcile")
+def reconcile_cmd(
+    kb_dir: Path = typer.Option(
+        Path("data/kb"),
+        "--kb-dir",
+        "-k",
+        help="Répertoire racine de la base de connaissances.",
+    ),
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Simuler sans modifier les fichiers Markdown.",
+    ),
+) -> None:
+    """Réconcilie sémantiquement les assets KB avec les contrôles réglementaires (NIS2, SecNumCloud, ISO 27001, 3GPP)."""
+    from pipelines.compliance_mapper import reconcile_kb_assets
+
+    console.print(f"[bold blue]🔗 Lancement de la réconciliation sémantique (dry_run={dry_run})...[/bold blue]")
+    res = reconcile_kb_assets(kb_dir=kb_dir, dry_run=dry_run)
+    count = res["updated_assets_count"]
+    if count == 0:
+        console.print("[bold green]✨ Tous les assets sont déjà parfaitement synchronisés avec les contrôles réglementaires.[/bold green]")
+    else:
+        console.print(f"[bold green]✅ {count} assets mis à jour avec leurs contrôles réglementaires correspondants.[/bold green]")
+        for item in res["updated_assets"]:
+            console.print(f"  • [cyan]{item['asset_id']}[/cyan] : +{item['added_controls']} (total: {item['total_controls']})")
+
+
+@app.command(name="audit-compliance")
+def audit_compliance_cmd(
+    kb_dir: Path = typer.Option(
+        Path("data/kb"),
+        "--kb-dir",
+        "-k",
+        help="Répertoire racine de la base de connaissances.",
+    ),
+    framework: str = typer.Option(
+        None,
+        "--framework",
+        "-f",
+        help="Filtrer par référentiel spécifique (NIS2, SecNumCloud, ISO27001, 3GPP).",
+    ),
+) -> None:
+    """Audite la couverture réglementaire et détecte les manques d'architecture (Gap Analysis)."""
+    from rich.table import Table
+    from pipelines.compliance_mapper import audit_compliance_gaps
+
+    console.print(f"[bold blue]🛡️ Audit de conformité réglementaire (framework: {framework or 'TOUS'})...[/bold blue]")
+    res = audit_compliance_gaps(kb_dir=kb_dir, framework=framework)
+
+    table = Table(title="Couverture des Référentiels Réglementaires")
+    table.add_column("Référentiel", style="cyan")
+    table.add_column("Couverts / Total", style="magenta")
+    table.add_column("Taux", style="green")
+    table.add_column("Contrôles Orphelins (Gaps)", style="red")
+
+    for fw, data in res["frameworks"].items():
+        total = data["total"]
+        cov = data["covered"]
+        pct = f"{round((cov / total) * 100, 1)}%" if total > 0 else "0%"
+        unc = ", ".join([c["id"] for c in data["uncovered_controls"]]) or "Aucun (100% couvert)"
+        table.add_row(fw, f"{cov} / {total}", pct, unc)
+
+    console.print(table)
+    console.print(
+        f"[bold]Couverture globale : {res['global_covered']}/{res['global_total']} ({res['global_coverage_percentage']} %)[/bold]"
+    )
+
+
 def ingest_main() -> None:
     """Point d'entrée CLI direct pour l'ingestion."""
     typer.run(ingest)

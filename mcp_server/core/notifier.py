@@ -36,6 +36,18 @@ def notify_owner_of_suggestion(
     timestamp = datetime.now(UTC).isoformat()
     suggestion_id = f"SUG-{datetime.now(UTC).strftime('%Y%m%d')}-{uuid4().hex[:6].upper()}"
 
+    suggested_controls = []
+    try:
+        from pipelines.compliance_mapper import match_text_to_controls
+        matches = match_text_to_controls(
+            title=title,
+            text=f"{rationale}\n{suggested_change}",
+            threshold=0.35,
+        )
+        suggested_controls = [m.control_id for m in matches]
+    except Exception as match_err:
+        logger.debug("Échec détection automatique des contrôles : %s", match_err)
+
     payload = {
         "id": suggestion_id,
         "timestamp": timestamp,
@@ -46,6 +58,7 @@ def notify_owner_of_suggestion(
         "contact": contact,
         "source_engagement": source_engagement,
         "owner_notified": DEFAULT_OWNER_EMAIL,
+        "suggested_controls": suggested_controls,
     }
 
     # 1. Persistance locale dans data/suggestions/
@@ -56,11 +69,11 @@ def notify_owner_of_suggestion(
 
     # 2. Journalisation d'alerte haute priorité (GCP Cloud Logging)
     logger.warning(
-        "📢 [KNOWLEDGE_IMPROVEMENT_SUGGESTION] ID: %s | Title: %s | Author: %s | Contact: %s",
+        "📢 [KNOWLEDGE_IMPROVEMENT_SUGGESTION] ID: %s | Title: %s | Author: %s | Controls: %s",
         suggestion_id,
         title,
         author,
-        contact or "N/A",
+        ", ".join(suggested_controls) or "none",
     )
 
     notifications_sent = ["local_archive", "cloud_logging"]
@@ -78,7 +91,19 @@ def notify_owner_of_suggestion(
     for url in endpoints_to_try:
         try:
             if "discord.com/api/webhooks" in url:
-                # Format spécifique Discord Webhook avec Embed riche
+                fields = [
+                    {"name": "Auteur", "value": author, "inline": True},
+                    {"name": "Contact", "value": contact or "Non renseigné", "inline": True},
+                    {"name": "Engagement", "value": source_engagement or "Global KB", "inline": True},
+                    {"name": "ID Notification", "value": suggestion_id, "inline": True},
+                ]
+                if suggested_controls:
+                    fields.append({
+                        "name": "🛡️ Contrôles Réglementaires Détectés",
+                        "value": ", ".join(suggested_controls),
+                        "inline": False,
+                    })
+
                 discord_data = {
                     "username": "Knowledge Hub Bot",
                     "avatar_url": "https://raw.githubusercontent.com/MauriceIsrael/LLMOps/main/assets/icon.png",
@@ -87,13 +112,8 @@ def notify_owner_of_suggestion(
                             "title": f"📢 Nouvelle Suggestion d'Amélioration : {title}",
                             "description": f"**Raison / Valeur Architecturale :**\n{rationale}\n\n**Proposition :**\n```markdown\n{suggested_change[:600]}\n```",
                             "color": 3066993,  # Vert émeraude
-                            "fields": [
-                                {"name": "Auteur", "value": author, "inline": True},
-                                {"name": "Contact", "value": contact or "Non renseigné", "inline": True},
-                                {"name": "Engagement", "value": source_engagement or "Global KB", "inline": True},
-                                {"name": "ID Notification", "value": suggestion_id, "inline": True},
-                            ],
-                            "footer": {"text": "Knowledge Hub LLMOps • Détection & Harvest"},
+                            "fields": fields,
+                            "footer": {"text": "Knowledge Hub LLMOps • Détection & Harvest Automatique"},
                             "timestamp": timestamp,
                         }
                     ],
