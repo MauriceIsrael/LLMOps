@@ -2,10 +2,6 @@
   "analytics": {
     "volume_by_type": [
       {
-        "type": "estimate",
-        "count": 1
-      },
-      {
         "type": "template",
         "count": 5
       },
@@ -24,6 +20,10 @@
       {
         "type": "decision",
         "count": 13
+      },
+      {
+        "type": "estimate",
+        "count": 1
       },
       {
         "type": "questionnaire",
@@ -50,16 +50,16 @@
     ],
     "confidence_breakdown": [
       {
-        "confidence": "verified",
-        "count": 51
-      },
-      {
         "confidence": "vendor-stated",
         "count": 2
       },
       {
         "confidence": "assumed",
         "count": 3
+      },
+      {
+        "confidence": "verified",
+        "count": 51
       }
     ],
     "glossary_count": 17,

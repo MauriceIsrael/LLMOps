@@ -11,16 +11,15 @@ ENV/
 
 # Graph DB & local storage
 data/kuzu_db/
-data/knowledge.kuzu/
 data/knowledge.lbug
-data/engagements/
-!data/engagements/nordwave-mcx-2027.kuzu
+data/engagements/*
 data/snapshots/*
 !data/snapshots/latest.json
 *.kuzu
 *.lbug
 *.kz
 *.hindex
+!data/engagements/nordwave-mcx-2027.lbug
 
 # DeepEval / Promptfoo caches
 .deepeval/

@@ -30,10 +30,16 @@ def validate_engagement_id(engagement_id: str) -> str:
 
 
 def get_engagement_path(engagement_id: str, base_dir: Path | str | None = None) -> Path:
-    """Resolves an engagement identifier to its .kuzu database path."""
+    """Resolves an engagement identifier to its .lbug (or legacy .kuzu) database path."""
     valid_id = validate_engagement_id(engagement_id)
     eng_dir = Path(base_dir or server_config.engagements_dir)
-    return eng_dir / f"{valid_id}.kuzu"
+    lbug_path = eng_dir / f"{valid_id}.lbug"
+    if lbug_path.exists():
+        return lbug_path
+    kuzu_path = eng_dir / f"{valid_id}.kuzu"
+    if kuzu_path.exists():
+        return kuzu_path
+    return lbug_path
 
 
 def discover_engagements(base_dir: Path | str | None = None) -> list[dict[str, Any]]:
@@ -42,16 +48,24 @@ def discover_engagements(base_dir: Path | str | None = None) -> list[dict[str, A
     if not eng_dir.exists():
         return []
 
-    discovered = []
-    for path in eng_dir.glob("*.kuzu"):
+    discovered: dict[str, dict[str, Any]] = {}
+    for path in eng_dir.glob("*.lbug"):
         eng_id = path.stem
         if re.match(r"^[a-z0-9-]+$", eng_id):
-            discovered.append({
+            discovered[eng_id] = {
                 "id": eng_id,
                 "dataset": str(path),
                 "path": path,
-            })
-    return sorted(discovered, key=lambda x: x["id"])
+            }
+    for path in eng_dir.glob("*.kuzu"):
+        eng_id = path.stem
+        if eng_id not in discovered and re.match(r"^[a-z0-9-]+$", eng_id):
+            discovered[eng_id] = {
+                "id": eng_id,
+                "dataset": str(path),
+                "path": path,
+            }
+    return sorted(discovered.values(), key=lambda x: x["id"])
 
 
 class ReadOnlyLadybugClient:

@@ -29,10 +29,10 @@ def ingest(
         help="Répertoire racine de la base de connaissances d'architecture.",
     ),
     db_path: Path = typer.Option(
-        Path("data/kuzu_db"),
+        Path("data/knowledge.lbug"),
         "--db-path",
         "-d",
-        help="Répertoire de stockage de la base Kùzu DB.",
+        help="Chemin de stockage de la base LadybugDB.",
     ),
 ) -> None:
     """Ingère tous les fichiers Markdown du dossier KB et construit le graphe dans Kùzu DB."""
@@ -97,10 +97,10 @@ def ingest(
 @app.command(name="visualize")
 def visualize_cmd(
     db_path: Path = typer.Option(
-        Path("data/kuzu_db"),
+        Path("data/knowledge.lbug"),
         "--db-path",
         "-d",
-        help="Répertoire de stockage de la base Kùzu DB.",
+        help="Chemin de stockage de la base LadybugDB.",
     ),
     output: Path = typer.Option(
         Path("docs/graph_explorer.html"),

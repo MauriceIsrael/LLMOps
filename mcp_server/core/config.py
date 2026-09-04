@@ -15,14 +15,14 @@ class ServerConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     plane: Literal["knowledge", "engagement"] = "knowledge"
-    db_path: Path = Path("data/knowledge.kuzu")
-    knowledge_db_path: Path = Path("data/knowledge.kuzu")
+    db_path: Path = Path("data/knowledge.lbug")
+    knowledge_db_path: Path = Path("data/knowledge.lbug")
     engagements_dir: Path = Path("data/engagements")
     engagement: str | None = "nordwave-mcx-2027"
     app_name: str = "LLMOps Architecture KB"
     host: str = "0.0.0.0"
     port: int = 8000
-    dataset: str = "kuzu://data/knowledge.kuzu"
+    dataset: str = "ladybug://data/knowledge.lbug"
 
 
 server_config = ServerConfig()

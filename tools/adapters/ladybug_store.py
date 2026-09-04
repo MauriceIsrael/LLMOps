@@ -71,9 +71,19 @@ class LadybugGraphStore(GraphStore):
 
     def __init__(self, db_path: str | Path, read_only: bool = False) -> None:
         p = Path(db_path).resolve()
-        if p.is_dir() or p.suffix == ".kuzu" or p.name.endswith(".kuzu"):
-            # LadybugDB requires a file path, whereas legacy Kuzu used a directory.
-            self.db_path = str(p / "database.lbug")
+        if p.suffix == ".kuzu" or p.name.endswith(".kuzu"):
+            lbug_companion = p.with_suffix(".lbug")
+            if lbug_companion.exists() and lbug_companion.is_file():
+                self.db_path = str(lbug_companion)
+            elif (p / "database.lbug").exists():
+                self.db_path = str(p / "database.lbug")
+            else:
+                self.db_path = str(lbug_companion)
+        elif p.is_dir():
+            if (p / "database.lbug").exists():
+                self.db_path = str(p / "database.lbug")
+            else:
+                self.db_path = str(p.with_suffix(".lbug"))
         elif not p.suffix:
             self.db_path = str(p.with_suffix(".lbug"))
         else:
