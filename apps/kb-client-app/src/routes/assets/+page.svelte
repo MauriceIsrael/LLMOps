@@ -96,38 +96,46 @@
 	<!-- Main Workspace Split View -->
 	<div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
 		<!-- Left Sidebar Catalogue & Filters -->
-		<aside class="w-full lg:w-96 border-r border-slate-800/80 bg-slate-950/90 flex flex-col">
+		<aside class="w-full lg:w-[420px] shrink-0 border-r border-slate-800/80 bg-slate-950/90 flex flex-col">
 			<!-- Filters Section -->
 			<div class="p-4 border-b border-slate-800/80 space-y-3">
 				<input
 					type="text"
 					bind:value={searchQuery}
 					placeholder="Rechercher par titre ou ID..."
-					class="w-full bg-slate-900 border border-slate-800 text-white placeholder-slate-500 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-emerald-500 font-mono"
+					class="w-full bg-slate-900 border border-slate-800 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-emerald-500 font-mono shadow-inner"
 				/>
 
-				<div class="flex items-center gap-2">
-					<select
-						bind:value={selectedDomainFilter}
-						class="flex-1 bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none"
-					>
-						<option value="all">Tous les domaines</option>
-						{#each domains.filter((d) => d !== 'all') as dom}
-							<option value={dom}>{dom}</option>
-						{/each}
-					</select>
+				<div class="grid grid-cols-2 gap-2.5">
+					<div class="min-w-0">
+						<label for="type-filter" class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Type d'actif</label>
+						<select
+							id="type-filter"
+							bind:value={selectedType}
+							class="w-full bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-2 focus:outline-none focus:border-emerald-500 cursor-pointer truncate"
+						>
+							<option value="all">Tous types</option>
+							<option value="decision">ADR (Décision)</option>
+							<option value="principle">Principe</option>
+							<option value="pattern">Pattern</option>
+							<option value="template">Modèle</option>
+							<option value="control">🛡️ Normes / Contrôles</option>
+						</select>
+					</div>
 
-					<select
-						bind:value={selectedType}
-						class="bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none"
-					>
-						<option value="all">Tous types</option>
-						<option value="decision">ADR (Décision)</option>
-						<option value="principle">Principe</option>
-						<option value="pattern">Pattern</option>
-						<option value="template">Modèle</option>
-						<option value="control">🛡️ Normes & Contrôles</option>
-					</select>
+					<div class="min-w-0">
+						<label for="domain-filter" class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Domaine</label>
+						<select
+							id="domain-filter"
+							bind:value={selectedDomainFilter}
+							class="w-full bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-2 focus:outline-none focus:border-emerald-500 cursor-pointer truncate"
+						>
+							<option value="all">Tous domaines</option>
+							{#each domains.filter((d) => d !== 'all') as dom}
+								<option value={dom}>{dom}</option>
+							{/each}
+						</select>
+					</div>
 				</div>
 			</div>
 
