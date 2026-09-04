@@ -36,7 +36,7 @@
 </script>
 
 <svelte:head>
-  <title>{$t('nav.admin')} — Template App</title>
+  <title>{$t('nav.admin')} — {$t('app.title', { default: 'LLMOps explorer' })}</title>
 </svelte:head>
 
 <div class="flex-1 space-y-6 p-4 md:p-8 pt-6">

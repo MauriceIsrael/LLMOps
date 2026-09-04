@@ -1,12 +1,12 @@
 {
   "app": {
-    "title": "A small app to have fun"
+    "title": "LLMOps explorer"
   },
   "nav": {
     "dashboard": "Dashboard",
-    "explorer": "3D Visualizer (Threlte)",
-    "assets": "KB Asset Catalogue",
-    "governance": "REX Governance",
+    "explorer": "3D Explorer",
+    "assets": "Asset Catalog",
+    "governance": "Governance REX",
     "staffing": "Staffing & Skills",
     "ideas": "Idea Box",
     "users": "Users",
@@ -78,4 +78,3 @@
     "created": "Created \"{name}\""
   }
 }
-

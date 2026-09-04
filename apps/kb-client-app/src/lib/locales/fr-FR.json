@@ -1,16 +1,16 @@
 {
   "app": {
-    "title": "Une petite app pour rigoler"
+    "title": "LLMOps explorer"
   },
   "nav": {
     "dashboard": "Tableau de bord",
-    "explorer": "Visualiseur 3D Threlte",
-    "assets": "Catalogue d'Actifs KB",
+    "explorer": "Explorateur 3D",
+    "assets": "Catalogue d'actifs",
     "governance": "Gouvernance REX",
     "staffing": "Staffing & Compétences",
-    "users": "Utilisateurs (Exemple)",
-    "settings": "Paramètres (Exemple)",
     "ideas": "Boîte à idées",
+    "settings": "Paramètres",
+    "users": "Utilisateurs",
     "language": "Langue",
     "admin": "Administration"
   },
@@ -44,7 +44,6 @@
     "dark": "Sombre",
     "system": "Système"
   },
-
   "auth": {
     "signOut": "Déconnexion",
     "signIn": "Connexion"
@@ -115,17 +114,27 @@
       "email": "E-mail",
       "emailDesc": "Vous pouvez gérer les adresses e-mail vérifiées dans vos paramètres de messagerie.",
       "update": "Mettre à jour le profil"
-    }
+    },
+    "theme": "Thème"
   },
   "admin": {
     "title": "Administration",
     "desc": "Accessible uniquement aux utilisateurs ayant le rôle admin.",
     "rbacNotice": "RBAC en action. Cette page est protégée par requireRole(locals, 'admin') dans +page.server.ts.",
     "users": {
-      "title": "Utilisateurs de démonstration",
-      "desc": "{count} utilisateurs pré-enregistrés."
+      "title": "Gestion des utilisateurs",
+      "desc": "Gérez les utilisateurs de la plateforme et leurs rôles.",
+      "addUser": "Ajouter un utilisateur"
+    },
+    "policies": {
+      "title": "Permissions & Groupes",
+      "desc": "Gestion des politiques Casbin ABAC/RBAC.",
+      "addPolicy": "Ajouter une politique",
+      "addMember": "Ajouter un membre au groupe"
+    },
+    "tabs": {
+      "users": "Utilisateurs",
+      "permissions": "Permissions"
     }
   }
 }
-
-

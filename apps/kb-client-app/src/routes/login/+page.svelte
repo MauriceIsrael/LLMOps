@@ -2,6 +2,7 @@
   import { apiFetch } from '$lib/api/fetch';
   import { toast } from '$lib/toast/index.svelte';
   import { goto } from '$app/navigation';
+  import { t } from 'svelte-i18n';
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import type { PageData } from './$types';
@@ -56,7 +57,7 @@
 </script>
 
 <svelte:head>
-  <title>Sign In — Template App</title>
+  <title>{$t('auth.signIn', { default: 'Sign In' })} — {$t('app.title', { default: 'LLMOps explorer' })}</title>
 </svelte:head>
 
 <div class="min-h-screen flex items-center justify-center bg-muted/30 p-4">

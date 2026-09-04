@@ -1,12 +1,16 @@
 {
   "app": {
-    "title": "Una pequeña aplicación para divertirse"
+    "title": "LLMOps explorer"
   },
   "nav": {
     "dashboard": "Panel de control",
+    "explorer": "Explorador 3D",
+    "assets": "Catálogo de Activos",
+    "governance": "Gobernanza REX",
+    "staffing": "Dotación y Habilidades",
+    "ideas": "Buzón de ideas",
+    "settings": "Configuración",
     "users": "Usuarios",
-    "settings": "Ajustes",
-    "ideas": "Buzón de sugerencias",
     "language": "Idioma",
     "admin": "Administración"
   },

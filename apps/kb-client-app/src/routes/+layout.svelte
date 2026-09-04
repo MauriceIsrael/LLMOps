@@ -91,6 +91,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>{$t('app.title', { default: 'LLMOps explorer' })}</title>
+</svelte:head>
+
 <div class="flex min-h-screen w-full flex-col bg-background text-foreground text-base">
 
   <!-- ─── Top App Bar ──────────────────────────────────────────────────── -->
@@ -167,7 +171,7 @@
 
     <!-- App title -->
     <span class="text-lg font-bold tracking-tight truncate">
-      {$t('app.title', { default: 'SvelteKit Admin' })}
+      {$t('app.title', { default: 'LLMOps explorer' })}
     </span>
 
     <!-- Right-side controls -->

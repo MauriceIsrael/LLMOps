@@ -1,12 +1,16 @@
 {
   "app": {
-    "title": "A small app to have fun"
+    "title": "LLMOps explorer"
   },
   "nav": {
     "dashboard": "Dashboard",
-    "users": "Users (Example)",
-    "settings": "Settings (Example)",
-    "ideas": "Suggestions",
+    "explorer": "3D Explorer",
+    "assets": "Asset Catalog",
+    "governance": "Governance REX",
+    "staffing": "Staffing & Skills",
+    "ideas": "Idea Box",
+    "settings": "Settings",
+    "users": "Users",
     "language": "Language",
     "admin": "Administration"
   },
@@ -40,7 +44,6 @@
     "dark": "Dark",
     "system": "System"
   },
-
   "auth": {
     "signOut": "Sign out",
     "signIn": "Sign In"
@@ -111,7 +114,8 @@
       "email": "Email",
       "emailDesc": "You can manage verified email addresses in your email settings.",
       "update": "Update profile"
-    }
+    },
+    "theme": "Theme"
   },
   "admin": {
     "title": "Administration",
@@ -134,5 +138,3 @@
     }
   }
 }
-
-

@@ -30,7 +30,7 @@
 </script>
 
 <svelte:head>
-  <title>Boîte à Idées — Template App</title>
+  <title>{$t('nav.ideas', { default: 'Boîte à Idées' })} — {$t('app.title', { default: 'LLMOps explorer' })}</title>
 </svelte:head>
 
 <div class="flex-1 space-y-6 p-4 md:p-8 pt-6">
