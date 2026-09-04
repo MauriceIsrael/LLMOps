@@ -1,10 +1,9 @@
 """Unit tests for compliance mapper, regulatory control detection and gap auditing."""
 
-from pathlib import Path
 from pipelines.compliance_mapper import (
+    audit_compliance_gaps,
     load_all_controls,
     match_text_to_controls,
-    audit_compliance_gaps,
 )
 
 

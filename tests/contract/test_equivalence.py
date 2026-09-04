@@ -17,9 +17,9 @@ def _run_cli_script(script_name: str, *args: str) -> None:
 @pytest.mark.deterministic
 def test_knowledge_equivalence(tmp_path: Path):
     """Export knowledge plane -> Import into LadybugDB -> Assert dump matches golden snapshot."""
-    source_db = "data/knowledge.kuzu"
+    source_db = "data/knowledge.lbug" if Path("data/knowledge.lbug").exists() else "data/knowledge.kuzu"
     if not Path(source_db).exists():
-        pytest.skip("data/knowledge.kuzu does not exist")
+        pytest.skip(f"{source_db} does not exist")
 
     export_dir = tmp_path / "export_knowledge"
     target_db = tmp_path / "knowledge.lbug"
@@ -42,9 +42,9 @@ def test_knowledge_equivalence(tmp_path: Path):
 @pytest.mark.deterministic
 def test_engagement_equivalence(tmp_path: Path):
     """Export engagement plane -> Import into LadybugDB -> Assert dump matches golden snapshot."""
-    source_db = "data/engagements/nordwave-mcx-2027.kuzu"
+    source_db = "data/engagements/nordwave-mcx-2027.lbug" if Path("data/engagements/nordwave-mcx-2027.lbug").exists() else "data/engagements/nordwave-mcx-2027.kuzu"
     if not Path(source_db).exists():
-        pytest.skip("data/engagements/nordwave-mcx-2027.kuzu does not exist")
+        pytest.skip(f"{source_db} does not exist")
 
     export_dir = tmp_path / "export_engagement"
     target_db = tmp_path / "engagement.lbug"

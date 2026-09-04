@@ -166,6 +166,7 @@ def audit_compliance_cmd(
 ) -> None:
     """Audite la couverture réglementaire et détecte les manques d'architecture (Gap Analysis)."""
     from rich.table import Table
+
     from pipelines.compliance_mapper import audit_compliance_gaps
 
     console.print(f"[bold blue]🛡️ Audit de conformité réglementaire (framework: {framework or 'TOUS'})...[/bold blue]")

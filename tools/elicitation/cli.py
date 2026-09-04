@@ -752,7 +752,9 @@ def compliance_cmd(
     """Audite la couverture réglementaire d'un projet face aux exigences d'un référentiel (Top-Down Compliance)."""
     import json
     from pathlib import Path
+
     from rich.table import Table
+
     from mcp_server.knowledge.tools import get_compliance_matrix
 
     console.print(f"[bold blue]🛡️ Évaluation de conformité réglementaire pour '{engagement}' face à '{framework}'...[/bold blue]")

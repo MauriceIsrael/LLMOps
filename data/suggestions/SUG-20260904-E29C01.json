@@ -1,0 +1,12 @@
+{
+  "id": "SUG-20260904-E29C01",
+  "timestamp": "2026-09-04T20:16:13.266979+00:00",
+  "title": "Proposition de Pattern : Double Validation Canary pour NetDevOps",
+  "rationale": "Évite les régressions de routage BGP en injectant un préfixe canary avant déploiement généralisé.",
+  "suggested_change": "Créer un nouveau pattern PAT-007 spécifiant le canary testing réseau.",
+  "author": "Alice (Cloud Architect)",
+  "contact": "alice@nordwave.eu",
+  "source_engagement": "nordwave-mcx-2027",
+  "owner_notified": "maurice.israel@free.fr",
+  "suggested_controls": []
+}

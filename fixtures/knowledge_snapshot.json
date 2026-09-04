@@ -4,16 +4,16 @@
   "data": {
     "schema_version": "1.0",
     "knowledge": {
-      "dataset": "data/knowledge.kuzu",
+      "dataset": "data/knowledge.lbug",
       "node_counts": {
-        "Asset": 46,
-        "GlossaryTerm": 10
+        "Asset": 56,
+        "GlossaryTerm": 17
       }
     },
     "engagements": [
       {
         "id": "nordwave-mcx-2027",
-        "dataset": "data/engagements/nordwave-mcx-2027.kuzu",
+        "dataset": "data/engagements/nordwave-mcx-2027.lbug",
         "node_counts": {
           "Subject": 8,
           "Statement": 9,

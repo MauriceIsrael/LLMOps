@@ -14,13 +14,13 @@ from tools.elicitation.db_schema import ElicitationSchemaInitializer
 
 def migrate_to_adr0015(data_dir: Path | str = "data") -> dict[str, str]:
     base = Path(data_dir)
-    knowledge_db = base / "knowledge.kuzu"
+    knowledge_db = base / "knowledge.lbug"
     engagements_dir = base / "engagements"
-    ref_engagement_db = engagements_dir / "nordwave-mcx-2027.kuzu"
+    ref_engagement_db = engagements_dir / "nordwave-mcx-2027.lbug"
 
     engagements_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Initialize clean knowledge.kuzu
+    # 1. Initialize clean knowledge.lbug
     if knowledge_db.exists():
         if knowledge_db.is_dir():
             shutil.rmtree(knowledge_db)
