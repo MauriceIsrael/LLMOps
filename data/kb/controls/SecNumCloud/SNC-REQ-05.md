@@ -1,28 +1,31 @@
 ---
 id: SNC-REQ-05
-title: Journalisation immuable et transmission en temps réel au SOC
+title: Immutable Audit Logging and Real-Time SOC Telemetry
+title_fr: Journalisation immuable et transmission en temps réel au SOC
 type: control
 framework: SecNumCloud
 version: "3.2"
 jurisdiction: FR-EU
-domain: [observability,security-monitoring]
+domain: [observability, security-monitoring]
 severity: mandatory
-target_entities: [essential,critical-infrastructure]
+target_entities: [essential, critical-infrastructure]
 status: active
 confidence: verified
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-04
 owner: security-compliance-team
+source_ref: "ANSSI SecNumCloud 3.2, Requirement 12.4"
+terms: [immutable-log, worm, siem]
 ---
 
-# SNC-REQ-05 — Journalisation immuable et transmission en temps réel au SOC
+# SNC-REQ-05 — Immutable Audit Logging and Real-Time SOC Telemetry
 
-## Référence Réglementaire
-Référentiel d'exigences ANSSI SecNumCloud version 3.2, Exigence 12.4 (Surveillance, journalisation et détection).
+## Regulatory Reference
+ANSSI SecNumCloud 3.2 Requirements Baseline, Requirement 12.4.
 
-## Exigence Légale
-Les événements de sécurité, d'accès et d'administration doivent être journalisés sans délai, synchronisés sur une source de temps certifiée, scellés contre toute altération et analysés en temps réel par un SOC qualifié PDIS.
+## Legal Requirement
+Security, access, and administration events must be logged without delay, synchronized with certified time sources, cryptographically sealed, and analyzed in real time by a qualified SOC.
 
-## Critères d'Acceptation d'Architecture
-- Envoi chiffré et asynchrone des traces d'audit vers un puits de logs centralisé (SIEM/Elasticsearch) avec politique d'inviolabilité WORM (Write Once Read Many).
-- Synchronisation des horloges sur au moins deux sources NTP sécurisées et signées.
-- Détection proactive des anomalies de flux et déclenchement d'alertes automatiques vers l'équipe CSIRT/SOC.
+## Architecture Acceptance Criteria
+- Asynchronous, encrypted log forwarding to a centralized SIEM with Write-Once-Read-Many (WORM) immutability.
+- Clock synchronization across redundant, cryptographically secured NTP/PTP sources.
+- Automated anomaly detection triggering immediate alerts to the CSIRT/SOC incident response team.

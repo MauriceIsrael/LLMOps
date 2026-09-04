@@ -13,7 +13,7 @@
 	<div class="p-6 bg-slate-900/80 backdrop-blur border border-slate-800 rounded-xl shadow-lg">
 		<h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
 			<span class="p-1 bg-indigo-500/20 text-indigo-400 rounded">📊</span>
-			Masse Volumétrique par Domaine d'Expertise
+			Cartographie des Connaissances par Domaine
 		</h3>
 		<div class="space-y-4">
 			{#if data?.domain_volumes}
@@ -39,10 +39,10 @@
 	<div class="p-6 bg-slate-900/80 backdrop-blur border border-slate-800 rounded-xl shadow-lg">
 		<h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
 			<span class="p-1 bg-emerald-500/20 text-emerald-400 rounded">🧲</span>
-			Gravité & Matrice d'Ancrage Inter-Domaines
+			Dépendances & Synergies Inter-Domaines
 		</h3>
 		<p class="text-xs text-slate-400 mb-4">
-			Arêtes <code class="text-emerald-400">REQUIRES</code> franchissant les limites de domaines. Les domaines les plus ciblés agissent comme les **piliers d'ancrage**.
+			Arêtes <code class="text-emerald-400">REQUIRES</code> franchissant les limites de domaines. Les domaines les plus sollicités constituent les **socles d'architecture**.
 		</p>
 		<div class="space-y-3">
 			{#if data?.cross_domain_dependencies}

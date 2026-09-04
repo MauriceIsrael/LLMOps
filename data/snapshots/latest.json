@@ -1,8 +1,8 @@
 {
-  "snapshot_id": "snapshot-2026-09-03-9a50305",
-  "created_at": "2026-09-03T19:56:26Z",
-  "source_revision": "9a50305c8796b87530fdc79a26987dbdf0c64139",
-  "payload_sha256": "sha256:24a644a2189e307edab4f9cc4d533d79968acd898e4d9666f3d8673fa4582efb",
+  "snapshot_id": "snapshot-2026-09-04-783a4d8",
+  "created_at": "2026-09-04T19:24:51Z",
+  "source_revision": "783a4d88a38982371d1f37e7ce744fee375d53dd",
+  "payload_sha256": "sha256:45f49a21fc93c83080dd6a0028a87e4d4318f942c3f988a9f7362ac3b838c810",
   "schema_version": "1.0",
   "applicability_index": {
     "TPL-getting-started": {
@@ -193,7 +193,9 @@
     },
     "TPL-glossary": {
       "domains": [
-        "delivery"
+        "delivery",
+        "governance",
+        "security"
       ],
       "phases": [
         "BID",
@@ -581,6 +583,100 @@
       ],
       "rules": [
         "rule:tpl-hla-section-map"
+      ]
+    },
+    "PAT-008": {
+      "domains": [
+        "telecom-core",
+        "security-architecture"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-008"
+      ]
+    },
+    "SKL-AUTO-GITOPS": {
+      "domains": [
+        "automation-devops"
+      ],
+      "phases": [],
+      "rules": [
+        "rule:skl-auto-gitops"
+      ]
+    },
+    "SKL-CRYPTO-HSM": {
+      "domains": [
+        "security-cryptography"
+      ],
+      "phases": [],
+      "rules": [
+        "rule:skl-crypto-hsm"
+      ]
+    },
+    "SKL-KUBE-TELCO": {
+      "domains": [
+        "cloud-platform"
+      ],
+      "phases": [],
+      "rules": [
+        "rule:skl-kube-telco"
+      ]
+    },
+    "SKL-MOB-FLEET": {
+      "domains": [
+        "device-management"
+      ],
+      "phases": [],
+      "rules": [
+        "rule:skl-mob-fleet"
+      ]
+    },
+    "SKL-NET-UNDERLAY": {
+      "domains": [
+        "network-transport"
+      ],
+      "phases": [],
+      "rules": [
+        "rule:skl-net-underlay"
+      ]
+    },
+    "SKL-OBS-SOC": {
+      "domains": [
+        "observability-security"
+      ],
+      "phases": [],
+      "rules": [
+        "rule:skl-obs-soc"
+      ]
+    },
+    "SKL-RESIL-DR": {
+      "domains": [
+        "resilience-continuity"
+      ],
+      "phases": [],
+      "rules": [
+        "rule:skl-resil-dr"
+      ]
+    },
+    "SKL-SEC-ZEROTRUST": {
+      "domains": [
+        "security-architecture"
+      ],
+      "phases": [],
+      "rules": [
+        "rule:skl-sec-zerotrust"
+      ]
+    },
+    "SKL-TELCO-CORE": {
+      "domains": [
+        "telecom-core"
+      ],
+      "phases": [],
+      "rules": [
+        "rule:skl-telco-core"
       ]
     }
   },
@@ -1338,6 +1434,26 @@
       "superseded_by": []
     },
     {
+      "id": "PAT-008",
+      "typed_id": "pattern:PAT-008",
+      "title": "Proposition de Pattern : Double Validation Canary pour NetDevOps",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "telecom-core,security-architecture",
+      "phase": "BUILD,RUN",
+      "owner": "Alice (Cloud Architect)",
+      "last_reviewed": "2026-09-03",
+      "provenance": {
+        "document": "PAT-008.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "aab8edba381df414d61829c37595c8e5f831961ec3d7018b98ea4d8cccce682d"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
       "id": "QST-cloud-platform",
       "typed_id": "questionnaire:QST-cloud-platform",
       "title": "Container platform, observability and assistant \u2014 framing",
@@ -1418,6 +1534,186 @@
       "superseded_by": []
     },
     {
+      "id": "SKL-AUTO-GITOPS",
+      "typed_id": "asset:SKL-AUTO-GITOPS",
+      "title": "Automatisation NetDevOps, CI/CD et Single Source of Truth GitOps",
+      "type": "skill",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "automation-devops",
+      "phase": null,
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-03",
+      "provenance": {
+        "document": "SKL-AUTO-GITOPS.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "219a5f4550193a47188162f9989d97f245fd8712b14afa71a72d15a4f989fdb5"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "SKL-CRYPTO-HSM",
+      "typed_id": "asset:SKL-CRYPTO-HSM",
+      "title": "Cryptographie Avanc\u00e9e et Int\u00e9gration HSM / KMS Qualifi\u00e9s",
+      "type": "skill",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "security-cryptography",
+      "phase": null,
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-03",
+      "provenance": {
+        "document": "SKL-CRYPTO-HSM.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "cc26b0551af916b7de2e75913ecb1d8c2a39cad5542f2d530363777b4ff09a52"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "SKL-KUBE-TELCO",
+      "typed_id": "asset:SKL-KUBE-TELCO",
+      "title": "Virtualisation Cloud T\u00e9l\u00e9com et Durcissement Rancher/Kubernetes",
+      "type": "skill",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "cloud-platform",
+      "phase": null,
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-03",
+      "provenance": {
+        "document": "SKL-KUBE-TELCO.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "e49c62cfb2d0da8d425ef48b7989d8bce3a068e432488f0107e3d060f16c0e3e"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "SKL-MOB-FLEET",
+      "typed_id": "asset:SKL-MOB-FLEET",
+      "title": "Gestion de Flotte de Terminaux Mobiles et MDM/EMM",
+      "type": "skill",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "device-management",
+      "phase": null,
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-03",
+      "provenance": {
+        "document": "SKL-MOB-FLEET.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "af899f183c0965bab46b2825cc99329e37ddc1d891ede2d0d73efca682b955c5"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "SKL-NET-UNDERLAY",
+      "typed_id": "asset:SKL-NET-UNDERLAY",
+      "title": "Architecture IP Transport, BGP-EVPN et Matrices de Flux",
+      "type": "skill",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "network-transport",
+      "phase": null,
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-03",
+      "provenance": {
+        "document": "SKL-NET-UNDERLAY.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "c3bf9931f4832506cfe7ad99dd0f44db4348d49a535d8de311a4b8010d370d38"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "SKL-OBS-SOC",
+      "typed_id": "asset:SKL-OBS-SOC",
+      "title": "Observabilit\u00e9 T\u00e9l\u00e9com, Tra\u00e7abilit\u00e9 WORM et Int\u00e9gration SOC/SIEM",
+      "type": "skill",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "observability-security",
+      "phase": null,
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-03",
+      "provenance": {
+        "document": "SKL-OBS-SOC.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "55f77ea503847f091e12751b252f2f199937b67ab3bd8f1867e9f7ca5d0573d5"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "SKL-RESIL-DR",
+      "typed_id": "asset:SKL-RESIL-DR",
+      "title": "R\u00e9silience d'Infrastructure et Plans de Continuit\u00e9 / Reprise (PCA/PRA)",
+      "type": "skill",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "resilience-continuity",
+      "phase": null,
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-03",
+      "provenance": {
+        "document": "SKL-RESIL-DR.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "3b901051d2a9d1bd4009a3649ce28c5562c36946296c0c7ebe49acb34e5de62f"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "SKL-SEC-ZEROTRUST",
+      "typed_id": "asset:SKL-SEC-ZEROTRUST",
+      "title": "Architecture Zero-Trust, Zonage R\u00e9seau et Bastion d'Administration",
+      "type": "skill",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "security-architecture",
+      "phase": null,
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-03",
+      "provenance": {
+        "document": "SKL-SEC-ZEROTRUST.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "207b33e94d473d99afb5e064d3fa6efcbae118c9118b9fe5ff239a75b4c26ba1"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "SKL-TELCO-CORE",
+      "typed_id": "asset:SKL-TELCO-CORE",
+      "title": "Ing\u00e9nierie C\u0153ur de R\u00e9seau 5G SBA & Signalisation MCX",
+      "type": "skill",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "telecom-core",
+      "phase": null,
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-03",
+      "provenance": {
+        "document": "SKL-TELCO-CORE.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "e252cc59031a4c6058eb196029a2a2d16fe824c4113cca79229ed7139c65ab9f"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
       "id": "TPL-claims-register",
       "typed_id": "template:TPL-claims-register",
       "title": "Claims register for proposals",
@@ -1464,10 +1760,10 @@
       "type": "template",
       "status": "active",
       "confidence": "verified",
-      "domain": "delivery",
+      "domain": "delivery,governance,security",
       "phase": "BID,BUILD,RUN",
       "owner": "maintainers",
-      "last_reviewed": "2026-07-25",
+      "last_reviewed": "2026-09-04",
       "provenance": {
         "document": "TPL-glossary.md",
         "version": "1.0",
@@ -1597,7 +1893,7 @@
       "id": "ISO-27001-A5-15",
       "framework": "ISO27001",
       "version": "2022",
-      "title": "S\u00e9curit\u00e9 de l'information dans les relations avec les fournisseurs",
+      "title": "Information Security in Supplier Relationships",
       "domain": "supply-chain,third-party-risk",
       "severity": "mandatory",
       "implemented_by": []
@@ -1606,7 +1902,7 @@
       "id": "ISO-27001-A8-01",
       "framework": "ISO27001",
       "version": "2022",
-      "title": "S\u00e9curit\u00e9 des terminaux utilisateurs finaux et gestion de flotte",
+      "title": "User Endpoint Devices Security and Fleet Management",
       "domain": "endpoint-security,fleet-management",
       "severity": "mandatory",
       "implemented_by": []
@@ -1615,7 +1911,7 @@
       "id": "ISO-27001-A8-08",
       "framework": "ISO27001",
       "version": "2022",
-      "title": "Gestion des vuln\u00e9rabilit\u00e9s techniques et veille de s\u00e9curit\u00e9",
+      "title": "Management of Technical Vulnerabilities",
       "domain": "vulnerability-management,devsecops",
       "severity": "mandatory",
       "implemented_by": []
@@ -1624,7 +1920,7 @@
       "id": "ISO-27001-A8-09",
       "framework": "ISO27001",
       "version": "2022",
-      "title": "Gestion de la configuration et contr\u00f4le des d\u00e9rives (GitOps)",
+      "title": "Configuration Management and Drift Control (GitOps)",
       "domain": "configuration-management,automation",
       "severity": "mandatory",
       "implemented_by": []
@@ -1633,7 +1929,7 @@
       "id": "ISO-27001-A8-24",
       "framework": "ISO27001",
       "version": "2022",
-      "title": "Utilisation de la cryptographie et politique de gestion des cl\u00e9s",
+      "title": "Use of Cryptography and Key Management Policy",
       "domain": "cryptography,key-management",
       "severity": "mandatory",
       "implemented_by": []
@@ -1642,7 +1938,7 @@
       "id": "ISO-27001-A8-28",
       "framework": "ISO27001",
       "version": "2022",
-      "title": "Protection et int\u00e9grit\u00e9 des enregistrements de journalisation",
+      "title": "Protection of Logging Records and Integrity Assurance",
       "domain": "observability,audit-logging",
       "severity": "mandatory",
       "implemented_by": []
@@ -1651,7 +1947,7 @@
       "id": "NIS2-ART21-2A",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Politiques d'analyse des risques et s\u00e9curit\u00e9 des syst\u00e8mes d'information",
+      "title": "Risk Analysis and Information System Security Policies",
       "domain": "security-governance,risk-management",
       "severity": "mandatory",
       "implemented_by": [
@@ -1662,8 +1958,8 @@
       "id": "NIS2-ART21-2B",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Gestion et traitement des incidents de s\u00e9curit\u00e9",
-      "domain": "incident-response,observability",
+      "title": "Incident Handling and Remediation",
+      "domain": "incident-handling,resilience",
       "severity": "mandatory",
       "implemented_by": [
         "P-002",
@@ -1674,8 +1970,8 @@
       "id": "NIS2-ART21-2C",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Continuit\u00e9 des activit\u00e9s, sauvegardes immuables et reprise apr\u00e8s sinistre",
-      "domain": "resilience,disaster-recovery,backup-management",
+      "title": "Business Continuity and Crisis Management",
+      "domain": "business-continuity,disaster-recovery",
       "severity": "mandatory",
       "implemented_by": [
         "ADR-0007",
@@ -1688,7 +1984,7 @@
       "id": "NIS2-ART21-2D",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "S\u00e9curit\u00e9 de la cha\u00eene d'approvisionnement et relations avec les fournisseurs",
+      "title": "Supply Chain Security and Direct Vendor Relations",
       "domain": "supply-chain,vendor-management",
       "severity": "mandatory",
       "implemented_by": [
@@ -1701,7 +1997,7 @@
       "id": "NIS2-ART21-2E",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "S\u00e9curit\u00e9 de l'acquisition, du d\u00e9veloppement et de la maintenance des SI",
+      "title": "Security in Network and Information Systems Lifecycle",
       "domain": "secure-development,vulnerability-management",
       "severity": "mandatory",
       "implemented_by": [
@@ -1713,7 +2009,7 @@
       "id": "NIS2-ART21-2F",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Politiques et proc\u00e9dures d'\u00e9valuation de l'efficacit\u00e9 des mesures de s\u00e9curit\u00e9",
+      "title": "Policies and Procedures to Assess Risk Management Effectiveness",
       "domain": "audit,compliance-evaluation",
       "severity": "mandatory",
       "implemented_by": [
@@ -1724,7 +2020,7 @@
       "id": "NIS2-ART21-2G",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Pratiques de base en cyber-hygi\u00e8ne et formation en cybers\u00e9curit\u00e9",
+      "title": "Basic Cyber Hygiene Practices and Cybersecurity Training",
       "domain": "cyber-hygiene,training",
       "severity": "mandatory",
       "implemented_by": []
@@ -1733,7 +2029,7 @@
       "id": "NIS2-ART21-2H",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Cryptographie, chiffrement et s\u00e9curit\u00e9 de l'intelligence artificielle",
+      "title": "Cryptography and Information System Security for AI Systems",
       "domain": "cryptography,ai-security",
       "severity": "mandatory",
       "implemented_by": [
@@ -1745,7 +2041,7 @@
       "id": "NIS2-ART21-2I",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "S\u00e9curit\u00e9 des ressources humaines, contr\u00f4le d'acc\u00e8s et gestion des actifs",
+      "title": "Human Resources Security, Access Control and Asset Management",
       "domain": "iam,asset-management",
       "severity": "mandatory",
       "implemented_by": [
@@ -1756,7 +2052,7 @@
       "id": "NIS2-ART21-2J",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Authentification multifacteur (MFA) et communications s\u00e9curis\u00e9es",
+      "title": "Multi-Factor Authentication and Secured Communications",
       "domain": "iam,mfa,secure-communications",
       "severity": "mandatory",
       "implemented_by": [
@@ -1767,7 +2063,7 @@
       "id": "SNC-REQ-01",
       "framework": "SecNumCloud",
       "version": "3.2",
-      "title": "Immunit\u00e9 aux lois extraterritoriales et localisation europ\u00e9enne des donn\u00e9es",
+      "title": "Extraterritorial Immunity and European Data Localization",
       "domain": "sovereignty,legal-compliance",
       "severity": "mandatory",
       "implemented_by": []
@@ -1776,7 +2072,7 @@
       "id": "SNC-REQ-02",
       "framework": "SecNumCloud",
       "version": "3.2",
-      "title": "Cloisonnement strict du r\u00e9seau d'administration et bastion d'acc\u00e8s",
+      "title": "Strict Administration Network Segregation and Bastion Access",
       "domain": "network-security,identity-access-management",
       "severity": "mandatory",
       "implemented_by": []
@@ -1785,7 +2081,7 @@
       "id": "SNC-REQ-03",
       "framework": "SecNumCloud",
       "version": "3.2",
-      "title": "Gestion des cl\u00e9s cryptographiques sur HSM qualifi\u00e9 ANSSI",
+      "title": "Cryptographic Key Management on ANSSI-Qualified HSM",
       "domain": "cryptography,data-protection",
       "severity": "mandatory",
       "implemented_by": []
@@ -1794,7 +2090,7 @@
       "id": "SNC-REQ-04",
       "framework": "SecNumCloud",
       "version": "3.2",
-      "title": "Isolation de l'hyperviseur et durcissement des environnements de conteneurs",
+      "title": "Hypervisor Isolation and Container Hardening",
       "domain": "infrastructure-security,container-security",
       "severity": "mandatory",
       "implemented_by": []
@@ -1803,7 +2099,7 @@
       "id": "SNC-REQ-05",
       "framework": "SecNumCloud",
       "version": "3.2",
-      "title": "Journalisation immuable et transmission en temps r\u00e9el au SOC",
+      "title": "Immutable Audit Logging and Real-Time SOC Telemetry",
       "domain": "observability,security-monitoring",
       "severity": "mandatory",
       "implemented_by": []
@@ -1812,23 +2108,178 @@
       "id": "SNC-REQ-06",
       "framework": "SecNumCloud",
       "version": "3.2",
-      "title": "R\u00e9silience multi-sites et plans de continuit\u00e9 d'activit\u00e9 (PCA/PRA)",
+      "title": "Multi-Site Resilience and Disaster Recovery (BCP/DRP)",
       "domain": "resilience,business-continuity",
       "severity": "mandatory",
       "implemented_by": []
     }
   ],
   "compliance_index": {
-    "3GPP": {
-      "3GPP-TS33179-ISOLATED": {
-        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
-        "version": "Rel-18",
+    "ISO27001": {
+      "ISO-27001-A5-15": {
+        "title": "Information Security in Supplier Relationships",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A8-28": {
+        "title": "Protection of Logging Records and Integrity Assurance",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A8-08": {
+        "title": "Management of Technical Vulnerabilities",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A8-01": {
+        "title": "User Endpoint Devices Security and Fleet Management",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A8-24": {
+        "title": "Use of Cryptography and Key Management Policy",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "ISO-27001-A8-09": {
+        "title": "Configuration Management and Drift Control (GitOps)",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": []
+      }
+    },
+    "NIS2": {
+      "NIS2-ART21-2D": {
+        "title": "Supply Chain Security and Direct Vendor Relations",
+        "version": "2022/2555",
         "severity": "mandatory",
         "implemented_by": [
-          "ADR-0007",
+          "ADR-0005",
+          "P-007",
+          "PAT-006"
+        ]
+      },
+      "NIS2-ART21-2J": {
+        "title": "Multi-Factor Authentication and Secured Communications",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
           "PAT-004"
         ]
       },
+      "NIS2-ART21-2A": {
+        "title": "Risk Analysis and Information System Security Policies",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-001"
+        ]
+      },
+      "NIS2-ART21-2G": {
+        "title": "Basic Cyber Hygiene Practices and Cybersecurity Training",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART21-2E": {
+        "title": "Security in Network and Information Systems Lifecycle",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-005",
+          "PAT-002"
+        ]
+      },
+      "NIS2-ART21-2H": {
+        "title": "Cryptography and Information System Security for AI Systems",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-015",
+          "PAT-007"
+        ]
+      },
+      "NIS2-ART21-2B": {
+        "title": "Incident Handling and Remediation",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-002",
+          "PAT-001"
+        ]
+      },
+      "NIS2-ART21-2C": {
+        "title": "Business Continuity and Crisis Management",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "P-009",
+          "PAT-003",
+          "PAT-004"
+        ]
+      },
+      "NIS2-ART21-2F": {
+        "title": "Policies and Procedures to Assess Risk Management Effectiveness",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "PAT-005"
+        ]
+      },
+      "NIS2-ART21-2I": {
+        "title": "Human Resources Security, Access Control and Asset Management",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-010"
+        ]
+      }
+    },
+    "SecNumCloud": {
+      "SNC-REQ-04": {
+        "title": "Hypervisor Isolation and Container Hardening",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "SNC-REQ-03": {
+        "title": "Cryptographic Key Management on ANSSI-Qualified HSM",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "SNC-REQ-02": {
+        "title": "Strict Administration Network Segregation and Bastion Access",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "SNC-REQ-06": {
+        "title": "Multi-Site Resilience and Disaster Recovery (BCP/DRP)",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "SNC-REQ-01": {
+        "title": "Extraterritorial Immunity and European Data Localization",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "SNC-REQ-05": {
+        "title": "Immutable Audit Logging and Real-Time SOC Telemetry",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": []
+      }
+    },
+    "3GPP": {
       "3GPP-TS33501-SBI": {
         "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
         "version": "Rel-18",
@@ -1844,6 +2295,15 @@
         "severity": "mandatory",
         "implemented_by": []
       },
+      "3GPP-TS33179-ISOLATED": {
+        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "PAT-004"
+        ]
+      },
       "3GPP-TS33179-AFFILIATION": {
         "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
         "version": "Rel-18",
@@ -1853,170 +2313,6 @@
       "3GPP-TS33501-SEPP": {
         "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
         "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": []
-      }
-    },
-    "ISO27001": {
-      "ISO-27001-A8-24": {
-        "title": "Utilisation de la cryptographie et politique de gestion des cl\u00e9s",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "ISO-27001-A5-15": {
-        "title": "S\u00e9curit\u00e9 de l'information dans les relations avec les fournisseurs",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "ISO-27001-A8-28": {
-        "title": "Protection et int\u00e9grit\u00e9 des enregistrements de journalisation",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "ISO-27001-A8-08": {
-        "title": "Gestion des vuln\u00e9rabilit\u00e9s techniques et veille de s\u00e9curit\u00e9",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "ISO-27001-A8-01": {
-        "title": "S\u00e9curit\u00e9 des terminaux utilisateurs finaux et gestion de flotte",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "ISO-27001-A8-09": {
-        "title": "Gestion de la configuration et contr\u00f4le des d\u00e9rives (GitOps)",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": []
-      }
-    },
-    "NIS2": {
-      "NIS2-ART21-2B": {
-        "title": "Gestion et traitement des incidents de s\u00e9curit\u00e9",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-002",
-          "PAT-001"
-        ]
-      },
-      "NIS2-ART21-2D": {
-        "title": "S\u00e9curit\u00e9 de la cha\u00eene d'approvisionnement et relations avec les fournisseurs",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0005",
-          "P-007",
-          "PAT-006"
-        ]
-      },
-      "NIS2-ART21-2J": {
-        "title": "Authentification multifacteur (MFA) et communications s\u00e9curis\u00e9es",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "PAT-004"
-        ]
-      },
-      "NIS2-ART21-2A": {
-        "title": "Politiques d'analyse des risques et s\u00e9curit\u00e9 des syst\u00e8mes d'information",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-001"
-        ]
-      },
-      "NIS2-ART21-2G": {
-        "title": "Pratiques de base en cyber-hygi\u00e8ne et formation en cybers\u00e9curit\u00e9",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "NIS2-ART21-2E": {
-        "title": "S\u00e9curit\u00e9 de l'acquisition, du d\u00e9veloppement et de la maintenance des SI",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-005",
-          "PAT-002"
-        ]
-      },
-      "NIS2-ART21-2H": {
-        "title": "Cryptographie, chiffrement et s\u00e9curit\u00e9 de l'intelligence artificielle",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-015",
-          "PAT-007"
-        ]
-      },
-      "NIS2-ART21-2C": {
-        "title": "Continuit\u00e9 des activit\u00e9s, sauvegardes immuables et reprise apr\u00e8s sinistre",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0007",
-          "P-009",
-          "PAT-003",
-          "PAT-004"
-        ]
-      },
-      "NIS2-ART21-2F": {
-        "title": "Politiques et proc\u00e9dures d'\u00e9valuation de l'efficacit\u00e9 des mesures de s\u00e9curit\u00e9",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "PAT-005"
-        ]
-      },
-      "NIS2-ART21-2I": {
-        "title": "S\u00e9curit\u00e9 des ressources humaines, contr\u00f4le d'acc\u00e8s et gestion des actifs",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-010"
-        ]
-      }
-    },
-    "SecNumCloud": {
-      "SNC-REQ-04": {
-        "title": "Isolation de l'hyperviseur et durcissement des environnements de conteneurs",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "SNC-REQ-03": {
-        "title": "Gestion des cl\u00e9s cryptographiques sur HSM qualifi\u00e9 ANSSI",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "SNC-REQ-02": {
-        "title": "Cloisonnement strict du r\u00e9seau d'administration et bastion d'acc\u00e8s",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "SNC-REQ-06": {
-        "title": "R\u00e9silience multi-sites et plans de continuit\u00e9 d'activit\u00e9 (PCA/PRA)",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "SNC-REQ-01": {
-        "title": "Immunit\u00e9 aux lois extraterritoriales et localisation europ\u00e9enne des donn\u00e9es",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": []
-      },
-      "SNC-REQ-05": {
-        "title": "Journalisation immuable et transmission en temps r\u00e9el au SOC",
-        "version": "3.2",
         "severity": "mandatory",
         "implemented_by": []
       }

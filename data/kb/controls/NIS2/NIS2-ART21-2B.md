@@ -1,28 +1,31 @@
 ---
 id: NIS2-ART21-2B
-title: Gestion et traitement des incidents de sécurité
+title: Incident Handling and Remediation
+title_fr: Traitement des incidents
 type: control
 framework: NIS2
 version: "2022/2555"
 jurisdiction: EU
-domain: [incident-response,observability]
+domain: [incident-handling, resilience]
 severity: mandatory
 target_entities: [essential, important]
 status: active
 confidence: verified
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-04
 owner: security-compliance-team
+source_ref: "Directive (EU) 2022/2555 (NIS 2), Article 21(2)(b)"
+terms: [incident-handling, closed-loop, early-warning]
 ---
 
-# NIS2-ART21-2B — Gestion et traitement des incidents de sécurité
+# NIS2-ART21-2B — Incident Handling and Remediation
 
-## Référence Réglementaire
-Directive (UE) 2022/2555 (NIS 2), Article 21, Paragraphe 2, Point (b).
+## Regulatory Reference
+Directive (EU) 2022/2555 (NIS 2), Article 21, Paragraph 2, Point (b).
 
-## Exigence Légale
-Traitement des incidents (prévention, détection et réponse aux incidents).
+## Legal Requirement
+Incident handling (prevention, detection, and response to incidents).
 
-## Critères d'Acceptation d'Architecture
-- Détection automatisée des anomalies avec boucles de rétroaction supervisées par l'humain.
-- Capacité de remédiation unitaire et traçabilité d'audit complète sur toutes les actions correctives.
-- Alerte rapide sous 24h et notification d'incident majeur sous 72h intégrées aux canaux de crise.
+## Architecture Acceptance Criteria
+- Supervised closed-loop automation: automated detection and remediation workflows gated by human validation for critical actions.
+- Real-time telemetry routing to CSIRT/SOC with automated early-warning generation (within 24 hours).
+- Automated generation of incident post-mortems feeding back into the knowledge base harvest process.

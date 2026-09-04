@@ -1,28 +1,31 @@
 ---
 id: SNC-REQ-03
-title: Gestion des clés cryptographiques sur HSM qualifié ANSSI
+title: Cryptographic Key Management on ANSSI-Qualified HSM
+title_fr: Gestion des clés cryptographiques sur HSM qualifié ANSSI
 type: control
 framework: SecNumCloud
 version: "3.2"
 jurisdiction: FR-EU
-domain: [cryptography,data-protection]
+domain: [cryptography, data-protection]
 severity: mandatory
-target_entities: [essential,critical-infrastructure]
+target_entities: [essential, critical-infrastructure]
 status: active
 confidence: verified
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-04
 owner: security-compliance-team
+source_ref: "ANSSI SecNumCloud 3.2, Requirement 10.1"
+terms: [hsm, envelope-encryption, root-of-trust]
 ---
 
-# SNC-REQ-03 — Gestion des clés cryptographiques sur HSM qualifié ANSSI
+# SNC-REQ-03 — Cryptographic Key Management on ANSSI-Qualified HSM
 
-## Référence Réglementaire
-Référentiel d'exigences ANSSI SecNumCloud version 3.2, Exigence 10.1 (Cryptographie et gestion des clés).
+## Regulatory Reference
+ANSSI SecNumCloud 3.2 Requirements Baseline, Requirement 10.1.
 
-## Exigence Légale
-Toutes les clés maîtresses de chiffrement au repos et de signature doivent être générées et conservées dans un module matériel de sécurité (HSM) ayant obtenu une qualification ANSSI (niveau standard ou renforcé).
+## Legal Requirement
+All master keys for data-at-rest encryption and digital signatures must be generated, stored, and managed inside an ANSSI-qualified Hardware Security Module (HSM).
 
-## Critères d'Acceptation d'Architecture
-- Intégration d'un HSM physique qualifié ANSSI pour la racine de confiance (Root of Trust) et les clés KMS MCX.
-- Chiffrement enveloppe (Envelope Encryption) avec rotation automatisée et contrôlée des clés de chiffrement de données (DEK).
-- Séparation stricte des rôles entre administrateurs de l'infrastructure et dépositaires des secrets cryptographiques.
+## Architecture Acceptance Criteria
+- Integration of an ANSSI-qualified physical HSM for Root of Trust and platform KMS keys.
+- Envelope encryption with automated, controlled Data Encryption Key (DEK) rotation.
+- Separation of duties between infrastructure administrators and cryptographic custodians.

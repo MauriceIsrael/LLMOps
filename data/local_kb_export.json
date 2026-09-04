@@ -2,42 +2,46 @@
   "analytics": {
     "volume_by_type": [
       {
-        "type": "template",
-        "count": 5
+        "type": "estimate",
+        "count": 1
       },
       {
         "type": "yaml-asset",
         "count": 1
       },
       {
-        "type": "decision",
-        "count": 13
-      },
-      {
-        "type": "estimate",
-        "count": 1
+        "type": "template",
+        "count": 5
       },
       {
         "type": "pattern",
-        "count": 7
-      },
-      {
-        "type": "questionnaire",
-        "count": 3
+        "count": 8
       },
       {
         "type": "principle",
         "count": 15
       },
       {
+        "type": "decision",
+        "count": 13
+      },
+      {
+        "type": "questionnaire",
+        "count": 3
+      },
+      {
         "type": "risk-register",
         "count": 1
+      },
+      {
+        "type": "skill",
+        "count": 9
       }
     ],
     "status_breakdown": [
       {
         "status": "active",
-        "count": 45
+        "count": 55
       },
       {
         "status": "superseded",
@@ -46,19 +50,19 @@
     ],
     "confidence_breakdown": [
       {
+        "confidence": "assumed",
+        "count": 3
+      },
+      {
         "confidence": "verified",
-        "count": 41
+        "count": 51
       },
       {
         "confidence": "vendor-stated",
         "count": 2
-      },
-      {
-        "confidence": "assumed",
-        "count": 3
       }
     ],
-    "glossary_count": 10,
+    "glossary_count": 17,
     "relations": {
       "REQUIRES": 0,
       "SUPERSEDES": 1
@@ -75,12 +79,20 @@
         "count": 8
       },
       {
+        "domain": "automation-devops",
+        "count": 1
+      },
+      {
         "domain": "cloud-platform",
-        "count": 5
+        "count": 6
       },
       {
         "domain": "delivery",
         "count": 6
+      },
+      {
+        "domain": "device-management",
+        "count": 1
       },
       {
         "domain": "mcx",
@@ -95,12 +107,36 @@
         "count": 11
       },
       {
+        "domain": "network-transport",
+        "count": 1
+      },
+      {
         "domain": "observability",
         "count": 7
       },
       {
+        "domain": "observability-security",
+        "count": 1
+      },
+      {
+        "domain": "resilience-continuity",
+        "count": 1
+      },
+      {
+        "domain": "security-architecture",
+        "count": 1
+      },
+      {
+        "domain": "security-cryptography",
+        "count": 1
+      },
+      {
         "domain": "service-management",
         "count": 3
+      },
+      {
+        "domain": "telecom-core",
+        "count": 2
       }
     ],
     "cross_domain_dependencies": []
@@ -109,13 +145,21 @@
     "domains": [
       "General",
       "ai-assistance",
+      "automation-devops",
       "cloud-platform",
       "delivery",
+      "device-management",
       "mcx",
       "mobile-core",
       "network-automation",
+      "network-transport",
       "observability",
-      "service-management"
+      "observability-security",
+      "resilience-continuity",
+      "security-architecture",
+      "security-cryptography",
+      "service-management",
+      "telecom-core"
     ],
     "nodes": [
       {
@@ -126,7 +170,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -12,
-        "y": 18,
+        "y": 24,
         "z": -10,
         "degree": 5
       },
@@ -150,7 +194,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 0,
-        "y": 36,
+        "y": 48,
         "z": -10,
         "degree": 5
       },
@@ -162,7 +206,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 6,
-        "y": 36,
+        "y": 48,
         "z": -10,
         "degree": 5
       },
@@ -174,7 +218,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 12,
-        "y": 36,
+        "y": 48,
         "z": -10,
         "degree": 5
       },
@@ -186,7 +230,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -12,
-        "y": 36,
+        "y": 48,
         "z": -5,
         "degree": 5
       },
@@ -198,7 +242,7 @@
         "status": "active",
         "confidence": "vendor-stated",
         "x": -6,
-        "y": 30,
+        "y": 42,
         "z": -5,
         "degree": 5
       },
@@ -210,7 +254,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 0,
-        "y": 12,
+        "y": 18,
         "z": -5,
         "degree": 5
       },
@@ -222,7 +266,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 6,
-        "y": 12,
+        "y": 18,
         "z": -5,
         "degree": 5
       },
@@ -234,7 +278,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 12,
-        "y": 42,
+        "y": 60,
         "z": -5,
         "degree": 5
       },
@@ -246,7 +290,7 @@
         "status": "active",
         "confidence": "assumed",
         "x": -12,
-        "y": 48,
+        "y": 90,
         "z": 0,
         "degree": 5
       },
@@ -282,7 +326,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 6,
-        "y": 42,
+        "y": 60,
         "z": 0,
         "degree": 5
       },
@@ -294,7 +338,7 @@
         "status": "active",
         "confidence": "assumed",
         "x": 12,
-        "y": 24,
+        "y": 36,
         "z": 0,
         "degree": 5
       },
@@ -306,7 +350,7 @@
         "status": "active",
         "confidence": "assumed",
         "x": -12,
-        "y": 18,
+        "y": 24,
         "z": 5,
         "degree": 5
       },
@@ -318,7 +362,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -6,
-        "y": 18,
+        "y": 24,
         "z": 5,
         "degree": 5
       },
@@ -342,7 +386,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 6,
-        "y": 36,
+        "y": 48,
         "z": 5,
         "degree": 5
       },
@@ -354,7 +398,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 12,
-        "y": 42,
+        "y": 60,
         "z": 5,
         "degree": 5
       },
@@ -366,7 +410,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -12,
-        "y": 36,
+        "y": 48,
         "z": 10,
         "degree": 5
       },
@@ -378,7 +422,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -6,
-        "y": 12,
+        "y": 18,
         "z": 10,
         "degree": 5
       },
@@ -390,7 +434,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 0,
-        "y": 42,
+        "y": 60,
         "z": 10,
         "degree": 5
       },
@@ -402,7 +446,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 6,
-        "y": 30,
+        "y": 42,
         "z": 10,
         "degree": 5
       },
@@ -426,7 +470,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -12,
-        "y": 36,
+        "y": 48,
         "z": 15,
         "degree": 5
       },
@@ -438,7 +482,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -6,
-        "y": 36,
+        "y": 48,
         "z": 15,
         "degree": 5
       },
@@ -450,7 +494,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 0,
-        "y": 36,
+        "y": 48,
         "z": 15,
         "degree": 5
       },
@@ -462,7 +506,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 6,
-        "y": 36,
+        "y": 48,
         "z": 15,
         "degree": 5
       },
@@ -474,7 +518,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 12,
-        "y": 42,
+        "y": 60,
         "z": 15,
         "degree": 5
       },
@@ -486,7 +530,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -12,
-        "y": 36,
+        "y": 48,
         "z": 20,
         "degree": 5
       },
@@ -498,7 +542,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -6,
-        "y": 30,
+        "y": 42,
         "z": 20,
         "degree": 5
       },
@@ -510,7 +554,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 0,
-        "y": 42,
+        "y": 60,
         "z": 20,
         "degree": 5
       },
@@ -522,7 +566,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 6,
-        "y": 12,
+        "y": 18,
         "z": 20,
         "degree": 5
       },
@@ -534,7 +578,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 12,
-        "y": 48,
+        "y": 90,
         "z": 20,
         "degree": 5
       },
@@ -546,7 +590,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -12,
-        "y": 42,
+        "y": 60,
         "z": 25,
         "degree": 5
       },
@@ -606,7 +650,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -12,
-        "y": 12,
+        "y": 18,
         "z": 30,
         "degree": 5
       },
@@ -618,7 +662,7 @@
         "status": "active",
         "confidence": "verified",
         "x": -6,
-        "y": 30,
+        "y": 42,
         "z": 30,
         "degree": 5
       },
@@ -630,7 +674,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 0,
-        "y": 48,
+        "y": 90,
         "z": 30,
         "degree": 5
       },
@@ -642,7 +686,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 6,
-        "y": 18,
+        "y": 24,
         "z": 30,
         "degree": 5
       },
@@ -654,7 +698,7 @@
         "status": "active",
         "confidence": "verified",
         "x": 12,
-        "y": 18,
+        "y": 24,
         "z": 30,
         "degree": 5
       },
@@ -666,8 +710,128 @@
         "status": "active",
         "confidence": "verified",
         "x": -12,
+        "y": 24,
+        "z": 35,
+        "degree": 5
+      },
+      {
+        "id": "PAT-008",
+        "title": "Proposition de Pattern : Double Validation Canary pour NetDevOps",
+        "type": "pattern",
+        "domain": "telecom-core",
+        "status": "active",
+        "confidence": "verified",
+        "x": -6,
+        "y": 96,
+        "z": 35,
+        "degree": 5
+      },
+      {
+        "id": "SKL-AUTO-GITOPS",
+        "title": "Automatisation NetDevOps, CI/CD et Single Source of Truth GitOps",
+        "type": "skill",
+        "domain": "automation-devops",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 12,
+        "z": 35,
+        "degree": 5
+      },
+      {
+        "id": "SKL-CRYPTO-HSM",
+        "title": "Cryptographie Avanc\u00e9e et Int\u00e9gration HSM / KMS Qualifi\u00e9s",
+        "type": "skill",
+        "domain": "security-cryptography",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 84,
+        "z": 35,
+        "degree": 5
+      },
+      {
+        "id": "SKL-KUBE-TELCO",
+        "title": "Virtualisation Cloud T\u00e9l\u00e9com et Durcissement Rancher/Kubernetes",
+        "type": "skill",
+        "domain": "cloud-platform",
+        "status": "active",
+        "confidence": "verified",
+        "x": 12,
         "y": 18,
         "z": 35,
+        "degree": 5
+      },
+      {
+        "id": "SKL-MOB-FLEET",
+        "title": "Gestion de Flotte de Terminaux Mobiles et MDM/EMM",
+        "type": "skill",
+        "domain": "device-management",
+        "status": "active",
+        "confidence": "verified",
+        "x": -12,
+        "y": 30,
+        "z": 40,
+        "degree": 5
+      },
+      {
+        "id": "SKL-NET-UNDERLAY",
+        "title": "Architecture IP Transport, BGP-EVPN et Matrices de Flux",
+        "type": "skill",
+        "domain": "network-transport",
+        "status": "active",
+        "confidence": "verified",
+        "x": -6,
+        "y": 54,
+        "z": 40,
+        "degree": 5
+      },
+      {
+        "id": "SKL-OBS-SOC",
+        "title": "Observabilit\u00e9 T\u00e9l\u00e9com, Tra\u00e7abilit\u00e9 WORM et Int\u00e9gration SOC/SIEM",
+        "type": "skill",
+        "domain": "observability-security",
+        "status": "active",
+        "confidence": "verified",
+        "x": 0,
+        "y": 66,
+        "z": 40,
+        "degree": 5
+      },
+      {
+        "id": "SKL-RESIL-DR",
+        "title": "R\u00e9silience d'Infrastructure et Plans de Continuit\u00e9 / Reprise (PCA/PRA)",
+        "type": "skill",
+        "domain": "resilience-continuity",
+        "status": "active",
+        "confidence": "verified",
+        "x": 6,
+        "y": 72,
+        "z": 40,
+        "degree": 5
+      },
+      {
+        "id": "SKL-SEC-ZEROTRUST",
+        "title": "Architecture Zero-Trust, Zonage R\u00e9seau et Bastion d'Administration",
+        "type": "skill",
+        "domain": "security-architecture",
+        "status": "active",
+        "confidence": "verified",
+        "x": 12,
+        "y": 78,
+        "z": 40,
+        "degree": 5
+      },
+      {
+        "id": "SKL-TELCO-CORE",
+        "title": "Ing\u00e9nierie C\u0153ur de R\u00e9seau 5G SBA & Signalisation MCX",
+        "type": "skill",
+        "domain": "telecom-core",
+        "status": "active",
+        "confidence": "verified",
+        "x": -12,
+        "y": 96,
+        "z": 45,
         "degree": 5
       }
     ],

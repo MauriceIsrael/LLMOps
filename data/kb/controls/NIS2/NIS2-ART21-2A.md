@@ -1,28 +1,31 @@
 ---
 id: NIS2-ART21-2A
-title: Politiques d'analyse des risques et sécurité des systèmes d'information
+title: Risk Analysis and Information System Security Policies
+title_fr: Politiques d'analyse des risques et sécurité des systèmes d'information
 type: control
 framework: NIS2
 version: "2022/2555"
 jurisdiction: EU
-domain: [security-governance,risk-management]
+domain: [security-governance, risk-management]
 severity: mandatory
 target_entities: [essential, important]
 status: active
 confidence: verified
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-04
 owner: security-compliance-team
+source_ref: "Directive (EU) 2022/2555 (NIS 2), Article 21(2)(a)"
+terms: [risk-analysis, security-baseline, gitops-governance]
 ---
 
-# NIS2-ART21-2A — Politiques d'analyse des risques et sécurité des systèmes d'information
+# NIS2-ART21-2A — Risk Analysis and Information System Security Policies
 
-## Référence Réglementaire
-Directive (UE) 2022/2555 (NIS 2), Article 21, Paragraphe 2, Point (a).
+## Regulatory Reference
+Directive (EU) 2022/2555 (NIS 2), Article 21, Paragraph 2, Point (a).
 
-## Exigence Légale
-Politiques relatives à l'analyse des risques et à la sécurité des systèmes d'information.
+## Legal Requirement
+Policies on risk analysis and information system security.
 
-## Critères d'Acceptation d'Architecture
-- Identification et modélisation formelle des risques d'architecture (ex. registre de risques lié aux flux et interfaces).
-- Définition d'un périmètre d'homologation de sécurité et gouvernance des baselines de configuration via GitOps.
-- Réévaluation périodique et déclenchement d'un réexamen d'architecture lors de toute dérive détectée.
+## Architecture Acceptance Criteria
+- Formal risk identification and architectural threat modeling (e.g. structured risk register linked to interfaces and data flows).
+- Definition of an explicit security accreditation boundary and governance of configuration baselines via GitOps.
+- Periodic risk re-evaluation and automated triggers for architectural review upon detected configuration or dependency drift.

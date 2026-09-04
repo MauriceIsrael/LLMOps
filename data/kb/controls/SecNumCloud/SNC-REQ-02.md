@@ -1,28 +1,31 @@
 ---
 id: SNC-REQ-02
-title: Cloisonnement strict du réseau d'administration et bastion d'accès
+title: Strict Administration Network Segregation and Bastion Access
+title_fr: Cloisonnement strict du réseau d'administration et bastion d'accès
 type: control
 framework: SecNumCloud
 version: "3.2"
 jurisdiction: FR-EU
-domain: [network-security,identity-access-management]
+domain: [network-security, identity-access-management]
 severity: mandatory
-target_entities: [essential,critical-infrastructure]
+target_entities: [essential, critical-infrastructure]
 status: active
 confidence: verified
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-04
 owner: security-compliance-team
+source_ref: "ANSSI SecNumCloud 3.2, Requirements 13.1 & 13.2"
+terms: [bastion, mtls, least-privilege]
 ---
 
-# SNC-REQ-02 — Cloisonnement strict de l'administration et bastion d'accès
+# SNC-REQ-02 — Strict Administration Network Segregation and Bastion Access
 
-## Référence Réglementaire
-Référentiel d'exigences ANSSI SecNumCloud version 3.2, Exigence 13.1 & 13.2 (Sécurité des réseaux et des accès d'administration).
+## Regulatory Reference
+ANSSI SecNumCloud 3.2 Requirements Baseline, Requirements 13.1 & 13.2.
 
-## Exigence Légale
-Les réseaux d'administration doivent être physiquement ou logiquement étanches vis-à-vis des réseaux clients et du réseau public. Aucun accès d'administration direct n'est autorisé.
+## Legal Requirement
+Administrative management networks must be physically or logically isolated from customer payload networks and the public Internet. Direct administrative access is strictly prohibited.
 
-## Critères d'Acceptation d'Architecture
-- Utilisation obligatoire d'une passerelle de rebond (bastion d'administration qualifié) avec authentification multifacteur (MFA) physique.
-- Chiffrement mTLS avec certificats émis par une autorité de certification (PKI) dédiée à l'administration.
-- Répudiation de tout canal d'administration direct depuis Internet : coupure protocolaire et enregistrement vidéo/session d'audit.
+## Architecture Acceptance Criteria
+- Mandatory transit through a qualified administration bastion with hardware multi-factor authentication (MFA).
+- Mutual TLS (mTLS) with certificates issued by a dedicated administration PKI.
+- Complete denial of direct internet administration: protocol break and full session audit logging.

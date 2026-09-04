@@ -1,28 +1,31 @@
 ---
 id: SNC-REQ-06
-title: Résilience multi-sites et plans de continuité d'activité (PCA/PRA)
+title: Multi-Site Resilience and Disaster Recovery (BCP/DRP)
+title_fr: Résilience multi-sites et plans de continuité d'activité (PCA/PRA)
 type: control
 framework: SecNumCloud
 version: "3.2"
 jurisdiction: FR-EU
-domain: [resilience,business-continuity]
+domain: [resilience, business-continuity]
 severity: mandatory
-target_entities: [essential,critical-infrastructure]
+target_entities: [essential, critical-infrastructure]
 status: active
 confidence: verified
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-04
 owner: security-compliance-team
+source_ref: "ANSSI SecNumCloud 3.2, Requirement 17.1"
+terms: [disaster-recovery, zero-rpo, multi-site]
 ---
 
-# SNC-REQ-06 — Résilience multi-sites et continuité d'activité
+# SNC-REQ-06 — Multi-Site Resilience and Disaster Recovery (BCP/DRP)
 
-## Référence Réglementaire
-Référentiel d'exigences ANSSI SecNumCloud version 3.2, Exigence 17.1 (Continuité d'activité et reprise après sinistre).
+## Regulatory Reference
+ANSSI SecNumCloud 3.2 Requirements Baseline, Requirement 17.1.
 
-## Exigence Légale
-Le service doit être déployé de façon redondante sur plusieurs zones de disponibilité distinctes non soumises aux mêmes risques physiques. Les procédures de bascule doivent être automatisées et testées au moins une fois par an.
+## Legal Requirement
+Services must be deployed redundantly across geographically separated availability zones not subject to shared physical risks. Failover mechanisms must be tested and automated.
 
-## Critères d'Acceptation d'Architecture
-- Déploiement actif/actif ou actif/veille sur au moins deux sites géographiquement distants (> 30 km).
-- RPO = 0 pour les flux transactionnels critiques et RTO < 60 secondes pour les services prioritaires de voix et signalisation MCX.
-- Automatisation des scénarios de bascule de réseau WAN et vérification de la non-dépendance à un point unique de défaillance (Single Point of Failure).
+## Architecture Acceptance Criteria
+- Active/active or active/hot-standby topology across at least two distant sites (> 30 km).
+- Zero data loss (RPO = 0) for critical transactional state and RTO < 60 seconds for priority mission services.
+- Automated WAN traffic rerouting avoiding single points of failure.

@@ -38,12 +38,6 @@
 	<!-- Top Navigation Overlay -->
 	<header class="absolute top-0 left-0 right-0 p-6 z-30 flex items-center justify-between pointer-events-none">
 		<div class="pointer-events-auto flex items-center gap-4">
-			<a
-				href="/"
-				class="px-4 py-2 bg-slate-900/90 backdrop-blur border border-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shadow-lg"
-			>
-				⬅ Tableau de Bord
-			</a>
 			<div>
 				<h1 class="text-xl font-black text-white tracking-tight flex items-center gap-2">
 					Visualiseur 3D <span class="px-2 py-0.5 bg-gradient-to-r from-emerald-500 to-indigo-500 text-white rounded-md text-xs font-bold uppercase tracking-wider">Threlte Planes</span>
