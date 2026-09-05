@@ -190,16 +190,16 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         caller = None
 
-        # 1. Validation du jeton serveur explicite à temps constant (secrets.compare_digest)
-        if provided_token and expected_token and secrets.compare_digest(provided_token, expected_token.strip()):
-            caller = "server_admin"
-
-        # 2. Validation contre les jetons locataires ENGAGEMENT_TOKENS à temps constant
-        if not caller and provided_token and tenant_tokens:
+        # 1. Validation prioritaire contre les jetons locataires ENGAGEMENT_TOKENS à temps constant
+        if provided_token and tenant_tokens:
             for t in tenant_tokens:
                 if secrets.compare_digest(provided_token, t):
                     caller = t
                     break
+
+        # 2. Sinon, validation du jeton d'administration serveur explicite à temps constant
+        if not caller and provided_token and expected_token and secrets.compare_digest(provided_token, expected_token.strip()):
+            caller = "server_admin"
 
         if caller:
             request.state.caller = caller

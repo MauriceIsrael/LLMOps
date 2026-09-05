@@ -32,7 +32,7 @@ RUN poetry install --no-interaction --no-ansi --only-root
 
 # Variables d'environnement pour GCP Cloud Run et LadybugDB backend
 ENV GRAPH_BACKEND=ladybug
-ENV LLMOPS_PLANE=knowledge
+ENV LLMOPS_PLANE=all
 ENV LLMOPS_TRANSPORT=sse
 ENV PORT=8000
 ENV HOST=0.0.0.0

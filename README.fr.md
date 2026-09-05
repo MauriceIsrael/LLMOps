@@ -27,7 +27,7 @@ Ajoutez la configuration suivante dans votre client MCP (ex: `claude_desktop_con
 }
 ```
 
-> **Avertissement Instance de Démonstration Publique :** Plan connaissances uniquement, lecture seule, taux limité, pas de SLA. Le jeton ci-dessus (`demo-public-2026-08`) est intentionnellement public et renouvelé périodiquement. Ne l'utilisez pas pour des données privées.
+> **Avertissement Instance de Démonstration Publique :** Expose à la fois le plan Connaissances et le plan Engagement (scopé strictement sur l'engagement de référence `nordwave-mcx-2027`). Lecture seule, taux limité, pas de SLA. Le jeton ci-dessus (`demo-public-2026-08`) est intentionnellement public et renouvelé périodiquement. Ne l'utilisez pas pour des données privées.
 
 ### 2. Connexion Locale (STDIO via Poetry)
 

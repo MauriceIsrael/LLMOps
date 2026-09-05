@@ -27,7 +27,7 @@ Add the following to your MCP client configuration (e.g. `claude_desktop_config.
 }
 ```
 
-> **Public Demo Instance Notice:** Knowledge plane only, read-only, rate-limited, no SLA. The token above (`demo-public-2026-08`) is intentionally public and rotated periodically. Do not use it for private data.
+> **Public Demo Instance Notice:** Exposes both Knowledge plane and Engagement plane (scoped strictly to reference engagement `nordwave-mcx-2027`). Read-only, rate-limited, no SLA. The token above (`demo-public-2026-08`) is intentionally public and rotated periodically. Do not use it for private data.
 
 ### 2. Local Connection (STDIO via Poetry)
 

@@ -51,7 +51,7 @@ The production deployment (`llmops-mcp-server` in region `europe-west1`) is conf
 ## 2. Public Demo vs Private Deployment Authentication
 
 ### Public Demo Deployment
-For public demo deployments, the `SERVER_TOKEN` environment variable is mapped from Secret Manager secret `llmops-demo-token`. The token value is intentionally public (`demo-public-2026-08`) and documented in public client examples.
+For public demo deployments, Cloud Run runs with `LLMOPS_PLANE=all` to expose both Knowledge plane tools (architecture principles, controls, zero-draft HLD) and Engagement plane tools (maturity boards, interview statements, conflicts, trajectories). The public token (`demo-public-2026-08`) is strictly scoped to the reference demo engagement (`nordwave-mcx-2027`) via `ENGAGEMENT_TOKENS=demo-public-2026-08:nordwave-mcx-2027`. Any attempt to access unauthorized engagements is rejected with a 403 Unauthorised error.
 
 ### Private Enterprise Deployment
 > [!IMPORTANT]
