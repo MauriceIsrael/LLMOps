@@ -139,7 +139,27 @@ class ElicitationSchemaInitializer:
                 """
             )
 
-        # 6. Tables de Relations
+        # 6. Table Requirement (RFP Shredder & Compliance Matrix)
+        if "Requirement" not in table_names:
+            self.graph_store.execute_cypher(
+                """
+                CREATE NODE TABLE Requirement (
+                    id STRING,
+                    engagement STRING,
+                    section STRING,
+                    category STRING,
+                    text STRING,
+                    criticality STRING,
+                    status STRING,
+                    matched_assets STRING,
+                    matched_controls STRING,
+                    rationale STRING,
+                    PRIMARY KEY(id)
+                );
+                """
+            )
+
+        # 7. Tables de Relations
         if "ABOUT" not in table_names:
             self.graph_store.execute_cypher("CREATE REL TABLE ABOUT (FROM Statement TO Subject);")
 
@@ -151,3 +171,9 @@ class ElicitationSchemaInitializer:
 
         if "INVOLVES" not in table_names:
             self.graph_store.execute_cypher("CREATE REL TABLE INVOLVES (FROM Conflict TO Statement);")
+
+        if "SATISFIES" not in table_names:
+            self.graph_store.execute_cypher("CREATE REL TABLE SATISFIES (FROM Statement TO Requirement);")
+
+        if "ADDRESSES" not in table_names:
+            self.graph_store.execute_cypher("CREATE REL TABLE ADDRESSES (FROM Question TO Requirement);")

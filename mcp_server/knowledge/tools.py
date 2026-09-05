@@ -458,7 +458,7 @@ def get_compliance_trail(control_id: str) -> dict[str, Any]:
         control_id: The control identifier (e.g. 'NIS2-ART21-2C', '3GPP-TS33179-KMS').
     """
     if not control_id or not isinstance(control_id, str):
-        return invalid_argument_response("control_id must be a non-empty string.")
+        return invalid_argument_response("control_id", "control_id must be a non-empty string.")
 
     kb_client = _get_db()
     try:
@@ -663,7 +663,7 @@ def get_skills_matrix(
     covered = mgr.get_all_covered_skills()
 
     required_skills_map = {}
-    all_required = set()
+    all_required: set[str] = set()
     for sec in bp.sections:
         s_skills = getattr(sec, "required_skills", [])
         if s_skills:
@@ -690,6 +690,140 @@ def get_skills_matrix(
         "sections": required_skills_map,
     }
     return ok_response(payload, count=len(required_skills_map))
+
+
+def shred_rfp(
+    rfp_text: str,
+    engagement: str = "default",
+    persist: bool = True,
+) -> dict[str, Any]:
+    """Deconstruct an RFP / tender document into atomic requirements and map them to KB assets.
+
+    Args:
+        rfp_text: Raw or Markdown RFP text containing client specifications and requirements.
+        engagement: Engagement identifier (default: 'default' or project name).
+        persist: Whether to store requirements into the engagement graph.
+    """
+    if not rfp_text.strip():
+        return invalid_argument_response("rfp_text", "rfp_text cannot be empty.")
+
+    try:
+        from pipelines.rfp_shredder import RFPShredder
+
+        shredder = RFPShredder(kb_dir="data/kb")
+        requirements = shredder.shred_text(rfp_text, engagement=engagement)
+        matrix = shredder.build_compliance_matrix(requirements)
+
+        if persist:
+            eng_path = server_config.engagements_dir / f"{engagement}.lbug"
+            shredder.persist_to_engagement(
+                engagement=engagement,
+                requirements=requirements,
+                db_path=eng_path,
+            )
+
+        return ok_response(matrix, count=len(requirements))
+    except Exception as e:
+        return error_response(f"Failed to shred RFP: {e}")
+
+
+def generate_zero_draft_hld(
+    engagement: str = "default",
+    project_title: str = "Système d'Architecture Télécom & Plateforme Sécurisée",
+    client_name: str = "Client RFP",
+) -> dict[str, Any]:
+    """Generate a structured High-Level Design (HLD) zero-draft from KB assets and RFP requirements.
+
+    Args:
+        engagement: Target engagement identifier.
+        project_title: Title of the architecture project.
+        client_name: Name of the client or recipient.
+    """
+    try:
+        from tools.elicitation.zero_draft import ZeroDraftAssembler
+
+        eng_path = server_config.engagements_dir / f"{engagement}.lbug"
+        assembler = ZeroDraftAssembler(
+            db_path=eng_path,
+            kb_dir="data/kb",
+        )
+        hld_result = assembler.generate_zero_draft_hld(
+            engagement=engagement,
+            project_title=project_title,
+            client_name=client_name,
+        )
+        return ok_response(hld_result)
+    except Exception as e:
+        return error_response(f"Failed to generate Zero-Draft HLD: {e}")
+
+
+def get_rfp_compliance_matrix(
+    engagement: str = "default",
+) -> dict[str, Any]:
+    """Retrieve the triangular compliance matrix (RFP Requirements vs KB Assets vs Controls).
+
+    Args:
+        engagement: Target engagement identifier.
+    """
+    try:
+        from tools.elicitation.repository import ElicitationRepository
+
+        eng_path = server_config.engagements_dir / f"{engagement}.lbug"
+        if not eng_path.exists():
+            return ok_response({
+                "engagement": engagement,
+                "total_requirements": 0,
+                "covered": 0,
+                "partially_covered": 0,
+                "gaps": 0,
+                "coverage_rate": 0.0,
+                "requirements": [],
+            }, count=0)
+
+        repo = ElicitationRepository(db_path=eng_path)
+        reqs = repo.get_requirements(engagement)
+        total = len(reqs)
+        covered = sum(1 for r in reqs if r.get("status") == "covered")
+        partial = sum(1 for r in reqs if r.get("status") == "partially_covered")
+        gaps = sum(1 for r in reqs if r.get("status") == "gap")
+
+        coverage_rate = round((covered / total * 100), 1) if total > 0 else 0.0
+
+        payload = {
+            "engagement": engagement,
+            "total_requirements": total,
+            "covered": covered,
+            "partially_covered": partial,
+            "gaps": gaps,
+            "coverage_rate": coverage_rate,
+            "requirements": reqs,
+        }
+        return ok_response(payload, count=total)
+    except Exception as e:
+        return error_response(f"Failed to get RFP compliance matrix: {e}")
+
+
+def trigger_rfp_elicitation(
+    engagement: str = "default",
+) -> dict[str, Any]:
+    """Trigger targeted elicitation questions specifically for uncovered RFP requirements (gaps).
+
+    Args:
+        engagement: Target engagement identifier.
+    """
+    try:
+        from tools.elicitation.zero_draft import ZeroDraftAssembler
+
+        eng_path = server_config.engagements_dir / f"{engagement}.lbug"
+        assembler = ZeroDraftAssembler(
+            db_path=eng_path,
+            kb_dir="data/kb",
+        )
+        result = assembler.trigger_targeted_elicitation(engagement=engagement)
+        return ok_response(result, count=result.get("questions_created", 0))
+    except Exception as e:
+        return error_response(f"Failed to trigger RFP elicitation: {e}")
+
 
 
 

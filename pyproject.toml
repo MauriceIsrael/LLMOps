@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "llmops-graphrag-mcp"
 version = "0.1.0"
-description = "Plateforme LLMOps Neuro-Symbolique d'Architecture (GraphRAG + Kùzu DB + FastMCP + DeepEval)"
+description = "Plateforme LLMOps Neuro-Symbolique d'Architecture (GraphRAG + LadybugDB + FastMCP + DeepEval)"
 authors = ["LLMOps Team <admin@llmops.local>"]
 readme = "README.md"
 packages = [
@@ -34,6 +34,7 @@ pytest-cov = "^6.0"
 ruff = "^0.4.0"
 mypy = "^1.9.0"
 mutmut = "^3.2.0"
+
 
 [tool.poetry.group.eval.dependencies]
 deepeval = ">=1.4.0"
@@ -79,3 +80,26 @@ markers = [
     "deterministic: oracle de migration — aucun appel LLM, résultat reproductible",
     "stochastic: extraction LLM, DeepEval, Promptfoo — non utilisable comme oracle",
 ]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_unused_configs = true
+warn_redundant_casts = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["yaml"]
+ignore_missing_imports = true
+
+[tool.mutmut]
+paths_to_mutate = "mcp_server/core/auth.py"
+tests_dir = "tests/unit"
+
+[tool.coverage.run]
+source = ["mcp_server", "tools", "pipelines"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+

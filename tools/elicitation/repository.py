@@ -14,11 +14,12 @@ class ElicitationRepository:
 
     def __init__(
         self,
-        db_path: str | Path = "data/kuzu_db",
+        db_path: str | Path | None = "data/kuzu_db",
         graph_store: GraphStore | None = None,
+        read_only: bool = False,
     ) -> None:
-        self.db_path = str(db_path)
-        self.graph_store = graph_store or make_graph_store(db_path=self.db_path, read_only=False)
+        self.db_path = str(db_path or "data/kuzu_db")
+        self.graph_store = graph_store or make_graph_store(db_path=self.db_path, read_only=read_only)
         self.db_client = self.graph_store  # Property alias for compatibility
         # Initialise le schéma au besoin
         ElicitationSchemaInitializer(db_path=self.db_path, graph_store=self.graph_store)
@@ -739,3 +740,115 @@ class ElicitationRepository:
             return False
         except Exception:
             return False
+
+    def save_requirement(self, req: dict[str, Any]) -> None:
+        """Enregistre ou met à jour une exigence RFP dans le graphe d'engagement."""
+        import json
+        req_id = req["id"]
+        engagement = req.get("engagement", "default")
+        section = req.get("section", "")
+        category = req.get("category", "general")
+        text = req.get("text", "")
+        criticality = req.get("criticality", "mandatory")
+        status = req.get("status", "gap")
+        matched_assets = req.get("matched_assets", "[]")
+        if isinstance(matched_assets, list):
+            matched_assets = json.dumps(matched_assets)
+        matched_controls = req.get("matched_controls", "[]")
+        if isinstance(matched_controls, list):
+            matched_controls = json.dumps(matched_controls)
+        rationale = req.get("rationale", "")
+
+        check_q = "MATCH (r:Requirement {id: $id}) RETURN count(r) AS c;"
+        rows = self.db_client.execute_cypher(check_q, params={"id": req_id})
+        exists = rows and rows[0].get("c", 0) > 0
+
+        if exists:
+            update_q = """
+            MATCH (r:Requirement {id: $id})
+            SET r.engagement = $engagement,
+                r.section = $section,
+                r.category = $category,
+                r.text = $text,
+                r.criticality = $criticality,
+                r.status = $status,
+                r.matched_assets = $matched_assets,
+                r.matched_controls = $matched_controls,
+                r.rationale = $rationale;
+            """
+            self.db_client.execute_cypher(
+                update_q,
+                params={
+                    "id": req_id,
+                    "engagement": engagement,
+                    "section": section,
+                    "category": category,
+                    "text": text,
+                    "criticality": criticality,
+                    "status": status,
+                    "matched_assets": str(matched_assets),
+                    "matched_controls": str(matched_controls),
+                    "rationale": rationale,
+                },
+            )
+        else:
+            create_q = """
+            CREATE (r:Requirement {
+                id: $id,
+                engagement: $engagement,
+                section: $section,
+                category: $category,
+                text: $text,
+                criticality: $criticality,
+                status: $status,
+                matched_assets: $matched_assets,
+                matched_controls: $matched_controls,
+                rationale: $rationale
+            });
+            """
+            self.db_client.execute_cypher(
+                create_q,
+                params={
+                    "id": req_id,
+                    "engagement": engagement,
+                    "section": section,
+                    "category": category,
+                    "text": text,
+                    "criticality": criticality,
+                    "status": status,
+                    "matched_assets": str(matched_assets),
+                    "matched_controls": str(matched_controls),
+                    "rationale": rationale,
+                },
+            )
+
+    def get_requirements(self, engagement: str) -> list[dict[str, Any]]:
+        """Récupère toutes les exigences enregistrées pour un engagement."""
+        query = (
+            "MATCH (r:Requirement) "
+            "WHERE r.engagement = $engagement OR $engagement = '*' "
+            "RETURN r.id as id, r.engagement as engagement, r.section as section, "
+            "r.category as category, r.text as text, r.criticality as criticality, "
+            "r.status as status, r.matched_assets as matched_assets, "
+            "r.matched_controls as matched_controls, r.rationale as rationale;"
+        )
+        try:
+            return self.db_client.execute_cypher(query, params={"engagement": engagement})
+        except Exception:
+            return []
+
+    def get_open_questions(self, engagement: str) -> list[dict[str, Any]]:
+        """Récupère les questions ouvertes pour un engagement."""
+        query = (
+            "MATCH (q:Question) "
+            "WHERE (q.engagement = $engagement OR $engagement = '*') AND q.status = 'open' "
+            "RETURN q.id as id, q.engagement as engagement, q.section as section, "
+            "q.question as question, q.gap_type as gap_type, q.why_it_matters as why_it_matters, "
+            "q.expected_shape as expected_shape, q.routed_to as routed_to, q.status as status;"
+        )
+        try:
+            return self.db_client.execute_cypher(query, params={"engagement": engagement})
+        except Exception:
+            return []
+
+

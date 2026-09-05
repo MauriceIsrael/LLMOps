@@ -1,8 +1,8 @@
 {
   "id": "Q-0002",
   "engagement": "nordwave-mcx-2027",
-  "question": "Which loops govern the system, and how does autonomy increase over time?",
-  "why_it_matters": "La section 8.1 (8.1) ne contient aucun énoncé d'architecture.",
+  "question": "What is the core for, and what must survive site isolation?",
+  "why_it_matters": "La section 5.1 (5.1) ne contient aucun énoncé d'architecture.",
   "expected_shape": "decision",
-  "routed_to": "chief-architect"
+  "routed_to": "mobile-core-architect"
 }

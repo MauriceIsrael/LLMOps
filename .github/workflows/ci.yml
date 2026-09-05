@@ -54,6 +54,9 @@ jobs:
       - name: Run Ruff Linter
         run: poetry run ruff check .
 
+      - name: Run Mypy Type Checker
+        run: poetry run mypy mcp_server tools pipelines
+
       - name: Run ADR-0015 Migration & Publish Reference Engagement
         env:
           GRAPH_BACKEND: ladybug

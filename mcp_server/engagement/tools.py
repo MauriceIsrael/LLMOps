@@ -48,7 +48,7 @@ def get_subject(subject: str, engagement: str | None = None, db_path: str | Path
         db_path: Optional explicit database path override.
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     if not subject:
         return invalid_argument_response("subject", "Parameter 'subject' is required.")
@@ -77,7 +77,7 @@ def get_subject_trajectory(subject: str, engagement: str | None = None, db_path:
         db_path: Optional explicit database path override.
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     if not subject:
         return invalid_argument_response("subject", "Parameter 'subject' is required.")
@@ -101,7 +101,7 @@ def get_board(engagement: str | None = None) -> dict[str, Any]:
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     try:
         repo = _get_repo(engagement=eng)
@@ -124,7 +124,7 @@ def get_statements(engagement: str | None = None, subject: str | None = None, se
         status: Optional statement status filter ('active', 'under_review', 'contested').
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     try:
         repo = _get_repo(engagement=eng)
@@ -153,7 +153,7 @@ def get_conflicts(engagement: str | None = None, status: str = "open") -> dict[s
         status: Conflict status filter ('open', 'arbitrated').
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     try:
         repo = _get_repo(engagement=eng)
@@ -174,11 +174,11 @@ def get_open_questions(engagement: str | None = None, role: str | None = None) -
         role: Optional architect role filter (e.g. 'mcx-architect', 'chief-architect').
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     try:
         repo = _get_repo(engagement=eng)
-        questions = repo.get_questions(engagement=eng, status="open")
+        questions = repo.get_open_questions(engagement=eng)
         repo.close()
 
         if role:
@@ -202,7 +202,7 @@ def get_diagram_graph(
         db_path: Optional explicit database path override.
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     try:
         repo = _get_repo(engagement=eng, db_path=db_path)
@@ -255,7 +255,7 @@ def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     try:
         repo = _get_repo(engagement=eng)
@@ -288,7 +288,7 @@ def get_render_payload(engagement: str | None = None, db_path: str | Path | None
         db_path: Optional explicit database path override.
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     try:
         repo = _get_repo(engagement=eng, db_path=db_path)
@@ -335,7 +335,7 @@ def get_engagement_export(engagement: str | None = None) -> dict[str, Any]:
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     board_res = get_board(engagement=eng)
     payload_res = get_render_payload(engagement=eng)
@@ -354,7 +354,7 @@ def get_engagement_export(engagement: str | None = None) -> dict[str, Any]:
 def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, Any]:
     """Executes a read-only Cypher query against the engagement graph when engagement is specified, or against the active server database. Contains no reusable assets."""
     eng = engagement or server_config.engagement or "nordwave-mcx-2027"
-    authorise(caller="default_user", engagement=eng)
+    authorise(engagement=eng)
 
     try:
         db_client = open_connection(scope=eng)
@@ -371,6 +371,6 @@ def get_graph_summary() -> dict[str, Any]:
 
     This server is read-only by design. Project data is written only through the elicitation engine's human-confirmation flow; see TPL-elicitation-proto for how to produce an engagement graph (E5).
     """
-    authorise(caller="default_user", engagement="nordwave-mcx-2027")
+    authorise(engagement="nordwave-mcx-2027")
     from mcp_server.knowledge.tools import get_graph_summary as kb_summary
     return kb_summary()

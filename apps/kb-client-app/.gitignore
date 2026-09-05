@@ -24,7 +24,7 @@ vite.config.ts.timestamp-*
 
 /../generated/prisma
 
-# Codex CLI
-.codex/*
-!.codex/agents/
-!.codex/config.toml
+# AI Agent Scaffolding Templates
+.agent/
+.arckit/
+.codex/

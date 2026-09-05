@@ -91,7 +91,7 @@
 					Knowledge Base Overview
 				</h1>
 				<span class="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-mono font-semibold">
-					Graphe Neuro-Symbolique Kùzu
+					Graphe Neuro-Symbolique LadybugDB
 				</span>
 			</div>
 			<p class="text-xs text-slate-400">

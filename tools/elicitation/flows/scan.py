@@ -81,7 +81,7 @@ class ScanState(TypedDict, total=False):
     counts_summary: dict[str, int]
 
 
-def require(state: dict[str, Any], *keys: str) -> None:
+def require(state: Any, *keys: str) -> None:
     """Valide la présence des clés obligatoires dans l'état (D10)."""
     missing = [k for k in keys if state.get(k) is None]
     if missing:
@@ -422,8 +422,8 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
                 existing_by_sec[sec] = r
             role_open_counts[role] = role_open_counts.get(role, 0) + 1
 
-    questions = []
-    queued_gaps = []
+    questions: list[dict[str, Any]] = []
+    queued_gaps: list[dict[str, Any]] = []
     new_count = 0
     open_count = 0
     next_id_num = len(existing_rows) + 1 if (existing_rows and "error" not in existing_rows[0]) else 1

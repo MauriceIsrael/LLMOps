@@ -21,7 +21,6 @@ logger = logging.getLogger("mcp_server.notifier")
 
 DEFAULT_OWNER_EMAIL = "maurice.israel@free.fr"
 DEFAULT_DISCORD_INVITE = "https://discord.gg/CQafeY6JJ"
-DEFAULT_DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1544949043631882250/NlTlNyu1u5Zr9ilw5UCeZoiUrT1nBvFG2F3ArNLg-y4NSGxN4UOPpLkzPhM90x9awKGY"
 
 
 def notify_owner_of_suggestion(
@@ -79,7 +78,7 @@ def notify_owner_of_suggestion(
     notifications_sent = ["local_archive", "cloud_logging"]
 
     # 3. Notification Webhook (Discord / Slack / ntfy.sh)
-    webhook_url = os.getenv("OWNER_NOTIFICATION_WEBHOOK") or os.getenv("NOTIFICATION_WEBHOOK_URL") or DEFAULT_DISCORD_WEBHOOK
+    webhook_url = os.getenv("OWNER_NOTIFICATION_WEBHOOK") or os.getenv("NOTIFICATION_WEBHOOK_URL")
 
     endpoints_to_try = []
     if webhook_url:
@@ -128,8 +127,8 @@ def notify_owner_of_suggestion(
                         notifications_sent.append("discord_webhook")
             elif "ntfy.sh" in url:
                 # Format ntfy.sh (Push instantané sur mobile / desktop)
-                headers = {
-                    "Title": f"Knowledge Hub: {title}".encode(),
+                headers: dict[str, str] = {
+                    "Title": f"Knowledge Hub: {title}",
                     "Priority": "high",
                     "Tags": "bulb,brain",
                 }

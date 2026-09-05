@@ -210,10 +210,18 @@ def main() -> None:
     skills_catalog = load_skills_catalog()
     results = analyze_document_skills(full_text, skills_catalog)
 
+    # Déstructuration sémantique RFP & Matrice de conformité triangulaire
+    from pipelines.rfp_shredder import RFPShredder
+    shredder = RFPShredder(kb_dir="data/kb")
+    requirements = shredder.shred_text(full_text, engagement=doc_path.stem)
+    compliance_res = shredder.build_compliance_matrix(requirements)
+    results["compliance_matrix"] = compliance_res
+
     # Affichage des référentiels détectés
     regs = results["regulatory_targets"]
     regs_str = ", ".join(f"[bold green]{r}[/bold green]" for r in regs) if regs else "[dim]Aucun référentiel formel mentionné[/dim]"
-    console.print(f"🏛️ [bold]Référentiels Réglementaires Détectés :[/bold] {regs_str}\n")
+    console.print(f"🏛️ [bold]Référentiels Réglementaires Détectés :[/bold] {regs_str}")
+    console.print(f"📋 [bold]Scorecard de Conformité Standard :[/bold] [bold green]{compliance_res['coverage_rate']} %[/bold green] ({compliance_res['covered']}/{compliance_res['total_requirements']} exigences couvertes, {compliance_res['gaps']} gaps)\n")
 
     # Table des compétences
     table_skills = Table(title="🎯 Compétences Techniques Requises par le Document")

@@ -76,8 +76,8 @@ def contribution_node(state: ContributionState) -> dict[str, Any]:
     elif action == "accept":
         if not ct_id:
             raise ValueError("contribution_id requis pour accept")
-        c = crepo.get(ct_id)
-        if not c or c.status != "confirmed_by_author":
+        c_obj = crepo.get(ct_id)
+        if not c_obj or c_obj.status != "confirmed_by_author":
             return {"rejected": True, "persisted_statement_ids": []}
         
         section_id = state.get("section", "4.5")

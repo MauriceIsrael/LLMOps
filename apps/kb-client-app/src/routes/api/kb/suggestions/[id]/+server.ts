@@ -3,8 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { detectApplicableControls } from '$lib/server/compliance-matcher';
 
-const DEFAULT_DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1544949043631882250/NlTlNyu1u5Zr9ilw5UCeZoiUrT1nBvFG2F3ArNLg-y4NSGxN4UOPpLkzPhM90x9awKGY";
-
 export const POST: RequestHandler = async ({ params, request }) => {
 	const { id } = params;
 	if (!id) {
@@ -98,54 +96,56 @@ Promu automatiquement depuis le projet \`${suggestion.source_engagement || 'glob
 
 		// Notification Discord automatique de l'arbitrage
 		try {
-			const webhookUrl = process.env.OWNER_NOTIFICATION_WEBHOOK || DEFAULT_DISCORD_WEBHOOK;
-			const colorMap: Record<string, number> = {
-				approve: 3066993,      // Vert émeraude
-				request_changes: 3447003, // Bleu information
-				reject: 15158332,      // Rouge
-			};
-			const actionTitles: Record<string, string> = {
-				approve: `✅ Proposition APPROUVÉE : ${suggestion.title}`,
-				request_changes: `🔄 Demande d'Approfondissement : ${suggestion.title}`,
-				reject: `❌ Proposition REJETÉE : ${suggestion.title}`,
-			};
+			const webhookUrl = process.env.OWNER_NOTIFICATION_WEBHOOK || process.env.DISCORD_WEBHOOK_URL;
+			if (webhookUrl) {
+				const colorMap: Record<string, number> = {
+					approve: 3066993,      // Vert émeraude
+					request_changes: 3447003, // Bleu information
+					reject: 15158332,      // Rouge
+				};
+				const actionTitles: Record<string, string> = {
+					approve: `✅ Proposition APPROUVÉE : ${suggestion.title}`,
+					request_changes: `🔄 Demande d'Approfondissement : ${suggestion.title}`,
+					reject: `❌ Proposition REJETÉE : ${suggestion.title}`,
+				};
 
-			const fields: any[] = [
-				{ name: "Auteur initial", value: suggestion.author || "Non spécifié", inline: true },
-				{ name: "Projet Source", value: suggestion.source_engagement || "Global", inline: true },
-				{ name: "Statut Actuel", value: suggestion.status.toUpperCase(), inline: true },
-			];
+				const fields: any[] = [
+					{ name: "Auteur initial", value: suggestion.author || "Non spécifié", inline: true },
+					{ name: "Projet Source", value: suggestion.source_engagement || "Global", inline: true },
+					{ name: "Statut Actuel", value: suggestion.status.toUpperCase(), inline: true },
+				];
 
-			if (detectedControls.length > 0) {
-				fields.push({
-					name: "🛡️ Contrôles Couverts (Auto)",
-					value: detectedControls.join(", "),
-					inline: false
+				if (detectedControls.length > 0) {
+					fields.push({
+						name: "🛡️ Contrôles Couverts (Auto)",
+						value: detectedControls.join(", "),
+						inline: false
+					});
+				}
+
+				const discordPayload = {
+					username: "Knowledge Hub Governance",
+					avatar_url: "https://raw.githubusercontent.com/MauriceIsrael/LLMOps/main/assets/icon.png",
+					embeds: [
+						{
+							title: actionTitles[action],
+							description: feedback 
+								? `**Retour du Lead Architect (${reviewer}) :**\n> ${feedback}\n\n**Proposition originale :**\n\`\`\`markdown\n${(suggestion.suggested_change || '').slice(0, 400)}\n\`\`\``
+								: (action === 'approve' ? `La proposition a été promue dans la base de connaissances sous l'identifiant actif **${createdAssetId}**.` : `La proposition a été clôturée.`),
+							color: colorMap[action],
+							fields: fields,
+							footer: { text: `ID: ${id} • Arbitrage Maurice Israel` },
+							timestamp: new Date().toISOString()
+						}
+					]
+				};
+
+				await fetch(webhookUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(discordPayload)
 				});
 			}
-
-			const discordPayload = {
-				username: "Knowledge Hub Governance",
-				avatar_url: "https://raw.githubusercontent.com/MauriceIsrael/LLMOps/main/assets/icon.png",
-				embeds: [
-					{
-						title: actionTitles[action],
-						description: feedback 
-							? `**Retour du Lead Architect (${reviewer}) :**\n> ${feedback}\n\n**Proposition originale :**\n\`\`\`markdown\n${(suggestion.suggested_change || '').slice(0, 400)}\n\`\`\``
-							: (action === 'approve' ? `La proposition a été promue dans la base de connaissances sous l'identifiant actif **${createdAssetId}**.` : `La proposition a été clôturée.`),
-						color: colorMap[action],
-						fields: fields,
-						footer: { text: `ID: ${id} • Arbitrage Maurice Israel` },
-						timestamp: new Date().toISOString()
-					}
-				]
-			};
-
-			await fetch(webhookUrl, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(discordPayload)
-			});
 		} catch (webhookErr) {
 			console.warn('Échec envoi notification Discord lors de l\'arbitrage:', webhookErr);
 		}

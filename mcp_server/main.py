@@ -20,6 +20,10 @@ from starlette.routing import Route
 from starlette.types import Receive, Scope, Send
 
 from mcp_server.config import settings
+from mcp_server.core.auth import (
+    parse_engagement_tokens,
+    set_current_caller,
+)
 from mcp_server.core.config import server_config
 from mcp_server.engagement.tools import (
     get_board,
@@ -34,6 +38,7 @@ from mcp_server.engagement.tools import (
     get_subject_trajectory,
 )
 from mcp_server.knowledge.tools import (
+    generate_zero_draft_hld,
     get_asset,
     get_assets,
     get_compliance_matrix,
@@ -42,6 +47,7 @@ from mcp_server.knowledge.tools import (
     get_glossary_term,
     get_graph_summary,
     get_principles_for,
+    get_rfp_compliance_matrix,
     get_skills_matrix,
     list_assets,
     list_controls,
@@ -49,7 +55,9 @@ from mcp_server.knowledge.tools import (
     list_skills,
     query_graph,
     search_assets,
+    shred_rfp,
     suggest_knowledge_improvement,
+    trigger_rfp_elicitation,
 )
 
 active_plane = os.getenv("LLMOPS_PLANE", server_config.plane).lower()
@@ -72,6 +80,10 @@ mcp.tool()(get_compliance_matrix)
 mcp.tool()(list_skills)
 mcp.tool()(get_skills_matrix)
 mcp.tool()(suggest_knowledge_improvement)
+mcp.tool()(shred_rfp)
+mcp.tool()(generate_zero_draft_hld)
+mcp.tool()(get_rfp_compliance_matrix)
+mcp.tool()(trigger_rfp_elicitation)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -91,7 +103,11 @@ import secrets
 
 
 class TokenPreservingSseServerTransport(SseServerTransport):
-    """Transport SSE qui génère le callback /messages pour les sessions SSE."""
+    """Transport SSE qui génère le callback /messages pour les sessions SSE avec traçabilité du caller."""
+
+    def __init__(self, endpoint: str):
+        super().__init__(endpoint)
+        self._session_callers: dict[Any, str] = {}
 
     @asynccontextmanager
     async def connect_sse(self, scope: Scope, receive: Receive, send: Send):
@@ -103,6 +119,9 @@ class TokenPreservingSseServerTransport(SseServerTransport):
 
         session_id = uuid4()
         self._read_stream_writers[session_id] = read_stream_writer
+
+        caller = scope.get("caller") or "default_user"
+        self._session_callers[session_id] = caller
 
         root_path = scope.get("root_path", "")
         full_message_path = root_path.rstrip("/") + self._endpoint
@@ -135,6 +154,7 @@ class TokenPreservingSseServerTransport(SseServerTransport):
                 yield (read_stream, write_stream)
         finally:
             self._read_stream_writers.pop(session_id, None)
+            self._session_callers.pop(session_id, None)
 
 
 # Transport SSE global
@@ -142,14 +162,17 @@ sse_transport = TokenPreservingSseServerTransport("/messages")
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
-    """Middleware pour sécuriser l'accès HTTP/SSE par jeton Bearer ou Header HTTP (constant-time)."""
+    """Middleware pour sécuriser l'accès HTTP/SSE par jeton Bearer ou Header HTTP (constant-time, multi-tenant)."""
 
     async def dispatch(self, request, call_next):
         if request.url.path in ("/health", "/healthz"):
             return await call_next(request)
 
         expected_token = os.getenv("SERVER_TOKEN") or os.getenv("LLMOPS_AUTH_TOKEN") or settings.AUTH_TOKEN
-        if not expected_token or not expected_token.strip():
+        env_tokens = os.getenv("ENGAGEMENT_TOKENS", "").strip()
+        tenant_tokens = parse_engagement_tokens(env_tokens) if env_tokens else {}
+
+        if (not expected_token or not expected_token.strip()) and not tenant_tokens:
             return JSONResponse(
                 {"error": "Unauthorized: SERVER_TOKEN or LLMOPS_AUTH_TOKEN is not configured on server"},
                 status_code=500,
@@ -157,7 +180,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         auth_header = request.headers.get("Authorization")
         header_token = request.headers.get("X-API-Key") or request.headers.get("X-Server-Token")
-        session_id = request.query_params.get("session_id")
+        session_id_str = request.query_params.get("session_id")
 
         provided_token = None
         if auth_header and auth_header.startswith("Bearer "):
@@ -165,14 +188,38 @@ class AuthMiddleware(BaseHTTPMiddleware):
         elif header_token:
             provided_token = header_token.strip()
 
-        # 1. Validation du jeton explicite à temps constant (secrets.compare_digest)
-        if provided_token and secrets.compare_digest(provided_token, expected_token):
+        caller = None
+
+        # 1. Validation du jeton serveur explicite à temps constant (secrets.compare_digest)
+        if provided_token and expected_token and secrets.compare_digest(provided_token, expected_token.strip()):
+            caller = "server_admin"
+
+        # 2. Validation contre les jetons locataires ENGAGEMENT_TOKENS à temps constant
+        if not caller and provided_token and tenant_tokens:
+            for t in tenant_tokens:
+                if secrets.compare_digest(provided_token, t):
+                    caller = t
+                    break
+
+        if caller:
+            request.state.caller = caller
+            request.scope["caller"] = caller
+            set_current_caller(caller)
             return await call_next(request)
 
-        # 2. Validation de secours si session_id appartient à une session SSE active sur la même instance
-        if session_id and hasattr(sse_transport, "_read_stream_writers"):
-            if session_id in sse_transport._read_stream_writers:
-                return await call_next(request)
+        # 3. Validation de secours si session_id appartient à une session SSE active sur la même instance
+        if session_id_str and hasattr(sse_transport, "_read_stream_writers"):
+            try:
+                from uuid import UUID
+                sid = UUID(session_id_str)
+                if sid in sse_transport._read_stream_writers:
+                    caller = getattr(sse_transport, "_session_callers", {}).get(sid, "default_user")
+                    request.state.caller = caller
+                    request.scope["caller"] = caller
+                    set_current_caller(caller)
+                    return await call_next(request)
+            except Exception:
+                pass
 
         return JSONResponse(
             {"error": "Unauthorized: Invalid or missing LLMOps authentication token in Authorization header"},
@@ -180,8 +227,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         )
 
 
-async def run_sse_authenticated(host: str, port: int) -> None:
-    """Démarre le serveur SSE FastMCP enveloppé dans le middleware d'authentification."""
+def create_starlette_app() -> Starlette:
+    """Crée et configure l'application Starlette avec ses routes et son middleware d'authentification."""
 
     async def handle_health(request):
         active_plane = os.getenv("LLMOPS_PLANE", server_config.plane).lower()
@@ -215,6 +262,8 @@ async def run_sse_authenticated(host: str, port: int) -> None:
             )
 
     async def handle_sse(request):
+        caller = getattr(request.state, "caller", None) or request.scope.get("caller") or "default_user"
+        set_current_caller(caller)
         async with sse_transport.connect_sse(
             request.scope, request.receive, request._send
         ) as streams:
@@ -225,9 +274,23 @@ async def run_sse_authenticated(host: str, port: int) -> None:
             )
 
     async def handle_messages(request):
-        await sse_transport.handle_post_message(
-            request.scope, request.receive, request._send
-        )
+        session_id_str = request.query_params.get("session_id")
+        caller = getattr(request.state, "caller", None)
+        if not caller and session_id_str:
+            try:
+                from uuid import UUID
+                sid = UUID(session_id_str)
+                caller = getattr(sse_transport, "_session_callers", {}).get(sid, "default_user")
+            except Exception:
+                caller = "default_user"
+        if caller:
+            set_current_caller(caller)
+
+        class SsePostResponse:
+            async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+                await sse_transport.handle_post_message(scope, receive, send)
+
+        return SsePostResponse()
 
     async def handle_visualize(request):
         from pathlib import Path
@@ -266,7 +329,7 @@ async def run_sse_authenticated(host: str, port: int) -> None:
         etag = data.get("payload_sha256", "")
         return JSONResponse(data, headers={"ETag": etag, "Cache-Control": "public, max-age=86400"})
 
-    starlette_app = Starlette(
+    return Starlette(
         debug=settings.DEBUG,
         routes=[
             Route("/health", endpoint=handle_health, methods=["GET"]),
@@ -279,6 +342,10 @@ async def run_sse_authenticated(host: str, port: int) -> None:
         middleware=[Middleware(AuthMiddleware)],
     )
 
+
+async def run_sse_authenticated(host: str, port: int) -> None:
+    """Démarre le serveur SSE FastMCP enveloppé dans le middleware d'authentification."""
+    starlette_app = create_starlette_app()
     config = uvicorn.Config(
         starlette_app,
         host=host,

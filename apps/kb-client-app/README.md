@@ -1,108 +1,85 @@
-# template-app
+# Architecture Knowledge Base & Governance Console
 
-Enterprise Architecture Governance Project
+Interface web full-stack développée avec **Svelte 5** et **SvelteKit**, servant de console d'administration, d'exploration visuelle et de gouvernance des retours d'expérience (REX) pour la plateforme LLMOps d'architecture neuro-symbolique.
 
-## Getting Started
+---
 
-This project uses ArcKit for enterprise architecture governance and vendor procurement.
+## Fonctionnalités Principales
 
-### Available Commands
+### 1. Exploration du Référentiel d'Architecture
+- Consultation et filtrage des actifs d'architecture (Patterns `PAT-*`, Décisions `ADR-*`, Principes `PRN-*`).
+- Visualisation du graphe de dépendances et de conformité réglementaire (ECharts, Threlte 3D).
+- Inspection de la traçabilité des décisions et de la matrice de conformité (NIS2, DORA, 3GPP MCX).
 
-Once you start your AI assistant, you'll have access to these commands:
+### 2. Gouvernance & Arbitrage des Suggestions REX (`/governance/suggestions`)
+- Réception et examen des propositions d'amélioration issues des moissonnages de projets (`elicit harvest`).
+- Détection sémantique automatique des contrôles réglementaires impactés (Bottom-Up).
+- Workflow d'arbitrage par le Lead Architect : approbation (promotion automatique en pattern), demande de réétude, ou rejet.
+- Dispatch d'alertes événementielles (Discord Webhook, push mobile ntfy.sh).
 
-#### Project Planning
-- `$arckit-plan` - Create project plan with timeline, phases, and gates
+### 3. Gestion des Identités & Contrôle d'Accès (ABAC)
+- Authentification par session JWT (Access & Refresh tokens) avec hachage sécurisé bcrypt.
+- Moteur d'autorisation fine basé sur les attributs (**Casbin ABAC**).
+- Persistance locale des politiques et utilisateurs via **Prisma ORM** et SQLite (`dev.db`).
 
-#### Core Workflow
-- `$arckit-principles` - Create or update architecture principles
-- `$arckit-stakeholders` - Analyze stakeholder drivers, goals, and outcomes
-- `$arckit-risk` - Create comprehensive risk register (Orange Book)
-- `$arckit-sobc` - Create Strategic Outline Business Case (Green Book 5-case)
-- `$arckit-requirements` - Define comprehensive requirements
-- `$arckit-data-model` - Create data model with ERD, GDPR compliance, data governance
-- `$arckit-research` - Research technology, services, and products with build vs buy analysis
-- `$arckit-wardley` - Create strategic Wardley Maps for build vs buy and procurement strategy
+---
 
-#### Vendor Procurement
-- `$arckit-sow` - Generate Statement of Work (RFP)
-- `$arckit-dos` - Digital Outcomes and Specialists (DOS) procurement (UK Digital Marketplace)
-- `$arckit-gcloud-search` - Search G-Cloud services on UK Digital Marketplace
-- `$arckit-gcloud-clarify` - Validate G-Cloud services and generate clarification questions
-- `$arckit-evaluate` - Create vendor evaluation framework and score vendors
-
-#### Design Review
-- `$arckit-hld-review` - Review High-Level Design
-- `$arckit-dld-review` - Review Detailed Design
-
-#### Architecture Diagrams
-- `$arckit-diagram` - Generate visual architecture diagrams using Mermaid
-
-#### Sprint Planning
-- `$arckit-backlog` - Generate prioritised product backlog with GDS user stories
-
-#### Service Management
-- `$arckit-servicenow` - Generate ServiceNow service design (CMDB, SLAs, incident/change management)
-
-#### Traceability & Quality
-- `$arckit-traceability` - Generate requirements traceability matrix
-- `$arckit-analyze` - Comprehensive governance quality analysis
-
-#### Template Customization
-- `$arckit-customize` - Copy templates for customization (preserves across updates)
-
-#### UK Government Compliance
-- `$arckit-service-assessment` - GDS Service Standard assessment preparation
-- `$arckit-tcop` - Technology Code of Practice assessment (all 13 points)
-- `$arckit-ai-playbook` - AI Playbook compliance for responsible AI
-- `$arckit-atrs` - Algorithmic Transparency Recording Standard (ATRS) record
-
-#### Security Assessment
-- `$arckit-secure` - UK Government Secure by Design (NCSC CAF, Cyber Essentials, UK GDPR)
-- `$arckit-mod-secure` - MOD Secure by Design (JSP 440, IAMM, security clearances)
-- `$arckit-jsp-936` - MOD JSP 936 AI assurance documentation
-
-## Project Structure
+## Architecture Technique
 
 ```
-template-app/
-├── .arckit/
-│   ├── scripts/
-│   │   └── bash/
-│   ├── templates/           # Default templates (refreshed by arckit init)
-│   └── templates-custom/    # Your customizations (preserved across updates)
-├── .agents/skills/          # Codex skills (auto-discovered)
-├── projects/
-│   ├── 000-global/
-│   │   └── ARC-000-PRIN-v1.0.md (global principles)
-│   └── 001-project-name/
-│       ├── requirements.md
-│       ├── sow.md
-│       └── vendors/
+apps/kb-client-app/
+├── src/
+│   ├── lib/
+│   │   ├── components/      # Composants UI Svelte 5 (Runes, Bits UI, Tailwind CSS)
+│   │   └── server/          # Services backend (Casbin, JWT, Compliance matcher)
+│   └── routes/
+│       ├── +layout.svelte   # Navigation et état global de session
+│       ├── assets/          # Consultation des actifs de connaissances
+│       ├── explorer/        # Visualiseur interactif de graphe
+│       ├── governance/      # Tableau de bord d'arbitrage des REX
+│       ├── admin/           # Gestion des utilisateurs et politiques Casbin
+│       └── api/             # Endpoints API (proxy MCP, suggestions, auth)
+├── prisma/
+│   ├── schema.prisma        # Modèle de données utilisateurs & Casbin
+│   └── seed.ts              # Données de démonstration initiales
+└── static/                  # Assets statiques
 ```
 
-## Template Customization
+---
 
-ArcKit templates can be customized without modifying the defaults:
+## Configuration & Démarrage
 
-1. Run `$arckit-customize <template-name>` to copy a template for editing
-2. Your customizations are stored in `.arckit/templates-custom/`
-3. Commands automatically use your custom templates when present
-4. Running `arckit init` again preserves your customizations
+### Variables d'environnement (`.env`)
 
-Example:
-```
-$arckit-customize requirements   # Copy requirements template
-$arckit-customize all            # Copy all templates
+Créez un fichier `.env` à la racine de `apps/kb-client-app/` à partir de `.env.example` :
+
+```bash
+cp .env.example .env
 ```
 
-## Next Steps
+| Variable | Description | Exemple |
+|---|---|---|
+| `DATABASE_URL` | Chaîne de connexion SQLite pour Prisma | `file:./dev.db` |
+| `SERVER_TOKEN` | Jeton d'authentification pour le serveur FastMCP | `llmops-token-...` |
+| `GCP_KB_ENDPOINT` | URL du serveur FastMCP LLMOps | `https://llmops-mcp-server-...run.app` |
+| `OWNER_NOTIFICATION_WEBHOOK` | (Optionnel) URL Webhook Discord pour notifications | `https://discord.com/api/webhooks/...` |
 
-1. Start your AI assistant (OpenAI Codex CLI)
-2. Run `$arckit-principles` to establish architecture governance
-3. Create your first project with `$arckit-requirements`
+### Commandes de Développement
 
-## Documentation
+```bash
+# 1. Installer les dépendances
+npm install
 
-- [ArcKit Documentation](https://github.com/github/arc-kit)
-- [Architecture Principles Guide](https://github.com/github/arc-kit/docs/principles.md)
-- [Vendor Procurement Guide](https://github.com/github/arc-kit/docs/procurement.md)
+# 2. Initialiser la base de données SQLite et charger le seed
+npx prisma db push
+npx prisma db seed
+
+# 3. Lancer le serveur de développement Vite
+npm run dev
+
+# 4. Vérifier les types Svelte et TypeScript
+npm run check
+
+# 5. Compiler pour la production
+npm run build
+```

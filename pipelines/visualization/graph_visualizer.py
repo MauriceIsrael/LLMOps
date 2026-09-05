@@ -298,7 +298,7 @@ class GraphVisualizer:
     <header>
         <div class="title-area">
             <h1>LLMOps Architecture KB</h1>
-            <span class="badge">Plans de Connaissance Kùzu DB</span>
+            <span class="badge">Plans de Connaissance LadybugDB</span>
         </div>
 
         <!-- Sélecteur de Plans de Connaissance -->
@@ -361,7 +361,7 @@ class GraphVisualizer:
 
         function showDetails(details) {{
             document.getElementById('sidebar-title').innerText = details.id || details.title;
-            document.getElementById('sidebar-subtitle').innerText = "Propriétés enregistrées dans Kùzu DB";
+            document.getElementById('sidebar-subtitle').innerText = "Propriétés enregistrées dans LadybugDB";
             
             let html = '<div class="panel-card"><h3>Métadonnées du Nœud</h3>';
             for (const [k, v] of Object.entries(details)) {{

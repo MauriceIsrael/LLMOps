@@ -32,7 +32,7 @@ def harvest_candidates_node(state: HarvestState) -> dict[str, Any]:
     return {"promotion_candidates": candidates}
 
 
-def build_harvest_graph() -> StateGraph:
+def build_harvest_graph() -> Any:
     """Construit le graphe d'exécution du flux D : Harvest."""
     builder = StateGraph(HarvestState)
     builder.add_node("harvest", harvest_candidates_node)

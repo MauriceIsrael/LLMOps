@@ -191,6 +191,101 @@ def audit_compliance_cmd(
     )
 
 
+@app.command(name="shred-rfp")
+def shred_rfp_cmd(
+    rfp_file: Path = typer.Argument(..., help="Chemin vers le fichier RFP/CCTP brut ou Markdown."),
+    engagement: str = typer.Option("demo-rfp-2026", "--engagement", "-e", help="Identifiant de l'engagement projet."),
+    persist: bool = typer.Option(True, "--persist/--no-persist", help="Persister dans la base d'engagement locale."),
+    output_json: Path = typer.Option(None, "--output-json", "-o", help="Chemin d'export JSON de la matrice."),
+) -> None:
+    """Déstructure un RFP en exigences atomiques et calcule la matrice de conformité triangulaire."""
+    import json
+
+    from rich.table import Table
+
+    from pipelines.rfp_shredder import RFPShredder
+
+    if not rfp_file.exists():
+        console.print(f"[bold red]❌ Fichier introuvable : {rfp_file}[/bold red]")
+        raise typer.Exit(code=1)
+
+    text = rfp_file.read_text(encoding="utf-8")
+    shredder = RFPShredder(kb_dir="data/kb")
+    requirements = shredder.shred_text(text, engagement=engagement)
+    res = shredder.build_compliance_matrix(requirements)
+
+    console.print(f"\n[bold cyan]📑 RFP Déstructuré : {len(requirements)} exigences identifiées[/bold cyan]")
+    console.print(f"Couverture KB standard : [bold green]{res['coverage_rate']} %[/bold green] ({res['covered']}/{res['total_requirements']})")
+    console.print(f"Écarts identifiés (Gaps) : [bold red]{res['gaps']}[/bold red] | Partiel : [bold yellow]{res['partially_covered']}[/bold yellow]")
+
+    table = Table(title=f"Matrice de Conformité RFP Triangulaire — {engagement}", show_header=True)
+    table.add_column("ID", style="cyan")
+    table.add_column("Catégorie", style="magenta")
+    table.add_column("Statut", style="bold")
+    table.add_column("Actifs KB", style="green")
+    table.add_column("Contrôles", style="yellow")
+
+    for r in requirements[:15]:
+        status_style = "green" if r.status == "covered" else ("yellow" if r.status == "partially_covered" else "red")
+        table.add_row(
+            r.id,
+            r.category,
+            f"[{status_style}]{r.status}[/{status_style}]",
+            ", ".join(r.matched_assets[:2]) or "-",
+            ", ".join(r.matched_controls[:2]) or "-",
+        )
+    console.print(table)
+    if len(requirements) > 15:
+        console.print(f"... et {len(requirements) - 15} autres exigences.")
+
+    if persist:
+        from mcp_server.core.config import server_config
+        eng_p = server_config.engagements_dir / f"{engagement}.lbug"
+        shredder.persist_to_engagement(
+            engagement=engagement,
+            requirements=requirements,
+            db_path=eng_p if eng_p.exists() else server_config.knowledge_db_path,
+        )
+        console.print(f"[bold green]💾 Exigences enregistrées dans le graphe d'engagement : {engagement}[/bold green]")
+
+    if output_json:
+        output_json.write_text(json.dumps(res, indent=2, ensure_ascii=False), encoding="utf-8")
+        console.print(f"[bold blue]Export JSON écrit : {output_json}[/bold blue]")
+
+
+@app.command(name="zero-draft-hld")
+def zero_draft_hld_cmd(
+    engagement: str = typer.Option("demo-rfp-2026", "--engagement", "-e", help="Identifiant de l'engagement projet."),
+    output_md: Path = typer.Option(None, "--output-md", "-o", help="Chemin du fichier Markdown HLD généré."),
+    trigger_gaps: bool = typer.Option(False, "--trigger-gaps", help="Générer les questions d'élicitation pour les gaps."),
+) -> None:
+    """Génère le document HLD Zero-Draft et optionnellement les questions d'élicitation ciblées."""
+    from mcp_server.core.config import server_config
+    from tools.elicitation.zero_draft import ZeroDraftAssembler
+
+    eng_p = server_config.engagements_dir / f"{engagement}.lbug"
+    assembler = ZeroDraftAssembler(
+        db_path=eng_p if eng_p.exists() else server_config.knowledge_db_path,
+        kb_dir="data/kb",
+    )
+    result = assembler.generate_zero_draft_hld(engagement=engagement)
+
+    console.print(f"\n[bold cyan]📄 Zero-Draft HLD généré pour l'engagement : {engagement}[/bold cyan]")
+    console.print(f"Statut du document : [bold]{result['status'].upper()}[/bold]")
+    console.print(f"Couverture standard : [bold green]{result['coverage_rate']} %[/bold green] ({result['covered_count']}/{result['total_requirements']})")
+    console.print(f"Gaps résiduels : [bold red]{result['gap_count']}[/bold red]")
+
+    out_file = output_md or Path(f"projects/{engagement}/HLD-zero-draft.md")
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    out_file.write_text(result["document_markdown"], encoding="utf-8")
+    console.print(f"[bold green]✅ Document HLD enregistré dans : {out_file}[/bold green]")
+
+    if trigger_gaps:
+        q_res = assembler.trigger_targeted_elicitation(engagement=engagement)
+        console.print(f"[bold magenta]📬 {q_res['questions_created']} questions d'élicitation créées pour combler les gaps ![/bold magenta]")
+
+
+
 def ingest_main() -> None:
     """Point d'entrée CLI direct pour l'ingestion."""
     typer.run(ingest)

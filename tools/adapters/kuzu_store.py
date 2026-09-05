@@ -10,10 +10,10 @@ KuzuGraphStore = LadybugGraphStore
 
 
 def make_graph_store(
-    db_path: str | Path, read_only: bool = False, backend: str | None = None
+    db_path: str | Path | None = "data/kuzu_db", read_only: bool = False, backend: str | None = None
 ) -> GraphStore:
     """Factory function returning the native LadybugGraphStore instance."""
-    return LadybugGraphStore(db_path=db_path, read_only=read_only)
+    return LadybugGraphStore(db_path=str(db_path or "data/kuzu_db"), read_only=read_only)
 
 
 __all__ = ["GraphStore", "KuzuGraphStore", "LadybugGraphStore", "make_graph_store"]

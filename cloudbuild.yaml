@@ -48,7 +48,7 @@ steps:
       - '--set-env-vars'
       - 'GRAPH_BACKEND=ladybug,LLMOPS_TRANSPORT=sse,LLMOPS_PLANE=knowledge'
       - '--set-secrets'
-      - 'SERVER_TOKEN=llmops-auth-token:latest'
+      - 'SERVER_TOKEN=llmops-auth-token:latest,OWNER_NOTIFICATION_WEBHOOK=llmops-discord-webhook:latest'
       - '--port'
       - '8000'
 

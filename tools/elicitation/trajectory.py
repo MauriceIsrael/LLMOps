@@ -38,7 +38,7 @@ def get_subject_trajectory(
         st_query, params={"subject_name": subject_name, "engagement": engagement}
     )
 
-    steps = []
+    steps: list[dict[str, Any]] = []
     # Reconstruire les étapes de maturité (L1 à L4)
     # Remplir des étapes exemples si aucune donnée en base
     if not q_rows or "error" in q_rows[0]:

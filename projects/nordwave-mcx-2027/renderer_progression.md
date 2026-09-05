@@ -67,6 +67,13 @@ Copiez la commande suivante et répondez :
 - Énoncé validé (`designed`) par amina : `has_property` = ``.
   > *Verbatim :* ""
 
+### Section 4.1
+
+- Énoncé validé (`designed`) par Amina Duarte : `is_constrained_by` = `3GPP MC service layer boundary`.
+  > *Verbatim :* "3GPP MC service layer boundary"
+- Énoncé validé (`stated-by-client`) par Amina Duarte : `has_property` = `group voice must survive site isolation from national data centres`.
+  > *Verbatim :* "group voice must survive site isolation from national data centres"
+
 ```
 
 
@@ -106,7 +113,7 @@ Copiez la commande suivante et répondez :
 
 ### ⚠️ Fiche Conflit générée par le Conflict Renderer (`conflict.md.j2`) :
 ```markdown
-<!-- elicit:nordwave-mcx-2027:C-0001:conflict:sha=dbefd2 -->
+<!-- elicit:nordwave-mcx-2027:C-0001:conflict:sha=34d1b5 -->
 ### ⚠️ Registre de Conflit d'Architecture — C-0001
 
 **Sujet & Prédicat Contestés :** `floor-control` · `has_property / depends_on`
@@ -116,7 +123,7 @@ Copiez la commande suivante et répondez :
 - **Énoncé `S-0034`** par Amina Duarte (Rôle : `mcx-service-architect`) le  :
   - Valeur proposé : `arbitration terminates in the MC service layer, at the site` (Confiance : `designed`)
   - *Verbatim :* ""
-- **Énoncé `S-0003`** par Rui Vasconcelos (Rôle : `mobile-core-architect`) le  :
+- **Énoncé `S-0005`** par Rui Vasconcelos (Rôle : `mobile-core-architect`) le  :
   - Valeur proposé : `depends on a committed priority and pre-emption profile in the core` (Confiance : `designed`)
   - *Verbatim :* ""
 
@@ -135,14 +142,14 @@ Exécutez la commande suivante en précisant obligatoirement la raison d'archite
 
 ### ✅ Fiche Arbitrage générée par le Arbitration Renderer (`arbitration.md.j2`) :
 ```markdown
-<!-- elicit:nordwave-mcx-2027:C-0001:arbitration:sha=d7af03 -->
+<!-- elicit:nordwave-mcx-2027:C-0001:arbitration:sha=c2ec22 -->
 ### ⚖️ Rapport d'Arbitrage — Conflit C-0001
 
 **Arbitré par :** `Sofia Lindqvist`
 
 #### Décision d'Architecture :
-- **Énoncé Conservé (Actif) :** `S-0003` (`floor-control` · `depends_on` = `depends on a committed priority and pre-emption profile in the core`) par Rui Vasconcelos.
-- **Énoncé Rendu Caduc (`superseded`) :** `S-0002` (`floor-control` · `has_property` = `floor arbitration terminates in the MC service layer at the site`) par Amina Duarte.
+- **Énoncé Conservé (Actif) :** `S-0005` (`floor-control` · `depends_on` = `depends on a committed priority and pre-emption profile in the core`) par Rui Vasconcelos.
+- **Énoncé Rendu Caduc (`superseded`) :** `S-0004` (`floor-control` · `has_property` = `floor arbitration terminates in the MC service layer at the site`) par Amina Duarte.
 
 > 📌 **Note d'historique :** L'énoncé rendu caduc reste conservé dans l'historique d'architecture et constitue un candidat de promotion si l'expérience terrain le justifie ultérieurement.
 
@@ -166,6 +173,13 @@ Exécutez la commande suivante en précisant obligatoirement la raison d'archite
 
 - Énoncé validé (`designed`) par amina : `has_property` = ``.
   > *Verbatim :* ""
+
+### Section 4.1
+
+- Énoncé validé (`designed`) par Amina Duarte : `is_constrained_by` = `3GPP MC service layer boundary`.
+  > *Verbatim :* "3GPP MC service layer boundary"
+- Énoncé validé (`stated-by-client`) par Amina Duarte : `has_property` = `group voice must survive site isolation from national data centres`.
+  > *Verbatim :* "group voice must survive site isolation from national data centres"
 
 ### Section 4.3
 

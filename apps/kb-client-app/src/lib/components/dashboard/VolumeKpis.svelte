@@ -26,7 +26,7 @@
 		</div>
 		<div class="text-3xl font-extrabold text-white mb-1">{totalAssets}</div>
 		<div class="text-xs text-slate-400">
-			<span class="text-emerald-400 font-medium">100%</span> cartographiés en Kùzu DB
+			<span class="text-emerald-400 font-medium">100%</span> cartographiés en LadybugDB
 		</div>
 	</div>
 
