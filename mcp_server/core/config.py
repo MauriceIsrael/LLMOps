@@ -95,9 +95,17 @@ class ServerConfig(BaseSettings):
     def AUTH_TOKEN(self) -> str | None:  # noqa: N802
         return self.auth_token
 
+    @AUTH_TOKEN.setter
+    def AUTH_TOKEN(self, value: str | None) -> None:  # noqa: N802
+        self.auth_token = value
+
     @property
     def APP_NAME(self) -> str:  # noqa: N802
         return self.app_name
+
+    @property
+    def DEBUG(self) -> bool:  # noqa: N802
+        return self.env == "development"
 
 
 server_config = ServerConfig()

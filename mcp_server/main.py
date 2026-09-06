@@ -355,6 +355,47 @@ def create_starlette_app() -> Starlette:
         etag = data.get("payload_sha256", "")
         return JSONResponse(data, headers={"ETag": etag, "Cache-Control": "public, max-age=86400"})
 
+    async def handle_knowledge_search(request):
+        """Recherche REST d'assets dans le graphe de connaissances (Document Studio & clients HTTP)."""
+        query = request.query_params.get("query", "").strip()
+        res = search_assets(query=query)
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
+    async def handle_knowledge_suggestions(request):
+        """Soumission REST d'une suggestion d'amélioration/REX issue de la curation humaine."""
+        try:
+            body = await request.json()
+        except Exception:
+            return JSONResponse(
+                {"status": "error", "error": "Corps de requête JSON invalide ou absent"},
+                status_code=400,
+            )
+
+        if not isinstance(body, dict):
+            return JSONResponse(
+                {"status": "error", "error": "Le corps de requête doit être un objet JSON"},
+                status_code=400,
+            )
+
+        title = str(body.get("title", "")).strip()
+        rationale = str(body.get("rationale", "")).strip()
+        suggested_change = str(body.get("suggested_change", "")).strip()
+        author = str(body.get("author", "document-studio")).strip()
+        contact_email = body.get("contact_email")
+        source_engagement = body.get("source_engagement")
+
+        res = suggest_knowledge_improvement(
+            title=title,
+            rationale=rationale,
+            suggested_change=suggested_change,
+            author=author,
+            contact_email=str(contact_email).strip() if contact_email else None,
+            source_engagement=str(source_engagement).strip() if source_engagement else None,
+        )
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
     return Starlette(
         debug=settings.DEBUG,
         routes=[
@@ -367,6 +408,8 @@ def create_starlette_app() -> Starlette:
             Route("/visualize", endpoint=handle_visualize, methods=["GET"]),
             Route("/snapshot/latest", endpoint=handle_snapshot_latest, methods=["GET"]),
             Route("/snapshot/{snapshot_id}", endpoint=handle_snapshot_by_id, methods=["GET"]),
+            Route("/api/knowledge/search", endpoint=handle_knowledge_search, methods=["GET"]),
+            Route("/api/knowledge/suggestions", endpoint=handle_knowledge_suggestions, methods=["POST"]),
         ],
         middleware=[Middleware(AuthMiddleware)],
     )
