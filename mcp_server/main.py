@@ -357,10 +357,68 @@ def create_starlette_app() -> Starlette:
 
     async def handle_knowledge_search(request):
         """Recherche REST d'assets dans le graphe de connaissances (Document Studio & clients HTTP)."""
+        engagement = (
+            request.headers.get("X-Engagement-Id")
+            or request.query_params.get("engagement")
+            or "default"
+        ).strip()
         query = request.query_params.get("query", "").strip()
         res = search_assets(query=query)
         status_code = 200 if res.get("status") == "ok" else 400
         return JSONResponse(res, status_code=status_code)
+
+    async def handle_knowledge_engagements(request):
+        """Liste les référentiels d'engagements / bases d'architecture disponibles sur le Hub."""
+        engagements = [
+            {
+                "id": "default",
+                "name": "Socle Transverse Télécom & Sécurité",
+                "description": "Motifs d'architecture, ADRs et principes directeurs d'entreprise",
+                "is_default": True,
+            }
+        ]
+        eng_dir = server_config.engagements_dir
+        if eng_dir.exists():
+            for f in sorted(eng_dir.glob("*.lbug")):
+                eid = f.stem
+                if eid == "default":
+                    continue
+                friendly_name = eid.replace("-", " ").replace("_", " ").title()
+                engagements.append({
+                    "id": eid,
+                    "name": friendly_name,
+                    "description": f"Référentiel d'engagement et base projet pour {friendly_name}",
+                    "is_default": False,
+                })
+
+        return JSONResponse({
+            "status": "ok",
+            "engagements": engagements,
+            "count": len(engagements),
+        }, status_code=200)
+
+    async def handle_compliance_conformity_snapshot(request):
+        """Exporte un ConformitySnapshot scellé pour injection directe dans document-engine (ADR-DE-05)."""
+        engagement = (
+            request.headers.get("X-Engagement-Id")
+            or request.query_params.get("engagement")
+            or "default"
+        ).strip()
+        framework = request.query_params.get("framework", "ALL").strip()
+
+        try:
+            from pipelines.compliance_mapper import to_conformity_snapshot
+            snapshot = to_conformity_snapshot(
+                engagement=engagement,
+                framework=framework,
+                controls_dir=server_config.kb_dir / "controls",
+            )
+            return JSONResponse(snapshot, status_code=200)
+        except Exception as e:
+            return JSONResponse(
+                {"status": "error", "error": f"Échec de génération du ConformitySnapshot : {e}"},
+                status_code=500,
+            )
 
     async def handle_knowledge_suggestions(request):
         """Soumission REST d'une suggestion d'amélioration/REX issue de la curation humaine."""
@@ -561,7 +619,9 @@ def create_starlette_app() -> Starlette:
             Route("/snapshot/latest", endpoint=handle_snapshot_latest, methods=["GET"]),
             Route("/snapshot/{snapshot_id}", endpoint=handle_snapshot_by_id, methods=["GET"]),
             Route("/api/knowledge/search", endpoint=handle_knowledge_search, methods=["GET"]),
+            Route("/api/knowledge/engagements", endpoint=handle_knowledge_engagements, methods=["GET"]),
             Route("/api/knowledge/suggestions", endpoint=handle_knowledge_suggestions, methods=["POST"]),
+            Route("/api/compliance/conformity-snapshot", endpoint=handle_compliance_conformity_snapshot, methods=["GET"]),
             Route("/api/rfp/shred-to-candidates", endpoint=handle_rfp_shred_to_candidates, methods=["POST"]),
             Route("/api/documents/zero-draft-blueprint", endpoint=handle_zero_draft_blueprint, methods=["POST"]),
             Route("/api/prose/suggest-batch", endpoint=handle_prose_suggest_batch, methods=["POST"]),

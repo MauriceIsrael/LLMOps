@@ -170,3 +170,46 @@ def test_prose_suggest_batch_rest_endpoint():
         assert "block-core-2" in data["drafts"]
         assert "generatedAt" in data
         assert "basedOnModelHash" in data
+
+
+def test_knowledge_engagements_rest_endpoint():
+    """Vérifie GET /api/knowledge/engagements pour le multi-bases / multi-engagements."""
+    with patch.dict(os.environ, {"LLMOPS_AUTH_TOKEN": "secret-test-token"}):
+        app = create_starlette_app()
+        client = TestClient(app)
+        headers = {"Authorization": "Bearer secret-test-token"}
+
+        res = client.get("/api/knowledge/engagements", headers=headers)
+        assert res.status_code == 200
+        data = res.json()
+        assert data.get("status") == "ok"
+        assert "engagements" in data
+        assert len(data["engagements"]) >= 1
+        ids = [e["id"] for e in data["engagements"]]
+        assert "default" in ids
+
+
+def test_compliance_conformity_snapshot_rest_endpoint():
+    """Vérifie GET /api/compliance/conformity-snapshot pour injection directe dans document-engine."""
+    with patch.dict(os.environ, {"LLMOPS_AUTH_TOKEN": "secret-test-token"}):
+        app = create_starlette_app()
+        client = TestClient(app)
+        headers = {"Authorization": "Bearer secret-test-token"}
+
+        res = client.get("/api/compliance/conformity-snapshot?framework=ISO27001&engagement=rrf", headers=headers)
+        assert res.status_code == 200
+        snap = res.json()
+        assert "snapshotId" in snap
+        assert snap["sourceSystem"] == "tuleap"
+        assert snap["schemaVersion"] == "2.0"
+        assert snap["checksum"].startswith("sha256:")
+        assert "data" in snap
+        assert "requirements" in snap["data"]
+        assert len(snap["data"]["requirements"]) >= 1
+        req = snap["data"]["requirements"][0]
+        assert "id" in req
+        assert "title" in req
+        assert "domain" in req
+        assert "verificationModes" in req
+        assert "evidence" in req
+

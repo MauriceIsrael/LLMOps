@@ -370,3 +370,83 @@ def audit_compliance_gaps(
         "global_coverage_percentage": global_pct,
         "frameworks": fw_report,
     }
+
+
+def to_conformity_snapshot(
+    engagement: str = "default",
+    framework: str = "ALL",
+    controls_dir: Path | str = "data/kb/controls",
+) -> dict[str, Any]:
+    """Génère un ConformitySnapshot conforme au contrat ExternalSnapshotEnvelope<ConformityData> pour document-engine."""
+    import hashlib
+    import json
+    from datetime import datetime, timezone
+
+    controls = load_all_controls(controls_dir)
+    target_fw = framework.upper().replace("-", "").replace("_", "")
+
+    requirements: list[dict[str, Any]] = []
+
+    for cid, ctrl in controls.items():
+        ctrl_fw = ctrl.framework.upper().replace("-", "").replace("_", "")
+        if target_fw != "ALL" and target_fw not in ctrl_fw and ctrl_fw not in target_fw:
+            continue
+
+        covered_by: list[str] = []
+        for asset_id, mapped_ctrls in EXPLICIT_KB_ALIGNMENTS.items():
+            if cid in mapped_ctrls:
+                covered_by.append(asset_id)
+
+        domain = "COMPLIANCE"
+        if "security" in ctrl.domain or "securite" in ctrl.domain:
+            domain = "SECURITY"
+        elif "resilience" in ctrl.domain:
+            domain = "RESILIENCE"
+        elif "network" in ctrl.domain:
+            domain = "NETWORK"
+
+        evidence = [
+            {
+                "mode": "architecture-model",
+                "type": "graph-item",
+                "reference": ref,
+                "source": "architecture-studio",
+            }
+            for ref in sorted(covered_by)
+        ]
+
+        req: dict[str, Any] = {
+            "id": ctrl.id,
+            "title": ctrl.title_fr or ctrl.title,
+            "domain": domain,
+            "verificationModes": ["architecture-model"],
+            "status": "verified" if covered_by else "allocated",
+            "evidence": evidence,
+            "appliesTo": {
+                "programRef": engagement.upper(),
+                "lotRefs": [],
+                "pbsRefs": [],
+            },
+        }
+        requirements.append(req)
+
+    # Tri déterministe des exigences par id
+    requirements.sort(key=lambda r: r["id"])
+
+    data = {
+        "requirements": requirements,
+    }
+
+    canonical_str = json.dumps(data, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
+    checksum = f"sha256:{hashlib.sha256(canonical_str.encode('utf-8')).hexdigest()}"
+    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    return {
+        "snapshotId": f"tuleap-kh-{engagement}-{framework.lower()}-{int(datetime.now().timestamp())}",
+        "sourceSystem": "tuleap",
+        "schemaVersion": "2.0",
+        "createdAt": now_iso,
+        "checksum": checksum,
+        "data": data,
+    }
+
