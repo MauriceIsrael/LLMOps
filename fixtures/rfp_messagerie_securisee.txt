@@ -1,0 +1,42 @@
+# CCTP — Système de Messagerie Sécurisée & Communications Critiques
+
+**Document Ref** : CCTP-SEC-2026-V1.0  
+**Objet** : Fourniture et déploiement d'une plateforme souveraine de messagerie sécurisée, voix et données pour opérateurs d'importance vitale (OIV).
+
+---
+
+## 1. Souveraineté, Hébergement & Réglementation
+
+* **[REQ-SOUV-01]** Le système complet (serveurs applicatifs, bases de données, passerelles) doit impérativement être hébergé sur une infrastructure qualifiée **SecNumCloud 3.2** par l'ANSSI, garantissant l'immunité aux lois extraterritoriales.
+* **[REQ-SOUV-02]** Le chiffrement des données au repos et en transit doit s'appuyer sur des clés générées et séquestrées au sein d'un boîtier matériel **HSM qualifié niveau renforcé** par l'ANSSI.
+* **[REQ-SOUV-03]** L'ensemble des flux d'administration système doit être cloisonné sur un réseau d'administration dédié (bastion d'administration certifié).
+
+---
+
+## 2. Architecture Logicielle & Déploiement
+
+* **[REQ-ARCH-01]** La plateforme doit être déployée sous forme de microservices conteneurisés orchestrés par Kubernetes, gérés selon une démarche **GitOps** avec réconciliation continue et immuabilité des manifests.
+* **[REQ-ARCH-02]** Les communications inter-services doivent être systématiquement chiffrées et authentifiées via un **Service Mesh** imposant une politique **mTLS stricte** avec rotation automatisée des certificats éphémères sous 24h.
+* **[REQ-ARCH-03]** Le stockage persistant des messages et métadonnées doit garantir une résilience sans perte (RPO=0) et une bascule automatique (RTO < 30s) sur architecture multi-zones de disponibilité.
+
+---
+
+## 3. Sécurité des Échanges & Identités
+
+* **[REQ-SEC-01]** L'authentification des utilisateurs finaux doit supporter une authentification forte multi-facteurs (MFA) basée sur des clés physiques FIDO2 / WebAuthn ou cartes à puce agent.
+* **[REQ-SEC-02]** Les échanges de messagerie instantanée doivent implémenter un chiffrement de bout en bout (E2EE) avec dérivation de clés à double cliquet (Double Ratchet) et forward secrecy.
+* **[REQ-SEC-03]** Le système doit intégrer dès la phase de conception des primitives cryptographiques hybrides post-quantiques (PQC / ML-KEM) pour prémunir les archives contre les attaques de type « récolter maintenant, déchiffrer plus tard ».
+
+---
+
+## 4. Télécom & Interconnexion Réseau Critique
+
+* **[REQ-TEL-01]** La solution doit s'interconnecter avec les cœurs de réseau 4G/5G critiques selon les normes 3GPP MCX (Mission Critical Push-to-Talk, Data et Video).
+* **[REQ-TEL-02]** En cas de perte de connectivité avec le cœur central, les passerelles locales tactiques doivent maintenir le service voix et messagerie en mode dégradé autonome.
+
+---
+
+## 5. Exigences Particulières & Spécifiques (Gaps d'Élicitation)
+
+* **[REQ-SPEC-01]** Le titulaire devra interfacer la messagerie avec un commutateur télégraphique propriétaire non IP existant sur liaison synchrone V.24/V.28.
+* **[REQ-SPEC-02]** Le format d'archivage légal devra respecter une spécification interne propriétaire 'Norme-Secret-Client-2024' dont les détails seront remis après habilitation.
