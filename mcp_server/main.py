@@ -232,13 +232,33 @@ def create_starlette_app() -> Starlette:
     """Crée et configure l'application Starlette avec ses routes et son middleware d'authentification."""
 
     async def handle_health(request):
-        """Liveness probe: returns 200 if the server process is responsive."""
+        """Liveness probe: returns 200 if the server process is responsive, with engine and KB version metadata."""
+        import json
+        from pathlib import Path
+
+        kb_meta = {}
+        latest_file = Path("data/snapshots/latest.json")
+        if latest_file.exists():
+            try:
+                snap = json.loads(latest_file.read_text(encoding="utf-8"))
+                kb_meta = {
+                    "snapshot_id": snap.get("snapshot_id"),
+                    "source_revision": snap.get("source_revision"),
+                    "payload_sha256": snap.get("payload_sha256"),
+                    "created_at": snap.get("created_at"),
+                }
+            except Exception:
+                pass
+
         return JSONResponse(
             {
                 "status": "ok",
                 "plane": server_config.plane,
                 "schema_version": "1.0",
                 "service": "llmops-mcp-server",
+                "engine_version": "0.1.0",
+                "engine_commit": "aa2ec8e",
+                "kb": kb_meta,
             },
             status_code=200,
         )
