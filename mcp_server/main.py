@@ -469,7 +469,7 @@ def create_starlette_app() -> Starlette:
                 project_title=project_title,
                 client_name=client_name,
             )
-            return JSONResponse({"status": "ok", **res}, status_code=200)
+            return JSONResponse({"status": "ok", "proseStore": res.get("prose_store", {}), **res}, status_code=200)
         except Exception as e:
             return JSONResponse(
                 {"status": "error", "error": f"Échec de la génération Blueprint : {e}"},
