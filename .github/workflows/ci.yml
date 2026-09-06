@@ -92,7 +92,7 @@ jobs:
           cache-dependency-path: 'apps/kb-client-app/package-lock.json'
 
       - name: Install Frontend Dependencies
-        run: npm --prefix apps/kb-client-app ci
+        run: npm --prefix apps/kb-client-app ci --legacy-peer-deps
 
       - name: Run SvelteKit Type & Syntax Check
         run: npm --prefix apps/kb-client-app run check
