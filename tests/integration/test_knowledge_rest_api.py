@@ -184,9 +184,47 @@ def test_knowledge_engagements_rest_endpoint():
         data = res.json()
         assert data.get("status") == "ok"
         assert "engagements" in data
-        assert len(data["engagements"]) >= 1
+        assert isinstance(data["engagements"], list)
         ids = [e["id"] for e in data["engagements"]]
         assert "default" in ids
+
+
+def test_elicitation_and_arbitration_rest_endpoints():
+    """Vérifie les endpoints REST d'élicitation, arbitrage et skills."""
+    with patch.dict(os.environ, {"LLMOPS_AUTH_TOKEN": "secret-test-token"}):
+        app = create_starlette_app()
+        client = TestClient(app)
+        headers = {"Authorization": "Bearer secret-test-token"}
+
+        # 1. GET /api/skills
+        res = client.get("/api/skills", headers=headers)
+        assert res.status_code == 200
+        assert res.json().get("status") == "ok"
+
+        # 2. GET /api/skills/matrix
+        res = client.get("/api/skills/matrix", headers=headers)
+        assert res.status_code == 200
+        assert res.json().get("status") == "ok"
+
+        # 3. GET /api/arbitration/board
+        res = client.get("/api/arbitration/board", headers=headers)
+        assert res.status_code == 200
+        assert res.json().get("status") == "ok"
+
+        # 4. GET /api/arbitration/conflicts
+        res = client.get("/api/arbitration/conflicts", headers=headers)
+        assert res.status_code == 200
+        assert res.json().get("status") == "ok"
+
+        # 5. GET /api/arbitration/statements
+        res = client.get("/api/arbitration/statements", headers=headers)
+        assert res.status_code == 200
+        assert res.json().get("status") == "ok"
+
+        # 6. GET /api/elicitation/questions
+        res = client.get("/api/elicitation/questions", headers=headers)
+        assert res.status_code == 200
+        assert res.json().get("status") == "ok"
 
 
 def test_compliance_conformity_snapshot_rest_endpoint():

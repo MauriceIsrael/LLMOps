@@ -606,6 +606,91 @@ def create_starlette_app() -> Starlette:
             status_code=200,
         )
 
+    async def handle_elicitation_trigger(request):
+        """Déclenche la génération de questions ciblées pour les exigences RFP non couvertes (gaps)."""
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        engagement = (
+            request.headers.get("X-Engagement-Id")
+            or (body.get("engagement") if isinstance(body, dict) else None)
+            or request.query_params.get("engagement")
+            or "default"
+        ).strip()
+
+        res = trigger_rfp_elicitation(engagement=engagement)
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
+    async def handle_elicitation_questions(request):
+        """Liste les questions ouvertes d'élicitation pour un engagement et un rôle donné."""
+        engagement = (
+            request.headers.get("X-Engagement-Id")
+            or request.query_params.get("engagement")
+            or "default"
+        ).strip()
+        role = request.query_params.get("role")
+        res = get_open_questions(engagement=engagement, role=role)
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
+    async def handle_arbitration_board(request):
+        """Tableau de maturité d'architecture des sujets (L0 à L4)."""
+        engagement = (
+            request.headers.get("X-Engagement-Id")
+            or request.query_params.get("engagement")
+            or "default"
+        ).strip()
+        res = get_board(engagement=engagement)
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
+    async def handle_arbitration_conflicts(request):
+        """Liste les conflits et controverses d'architecture ouverts ou arbitrés."""
+        engagement = (
+            request.headers.get("X-Engagement-Id")
+            or request.query_params.get("engagement")
+            or "default"
+        ).strip()
+        status = request.query_params.get("status", "open")
+        res = get_conflicts(engagement=engagement, status=status)
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
+    async def handle_arbitration_statements(request):
+        """Liste les énoncés d'architecture actifs."""
+        engagement = (
+            request.headers.get("X-Engagement-Id")
+            or request.query_params.get("engagement")
+            or "default"
+        ).strip()
+        subject = request.query_params.get("subject")
+        section = request.query_params.get("section")
+        status = request.query_params.get("status")
+        res = get_statements(engagement=engagement, subject=subject, section=section, status=status)
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
+    async def handle_skills_list(request):
+        """Référentiel canonique des compétences d'ingénierie et niveaux de criticité."""
+        domain = request.query_params.get("domain")
+        res = list_skills(domain=domain)
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
+    async def handle_skills_matrix(request):
+        """Matrice de couverture de compétences et risque de staffing pour un engagement."""
+        engagement = (
+            request.headers.get("X-Engagement-Id")
+            or request.query_params.get("engagement")
+            or "default"
+        ).strip()
+        blueprint_path = request.query_params.get("blueprint_path", "data/kb/blueprints/BLU-hla-mcx.yaml")
+        res = get_skills_matrix(engagement=engagement, blueprint_path=blueprint_path)
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
     return Starlette(
         debug=settings.DEBUG,
         routes=[
@@ -625,6 +710,13 @@ def create_starlette_app() -> Starlette:
             Route("/api/rfp/shred-to-candidates", endpoint=handle_rfp_shred_to_candidates, methods=["POST"]),
             Route("/api/documents/zero-draft-blueprint", endpoint=handle_zero_draft_blueprint, methods=["POST"]),
             Route("/api/prose/suggest-batch", endpoint=handle_prose_suggest_batch, methods=["POST"]),
+            Route("/api/elicitation/trigger", endpoint=handle_elicitation_trigger, methods=["POST"]),
+            Route("/api/elicitation/questions", endpoint=handle_elicitation_questions, methods=["GET"]),
+            Route("/api/arbitration/board", endpoint=handle_arbitration_board, methods=["GET"]),
+            Route("/api/arbitration/conflicts", endpoint=handle_arbitration_conflicts, methods=["GET"]),
+            Route("/api/arbitration/statements", endpoint=handle_arbitration_statements, methods=["GET"]),
+            Route("/api/skills", endpoint=handle_skills_list, methods=["GET"]),
+            Route("/api/skills/matrix", endpoint=handle_skills_matrix, methods=["GET"]),
         ],
         middleware=[Middleware(AuthMiddleware)],
     )
