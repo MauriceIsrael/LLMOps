@@ -100,6 +100,7 @@ if active_plane != "knowledge":
 
 
 import secrets
+from datetime import UTC
 
 
 class TokenPreservingSseServerTransport(SseServerTransport):
@@ -377,11 +378,6 @@ def create_starlette_app() -> Starlette:
 
     async def handle_knowledge_search(request):
         """Recherche REST d'assets dans le graphe de connaissances (Document Studio & clients HTTP)."""
-        engagement = (
-            request.headers.get("X-Engagement-Id")
-            or request.query_params.get("engagement")
-            or "default"
-        ).strip()
         query = request.query_params.get("query", "").strip()
         res = search_assets(query=query)
         status_code = 200 if res.get("status") == "ok" else 400
@@ -617,7 +613,7 @@ def create_starlette_app() -> Starlette:
             )
 
         import hashlib
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         drafts = {}
         warnings = []
@@ -653,7 +649,7 @@ def create_starlette_app() -> Starlette:
             drafts[block_id] = draft_content
 
         model_hash = hashlib.sha256(str(body).encode()).hexdigest()[:16]
-        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        now_str = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         return JSONResponse(
             {

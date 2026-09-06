@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
@@ -416,7 +417,7 @@ def to_conformity_snapshot(
     """Génère un ConformitySnapshot conforme au contrat ExternalSnapshotEnvelope<ConformityData> pour document-engine."""
     import hashlib
     import json
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     controls = load_all_controls(controls_dir)
     target_fw = framework.upper().replace("-", "").replace("_", "")
@@ -481,7 +482,7 @@ def to_conformity_snapshot(
 
     canonical_str = json.dumps(data, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
     checksum = f"sha256:{hashlib.sha256(canonical_str.encode('utf-8')).hexdigest()}"
-    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now_iso = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     return {
         "snapshotId": f"tuleap-kh-{engagement}-{framework.lower()}-{int(datetime.now().timestamp())}",

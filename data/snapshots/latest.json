@@ -1,7 +1,7 @@
 {
-  "snapshot_id": "snapshot-2026-09-06-31c1d6b",
-  "created_at": "2026-09-06T13:10:52Z",
-  "source_revision": "31c1d6b2e2dd70e40f1e5f30f987d34160f87e79",
+  "snapshot_id": "snapshot-2026-09-06-31b567e",
+  "created_at": "2026-09-06T14:31:48Z",
+  "source_revision": "31b567e424e7bd54c2bb9ed9bf48904daf835d72",
   "payload_sha256": "sha256:a89fa8c08d75af9d900d9759ba36403576bbdb5495af305cb2c0f80da9c12a48",
   "schema_version": "1.0",
   "applicability_index": {
@@ -2249,39 +2249,18 @@
     }
   ],
   "compliance_index": {
-    "ISO27001": {
-      "ISO-27001-A8-01": {
-        "title": "User Endpoint Devices Security and Fleet Management",
-        "version": "2022",
+    "3GPP": {
+      "3GPP-TS33179-AFFILIATION": {
+        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
+        "version": "Rel-18",
         "severity": "mandatory",
         "implemented_by": [
-          "ADR-0013",
-          "ADR-0015",
-          "PAT-004"
+          "ADR-0013"
         ]
       },
-      "ISO-27001-A8-08": {
-        "title": "Management of Technical Vulnerabilities",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0012",
-          "P-005",
-          "PAT-002"
-        ]
-      },
-      "ISO-27001-A8-24": {
-        "title": "Use of Cryptography and Key Management Policy",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-015",
-          "PAT-004"
-        ]
-      },
-      "ISO-27001-A5-15": {
-        "title": "Information Security in Supplier Relationships",
-        "version": "2022",
+      "3GPP-TS33501-SEPP": {
+        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
+        "version": "Rel-18",
         "severity": "mandatory",
         "implemented_by": [
           "ADR-0005",
@@ -2289,35 +2268,60 @@
           "PAT-006"
         ]
       },
-      "ISO-27001-A8-28": {
-        "title": "Protection of Logging Records and Integrity Assurance",
-        "version": "2022",
+      "3GPP-TS33179-ISOLATED": {
+        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
+        "version": "Rel-18",
         "severity": "mandatory",
         "implemented_by": [
-          "ADR-0008",
-          "P-011",
-          "PAT-005"
+          "ADR-0007",
+          "PAT-004"
         ]
       },
-      "ISO-27001-A8-09": {
-        "title": "Configuration Management and Drift Control (GitOps)",
-        "version": "2022",
+      "3GPP-TS33501-SBI": {
+        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
+        "version": "Rel-18",
         "severity": "mandatory",
         "implemented_by": [
-          "ADR-0001",
-          "ADR-0002",
           "ADR-0005",
-          "ADR-0006",
-          "ADR-0009",
-          "P-001",
-          "P-007",
-          "P-008",
-          "P-010",
           "PAT-006"
+        ]
+      },
+      "3GPP-TS33179-KMS": {
+        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "PAT-004"
         ]
       }
     },
     "NIS2": {
+      "NIS2-ART21-2I": {
+        "title": "Human Resources Security, Access Control and Asset Management",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-010"
+        ]
+      },
+      "NIS2-ART21-2B": {
+        "title": "Incident Handling and Remediation",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-002",
+          "PAT-001"
+        ]
+      },
+      "NIS2-ART21-2A": {
+        "title": "Risk Analysis and Information System Security Policies",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0001",
+          "P-001"
+        ]
+      },
       "NIS2-ART21-2E": {
         "title": "Security in Network and Information Systems Lifecycle",
         "version": "2022/2555",
@@ -2343,24 +2347,6 @@
         "severity": "mandatory",
         "implemented_by": [
           "P-003"
-        ]
-      },
-      "NIS2-ART21-2A": {
-        "title": "Risk Analysis and Information System Security Policies",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0001",
-          "P-001"
-        ]
-      },
-      "NIS2-ART21-2B": {
-        "title": "Incident Handling and Remediation",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-002",
-          "PAT-001"
         ]
       },
       "NIS2-ART21-2D": {
@@ -2401,63 +2387,29 @@
           "ADR-0008",
           "PAT-005"
         ]
-      },
-      "NIS2-ART21-2I": {
-        "title": "Human Resources Security, Access Control and Asset Management",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-010"
-        ]
-      }
-    },
-    "3GPP": {
-      "3GPP-TS33179-KMS": {
-        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "PAT-004"
-        ]
-      },
-      "3GPP-TS33501-SBI": {
-        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0005",
-          "PAT-006"
-        ]
-      },
-      "3GPP-TS33179-ISOLATED": {
-        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0007",
-          "PAT-004"
-        ]
-      },
-      "3GPP-TS33179-AFFILIATION": {
-        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0013"
-        ]
-      },
-      "3GPP-TS33501-SEPP": {
-        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0005",
-          "P-007",
-          "PAT-006"
-        ]
       }
     },
     "SecNumCloud": {
+      "SNC-REQ-01": {
+        "title": "Extraterritorial Immunity and European Data Localization",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0011",
+          "P-015",
+          "PAT-006"
+        ]
+      },
+      "SNC-REQ-05": {
+        "title": "Immutable Audit Logging and Real-Time SOC Telemetry",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0008",
+          "P-011",
+          "PAT-005"
+        ]
+      },
       "SNC-REQ-03": {
         "title": "Cryptographic Key Management on ANSSI-Qualified HSM",
         "version": "3.2",
@@ -2495,25 +2447,73 @@
           "P-009",
           "PAT-003"
         ]
-      },
-      "SNC-REQ-01": {
-        "title": "Extraterritorial Immunity and European Data Localization",
-        "version": "3.2",
+      }
+    },
+    "ISO27001": {
+      "ISO-27001-A8-24": {
+        "title": "Use of Cryptography and Key Management Policy",
+        "version": "2022",
         "severity": "mandatory",
         "implemented_by": [
-          "ADR-0011",
           "P-015",
+          "PAT-004"
+        ]
+      },
+      "ISO-27001-A8-08": {
+        "title": "Management of Technical Vulnerabilities",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0012",
+          "P-005",
+          "PAT-002"
+        ]
+      },
+      "ISO-27001-A8-01": {
+        "title": "User Endpoint Devices Security and Fleet Management",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0013",
+          "ADR-0015",
+          "PAT-004"
+        ]
+      },
+      "ISO-27001-A5-15": {
+        "title": "Information Security in Supplier Relationships",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "P-007",
           "PAT-006"
         ]
       },
-      "SNC-REQ-05": {
-        "title": "Immutable Audit Logging and Real-Time SOC Telemetry",
-        "version": "3.2",
+      "ISO-27001-A8-28": {
+        "title": "Protection of Logging Records and Integrity Assurance",
+        "version": "2022",
         "severity": "mandatory",
         "implemented_by": [
           "ADR-0008",
           "P-011",
           "PAT-005"
+        ]
+      },
+      "ISO-27001-A8-09": {
+        "title": "Configuration Management and Drift Control (GitOps)",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0001",
+          "ADR-0002",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0009",
+          "P-001",
+          "P-007",
+          "P-008",
+          "P-010",
+          "PAT-006"
         ]
       }
     }

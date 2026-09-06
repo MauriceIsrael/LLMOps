@@ -409,7 +409,7 @@ class ZeroDraftAssembler:
         # Patterns
         if patterns:
             for pat in patterns:
-                p_id = pat.get("id")
+                p_id = str(pat.get("id") or "pat")
                 p_title = pat.get("title", "")
                 p_body = pat.get("raw_body", "").strip()
                 pat_desc = f"**{p_title}** : {p_body[:300]}..." if p_body else f"Application du motif {p_id} ({p_title})."
@@ -428,7 +428,7 @@ class ZeroDraftAssembler:
         # ADRs
         if adrs:
             for adr in adrs:
-                a_id = adr.get("id")
+                a_id = str(adr.get("id") or "adr")
                 a_title = adr.get("title", "")
                 prose_store[a_id] = {
                     "content": f"Choix d'architecture formalisé par l'ADR {a_id} : {a_title}.",
