@@ -1,8 +1,8 @@
 {
-  "snapshot_id": "snapshot-2026-09-05-0e1a058",
-  "created_at": "2026-09-05T06:13:41Z",
-  "source_revision": "0e1a0585161b412596e1cc669f1548acc17bfeab",
-  "payload_sha256": "sha256:cdc750af16abf663902ba1b24d2f78d3edb65c453df46690a4de397d0d0fe93c",
+  "snapshot_id": "snapshot-2026-09-06-31c1d6b",
+  "created_at": "2026-09-06T13:10:52Z",
+  "source_revision": "31c1d6b2e2dd70e40f1e5f30f987d34160f87e79",
+  "payload_sha256": "sha256:a89fa8c08d75af9d900d9759ba36403576bbdb5495af305cb2c0f80da9c12a48",
   "schema_version": "1.0",
   "applicability_index": {
     "TPL-getting-started": {
@@ -177,6 +177,34 @@
       ],
       "rules": [
         "rule:adr-0013"
+      ]
+    },
+    "ADR-0014": {
+      "domains": [
+        "architecture",
+        "mcp",
+        "api"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:adr-0014"
+      ]
+    },
+    "ADR-0015": {
+      "domains": [
+        "architecture",
+        "security",
+        "data-isolation"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:adr-0015"
       ]
     },
     "EST-netdevops-telco": {
@@ -949,6 +977,46 @@
         "version": "1.0",
         "section": "architecture",
         "text_sha256": "3a093695b9ddc8009e9b3161a1219d6a6dceb68b9c891f768cd844fecf0cb2f8"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0014",
+      "typed_id": "decision:ADR-0014",
+      "title": "Normalized Envelope Response and Unified Server Configuration for MCP",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "architecture,mcp,api",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-06",
+      "provenance": {
+        "document": "ADR-0014.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "9fd6725e9c89e8536bc7535396ea1afdc702952d3999cbf70a7bfdf34881f1aa"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "ADR-0015",
+      "typed_id": "decision:ADR-0015",
+      "title": "Dual-Plane Physical Database Isolation (Knowledge vs Engagement)",
+      "type": "decision",
+      "status": "active",
+      "confidence": "verified",
+      "domain": "architecture,security,data-isolation",
+      "phase": "BUILD,RUN",
+      "owner": "core-owner-architecture",
+      "last_reviewed": "2026-09-06",
+      "provenance": {
+        "document": "ADR-0015.md",
+        "version": "1.0",
+        "section": "architecture",
+        "text_sha256": "47e784eb28c7509a30ee64fd30c7432a662c01b49dec8ef325351eb33abb1c6a"
       },
       "supersedes": [],
       "superseded_by": []
@@ -1919,6 +1987,7 @@
       "severity": "mandatory",
       "implemented_by": [
         "ADR-0013",
+        "ADR-0015",
         "PAT-004"
       ]
     },
@@ -2181,6 +2250,35 @@
   ],
   "compliance_index": {
     "ISO27001": {
+      "ISO-27001-A8-01": {
+        "title": "User Endpoint Devices Security and Fleet Management",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0013",
+          "ADR-0015",
+          "PAT-004"
+        ]
+      },
+      "ISO-27001-A8-08": {
+        "title": "Management of Technical Vulnerabilities",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0012",
+          "P-005",
+          "PAT-002"
+        ]
+      },
+      "ISO-27001-A8-24": {
+        "title": "Use of Cryptography and Key Management Policy",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-015",
+          "PAT-004"
+        ]
+      },
       "ISO-27001-A5-15": {
         "title": "Information Security in Supplier Relationships",
         "version": "2022",
@@ -2201,24 +2299,6 @@
           "PAT-005"
         ]
       },
-      "ISO-27001-A8-01": {
-        "title": "User Endpoint Devices Security and Fleet Management",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0013",
-          "PAT-004"
-        ]
-      },
-      "ISO-27001-A8-24": {
-        "title": "Use of Cryptography and Key Management Policy",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-015",
-          "PAT-004"
-        ]
-      },
       "ISO-27001-A8-09": {
         "title": "Configuration Management and Drift Control (GitOps)",
         "version": "2022",
@@ -2235,37 +2315,9 @@
           "P-010",
           "PAT-006"
         ]
-      },
-      "ISO-27001-A8-08": {
-        "title": "Management of Technical Vulnerabilities",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0012",
-          "P-005",
-          "PAT-002"
-        ]
       }
     },
     "NIS2": {
-      "NIS2-ART21-2D": {
-        "title": "Supply Chain Security and Direct Vendor Relations",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0005",
-          "P-007",
-          "PAT-006"
-        ]
-      },
-      "NIS2-ART21-2J": {
-        "title": "Multi-Factor Authentication and Secured Communications",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "PAT-004"
-        ]
-      },
       "NIS2-ART21-2E": {
         "title": "Security in Network and Information Systems Lifecycle",
         "version": "2022/2555",
@@ -2293,6 +2345,15 @@
           "P-003"
         ]
       },
+      "NIS2-ART21-2A": {
+        "title": "Risk Analysis and Information System Security Policies",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0001",
+          "P-001"
+        ]
+      },
       "NIS2-ART21-2B": {
         "title": "Incident Handling and Remediation",
         "version": "2022/2555",
@@ -2300,6 +2361,24 @@
         "implemented_by": [
           "P-002",
           "PAT-001"
+        ]
+      },
+      "NIS2-ART21-2D": {
+        "title": "Supply Chain Security and Direct Vendor Relations",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "P-007",
+          "PAT-006"
+        ]
+      },
+      "NIS2-ART21-2J": {
+        "title": "Multi-Factor Authentication and Secured Communications",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "PAT-004"
         ]
       },
       "NIS2-ART21-2C": {
@@ -2330,18 +2409,64 @@
         "implemented_by": [
           "P-010"
         ]
-      },
-      "NIS2-ART21-2A": {
-        "title": "Risk Analysis and Information System Security Policies",
-        "version": "2022/2555",
+      }
+    },
+    "3GPP": {
+      "3GPP-TS33179-KMS": {
+        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
+        "version": "Rel-18",
         "severity": "mandatory",
         "implemented_by": [
-          "ADR-0001",
-          "P-001"
+          "PAT-004"
+        ]
+      },
+      "3GPP-TS33501-SBI": {
+        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "PAT-006"
+        ]
+      },
+      "3GPP-TS33179-ISOLATED": {
+        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "PAT-004"
+        ]
+      },
+      "3GPP-TS33179-AFFILIATION": {
+        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0013"
+        ]
+      },
+      "3GPP-TS33501-SEPP": {
+        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "P-007",
+          "PAT-006"
         ]
       }
     },
     "SecNumCloud": {
+      "SNC-REQ-03": {
+        "title": "Cryptographic Key Management on ANSSI-Qualified HSM",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "PAT-004"
+        ]
+      },
       "SNC-REQ-04": {
         "title": "Hypervisor Isolation and Container Hardening",
         "version": "3.2",
@@ -2389,61 +2514,6 @@
           "ADR-0008",
           "P-011",
           "PAT-005"
-        ]
-      },
-      "SNC-REQ-03": {
-        "title": "Cryptographic Key Management on ANSSI-Qualified HSM",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0005",
-          "PAT-004"
-        ]
-      }
-    },
-    "3GPP": {
-      "3GPP-TS33179-KMS": {
-        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "PAT-004"
-        ]
-      },
-      "3GPP-TS33179-ISOLATED": {
-        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0007",
-          "PAT-004"
-        ]
-      },
-      "3GPP-TS33179-AFFILIATION": {
-        "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0013"
-        ]
-      },
-      "3GPP-TS33501-SEPP": {
-        "title": "Inter-PLMN Security Edge Protection Proxy (SEPP) & Roaming Confidentiality",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0005",
-          "P-007",
-          "PAT-006"
-        ]
-      },
-      "3GPP-TS33501-SBI": {
-        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0005",
-          "PAT-006"
         ]
       }
     }

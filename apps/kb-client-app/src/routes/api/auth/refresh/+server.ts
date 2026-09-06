@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from '$lib/auth/jwt.server';
-import { getUserById } from '$lib/auth/users.server';
+import { prisma } from '$lib/server/prisma';
 
 const COOKIE_OPTS = {
   httpOnly: true,
@@ -24,10 +24,19 @@ export const POST: RequestHandler = async ({ cookies }) => {
     error(401, { message: 'Refresh token invalid or expired' });
   }
 
-  const user = getUserById(userId!);
-  if (!user) {
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId! }
+  });
+  if (!dbUser) {
     error(401, { message: 'User not found' });
   }
+
+  const user = {
+    id: dbUser!.id,
+    email: dbUser!.email,
+    name: dbUser!.name,
+    role: dbUser!.role as 'admin' | 'user',
+  };
 
   // Rotate both tokens
   const [newAccessToken, newRefreshToken] = await Promise.all([

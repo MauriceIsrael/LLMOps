@@ -40,12 +40,17 @@ ENV HOST=0.0.0.0
 # Ingestion et migration déterministe de la base de connaissances (Knowledge Plane)
 RUN poetry run python -m pipelines.ingestion.migrate_adr0015
 RUN poetry run python scripts/export_sealed_snapshot.py
-RUN poetry run python -c "import os; from mcp_server.knowledge.tools import get_graph_summary; res = get_graph_summary(); count = res.get('data', {}).get('knowledge', {}).get('node_counts', {}).get('Asset', 0); print(f'✅ Build Verification — Knowledge Asset Count: {count}'); assert count > 0, f'Asset count is {count}'; os._exit(0)"
+RUN poetry run python -c "import sys; from mcp_server.knowledge.tools import get_graph_summary; res = get_graph_summary(); count = res.get('data', {}).get('knowledge', {}).get('node_counts', {}).get('Asset', 0); print(f'✅ Build Verification — Knowledge Asset Count: {count}'); assert count > 0, f'Asset count is {count}'; sys.exit(0)"
+
+# Sécurité conteneur : exécution sous utilisateur non-root non privilégié
+RUN groupadd -g 10001 appuser && useradd -u 10001 -g appuser -s /bin/bash -m appuser \
+    && chown -R appuser:appuser /app
+USER appuser
 
 EXPOSE 8000
 
-# Health check conteneur utilisant l'endpoint HTTP /health
+# Health check conteneur utilisant l'endpoint HTTP /ready
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
+  CMD curl -f http://localhost:8000/ready || exit 1
 
 CMD ["poetry", "run", "mcp-server"]

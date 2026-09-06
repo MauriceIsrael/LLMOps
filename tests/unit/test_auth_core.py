@@ -54,9 +54,22 @@ def test_authorise_blocked_callers():
 
 def test_authorise_single_tenant_mode(monkeypatch):
     monkeypatch.delenv("ENGAGEMENT_TOKENS", raising=False)
-    # Dans le mode standard sans multi-tenant, default_user et les callers réguliers passent
+    monkeypatch.setenv("LLMOPS_ENV", "development")
+    # Dans le mode dev standard sans multi-tenant, default_user et les callers réguliers passent
     authorise(caller="default_user", engagement="nordwave-mcx-2027")
     authorise(caller="custom_user", engagement="any-project")
+
+
+def test_authorise_fail_closed_in_production(monkeypatch):
+    """En production, l'accès doit échouer fermé (403) si ENGAGEMENT_TOKENS n'est pas configuré."""
+    monkeypatch.delenv("ENGAGEMENT_TOKENS", raising=False)
+    monkeypatch.setenv("LLMOPS_ENV", "production")
+
+    with pytest.raises(Unauthorised):
+        authorise(caller="default_user", engagement="nordwave-mcx-2027")
+
+    with pytest.raises(Unauthorised):
+        authorise(caller="any_caller", engagement="any_engagement")
 
 
 def test_authorise_multi_tenant_scoping(monkeypatch):

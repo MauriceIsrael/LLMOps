@@ -4,8 +4,8 @@
 
 The token string published in `README.md`, `README.fr.md`, `docs/user_manual.md`, and `docs/renderer_integration.md` (`demo-public-2026-08`) **is intentionally public**.
 
-- It grants access exclusively to the **read-only Knowledge Plane** (`LLMOPS_PLANE=knowledge`) of the public demonstration deployment on GCP Cloud Run.
-- No write, insert, update, or delete operations are exposed or permitted on the public endpoint.
+- It grants access to the **read-only Knowledge Plane** and the reference **Engagement Plane** (`nordwave-mcx-2027`) (`LLMOPS_PLANE=all`, `ENGAGEMENT_TOKENS=demo-public-2026-08:nordwave-mcx-2027`) of the public demonstration deployment on GCP Cloud Run.
+- No write, insert, update, or delete operations are permitted on the public endpoint (enforced by engine-level read-only mode and Cypher whitelist). Access to unauthorized engagements is strictly blocked (403).
 - Do **not** report the published demo token string as a leaked secret or credential exposure issue.
 
 For details on configuring a private, authenticated enterprise deployment with dedicated Secret Manager tokens, see [`docs/deployment.md`](docs/deployment.md).

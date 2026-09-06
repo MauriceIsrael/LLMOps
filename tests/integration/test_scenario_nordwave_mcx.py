@@ -236,15 +236,17 @@ def test_act1_first_scan_gates_premature_questions(repo, report, state):
     report.table(["Question", "Subject", "Routed to", "Blocks"],
                  [[q["id"], q["subject"], q.get("routed_to", "?"),
                    ", ".join(q.get("blocking", []))] for q in questions])
-    report.mermaid("""
+    gate_label = f"Level gate: {len(held)} gaps held"
+    questions_mermaid = "\n            ".join(
+        f'{q["id"].replace("-", "")}["{q["id"]} → {q["subject"]}"]'
+        for q in questions
+    )
+    report.mermaid(f"""
         graph TD
-            GATE["Level gate: %d gaps held"]:::held
-            %s
+            GATE["{gate_label}"]:::held
+            {questions_mermaid}
             classDef held stroke-dasharray: 4 3;
-    """ % (len(held),
-           "\n            ".join(
-               f'{q["id"].replace("-", "")}["{q["id"]} → {q["subject"]}"]'
-               for q in questions)))
+    """)
 
     state["questions_act1"] = questions
     state["held_count_act1"] = len(held)

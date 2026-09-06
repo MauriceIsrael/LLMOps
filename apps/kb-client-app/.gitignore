@@ -28,3 +28,9 @@ vite.config.ts.timestamp-*
 .agent/
 .arckit/
 .codex/
+
+# Databases
+*.db
+*.db-journal
+prisma/*.db
+prisma/*.db-journal

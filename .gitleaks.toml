@@ -1,0 +1,12 @@
+# Gitleaks configuration for LLMOps repository
+
+[allowlist]
+description = "Ignore revoked historical commits and intentionally public demo token"
+commits = [
+  "9a50305c8796b87530fdc79a26987dbdf0c64139",
+  "758e874878e7d9d618ec86c441a63558a22ecf25"
+]
+regexes = [
+  '''demo-public-2026-08'''
+]
+

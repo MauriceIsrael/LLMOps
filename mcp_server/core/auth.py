@@ -2,8 +2,16 @@
 
 import os
 from contextvars import ContextVar
+from enum import Enum
 
 _current_caller: ContextVar[str] = ContextVar("current_caller", default="default_user")
+
+
+class Role(str, Enum):
+    SERVER_ADMIN = "server_admin"
+    SYSTEM = "system"
+    TENANT_USER = "tenant_user"
+    LOCAL_DEV = "local_dev"
 
 
 def get_current_caller() -> str:
@@ -50,36 +58,50 @@ def authorise(caller: str | None = None, engagement: str = "default-engagement")
 
     Every engagement tool calls this on its first line before touching the graph.
     Propagates authenticated tenant identity from request context if caller is None.
+
+    Security model:
+    - In production (LLMOPS_ENV=production): Fails closed. ENGAGEMENT_TOKENS must be explicitly defined.
+    - In development/demo mode: Permits seamless local testing while enforcing token scoping when set.
     """
     if caller is None:
         caller = get_current_caller()
 
-    if not engagement or not isinstance(engagement, str):
+    if not engagement or not isinstance(engagement, str) or not engagement.strip():
         raise Unauthorised(engagement or "unknown")
 
-    if not caller or not isinstance(caller, str):
+    if not caller or not isinstance(caller, str) or not caller.strip():
         raise Unauthorised(engagement)
 
-    if caller.startswith("unauthorised") or caller.startswith("unauthorized") or caller == "anonymous_blocked":
+    # Rejeter immédiatement les identités anonymes ou non authentifiées
+    blocked_identities = {"anonymous", "unauthenticated", "anonymous_blocked", "none", "null"}
+    if caller in blocked_identities or caller.startswith("unauthorised") or caller.startswith("unauthorized"):
         raise Unauthorised(engagement)
 
-    # Master server tokens / admin roles have unrestricted access
-    if caller in ("server_admin", "admin", "system"):
+    # Rôles maîtres d'administration
+    if caller in (Role.SERVER_ADMIN.value, Role.SYSTEM.value, "admin"):
         return
 
-    # Multi-tenant scoping via ENGAGEMENT_TOKENS
+    # Contrôle multi-tenant par ENGAGEMENT_TOKENS
     env_tokens = os.getenv("ENGAGEMENT_TOKENS", "").strip()
     if env_tokens:
         token_map = parse_engagement_tokens(env_tokens)
-
-        # Check if caller matches any authorized tenant token or user
         if caller in token_map:
             allowed_scopes = token_map[caller]
             if "*" in allowed_scopes or engagement in allowed_scopes:
                 return
             raise Unauthorised(engagement)
 
-        # If ENGAGEMENT_TOKENS is active and caller is default_user (or unmatched token), refuse access
+        # Si ENGAGEMENT_TOKENS est actif et le caller n'y est pas listé -> refus strict
         raise Unauthorised(engagement)
 
-    # When ENGAGEMENT_TOKENS is not configured, default_user or standard callers are accepted
+    # Si ENGAGEMENT_TOKENS n'est pas configuré :
+    env_mode = os.getenv("LLMOPS_ENV", "development").lower().strip()
+    if env_mode in ("production", "prod"):
+        # En production, interdiction stricte d'accès sans scoping explicite (Fail closed - P0-3)
+        raise Unauthorised(engagement)
+
+    # Mode développement / démo locale : autoriser l'accès fluide pour les développeurs locaux
+    if caller in ("default_user", Role.LOCAL_DEV.value) or not caller.startswith("unauth"):
+        return
+
+    raise Unauthorised(engagement)

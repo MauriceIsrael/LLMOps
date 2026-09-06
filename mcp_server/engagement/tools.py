@@ -13,7 +13,7 @@ from mcp_server.core.db import (
     open_connection,
 )
 from mcp_server.core.envelope import (
-    error_response,
+    handle_exception_response,
     invalid_argument_response,
     not_found_response,
     ok_response,
@@ -65,7 +65,7 @@ def get_subject(subject: str, engagement: str | None = None, db_path: str | Path
     except FileNotFoundError:
         return not_found_response(subject)
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_subject")
 
 
 def get_subject_trajectory(subject: str, engagement: str | None = None, db_path: str | Path | None = None) -> dict[str, Any]:
@@ -91,7 +91,7 @@ def get_subject_trajectory(subject: str, engagement: str | None = None, db_path:
     except FileNotFoundError:
         return ok_response([])
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_subject_trajectory")
 
 
 def get_board(engagement: str | None = None) -> dict[str, Any]:
@@ -111,7 +111,7 @@ def get_board(engagement: str | None = None) -> dict[str, Any]:
     except FileNotFoundError:
         return ok_response([])
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_board")
 
 
 def get_statements(engagement: str | None = None, subject: str | None = None, section: str | None = None, status: str | None = None) -> dict[str, Any]:
@@ -142,7 +142,7 @@ def get_statements(engagement: str | None = None, subject: str | None = None, se
     except FileNotFoundError:
         return ok_response([])
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_statements")
 
 
 def get_conflicts(engagement: str | None = None, status: str = "open") -> dict[str, Any]:
@@ -163,7 +163,7 @@ def get_conflicts(engagement: str | None = None, status: str = "open") -> dict[s
     except FileNotFoundError:
         return ok_response([])
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_conflicts")
 
 
 def get_open_questions(engagement: str | None = None, role: str | None = None) -> dict[str, Any]:
@@ -188,7 +188,7 @@ def get_open_questions(engagement: str | None = None, role: str | None = None) -
     except FileNotFoundError:
         return ok_response([])
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_open_questions")
 
 
 def get_diagram_graph(
@@ -245,7 +245,7 @@ def get_diagram_graph(
     except FileNotFoundError:
         return ok_response({"engagement": eng, "format": format, "nodes": [], "edges": [], "mermaid": "flowchart TD"}, count=0)
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_diagram_graph")
 
 
 def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
@@ -277,7 +277,7 @@ def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
     except FileNotFoundError:
         return ok_response([])
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_dangling_references")
 
 
 def get_render_payload(engagement: str | None = None, db_path: str | Path | None = None) -> dict[str, Any]:
@@ -325,7 +325,7 @@ def get_render_payload(engagement: str | None = None, db_path: str | Path | None
             "unripe_subjects": [],
         })
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_render_payload")
 
 
 def get_engagement_export(engagement: str | None = None) -> dict[str, Any]:
@@ -363,7 +363,7 @@ def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, A
     except FileNotFoundError as e:
         return not_found_response(id_val=eng, data=str(e))
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="query_graph")
 
 
 def get_graph_summary() -> dict[str, Any]:

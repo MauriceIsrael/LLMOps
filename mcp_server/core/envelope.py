@@ -59,12 +59,43 @@ def invalid_argument_response(argument: str, reason: str) -> dict[str, Any]:
     }
 
 
-def error_response(reason: str) -> dict[str, Any]:
-    """Erreur générique d'exécution."""
-    return {
+def error_response(reason: str, correlation_id: str | None = None) -> dict[str, Any]:
+    """Erreur générique d'exécution avec raison assainie et corrélation optionnelle."""
+    res: dict[str, Any] = {
         "status": "error",
         "reason": reason,
     }
+    if correlation_id:
+        res["correlation_id"] = correlation_id
+    return res
+
+
+def handle_exception_response(exc: Exception, context_action: str = "operation") -> dict[str, Any]:
+    """Intercepte une exception, trace le log serveur avec ID, et retourne une enveloppe assainie."""
+    import logging
+    import uuid
+
+    from mcp_server.core.config import server_config
+    from mcp_server.core.exceptions import EngagementNotFound, QueryRejected, SchemaError
+
+    corr_id = uuid.uuid4().hex[:8]
+    logger = logging.getLogger("mcp_server")
+    logger.error("Error [%s] during %s: %s", corr_id, context_action, exc, exc_info=True)
+
+    if isinstance(exc, QueryRejected):
+        return error_response(f"Query rejected: {exc.reason}", correlation_id=corr_id)
+    if isinstance(exc, EngagementNotFound):
+        return error_response(f"Engagement not found: {exc.engagement}", correlation_id=corr_id)
+    if isinstance(exc, SchemaError):
+        clean_schema_err = str(exc).replace("/home/momo/Dev/LLMOps/", "")
+        return error_response(f"Database schema error: table or property does not exist ({clean_schema_err})", correlation_id=corr_id)
+
+    if server_config.env == "production":
+        return error_response(f"Internal error during {context_action}. Correlation ID: {corr_id}", correlation_id=corr_id)
+
+    # En développement : message descriptif sans fuite de chemins absolus système
+    clean_msg = str(exc).replace("/home/momo/Dev/LLMOps/", "")
+    return error_response(clean_msg, correlation_id=corr_id)
 
 
 def unauthorized_response(engagement: str, reason: str = "Unauthorized to access engagement") -> dict[str, Any]:

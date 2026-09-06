@@ -11,15 +11,18 @@ ENV/
 
 # Graph DB & local storage
 data/kuzu_db/
-data/knowledge.lbug
-data/engagements/*
-data/snapshots/*
-!data/snapshots/latest.json
 *.kuzu
 *.lbug
+!data/engagements/nordwave-mcx-2027.lbug
+!data/knowledge.lbug
+data/snapshots/*
+!data/snapshots/latest.json
 *.kz
 *.hindex
-!data/engagements/nordwave-mcx-2027.lbug
+.lock
+*.shadow
+*.wal
+graph_proc/
 
 # DeepEval / Promptfoo caches
 .deepeval/
@@ -31,8 +34,10 @@ data/snapshots/*
 htmlcov/
 
 # Generated Artifacts & Local Projects
-artifacts/
-projects/
+/artifacts/*
+!/artifacts/nordwave-mcx-2027/
+/projects/*
+!/projects/nordwave-mcx-2027/
 data/project/
 Arborescence exemple/
 
@@ -48,10 +53,6 @@ Arborescence exemple/
 # SQLite Checkpoints & Locks
 *.checkpoints.sqlite
 *.sqlite
-.lock
-.shadow
-.wal
-graph_proc/
 
 # apps/kb-client-app build logs & scratch
 apps/kb-client-app/npm_output.log

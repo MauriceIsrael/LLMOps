@@ -2,7 +2,7 @@ name: Semantic Evals & Non-Regression
 
 on:
   schedule:
-    - cron: '0 2 * * *' # Tous les jours à 2h du matin
+    - cron: '0 2 * * 0' # Hebdomadaire (dimanche à 2h du matin) au lieu de quotidien
   workflow_dispatch:
 
 jobs:

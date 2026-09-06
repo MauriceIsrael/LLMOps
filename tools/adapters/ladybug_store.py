@@ -17,7 +17,8 @@ class LadybugGraphStore(GraphStore):
 
     @classmethod
     def get_database(cls, db_path: str, read_only: bool = False) -> Any:
-        cache_key = str(Path(db_path).resolve())
+        canon = str(Path(db_path).resolve())
+        cache_key = f"{canon}:ro" if read_only else f"{canon}:rw"
         if cache_key in cls._db_cache:
             db = cls._db_cache[cache_key]
             try:
@@ -30,21 +31,21 @@ class LadybugGraphStore(GraphStore):
 
         try:
             db = lb.Database(
-                cache_key,
+                canon,
                 buffer_pool_size=64 * 1024 * 1024,
                 max_db_size=1024 * 1024 * 1024,
-                read_only=False,
+                read_only=read_only,
             )
         except Exception as e:
-            if "wal" in str(e).lower() or "record type" in str(e).lower():
-                wal_file = Path(f"{cache_key}.wal")
+            if not read_only and ("wal" in str(e).lower() or "record type" in str(e).lower()):
+                wal_file = Path(f"{canon}.wal")
                 if wal_file.exists():
                     wal_file.unlink()
                 db = lb.Database(
-                    cache_key,
+                    canon,
                     buffer_pool_size=64 * 1024 * 1024,
                     max_db_size=1024 * 1024 * 1024,
-                    read_only=False,
+                    read_only=read_only,
                 )
             else:
                 raise
@@ -93,11 +94,12 @@ class LadybugGraphStore(GraphStore):
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 
         self.db = self.get_database(self.db_path, read_only=self.read_only)
-        if self.db_path in self._conn_cache:
-            self.conn = self._conn_cache[self.db_path]
+        conn_key = f"{self.db_path}:ro" if self.read_only else f"{self.db_path}:rw"
+        if conn_key in self._conn_cache:
+            self.conn = self._conn_cache[conn_key]
         else:
             self.conn = lb.Connection(self.db)
-            self._conn_cache[self.db_path] = self.conn
+            self._conn_cache[conn_key] = self.conn
 
     def execute_cypher(
         self, query: str, params: dict[str, Any] | None = None

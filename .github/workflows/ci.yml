@@ -30,6 +30,16 @@ jobs:
           done
           echo "✅ Public demo token consistency verified across documentation."
 
+      - name: Check Deployment Plane Consistency in Documentation
+        run: |
+          PLANE_IN_CLOUDBUILD=$(grep -o "LLMOPS_PLANE=[a-z]*" cloudbuild.yaml | cut -d= -f2)
+          echo "Detected LLMOPS_PLANE in cloudbuild.yaml: $PLANE_IN_CLOUDBUILD"
+          if ! grep -q "LLMOPS_PLANE=$PLANE_IN_CLOUDBUILD" SECURITY.md; then
+            echo "ERROR: SECURITY.md does not document the active deployment plane '$PLANE_IN_CLOUDBUILD' configured in cloudbuild.yaml!"
+            exit 1
+          fi
+          echo "✅ Deployment plane consistency verified between cloudbuild.yaml and SECURITY.md."
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -68,3 +78,38 @@ jobs:
         env:
           GRAPH_BACKEND: ladybug
         run: poetry run pytest tests/contract tests/unit tests/integration -v
+
+  frontend-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'apps/kb-client-app/package-lock.json'
+
+      - name: Install Frontend Dependencies
+        run: npm --prefix apps/kb-client-app ci
+
+      - name: Run SvelteKit Type & Syntax Check
+        run: npm --prefix apps/kb-client-app run check
+
+      - name: Run Frontend Production Build
+        run: npm --prefix apps/kb-client-app run build
+
+  security-secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks Secret Scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
+          GITLEAKS_ENABLE_SUMMARY: true

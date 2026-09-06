@@ -31,6 +31,21 @@ def test_health_endpoint_public_unauthenticated(auth_client):
     assert data.get("status") == "ok"
     assert "schema_version" in data
 
+    resp_z = auth_client.get("/healthz")
+    assert resp_z.status_code == 200
+
+
+def test_ready_endpoint_public_readiness(auth_client):
+    """L'endpoint /ready valide la connectivité réelle à la base de connaissances sans authentification."""
+    resp = auth_client.get("/ready")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data.get("status") == "ready"
+    assert data.get("asset_count", 0) > 0
+
+    resp_z = auth_client.get("/readyz")
+    assert resp_z.status_code == 200
+
 
 def test_missing_token_returns_401(auth_client):
     """Une requête sur une route protégée sans jeton doit renvoyer 401 Unauthorized."""

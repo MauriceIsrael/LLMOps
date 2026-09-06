@@ -165,7 +165,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     """Middleware pour sécuriser l'accès HTTP/SSE par jeton Bearer ou Header HTTP (constant-time, multi-tenant)."""
 
     async def dispatch(self, request, call_next):
-        if request.url.path in ("/health", "/healthz"):
+        if request.url.path in ("/health", "/healthz", "/ready", "/readyz"):
             return await call_next(request)
 
         expected_token = os.getenv("SERVER_TOKEN") or os.getenv("LLMOPS_AUTH_TOKEN") or settings.AUTH_TOKEN
@@ -213,11 +213,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 from uuid import UUID
                 sid = UUID(session_id_str)
                 if sid in sse_transport._read_stream_writers:
-                    caller = getattr(sse_transport, "_session_callers", {}).get(sid, "default_user")
-                    request.state.caller = caller
-                    request.scope["caller"] = caller
-                    set_current_caller(caller)
-                    return await call_next(request)
+                    caller = getattr(sse_transport, "_session_callers", {}).get(sid)
+                    if caller:
+                        request.state.caller = caller
+                        request.scope["caller"] = caller
+                        set_current_caller(caller)
+                        return await call_next(request)
             except Exception:
                 pass
 
@@ -231,18 +232,44 @@ def create_starlette_app() -> Starlette:
     """Crée et configure l'application Starlette avec ses routes et son middleware d'authentification."""
 
     async def handle_health(request):
-        active_plane = os.getenv("LLMOPS_PLANE", server_config.plane).lower()
+        """Liveness probe: returns 200 if the server process is responsive."""
+        return JSONResponse(
+            {
+                "status": "ok",
+                "plane": server_config.plane,
+                "schema_version": "1.0",
+                "service": "llmops-mcp-server",
+            },
+            status_code=200,
+        )
+
+    async def handle_ready(request):
+        """Readiness probe: validates actual database connectivity and non-zero knowledge assets."""
+        db_path = server_config.knowledge_db_path
         backend = os.getenv("GRAPH_BACKEND", "ladybug")
         try:
             from tools.adapters.kuzu_store import make_graph_store
-            store = make_graph_store("data/knowledge.kuzu", read_only=True)
+
+            store = make_graph_store(db_path, read_only=True)
             res = store.execute_cypher("MATCH (a:Asset) RETURN count(a) as count;")
             asset_count = res[0]["count"] if res and isinstance(res, list) and "count" in res[0] else 0
             store.close()
+
+            if asset_count == 0:
+                return JSONResponse(
+                    {
+                        "status": "not_ready",
+                        "error": "Knowledge graph is empty (asset_count is 0)",
+                        "plane": server_config.plane,
+                        "backend": backend,
+                    },
+                    status_code=503,
+                )
+
             return JSONResponse(
                 {
-                    "status": "ok",
-                    "plane": active_plane,
+                    "status": "ready",
+                    "plane": server_config.plane,
                     "schema_version": "1.0",
                     "asset_count": asset_count,
                     "backend": backend,
@@ -252,13 +279,12 @@ def create_starlette_app() -> Starlette:
         except Exception as e:
             return JSONResponse(
                 {
-                    "status": "ok",
-                    "plane": active_plane,
-                    "schema_version": "1.0",
+                    "status": "not_ready",
+                    "error": f"Database readiness check failed: {e}",
+                    "plane": server_config.plane,
                     "backend": backend,
-                    "warning": str(e),
                 },
-                status_code=200,
+                status_code=503,
             )
 
     async def handle_sse(request):
@@ -333,6 +359,9 @@ def create_starlette_app() -> Starlette:
         debug=settings.DEBUG,
         routes=[
             Route("/health", endpoint=handle_health, methods=["GET"]),
+            Route("/healthz", endpoint=handle_health, methods=["GET"]),
+            Route("/ready", endpoint=handle_ready, methods=["GET"]),
+            Route("/readyz", endpoint=handle_ready, methods=["GET"]),
             Route("/sse", endpoint=handle_sse),
             Route("/messages", endpoint=handle_messages, methods=["POST"]),
             Route("/visualize", endpoint=handle_visualize, methods=["GET"]),

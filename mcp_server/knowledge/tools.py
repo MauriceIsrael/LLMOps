@@ -13,7 +13,7 @@ from mcp_server.core.db import (
     open_connection,
 )
 from mcp_server.core.envelope import (
-    error_response,
+    handle_exception_response,
     invalid_argument_response,
     not_found_response,
     ok_response,
@@ -61,10 +61,7 @@ def list_assets(
         data = _get_db().execute_cypher(query, params)
         return ok_response(data)
     except Exception as e:
-        err_str = str(e)
-        if "Binder exception" in err_str or "does not exist" in err_str or "Table" in err_str:
-            return ok_response([])
-        return error_response(err_str)
+        return handle_exception_response(e, context_action="list_assets")
 
 
 def get_asset(id: str) -> dict[str, Any]:
@@ -219,7 +216,7 @@ def search_assets(query: str, filters: dict[str, Any] | None = None) -> dict[str
         data = _get_db().execute_cypher(cypher_q, {"query": query})
         return ok_response(data)
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="search_assets")
 
 
 def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, Any]:
@@ -236,7 +233,7 @@ def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, A
     except FileNotFoundError as e:
         return not_found_response(id_val=engagement or "unknown", data=str(e))
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="query_graph")
 
 
 def get_graph_summary() -> dict[str, Any]:
@@ -409,7 +406,7 @@ def list_frameworks() -> dict[str, Any]:
             })
         return ok_response(res, count=len(res))
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="list_frameworks")
 
 
 def list_controls(
@@ -448,7 +445,7 @@ def list_controls(
         rows = _get_db().execute_cypher(query, params)
         return ok_response(rows, count=len(rows))
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="list_controls")
 
 
 def get_compliance_trail(control_id: str) -> dict[str, Any]:
@@ -496,7 +493,7 @@ def get_compliance_trail(control_id: str) -> dict[str, Any]:
         }
         return ok_response(trail, count=1)
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_compliance_trail")
 
 
 def get_compliance_matrix(engagement: str, framework: str) -> dict[str, Any]:
@@ -569,7 +566,7 @@ def get_compliance_matrix(engagement: str, framework: str) -> dict[str, Any]:
         }
         return ok_response(summary, count=1)
     except Exception as e:
-        return error_response(str(e))
+        return handle_exception_response(e, context_action="get_compliance_matrix")
 
 
 def suggest_knowledge_improvement(
@@ -724,7 +721,7 @@ def shred_rfp(
 
         return ok_response(matrix, count=len(requirements))
     except Exception as e:
-        return error_response(f"Failed to shred RFP: {e}")
+        return handle_exception_response(e, context_action="shred_rfp")
 
 
 def generate_zero_draft_hld(
@@ -754,7 +751,7 @@ def generate_zero_draft_hld(
         )
         return ok_response(hld_result)
     except Exception as e:
-        return error_response(f"Failed to generate Zero-Draft HLD: {e}")
+        return handle_exception_response(e, context_action="generate_zero_draft_hld")
 
 
 def get_rfp_compliance_matrix(
@@ -800,7 +797,7 @@ def get_rfp_compliance_matrix(
         }
         return ok_response(payload, count=total)
     except Exception as e:
-        return error_response(f"Failed to get RFP compliance matrix: {e}")
+        return handle_exception_response(e, context_action="get_rfp_compliance_matrix")
 
 
 def trigger_rfp_elicitation(
@@ -822,7 +819,7 @@ def trigger_rfp_elicitation(
         result = assembler.trigger_targeted_elicitation(engagement=engagement)
         return ok_response(result, count=result.get("questions_created", 0))
     except Exception as e:
-        return error_response(f"Failed to trigger RFP elicitation: {e}")
+        return handle_exception_response(e, context_action="trigger_rfp_elicitation")
 
 
 

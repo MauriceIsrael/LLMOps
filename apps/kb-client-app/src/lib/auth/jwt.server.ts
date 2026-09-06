@@ -13,13 +13,26 @@
  *   (fallback to a dev secret if not set — NEVER use in production)
  */
 
+import { building } from '$app/environment';
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import type { SessionUser } from '../../app.d.ts';
 
-// @security Set JWT_SECRET in .env for production
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? 'dev-secret-change-me-in-production-min-32-chars!!'
-);
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  const isProd = process.env.NODE_ENV === 'production';
+  if (!secret) {
+    if (isProd && !building) {
+      throw new Error('FATAL: JWT_SECRET environment variable is mandatory in production!');
+    }
+    return new TextEncoder().encode('dev-secret-change-me-in-production-min-32-chars!!');
+  }
+  if (secret.length < 32) {
+    throw new Error('FATAL: JWT_SECRET must be at least 32 characters long for cryptographic security!');
+  }
+  return new TextEncoder().encode(secret);
+}
+
+const JWT_SECRET = getJwtSecret();
 
 const ACCESS_TOKEN_TTL = '15m';
 const REFRESH_TOKEN_TTL = '7d';

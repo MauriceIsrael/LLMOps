@@ -30,7 +30,8 @@ Pour garantir que les exigences de l'Étape 1 précèdent strictement les choix 
 
 ## 2. Accord Inter-Annotateurs & Intervalle de Confiance (§5.3)
 
-> **Variante retenue : à confirmer par l'humain avant exécution**
+> **Statut d'application actuel (Phase Prototype) :**  
+> Le corpus d'évaluation 3GPP est actuellement constitué sous forme de banc d'essai pilote (jeu QA d'exemple et corpus initial). En l'absence de campagne de double annotation humaine formalisée, l'accord inter-annotateurs ($\kappa$ de Cohen) est pour l'instant qualifié de **« Non évaluable - banc prototype »**. Les exécutions CI sont hebdomadaires et déclenchables à la demande (`workflow_dispatch`), réservant le calcul formel de $\kappa$ à la campagne de labellisation finale.
 
 ### Variante A — Second Annotateur Humain Indépendant
 - **Fichiers lus :** `annotation/annotator1.csv` et `annotation/annotator2.csv`.

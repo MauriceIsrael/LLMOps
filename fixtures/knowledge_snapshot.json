@@ -6,7 +6,7 @@
     "knowledge": {
       "dataset": "data/knowledge.lbug",
       "node_counts": {
-        "Asset": 56,
+        "Asset": 58,
         "GlossaryTerm": 17
       }
     },

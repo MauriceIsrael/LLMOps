@@ -8,7 +8,7 @@ from mcp_server.db.ladybug_client import LadybugClient
 @pytest.fixture
 def temp_ladybug_client(tmp_path) -> LadybugClient:
     db_dir = tmp_path / "ladybug_test_db"
-    return LadybugClient(db_path=db_dir)
+    return LadybugClient(db_path=db_dir, read_only=False)
 
 
 @pytest.mark.deterministic
