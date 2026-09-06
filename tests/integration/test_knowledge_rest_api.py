@@ -251,3 +251,40 @@ def test_compliance_conformity_snapshot_rest_endpoint():
         assert "verificationModes" in req
         assert "evidence" in req
 
+
+def test_compliance_frameworks_endpoints():
+    """Vérifie le listing et la configuration des référentiels applicables par engagement."""
+    with patch.dict(os.environ, {"LLMOPS_AUTH_TOKEN": "secret-test-token"}):
+        app = create_starlette_app()
+        client = TestClient(app)
+        headers = {"Authorization": "Bearer secret-test-token"}
+
+        # 1. GET /api/compliance/frameworks
+        res = client.get("/api/compliance/frameworks", headers=headers)
+        assert res.status_code == 200
+        assert res.json().get("status") == "ok"
+        fws = res.json().get("data", [])
+        assert len(fws) >= 1
+
+        # 2. GET /api/compliance/frameworks/applicable
+        res = client.get("/api/compliance/frameworks/applicable?engagement=test-fw-eng", headers=headers)
+        assert res.status_code == 200
+        data = res.json()
+        assert data.get("status") == "ok"
+        assert isinstance(data.get("applicable_frameworks"), list)
+
+        # 3. PUT /api/compliance/frameworks/applicable
+        res = client.put(
+            "/api/compliance/frameworks/applicable?engagement=test-fw-eng",
+            headers=headers,
+            json={"frameworks": ["SecNumCloud", "NIS2"]},
+        )
+        assert res.status_code == 200
+        assert res.json().get("applicable_frameworks") == ["SecNumCloud", "NIS2"]
+
+        # 4. Vérification de la persistance
+        res = client.get("/api/compliance/frameworks/applicable?engagement=test-fw-eng", headers=headers)
+        assert res.status_code == 200
+        assert res.json().get("applicable_frameworks") == ["SecNumCloud", "NIS2"]
+
+

@@ -440,6 +440,45 @@ def create_starlette_app() -> Starlette:
                 status_code=500,
             )
 
+    async def handle_compliance_frameworks(request):
+        """Liste les référentiels réglementaires disponibles dans la base de connaissances."""
+        res = list_frameworks()
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
+    async def handle_compliance_applicable_frameworks_get(request):
+        """Récupère la liste des référentiels applicables pour un engagement donné."""
+        engagement = (
+            request.headers.get("X-Engagement-Id")
+            or request.query_params.get("engagement")
+            or "default"
+        ).strip()
+        from pipelines.compliance_mapper import get_applicable_frameworks
+        fws = get_applicable_frameworks(engagement=engagement)
+        return JSONResponse({
+            "status": "ok",
+            "engagement": engagement,
+            "applicable_frameworks": fws,
+            "count": len(fws),
+        }, status_code=200)
+
+    async def handle_compliance_applicable_frameworks_put(request):
+        """Définit la liste des référentiels applicables pour un engagement donné."""
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        engagement = (
+            request.headers.get("X-Engagement-Id")
+            or (body.get("engagement") if isinstance(body, dict) else None)
+            or request.query_params.get("engagement")
+            or "default"
+        ).strip()
+        fws = body.get("frameworks", []) if isinstance(body, dict) else []
+        from pipelines.compliance_mapper import set_applicable_frameworks
+        res = set_applicable_frameworks(engagement=engagement, frameworks=fws)
+        return JSONResponse(res, status_code=200)
+
     async def handle_knowledge_suggestions(request):
         """Soumission REST d'une suggestion d'amélioration/REX issue de la curation humaine."""
         try:
@@ -727,6 +766,9 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/engagements", endpoint=handle_knowledge_engagements, methods=["GET"]),
             Route("/api/knowledge/suggestions", endpoint=handle_knowledge_suggestions, methods=["POST"]),
             Route("/api/compliance/conformity-snapshot", endpoint=handle_compliance_conformity_snapshot, methods=["GET"]),
+            Route("/api/compliance/frameworks", endpoint=handle_compliance_frameworks, methods=["GET"]),
+            Route("/api/compliance/frameworks/applicable", endpoint=handle_compliance_applicable_frameworks_get, methods=["GET"]),
+            Route("/api/compliance/frameworks/applicable", endpoint=handle_compliance_applicable_frameworks_put, methods=["PUT", "POST"]),
             Route("/api/rfp/shred-to-candidates", endpoint=handle_rfp_shred_to_candidates, methods=["POST"]),
             Route("/api/documents/zero-draft-blueprint", endpoint=handle_zero_draft_blueprint, methods=["POST"]),
             Route("/api/prose/suggest-batch", endpoint=handle_prose_suggest_batch, methods=["POST"]),

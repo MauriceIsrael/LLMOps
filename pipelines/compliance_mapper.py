@@ -372,6 +372,42 @@ def audit_compliance_gaps(
     }
 
 
+def get_applicable_frameworks(engagement: str = "default") -> list[str]:
+    """Retourne la liste des codes de référentiels applicables pour un engagement."""
+    import json
+    meta_path = Path("data/engagements") / f"{engagement}.meta.json"
+    if meta_path.exists():
+        try:
+            data = json.loads(meta_path.read_text(encoding="utf-8"))
+            fws = data.get("applicable_frameworks")
+            if isinstance(fws, list) and fws:
+                return fws
+        except Exception:
+            pass
+    controls = load_all_controls("data/kb/controls")
+    return sorted(list({c.framework for c in controls.values()}))
+
+
+def set_applicable_frameworks(engagement: str, frameworks: list[str]) -> dict[str, Any]:
+    """Définit les référentiels applicables pour un engagement donné."""
+    import json
+    meta_path = Path("data/engagements") / f"{engagement}.meta.json"
+    meta_path.parent.mkdir(parents=True, exist_ok=True)
+    existing = {}
+    if meta_path.exists():
+        try:
+            existing = json.loads(meta_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    existing["applicable_frameworks"] = frameworks
+    meta_path.write_text(json.dumps(existing, indent=2, ensure_ascii=False), encoding="utf-8")
+    return {
+        "status": "ok",
+        "engagement": engagement,
+        "applicable_frameworks": frameworks,
+    }
+
+
 def to_conformity_snapshot(
     engagement: str = "default",
     framework: str = "ALL",
@@ -385,12 +421,18 @@ def to_conformity_snapshot(
     controls = load_all_controls(controls_dir)
     target_fw = framework.upper().replace("-", "").replace("_", "")
 
+    applicable_fws = [fw.upper().replace("-", "").replace("_", "") for fw in get_applicable_frameworks(engagement)]
+
     requirements: list[dict[str, Any]] = []
 
     for cid, ctrl in controls.items():
         ctrl_fw = ctrl.framework.upper().replace("-", "").replace("_", "")
-        if target_fw != "ALL" and target_fw not in ctrl_fw and ctrl_fw not in target_fw:
-            continue
+        if target_fw != "ALL":
+            if target_fw not in ctrl_fw and ctrl_fw not in target_fw:
+                continue
+        else:
+            if not any(afw in ctrl_fw or ctrl_fw in afw for afw in applicable_fws):
+                continue
 
         covered_by: list[str] = []
         for asset_id, mapped_ctrls in EXPLICIT_KB_ALIGNMENTS.items():
