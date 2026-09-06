@@ -396,6 +396,158 @@ def create_starlette_app() -> Starlette:
         status_code = 200 if res.get("status") == "ok" else 400
         return JSONResponse(res, status_code=status_code)
 
+    async def handle_rfp_shred_to_candidates(request):
+        """Déstructure un RFP et produit directement la liste des ExtractedCandidate pour requirements-intake."""
+        try:
+            body = await request.json()
+        except Exception:
+            return JSONResponse(
+                {"status": "error", "error": "Corps de requête JSON invalide ou absent"},
+                status_code=400,
+            )
+
+        if not isinstance(body, dict):
+            return JSONResponse(
+                {"status": "error", "error": "Le corps de requête doit être un objet JSON"},
+                status_code=400,
+            )
+
+        rfp_text = str(body.get("rfp_text", "")).strip()
+        document_id = str(body.get("document_id", "doc-rfp")).strip()
+        document_version = str(body.get("document_version", "1.0")).strip()
+        engagement = str(body.get("engagement", "default")).strip()
+
+        if not rfp_text:
+            return JSONResponse(
+                {"status": "error", "error": "rfp_text ne peut pas être vide"},
+                status_code=400,
+            )
+
+        try:
+            from pipelines.rfp_shredder import RFPShredder, to_extracted_candidates
+
+            shredder = RFPShredder(kb_dir="data/kb")
+            requirements = shredder.shred_text(rfp_text, engagement=engagement)
+            candidates = to_extracted_candidates(requirements, document_id, document_version)
+
+            return JSONResponse(
+                {
+                    "status": "ok",
+                    "candidates": candidates,
+                    "count": len(candidates),
+                    "documentId": document_id,
+                    "documentVersion": document_version,
+                },
+                status_code=200,
+            )
+        except Exception as e:
+            return JSONResponse(
+                {"status": "error", "error": f"Échec de l'extraction de candidates : {e}"},
+                status_code=500,
+            )
+
+    async def handle_zero_draft_blueprint(request):
+        """Génère un couple Blueprint + ProseStore pour document-engine à partir des connaissances du Hub."""
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+
+        engagement = str(body.get("engagement", "default")).strip() if isinstance(body, dict) else "default"
+        project_title = str(body.get("project_title", "Système d'Architecture Télécom & Plateforme Sécurisée")).strip() if isinstance(body, dict) else "Système d'Architecture Télécom & Plateforme Sécurisée"
+        client_name = str(body.get("client_name", "Client RFP")).strip() if isinstance(body, dict) else "Client RFP"
+
+        try:
+            from tools.elicitation.zero_draft import ZeroDraftAssembler
+
+            assembler = ZeroDraftAssembler(
+                db_path=server_config.engagements_dir / f"{engagement}.lbug",
+                kb_dir=server_config.kb_dir,
+            )
+            res = assembler.to_blueprint_and_prose(
+                engagement=engagement,
+                project_title=project_title,
+                client_name=client_name,
+            )
+            return JSONResponse({"status": "ok", **res}, status_code=200)
+        except Exception as e:
+            return JSONResponse(
+                {"status": "error", "error": f"Échec de la génération Blueprint : {e}"},
+                status_code=500,
+            )
+
+    async def handle_prose_suggest_batch(request):
+        """Assistance de rédaction par lot pour les blocs prose de document-engine (ADR-DE-02)."""
+        try:
+            body = await request.json()
+        except Exception:
+            return JSONResponse(
+                {"status": "error", "error": "Corps de requête JSON invalide ou absent"},
+                status_code=400,
+            )
+
+        if not isinstance(body, dict):
+            return JSONResponse(
+                {"status": "error", "error": "Le corps de requête doit être un objet JSON"},
+                status_code=400,
+            )
+
+        requests = body.get("requests", [])
+        if not isinstance(requests, list):
+            return JSONResponse(
+                {"status": "error", "error": "'requests' doit être une liste"},
+                status_code=400,
+            )
+
+        import hashlib
+        from datetime import datetime, timezone
+
+        drafts = {}
+        warnings = []
+
+        for req in requests:
+            if not isinstance(req, dict):
+                continue
+            block_id = req.get("blockId", "")
+            if not block_id:
+                continue
+            anchor_ids = req.get("anchorIds", [])
+            instructions = req.get("instructions", "")
+
+            matched_text = []
+            for anchor in anchor_ids:
+                res = search_assets(query=anchor)
+                if res.get("status") == "ok" and res.get("assets"):
+                    for a in res["assets"][:2]:
+                        matched_text.append(f"{a.get('title', '')} : {a.get('summary', '')}")
+
+            if matched_text:
+                draft_content = (
+                    f"Conception validée pour le bloc '{block_id}' : "
+                    + " ".join(matched_text)
+                    + (" " + instructions if instructions else "")
+                )
+            else:
+                draft_content = (
+                    f"Le bloc '{block_id}' implémente les composants ({', '.join(anchor_ids) if anchor_ids else 'génériques'}) "
+                    f"conformément aux motifs d'architecture du Knowledge Hub et aux exigences contractuelles."
+                )
+
+            drafts[block_id] = draft_content
+
+        model_hash = hashlib.sha256(str(body).encode()).hexdigest()[:16]
+        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        return JSONResponse(
+            {
+                "drafts": drafts,
+                "warnings": warnings,
+                "basedOnModelHash": model_hash,
+                "generatedAt": now_str,
+            },
+            status_code=200,
+        )
+
     return Starlette(
         debug=settings.DEBUG,
         routes=[
@@ -410,6 +562,9 @@ def create_starlette_app() -> Starlette:
             Route("/snapshot/{snapshot_id}", endpoint=handle_snapshot_by_id, methods=["GET"]),
             Route("/api/knowledge/search", endpoint=handle_knowledge_search, methods=["GET"]),
             Route("/api/knowledge/suggestions", endpoint=handle_knowledge_suggestions, methods=["POST"]),
+            Route("/api/rfp/shred-to-candidates", endpoint=handle_rfp_shred_to_candidates, methods=["POST"]),
+            Route("/api/documents/zero-draft-blueprint", endpoint=handle_zero_draft_blueprint, methods=["POST"]),
+            Route("/api/prose/suggest-batch", endpoint=handle_prose_suggest_batch, methods=["POST"]),
         ],
         middleware=[Middleware(AuthMiddleware)],
     )

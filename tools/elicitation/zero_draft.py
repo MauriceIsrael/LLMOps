@@ -284,3 +284,181 @@ class ZeroDraftAssembler:
             "questions_created": len(created_questions),
             "questions": created_questions,
         }
+
+    def to_blueprint_and_prose(
+        self,
+        engagement: str = "default",
+        project_title: str = "Système d'Architecture Télécom & Plateforme Sécurisée",
+        client_name: str = "Client RFP",
+    ) -> dict[str, Any]:
+        """Génère une structure Blueprint (conforme à blueprint.schema.json) et son ProseStore associé pour document-engine."""
+        import hashlib
+
+        requirements = self.repo.get_requirements(engagement)
+        referenced_assets: set[str] = set()
+        for r in requirements:
+            m = r.get("matched_assets") or "[]"
+            import json
+            try:
+                asset_list = json.loads(m) if isinstance(m, str) else m
+                referenced_assets.update(asset_list)
+            except Exception:
+                pass
+
+        kb_assets = self.load_kb_asset_details(list(referenced_assets))
+        patterns = [a for a in kb_assets if a.get("id", "").startswith("PAT-")]
+        adrs = [a for a in kb_assets if a.get("id", "").startswith("ADR-")]
+
+        # 1. Blueprint structure
+        sections = [
+            {
+                "id": "contexte-objectifs",
+                "title": f"1. Contexte et Objectifs — {project_title}",
+                "blocks": [
+                    {
+                        "type": "prose",
+                        "anchorIds": ["contexte-projet"],
+                    }
+                ],
+            },
+            {
+                "id": "exigences-perimetre",
+                "title": "2. Périmètre et Exigences Contractuelles",
+                "blocks": [
+                    {
+                        "type": "prose",
+                        "anchorIds": ["perimetre-exigences"],
+                    }
+                ],
+            },
+            {
+                "id": "motifs-architecture",
+                "title": "3. Motifs d'Architecture (Building Blocks)",
+                "blocks": [
+                    {
+                        "type": "prose",
+                        "anchorIds": [p.get("id", "pattern-default") for p in patterns] if patterns else ["patterns-socle"],
+                    }
+                ],
+            },
+            {
+                "id": "decisions-adrs",
+                "title": "4. Décisions d'Architecture Structurantes (ADRs)",
+                "blocks": [
+                    {
+                        "type": "prose",
+                        "anchorIds": [a.get("id", "adr-default") for a in adrs] if adrs else ["adrs-socle"],
+                    }
+                ],
+            },
+            {
+                "id": "securite-resilience",
+                "title": "5. Sécurité, Souveraineté et Résilience",
+                "blocks": [
+                    {
+                        "type": "prose",
+                        "anchorIds": ["securite-souverainete"],
+                    }
+                ],
+            },
+        ]
+
+        blueprint = {
+            "version": "1.0",
+            "documentType": "hld",
+            "expectedContext": {
+                "Author": "string",
+                "Date": "date",
+                "Project.Name": "string",
+                "Project.Version": "string",
+            },
+            "sections": sections,
+        }
+
+        # 2. ProseStore content
+        model_hash = hashlib.sha256(f"{engagement}:{project_title}".encode()).hexdigest()[:16]
+        prose_store: dict[str, Any] = {}
+
+        # Contexte
+        contexte_text = (
+            f"Le présent document d'Architecture de Haut Niveau (HLD) spécifie la conception de la solution "
+            f"'{project_title}' pour le compte de '{client_name}'. Il consolide l'ensemble des exigences du client "
+            f"et formalise les choix techniques retenus pour garantir performance, sécurité et maintenabilité."
+        )
+        prose_store["contexte-projet"] = {
+            "content": contexte_text,
+            "anchoredOn": ["contexte-projet"],
+            "lastModelHashSeen": model_hash,
+        }
+
+        # Exigences
+        total_reqs = len(requirements)
+        covered_count = sum(1 for r in requirements if r.get("status") == "covered")
+        req_text = (
+            f"Le périmètre contractuel comprend {total_reqs} exigences élémentaires. "
+            f"L'analyse de couverture préliminaire montre un taux de conformité immédiate de "
+            f"{(covered_count / total_reqs * 100):.1f}% sur le socle standard de la plateforme."
+            if total_reqs > 0 else "Le périmètre contractuel s'appuie sur le référentiel des exigences du projet."
+        )
+        prose_store["perimetre-exigences"] = {
+            "content": req_text,
+            "anchoredOn": ["perimetre-exigences"],
+            "lastModelHashSeen": model_hash,
+        }
+
+        # Patterns
+        if patterns:
+            for pat in patterns:
+                p_id = pat.get("id")
+                p_title = pat.get("title", "")
+                p_body = pat.get("raw_body", "").strip()
+                pat_desc = f"**{p_title}** : {p_body[:300]}..." if p_body else f"Application du motif {p_id} ({p_title})."
+                prose_store[p_id] = {
+                    "content": pat_desc,
+                    "anchoredOn": [p_id],
+                    "lastModelHashSeen": model_hash,
+                }
+        else:
+            prose_store["patterns-socle"] = {
+                "content": "Les motifs d'architecture du socle d'entreprise garantissent la haute disponibilité et le découplage des composants.",
+                "anchoredOn": ["patterns-socle"],
+                "lastModelHashSeen": model_hash,
+            }
+
+        # ADRs
+        if adrs:
+            for adr in adrs:
+                a_id = adr.get("id")
+                a_title = adr.get("title", "")
+                prose_store[a_id] = {
+                    "content": f"Choix d'architecture formalisé par l'ADR {a_id} : {a_title}.",
+                    "anchoredOn": [a_id],
+                    "lastModelHashSeen": model_hash,
+                }
+        else:
+            prose_store["adrs-socle"] = {
+                "content": "La gouvernance des décisions d'architecture repose sur les ADRs validées de la plateforme.",
+                "anchoredOn": ["adrs-socle"],
+                "lastModelHashSeen": model_hash,
+            }
+
+        # Sécurité
+        sec_text = (
+            "La sécurité du système met en œuvre une approche Zero-Trust, l'authentification mutuelle mTLS systématique "
+            "sur les flux d'interconnexion, et la conformité aux directives SecNumCloud et ISO 27001."
+        )
+        prose_store["securite-souverainete"] = {
+            "content": sec_text,
+            "anchoredOn": ["securite-souverainete"],
+            "lastModelHashSeen": model_hash,
+        }
+
+        return {
+            "engagement": engagement,
+            "project_title": project_title,
+            "client_name": client_name,
+            "blueprint": blueprint,
+            "prose_store": prose_store,
+            "sections_count": len(sections),
+            "prose_blocks_count": len(prose_store),
+        }

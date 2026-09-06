@@ -2,7 +2,6 @@
 
 import os
 from unittest.mock import patch
-
 from starlette.testclient import TestClient
 
 from mcp_server.main import create_starlette_app
@@ -89,3 +88,85 @@ def test_knowledge_suggestions_rest_endpoint():
         assert "data" in data
         assert data["data"].get("suggestion_id", "").startswith("SUG-")
         assert "Pattern Architecture Zero-Trust Edge" in data["data"].get("message", "")
+
+
+def test_rfp_shred_to_candidates_rest_endpoint():
+    """Vérifie POST /api/rfp/shred-to-candidates pour l'intégration avec requirements-intake."""
+    with patch.dict(os.environ, {"LLMOPS_AUTH_TOKEN": "secret-test-token"}):
+        app = create_starlette_app()
+        client = TestClient(app)
+        headers = {"Authorization": "Bearer secret-test-token"}
+
+        # Requête invalide
+        res = client.post("/api/rfp/shred-to-candidates", json={}, headers=headers)
+        assert res.status_code == 400
+
+        # Requête nominale
+        payload = {
+            "rfp_text": "### 4.1 Sécurité\nLe système doit supporter le chiffrement TLS 1.3 et mTLS pour toutes les interfaces.",
+            "document_id": "cctp-sec-2026",
+            "document_version": "1.0",
+            "engagement": "test-intake",
+        }
+        res = client.post("/api/rfp/shred-to-candidates", json=payload, headers=headers)
+        assert res.status_code == 200
+        data = res.json()
+        assert data.get("status") == "ok"
+        assert "candidates" in data
+        assert len(data["candidates"]) >= 1
+        c = data["candidates"][0]
+        assert c["candidateKind"] == "technical-requirement"
+        assert c["suggestedDestination"] == "requirements-intake"
+        assert c["sourceFragment"]["documentId"] == "cctp-sec-2026"
+
+
+def test_zero_draft_blueprint_rest_endpoint():
+    """Vérifie POST /api/documents/zero-draft-blueprint pour l'intégration avec document-engine."""
+    with patch.dict(os.environ, {"LLMOPS_AUTH_TOKEN": "secret-test-token"}):
+        app = create_starlette_app()
+        client = TestClient(app)
+        headers = {"Authorization": "Bearer secret-test-token"}
+
+        payload = {
+            "engagement": "default",
+            "project_title": "HLD Plateforme Télécom 5G",
+            "client_name": "Opérateur National",
+        }
+        res = client.post("/api/documents/zero-draft-blueprint", json=payload, headers=headers)
+        assert res.status_code == 200
+        data = res.json()
+        assert data.get("status") == "ok"
+        assert "blueprint" in data
+        assert "prose_store" in data
+        assert data["blueprint"]["version"] == "1.0"
+        assert data["blueprint"]["documentType"] == "hld"
+
+
+def test_prose_suggest_batch_rest_endpoint():
+    """Vérifie POST /api/prose/suggest-batch conforme à ADR-DE-02 de document-engine."""
+    with patch.dict(os.environ, {"LLMOPS_AUTH_TOKEN": "secret-test-token"}):
+        app = create_starlette_app()
+        client = TestClient(app)
+        headers = {"Authorization": "Bearer secret-test-token"}
+
+        payload = {
+            "requests": [
+                {
+                    "blockId": "block-sec-1",
+                    "anchorIds": ["securite", "mtls"],
+                    "instructions": "Préciser le chiffrement.",
+                },
+                {
+                    "blockId": "block-core-2",
+                    "anchorIds": ["core-5g"],
+                },
+            ]
+        }
+        res = client.post("/api/prose/suggest-batch", json=payload, headers=headers)
+        assert res.status_code == 200
+        data = res.json()
+        assert "drafts" in data
+        assert "block-sec-1" in data["drafts"]
+        assert "block-core-2" in data["drafts"]
+        assert "generatedAt" in data
+        assert "basedOnModelHash" in data

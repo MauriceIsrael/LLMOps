@@ -329,3 +329,65 @@ class RFPShredder:
             "saved_requirements": saved_count,
             "db_path": str(db_path),
         }
+
+
+def to_extracted_candidates(
+    requirements: list[RFPRequirement],
+    document_id: str,
+    document_version: str,
+) -> list[dict[str, Any]]:
+    """Convertit une liste de RFPRequirement vers le schéma ExtractedCandidate (@architecture-suite/contracts)."""
+    import hashlib
+
+    kind_map = {
+        "security": "technical-requirement",
+        "infrastructure": "technical-requirement",
+        "cloud-platform": "technical-requirement",
+        "network": "technical-requirement",
+        "observability": "technical-requirement",
+        "resilience": "technical-requirement",
+        "telco-core": "technical-requirement",
+        "ai-assistance": "technical-requirement",
+        "sovereignty": "governance-obligation",
+        "compliance": "governance-obligation",
+    }
+
+    mode_map = {
+        "security": ["automated-test", "configuration-review"],
+        "infrastructure": ["configuration-review", "manual-inspection"],
+        "cloud-platform": ["automated-test", "configuration-review"],
+        "network": ["configuration-review", "automated-test"],
+        "observability": ["automated-test"],
+        "resilience": ["automated-test", "manual-inspection"],
+        "telco-core": ["automated-test", "vendor-attestation"],
+        "sovereignty": ["vendor-attestation", "manual-inspection"],
+        "compliance": ["vendor-attestation", "manual-inspection"],
+    }
+
+    candidates = []
+    for req in requirements:
+        text = req.text.strip()
+        h = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        frag_id = f"frag-{req.id}"
+        cand_id = f"cand-{req.id}"
+        kind = kind_map.get(req.category, "functional-requirement")
+        modes = mode_map.get(req.category, ["manual-inspection"])
+
+        candidates.append({
+            "id": cand_id,
+            "sourceFragment": {
+                "id": frag_id,
+                "documentId": document_id,
+                "documentVersion": document_version,
+                "sectionPath": [req.section] if req.section else ["1"],
+                "originalText": text,
+                "hash": f"sha256:{h}",
+            },
+            "originalText": text,
+            "normalizedText": text,
+            "candidateKind": kind,
+            "suggestedDestination": "requirements-intake",
+            "routingConfidence": 0.95 if req.status == "covered" else 0.85,
+            "verificationModes": modes,
+        })
+    return candidates
