@@ -70,7 +70,14 @@ CATEGORY_KEYWORDS: dict[str, list[str]] = {
     ],
     "telco-core": [
         "3gpp", "5g", "core", "sba", "mcx", "mcptt", "mcdata", "mcvideo", "sip", "rtp",
-        "sim", "e-sim", "provisioning", "radio", "ran"
+        "sim", "e-sim", "esim", "euicc", "sm-dp", "provisioning", "radio", "ran", "nef", "mda", "scas", "ics", "plugtests"
+    ],
+    "device-hardware": [
+        "terminal", "durci", "rugged", "mil-std-810", "mil-810", "ip68", "ip69k", "atex", "véhicule", "vehicular",
+        "v-device", "dmo", "prose", "band 68", "gov-68", "emc", "iso 11451", "antidéflagrant"
+    ],
+    "timing-sync": [
+        "ptp", "ieee 1588", "synce", "horloge", "rubidium", "ocxo", "gnss", "synchronisation", "holdover", "g.8275"
     ],
     "ai-assistance": [
         "ia", "llm", "assistant", "modèle", "inférence", "agent", "rag", "prompt", "gpu"

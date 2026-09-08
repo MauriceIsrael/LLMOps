@@ -1,8 +1,8 @@
 {
-  "snapshot_id": "snapshot-2026-09-06-31b567e",
-  "created_at": "2026-09-06T14:31:48Z",
-  "source_revision": "31b567e424e7bd54c2bb9ed9bf48904daf835d72",
-  "payload_sha256": "sha256:a89fa8c08d75af9d900d9759ba36403576bbdb5495af305cb2c0f80da9c12a48",
+  "snapshot_id": "snapshot-2026-09-08-3aa7524",
+  "created_at": "2026-09-08T12:07:59Z",
+  "source_revision": "3aa7524a4f178d3dba4e4c0277ea06d67bef252d",
+  "payload_sha256": "sha256:7a347b847fbcc61fb19dc4487db8ee4048199af712a198c8e796e56d4d7b09e1",
   "schema_version": "1.0",
   "applicability_index": {
     "TPL-getting-started": {
@@ -1887,7 +1887,32 @@
     {
       "framework": "3GPP",
       "version": "Rel-18",
-      "controls_count": 5
+      "controls_count": 9
+    },
+    {
+      "framework": "CER",
+      "version": "2022/2557",
+      "controls_count": 1
+    },
+    {
+      "framework": "CRA",
+      "version": "2024/2847",
+      "controls_count": 2
+    },
+    {
+      "framework": "GSMA",
+      "version": "SGP.24 / SGP.25",
+      "controls_count": 4
+    },
+    {
+      "framework": "ISO14001",
+      "version": "2015",
+      "controls_count": 1
+    },
+    {
+      "framework": "ISO22301",
+      "version": "2019",
+      "controls_count": 1
     },
     {
       "framework": "ISO27001",
@@ -1895,17 +1920,73 @@
       "controls_count": 6
     },
     {
+      "framework": "ISO27005",
+      "version": "2022",
+      "controls_count": 1
+    },
+    {
+      "framework": "ITIL-FCAPS",
+      "version": "v4",
+      "controls_count": 2
+    },
+    {
       "framework": "NIS2",
       "version": "2022/2555",
       "controls_count": 10
     },
     {
+      "framework": "PPDR-DEVICE",
+      "version": "2014/34/EU",
+      "controls_count": 4
+    },
+    {
+      "framework": "RGPD",
+      "version": "2016/679",
+      "controls_count": 2
+    },
+    {
       "framework": "SecNumCloud",
       "version": "3.2",
       "controls_count": 6
+    },
+    {
+      "framework": "TELCO-RESIL",
+      "version": "SR-332 / FIDES",
+      "controls_count": 4
     }
   ],
   "controls": [
+    {
+      "id": "3GPP-TS28104-MDA",
+      "framework": "3GPP",
+      "version": "Rel-18",
+      "title": "Management Data Analytics (MDA) for Autonomous 5GS Core and RAN Operations",
+      "domain": "observability,network-automation,ai-assistance",
+      "severity": "recommended",
+      "implemented_by": [
+        "ADR-0007",
+        "ADR-0008",
+        "P-003",
+        "P-014",
+        "PAT-001",
+        "PAT-005"
+      ]
+    },
+    {
+      "id": "3GPP-TS29522-NEF",
+      "framework": "3GPP",
+      "version": "Rel-18",
+      "title": "5G Network Exposure Function (NEF) Northbound APIs for Dynamic QoS & Location",
+      "domain": "mobile-core,network-exposure,mcx",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0005",
+        "ADR-0010",
+        "ADR-0011",
+        "PAT-006",
+        "PAT-007"
+      ]
+    },
     {
       "id": "3GPP-TS33179-AFFILIATION",
       "framework": "3GPP",
@@ -1966,6 +2047,152 @@
       ]
     },
     {
+      "id": "3GPP-TS33926-SCAS",
+      "framework": "3GPP",
+      "version": "Rel-18 / NESAS v2.2",
+      "title": "Security Assurance Specifications (SCAS) & GSMA NESAS Network Equipment Audit",
+      "domain": "security,compliance,telecom-core",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0005",
+        "PAT-006"
+      ]
+    },
+    {
+      "id": "3GPP-TS37579-ICS",
+      "framework": "3GPP",
+      "version": "Rel-18 / TS 103 564",
+      "title": "Implementation Conformance Statement (ICS) & ETSI MCX Plugtests Interoperability",
+      "domain": "mcx,conformance,interoperability",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0007",
+        "ADR-0008",
+        "P-004",
+        "PAT-004"
+      ]
+    },
+    {
+      "id": "CER-ART13-RESIL",
+      "framework": "CER",
+      "version": "2022/2557",
+      "title": "Critical Entities Resilience, Physical Security & Disaster Recovery",
+      "domain": "resilience,infrastructure,disaster-recovery",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0007",
+        "ADR-0013",
+        "P-003",
+        "PAT-003"
+      ]
+    },
+    {
+      "id": "CRA-REQ-SECBYDES-02",
+      "framework": "CRA",
+      "version": "2024/2847",
+      "title": "Essential Cybersecurity Requirements and Secure by Default Configuration",
+      "domain": "security,hardening,device-security",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0013"
+      ]
+    },
+    {
+      "id": "CRA-REQ-VULN-01",
+      "framework": "CRA",
+      "version": "2024/2847",
+      "title": "Software Bill of Materials (SBOM), Vulnerability Handling & Patch Lifecycle",
+      "domain": "supply-chain,vulnerability-management,security",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0012",
+        "P-005",
+        "PAT-002"
+      ]
+    },
+    {
+      "id": "FCAPS-OAM-PROT",
+      "framework": "ITIL-FCAPS",
+      "version": "RFC 5424 / ITU-T M.3400",
+      "title": "FCAPS Telemetry, Syslog RFC 5424 Bastion Forwarding & Secure O&M Protocols",
+      "domain": "observability,operations,network-automation",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0008",
+        "P-011",
+        "PAT-005"
+      ]
+    },
+    {
+      "id": "GSMA-CEIR-PEI",
+      "framework": "GSMA",
+      "version": "PRD SG.18",
+      "title": "GSMA Central EIR Integration for Stolen Device Tracking and PEI/IMEI Blacklisting",
+      "domain": "mobile-core,security,device-management",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0013",
+        "P-008",
+        "PAT-003"
+      ]
+    },
+    {
+      "id": "GSMA-SAS-EAL4",
+      "framework": "GSMA",
+      "version": "SGP.24 / SGP.25",
+      "title": "Common Criteria EAL4+ and GSMA SAS Certification for eUICC & SM-DP+",
+      "domain": "cryptography,sim-identity,certification",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-007"
+      ]
+    },
+    {
+      "id": "GSMA-SGP22-RSP",
+      "framework": "GSMA",
+      "version": "SGP.22 v3.0",
+      "title": "Remote SIM Provisioning (RSP) Architecture & Profile Download",
+      "domain": "mobile-core,sim-identity,cryptography",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0013"
+      ]
+    },
+    {
+      "id": "GSMA-SGP32-IOT",
+      "framework": "GSMA",
+      "version": "SGP.32 v1.1",
+      "title": "Remote SIM Provisioning for Headless IoT and Mission-Critical In-Vehicle Routers",
+      "domain": "mobile-core,sim-identity,iot",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0013"
+      ]
+    },
+    {
+      "id": "ISO-14001-DECOM",
+      "framework": "ISO14001",
+      "version": "2015",
+      "title": "Sustainable Decommissioning, Low Carbon Footprint & Circular Asset Recycling",
+      "domain": "environmental,lifecycle,infrastructure",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-001"
+      ]
+    },
+    {
+      "id": "ISO-22301-BCP",
+      "framework": "ISO22301",
+      "version": "2019",
+      "title": "Business Continuity Management System (BCMS), Contingency & Disaster Recovery",
+      "domain": "resilience,operations,business-continuity",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0007",
+        "PAT-003"
+      ]
+    },
+    {
       "id": "ISO-27001-A5-15",
       "framework": "ISO27001",
       "version": "2022",
@@ -2017,6 +2244,7 @@
         "ADR-0005",
         "ADR-0006",
         "ADR-0009",
+        "ADR-0014",
         "P-001",
         "P-007",
         "P-008",
@@ -2047,6 +2275,28 @@
         "ADR-0008",
         "P-011",
         "PAT-005"
+      ]
+    },
+    {
+      "id": "ISO-27005-RISK",
+      "framework": "ISO27005",
+      "version": "2022",
+      "title": "Information Security Risk Management Aligned with National Methodologies (MONARC / EBIOS RM)",
+      "domain": "security,risk-management,governance",
+      "severity": "mandatory",
+      "implemented_by": [
+        "PAT-001"
+      ]
+    },
+    {
+      "id": "ITIL-SERV-MGMT",
+      "framework": "ITIL-FCAPS",
+      "version": "v4",
+      "title": "ITIL v4 Service Management & Synchronized OSS/BSS CMDB",
+      "domain": "service-management,operations,cmdb",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-010"
       ]
     },
     {
@@ -2172,6 +2422,74 @@
       ]
     },
     {
+      "id": "PPDR-DEVICE-ATEX",
+      "framework": "PPDR-DEVICE",
+      "version": "2014/34/EU",
+      "title": "ATEX Directive 2014/34/EU Explosion-Proof Equipment Certification (Zones 1/21)",
+      "domain": "hardware,safety,tactical-device",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0013"
+      ]
+    },
+    {
+      "id": "PPDR-DMO-LEGACY",
+      "framework": "PPDR-DEVICE",
+      "version": "ERC/DEC/(01)19",
+      "title": "Legacy Direct Mode Operation (TETRA DMO) & 3GPP ProSe Interoperability",
+      "domain": "ran,tactical-comms,mcx",
+      "severity": "mandatory",
+      "implemented_by": [
+        "PAT-006"
+      ]
+    },
+    {
+      "id": "PPDR-RADIO-B68",
+      "framework": "PPDR-DEVICE",
+      "version": "ECC/DEC/(16)02",
+      "title": "Dedicated BB-PPDR Spectrum Compliance (Band 68 / Band 28) per CEPT/ECC (16)02",
+      "domain": "ran,spectrum,ppdr-radio",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0013"
+      ]
+    },
+    {
+      "id": "PPDR-VEHICLE-CEM",
+      "framework": "PPDR-DEVICE",
+      "version": "ISO 11451 / 16750",
+      "title": "In-Vehicle Mission-Critical Modem EMC & Environmental Hardening (ISO 11451 / UN R2144)",
+      "domain": "hardware,vehicle-gateway,automotive",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0013"
+      ]
+    },
+    {
+      "id": "RGPD-REQ-BREACH-02",
+      "framework": "RGPD",
+      "version": "2016/679",
+      "title": "Personal Data Breach Detection, Forensic Logging & 72-Hour Notification",
+      "domain": "data-protection,incident-response,security",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0008",
+        "P-012",
+        "PAT-005"
+      ]
+    },
+    {
+      "id": "RGPD-REQ-PRIVACY-01",
+      "framework": "RGPD",
+      "version": "2016/679",
+      "title": "Privacy by Design & Default for Real-Time Location, CDRs and MCX Media",
+      "domain": "data-protection,privacy,security",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-015"
+      ]
+    },
+    {
       "id": "SNC-REQ-01",
       "framework": "SecNumCloud",
       "version": "3.2",
@@ -2246,10 +2564,129 @@
         "P-009",
         "PAT-003"
       ]
+    },
+    {
+      "id": "TELCO-RESIL-GNSS-HOLDOVER",
+      "framework": "TELCO-RESIL",
+      "version": "2026",
+      "title": "GNSS Anti-Jamming, Anti-Spoofing & Atomic Clock Holdover Exceeding 30 Days",
+      "domain": "resilience,transport,electronic-warfare",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0007",
+        "PAT-004"
+      ]
+    },
+    {
+      "id": "TELCO-RESIL-MTBF",
+      "framework": "TELCO-RESIL",
+      "version": "SR-332 / FIDES",
+      "title": "Reliability and Availability Engineering via Standardized MTBF Modeling",
+      "domain": "infrastructure,reliability,engineering",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-009"
+      ]
+    },
+    {
+      "id": "TELCO-RESIL-PTP-01",
+      "framework": "TELCO-RESIL",
+      "version": "2019 / G.8275.1",
+      "title": "Deterministic Frequency & Phase Synchronization via IEEE 1588-2019 PTP v2.1 & SyncE",
+      "domain": "transport,telecom-core,resilience",
+      "severity": "mandatory",
+      "implemented_by": [
+        "P-009",
+        "PAT-004"
+      ]
+    },
+    {
+      "id": "TELCO-RESIL-TIER4",
+      "framework": "TELCO-RESIL",
+      "version": "EN 50600 / Tier IV",
+      "title": "Dual-Site Geo-Redundant Datacenters Compliant with EN 50600 Class 4 / Tier IV",
+      "domain": "infrastructure,resilience,cloud-platform",
+      "severity": "mandatory",
+      "implemented_by": [
+        "ADR-0007",
+        "P-009",
+        "PAT-003"
+      ]
     }
   ],
   "compliance_index": {
     "3GPP": {
+      "3GPP-TS33179-KMS": {
+        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "PAT-004"
+        ]
+      },
+      "3GPP-TS37579-ICS": {
+        "title": "Implementation Conformance Statement (ICS) & ETSI MCX Plugtests Interoperability",
+        "version": "Rel-18 / TS 103 564",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "ADR-0008",
+          "P-004",
+          "PAT-004"
+        ]
+      },
+      "3GPP-TS33179-ISOLATED": {
+        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "PAT-004"
+        ]
+      },
+      "3GPP-TS29522-NEF": {
+        "title": "5G Network Exposure Function (NEF) Northbound APIs for Dynamic QoS & Location",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "ADR-0010",
+          "ADR-0011",
+          "PAT-006",
+          "PAT-007"
+        ]
+      },
+      "3GPP-TS33501-SBI": {
+        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
+        "version": "Rel-18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "PAT-006"
+        ]
+      },
+      "3GPP-TS33926-SCAS": {
+        "title": "Security Assurance Specifications (SCAS) & GSMA NESAS Network Equipment Audit",
+        "version": "Rel-18 / NESAS v2.2",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "PAT-006"
+        ]
+      },
+      "3GPP-TS28104-MDA": {
+        "title": "Management Data Analytics (MDA) for Autonomous 5GS Core and RAN Operations",
+        "version": "Rel-18",
+        "severity": "recommended",
+        "implemented_by": [
+          "ADR-0007",
+          "ADR-0008",
+          "P-003",
+          "P-014",
+          "PAT-001",
+          "PAT-005"
+        ]
+      },
       "3GPP-TS33179-AFFILIATION": {
         "title": "Secure User Affiliation and Mutual Authentication for Mission Critical Services",
         "version": "Rel-18",
@@ -2267,80 +2704,65 @@
           "P-007",
           "PAT-006"
         ]
-      },
-      "3GPP-TS33179-ISOLATED": {
-        "title": "Autonomous Security and Key Distribution in Isolated Local Site Operation (IOPS)",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0007",
-          "PAT-004"
-        ]
-      },
-      "3GPP-TS33501-SBI": {
-        "title": "5G Service-Based Architecture (SBA) Token Authorization & TLS Protection",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0005",
-          "PAT-006"
-        ]
-      },
-      "3GPP-TS33179-KMS": {
-        "title": "Key Management Server (KMS) & End-to-End Media Encryption for MCX",
-        "version": "Rel-18",
-        "severity": "mandatory",
-        "implemented_by": [
-          "PAT-004"
-        ]
       }
     },
-    "NIS2": {
-      "NIS2-ART21-2I": {
-        "title": "Human Resources Security, Access Control and Asset Management",
-        "version": "2022/2555",
+    "CRA": {
+      "CRA-REQ-VULN-01": {
+        "title": "Software Bill of Materials (SBOM), Vulnerability Handling & Patch Lifecycle",
+        "version": "2024/2847",
         "severity": "mandatory",
         "implemented_by": [
-          "P-010"
-        ]
-      },
-      "NIS2-ART21-2B": {
-        "title": "Incident Handling and Remediation",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-002",
-          "PAT-001"
-        ]
-      },
-      "NIS2-ART21-2A": {
-        "title": "Risk Analysis and Information System Security Policies",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0001",
-          "P-001"
-        ]
-      },
-      "NIS2-ART21-2E": {
-        "title": "Security in Network and Information Systems Lifecycle",
-        "version": "2022/2555",
-        "severity": "mandatory",
-        "implemented_by": [
+          "ADR-0012",
           "P-005",
           "PAT-002"
         ]
       },
-      "NIS2-ART21-2H": {
-        "title": "Cryptography and Information System Security for AI Systems",
-        "version": "2022/2555",
+      "CRA-REQ-SECBYDES-02": {
+        "title": "Essential Cybersecurity Requirements and Secure by Default Configuration",
+        "version": "2024/2847",
         "severity": "mandatory",
         "implemented_by": [
-          "ADR-0011",
-          "P-015",
-          "PAT-007"
+          "ADR-0013"
+        ]
+      }
+    },
+    "GSMA": {
+      "GSMA-SAS-EAL4": {
+        "title": "Common Criteria EAL4+ and GSMA SAS Certification for eUICC & SM-DP+",
+        "version": "SGP.24 / SGP.25",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-007"
         ]
       },
+      "GSMA-CEIR-PEI": {
+        "title": "GSMA Central EIR Integration for Stolen Device Tracking and PEI/IMEI Blacklisting",
+        "version": "PRD SG.18",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0013",
+          "P-008",
+          "PAT-003"
+        ]
+      },
+      "GSMA-SGP22-RSP": {
+        "title": "Remote SIM Provisioning (RSP) Architecture & Profile Download",
+        "version": "SGP.22 v3.0",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0013"
+        ]
+      },
+      "GSMA-SGP32-IOT": {
+        "title": "Remote SIM Provisioning for Headless IoT and Mission-Critical In-Vehicle Routers",
+        "version": "SGP.32 v1.1",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0013"
+        ]
+      }
+    },
+    "NIS2": {
       "NIS2-ART21-2G": {
         "title": "Basic Cyber Hygiene Practices and Cybersecurity Training",
         "version": "2022/2555",
@@ -2387,9 +2809,184 @@
           "ADR-0008",
           "PAT-005"
         ]
+      },
+      "NIS2-ART21-2B": {
+        "title": "Incident Handling and Remediation",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-002",
+          "PAT-001"
+        ]
+      },
+      "NIS2-ART21-2A": {
+        "title": "Risk Analysis and Information System Security Policies",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0001",
+          "P-001"
+        ]
+      },
+      "NIS2-ART21-2E": {
+        "title": "Security in Network and Information Systems Lifecycle",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-005",
+          "PAT-002"
+        ]
+      },
+      "NIS2-ART21-2H": {
+        "title": "Cryptography and Information System Security for AI Systems",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0011",
+          "P-015",
+          "PAT-007"
+        ]
+      },
+      "NIS2-ART21-2I": {
+        "title": "Human Resources Security, Access Control and Asset Management",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-010"
+        ]
+      }
+    },
+    "PPDR-DEVICE": {
+      "PPDR-DEVICE-ATEX": {
+        "title": "ATEX Directive 2014/34/EU Explosion-Proof Equipment Certification (Zones 1/21)",
+        "version": "2014/34/EU",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0013"
+        ]
+      },
+      "PPDR-VEHICLE-CEM": {
+        "title": "In-Vehicle Mission-Critical Modem EMC & Environmental Hardening (ISO 11451 / UN R2144)",
+        "version": "ISO 11451 / 16750",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0013"
+        ]
+      },
+      "PPDR-DMO-LEGACY": {
+        "title": "Legacy Direct Mode Operation (TETRA DMO) & 3GPP ProSe Interoperability",
+        "version": "ERC/DEC/(01)19",
+        "severity": "mandatory",
+        "implemented_by": [
+          "PAT-006"
+        ]
+      },
+      "PPDR-RADIO-B68": {
+        "title": "Dedicated BB-PPDR Spectrum Compliance (Band 68 / Band 28) per CEPT/ECC (16)02",
+        "version": "ECC/DEC/(16)02",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0013"
+        ]
+      }
+    },
+    "RGPD": {
+      "RGPD-REQ-PRIVACY-01": {
+        "title": "Privacy by Design & Default for Real-Time Location, CDRs and MCX Media",
+        "version": "2016/679",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-015"
+        ]
+      },
+      "RGPD-REQ-BREACH-02": {
+        "title": "Personal Data Breach Detection, Forensic Logging & 72-Hour Notification",
+        "version": "2016/679",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0008",
+          "P-012",
+          "PAT-005"
+        ]
+      }
+    },
+    "TELCO-RESIL": {
+      "TELCO-RESIL-MTBF": {
+        "title": "Reliability and Availability Engineering via Standardized MTBF Modeling",
+        "version": "SR-332 / FIDES",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-009"
+        ]
+      },
+      "TELCO-RESIL-PTP-01": {
+        "title": "Deterministic Frequency & Phase Synchronization via IEEE 1588-2019 PTP v2.1 & SyncE",
+        "version": "2019 / G.8275.1",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-009",
+          "PAT-004"
+        ]
+      },
+      "TELCO-RESIL-TIER4": {
+        "title": "Dual-Site Geo-Redundant Datacenters Compliant with EN 50600 Class 4 / Tier IV",
+        "version": "EN 50600 / Tier IV",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "P-009",
+          "PAT-003"
+        ]
+      },
+      "TELCO-RESIL-GNSS-HOLDOVER": {
+        "title": "GNSS Anti-Jamming, Anti-Spoofing & Atomic Clock Holdover Exceeding 30 Days",
+        "version": "2026",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "PAT-004"
+        ]
       }
     },
     "SecNumCloud": {
+      "SNC-REQ-02": {
+        "title": "Strict Administration Network Segregation and Bastion Access",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "P-009",
+          "PAT-004"
+        ]
+      },
+      "SNC-REQ-04": {
+        "title": "Hypervisor Isolation and Container Hardening",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0006",
+          "P-001"
+        ]
+      },
+      "SNC-REQ-06": {
+        "title": "Multi-Site Resilience and Disaster Recovery (BCP/DRP)",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "P-009",
+          "PAT-003"
+        ]
+      },
+      "SNC-REQ-03": {
+        "title": "Cryptographic Key Management on ANSSI-Qualified HSM",
+        "version": "3.2",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0005",
+          "PAT-004"
+        ]
+      },
       "SNC-REQ-01": {
         "title": "Extraterritorial Immunity and European Data Localization",
         "version": "3.2",
@@ -2409,76 +3006,20 @@
           "P-011",
           "PAT-005"
         ]
-      },
-      "SNC-REQ-03": {
-        "title": "Cryptographic Key Management on ANSSI-Qualified HSM",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0005",
-          "PAT-004"
-        ]
-      },
-      "SNC-REQ-04": {
-        "title": "Hypervisor Isolation and Container Hardening",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0006",
-          "P-001"
-        ]
-      },
-      "SNC-REQ-02": {
-        "title": "Strict Administration Network Segregation and Bastion Access",
-        "version": "3.2",
+      }
+    },
+    "ISO22301": {
+      "ISO-22301-BCP": {
+        "title": "Business Continuity Management System (BCMS), Contingency & Disaster Recovery",
+        "version": "2019",
         "severity": "mandatory",
         "implemented_by": [
           "ADR-0007",
-          "P-009",
-          "PAT-004"
-        ]
-      },
-      "SNC-REQ-06": {
-        "title": "Multi-Site Resilience and Disaster Recovery (BCP/DRP)",
-        "version": "3.2",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0007",
-          "P-009",
           "PAT-003"
         ]
       }
     },
     "ISO27001": {
-      "ISO-27001-A8-24": {
-        "title": "Use of Cryptography and Key Management Policy",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": [
-          "P-015",
-          "PAT-004"
-        ]
-      },
-      "ISO-27001-A8-08": {
-        "title": "Management of Technical Vulnerabilities",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0012",
-          "P-005",
-          "PAT-002"
-        ]
-      },
-      "ISO-27001-A8-01": {
-        "title": "User Endpoint Devices Security and Fleet Management",
-        "version": "2022",
-        "severity": "mandatory",
-        "implemented_by": [
-          "ADR-0013",
-          "ADR-0015",
-          "PAT-004"
-        ]
-      },
       "ISO-27001-A5-15": {
         "title": "Information Security in Supplier Relationships",
         "version": "2022",
@@ -2509,11 +3050,94 @@
           "ADR-0005",
           "ADR-0006",
           "ADR-0009",
+          "ADR-0014",
           "P-001",
           "P-007",
           "P-008",
           "P-010",
           "PAT-006"
+        ]
+      },
+      "ISO-27001-A8-24": {
+        "title": "Use of Cryptography and Key Management Policy",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-015",
+          "PAT-004"
+        ]
+      },
+      "ISO-27001-A8-08": {
+        "title": "Management of Technical Vulnerabilities",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0012",
+          "P-005",
+          "PAT-002"
+        ]
+      },
+      "ISO-27001-A8-01": {
+        "title": "User Endpoint Devices Security and Fleet Management",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0013",
+          "ADR-0015",
+          "PAT-004"
+        ]
+      }
+    },
+    "ISO27005": {
+      "ISO-27005-RISK": {
+        "title": "Information Security Risk Management Aligned with National Methodologies (MONARC / EBIOS RM)",
+        "version": "2022",
+        "severity": "mandatory",
+        "implemented_by": [
+          "PAT-001"
+        ]
+      }
+    },
+    "ITIL-FCAPS": {
+      "ITIL-SERV-MGMT": {
+        "title": "ITIL v4 Service Management & Synchronized OSS/BSS CMDB",
+        "version": "v4",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-010"
+        ]
+      },
+      "FCAPS-OAM-PROT": {
+        "title": "FCAPS Telemetry, Syslog RFC 5424 Bastion Forwarding & Secure O&M Protocols",
+        "version": "RFC 5424 / ITU-T M.3400",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0008",
+          "P-011",
+          "PAT-005"
+        ]
+      }
+    },
+    "ISO14001": {
+      "ISO-14001-DECOM": {
+        "title": "Sustainable Decommissioning, Low Carbon Footprint & Circular Asset Recycling",
+        "version": "2015",
+        "severity": "mandatory",
+        "implemented_by": [
+          "P-001"
+        ]
+      }
+    },
+    "CER": {
+      "CER-ART13-RESIL": {
+        "title": "Critical Entities Resilience, Physical Security & Disaster Recovery",
+        "version": "2022/2557",
+        "severity": "mandatory",
+        "implemented_by": [
+          "ADR-0007",
+          "ADR-0013",
+          "P-003",
+          "PAT-003"
         ]
       }
     }

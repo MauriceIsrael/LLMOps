@@ -52,31 +52,51 @@ EXPLICIT_KB_ALIGNMENTS: dict[str, list[str]] = {
     # ADRs
     "ADR-0001": ["ISO-27001-A8-09", "NIS2-ART21-2A"],
     "ADR-0002": ["ISO-27001-A8-09", "NIS2-ART21-2F"],
-    "ADR-0005": ["3GPP-TS33501-SBI", "3GPP-TS33501-SEPP", "NIS2-ART21-2D", "ISO-27001-A5-15", "SNC-REQ-03"],
+    "ADR-0005": [
+        "3GPP-TS33501-SBI", "3GPP-TS33501-SEPP", "3GPP-TS29522-NEF", "3GPP-TS33926-SCAS",
+        "NIS2-ART21-2D", "ISO-27001-A5-15", "SNC-REQ-03"
+    ],
     "ADR-0006": ["ISO-27001-A8-09", "SNC-REQ-04"],
-    "ADR-0007": ["SNC-REQ-02", "SNC-REQ-06", "NIS2-ART21-2C", "3GPP-TS33179-ISOLATED"],
-    "ADR-0008": ["SNC-REQ-05", "ISO-27001-A8-28"],
+    "ADR-0007": [
+        "SNC-REQ-02", "SNC-REQ-06", "NIS2-ART21-2C", "3GPP-TS33179-ISOLATED",
+        "CER-ART13-RESIL", "TELCO-RESIL-TIER4", "TELCO-RESIL-GNSS-HOLDOVER", "ISO-22301-BCP"
+    ],
+    "ADR-0008": ["SNC-REQ-05", "ISO-27001-A8-28", "FCAPS-OAM-PROT", "RGPD-REQ-BREACH-02"],
     "ADR-0011": ["SNC-REQ-01", "NIS2-ART21-2H"],
-    "ADR-0012": ["ISO-27001-A8-08"],
-    "ADR-0013": ["ISO-27001-A8-01", "3GPP-TS33179-AFFILIATION"],
+    "ADR-0012": ["ISO-27001-A8-08", "CRA-REQ-VULN-01"],
+    "ADR-0013": [
+        "ISO-27001-A8-01", "3GPP-TS33179-AFFILIATION", "GSMA-SGP22-RSP", "GSMA-SGP32-IOT",
+        "GSMA-CEIR-PEI", "PPDR-DEVICE-RUGGED", "PPDR-DEVICE-ATEX", "PPDR-VEHICLE-CEM",
+        "PPDR-RADIO-B68", "CRA-REQ-SECBYDES-02"
+    ],
     # Patterns
-    "PAT-001": ["NIS2-ART21-2B"],
-    "PAT-002": ["NIS2-ART21-2E", "ISO-27001-A8-08"],
-    "PAT-003": ["NIS2-ART21-2C", "SNC-REQ-06"],
-    "PAT-004": ["NIS2-ART21-2C", "NIS2-ART21-2J", "3GPP-TS33179-ISOLATED", "3GPP-TS33179-KMS", "SNC-REQ-02", "SNC-REQ-03", "ISO-27001-A8-01", "ISO-27001-A8-24"],
-    "PAT-005": ["NIS2-ART21-2F", "SNC-REQ-05", "ISO-27001-A8-28"],
-    "PAT-006": ["NIS2-ART21-2D", "3GPP-TS33501-SBI", "3GPP-TS33501-SEPP", "SNC-REQ-01", "ISO-27001-A5-15"],
+    "PAT-001": ["NIS2-ART21-2B", "ISO-27005-RISK"],
+    "PAT-002": ["NIS2-ART21-2E", "ISO-27001-A8-08", "CRA-REQ-VULN-01"],
+    "PAT-003": ["NIS2-ART21-2C", "SNC-REQ-06", "TELCO-RESIL-TIER4", "CER-ART13-RESIL", "ISO-22301-BCP"],
+    "PAT-004": [
+        "NIS2-ART21-2C", "NIS2-ART21-2J", "3GPP-TS33179-ISOLATED", "3GPP-TS33179-KMS",
+        "SNC-REQ-02", "SNC-REQ-03", "ISO-27001-A8-01", "ISO-27001-A8-24",
+        "3GPP-TS37579-ICS", "TELCO-RESIL-PTP-01", "TELCO-RESIL-GNSS-HOLDOVER"
+    ],
+    "PAT-005": ["NIS2-ART21-2F", "SNC-REQ-05", "ISO-27001-A8-28", "FCAPS-OAM-PROT", "RGPD-REQ-BREACH-02"],
+    "PAT-006": [
+        "NIS2-ART21-2D", "3GPP-TS33501-SBI", "3GPP-TS33501-SEPP", "SNC-REQ-01",
+        "ISO-27001-A5-15", "3GPP-TS29522-NEF", "3GPP-TS33926-SCAS"
+    ],
     "PAT-007": ["NIS2-ART21-2H"],
     # Principles
-    "P-001": ["NIS2-ART21-2A", "ISO-27001-A8-09", "SNC-REQ-04"],
+    "P-001": ["NIS2-ART21-2A", "ISO-27001-A8-09", "SNC-REQ-04", "ISO-14001-DECOM"],
     "P-002": ["NIS2-ART21-2B"],
     "P-003": ["NIS2-ART21-2G"],
-    "P-005": ["NIS2-ART21-2E", "ISO-27001-A8-08"],
-    "P-007": ["NIS2-ART21-2D", "ISO-27001-A5-15", "3GPP-TS33501-SEPP"],
-    "P-009": ["NIS2-ART21-2C", "SNC-REQ-02", "SNC-REQ-06"],
-    "P-010": ["NIS2-ART21-2I", "ISO-27001-A8-09"],
-    "P-011": ["SNC-REQ-05", "ISO-27001-A8-28"],
-    "P-015": ["NIS2-ART21-2H", "SNC-REQ-01", "ISO-27001-A8-24"],
+    "P-005": ["NIS2-ART21-2E", "ISO-27001-A8-08", "CRA-REQ-VULN-01"],
+    "P-007": ["NIS2-ART21-2D", "ISO-27001-A5-15", "3GPP-TS33501-SEPP", "GSMA-SAS-EAL4"],
+    "P-009": [
+        "NIS2-ART21-2C", "SNC-REQ-02", "SNC-REQ-06", "TELCO-RESIL-TIER4",
+        "TELCO-RESIL-PTP-01", "TELCO-RESIL-MTBF"
+    ],
+    "P-010": ["NIS2-ART21-2I", "ISO-27001-A8-09", "ITIL-SERV-MGMT"],
+    "P-011": ["SNC-REQ-05", "ISO-27001-A8-28", "FCAPS-OAM-PROT"],
+    "P-015": ["NIS2-ART21-2H", "SNC-REQ-01", "ISO-27001-A8-24", "RGPD-REQ-PRIVACY-01"],
 }
 
 
@@ -184,6 +204,41 @@ def match_text_to_controls(
             "ISO-27001-A8-09": ["gitops", "source of truth", "drift", "configuration management", "declarative"],
             "ISO-27001-A8-24": ["cryptography", "ciphers", "key lifecycle", "encryption"],
             "ISO-27001-A8-28": ["log", "logging", "tamper-resistant", "retention", "non-repudiation"],
+            # CER & CRA
+            "CER-ART13-RESIL": ["cer", "entité critique", "critical entity", "physical security", "sabotage", "resilience plan"],
+            "CRA-REQ-VULN-01": ["cra", "sbom", "cyclonedx", "spdx", "cve", "vulnerability disclosure", "patch management", "remediation"],
+            "CRA-REQ-SECBYDES-02": ["cra", "secure by default", "secure boot", "root of trust", "hardening", "attack surface"],
+            # RGPD
+            "RGPD-REQ-PRIVACY-01": ["rgpd", "gdpr", "privacy by design", "location data", "cdr", "retention", "pseudonymization"],
+            "RGPD-REQ-BREACH-02": ["rgpd", "gdpr", "breach notification", "72-hour", "violation de données", "dpo"],
+            # GSMA
+            "GSMA-SGP22-RSP": ["rsp", "esim", "euicc", "sm-dp", "sm-ds", "profile download", "remote sim provisioning"],
+            "GSMA-SGP32-IOT": ["sgp.32", "sgp32", "esim iot", "eim", "headless", "in-vehicle router"],
+            "GSMA-CEIR-PEI": ["ceir", "eir", "imei", "pei", "blacklist", "stolen", "terminal volé"],
+            "GSMA-SAS-EAL4": ["sas-sm", "sas-up", "eal4+", "eal4", "common criteria", "critères communs"],
+            # ITIL & FCAPS
+            "ITIL-SERV-MGMT": ["itil", "cmdb", "incident", "change management", "problem management", "sla", "service management"],
+            "FCAPS-OAM-PROT": ["fcaps", "syslog", "rfc 5424", "snmpv3", "netconf", "restconf", "yang", "bastion"],
+            # TELCO RESILIENCE
+            "TELCO-RESIL-TIER4": ["tier iv", "tier 4", "en 50600", "class 4", "five-nines", "99.999%", "active-active", "géoredondant"],
+            "TELCO-RESIL-PTP-01": ["ptp", "ieee 1588", "synce", "g.8275", "g.8264", "grandmaster", "phase sync", "synchronisation"],
+            "TELCO-RESIL-GNSS-HOLDOVER": ["gnss", "holdover", "rubidium", "ocxo", "jamming", "spoofing", "anti-jamming", "déni gnss"],
+            "TELCO-RESIL-MTBF": ["mtbf", "mttr", "telcordia", "sr-332", "fides", "mil-hdbk-217f", "reliability prediction"],
+            # PPDR DEVICES & VEHICLES
+            "PPDR-RADIO-B68": ["band 68", "band 28", "b68", "gov-68", "gov-28", "cept/ecc", "ppdr", "700 mhz"],
+            "PPDR-DMO-LEGACY": ["dmo", "tetra dmo", "direct mode", "prose", "sidelink", "pc5", "off-network"],
+            "PPDR-DEVICE-RUGGED": ["mil-std-810h", "mil-810", "ip68", "ip69k", "rugged", "drop test", "chocs"],
+            "PPDR-DEVICE-ATEX": ["atex", "zone 1", "zone 21", "ex ib", "explosion-proof", "atmosphère explosive", "antidéflagrant"],
+            "PPDR-VEHICLE-CEM": ["iso 11451", "iso 16750", "sae j1455", "v-device", "vehicular", "cem véhicule", "règlement 2019/2144"],
+            # 3GPP Extensions
+            "3GPP-TS37579-ICS": ["ics", "conformance statement", "plugtests", "etsi ts 103 564", "gcf"],
+            "3GPP-TS28104-MDA": ["mda", "mdas", "management data analytics", "aiops", "analytics"],
+            "3GPP-TS29522-NEF": ["nef", "n33", "network exposure", "ts 29.522", "qos on demand"],
+            "3GPP-TS33926-SCAS": ["scas", "nesas", "security assurance specifications", "ts 33.926"],
+            # ISO Standards
+            "ISO-22301-BCP": ["iso 22301", "iso22301", "bcms", "continuity", "contingence", "disaster recovery plan"],
+            "ISO-27005-RISK": ["iso 27005", "iso27005", "monarc", "ebios", "risk assessment", "analyse de risque"],
+            "ISO-14001-DECOM": ["iso 14001", "iso14001", "decommissioning", "démantèlement", "recyclage", "weee", "carbon footprint"],
         }
 
         if cid in kw_map:

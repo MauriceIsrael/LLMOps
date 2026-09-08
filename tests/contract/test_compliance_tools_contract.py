@@ -38,7 +38,7 @@ def test_list_controls_filtering():
 
     res_3gpp = list_controls(framework="3GPP")
     assert res_3gpp["status"] == "ok"
-    assert res_3gpp["count"] == 5
+    assert res_3gpp["count"] == 9
 
     res_snc = list_controls(framework="SecNumCloud")
     assert res_snc["status"] == "ok"

@@ -1,0 +1,36 @@
+# LUX Engagement — Lot 1 Statement of Work (Critical Telecom & MCX System)
+
+## 1.0 Cadrage Général & Gouvernance de Sécurité
+* [REQ-LUX-CYBER-01] Le système LUX et ses opérations doivent se conformer strictement à l'article 21 de la directive NIS2 (UE 2022/2555), incluant la gestion des risques, le traitement des incidents, le MFA durci et la sécurité de la supply chain.
+* [REQ-LUX-CYBER-02] La résilience physique et opérationnelle des sites centraux doit respecter l'article 13 de la directive CER (UE 2022/2557) pour la prévention des incidents, la protection contre le sabotage et le plan de résilience d'entité critique.
+* [REQ-LUX-CYBER-03] Tous les composants logiciels et matériels fournis doivent être conçus selon les exigences essentielles du Cyber Resilience Act (CRA UE 2024/2847) avec fourniture d'un SBOM machine-readable et support des vulnérabilités sur 5 ans.
+* [REQ-LUX-PRIVACY-04] La plateforme doit respecter le RGPD avec Privacy by Design pour la localisation temps réel des abonnés, les flux MCX et les CDR, et notification des violations sous 72h.
+* [REQ-LUX-RISK-05] Le titulaire doit réaliser une analyse de risques selon ISO 27005 en s'appuyant sur la méthode MONARC ou équivalent régalien.
+
+## 2.0 Cœur 5G & Services Mission-Critical (MCX)
+* [REQ-LUX-CORE-01] Le cœur de réseau 5GS fourni doit être conforme 3GPP Release 18 pour l'architecture SBA, le slicing et les interfaces N33/NEF pour l'exposition d'APIs de QoS à la demande.
+* [REQ-LUX-MCX-02] La suite applicative mission-critical doit satisfaire les spécifications 3GPP TS 23.280, TS 23.379 (MCPTT), TS 23.281 (MCVideo) et TS 23.282 (MCData), avec soumission d'un formulaire ICS (TS 37.579) et preuve de participation aux Plugtests ETSI TS 103 564.
+* [REQ-LUX-CRYPTO-03] La sécurité applicative MCX doit s'appuyer sur un Key Management Server (KMS) conforme 3GPP TS 33.179 / TS 33.180 assurant le chiffrement de bout en bout voix/vidéo (GMK/GTK) adossé à un HSM qualifié EAL4+.
+* [REQ-LUX-SCAS-04] Les équipements réseau 5G et MCX doivent satisfaire les spécifications de sécurité 3GPP SCAS (TS 33.926) et le schéma d'audit GSMA NESAS.
+
+## 3.0 Gestion des Abonnés, eSIM & Équipements
+* [REQ-LUX-ESIM-01] La solution doit intégrer une plateforme Remote SIM Provisioning conforme GSMA SGP.22 pour les terminaux opérationnels et GSMA SGP.32 pour les routeurs véhicules et capteurs IoT.
+* [REQ-LUX-CEIR-02] Le 5G-EIR doit obligatoirement s'interfacer avec le GSMA Central EIR pour le blocage et la mise sur liste noire immédiate des IMEI/PEI de terminaux volés ou compromis.
+* [REQ-LUX-SAS-03] Les composants eUICC et modules SM-DP+ doivent posséder une certification Common Criteria EAL4+ et une qualification GSMA SAS.
+
+## 4.0 Exploitation, NOC/SOC & Télémétrie
+* [REQ-LUX-ITSM-01] Les processus d'exploitation du NOC doivent être certifiés conformes ITIL v4 avec une CMDB temps réel synchronisée avec l'inventaire OSS/BSS.
+* [REQ-LUX-FCAPS-02] La supervision réseau doit respecter le modèle FCAPS, exporter les logs selon Syslog RFC 5424 vers un bastion SOC étanche, et supporter SNMPv3 et NETCONF/YANG.
+
+## 5.0 Datacenters & Synchronisation Résiliente
+* [REQ-LUX-DC-01] Les datacenters géoredondants doivent être conformes aux exigences de haute disponibilité EN 50600 Classe 4 ou Uptime Institute Tier IV (disponibilité 99.999%, RTO < 30s, RPO = 0).
+* [REQ-LUX-PTP-02] La synchronisation temporelle sub-microseconde doit être assurée par IEEE 1588-2019 PTP v2.1 (profil G.8275.1) et SyncE ITU-T G.8264.
+* [REQ-LUX-GNSS-03] L'infrastructure de temps doit garantir une autonomie en holdover local (oscillateur atomique Rubidium/OCXO) supérieure à 30 jours en cas de brouillage ou déni GNSS.
+
+## 6.0 Terminaux Tactiques, Véhicules & Fréquences PPDR
+* [REQ-LUX-RADIO-01] Les terminaux et routeurs doivent opérer nativement dans les bandes PPDR 700 MHz harmonisées CEPT/ECC (16)02 (Band 68 et Band 28).
+* [REQ-LUX-DMO-02] Les terminaux portatifs hybrides doivent supporter le mode direct secours TETRA DMO (CEPT ERC/Dec/(01)19) et le mode direct 3GPP ProSe hors couverture.
+* [REQ-LUX-RUGGED-03] Les terminaux d'intervention doivent être certifiés MIL-STD-810H et IP68/IP69K pour résister aux chutes, immersions et nettoyages haute pression.
+* [REQ-LUX-ATEX-04] Les terminaux engagés en milieux périlleux doivent être certifiés ATEX Zones 1/21 (Ex ib IIC T4 Gb).
+* [REQ-LUX-VEHICLE-05] Les modems embarqués véhicules (V-Devices) doivent respecter la norme CEM ISO 11451, la tenue mécanique ISO 16750 / SAE J1455 et le règlement UE 2019/2144.
+

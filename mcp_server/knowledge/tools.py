@@ -387,9 +387,69 @@ def list_frameworks() -> dict[str, Any]:
                 "description": "Mesures de gestion des risques de cybersécurité pour les entités essentielles et importantes.",
             },
             "3GPP": {
-                "title": "3GPP Security Specifications (TS 33.179 / TS 33.501)",
+                "title": "3GPP Telecom & Security Specifications (Rel-18 / TS 33.179 / TS 23.501)",
                 "jurisdiction": "International",
-                "description": "Sécurité des services de communication critique (MCX) et de l'architecture SBA 5G.",
+                "description": "Sécurité et architecture des services 5G et communications critiques mission-critical (MCX).",
+            },
+            "ISO27001": {
+                "title": "ISO/IEC 27001:2022",
+                "jurisdiction": "International",
+                "description": "Système de management de la sécurité de l'information (SMSI) et contrôles Annexe A.",
+            },
+            "SecNumCloud": {
+                "title": "ANSSI SecNumCloud 3.2",
+                "jurisdiction": "France / EU",
+                "description": "Référentiel de qualification des prestataires de services de cloud de confiance et immunité extraterritoriale.",
+            },
+            "CER": {
+                "title": "Directive (UE) 2022/2557 (CER)",
+                "jurisdiction": "EU",
+                "description": "Résilience des entités critiques, protection physique des infrastructures et plans de continuité.",
+            },
+            "CRA": {
+                "title": "Règlement (UE) 2024/2847 (Cyber Resilience Act)",
+                "jurisdiction": "EU",
+                "description": "Exigences essentielles de cybersécurité pour produits avec éléments numériques, SBOM et gestion des vulnérabilités.",
+            },
+            "RGPD": {
+                "title": "Règlement (UE) 2016/679 (RGPD / GDPR)",
+                "jurisdiction": "EU",
+                "description": "Protection des données à caractère personnel, Privacy by Design et notification des violations sous 72h.",
+            },
+            "GSMA": {
+                "title": "GSMA eSIM, Remote SIM Provisioning (SGP.22/32) & Central EIR",
+                "jurisdiction": "International",
+                "description": "Spécifications de provisioning distant eSIM/eUICC, sécurité SAS et blocage des terminaux volés via Central EIR.",
+            },
+            "ITIL-FCAPS": {
+                "title": "ITIL v4 & FCAPS Telemetry Standards",
+                "jurisdiction": "International",
+                "description": "Gouvernance des opérations de service ITIL v4, supervision FCAPS, Syslog RFC 5424 et protocoles O&M.",
+            },
+            "TELCO-RESIL": {
+                "title": "Datacenter Tier IV / EN 50600 & Resilient PTP/GNSS Timing",
+                "jurisdiction": "International",
+                "description": "Résilience des datacenters classe 4, synchronisation déterministe PTP v2.1 et holdover GNSS > 30 jours.",
+            },
+            "PPDR-DEVICE": {
+                "title": "PPDR Spectrum (Band 68/28), Tactical Hardening & In-Vehicle Standards",
+                "jurisdiction": "Europe / International",
+                "description": "Terminaux durcis MIL-STD-810H, IP68/69K, ATEX, spectre PPDR CEPT (16)02 et CEM véhicules ISO 11451.",
+            },
+            "ISO22301": {
+                "title": "ISO 22301:2019",
+                "jurisdiction": "International",
+                "description": "Système de management de la continuité d'activité (SMCA) et plans de reprise d'activité (PRA/PCA).",
+            },
+            "ISO27005": {
+                "title": "ISO/IEC 27005:2022",
+                "jurisdiction": "International",
+                "description": "Gestion des risques de sécurité de l'information et méthodologies nationales (MONARC, EBIOS RM).",
+            },
+            "ISO14001": {
+                "title": "ISO 14001:2015",
+                "jurisdiction": "International",
+                "description": "Management environnemental, démantèlement durable et recyclage des actifs télécoms.",
             },
         }
         res = []

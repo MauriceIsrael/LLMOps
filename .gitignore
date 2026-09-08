@@ -23,6 +23,7 @@ data/snapshots/*
 *.shadow
 *.wal
 graph_proc/
+data/suggestions/
 
 # DeepEval / Promptfoo caches
 .deepeval/

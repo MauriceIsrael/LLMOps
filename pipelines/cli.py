@@ -249,6 +249,7 @@ def shred_rfp_cmd(
         console.print(f"[bold green]💾 Exigences enregistrées dans le graphe d'engagement : {engagement}[/bold green]")
 
     if output_json:
+        output_json.parent.mkdir(parents=True, exist_ok=True)
         output_json.write_text(json.dumps(res, indent=2, ensure_ascii=False), encoding="utf-8")
         console.print(f"[bold blue]Export JSON écrit : {output_json}[/bold blue]")
 

@@ -9,11 +9,15 @@ from pipelines.compliance_mapper import (
 
 def test_load_all_controls():
     controls = load_all_controls("data/kb/controls")
-    assert len(controls) == 27
+    assert len(controls) == 53
     assert "SNC-REQ-01" in controls
     assert "ISO-27001-A8-09" in controls
     assert "NIS2-ART21-2A" in controls
     assert "3GPP-TS33501-SBI" in controls
+    assert "CER-ART13-RESIL" in controls
+    assert "CRA-REQ-VULN-01" in controls
+    assert "TELCO-RESIL-PTP-01" in controls
+    assert "PPDR-RADIO-B68" in controls
 
     snc_01 = controls["SNC-REQ-01"]
     assert snc_01.framework == "SecNumCloud"
@@ -50,12 +54,18 @@ def test_match_text_to_controls_gitops():
 
 def test_audit_compliance_gaps_100_percent():
     report = audit_compliance_gaps("data/kb")
-    assert report["global_total"] == 27
-    assert report["global_covered"] == 27
+    assert report["global_total"] == 53
+    assert report["global_covered"] == 53
     assert report["global_coverage_percentage"] == 100.0
 
     fw = report["frameworks"]
     assert fw["NIS2"]["uncovered"] == 0
     assert fw["SecNumCloud"]["uncovered"] == 0
     assert fw["ISO27001"]["uncovered"] == 0
+    assert fw["3GPP"]["uncovered"] == 0
+    assert fw["CER"]["uncovered"] == 0
+    assert fw["CRA"]["uncovered"] == 0
+    assert fw["GSMA"]["uncovered"] == 0
+    assert fw["TELCO-RESIL"]["uncovered"] == 0
+    assert fw["PPDR-DEVICE"]["uncovered"] == 0
     assert fw["3GPP"]["uncovered"] == 0

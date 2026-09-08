@@ -12,6 +12,15 @@
     },
     "engagements": [
       {
+        "id": "default",
+        "dataset": "data/engagements/default.lbug",
+        "node_counts": {
+          "Subject": 0,
+          "Statement": 0,
+          "Conflict": 0
+        }
+      },
+      {
         "id": "nordwave-mcx-2027",
         "dataset": "data/engagements/nordwave-mcx-2027.lbug",
         "node_counts": {
