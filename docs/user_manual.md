@@ -255,3 +255,55 @@ poetry run elicit harvest --engagement nordwave-mcx-2027
 
 Les notifications sont transmises sous forme d'**Embed riche sur Discord** (titre, auteur, contexte projet, raison et extrait Markdown de la proposition) et archivées dans `data/suggestions/`.
 
+---
+
+## 11. Déstructuration d'Appels d'Offres (RFP Shredder) & Zero-Draft HLD Bilingue (FR / EN)
+
+Le module d'avant-vente permet d'ingérer un cahier des charges client (RFP / CCTP), de décomposer chaque exigence de manière atomique, d'établir la matrice triangulaire de conformité par rapport aux 53 contrôles de la base de connaissances (NIS2, CER, CRA, RGPD, GSMA, 3GPP Rel-18, etc.) et de générer automatiquement un dossier d'architecture **Zero-Draft HLD** en français ou en anglais.
+
+### 11.1 Déstructuration atomique du RFP et calcul de conformité
+
+```bash
+# Déstructurer le cahier des charges et alimenter la base d'engagement locale
+poetry run python pipelines/cli.py shred-rfp fixtures/rfp_lux_mcx.txt \
+  --engagement lux-lot1 \
+  --output-json projects/lux-lot1/compliance-matrix.json
+```
+
+Cette commande :
+1. Découpe le texte en exigences atomiques typées (`REQ-RFP-xxx`).
+2. Rapproche chaque exigence des décisions d'architecture (ADRs), patterns, principes et contrôles réglementaires.
+3. Calcule le statut de couverture (`covered`, `partially_covered`, `gap`) et enregistre les données dans la base d'engagement isolée (`data/engagements/<id>.lbug`).
+
+### 11.2 Génération du Zero-Draft HLD Bilingue (FR / EN)
+
+Le document High-Level Design (HLD) d'avant-vente peut être généré instantanément selon la langue requise :
+
+```bash
+# Génération en anglais (EN)
+poetry run python pipelines/cli.py zero-draft-hld \
+  --engagement lux-lot1 \
+  --language en \
+  --output-md projects/lux-lot1/HLD-zero-draft.en.md
+
+# Génération en français (FR - par défaut)
+poetry run python pipelines/cli.py zero-draft-hld \
+  --engagement lux-lot1 \
+  --language fr \
+  --output-md projects/lux-lot1/HLD-zero-draft.md
+```
+
+### 11.3 Templates de Livrables Disponibles
+
+Le référentiel fournit deux modèles de dossiers d'architecture prêts pour les phases de qualification :
+- **Modèle Français :** `templates/HLD-zero-draft-template.md` (Actif KB : `data/kb/templates/TPL-zero-draft-hld.md`)
+- **Modèle Anglais :** `templates/HLD-zero-draft-template.en.md` (Actif KB : `data/kb/templates/TPL-zero-draft-hld-en.md`)
+
+### 11.4 Outils FastMCP Associés
+
+Les agents d'avant-vente et assistants IA peuvent piloter l'ensemble du cycle via FastMCP :
+- `shred_rfp(rfp_text, engagement, persist)` : Découpe et calcul de conformité à distance.
+- `generate_zero_draft_hld(engagement, language="fr"|"en", project_title, client_name)` : Assemblage et rendu Markdown du dossier HLD.
+- `get_rfp_compliance_matrix(engagement)` : Extraction de la matrice de conformité triangulaire.
+- `trigger_rfp_elicitation(engagement)` : Routage automatique des questions ciblées sur les écarts résiduels (gaps) vers les rôles d'experts concernés.
+

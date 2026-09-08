@@ -69,6 +69,10 @@ make demo-check
    Les connaissances transverses (`data/knowledge.lbug`) sont strictement séparées des engagements projets (`data/engagements/<id>.lbug`).
 4. **Canal d'Instantané Scellé (Sealed Snapshot)**  
    Publication d'exports JSON scellés par SHA-256 (`fixtures/sealed_snapshot.json` ou `GET /snapshot/latest`) avec identifiants typés (`decision:ADR-0014`, `principle:P-002`) et index d'applicabilité pour une intégration résiliente et sans latence (ex. *Architecture Studio*).
+5. **Référentiels Réglementaires TELCO MCX Souverains (14 Frameworks, 53 Contrôles)**  
+   Couverture complète de conformité technique sur les normes européennes et critiques : NIS2, CER (Résilience des entités critiques UE 2022/2557), CRA (Cyber Resilience Act UE 2024/2847), RGPD, GSMA (eSIM SGP.22/32, Central EIR, SAS EAL4+), 3GPP Rel-18 (MCX, NEF, SCAS/NESAS, MDA AIOps), ITIL v4 / FCAPS O&M, Résilience Télécom (Datacenters Tier IV, sync PTP G.8275.1, holdover Rubidium >30j), et Terminaux Tactiques PPDR (Bande 68/28 ECC, TETRA DMO, MIL-STD-810H, ATEX, CEM véhicule ISO 11451/UN R2144).
+6. **Déstructeur de RFP & Générateur de Zero-Draft HLD Bilingue (FR / EN)**  
+   Déconstruction atomique des cahiers des charges (`shred-rfp`), calcul de matrice triangulaire de conformité et génération instantanée du dossier d'architecture d'avant-vente (`zero-draft-hld`) en français ou en anglais sans écart résiduel. Modèles de livrables normalisés disponibles dans `templates/HLD-zero-draft-template.md` (FR) et `templates/HLD-zero-draft-template.en.md` (EN).
 
 ---
 

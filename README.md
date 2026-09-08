@@ -79,6 +79,10 @@ make demo-check
    Ingests client tenders and CCTP documents (Word DOCX, PDF, Markdown), detects regulatory security targets (NIS2, SecNumCloud, 3GPP, ISO27001), and automatically sizes the target project team in ETP with recommended roles, seniorities, and missions.
 7. **Continuous Harvest & Multi-Channel Webhook Loop**  
    Proven field patterns and REX are harvested from projects (`elicit harvest`) and instantly dispatched to the Knowledge Owner via Discord Webhooks (rich embeds) and mobile push (`ntfy.sh`) for formal governance review.
+8. **Sovereign TELCO MCX Regulatory Frameworks (14 Frameworks, 53 Controls)**  
+   Exhaustive technical compliance coverage across European and mission-critical standards: NIS2, CER (Critical Entities Resilience EU 2022/2557), CRA (Cyber Resilience Act EU 2024/2847), GDPR, GSMA (SGP.22/32 eSIM, Central EIR, SAS EAL4+), 3GPP Rel-18 (MCX, NEF, SCAS/NESAS, MDA AIOps), ITIL v4 / FCAPS O&M, Telco Resilience (Tier IV dual-datacenter, G.8275.1 PTP sync, >30d Rubidium holdover), and PPDR Tactical Terminals (ECC Band 68/28, TETRA DMO, MIL-STD-810H, ATEX, ISO 11451/UN R2144 vehicle EMC).
+9. **Automated RFP Shredder & Bilingual Zero-Draft HLD Engine (FR / EN)**  
+   Deconstructs client tenders into atomic requirements (`shred-rfp`), builds the triangular compliance matrix against standard architecture decisions (ADRs) and regulatory controls, and auto-generates a High-Level Design pre-sales document (`zero-draft-hld`) in English or French with zero residual gaps. Ready-to-use deliverable templates are available in `templates/HLD-zero-draft-template.md` (FR) and `templates/HLD-zero-draft-template.en.md` (EN).
 
 ---
 

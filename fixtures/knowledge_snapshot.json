@@ -21,6 +21,15 @@
         }
       },
       {
+        "id": "lux-lot1",
+        "dataset": "data/engagements/lux-lot1.lbug",
+        "node_counts": {
+          "Subject": 0,
+          "Statement": 0,
+          "Conflict": 0
+        }
+      },
+      {
         "id": "nordwave-mcx-2027",
         "dataset": "data/engagements/nordwave-mcx-2027.lbug",
         "node_counts": {
