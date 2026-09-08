@@ -61,10 +61,20 @@ class ZeroDraftAssembler:
     def generate_zero_draft_hld(
         self,
         engagement: str,
-        project_title: str = "Système d'Architecture Télécom & Plateforme Sécurisée",
+        project_title: str | None = None,
         client_name: str = "Client RFP",
+        language: str = "fr",
     ) -> dict[str, Any]:
-        """Génère le document HLD complet au format Markdown et la synthèse de conformité."""
+        """Génère le document HLD complet au format Markdown et la synthèse de conformité (FR ou EN)."""
+        is_en = language.lower() in ("en", "english")
+        
+        default_title = (
+            "Telecom Architecture System & Secure Mission-Critical Platform"
+            if is_en
+            else "Système d'Architecture Télécom & Plateforme Sécurisée"
+        )
+        resolved_title = project_title or default_title
+
         requirements = self.repo.get_requirements(engagement)
 
         # Statistiques de conformité
@@ -94,81 +104,139 @@ class ZeroDraftAssembler:
         # Construction du document Markdown
         doc_lines: list[str] = []
 
+        status_tag = (
+            "FINAL" if not gap_reqs else "ZERO-DRAFT (PROVISIONAL - ELICITATION REQUIRED)"
+        ) if is_en else (
+            "FINALISÉ" if not gap_reqs else "ZERO-DRAFT (PROVISOIRE - ÉLICITATION REQUISE)"
+        )
+
+        coverage_txt = (
+            f"> **Standard KB Coverage :** `{coverage_rate}%` ({len(covered_reqs)}/{total_reqs} requirements satisfied out-of-the-box)  "
+            if is_en
+            else f"> **Couverture Standard KB :** `{coverage_rate}%` ({len(covered_reqs)}/{total_reqs} exigences satisfaites d'emblée)  "
+        )
+
         # 1. En-tête
-        doc_lines.append(f"# High-Level Design (HLD) — {project_title}")
+        doc_lines.append(f"# High-Level Design (HLD) — {resolved_title}")
         doc_lines.append("")
         doc_lines.append(f"> **Engagement :** `{engagement}`  ")
-        doc_lines.append(f"> **Destinataire :** {client_name}  ")
-        doc_lines.append(f"> **Date de génération :** {datetime.now().strftime('%Y-%m-%d')}  ")
-        doc_lines.append(f"> **Statut du document :** `{'FINALISÉ' if not gap_reqs else 'ZERO-DRAFT (PROVISOIRE - ÉLICITATION REQUISE)'}`  ")
-        doc_lines.append(f"> **Couverture Standard KB :** `{coverage_rate}%` ({len(covered_reqs)}/{total_reqs} exigences satisfaites d'emblée)  ")
+        doc_lines.append(f"> **{'Recipient' if is_en else 'Destinataire'} :** {client_name}  ")
+        doc_lines.append(f"> **{'Generation Date' if is_en else 'Date de génération'} :** {datetime.now().strftime('%Y-%m-%d')}  ")
+        doc_lines.append(f"> **{'Document Status' if is_en else 'Statut du document'} :** `{status_tag}`  ")
+        doc_lines.append(coverage_txt)
         doc_lines.append("")
         doc_lines.append("---")
         doc_lines.append("")
 
         # 2. Synthèse Exécutive
-        doc_lines.append("## 1. Synthèse Exécutive & Scorecard de Conformité")
-        doc_lines.append("")
-        doc_lines.append(
-            f"Ce document High-Level Design (HLD) constitue la réponse architecturale technique au cahier des charges "
-            f"fourni par **{client_name}**. Il capitalise sur le socle neuro-symbolique standardisé du Knowledge Hub, "
-            f"garantissant la réutilisation immédiate des patterns éprouvés en production et le respect strict des réglementations en vigueur."
-        )
-        doc_lines.append("")
-        doc_lines.append("### Scorecard de Couverture Réglementaire & Technique")
-        doc_lines.append("")
-        doc_lines.append("| Indicateur | Valeur | Statut |")
-        doc_lines.append("|---|---|---|")
-        doc_lines.append(f"| **Exigences Totales Analysées** | {total_reqs} | 📋 Inventoriées |")
-        doc_lines.append(f"| **Conformité Standard Immédiate** | {len(covered_reqs)} ({coverage_rate}%) | {'✅ Excellente' if coverage_rate >= 70 else '⚠️ À consolider'} |")
-        doc_lines.append(f"| **Conformité Partielle** | {len(partial_reqs)} | 🔍 Sous réserve de cadrage |")
-        doc_lines.append(f"| **Écarts Résiduels (Gaps)** | {len(gap_reqs)} | {'✅ Aucun gap' if not gap_reqs else '🚨 Élicitation active'} |")
+        if is_en:
+            doc_lines.append("## 1. Executive Summary & Regulatory Compliance Scorecard")
+            doc_lines.append("")
+            doc_lines.append(
+                f"This High-Level Design (HLD) document constitutes the technical architecture response to the tender "
+                f"requirements issued by **{client_name}**. It leverages the standardized neuro-symbolic foundation of the Knowledge Hub, "
+                f"ensuring immediate reuse of production-proven patterns and strict compliance with applicable regulations."
+            )
+            doc_lines.append("")
+            doc_lines.append("### Regulatory & Technical Coverage Scorecard")
+            doc_lines.append("")
+            doc_lines.append("| Indicator | Value | Engineering Status |")
+            doc_lines.append("|---|---|---|")
+            doc_lines.append(f"| **Total Analyzed Requirements** | {total_reqs} | 📋 Inventoried |")
+            doc_lines.append(f"| **Immediate Standard Compliance** | {len(covered_reqs)} ({coverage_rate}%) | {'✅ Excellent' if coverage_rate >= 70 else '⚠️ To consolidate'} |")
+            doc_lines.append(f"| **Partial Compliance** | {len(partial_reqs)} | 🔍 Subject to scoping |")
+            doc_lines.append(f"| **Residual Gaps** | {len(gap_reqs)} | {'✅ Zero gaps' if not gap_reqs else '🚨 Active elicitation'} |")
+        else:
+            doc_lines.append("## 1. Synthèse Exécutive & Scorecard de Conformité")
+            doc_lines.append("")
+            doc_lines.append(
+                f"Ce document High-Level Design (HLD) constitue la réponse architecturale technique au cahier des charges "
+                f"fourni par **{client_name}**. Il capitalise sur le socle neuro-symbolique standardisé du Knowledge Hub, "
+                f"garantissant la réutilisation immédiate des patterns éprouvés en production et le respect strict des réglementations en vigueur."
+            )
+            doc_lines.append("")
+            doc_lines.append("### Scorecard de Couverture Réglementaire & Technique")
+            doc_lines.append("")
+            doc_lines.append("| Indicateur | Valeur | Statut |")
+            doc_lines.append("|---|---|---|")
+            doc_lines.append(f"| **Exigences Totales Analysées** | {total_reqs} | 📋 Inventoriées |")
+            doc_lines.append(f"| **Conformité Standard Immédiate** | {len(covered_reqs)} ({coverage_rate}%) | {'✅ Excellente' if coverage_rate >= 70 else '⚠️ À consolider'} |")
+            doc_lines.append(f"| **Conformité Partielle** | {len(partial_reqs)} | 🔍 Sous réserve de cadrage |")
+            doc_lines.append(f"| **Écarts Résiduels (Gaps)** | {len(gap_reqs)} | {'✅ Aucun gap' if not gap_reqs else '🚨 Élicitation active'} |")
         doc_lines.append("")
 
         # 3. Principes Directeurs
-        doc_lines.append("## 2. Principes Directeurs d'Architecture")
+        if is_en:
+            doc_lines.append("## 2. Guiding Architecture Principles")
+            doc_lines.append("")
+            doc_lines.append("The overarching solution architecture is governed by the following sovereign, non-negotiable principles:")
+        else:
+            doc_lines.append("## 2. Principes Directeurs d'Architecture")
+            doc_lines.append("")
+            doc_lines.append("L'architecture globale de la solution est gouvernée par les principes souverains et immuables suivants :")
         doc_lines.append("")
-        doc_lines.append("L'architecture globale de la solution est gouvernée par les principes souverains et immuables suivants :")
-        doc_lines.append("")
+
         if principles:
             for p in sorted(principles, key=lambda x: x.get("id", "")):
                 p_id = p.get("id")
                 p_title = p.get("title")
                 doc_lines.append(f"### `{p_id}` — {p_title}")
                 body = p.get("raw_body", "").strip()
-                # Extraire un extrait pertinent
                 summary = body[:300].replace("\n", " ").strip()
                 doc_lines.append(f"{summary}...")
                 doc_lines.append("")
         else:
-            doc_lines.append("*Les principes d'architecture fondamentaux du socle (P-001, P-009, P-015) sont appliqués par défaut.*")
+            fallback_p = (
+                "*Foundational architecture principles (P-001, P-009, P-015) are enforced by default.*"
+                if is_en
+                else "*Les principes d'architecture fondamentaux du socle (P-001, P-009, P-015) sont appliqués par défaut.*"
+            )
+            doc_lines.append(fallback_p)
             doc_lines.append("")
 
         # 4. Architecture de Référence & Patterns
-        doc_lines.append("## 3. Architecture de Référence & Motifs Clés (Patterns)")
+        if is_en:
+            doc_lines.append("## 3. Reference Architecture & Key Patterns")
+            doc_lines.append("")
+            doc_lines.append("To fulfill functional and security requirements, the following architectural patterns are incorporated:")
+        else:
+            doc_lines.append("## 3. Architecture de Référence & Motifs Clés (Patterns)")
+            doc_lines.append("")
+            doc_lines.append("Pour couvrir les exigences fonctionnelles et de sécurité, les motifs d'architecture suivants sont intégrés :")
         doc_lines.append("")
-        doc_lines.append("Pour couvrir les exigences fonctionnelles et de sécurité, les motifs d'architecture suivants sont intégrés :")
-        doc_lines.append("")
+
         if patterns:
             for pat in sorted(patterns, key=lambda x: x.get("id", "")):
                 pat_id = pat.get("id")
                 pat_title = pat.get("title")
                 fm = pat.get("frontmatter", {})
                 ctrls = fm.get("implements_controls", [])
-                ctrl_txt = f" *(Conforme à {', '.join(ctrls)})*" if ctrls else ""
+                tag_label = "Complies with" if is_en else "Conforme à"
+                ctrl_txt = f" *({tag_label} {', '.join(ctrls)})*" if ctrls else ""
                 doc_lines.append(f"### `{pat_id}` — {pat_title}{ctrl_txt}")
                 body = pat.get("raw_body", "").strip()
                 doc_lines.append(f"{body[:400]}...")
                 doc_lines.append("")
         else:
-            doc_lines.append("*Motifs standard appliqués selon la matrice de conformité.*")
+            fallback_pat = (
+                "*Standard patterns applied according to the compliance matrix.*"
+                if is_en
+                else "*Motifs standard appliqués selon la matrice de conformité.*"
+            )
+            doc_lines.append(fallback_pat)
             doc_lines.append("")
 
         # 5. Décisions d'Architecture Structurantes (ADRs)
-        doc_lines.append("## 4. Décisions d'Architecture Structurantes (ADRs)")
+        if is_en:
+            doc_lines.append("## 4. Key Architecture Decision Records (ADRs)")
+            doc_lines.append("")
+            doc_lines.append("Major engineering choices rely on validated Architecture Decision Records (ADRs) from the platform:")
+        else:
+            doc_lines.append("## 4. Décisions d'Architecture Structurantes (ADRs)")
+            doc_lines.append("")
+            doc_lines.append("Les choix techniques majeurs s'appuient sur les ADRs validées de la plateforme :")
         doc_lines.append("")
-        doc_lines.append("Les choix techniques majeurs s'appuient sur les ADRs validées de la plateforme :")
-        doc_lines.append("")
+
         if adrs:
             for adr in sorted(adrs, key=lambda x: x.get("id", "")):
                 a_id = adr.get("id")
@@ -182,15 +250,25 @@ class ZeroDraftAssembler:
             doc_lines.append("")
 
         # 6. Matrice Triangulaire Complète
-        doc_lines.append("## 5. Matrice Triangulaire de Conformité RFP")
-        doc_lines.append("")
-        doc_lines.append("| ID Exigence | Section RFP | Énoncé / Exigence | Statut | Actifs KB Mobilisés | Preuves Normatives | Rationale |")
+        if is_en:
+            doc_lines.append("## 5. Triangular RFP Compliance Matrix")
+            doc_lines.append("")
+            doc_lines.append("| Requirement ID | RFP Section | Statement / Requirement | Status | Mobilized KB Assets | Regulatory Evidence | Rationale |")
+        else:
+            doc_lines.append("## 5. Matrice Triangulaire de Conformité RFP")
+            doc_lines.append("")
+            doc_lines.append("| ID Exigence | Section RFP | Énoncé / Exigence | Statut | Actifs KB Mobilisés | Preuves Normatives | Rationale |")
         doc_lines.append("|---|---|---|---|---|---|---|")
+
         for req in requirements:
             r_id = req.get("id")
             r_sec = req.get("section", "-")
             r_txt = req.get("text", "").replace("|", "\\|")[:80] + ("..." if len(req.get("text", "")) > 80 else "")
-            r_stat = "✅ Conforme" if req.get("status") == "covered" else ("🔍 Partiel" if req.get("status") == "partially_covered" else "🚨 Écart (Gap)")
+            
+            if is_en:
+                r_stat = "✅ Compliant" if req.get("status") == "covered" else ("🔍 Partial" if req.get("status") == "partially_covered" else "🚨 Gap")
+            else:
+                r_stat = "✅ Conforme" if req.get("status") == "covered" else ("🔍 Partiel" if req.get("status") == "partially_covered" else "🚨 Écart (Gap)")
             
             import json
             m_a = req.get("matched_assets") or "[]"
@@ -209,36 +287,62 @@ class ZeroDraftAssembler:
         doc_lines.append("")
 
         # 7. Écarts & Élicitation Ciblée
-        doc_lines.append("## 6. Écarts Identifiés & Plan d'Élicitation Ciblée (Gaps)")
-        doc_lines.append("")
-        if gap_reqs or partial_reqs:
-            doc_lines.append("> [!WARNING]")
-            doc_lines.append("> **Attention : Clauses spécifiques du client non couvertes par le standard standardisé.**")
-            doc_lines.append(f"> Le système a détecté {len(gap_reqs)} écarts stricts et {len(partial_reqs)} points d'attention partielle. ")
-            doc_lines.append("> Des questions d'élicitation ciblées ont été générées dans la boîte aux lettres des architectes.")
+        if is_en:
+            doc_lines.append("## 6. Identified Gaps & Targeted Elicitation Plan")
             doc_lines.append("")
+            if gap_reqs or partial_reqs:
+                doc_lines.append("> [!WARNING]")
+                doc_lines.append("> **Notice: Specific client clauses not covered by the standardized baseline.**")
+                doc_lines.append(f"> The system detected {len(gap_reqs)} strict gaps and {len(partial_reqs)} points of partial attention. ")
+                doc_lines.append("> Targeted elicitation questions have been generated in the architects' mailbox.")
+                doc_lines.append("")
 
-            for g in gap_reqs:
-                g_id = g.get("id")
-                g_txt = g.get("text")
-                g_cat = g.get("category", "general")
-                role = CATEGORY_ROLE_ROUTING.get(g_cat, "lead-architect")
-                doc_lines.append(f"### Point d'arbitrage : `{g_id}` ({g.get('section', 'Cadrage')})")
-                doc_lines.append(f"- **Texte de l'exigence :** *\"{g_txt}\"*")
-                doc_lines.append(f"- **Criticité :** `{g.get('criticality', 'mandatory')}` | **Catégorie :** `{g_cat}`")
-                doc_lines.append(f"- **Expert sollicité pour décision :** `{role}`")
-                doc_lines.append("- **Action requise :** Valider ou compléter l'énoncé d'architecture pour lever le statut provisoire.")
+                for g in gap_reqs:
+                    g_id = g.get("id")
+                    g_txt = g.get("text")
+                    g_cat = g.get("category", "general")
+                    role = CATEGORY_ROLE_ROUTING.get(g_cat, "lead-architect")
+                    doc_lines.append(f"### Arbitration Point: `{g_id}` ({g.get('section', 'Scoping')})")
+                    doc_lines.append(f"- **Requirement Statement:** *\"{g_txt}\"*")
+                    doc_lines.append(f"- **Criticality:** `{g.get('criticality', 'mandatory')}` | **Category:** `{g_cat}`")
+                    doc_lines.append(f"- **Assigned Expert Role:** `{role}`")
+                    doc_lines.append("- **Required Action:** Validate or complete the architecture statement to resolve provisional status.")
+                    doc_lines.append("")
+            else:
+                doc_lines.append("✅ **Zero Residual Gaps.** All tender requirements are fully satisfied by the architecture baseline.")
                 doc_lines.append("")
         else:
-            doc_lines.append("✅ **Aucun écart résiduel.** Toutes les exigences du cahier des charges sont intégralement satisfaites par le socle.")
+            doc_lines.append("## 6. Écarts Identifiés & Plan d'Élicitation Ciblée (Gaps)")
             doc_lines.append("")
+            if gap_reqs or partial_reqs:
+                doc_lines.append("> [!WARNING]")
+                doc_lines.append("> **Attention : Clauses spécifiques du client non couvertes par le standard standardisé.**")
+                doc_lines.append(f"> Le système a détecté {len(gap_reqs)} écarts stricts et {len(partial_reqs)} points d'attention partielle. ")
+                doc_lines.append("> Des questions d'élicitation ciblées ont été générées dans la boîte aux lettres des architectes.")
+                doc_lines.append("")
+
+                for g in gap_reqs:
+                    g_id = g.get("id")
+                    g_txt = g.get("text")
+                    g_cat = g.get("category", "general")
+                    role = CATEGORY_ROLE_ROUTING.get(g_cat, "lead-architect")
+                    doc_lines.append(f"### Point d'arbitrage : `{g_id}` ({g.get('section', 'Cadrage')})")
+                    doc_lines.append(f"- **Texte de l'exigence :** *\"{g_txt}\"*")
+                    doc_lines.append(f"- **Criticité :** `{g.get('criticality', 'mandatory')}` | **Catégorie :** `{g_cat}`")
+                    doc_lines.append(f"- **Expert sollicité pour décision :** `{role}`")
+                    doc_lines.append("- **Action requise :** Valider ou compléter l'énoncé d'architecture pour lever le statut provisoire.")
+                    doc_lines.append("")
+            else:
+                doc_lines.append("✅ **Aucun écart résiduel.** Toutes les exigences du cahier des charges sont intégralement satisfaites par le socle.")
+                doc_lines.append("")
 
         full_markdown = "\n".join(doc_lines)
 
         return {
             "engagement": engagement,
-            "project_title": project_title,
+            "project_title": resolved_title,
             "client_name": client_name,
+            "language": "en" if is_en else "fr",
             "status": "final" if not gap_reqs else "provisional",
             "coverage_rate": coverage_rate,
             "total_requirements": total_reqs,

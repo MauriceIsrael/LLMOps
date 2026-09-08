@@ -259,19 +259,21 @@ def zero_draft_hld_cmd(
     engagement: str = typer.Option("demo-rfp-2026", "--engagement", "-e", help="Identifiant de l'engagement projet."),
     output_md: Path = typer.Option(None, "--output-md", "-o", help="Chemin du fichier Markdown HLD généré."),
     trigger_gaps: bool = typer.Option(False, "--trigger-gaps", help="Générer les questions d'élicitation pour les gaps."),
+    language: str = typer.Option("fr", "--language", "--lang", "-l", help="Langue de rédaction du HLD ('fr' ou 'en')."),
 ) -> None:
     """Génère le document HLD Zero-Draft et optionnellement les questions d'élicitation ciblées."""
     from mcp_server.core.config import server_config
     from tools.elicitation.zero_draft import ZeroDraftAssembler
 
     eng_p = server_config.engagements_dir / f"{engagement}.lbug"
+    eng_p.parent.mkdir(parents=True, exist_ok=True)
     assembler = ZeroDraftAssembler(
-        db_path=eng_p if eng_p.exists() else server_config.knowledge_db_path,
+        db_path=eng_p,
         kb_dir="data/kb",
     )
-    result = assembler.generate_zero_draft_hld(engagement=engagement)
+    result = assembler.generate_zero_draft_hld(engagement=engagement, language=language)
 
-    console.print(f"\n[bold cyan]📄 Zero-Draft HLD généré pour l'engagement : {engagement}[/bold cyan]")
+    console.print(f"\n[bold cyan]📄 Zero-Draft HLD généré ({result.get('language', 'fr').upper()}) pour l'engagement : {engagement}[/bold cyan]")
     console.print(f"Statut du document : [bold]{result['status'].upper()}[/bold]")
     console.print(f"Couverture standard : [bold green]{result['coverage_rate']} %[/bold green] ({result['covered_count']}/{result['total_requirements']})")
     console.print(f"Gaps résiduels : [bold red]{result['gap_count']}[/bold red]")

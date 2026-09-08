@@ -786,15 +786,17 @@ def shred_rfp(
 
 def generate_zero_draft_hld(
     engagement: str = "default",
-    project_title: str = "Système d'Architecture Télécom & Plateforme Sécurisée",
+    project_title: str | None = None,
     client_name: str = "Client RFP",
+    language: str = "fr",
 ) -> dict[str, Any]:
-    """Generate a structured High-Level Design (HLD) zero-draft from KB assets and RFP requirements.
+    """Generate a structured High-Level Design (HLD) zero-draft from KB assets and RFP requirements in FR or EN.
 
     Args:
         engagement: Target engagement identifier.
-        project_title: Title of the architecture project.
+        project_title: Title of the architecture project (optional, defaults to standard title in chosen language).
         client_name: Name of the client or recipient.
+        language: Target document language ('fr' or 'en', defaults to 'fr').
     """
     try:
         from tools.elicitation.zero_draft import ZeroDraftAssembler
@@ -808,6 +810,7 @@ def generate_zero_draft_hld(
             engagement=engagement,
             project_title=project_title,
             client_name=client_name,
+            language=language,
         )
         return ok_response(hld_result)
     except Exception as e:
