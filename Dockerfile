@@ -36,6 +36,7 @@ ENV LLMOPS_PLANE=all
 ENV LLMOPS_TRANSPORT=sse
 ENV PORT=8000
 ENV HOST=0.0.0.0
+ENV POETRY_VIRTUALENVS_CREATE=false
 
 # Ingestion et migration déterministe de la base de connaissances (Knowledge Plane)
 RUN poetry run python -m pipelines.ingestion.migrate_adr0015
@@ -53,4 +54,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:8000/ready || exit 1
 
-CMD ["poetry", "run", "mcp-server"]
+CMD ["python", "-m", "mcp_server.main"]
