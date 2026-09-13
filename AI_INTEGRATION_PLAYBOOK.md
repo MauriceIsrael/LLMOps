@@ -10,7 +10,7 @@
 ## 1. Contexte et Raison d'Être
 
 Lors des premières propositions d'intégration de LLMOps (Knowledge Hub) au sein des dépôts de l'*Architecture Suite*, plusieurs anomalies d'hygiène de code, de périmètre et de posture technique ont été identifiées par les mainteneurs de la suite :
-* Fuite de chemins absolus de la machine hôte (`file:///home/momo/...`) et travail isolé dans des répertoires temporaires d'agent (`.gemini/.../scratch/`),
+* Fuite de chemins absolus de la machine hôte (`file://.../home/momo/...`) et travail isolé dans des répertoires temporaires d'agent (`.gemini/.../scratch/`),
 * Fichiers parasites committés dans les arbres Git des dépôts cibles (`PULL_REQUEST.md`),
 * Altération unilatérale de contrats partagés (`channel-registry.md`, `vendored.manifest.json`) au sein de simples Pull Requests de fonctionnalité,
 * Replis silencieux de type `catch { return []; }` masquant les pannes réseau ou d'authentification sous l'apparence de résultats vides,
@@ -26,7 +26,7 @@ Ce playbook édicte les **7 Règles d'Or** que **tout agent IA et tout développ
 ### Règle 1 : Règle du Clone Réel (Bannissement du Mode Scratch)
 * **Obligation** : Tout travail de modification de code sur un dépôt de la suite (`Document-studio`, `document-engine`, `requirements-intake`, `WBS-engine`) ou sur `LLMOps` s'exécute **exclusivement dans un vrai clone Git**, situé dans l'arborescence standard de développement (`~/Dev/<nom-du-depot>`).
 * **Interdiction** : Il est formellement interdit de cloner, modifier ou builder du code dans des dossiers temporaires ou caches d'agent (ex: `~/.gemini/antigravity/brain/.../scratch/`).
-* **Zéro fuite d'URI locale** : Aucun chemin absolu hôte (`/home/momo/...`, `file:///...`, `C:\...`) ne doit jamais apparaître dans un commit, une PR, un log public ou une issue GitHub.
+* **Zéro fuite d'URI locale** : Aucun chemin absolu hôte (`/home/momo/...`, `file://...`, `C:\...`) ne doit jamais apparaître dans un commit, une PR, un log public ou une issue GitHub.
 
 ### Règle 2 : Zéro Artefact Parasite dans Git
 * **Obligation** : L'arbre Git d'une branche de PR ne doit contenir **que** le code source métier, ses tests et sa documentation canonique.
@@ -116,7 +116,7 @@ Lorsqu'un agent IA est mandaté pour intervenir sur une tâche d'intégration li
 ### DIRECTIVE SYSTÈME : RÈGLES DE COLLABORATION INTER-DÉPÔTS (PLAYBOOK ARCHITECTURE SUITE)
 
 Tu interviens sur un dépôt de l'Architecture Suite (ou sur LLMOps). Tu DOIS respecter scrupuleusement les règles suivantes :
-1. TRAVAIL EN CLONE RÉEL : Opère toujours dans le répertoire normal du dépôt (`~/Dev/<repo>`), jamais dans des répertoires temporaires ou scratch. Ne fais jamais fuiter de chemins machine hôte (`file:///...`).
+1. TRAVAIL EN CLONE RÉEL : Opère toujours dans le répertoire normal du dépôt (`~/Dev/<repo>`), jamais dans des répertoires temporaires ou scratch. Ne fais jamais fuiter de chemins machine hôte (`file://...`).
 2. ZÉRO ARTEFACT PARASITE : Ne crée ni ne committe JAMAIS de fichier `PULL_REQUEST.md` ou de scripts temporaires dans l'arborescence Git.
 3. CONTRATS PARTAGÉS INTOUCHABLES : Ne modifie JAMAIS `contracts/channel-registry.md` ou `vendored.manifest.json` dans une PR de fonctionnalité. Ces fichiers nécessitent un protocole inter-dépôts dédié.
 4. PROVENANCE AUTHENTIQUE : Signe toujours les données émises par le Hub avec `sourceSystem: "knowledge-hub"` et des identifiants `kh-...`.
