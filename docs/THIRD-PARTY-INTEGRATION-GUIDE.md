@@ -452,5 +452,26 @@ For air-gapped sovereign infrastructures or classified client enclaves that proh
    * Each file is signed with its SHA-256 digest and sealed with the Git commit hash.
 3. **Zero Callout**: Third-party client tools can mount or copy this JSON file directly into their runtime environment without starting an MCP server or calling any external API. All principles, patterns, ADRs, compliance controls, and skills matrices are fully self-contained.
 
+---
+
+## 16. Regulatory Conformity Snapshot for Document Engines (`document-engine`)
+
+For document generators requiring sealed regulatory compliance matrices (e.g., `document-engine`, HLD generators, audit packages):
+
+### 16.1 Architecture & Provenance Contract
+The Knowledge Hub emits machine-validated conformity snapshots under the canonical envelope `ExternalSnapshotEnvelope<ConformityData>`:
+* **Route**: `GET /api/compliance/conformity-snapshot?framework=ISO27001&engagement=nordwave-mcx-2027`
+* **Provenance**: `sourceSystem` defaults to `"knowledge-hub"`. The snapshot identifier adheres to `kh-<engagement>-<framework>-<timestamp>`. (A backward-compatible query parameter `?source_system=tuleap` is temporarily supported for legacy validators).
+* **Integrity & Checksum**: Sealed with `sha256:<hex>` computed strictly over the canonicalized `data` payload according to `canonical-json (v1)` (lexicographically sorted keys, compact separators `","` and `":"`, UTF-8 direct encoding).
+
+### 16.2 Out-of-Band Integration (ADR-DE-05)
+Per strict compilation isolation principles, the Document Engine's `compile()` pipeline remains 100% pure and offline. The integration must follow this two-stage pattern:
+1. **Pre-fetch (Out-of-band)**: The host CLI or orchestrator calls the Hub API and validates the snapshot with `validateConformitySnapshot`.
+2. **In-memory compilation**: The verified snapshot is passed as a pure parameter into `compile(graph, blueprint, { conformitySnapshots: [snapshot] })`. No HTTP or I/O calls penetrate the compiler runtime.
+
+### 16.3 Reference Test Vector
+The test vector fixture [`tests/fixtures/canonical_conformity_vector.json`](../tests/fixtures/canonical_conformity_vector.json) provides a standard cross-language oracle to verify SHA-256 calculation compatibility between Python (`pipelines.compliance_mapper`) and TypeScript (`validateConformitySnapshot`).
+
+
 
 

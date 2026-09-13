@@ -421,6 +421,11 @@ def create_starlette_app() -> Starlette:
             or "default"
         ).strip()
         framework = request.query_params.get("framework", "ALL").strip()
+        source_system = (
+            request.query_params.get("source_system")
+            or request.headers.get("X-Source-System")
+            or "knowledge-hub"
+        ).strip()
 
         try:
             from pipelines.compliance_mapper import to_conformity_snapshot
@@ -428,6 +433,7 @@ def create_starlette_app() -> Starlette:
                 engagement=engagement,
                 framework=framework,
                 controls_dir=server_config.kb_dir / "controls",
+                source_system=source_system,
             )
             return JSONResponse(snapshot, status_code=200)
         except Exception as e:

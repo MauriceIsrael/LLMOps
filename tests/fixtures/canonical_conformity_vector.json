@@ -1,0 +1,57 @@
+{
+  "description": "Standardized test vector for canonical-json (v1) and sha256 checksum verification between Knowledge Hub and Document Engine (validateConformitySnapshot)",
+  "canonicalizationProfile": "canonical-json-v1",
+  "sourceSystem": "knowledge-hub",
+  "schemaVersion": "2.0",
+  "data": {
+    "requirements": [
+      {
+        "id": "ISO-27001-A8-09",
+        "title": "Clear Desk and Clear Screen",
+        "domain": "SECURITY",
+        "verificationModes": [
+          "architecture-model"
+        ],
+        "status": "verified",
+        "evidence": [
+          {
+            "mode": "architecture-model",
+            "type": "graph-item",
+            "reference": "ADR-0001",
+            "source": "architecture-studio"
+          }
+        ],
+        "appliesTo": {
+          "programRef": "RRF",
+          "lotRefs": [],
+          "pbsRefs": []
+        }
+      },
+      {
+        "id": "SCN-OPS-01",
+        "title": "Journalisation et Horodatage Certifié",
+        "domain": "SECURITY",
+        "verificationModes": [
+          "architecture-model"
+        ],
+        "status": "verified",
+        "evidence": [
+          {
+            "mode": "architecture-model",
+            "type": "graph-item",
+            "reference": "ADR-0002",
+            "source": "architecture-studio"
+          }
+        ],
+        "appliesTo": {
+          "programRef": "RRF",
+          "lotRefs": [],
+          "pbsRefs": []
+        }
+      }
+    ]
+  },
+  "canonicalJson": "{\"requirements\":[{\"appliesTo\":{\"lotRefs\":[],\"pbsRefs\":[],\"programRef\":\"RRF\"},\"domain\":\"SECURITY\",\"evidence\":[{\"mode\":\"architecture-model\",\"reference\":\"ADR-0001\",\"source\":\"architecture-studio\",\"type\":\"graph-item\"}],\"id\":\"ISO-27001-A8-09\",\"status\":\"verified\",\"title\":\"Clear Desk and Clear Screen\",\"verificationModes\":[\"architecture-model\"]},{\"appliesTo\":{\"lotRefs\":[],\"pbsRefs\":[],\"programRef\":\"RRF\"},\"domain\":\"SECURITY\",\"evidence\":[{\"mode\":\"architecture-model\",\"reference\":\"ADR-0002\",\"source\":\"architecture-studio\",\"type\":\"graph-item\"}],\"id\":\"SCN-OPS-01\",\"status\":\"verified\",\"title\":\"Journalisation et Horodatage Certifié\",\"verificationModes\":[\"architecture-model\"]}]}",
+  "expectedChecksum": "sha256:2f07e10d3e608bbe19c720c596227ea5b0ea721376f51c2e06cd683490060e7e"
+}
+

@@ -239,7 +239,8 @@ def test_compliance_conformity_snapshot_rest_endpoint():
         assert res.status_code == 200
         snap = res.json()
         assert "snapshotId" in snap
-        assert snap["sourceSystem"] == "tuleap"
+        assert snap["snapshotId"].startswith("kh-rrf-iso27001-")
+        assert snap["sourceSystem"] == "knowledge-hub"
         assert snap["schemaVersion"] == "2.0"
         assert snap["checksum"].startswith("sha256:")
         assert "data" in snap
@@ -251,6 +252,13 @@ def test_compliance_conformity_snapshot_rest_endpoint():
         assert "domain" in req
         assert "verificationModes" in req
         assert "evidence" in req
+
+        # Vérification rétrocompatibilité ?source_system=tuleap
+        res_tuleap = client.get("/api/compliance/conformity-snapshot?framework=ISO27001&engagement=rrf&source_system=tuleap", headers=headers)
+        assert res_tuleap.status_code == 200
+        snap_tuleap = res_tuleap.json()
+        assert snap_tuleap["sourceSystem"] == "tuleap"
+        assert snap_tuleap["snapshotId"].startswith("tuleap-kh-rrf-iso27001-")
 
 
 def test_compliance_frameworks_endpoints():

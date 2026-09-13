@@ -468,6 +468,7 @@ def to_conformity_snapshot(
     engagement: str = "default",
     framework: str = "ALL",
     controls_dir: Path | str = "data/kb/controls",
+    source_system: str = "knowledge-hub",
 ) -> dict[str, Any]:
     """Génère un ConformitySnapshot conforme au contrat ExternalSnapshotEnvelope<ConformityData> pour document-engine."""
     import hashlib
@@ -538,10 +539,11 @@ def to_conformity_snapshot(
     canonical_str = json.dumps(data, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
     checksum = f"sha256:{hashlib.sha256(canonical_str.encode('utf-8')).hexdigest()}"
     now_iso = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    prefix = "kh" if source_system == "knowledge-hub" else ("tuleap-kh" if source_system == "tuleap" else f"{source_system}-kh")
 
     return {
-        "snapshotId": f"tuleap-kh-{engagement}-{framework.lower()}-{int(datetime.now().timestamp())}",
-        "sourceSystem": "tuleap",
+        "snapshotId": f"{prefix}-{engagement}-{framework.lower()}-{int(datetime.now().timestamp())}",
+        "sourceSystem": source_system,
         "schemaVersion": "2.0",
         "createdAt": now_iso,
         "checksum": checksum,
