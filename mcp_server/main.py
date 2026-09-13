@@ -549,6 +549,7 @@ def create_starlette_app() -> Starlette:
         document_id = str(body.get("document_id", "doc-rfp")).strip()
         document_version = str(body.get("document_version", "1.0")).strip()
         engagement = str(body.get("engagement", "default")).strip()
+        destination = str(body.get("destination", "knowledge-hub-reference")).strip()
 
         if not rfp_text:
             return JSONResponse(
@@ -561,7 +562,12 @@ def create_starlette_app() -> Starlette:
 
             shredder = RFPShredder(kb_dir="data/kb")
             requirements = shredder.shred_text(rfp_text, engagement=engagement)
-            candidates = to_extracted_candidates(requirements, document_id, document_version)
+            candidates = to_extracted_candidates(
+                requirements,
+                document_id,
+                document_version,
+                destination=destination,
+            )
 
             return JSONResponse(
                 {

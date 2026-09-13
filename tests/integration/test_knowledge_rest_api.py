@@ -117,7 +117,7 @@ def test_rfp_shred_to_candidates_rest_endpoint():
         assert len(data["candidates"]) >= 1
         c = data["candidates"][0]
         assert c["candidateKind"] == "technical-requirement"
-        assert c["suggestedDestination"] == "requirements-intake"
+        assert c["suggestedDestination"] == "knowledge-hub-reference"
         assert c["sourceFragment"]["documentId"] == "cctp-sec-2026"
 
 

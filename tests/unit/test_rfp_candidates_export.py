@@ -39,7 +39,7 @@ def test_to_extracted_candidates_format():
     c1 = candidates[0]
     assert c1["id"] == "cand-REQ-SEC-01"
     assert c1["candidateKind"] == "technical-requirement"
-    assert c1["suggestedDestination"] == "requirements-intake"
+    assert c1["suggestedDestination"] == "knowledge-hub-reference"
     assert c1["routingConfidence"] == 0.95
     assert "automated-test" in c1["verificationModes"]
 
@@ -54,6 +54,10 @@ def test_to_extracted_candidates_format():
     c2 = candidates[1]
     assert c2["id"] == "cand-REQ-SOV-02"
     assert c2["candidateKind"] == "governance-obligation"
-    assert c2["suggestedDestination"] == "requirements-intake"
+    assert c2["suggestedDestination"] == "knowledge-hub-reference"
     assert c2["routingConfidence"] == 0.85
     assert "vendor-attestation" in c2["verificationModes"]
+
+    # 3. Destination personnalisée (ex: client tiers spécifique)
+    custom_cands = to_extracted_candidates(reqs, "doc-custom", "1.0", destination="custom-intake")
+    assert custom_cands[0]["suggestedDestination"] == "custom-intake"

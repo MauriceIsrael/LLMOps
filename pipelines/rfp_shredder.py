@@ -342,6 +342,7 @@ def to_extracted_candidates(
     requirements: list[RFPRequirement],
     document_id: str,
     document_version: str,
+    destination: str = "knowledge-hub-reference",
 ) -> list[dict[str, Any]]:
     """Convertit une liste de RFPRequirement vers le schéma ExtractedCandidate (@architecture-suite/contracts)."""
     import hashlib
@@ -393,7 +394,7 @@ def to_extracted_candidates(
             "originalText": text,
             "normalizedText": text,
             "candidateKind": kind,
-            "suggestedDestination": "requirements-intake",
+            "suggestedDestination": destination,
             "routingConfidence": 0.95 if req.status == "covered" else 0.85,
             "verificationModes": modes,
         })

@@ -472,6 +472,23 @@ Per strict compilation isolation principles, the Document Engine's `compile()` p
 ### 16.3 Reference Test Vector
 The test vector fixture [`tests/fixtures/canonical_conformity_vector.json`](../tests/fixtures/canonical_conformity_vector.json) provides a standard cross-language oracle to verify SHA-256 calculation compatibility between Python (`pipelines.compliance_mapper`) and TypeScript (`validateConformitySnapshot`).
 
+---
+
+## 17. Dual-Mode Architecture & Intake Admission (`requirements-intake`)
+
+For requirement extractors and document intake pipelines:
+
+### 17.1 Dual-Mode: Synchronous REST vs. Decoupled Sealed Snapshots
+The Knowledge Hub supports two consumption patterns:
+* **Mode 1 (Synchronous REST)**: Direct calls to `POST /api/rfp/shred-to-candidates` for interactive UIs, CLI scripts, and CI/CD pipelines.
+* **Mode 2 (Decoupled Sealed Snapshots)**: Cold ingestion of pre-computed, deterministic JSON candidates or out-of-band imports, preserving the local gate's offline-first independence (per `ADR-SUITE-05`).
+
+### 17.2 Unified Curation Vocabulary (`CONTRATS_KH Contrat 2`)
+Regardless of the transport mode:
+* The candidate schema matches `ExtractedCandidate` (@architecture-suite/contracts).
+* The routing destination defaults to `suggestedDestination: "knowledge-hub-reference"`, routing propositions directly into the unified curation stream alongside locally extracted candidates.
+* Formal contract and schemas are maintained in [`docs/contracts/knowledge-hub-api-v1.md`](contracts/knowledge-hub-api-v1.md).
+
 
 
 
