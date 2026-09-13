@@ -73,11 +73,15 @@ make demo-check
    Couverture complète de conformité technique sur les normes européennes et critiques : NIS2, CER (Résilience des entités critiques UE 2022/2557), CRA (Cyber Resilience Act UE 2024/2847), RGPD, GSMA (eSIM SGP.22/32, Central EIR, SAS EAL4+), 3GPP Rel-18 (MCX, NEF, SCAS/NESAS, MDA AIOps), ITIL v4 / FCAPS O&M, Résilience Télécom (Datacenters Tier IV, sync PTP G.8275.1, holdover Rubidium >30j), et Terminaux Tactiques PPDR (Bande 68/28 ECC, TETRA DMO, MIL-STD-810H, ATEX, CEM véhicule ISO 11451/UN R2144).
 6. **Déstructeur de RFP & Générateur de Zero-Draft HLD Bilingue (FR / EN)**  
    Déconstruction atomique des cahiers des charges (`shred-rfp`), calcul de matrice triangulaire de conformité et génération instantanée du dossier d'architecture d'avant-vente (`zero-draft-hld`) en français ou en anglais sans écart résiduel. Modèles de livrables normalisés disponibles dans `templates/HLD-zero-draft-template.md` (FR) et `templates/HLD-zero-draft-template.en.md` (EN).
+7. **Architecture Double-Mode & Contrat v1 Architecture Suite**  
+   Fourniture simultanée d'endpoints REST synchrones (`/api/rfp/*`, `/api/compliance/*`, `/api/knowledge/*`, `/api/skills/*`) pour les interfaces interactives et CLI, et de snapshots canoniques scellés (`latest.json`) pour les sas d'admission hors-ligne (ADR-SUITE-05). Tous les contrats respectent une provenance stricte (`sourceSystem: "knowledge-hub"`), un scellement SHA-256 canonique et le principe de résilience *Fail Loud*.
 
 ---
 
 ## Liens vers la Documentation
 
+- **[Contrat d'API Knowledge Hub v1](docs/contracts/knowledge-hub-api-v1.md)** : Spécification contractuelle pour l'Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).
+- **[Playbook d'Intégration IA](AI_INTEGRATION_PLAYBOOK.md)** : Règles de gouvernance multi-dépôts, checklist pré-vol et directives système pour les agents IA.
 - **[Guide d'Intégration Tiers](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**
 - **[Spécification d'Interface Externe (INTERFACE.md)](docs/INTERFACE.md)**
 - **[Guide d'Alignement Épistémique (EPISTEMIC-ALIGNMENT.md)](docs/EPISTEMIC-ALIGNMENT.md)**

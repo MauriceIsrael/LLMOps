@@ -1,6 +1,8 @@
 """Interface CLI Typer pour le prototype d'élicitation pilotée par les manques (elicit)."""
 
 
+from pathlib import Path
+
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -805,6 +807,44 @@ def compliance_cmd(
                 }
                 q_file.write_text(json.dumps(q_payload, indent=2, ensure_ascii=False), encoding="utf-8")
                 console.print(f"  • Question d'élicitation générée : [cyan]{qid}[/cyan] ({u['control_id']})")
+
+
+@app.command(name="canvas")
+def canvas_cmd(
+    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement projet"),
+    sync_library: bool = typer.Option(True, "--sync-library/--no-sync", help="Synchroniser directement dans la bibliothèque PetitesBriques"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Chemin d'export JSON explicite"),
+) -> None:
+    """Projette l'architecture de l'engagement dans un scénario PetitesBriques (Poka-Yoke validé)."""
+    from tools.adapters.petitesbriques_adapter import PetitesBriquesAdapter
+
+    console.print(f"[bold blue]🧱 Projection de l'architecture '{engagement}' vers PetitesBriques...[/bold blue]")
+
+    adapter = PetitesBriquesAdapter(engagement=engagement)
+    model = adapter.build_canvas()
+
+    table = Table(title=f"PetitesBriques Canvas — {engagement}")
+    table.add_column("Site ID", style="cyan")
+    table.add_column("Nom du Site", style="white")
+    table.add_column("Hébergement", style="magenta")
+    table.add_column("Briques Empilées", style="green")
+
+    for s in model.get("sites", []):
+        bricks_str = " → ".join(b["templateId"] for b in s.get("bricks", []))
+        table.add_row(s["id"], s["name"], s.get("siteType", "on-prem"), bricks_str)
+
+    console.print(table)
+    console.print(f"🔗 [bold]Interconnexions 3GPP générées :[/bold] {len(model.get('connections', []))} liens")
+    for c in model.get("connections", []):
+        console.print(f"  • [cyan]{c['sourceBrickId']}[/cyan] ──([yellow]{c['linkTypeId']}[/yellow])──▶ [cyan]{c['targetBrickId']}[/cyan]")
+
+    json_path = adapter.export_json(output_path=output)
+    console.print(f"\n📄 [green]Fichier JSON exporté :[/green] [bold]{json_path}[/bold]")
+
+    if sync_library:
+        lib_path = adapter.sync_to_petitesbriques()
+        console.print(f"📚 [bold green]Modèle injecté dans la bibliothèque PetitesBriques :[/bold green] {lib_path}")
+        console.print("[italic dim]L'architecte peut maintenant ouvrir PetitesBriques (http://localhost:5173), charger le modèle et exporter en SVG.[/italic dim]")
 
 
 def main() -> None:

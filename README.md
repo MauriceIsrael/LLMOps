@@ -83,6 +83,8 @@ make demo-check
    Exhaustive technical compliance coverage across European and mission-critical standards: NIS2, CER (Critical Entities Resilience EU 2022/2557), CRA (Cyber Resilience Act EU 2024/2847), GDPR, GSMA (SGP.22/32 eSIM, Central EIR, SAS EAL4+), 3GPP Rel-18 (MCX, NEF, SCAS/NESAS, MDA AIOps), ITIL v4 / FCAPS O&M, Telco Resilience (Tier IV dual-datacenter, G.8275.1 PTP sync, >30d Rubidium holdover), and PPDR Tactical Terminals (ECC Band 68/28, TETRA DMO, MIL-STD-810H, ATEX, ISO 11451/UN R2144 vehicle EMC).
 9. **Automated RFP Shredder & Bilingual Zero-Draft HLD Engine (FR / EN)**  
    Deconstructs client tenders into atomic requirements (`shred-rfp`), builds the triangular compliance matrix against standard architecture decisions (ADRs) and regulatory controls, and auto-generates a High-Level Design pre-sales document (`zero-draft-hld`) in English or French with zero residual gaps. Ready-to-use deliverable templates are available in `templates/HLD-zero-draft-template.md` (FR) and `templates/HLD-zero-draft-template.en.md` (EN).
+10. **Dual-Mode Architecture & Architecture Suite Contract v1**  
+    Provides both synchronous REST endpoints (`/api/rfp/*`, `/api/compliance/*`, `/api/knowledge/*`, `/api/skills/*`) for interactive web interfaces and CLI tools, as well as sealed canonical snapshots (`latest.json`) for offline-first admission gates (per ADR-SUITE-05). All contracts follow strict provenance (`sourceSystem: "knowledge-hub"`), canonical SHA-256 sealing, and Fail Loud resilience.
 
 ---
 
@@ -103,7 +105,9 @@ poetry run elicit scan --engagement nordwave-mcx-2027 --max-questions 3
 
 ## Documentation Links
 
-- **[Third-Party Integration Guide](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**: Full guide to writing custom renderers (DOCX, PPTX, Web UI) without running the server.
+- **[Knowledge Hub API v1 Contract](docs/contracts/knowledge-hub-api-v1.md)**: Formal contract specification for the Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).
+- **[AI Integration Playbook](AI_INTEGRATION_PLAYBOOK.md)**: Multi-repo governance rules, pre-flight checklist, and operational directives for AI agents.
+- **[Third-Party Integration Guide](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**: Full guide to writing custom renderers (DOCX, PPTX, Web UI) and consuming sealed snapshots.
 - **[External Interface Specification (INTERFACE.md)](docs/INTERFACE.md)**: Technical MCP contract, response envelopes, JSON Schemas, and transport protocols.
 - **[Epistemic Alignment Guide (EPISTEMIC-ALIGNMENT.md)](docs/EPISTEMIC-ALIGNMENT.md)**: Correspondence table between KH confidence and Architecture Studio proof models.
 - **[Schema Specification (SCHEMA.md)](docs/SCHEMA.md)**: Automatically generated LadybugDB graph schema.
