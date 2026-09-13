@@ -331,9 +331,68 @@ Calcule l'adéquation entre les compétences requises par l'architecture du proj
 
 ---
 
+### 3.10 `POST /api/documents/zero-draft-blueprint` — Génération Blueprint & ProseStore Initial
+Génère le squelette formel de document d'architecture (`DocumentBlueprint`) et son magasin de prose initial (`ProseStore`) à partir des actifs du Hub et de l'engagement ciblé.
+* **Corps de requête** :
+```json
+{
+  "engagement": "nordwave-mcx-2027",
+  "project_title": "Système d'Architecture Télécom & Plateforme Sécurisée",
+  "client_name": "Opérateur NordWave"
+}
+```
+* **Réponse HTTP 200** :
+```json
+{
+  "status": "ok",
+  "blueprint": {
+    "documentId": "nordwave-mcx-2027-hld-zero-draft",
+    "title": "HLD — Système d'Architecture Télécom & Plateforme Sécurisée",
+    "sections": []
+  },
+  "proseStore": {
+    "contexte-projet": {
+      "blockId": "contexte-projet",
+      "text": "Le présent document décrit l'architecture cible..."
+    }
+  }
+}
+```
+
+---
+
+### 3.11 `POST /api/prose/suggest-batch` — Assistance de Rédaction Prose par Lot (ADR-DE-02)
+Fournit des suggestions de rédaction pour les blocs de prose de `document-engine` en exploitant les motifs d'architecture du Knowledge Hub, sans jamais altérer directement le `ProseStore` du compilateur pur.
+* **Corps de requête** :
+```json
+{
+  "requests": [
+    {
+      "blockId": "contexte-projet",
+      "anchorIds": ["ADR-0014", "PAT-001"],
+      "instructions": "Souligner les contraintes de haute disponibilité et de souveraineté."
+    }
+  ]
+}
+```
+* **Réponse HTTP 200** :
+```json
+{
+  "drafts": {
+    "contexte-projet": "Conception validée pour le bloc 'contexte-projet' : ..."
+  },
+  "warnings": [],
+  "basedOnModelHash": "fa1ecf2b8be24ab7",
+  "generatedAt": "2026-09-13T16:00:00Z"
+}
+```
+
+---
+
 ## 4. Oracles & Vecteurs de Test Partagés
 
 Afin de garantir une interopérabilité sans faille entre implémentations Python et TypeScript, les vecteurs de référence suivants sont tenus à disposition dans le dépôt :
 * **Vecteur de Test Canonique (`canonical-json v1` + SHA-256)** : [`tests/fixtures/canonical_conformity_vector.json`](../../tests/fixtures/canonical_conformity_vector.json)
 * **Jeu d'Essai CCTP de Référence (Messagerie OIV)** : [`fixtures/rfp_messagerie_securisee.txt`](../../fixtures/rfp_messagerie_securisee.txt) (SHA-256: `792b9d332e8ccc589a2d74468d56bc761539542fc8d337a71d77854f87c258b5`)
+
 
