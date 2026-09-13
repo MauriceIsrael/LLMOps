@@ -251,6 +251,20 @@ def create_starlette_app() -> Starlette:
             except Exception:
                 pass
 
+        import os
+        import subprocess
+
+        engine_commit = os.environ.get("LLMOPS_COMMIT")
+        if not engine_commit:
+            try:
+                engine_commit = subprocess.check_output(
+                    ["git", "rev-parse", "--short", "HEAD"],
+                    stderr=subprocess.DEVNULL,
+                    text=True,
+                ).strip()
+            except Exception:
+                engine_commit = "d7d3291"
+
         return JSONResponse(
             {
                 "status": "ok",
@@ -258,7 +272,7 @@ def create_starlette_app() -> Starlette:
                 "schema_version": "1.0",
                 "service": "llmops-mcp-server",
                 "engine_version": "0.1.0",
-                "engine_commit": "aa2ec8e",
+                "engine_commit": engine_commit,
                 "kb": kb_meta,
             },
             status_code=200,
