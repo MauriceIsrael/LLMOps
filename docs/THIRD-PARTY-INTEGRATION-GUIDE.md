@@ -7,7 +7,7 @@ confidence: verified
 phase: [BID, BUILD, RUN]
 domain: [ai-assistance, delivery]
 owner: core-owner-automation
-last_reviewed: 2026-07-29
+last_reviewed: 2026-09-17
 related: [ADR-0014, ADR-0015, TPL-mcp-spec, TPL-planning-and-demo]
 ---
 
@@ -15,7 +15,7 @@ related: [ADR-0014, ADR-0015, TPL-mcp-spec, TPL-planning-and-demo]
 
 For a team that wants to build its own document generator, diagram renderer or
 custom interface on top of this knowledge base, without adopting our CLI or our
-templates. Verified against the deployed server on 2026-07-29.
+templates. Verified against the deployed server on 2026-09-17.
 
 Three things you can do, independently: read the reusable knowledge, inject and
 read your own project data, and render either into whatever output format you
@@ -46,8 +46,8 @@ graph edges.
 summary = mcp.call("get_graph_summary", {})
 # {"schema_version": "1.0",
 #  "knowledge": {"dataset": "...", "node_counts": {"Asset": 46, "GlossaryTerm": 10}},
-#  "engagements": [{"id": "nordwave-mcx-2027",
-#                    "node_counts": {"Subject": 8, "Statement": 9, "Conflict": 2}}]}
+#  "engagements": [{"id": "demo-engagement-2027",
+#                   "node_counts": {"Subject": 8, "Statement": 9, "Conflict": 2}}]}
 ```
 
 If `knowledge.node_counts.Asset` is `0`, the server has not been (re)ingested and
@@ -370,7 +370,7 @@ The Blueprint defines the **"What"** (the corporate architecture standard, manda
 ```mermaid
 flowchart LR
     OWNER["Corporate Architecture Board (Owner)"] -->|"Governs & Versions (SUPERSEDES)"| BP["Blueprint (Corporate Standard)"]
-    BP -->|"Exigences & Controls"| ENG["Project Engagement (Local Team)"]
+    BP -->|"Requirements & Controls"| ENG["Project Engagement (Local Team)"]
     ENG -->|"Harvest Flow (Promotion Candidates)"| OWNER
 ```
 
@@ -389,7 +389,7 @@ When a project successfully establishes a new reusable pattern or section (e.g. 
 
 ## 13. Staffing & Technical Competencies (Skills Meta-Model)
 
-Third-party orchestrators, bid managers, and project management portals (such as *La Suite*) can audit team capabilities directly against project architecture requirements.
+Third-party orchestrators, bid managers, and project management portals can audit team capabilities directly against project architecture requirements.
 
 ### 13.1 Querying Required Competencies
 ```python
@@ -401,14 +401,14 @@ mcp.call("list_skills", {"domain": "security-cryptography"})
 ### 13.2 Project Staffing Coverage Audit & Risk Scoring
 ```python
 # Compute the real-time skills coverage matrix for a project engagement
-matrix = mcp.call("get_skills_matrix", {"engagement": "nordwave-mcx-2027"})
+matrix = mcp.call("get_skills_matrix", {"engagement": "your-engagement"})
 # {
 #   "coverage_percentage": 100.0,
 #   "risk_level": "low",
 #   "total_required_skills": 9,
 #   "covered_skills_count": 9,
 #   "missing_skills": [],
-#   "external_contractors": [{"skill": "SKL-CRYPTO-HSM", "provider": "Thalix", "ref": "PO-2026-904"}],
+#   "external_contractors": [{"skill": "SKL-CRYPTO-HSM", "provider": "External Firm", "ref": "PO-2026-001"}],
 #   "sections": {"7.3": {"title": "Cryptography", "covered": True, ...}}
 # }
 ```
@@ -420,16 +420,16 @@ When running `elicit scan`, any section requiring an expertise not present in th
 
 ## 14. External Contribution & REX Feedback (`suggest_knowledge_improvement`)
 
-External teams, client portals can push suggestions, amendments, or proven field patterns directly into the Knowledge Hub governance loop without direct database write access:
+External teams and client portals can push suggestions, amendments, or proven field patterns directly into the Knowledge Hub governance loop without direct database write access:
 
 ```python
 response = mcp.call("suggest_knowledge_improvement", {
-    "title": "Limitation du bulk export sur Element Manager Ericsson (2000 objets)",
-    "rationale": "Éviter les timeouts de réconciliation GitOps sur les déploiements 5G Core massifs.",
-    "suggested_change": "Ajouter la recommandation de découpage par lots de 500 objets dans PAT-005.",
-    "author": "Antoine)",
-    "contact_email": "antoin@antoine",
-    "source_engagement": "suite-numerique-2026"
+    "title": "Bulk export limit on Ericsson Element Manager (2000 objects)",
+    "rationale": "Avoid GitOps reconciliation timeouts on massive 5G Core deployments.",
+    "suggested_change": "Add recommendation to split into batches of 500 objects in PAT-005.",
+    "author": "field-contributor",
+    "contact_email": "contributor@example.com",
+    "source_engagement": "your-engagement"
 })
 # {"status": "ok", "suggestion_id": "SUG-20260903-XXXXXX", "notifications_sent": ["local_archive", "cloud_logging", "discord_webhook", "push_ntfy"]}
 ```
@@ -441,7 +441,7 @@ This triggers:
 
 ---
 
-## 15. Sealed Offline Snapshot Consumption (Air-Gap & Zero Callout for "La Suite")
+## 15. Sealed Offline Snapshot Consumption (Air-Gap & Zero Callout)
 
 For air-gapped sovereign infrastructures or classified client enclaves that prohibit outgoing network connections (SecNumCloud, NIS2 strict enclaves):
 
@@ -460,7 +460,7 @@ For document generators requiring sealed regulatory compliance matrices (e.g., `
 
 ### 16.1 Architecture & Provenance Contract
 The Knowledge Hub emits machine-validated conformity snapshots under the canonical envelope `ExternalSnapshotEnvelope<ConformityData>`:
-* **Route**: `GET /api/compliance/conformity-snapshot?framework=ISO27001&engagement=nordwave-mcx-2027`
+* **Route**: `GET /api/compliance/conformity-snapshot?framework=ISO27001&engagement=your-engagement`
 * **Provenance**: `sourceSystem` defaults to `"knowledge-hub"`. The snapshot identifier adheres to `kh-<engagement>-<framework>-<timestamp>`. (A backward-compatible query parameter `?source_system=tuleap` is temporarily supported for legacy validators).
 * **Integrity & Checksum**: Sealed with `sha256:<hex>` computed strictly over the canonicalized `data` payload according to `canonical-json (v1)` (lexicographically sorted keys, compact separators `","` and `":"`, UTF-8 direct encoding).
 
@@ -488,7 +488,3 @@ Regardless of the transport mode:
 * The candidate schema matches `ExtractedCandidate` (@architecture-suite/contracts).
 * The routing destination defaults to `suggestedDestination: "knowledge-hub-reference"`, routing propositions directly into the unified curation stream alongside locally extracted candidates.
 * Formal contract and schemas are maintained in [`docs/contracts/knowledge-hub-api-v1.md`](contracts/knowledge-hub-api-v1.md).
-
-
-
-

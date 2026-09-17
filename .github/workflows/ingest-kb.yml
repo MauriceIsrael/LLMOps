@@ -9,6 +9,8 @@ on:
 jobs:
   update-graph-db:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -19,6 +21,18 @@ jobs:
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
 
       - name: Install dependencies
         run: poetry install --no-interaction
@@ -29,10 +43,25 @@ jobs:
           GRAPH_BACKEND: ladybug
         run: poetry run python -m pipelines.ingestion.migrate_adr0015
 
+      - name: Health Check — Verify Knowledge Graph node counts
+        env:
+          GRAPH_BACKEND: ladybug
+        run: |
+          poetry run python -c "
+          from pipelines.ingestion.graph_loader import get_knowledge_db_path
+          import ladybug as lb
+          db = lb.connect(get_knowledge_db_path(), read_only=True)
+          result = db.execute('MATCH (a:Asset) RETURN count(a) AS n').fetchone()
+          count = result['n']
+          print(f'Knowledge graph: {count} Asset nodes')
+          if count == 0:
+              raise SystemExit('ERROR: Knowledge graph is empty after ingestion!')
+          print('✅ Knowledge graph health check passed.')
+          "
+
       - name: Upload LadybugDB Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ladybug-db-artifacts
-          path: |
-            data/knowledge.lbug
-            data/engagements
+          name: ladybug-kb-artifact
+          path: data/knowledge.lbug
+          retention-days: 7

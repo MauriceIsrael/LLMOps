@@ -27,7 +27,7 @@ Ajoutez la configuration suivante dans votre client MCP (ex: `claude_desktop_con
 }
 ```
 
-> **Avertissement Instance de Démonstration Publique :** Expose à la fois le plan Connaissances et le plan Engagement (scopé strictement sur l'engagement de référence `nordwave-mcx-2027`). Lecture seule, taux limité, pas de SLA. Le jeton ci-dessus (`demo-public-2026-08`) est intentionnellement public et renouvelé périodiquement. Ne l'utilisez pas pour des données privées.
+> **Avertissement Instance de Démonstration Publique :** Expose à la fois le plan Connaissances et le plan Engagement (scopé strictement sur l'engagement de référence de démonstration). Lecture seule, taux limité, pas de SLA. Le jeton ci-dessus (`demo-public-2026-08`) est intentionnellement public et renouvelé périodiquement. Ne l'utilisez pas pour des données privées.
 
 ### 2. Connexion Locale (STDIO via Poetry)
 
@@ -81,7 +81,6 @@ make demo-check
 ## Liens vers la Documentation
 
 - **[Contrat d'API Knowledge Hub v1](docs/contracts/knowledge-hub-api-v1.md)** : Spécification contractuelle pour l'Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).
-- **[Playbook d'Intégration IA](AI_INTEGRATION_PLAYBOOK.md)** : Règles de gouvernance multi-dépôts, checklist pré-vol et directives système pour les agents IA.
 - **[Guide d'Intégration Tiers](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**
 - **[Spécification d'Interface Externe (INTERFACE.md)](docs/INTERFACE.md)**
 - **[Guide d'Alignement Épistémique (EPISTEMIC-ALIGNMENT.md)](docs/EPISTEMIC-ALIGNMENT.md)**

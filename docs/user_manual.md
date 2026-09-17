@@ -41,7 +41,7 @@ GRAPH_BACKEND=ladybug poetry run python -m pipelines.ingestion.migrate_adr0015
 ```
 
 - Ingestion des fichiers Markdown (`.md`) et des spécifications YAML (`.yaml` / `.yml`).
-- Structure physique ADR-0015 créée automatiquement : `data/knowledge.kuzu` (`database.lbug`) et `data/engagements/nordwave-mcx-2027.kuzu`.
+- Structure physique ADR-0015 créée automatiquement : `data/knowledge.lbug` et `data/engagements/<id>.lbug`.
 - Génération automatisée de la documentation du schéma : `poetry run python -m pipelines.ingestion.generate_schema_doc`.
 
 ---
@@ -81,31 +81,31 @@ Grâce au drapeau d'usurpation `--as <login>` (`--as alice`, `--as bob`, `--as c
 
 ```bash
 # 1. Détecter les manques du projet et poser les questions dans la boîte aux lettres
-poetry run elicit scan --engagement nordwave-mcx-2027
+poetry run elicit scan --engagement demo-engagement-2027
 
 # 2. Réponse d'Amina (mcx-service-architect) via une fiche Markdown ou CLI
-poetry run elicit answer Q-0001 --from-file artifacts/nordwave-mcx-2027/mailbox/Q-0001.md --as amina
+poetry run elicit answer Q-0001 --from-file artifacts/demo-engagement-2027/mailbox/Q-0001.md --as amina
 
 # 3. Validation de la proposition d'extraction (Interrupt / Human-in-the-loop)
 poetry run elicit confirm Q-0001 --accept
 
 # 4. Observer la trajectoire d'un sujet (Level Gate & historisation)
-poetry run elicit trajectory --engagement nordwave-mcx-2027 --subject mcx-services
+poetry run elicit trajectory --engagement demo-engagement-2027 --subject mcx-services
 
 # 5. Rétrogradation de maturité (Demotion non-monotone) si remise en cause
-poetry run elicit demote --engagement nordwave-mcx-2027 --subject floor-control --to-level L2_decomposed --by sofia --reason "Révision nécessaire"
+poetry run elicit demote --engagement demo-engagement-2027 --subject floor-control --to-level L2_decomposed --by sofia --reason "Révision nécessaire"
 
 # 6. Soumettre une contribution externe terrain (double confirmation)
-poetry run elicit contribute --engagement nordwave-mcx-2027 --file demo/answers/contribution.md --as rui
+poetry run elicit contribute --engagement demo-engagement-2027 --file demo/answers/contribution.md --as rui
 
 # 7. Arbitrage par Sofia (chief-architect) via --as sofia
 poetry run elicit arbitrate C-0001 --keep S-0001 --reason "Arbitrage MCX service layer au site" --as sofia
 
-# 8. Assembler le document final (projects/nordwave-mcx-2027/document.md)
-poetry run elicit assemble --engagement nordwave-mcx-2027
+# 8. Assembler le document final (projects/demo-engagement-2027/document.md)
+poetry run elicit assemble --engagement demo-engagement-2027
 ```
 
-### B. Mode Test d'Intégration Référent (Scénario Nordwave MCX v2)
+### B. Mode Test d'Intégration Référent (Scénario de Référence v2)
 
 Pour exécuter la démonstration automatisée complète couvrant les 6 phases et 18 tests d'élicitation :
 
@@ -117,7 +117,7 @@ poetry run pytest tests/integration/test_scenario_nordwave_mcx_v2.py -v
 
 ## 5. Comment utiliser la Plateforme
 
-### Option 1 : Partager l'accès au Serveur MCP (Claude Desktop / Cursor / Antigravity / VS Code)
+### Option 1 : Partager l'accès au Serveur MCP (Claude Desktop / Cursor / VS Code / Agents)
 
 Transmettez simplement cet extrait de configuration à vos collègues pour qu'ils l'ajoutent dans leur fichier `mcp_config.json` local :
 
@@ -208,22 +208,22 @@ Le système audite l'adéquation entre l'équipe mobilisée et les exigences tec
 
 ### 8.1 Auditer la couverture des compétences
 ```bash
-poetry run elicit audit-skills --engagement nordwave-mcx-2027
+poetry run elicit audit-skills --engagement demo-engagement-2027
 ```
 Affiche la matrice complète de couverture, le taux global (ex: `88.9%`), les compétences critiques non pourvues, et l'**Index de risque de staffing** (*Faible / Modéré / Critique*).
 
 ### 8.2 Administrer l'équipe et résoudre les manques (Gap G5)
 * **Affecter un nouveau collaborateur interne :**
   ```bash
-  poetry run elicit staff assign --engagement nordwave-mcx-2027 --user julien --role cloud-architect --skills "SKL-KUBE-TELCO,SKL-AUTO-GITOPS"
+  poetry run elicit staff assign --engagement demo-engagement-2027 --user julien --role cloud-architect --skills "SKL-KUBE-TELCO,SKL-AUTO-GITOPS"
   ```
 * **Enregistrer une montée en compétence / certification :**
   ```bash
-  poetry run elicit staff add-skill --engagement nordwave-mcx-2027 --user sofia --skill SKL-CRYPTO-HSM --level expert --evidence "Certification ANSSI 2026"
+  poetry run elicit staff add-skill --engagement demo-engagement-2027 --user sofia --skill SKL-CRYPTO-HSM --level expert --evidence "Certification ANSSI 2026"
   ```
 * **Contractualiser une expertise ou assistance technique externe :**
   ```bash
-  poetry run elicit staff contract-expertise --engagement nordwave-mcx-2027 --skill SKL-CRYPTO-HSM --provider "Cabinet Cryptologique Thalix" --ref "PO-2026-904"
+  poetry run elicit staff contract-expertise --engagement demo-engagement-2027 --skill SKL-CRYPTO-HSM --provider "Cabinet Cryptologique Externe" --ref "PO-2026-904"
   ```
 
 ---
@@ -249,8 +249,8 @@ poetry run python scripts/analyze_rfp.py data/project/netdevops/netdevops_mcx_ar
 Lorsqu'un projet valide de nouvelles pratiques ou limitations constructeurs, le moissonnage REX permet de notifier instantanément le propriétaire de la base :
 
 ```bash
-# Moissonner les candidats REX d'un projet et notifier Maurice sur Discord :
-poetry run elicit harvest --engagement nordwave-mcx-2027
+# Moissonner les candidats REX d'un projet et notifier via Discord :
+poetry run elicit harvest --engagement demo-engagement-2027
 ```
 
 Les notifications sont transmises sous forme d'**Embed riche sur Discord** (titre, auteur, contexte projet, raison et extrait Markdown de la proposition) et archivées dans `data/suggestions/`.
@@ -306,4 +306,3 @@ Les agents d'avant-vente et assistants IA peuvent piloter l'ensemble du cycle vi
 - `generate_zero_draft_hld(engagement, language="fr"|"en", project_title, client_name)` : Assemblage et rendu Markdown du dossier HLD.
 - `get_rfp_compliance_matrix(engagement)` : Extraction de la matrice de conformité triangulaire.
 - `trigger_rfp_elicitation(engagement)` : Routage automatique des questions ciblées sur les écarts résiduels (gaps) vers les rôles d'experts concernés.
-

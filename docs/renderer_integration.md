@@ -38,7 +38,7 @@ Récupère un **payload JSON d'affichage complet** contenant la synthèse du doc
   "params": {
     "name": "get_render_payload",
     "arguments": {
-      "engagement": "nordwave-mcx-2027"
+      "engagement": "demo-engagement-2027"
     }
   },
   "id": 1
@@ -48,7 +48,7 @@ Récupère un **payload JSON d'affichage complet** contenant la synthèse du doc
 **Structure de la Réponse Payload :**
 ```json
 {
-  "engagement": "nordwave-mcx-2027",
+  "engagement": "demo-engagement-2027",
   "status": "provisional", // "provisional" ou "final"
   "is_provisional": true,
   "maturity_board": [
@@ -99,7 +99,7 @@ Génère la structure graphique de l'architecture (nœuds, arêtes, statut des c
   "params": {
     "name": "get_diagram_graph",
     "arguments": {
-      "engagement": "nordwave-mcx-2027",
+      "engagement": "demo-engagement-2027",
       "format": "mermaid"
     }
   },
@@ -110,7 +110,7 @@ Génère la structure graphique de l'architecture (nœuds, arêtes, statut des c
 **Structure de la Réponse :**
 ```json
 {
-  "engagement": "nordwave-mcx-2027",
+  "engagement": "demo-engagement-2027",
   "format": "mermaid",
   "nodes": [
     { "id": "mcx-services", "label": "mcx-services", "type": "Subject", "level": "L2_decomposed" }
@@ -135,7 +135,7 @@ Fournit la trajectoire historique des niveaux de maturité franchis par un sujet
   "params": {
     "name": "get_subject_trajectory",
     "arguments": {
-      "engagement": "nordwave-mcx-2027",
+      "engagement": "demo-engagement-2027",
       "subject": "mcx-services"
     }
   },
@@ -165,7 +165,7 @@ Si votre renderer est développé en Python, vous pouvez importer directement `R
 from mcp_server.renderer_interface import RendererClient
 
 # 1. Initialiser le client pour un engagement
-client = RendererClient(engagement="nordwave-mcx-2027")
+client = RendererClient(engagement="demo-engagement-2027")
 
 # 2. Récupérer les données de document
 payload = client.fetch_render_payload()
@@ -208,7 +208,7 @@ eventSource.addEventListener("endpoint", (event) => {
       method: "tools/call",
       params: {
         name: "get_render_payload",
-        arguments: { engagement: "nordwave-mcx-2027" }
+        arguments: { engagement: "demo-engagement-2027" }
       },
       id: 1
     })

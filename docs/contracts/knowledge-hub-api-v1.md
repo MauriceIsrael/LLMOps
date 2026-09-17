@@ -4,7 +4,7 @@ title: Spécification Contractuelle de l'API Knowledge Hub (v1.0)
 schemaVersion: "1.0"
 status: active
 owner: core-owner-llmops
-last_reviewed: 2026-09-13
+last_reviewed: 2026-09-17
 related: [ADR-SUITE-05, ADR-KH-01, ADR-DE-05, ADR-DS-07, TPL-third-party-integration-guide]
 ---
 
@@ -30,8 +30,8 @@ Le Knowledge Hub expose une architecture **Dual-Mode** permettant à chaque syst
                    │                                                               │
     • Composants cibles :                                           • Composants cibles :
       - Document Studio (actions interactives à chaud)                - requirements-intake (sas d'admission local)
-      - PetitesBriques (génération visuelle de canvas)                - document-engine (compilation pure hors-ligne)
-      - Outils tiers, CLI et pipelines CI/CD                          - Enclaves souveraines / Air-Gapped (SecNumCloud)
+      - Outils tiers, CLI et pipelines CI/CD                          - document-engine (compilation pure hors-ligne)
+                                                                       - Enclaves souveraines / Air-Gapped (SecNumCloud)
 ```
 
 1. **Mode 1 — Synchrone Interactif (HTTP REST direct)** :
@@ -56,7 +56,7 @@ Le Knowledge Hub expose une architecture **Dual-Mode** permettant à chaque syst
   * Valeur par défaut si non spécifié : `"default"` (Socle transverse d'entreprise).
 
 ### 2.2 Politique d'Erreur & Résilience (« Fail Loud »)
-Conformément aux conventions de robustesse de la suite, le Hub rejette le repli silencieux (*silent fallback*). En cas d'anomalie, le Hub retourne un code HTTP explicite accompagné d'un corps JSON structuré :
+Conformément aux conventions de robustesse, le Hub rejette le repli silencieux (*silent fallback*). En cas d'anomalie, le Hub retourne un code HTTP explicite accompagné d'un corps JSON structuré :
 ```json
 {
   "status": "error",
@@ -85,10 +85,10 @@ Retourne l'état de fonctionnement du Hub et scelle l'empreinte exacte du moteur
   "engine_version": "0.1.0",
   "engine_commit": "474b9e3",
   "kb": {
-    "snapshot_id": "snapshot-2026-09-13-fa1ecf2",
+    "snapshot_id": "snapshot-2026-09-17-fa1ecf2",
     "source_revision": "fa1ecf2b8be24ab7ccdea2cea6e1fd8d140ad485",
     "payload_sha256": "sha256:beb4c7cd2389cf7219871abba69f657e68562240d039e1fcf85ddb15b3068d7d",
-    "created_at": "2026-09-13T14:40:46Z"
+    "created_at": "2026-09-17T14:40:46Z"
   }
 }
 ```
@@ -144,7 +144,7 @@ Analyse les lacunes (gaps) d'un engagement et produit des questions ciblées de 
 * **Corps de requête** :
 ```json
 {
-  "engagement": "nordwave-mcx-2027"
+  "engagement": "your-engagement"
 }
 ```
 * **Réponse HTTP 200** :
@@ -153,13 +153,13 @@ Analyse les lacunes (gaps) d'un engagement et produit des questions ciblées de 
   "status": "ok",
   "count": 3,
   "data": {
-    "engagement": "nordwave-mcx-2027",
+    "engagement": "your-engagement",
     "total_gaps_targeted": 3,
     "questions_created": 3,
     "questions": [
       {
         "id": "Q-RFP-011",
-        "engagement": "nordwave-mcx-2027",
+        "engagement": "your-engagement",
         "gap_type": "rfp_uncovered_requirement",
         "section": "4.0",
         "question": "Comment l'architecture doit-elle satisfaire l'exigence client : 'Interconnexion 3GPP MCX' ?",
@@ -200,7 +200,7 @@ Liste les questions d'élicitation d'un engagement, avec filtrage optionnel par 
 ---
 
 ### 3.5 `GET /api/arbitration/board` — Tableau de Maturité d'Architecture (L0 à L4)
-Expose la maturité d'ingénierie par sujet technique pour affichage direct dans Document Studio.
+Expose la maturité d'ingénierie par sujet technique pour affichage direct dans les outils consommateurs.
 * **Réponse HTTP 200** :
 ```json
 {
@@ -246,15 +246,15 @@ Liste les contradictions détectées entre exigences ou entre choix d'architectu
 ---
 
 ### 3.7 `POST /api/knowledge/suggestions` — Boucle de REX et Curation Amont
-Permet à Document Studio ou à un architecte de soumettre un motif éprouvé, un arbitrage ou une correction vers la gouvernance du Hub.
+Permet de soumettre un motif éprouvé, un arbitrage ou une correction vers la gouvernance du Hub.
 * **Corps de requête** :
 ```json
 {
   "title": "Arbitrage HSM SecNumCloud : Partitionnement multi-tenant",
   "rationale": "Le CCTP impose une ségrégation stricte par opérateur.",
   "suggested_change": "Mettre à jour PAT-004 en recommandant des cartes dédiées...",
-  "author": "lead-architect@entreprise.fr",
-  "source_engagement": "nordwave-mcx-2027"
+  "author": "lead-architect@example.com",
+  "source_engagement": "your-engagement"
 }
 ```
 * **Réponse HTTP 200** :
@@ -276,10 +276,10 @@ Produit un instantané réglementaire scellé par checksum SHA-256 calculé sur 
 * **Réponse HTTP 200** :
 ```json
 {
-  "snapshotId": "kh-nordwave-mcx-2027-secnumcloud-1789311842",
+  "snapshotId": "kh-demo-engagement-2027-secnumcloud-1789311842",
   "sourceSystem": "knowledge-hub",
   "schemaVersion": "2.0",
-  "createdAt": "2026-09-13T15:04:02Z",
+  "createdAt": "2026-09-17T15:04:02Z",
   "checksum": "sha256:7a3c611095db2cd333cae158a715aea5dae6b55c381745c6423b1b5674313f4c",
   "data": {
     "requirements": [
@@ -298,7 +298,7 @@ Produit un instantané réglementaire scellé par checksum SHA-256 calculé sur 
           }
         ],
         "appliesTo": {
-          "programRef": "NORDWAVE-MCX-2027",
+          "programRef": "DEMO-MCX-2027",
           "lotRefs": [],
           "pbsRefs": []
         }
@@ -318,7 +318,7 @@ Calcule l'adéquation entre les compétences requises par l'architecture du proj
   "status": "ok",
   "count": 11,
   "data": {
-    "engagement": "nordwave-mcx-2027",
+    "engagement": "your-engagement",
     "coverage_percentage": 77.8,
     "risk_level": "moderate",
     "total_required_skills": 9,
@@ -336,9 +336,9 @@ Génère le squelette formel de document d'architecture (`DocumentBlueprint`) et
 * **Corps de requête** :
 ```json
 {
-  "engagement": "nordwave-mcx-2027",
+  "engagement": "your-engagement",
   "project_title": "Système d'Architecture Télécom & Plateforme Sécurisée",
-  "client_name": "Opérateur NordWave"
+  "client_name": "Demo Operator"
 }
 ```
 * **Réponse HTTP 200** :
@@ -346,7 +346,7 @@ Génère le squelette formel de document d'architecture (`DocumentBlueprint`) et
 {
   "status": "ok",
   "blueprint": {
-    "documentId": "nordwave-mcx-2027-hld-zero-draft",
+    "documentId": "your-engagement-hld-zero-draft",
     "title": "HLD — Système d'Architecture Télécom & Plateforme Sécurisée",
     "sections": []
   },
@@ -383,7 +383,7 @@ Fournit des suggestions de rédaction pour les blocs de prose de `document-engin
   },
   "warnings": [],
   "basedOnModelHash": "fa1ecf2b8be24ab7",
-  "generatedAt": "2026-09-13T16:00:00Z"
+  "generatedAt": "2026-09-17T16:00:00Z"
 }
 ```
 
@@ -394,5 +394,3 @@ Fournit des suggestions de rédaction pour les blocs de prose de `document-engin
 Afin de garantir une interopérabilité sans faille entre implémentations Python et TypeScript, les vecteurs de référence suivants sont tenus à disposition dans le dépôt :
 * **Vecteur de Test Canonique (`canonical-json v1` + SHA-256)** : [`tests/fixtures/canonical_conformity_vector.json`](../../tests/fixtures/canonical_conformity_vector.json)
 * **Jeu d'Essai CCTP de Référence (Messagerie OIV)** : [`fixtures/rfp_messagerie_securisee.txt`](../../fixtures/rfp_messagerie_securisee.txt) (SHA-256: `792b9d332e8ccc589a2d74468d56bc761539542fc8d337a71d77854f87c258b5`)
-
-

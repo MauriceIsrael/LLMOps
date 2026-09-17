@@ -6,9 +6,14 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  DEMO_ENGAGEMENT_ID: demo-engagement-2027
+
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -56,7 +61,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-v2-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
 
       - name: Install dependencies
         run: poetry install --no-interaction
@@ -72,7 +79,7 @@ jobs:
           GRAPH_BACKEND: ladybug
         run: |
           poetry run python -m pipelines.ingestion.migrate_adr0015
-          poetry run elicit publish --engagement nordwave-mcx-2027
+          poetry run elicit publish --engagement ${{ env.DEMO_ENGAGEMENT_ID }}
 
       - name: Run Unit & Integration Tests
         env:
@@ -83,6 +90,8 @@ jobs:
 
   frontend-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -107,6 +116,8 @@ jobs:
 
   security-secrets-scan:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:

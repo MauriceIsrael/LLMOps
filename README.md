@@ -27,7 +27,7 @@ Add the following to your MCP client configuration (e.g. `claude_desktop_config.
 }
 ```
 
-> **Public Demo Instance Notice:** Exposes both Knowledge plane and Engagement plane (scoped strictly to reference engagement `nordwave-mcx-2027`). Read-only, rate-limited, no SLA. The token above (`demo-public-2026-08`) is intentionally public and rotated periodically. Do not use it for private data.
+> **Public Demo Instance Notice:** Exposes both Knowledge plane and Engagement plane (scoped strictly to the reference demo engagement). Read-only, rate-limited, no SLA. The token above (`demo-public-2026-08`) is intentionally public and rotated periodically. Do not use it for private data.
 
 ### 2. Local Connection (STDIO via Poetry)
 
@@ -59,7 +59,7 @@ make demo-check
 
 **Expected Node Counts after Demo Check (`make demo-check`):**
 - **Knowledge Plane (`data/knowledge.kuzu`)**: `Asset`: ~46 nodes, `GlossaryTerm`: ~10 nodes.
-- **Engagement Plane (`nordwave-mcx-2027`)**: `Subject`: 8 nodes, `Statement`: 9 nodes, `Conflict`: 2 nodes.
+- **Engagement Plane (`demo-engagement-2027`)**: `Subject`: 8 nodes, `Statement`: 9 nodes, `Conflict`: 2 nodes.
 
 ---
 
@@ -98,7 +98,7 @@ make test
 make lint
 
 # Run interactive CLI elicitation scan
-poetry run elicit scan --engagement nordwave-mcx-2027 --max-questions 3
+poetry run elicit scan --engagement demo-engagement-2027 --max-questions 3
 ```
 
 ---
@@ -106,7 +106,6 @@ poetry run elicit scan --engagement nordwave-mcx-2027 --max-questions 3
 ## Documentation Links
 
 - **[Knowledge Hub API v1 Contract](docs/contracts/knowledge-hub-api-v1.md)**: Formal contract specification for the Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).
-- **[AI Integration Playbook](AI_INTEGRATION_PLAYBOOK.md)**: Multi-repo governance rules, pre-flight checklist, and operational directives for AI agents.
 - **[Third-Party Integration Guide](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**: Full guide to writing custom renderers (DOCX, PPTX, Web UI) and consuming sealed snapshots.
 - **[External Interface Specification (INTERFACE.md)](docs/INTERFACE.md)**: Technical MCP contract, response envelopes, JSON Schemas, and transport protocols.
 - **[Epistemic Alignment Guide (EPISTEMIC-ALIGNMENT.md)](docs/EPISTEMIC-ALIGNMENT.md)**: Correspondence table between KH confidence and Architecture Studio proof models.

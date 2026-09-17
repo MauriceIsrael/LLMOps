@@ -2,12 +2,17 @@ name: Semantic Evals & Non-Regression
 
 on:
   schedule:
-    - cron: '0 2 * * 0' # Hebdomadaire (dimanche à 2h du matin) au lieu de quotidien
+    - cron: '0 2 * * 0' # Hebdomadaire (dimanche à 2h du matin)
   workflow_dispatch:
+
+env:
+  DEMO_ENGAGEMENT_ID: demo-engagement-2027
 
 jobs:
   run-evals:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -28,9 +33,11 @@ jobs:
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
 
-      - name: Install dependencies
-        run: poetry install --no-interaction
+      - name: Install dependencies (including eval group)
+        run: poetry install --no-interaction --with eval
 
       - name: Ingest KB and migrate databases locally for evals
         env:
@@ -38,7 +45,7 @@ jobs:
           GRAPH_BACKEND: ladybug
         run: |
           poetry run python -m pipelines.ingestion.migrate_adr0015
-          poetry run elicit publish --engagement nordwave-mcx-2027
+          poetry run elicit publish --engagement ${{ env.DEMO_ENGAGEMENT_ID }}
 
       - name: Run ADR Benchmark & Evaluation Harness
         env:

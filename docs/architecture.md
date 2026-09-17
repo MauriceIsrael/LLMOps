@@ -37,12 +37,12 @@ flowchart TB
         GL["Ladybug Graph Loader"]
     end
 
-    subgraph Elicitation_Engine ["Moteur d'Élicitation Collaboratif - LangGraph"]
-        SCAN["Scan Flow: Détections, Gaps G4 & Level Gate"]
+    subgraph Elicitation_Engine ["Moteur d'Elicitation Collaboratif - LangGraph"]
+        SCAN["Scan Flow: Detections, Gaps G4 & Level Gate"]
         INTAKE["Intake Flow: Saisie, Confiance & Check Node"]
-        ASSEMBLE["Assembly Flow: Assemblage & Maturité"]
+        ASSEMBLE["Assembly Flow: Assemblage & Maturite"]
         HARVEST["Harvest Flow: Extraction de Patterns"]
-        CHK["SQLite Checkpointer: Durabilité"]
+        CHK["SQLite Checkpointer: Durabilite"]
     end
 
     subgraph Storage_Layer ["Persistance"]
@@ -58,10 +58,10 @@ flowchart TB
         FSERV["FastMCP Server Engine"]
     end
 
-    subgraph Consumer_Layer ["Agents, Renderers & Évaluations"]
-        AGENT["Agent IA / Antigravity / Client MCP"]
+    subgraph Consumer_Layer ["Agents, Renderers & Evaluations"]
+        AGENT["Agent IA / MCP Client"]
         RENDers["Renderers: Markdown / Mermaid / Draw.io"]
-        EVAL["Évaluations: DeepEval & Promptfoo"]
+        EVAL["Evaluations: DeepEval & Promptfoo"]
     end
 
     Data_Layer --> MP
@@ -103,7 +103,7 @@ erDiagram
     Asset ||--o{ Control : COMPLIES_WITH
     Principle ||--o{ Control : SATISFIES
     Control ||--o{ Control : FRAMEWORK_VERSION
-    
+
     Question }|--|| Subject : TARGETS
     Statement }|--|| Subject : ABOUT
     Statement }|--|| Question : ANSWERS
@@ -164,21 +164,21 @@ Le parsing des connaissances s'effectue en deux étapes complémentaires : l'**i
 ```mermaid
 flowchart LR
     subgraph Step1 ["1. Ingestion Documentaire (KB)"]
-        MD_FILE["Fichier Markdown (ADR / Glossaire / Principe / Contrôle)"]
+        MD_FILE["Fichier Markdown (ADR / Glossaire / Principe / Controle)"]
         PARSER["Markdown & YAML Parser (pyyaml)"]
         EXTRACTOR["LlamaIndex PropertyGraphExtractor"]
         LBUG_LOADER["Ladybug Graph Loader (Cypher MERGE)"]
-        
+
         MD_FILE --> PARSER
         PARSER -->|"Frontmatter YAML + Sections"| EXTRACTOR
         EXTRACTOR -->|"Triplets (Sujet -> Rel -> Objet)"| LBUG_LOADER
     end
 
-    subgraph Step2 ["2. Parsing des Réponses (Intake)"]
-        ANS_TEXT["Réponse Textuelle de l'Architecte"]
+    subgraph Step2 ["2. Parsing des Reponses (Intake)"]
+        ANS_TEXT["Reponse Textuelle de l'Architecte"]
         INTAKE_GRAPH["LangGraph Intake Flow (intake.py)"]
-        STMTS["Énoncés (Statement) + Confiance + Incertitudes"]
-        
+        STMTS["Enonces (Statement) + Confiance + Incertitudes"]
+
         ANS_TEXT --> INTAKE_GRAPH
         INTAKE_GRAPH --> STMTS
     end
@@ -194,7 +194,7 @@ flowchart LR
    - S'appuie sur **LlamaIndex PropertyGraphIndex** et le composant `SchemaLLMPathExtractor`.
    - Le LLM analyse le texte de chaque section pour extraire automatiquement les triplets d'ontologie `(Entité -> Relation -> Entité)` selon le schéma (ex: `Principle` `-[:MITIGATES]->` `Risk`).
 
-3. **Chargement Idempotent dans Kùzu DB (`graph_loader.py`) :**
+3. **Chargement Idempotent dans LadybugDB (`graph_loader.py`) :**
    - Convertit les métadonnées et triplets en requêtes Cypher `MERGE`.
    - L'utilisation de `MERGE` garantit que l'ingestion est **100% idempotente** : ré-exécuter le pipeline met à jour les propriétés sans dupliquer aucun nœud ni aucune relation.
 
@@ -206,13 +206,13 @@ flowchart LR
    - Chaque énoncé reçoit un niveau de confiance (`assumed`, `designed`, `committed`).
    - Si la réponse exprime une indétermination (ex: *"nous ne savons pas encore pour la bande passante"*), le parser crée une entité `Uncertainty` au lieu d'inventer une valeur factuelle.
 3. **Traçabilité des Références (`BASED_ON`) :**
-   - Si l'architecte mentionne un document de la KB (ex: `projects/nordwave-mcx-2027/draft#section-5.4`), le parser relie l'énoncé au nœud `Asset` correspondant via la relation `BASED_ON`.
+   - Si l'architecte mentionne un document de la KB, le parser relie l'énoncé au nœud `Asset` correspondant via la relation `BASED_ON`.
 
 ---
 
 ## 6. Detail du Moteur d'Élicitation (`tools/elicitation/`)
 
-Le moteur d'élicitation structure le travail collaboratif entre plusieurs architectes système fictifs ou réels (*Amina Duarte* - Architecte Service MCX, *Rui Vasconcelos* - Architecte Cœur Mobile, *Sofia Lindqvist* - Architecte Référente).
+Le moteur d'élicitation structure le travail collaboratif entre plusieurs architectes système (*Amina Duarte* - Architecte Service, *Rui Vasconcelos* - Architecte Cœur Mobile, *Sofia Lindqvist* - Architecte Référente).
 
 ### 6.1 Modèle de Maturité par Sujet (Level Gate)
 Chaque sujet d'architecture (`Subject`) possède une maturité observable qui progresse par paliers stricts :
@@ -225,15 +225,15 @@ Chaque sujet d'architecture (`Subject`) possède une maturité observable qui pr
 > **Règle du Level Gate :** Le détecteur de manques (`detect_gaps_node`) retient (`held_premature: True`) les questions exigeant un niveau supérieur (ex: `L3_decided` ou `L4_specified`) tant que le sujet concerné n'a pas atteint le niveau requis. Cela évite d'engorger la réflexion avec des détails prématurés.
 
 ### 6.2 Détection de Manques et Décomposition Générative (`scan.py`)
-- **Éradication des sujets fantômes :** Le scan interroge Kùzu DB dynamiquement via `get_subjects_maturity_board()` pour ne scanner que les sujets **réellement nés dans le graphe**.
-- **Effet Génératif de la Décomposition :** Lorsqu'un sujet parent (ex: `mcx-services`) atteint `L2_decomposed`, il matérialise ses sous-sujets (`group-management`, `floor-control`, `media-distribution`, `lmr-interworking`) à `L0_named`. Ces nouveaux sujets engendrent immédiatement leurs propres questions de cadrage et leurs manques retenus par le Level Gate.
+- **Éradication des sujets fantômes :** Le scan interroge LadybugDB dynamiquement via `get_subjects_maturity_board()` pour ne scanner que les sujets **réellement nés dans le graphe**.
+- **Effet Génératif de la Décomposition :** Lorsqu'un sujet parent atteint `L2_decomposed`, il matérialise ses sous-sujets à `L0_named`. Ces nouveaux sujets engendrent immédiatement leurs propres questions de cadrage et leurs manques retenus par le Level Gate.
 
 ### 6.3 Conflits Déclarés vs Détectés (`intake.py` & `repository.py`)
 - **Déclaré (`origin: declared`)** : Un architecte conteste explicitement un énoncé via `contest_statement()`. L'énoncé cible passe au statut `contested`, un contre-énoncé `assumed` est créé, et un nœud `Conflict` est réifié.
 - **Détecté (`origin: detected`)** : Le nœud de vérification (`check_node` dans `intake.py`) exécute des requêtes Cypher pour détecter automatiquement des affirmations contradictoires sur le même sujet/propriété sans intervention humaine.
 
 ### 6.4 Arbitrage Non-Manichéen (`arbitrate_conflict`)
-L'arbitrage d'un conflit par un architecte référent (Sofia) ne se limite pas à désigner un vainqueur :
+L'arbitrage d'un conflit par un architecte référent ne se limite pas à désigner un vainqueur :
 - **Conservation & Amendement :** Permet de conserver un énoncé tout en amendant le second (ex: restriction de portée) pour préserver deux vérités complémentaires.
 - **Traçabilité des Motifs :** L'explication d'arbitrage est enregistrée dans le nœud `Conflict` qui passe au statut `arbitrated`, et l'historique des reformulations est conservé sous `previous_values`.
 
@@ -246,7 +246,7 @@ L'arbitrage d'un conflit par un architecte référent (Sofia) ne se limite pas �
 ### 6.6 Ingestion Documentaire Spécifiée (`SPEC-DOCUMENT-INGESTION.md`)
 - **Pipeline d'ingestion de livrables et drafts :** Lit et découpe les documents d'architecture `.md` selon leurs titres de sections (`1.1`, `4.1`, `5.4`).
 - **Extraction sémantique d'énoncés :** Chaque section est parsée pour en extraire les énoncés (`Statement`) avec leur niveau de confiance (`designed`, `stated-by-client`, `assumed`).
-- **Rapprochement Cypher avec Kùzu DB :** Les énoncés extraits sont rattachés aux sujets (`ABOUT`) et au blueprint (`requires`), permettant la réconciliation automatique des manques de la base.
+- **Rapprochement Cypher avec LadybugDB :** Les énoncés extraits sont rattachés aux sujets (`ABOUT`) et au blueprint (`requires`), permettant la réconciliation automatique des manques de la base.
 
 ### 6.7 Workflow de Contributions Externes (`contribution.py`)
 - **Gestion des apports externes :** Permet à un intervenant externe de soumettre un retour d'expérience ou une contrainte terrain (`elicit contribute`).
@@ -274,11 +274,11 @@ L'arbitrage d'un conflit par un architecte référent (Sofia) ne se limite pas �
 
 ### 6.12 Notifications Multi-Canaux & Cycle de Gouvernance des REX
 - **Dispatch Multi-Canaux (`notifier.py`) :** Lorsqu'une suggestion REX ou d'amélioration de la base est émise (`suggest_knowledge_improvement` ou `elicit harvest`), elle est relayée en temps réel via :
-  1. Discord Webhook (carte Embed riche avec métadonnées, auteur, contact et extrait Markdown).
-  2. Push mobile / desktop instantané via `ntfy.sh/llmops-maurice`.
+  1. Discord Webhook (carte Embed riche avec métadonnées, auteur, contexte projet, raison et extrait Markdown).
+  2. Push mobile / desktop instantané via `ntfy.sh`.
   3. Journalisation d'alerte Cloud Logging (GCP Cloud Run).
   4. Archivage persistant dans `data/suggestions/SUG-*.json`.
-- **Cycle d'Arbitrage de Gouvernance :** Les suggestions suivent un cycle d'approbation à 4 états (`pending_review` → `approved` / `needs_study` / `rejected`), permettant au Lead Architect (Maurice) de valider la promotion, de demander un complément d'étude technique, ou de clôturer la proposition.
+- **Cycle d'Arbitrage de Gouvernance :** Les suggestions suivent un cycle d'approbation à 4 états (`pending_review` → `approved` / `needs_study` / `rejected`), permettant au Lead Architect de valider la promotion, de demander un complément d'étude technique, ou de clôturer la proposition.
 
 ---
 
@@ -291,14 +291,14 @@ Conformément à l'**ADR-0015**, la plateforme repose sur une séparation physiq
 data/
   knowledge.lbug                   # Base Connaissances Réutilisable (Asset, GlossaryTerm, SUPERSEDES)
   engagements/
-    nordwave-mcx-2027.lbug         # Base Engagement Projet (Subject, Statement, Question, Conflict)
+    demo-engagement-2027.lbug      # Base Engagement Projet de Démo (Subject, Statement, Question, Conflict)
     <engagement-id>.lbug           # Base dédiée par projet client
 ```
 
 ### 7.2 Découverte Dynamique & Routage des Connexions (`open_connection`)
 - **Découverte Automatique (`discover_engagements`)** : Les bases d'engagement sont découvertes dynamiquement par scan du répertoire `data/engagements/*.lbug` (et compatibilité `.kuzu`).
 - **Routage & Sûreté des Connexions (`open_connection`)** :
-  1. **Autorisation en premier** (`authorise(caller, scope)` est appelé avant toute résolution de fichier).
+  1. **Autorisation en premier** (`authorise(caller, scope)` est appelé avant toute résolution de fichier).\
   2. **Validation d'identifiant** : Format contraint à `[a-z0-9-]+` (rejet de `/`, `\`, `..`).
   3. **Connexion en lecture seule** : Pool de connexions LadybugDB en lecture seule.
 
@@ -314,51 +314,46 @@ La structure du schéma graphique pour chaque plan est documentée de manière a
 
 La validation repose sur des tests d'intégration complets et des évaluations sémantiques :
 
-1. **Scénario Référent d'Élicitation Collaborative ([test_scenario_nordwave_mcx.py](../tests/integration/test_scenario_nordwave_mcx.py)) :**
+1. **Scénario Référent d'Élicitation Collaborative ([test_scenario_mcx.py](../tests/integration/test_scenario_nordwave_mcx.py)) :**
    - Simulation bout-en-bout de 8 actes avec 3 architectes fictifs (*Amina Duarte*, *Rui Vasconcelos*, *Sofia Lindqvist*).
-   - Génération automatisée d'un rapport de progression visuel complet ([artifacts/nordwave-mcx-2027/progression.md](../artifacts/nordwave-mcx-2027/progression.md)) projetant l'état réel du graphe à chaque étape (Maturity Boards, tables de preuves non-tronquées, diagrammes Mermaid).
+   - Génération automatisée d'un rapport de progression visuel complet projetant l'état réel du graphe à chaque étape (Maturity Boards, tables de preuves non-tronquées, diagrammes Mermaid).
 2. **DeepEval Metrics & Promptfoo Benchmarking (`tests/evals/`) :**
    - **FaithfulnessMetric & AnswerRelevancyMetric** : Évaluation de la fidélité des réponses formulées à partir des outils FastMCP.
    - Assertion automatisée sur le dataset `adr_qa_dataset.json`.
 
 ---
 
-## 9. Diagramme de Flux d'Interactions (Antigravity ↔ GCP Cloud Run ↔ OpenAI)
+## 9. Diagramme de Flux d'Interactions (Agent ↔ GCP Cloud Run ↔ OpenAI)
 
-Le schéma ci-dessous détaille le flux d'exécution et les échanges de données sécurisés entre l'environnement de développement local (Antigravity), le serveur FastMCP hébergé en Serverless sur GCP Cloud Run, et l'API OpenAI :
+Le schéma ci-dessous détaille le flux d'exécution et les échanges de données sécurisés entre l'environnement de développement local (client MCP), le serveur FastMCP hébergé en Serverless sur GCP Cloud Run, et l'API OpenAI :
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Utilisateur / Développeur
-    participant AG as Antigravity (IDE Local / Agent)
-    box GCP Cloud Run (Serverless Europe-West1)
-        participant MCP as Serveur FastMCP (FastAPI/Uvicorn)
-        participant SM as GCP Secret Manager
-        participant LBUG as LadybugDB Graph Store (Lecture Seule)
-    end
-    participant OAI as OpenAI API (Embeddings / LLM)
+    actor User as Utilisateur / Developpeur
+    participant AG as Client MCP (IDE Local / Agent)
+    participant MCP as Serveur FastMCP (FastAPI/Uvicorn)
+    participant SM as GCP Secret Manager
+    participant LBUG as LadybugDB Graph Store
+    participant OAI as OpenAI API
 
-    User->>AG: Requête (ex: "Génère le document HLA selon la KB")
+    User->>AG: Requete (ex: "Genere le document HLA selon la KB")
     AG->>AG: Analyse du besoin & identification de l'outil FastMCP
-    
-    note over AG,MCP: Connexion HTTP/SSE Sécurisée sur Port 8000 (HTTPS)
-    AG->>MCP: Appel d'outil FastMCP JSON-RPC (POST /messages?session_id=...)<br/>ex: get_asset("TPL-hla-section-map") / query_graph(...)
-    
-    rect rgb(240, 248, 255)
-        note over MCP,SM: Résolution des secrets & interrogation du graphe
-        MCP->>SM: Récupération sécurisée de OPENAI_API_KEY (IAM Role)
-        SM-->>MCP: Clé API déchiffrée en mémoire conteneur
-        MCP->>LBUG: Exécution requête Cypher / Lecture documentaire
-        LBUG-->>MCP: Résultats typés (Entités, ADRs, Principes, Dépendances)
+
+    note over AG,MCP: Connexion HTTP/SSE Securisee sur Port 8000 (HTTPS)
+    AG->>MCP: Appel d'outil FastMCP JSON-RPC (POST /messages)
+
+    MCP->>SM: Recuperation securisee de OPENAI_API_KEY (IAM Role)
+    SM-->>MCP: Cle API dechiffree en memoire conteneur
+    MCP->>LBUG: Execution requete Cypher / Lecture documentaire
+    LBUG-->>MCP: Resultats types (Entites, ADRs, Principes, Dependances)
+
+    opt Appel facultatif a OpenAI (Extraction semantique ou Evaluations)
+        MCP->>OAI: Requete Completion / Embedding (api.openai.com)
+        OAI-->>MCP: Reponse LLM / Embeddings
     end
 
-    opt Appel facultatif à OpenAI (Extraction sémantique ou Évaluations)
-        MCP->>OAI: Requête Completion / Embedding (api.openai.com)
-        OAI-->>MCP: Réponse LLM / Embeddings
-    end
-
-    MCP-->>AG: Stream SSE (text/event-stream) — Résultat structuré JSON-RPC
-    AG->>AG: Synthèse et construction de l'artefact (HLA / Draw.io / Doc)
-    AG-->>User: Présentation du résultat final dans l'interface Antigravity
+    MCP-->>AG: Stream SSE (text/event-stream) — Resultat structure JSON-RPC
+    AG->>AG: Synthese et construction de l'artefact (HLA / Draw.io / Doc)
+    AG-->>User: Presentation du resultat final
 ```
