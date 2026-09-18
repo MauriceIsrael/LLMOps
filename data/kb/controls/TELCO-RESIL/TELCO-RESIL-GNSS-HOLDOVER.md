@@ -13,7 +13,7 @@ status: active
 confidence: verified
 last_reviewed: 2026-09-08
 owner: transmission-architecture-wg
-source_ref: "ITU-T G.811.1 & LUMICC Lot 1 Statement of Work Section 6"
+source_ref: "ITU-T G.811.1 & Mission-Critical SoW §6"
 ---
 
 # TELCO-RESIL-GNSS-HOLDOVER — GNSS Denial Resilience & Atomic Clock Holdover > 30 Days
