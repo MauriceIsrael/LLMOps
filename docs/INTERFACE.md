@@ -93,7 +93,7 @@ All FastMCP tools return a **standardized JSON envelope**:
 | `get_knowledge_analytics` | Knowledge base volume indicators, relations count, and lifecycle stats | *(none)* |
 | `get_domain_prominence_report` | Domain gravity, cross-domain dependencies, and prominence score report | *(none)* |
 | `list_frameworks` | List supported regulatory security frameworks (14 frameworks: NIS2, CER, CRA, 3GPP, RGPD, GSMA, TELCO-RESIL, etc.) | *(none)* |
-| `list_controls` | List security controls with implementing principles and patterns (53 controls) | `framework` |
+| `list_controls` | List security controls with implementing principles and patterns (53 controls) | `framework`, `domain`, `severity` |
 | `get_compliance_trail` | Lineage trail from regulatory control to satisfying architecture assets | `control_id` |
 | `get_compliance_matrix` | Project compliance matrix and gaps for a regulatory framework | `framework`, `engagement` |
 | `list_skills` | List canonical engineering skills, domains, and criticality levels | `domain` |
@@ -103,7 +103,7 @@ All FastMCP tools return a **standardized JSON envelope**:
 | `get_rfp_compliance_matrix` | Retrieve triangular compliance matrix for a shredded RFP engagement | `engagement` |
 | `trigger_rfp_elicitation` | Generate targeted elicitation questions for unaddressed RFP requirements/gaps | `engagement` |
 | `suggest_knowledge_improvement` | Submit external REX, candidate pattern or feedback with instant Discord dispatch | `title`, `rationale`, `suggested_change`, `author`, `contact_email`, `source_engagement` |
-| `query_graph` | Execute read-only Cypher query on knowledge graph | `cypher_query` |
+| `query_graph` | Execute read-only Cypher query on knowledge graph | `cypher_query`, `engagement` *(optional, routes to engagement DB)* |
 | `get_graph_summary` | Graph summary node/rel counts and schema version | *(none)* |
 
 ---
@@ -115,7 +115,7 @@ All FastMCP tools return a **standardized JSON envelope**:
 | `get_subject` | Subject maturity state and associated active statements count | `engagement`, `subject` |
 | `get_subject_trajectory` | Maturity timeline history and questions answered for a subject | `engagement`, `subject` |
 | `get_board` | Per-subject maturity board (`L0_named` to `L4_specified`) and staleness | `engagement` |
-| `get_statements` | Active architectural statements with confidence and attribution | `engagement`, `subject` |
+| `get_statements` | Active architectural statements with confidence and attribution | `engagement`, `subject`, `section`, `status` |
 | `get_conflicts` | Open and arbitrated architecture conflicts (`contradiction`, `principle_violation`, `stale_basis`) | `engagement`, `status` |
 | `get_open_questions` | Open elicitation questions routed to specific roles | `engagement`, `role` |
 | `get_diagram_graph` | Structured component graph and Mermaid flowchart syntax string | `engagement`, `format` |

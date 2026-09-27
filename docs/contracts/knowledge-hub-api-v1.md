@@ -4,7 +4,7 @@ title: Spécification Contractuelle de l'API Knowledge Hub (v1.0)
 schemaVersion: "1.0"
 status: active
 owner: core-owner-llmops
-last_reviewed: 2026-09-17
+last_reviewed: 2026-09-27
 related: [ADR-0015, ADR-SUITE-05, ADR-KH-01, ADR-DE-05, ADR-DS-07, TPL-third-party-integration-guide]
 ---
 
@@ -167,7 +167,7 @@ Déstructure un texte de CCTP ou appel d'offres et projette les exigences extrai
 
 ---
 
-### 3.3 `POST /api/elicitation/trigger` — Déclenchement Asynchrone d'Élicitation
+### 3.4 `POST /api/elicitation/trigger` — Déclenchement Asynchrone d'Élicitation
 Analyse les lacunes (gaps) d'un engagement et produit des questions ciblées de niveau L2 routées aux rôles d'experts.
 * **Usage** : Déclenché out-of-band (à la demande de l'architecte ou via l'orchestrateur de build), sans couplage bloquant dans le sas d'admission.
 * **Corps de requête** :
@@ -205,7 +205,7 @@ Analyse les lacunes (gaps) d'un engagement et produit des questions ciblées de 
 
 ---
 
-### 3.4 `GET /api/elicitation/questions` — Consultation des Questions Ouvertes
+### 3.5 `GET /api/elicitation/questions` — Consultation des Questions Ouvertes
 Liste les questions d'élicitation d'un engagement, avec filtrage optionnel par rôle d'expert.
 * **Paramètres de requête** :
   * `role` *(optionnel)* : `lead-architect` | `security-architect` | `telco-specialist` | `compliance-lead` | `cloud-architect`
@@ -228,7 +228,7 @@ Liste les questions d'élicitation d'un engagement, avec filtrage optionnel par 
 
 ---
 
-### 3.5 `GET /api/arbitration/board` — Tableau de Maturité d'Architecture (L0 à L4)
+### 3.6 `GET /api/arbitration/board` — Tableau de Maturité d'Architecture (L0 à L4)
 Expose la maturité d'ingénierie par sujet technique pour affichage direct dans les outils consommateurs.
 * **Réponse HTTP 200** :
 ```json
@@ -250,7 +250,7 @@ Expose la maturité d'ingénierie par sujet technique pour affichage direct dans
 
 ---
 
-### 3.6 `GET /api/arbitration/conflicts` — Controverses et Conflits d'Architecture
+### 3.7 `GET /api/arbitration/conflicts` — Controverses et Conflits d'Architecture
 Liste les contradictions détectées entre exigences ou entre choix d'architecture nécessitant un arbitrage humain.
 * **Paramètres de requête** :
   * `status` *(optionnel)* : `open` | `resolved` | `waived` (défaut : `open`).
@@ -274,7 +274,7 @@ Liste les contradictions détectées entre exigences ou entre choix d'architectu
 
 ---
 
-### 3.7 `GET /api/arbitration/statements` — Énoncés d'Architecture Actifs
+### 3.8 `GET /api/arbitration/statements` — Énoncés d'Architecture Actifs
 Retourne les énoncés d'architecture (`Statement`) associés à un engagement, avec filtrage optionnel par sujet, section ou statut.
 * **Paramètres de requête** :
   * `engagement` *(optionnel via query ou header `X-Engagement-Id`)* : Identifiant d'engagement (ex: `nordwave-mcx-2027`).
@@ -302,7 +302,7 @@ Retourne les énoncés d'architecture (`Statement`) associés à un engagement, 
 
 ---
 
-### 3.8 `POST /api/knowledge/suggestions` — Boucle de REX et Curation Amont
+### 3.9 `POST /api/knowledge/suggestions` — Boucle de REX et Curation Amont
 Permet de soumettre un motif éprouvé, un arbitrage ou une correction vers la gouvernance du Hub.
 * **Corps de requête** :
 ```json
@@ -325,7 +325,7 @@ Permet de soumettre un motif éprouvé, un arbitrage ou une correction vers la g
 
 ---
 
-### 3.8 `GET /api/compliance/conformity-snapshot` — Snapshot de Conformité Scellé
+### 3.10 `GET /api/compliance/conformity-snapshot` — Snapshot de Conformité Scellé
 Produit un instantané réglementaire scellé par checksum SHA-256 calculé sur le profil strict `canonical-json (v1)`.
 * **Paramètres de requête** :
   * `framework` : `SecNumCloud` | `ISO27001` | `NIS2` | `3GPP` | `ALL` (défaut : `ALL`).
@@ -367,7 +367,7 @@ Produit un instantané réglementaire scellé par checksum SHA-256 calculé sur 
 
 ---
 
-### 3.9 `GET /api/skills/matrix` — Matrice de Staffing & Risque WBS
+### 3.11 `GET /api/skills/matrix` — Matrice de Staffing & Risque WBS
 Calcule l'adéquation entre les compétences requises par l'architecture du projet et les ressources mobilisées.
 * **Réponse HTTP 200** :
 ```json
@@ -388,7 +388,7 @@ Calcule l'adéquation entre les compétences requises par l'architecture du proj
 
 ---
 
-### 3.10 `POST /api/documents/zero-draft-blueprint` — Génération Blueprint & ProseStore Initial
+### 3.12 `POST /api/documents/zero-draft-blueprint` — Génération Blueprint & ProseStore Initial
 Génère le squelette formel de document d'architecture (`DocumentBlueprint`) et son magasin de prose initial (`ProseStore`) à partir des actifs du Hub et de l'engagement ciblé.
 * **Corps de requête** :
 ```json
@@ -418,7 +418,7 @@ Génère le squelette formel de document d'architecture (`DocumentBlueprint`) et
 
 ---
 
-### 3.11 `POST /api/prose/suggest-batch` — Assistance de Rédaction Prose par Lot (ADR-DE-02)
+### 3.13 `POST /api/prose/suggest-batch` — Assistance de Rédaction Prose par Lot (ADR-DE-02)
 Fournit des suggestions de rédaction pour les blocs de prose de `document-engine` en exploitant les motifs d'architecture du Knowledge Hub, sans jamais altérer directement le `ProseStore` du compilateur pur.
 * **Corps de requête** :
 ```json
@@ -445,6 +445,75 @@ Fournit des suggestions de rédaction pour les blocs de prose de `document-engin
 ```
 
 ---
+
+### 3.14 `GET /api/knowledge/search` - Recherche d'Actifs
+
+Recherche plein texte dans les actifs du plan Connaissances.
+
+- `q` : Texte de recherche libre.
+- `type` *(optionnel)* : `decision` | `principle` | `pattern` | `glossary` | `skill`.
+- `domain` *(optionnel)* : Filtre par domaine.
+
+```json
+{"status": "ok", "count": 3, "data": [{"id": "ADR-0015", "type": "decision", "title": "Separation Physique Dual-Plane"}]}
+```
+
+---
+
+### 3.15 `GET /api/knowledge/engagements` - Liste des Engagements
+
+Decouverte dynamique des engagements actifs.
+
+```json
+{"status": "ok", "count": 2, "data": [{"id": "nordwave-mcx-2027"}, {"id": "demo-engagement-2027"}]}
+```
+
+---
+
+### 3.16 `GET /api/compliance/frameworks` - Liste des Referentiels
+
+Liste les 14 referentiels reglementaires supportes.
+
+```json
+{"status": "ok", "count": 14, "data": [{"id": "NIS2"}, {"id": "3GPP"}]}
+```
+
+---
+
+### 3.17 `GET /api/compliance/frameworks/applicable` - Referentiels Applicables
+
+Retourne ou met a jour les referentiels applicables a un engagement.
+
+- Methodes : `GET` (lecture) / `PUT` ou `POST` (mise a jour).
+- `engagement` *(optionnel)* : Identifiant d'engagement.
+
+```json
+{"status": "ok", "engagement": "nordwave-mcx-2027", "applicable_frameworks": ["NIS2", "3GPP", "GSMA"]}
+```
+
+---
+
+### 3.18 `GET /api/skills` - Liste du Referentiel de Competences
+
+Liste les 9 competences canoniques d'ingenierie telecom et securite.
+
+- `domain` *(optionnel)* : Filtre par domaine.
+
+```json
+{"status": "ok", "count": 9, "data": [{"id": "SKL-CRYPTO-HSM", "domain": "security", "criticality": "critical"}]}
+```
+
+---
+
+### 3.19 `GET /snapshot/{snapshot_id}` - Instantane Scelle par Identifiant
+
+Retourne un instantane scelle par son identifiant unique (meme format que section 3.2).
+
+- Parametre URL : `snapshot_id` (ex: `snapshot-2026-09-17-fa1ecf2`).
+- HTTP 404 si l'identifiant est inconnu.
+
+---
+
 
 ## 4. Oracles & Vecteurs de Test Partagés
 

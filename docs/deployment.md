@@ -29,9 +29,9 @@ The production deployment (`llmops-mcp-server` in region `europe-west1`) is conf
       - '--cpu=1'
       - '--memory=512Mi'
       - '--set-env-vars'
-      - 'GRAPH_BACKEND=ladybug,LLMOPS_TRANSPORT=sse,LLMOPS_PLANE=knowledge'
+      - 'GRAPH_BACKEND=ladybug,LLMOPS_TRANSPORT=sse,LLMOPS_PLANE=all,ENGAGEMENT_TOKENS=demo-public-2026-08:nordwave-mcx-2027'
       - '--set-secrets'
-      - 'SERVER_TOKEN=llmops-demo-token:latest'
+      - 'SERVER_TOKEN=llmops-auth-token:latest,OWNER_NOTIFICATION_WEBHOOK=llmops-discord-webhook:latest'
       - '--port'
       - '8000'
 ```
@@ -51,7 +51,7 @@ The production deployment (`llmops-mcp-server` in region `europe-west1`) is conf
 ## 2. Public Demo vs Private Deployment Authentication
 
 ### Public Demo Deployment
-For public demo deployments, Cloud Run runs with `LLMOPS_PLANE=all` to expose both Knowledge plane tools (architecture principles, controls, zero-draft HLD) and Engagement plane tools (maturity boards, interview statements, conflicts, trajectories). The public token (`demo-public-2026-08`) is strictly scoped to the reference demo engagement via `ENGAGEMENT_TOKENS=demo-public-2026-08:demo-engagement-2027`. Any attempt to access unauthorized engagements is rejected with a 403 Unauthorised error.
+For public demo deployments, Cloud Run runs with `LLMOPS_PLANE=all` to expose both Knowledge plane tools (architecture principles, controls, zero-draft HLD) and Engagement plane tools (maturity boards, interview statements, conflicts, trajectories). The public token (`demo-public-2026-08`) is strictly scoped to the reference demo engagement via `ENGAGEMENT_TOKENS=demo-public-2026-08:nordwave-mcx-2027`. Any attempt to access unauthorized engagements is rejected with a 403 Unauthorised error.
 
 ### Private Enterprise Deployment
 > [!IMPORTANT]
@@ -72,8 +72,8 @@ Generate a new token string following the standard naming convention: `demo-publ
 
 ### Step 2: Add New Version in Secret Manager & Redeploy
 ```bash
-# Add new secret version to Secret Manager
-echo -n "demo-public-2026-09" | gcloud secrets versions add llmops-demo-token --data-file=-
+# Add new secret version to Secret Manager (secret name: llmops-auth-token)
+echo -n "demo-public-2026-09" | gcloud secrets versions add llmops-auth-token --data-file=-
 
 # Trigger automated build & deployment
 gcloud builds submit --config=cloudbuild.yaml .
