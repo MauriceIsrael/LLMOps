@@ -5,12 +5,12 @@ schemaVersion: "1.0"
 status: active
 owner: core-owner-llmops
 last_reviewed: 2026-09-17
-related: [ADR-SUITE-05, ADR-KH-01, ADR-DE-05, ADR-DS-07, TPL-third-party-integration-guide]
+related: [ADR-0015, ADR-SUITE-05, ADR-KH-01, ADR-DE-05, ADR-DS-07, TPL-third-party-integration-guide]
 ---
 
 # Spécification Contractuelle de l'API Knowledge Hub (v1.0)
 
-Ce document constitue le contrat d'interface formel, versionné et opposable entre le **Knowledge Hub (LLMOps)** et les composants consommateurs de l'Architecture Suite (`requirements-intake`, `document-studio`, `document-engine`, `WBS-engine`, ainsi que tout intégrateur tiers).
+Ce document constitue le contrat d'interface formel, versionné et opposable entre le **Knowledge Hub (LLMOps)** et les composants consommateurs de l'Architecture Suite (`requirements-intake`, `document-studio`, `document-engine`, `WBS-engine`, ainsi que tout intégrateur tiers comme `Archinex`).
 
 ---
 
@@ -30,14 +30,15 @@ Le Knowledge Hub expose une architecture **Dual-Mode** permettant à chaque syst
                    │                                                               │
     • Composants cibles :                                           • Composants cibles :
       - Document Studio (actions interactives à chaud)                - requirements-intake (sas d'admission local)
-      - Outils tiers, CLI et pipelines CI/CD                          - document-engine (compilation pure hors-ligne)
-                                                                       - Enclaves souveraines / Air-Gapped (SecNumCloud)
+      - Archinex Cockpit (Mode connecté FastMCP / REST)               - document-engine (compilation pure hors-ligne)
+      - Outils tiers, CLI et pipelines CI/CD                          - Archinex Cockpit (Mode déconnecté / Air-Gapped)
+                                                                       - Enclaves souveraines (SecNumCloud)
 ```
 
-1. **Mode 1 — Synchrone Interactif (HTTP REST direct)** :
+1. **Mode 1 — Synchrone Interactif (HTTP REST direct & FastMCP SSE)** :
    Le client interroge l'API du Hub en temps réel. Adapté pour les actions utilisateur interactives (demande de suggestion de prose, rafraîchissement d'un board de maturité, consultation des questions ouvertes).
 2. **Mode 2 — Asynchrone Découplé (Instantanés Scellés & Curation Unifiée)** :
-   Le client ingère ou produit des instantanés JSON immuables scellés par empreinte SHA-256 (conformes à `ADR-SUITE-05` et `ADR-KH-01`). Le sas d'admission local fonctionne de manière 100 % autonome (*offline-first*), sans dépendance réseau bloquante.
+   Le client ingère ou produit des instantanés JSON immuables scellés par empreinte SHA-256 (conformes à `ADR-SUITE-05`, `ADR-KH-01` et `ADR-0015`). Le sas d'admission local fonctionne de manière 100 % autonome (*offline-first*), sans dépendance réseau bloquante.
 
 > [!IMPORTANT]
 > **Contrat de Données Unifié** : Quel que soit le mode de transport (synchrone ou fichier scellé), les structures de données (`ExtractedCandidate`, `ConformitySnapshot`, `MaturityBoard`) respectent strictement les mêmes schémas canoniques.
@@ -46,14 +47,16 @@ Le Knowledge Hub expose une architecture **Dual-Mode** permettant à chaque syst
 
 ## 2. Protocole, Authentification & Routage Multi-Bases
 
-### 2.1 En-têtes Communs
+### 2.1 En-têtes Communs & Isolation Physique (ADR-0015)
 * **Format de charge utile** : `Content-Type: application/json` (UTF-8 strict).
 * **Authentification** : `Authorization: Bearer <LLMOPS_AUTH_TOKEN>`.
-  *(Les routes `/health` et `/healthz` sont publiques et ne requièrent aucun jeton).*
+  *(Les routes `/health`, `/healthz`, `/ready` et `/readyz` sont publiques et ne requièrent aucun jeton).*
 * **Sélection d'engagement (Multi-Base)** :
   * Soit via l'en-tête HTTP : `X-Engagement-Id: <id-engagement>`
   * Soit via le paramètre d'URL : `?engagement=<id-engagement>`
-  * Valeur par défaut si non spécifié : `"default"` (Socle transverse d'entreprise).
+  * Valeur par défaut si non spécifié : `"default"` (Socle transverse d'entreprise) ou `"nordwave-mcx-2027"` (Engagement opérationnel de référence).
+* **Isolation physique stricte (`ADR-0015`)** :
+  Le plan Connaissances (`data/knowledge.kuzu` / `.lbug`) et chaque engagement (`data/engagements/<id>.lbug`) résident dans des fichiers physiques distincts. Aucune jointure Cypher inter-plans n'est autorisée. Le routeur de connexion (`open_connection`) vérifie l'autorisation (`authorise()`) avant d'ouvrir la base de l'engagement.
 
 ### 2.2 Politique d'Erreur & Résilience (« Fail Loud »)
 Conformément aux conventions de robustesse, le Hub rejette le repli silencieux (*silent fallback*). En cas d'anomalie, le Hub retourne un code HTTP explicite accompagné d'un corps JSON structuré :
@@ -95,7 +98,33 @@ Retourne l'état de fonctionnement du Hub et scelle l'empreinte exacte du moteur
 
 ---
 
-### 3.2 `POST /api/rfp/shred-to-candidates` — Dépouillement CCTP & Export Candidats
+### 3.2 `GET /snapshot/latest` — Instantané Scellé Canonique (Mode 2)
+Retourne l'instantané scellé le plus récent de la base de connaissances et de l'état d'architecture, scellé par empreinte SHA-256. Utilisé par les composants déconnectés (Archinex Offline-First, Document Engine, enclaves souveraines).
+* **Accès** : Public / Cacheable (avec support de l'en-tête `ETag`).
+* **En-têtes de réponse** :
+  * `ETag: sha256:<hash>`
+  * `Cache-Control: public, max-age=3600`
+* **Réponse HTTP 200** :
+```json
+{
+  "snapshot_id": "snapshot-2026-09-13-e08939b",
+  "created_at": "2026-09-13T19:08:15Z",
+  "source_revision": "e08939b3471c2aaf6a50245a83cfe926d7235766",
+  "payload_sha256": "sha256:1c9b7f067bf4d544fd2c9019b130e2c036bda3bd7ea893eea9923f1d5bc66314",
+  "schema_version": "1.0",
+  "applicability_index": {
+    "ADR-0001": {
+      "domains": ["network-automation", "cloud-platform"],
+      "phases": ["BUILD"],
+      "rules": ["rule:adr-0001"]
+    }
+  }
+}
+```
+
+---
+
+### 3.3 `POST /api/rfp/shred-to-candidates` — Dépouillement CCTP & Export Candidats
 Déstructure un texte de CCTP ou appel d'offres et projette les exigences extraites dans le format `ExtractedCandidate` (@architecture-suite/contracts).
 * **Corps de requête** :
 ```json
@@ -245,7 +274,35 @@ Liste les contradictions détectées entre exigences ou entre choix d'architectu
 
 ---
 
-### 3.7 `POST /api/knowledge/suggestions` — Boucle de REX et Curation Amont
+### 3.7 `GET /api/arbitration/statements` — Énoncés d'Architecture Actifs
+Retourne les énoncés d'architecture (`Statement`) associés à un engagement, avec filtrage optionnel par sujet, section ou statut.
+* **Paramètres de requête** :
+  * `engagement` *(optionnel via query ou header `X-Engagement-Id`)* : Identifiant d'engagement (ex: `nordwave-mcx-2027`).
+  * `subject` *(optionnel)* : Nom du sujet technique (ex: `mcx-services`).
+  * `section` *(optionnel)* : Section documentaire (ex: `4.2`).
+  * `status` *(optionnel)* : `active` | `under_review` | `contested`.
+* **Réponse HTTP 200** :
+```json
+{
+  "status": "ok",
+  "count": 2,
+  "data": [
+    {
+      "id": "STMT-001",
+      "subject": "mcx-services",
+      "predicate": "implements",
+      "value": "3GPP TS 23.379 (MCPTT)",
+      "confidence": "verified",
+      "authority": "client-rfp",
+      "status": "active"
+    }
+  ]
+}
+```
+
+---
+
+### 3.8 `POST /api/knowledge/suggestions` — Boucle de REX et Curation Amont
 Permet de soumettre un motif éprouvé, un arbitrage ou une correction vers la gouvernance du Hub.
 * **Corps de requête** :
 ```json
