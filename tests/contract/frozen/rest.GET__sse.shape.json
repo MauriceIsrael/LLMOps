@@ -1,0 +1,15 @@
+{
+  "interface": "rest.GET /sse",
+  "shape": {
+    "keys": {
+      "route_registered": {
+        "type": [
+          "boolean"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

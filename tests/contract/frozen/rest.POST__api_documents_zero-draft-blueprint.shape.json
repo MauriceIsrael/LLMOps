@@ -1,0 +1,439 @@
+{
+  "interface": "rest.POST /api/documents/zero-draft-blueprint",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "blueprint": {
+            "keys": {
+              "documentType": {
+                "type": [
+                  "string"
+                ]
+              },
+              "expectedContext": {
+                "keys": {
+                  "Author": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "Date": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "Project.Name": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "Project.Version": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "sections": {
+                "items": {
+                  "keys": {
+                    "blocks": {
+                      "items": {
+                        "keys": {
+                          "anchorIds": {
+                            "items": {
+                              "type": [
+                                "string"
+                              ]
+                            },
+                            "type": [
+                              "array"
+                            ]
+                          },
+                          "type": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "version": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "client_name": {
+            "type": [
+              "string"
+            ]
+          },
+          "engagement": {
+            "type": [
+              "string"
+            ]
+          },
+          "project_title": {
+            "type": [
+              "string"
+            ]
+          },
+          "proseStore": {
+            "keys": {
+              "adrs-socle": {
+                "keys": {
+                  "anchoredOn": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "lastModelHashSeen": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "contexte-projet": {
+                "keys": {
+                  "anchoredOn": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "lastModelHashSeen": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "patterns-socle": {
+                "keys": {
+                  "anchoredOn": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "lastModelHashSeen": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "perimetre-exigences": {
+                "keys": {
+                  "anchoredOn": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "lastModelHashSeen": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "securite-souverainete": {
+                "keys": {
+                  "anchoredOn": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "lastModelHashSeen": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "prose_blocks_count": {
+            "type": [
+              "number"
+            ]
+          },
+          "prose_store": {
+            "keys": {
+              "adrs-socle": {
+                "keys": {
+                  "anchoredOn": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "lastModelHashSeen": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "contexte-projet": {
+                "keys": {
+                  "anchoredOn": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "lastModelHashSeen": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "patterns-socle": {
+                "keys": {
+                  "anchoredOn": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "lastModelHashSeen": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "perimetre-exigences": {
+                "keys": {
+                  "anchoredOn": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "lastModelHashSeen": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "securite-souverainete": {
+                "keys": {
+                  "anchoredOn": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "lastModelHashSeen": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "sections_count": {
+            "type": [
+              "number"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

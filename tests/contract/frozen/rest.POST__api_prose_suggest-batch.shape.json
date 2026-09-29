@@ -1,0 +1,58 @@
+{
+  "interface": "rest.POST /api/prose/suggest-batch",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "basedOnModelHash": {
+            "type": [
+              "string"
+            ]
+          },
+          "drafts": {
+            "type": [
+              "object"
+            ],
+            "values": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "generatedAt": {
+            "type": [
+              "string"
+            ]
+          },
+          "warnings": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

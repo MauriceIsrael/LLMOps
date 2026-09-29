@@ -1,0 +1,84 @@
+{
+  "interface": "rest.POST /api/knowledge/suggestions",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "message": {
+                "type": [
+                  "string"
+                ]
+              },
+              "notifications_sent": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "owner_notified": {
+                "type": [
+                  "string"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "suggestion_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "timestamp": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

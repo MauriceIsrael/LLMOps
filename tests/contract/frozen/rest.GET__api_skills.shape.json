@@ -1,0 +1,94 @@
+{
+  "interface": "rest.GET /api/skills",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "items": {
+              "keys": {
+                "criticality": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "description": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "domain": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "keywords": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "title": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "interface": "rest.POST /messages",
+  "shape": {
+    "keys": {
+      "route_registered": {
+        "type": [
+          "boolean"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

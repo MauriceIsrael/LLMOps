@@ -1,0 +1,106 @@
+{
+  "interface": "mcp.get_diagram_graph",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "edges": {
+            "items": {
+              "keys": {
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "predicate": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "source": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "target": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "engagement": {
+            "type": [
+              "string"
+            ]
+          },
+          "format": {
+            "type": [
+              "string"
+            ]
+          },
+          "mermaid": {
+            "type": [
+              "string"
+            ]
+          },
+          "nodes": {
+            "items": {
+              "keys": {
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "label": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "level": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

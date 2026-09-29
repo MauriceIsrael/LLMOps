@@ -1,0 +1,115 @@
+{
+  "interface": "mcp.get_knowledge_analytics",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "confidence_breakdown": {
+            "items": {
+              "keys": {
+                "confidence": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "count": {
+                  "type": [
+                    "number"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "glossary_count": {
+            "type": [
+              "number"
+            ]
+          },
+          "relations": {
+            "keys": {
+              "REQUIRES": {
+                "type": [
+                  "number"
+                ]
+              },
+              "SUPERSEDES": {
+                "type": [
+                  "number"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status_breakdown": {
+            "items": {
+              "keys": {
+                "count": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "volume_by_type": {
+            "items": {
+              "keys": {
+                "count": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "type": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "interface": "mcp.generate_zero_draft_hld",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "client_name": {
+            "type": [
+              "string"
+            ]
+          },
+          "coverage_rate": {
+            "type": [
+              "number"
+            ]
+          },
+          "covered_count": {
+            "type": [
+              "number"
+            ]
+          },
+          "document_markdown": {
+            "type": [
+              "string"
+            ]
+          },
+          "engagement": {
+            "type": [
+              "string"
+            ]
+          },
+          "gap_count": {
+            "type": [
+              "number"
+            ]
+          },
+          "language": {
+            "type": [
+              "string"
+            ]
+          },
+          "partial_count": {
+            "type": [
+              "number"
+            ]
+          },
+          "project_title": {
+            "type": [
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          },
+          "total_requirements": {
+            "type": [
+              "number"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

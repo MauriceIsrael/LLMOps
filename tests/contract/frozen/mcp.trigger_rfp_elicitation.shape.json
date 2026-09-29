@@ -1,0 +1,104 @@
+{
+  "interface": "mcp.trigger_rfp_elicitation",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "engagement": {
+            "type": [
+              "string"
+            ]
+          },
+          "questions": {
+            "items": {
+              "keys": {
+                "engagement": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "expected_shape": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "gap_type": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "level": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "question": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "routed_to": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "section": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "why_it_matters": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "questions_created": {
+            "type": [
+              "number"
+            ]
+          },
+          "total_gaps_targeted": {
+            "type": [
+              "number"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

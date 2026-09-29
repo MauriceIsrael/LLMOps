@@ -14,9 +14,22 @@ from mcp_server.engagement.tools import (
 from mcp_server.knowledge.tools import get_graph_summary
 
 
-def export_fixtures(engagement: str = "nordwave-mcx-2027", output_dir: Path | None = None) -> None:
+def export_fixtures(
+    engagement: str = "nordwave-mcx-2027",
+    output_dir: Path | None = None,
+    snapshot_dir: Path | None = None,
+) -> None:
+    """Export fixtures to ``output_dir``.
+
+    ``snapshot_dir`` receives the ``latest.json`` / versioned sealed snapshot copies.
+    It defaults to ``data/snapshots`` when exporting to the committed ``fixtures/``
+    directory, and to ``<output_dir>/snapshots`` otherwise, so that exporting to a
+    temporary directory (e.g. from tests) never touches the repository.
+    """
     if output_dir is None:
         output_dir = Path(__file__).parent.parent / "fixtures"
+    elif snapshot_dir is None:
+        snapshot_dir = output_dir / "snapshots"
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -34,7 +47,10 @@ def export_fixtures(engagement: str = "nordwave-mcx-2027", output_dir: Path | No
         print(f"Exported fixture: {filepath.relative_to(output_dir.parent)}")
 
     from scripts.export_sealed_snapshot import export_sealed_snapshot
-    export_sealed_snapshot(output_fixtures_path=output_dir / "sealed_snapshot.json")
+    export_sealed_snapshot(
+        output_fixtures_path=output_dir / "sealed_snapshot.json",
+        output_snapshot_dir=snapshot_dir,
+    )
 
     gc.collect()
 

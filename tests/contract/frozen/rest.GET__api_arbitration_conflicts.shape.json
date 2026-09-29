@@ -1,0 +1,89 @@
+{
+  "interface": "rest.GET /api/arbitration/conflicts",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "items": {
+              "keys": {
+                "arbitrated_by": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "detail": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "kind": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "origin": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "resolution": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

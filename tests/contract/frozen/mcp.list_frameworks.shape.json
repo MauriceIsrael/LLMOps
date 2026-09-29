@@ -1,0 +1,62 @@
+{
+  "interface": "mcp.list_frameworks",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "items": {
+          "keys": {
+            "control_count": {
+              "type": [
+                "number"
+              ]
+            },
+            "description": {
+              "type": [
+                "string"
+              ]
+            },
+            "framework": {
+              "type": [
+                "string"
+              ]
+            },
+            "jurisdiction": {
+              "type": [
+                "string"
+              ]
+            },
+            "title": {
+              "type": [
+                "string"
+              ]
+            },
+            "version": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        },
+        "type": [
+          "array"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "interface": "mcp.get_rfp_compliance_matrix",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "coverage_rate": {
+            "type": [
+              "number"
+            ]
+          },
+          "covered": {
+            "type": [
+              "number"
+            ]
+          },
+          "engagement": {
+            "type": [
+              "string"
+            ]
+          },
+          "gaps": {
+            "type": [
+              "number"
+            ]
+          },
+          "partially_covered": {
+            "type": [
+              "number"
+            ]
+          },
+          "requirements": {
+            "items": {
+              "keys": {
+                "category": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "criticality": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "engagement": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "matched_assets": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "matched_controls": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "rationale": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "section": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "text": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "total_requirements": {
+            "type": [
+              "number"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

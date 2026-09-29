@@ -1,0 +1,57 @@
+{
+  "interface": "rest.GET /ready",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "asset_count": {
+            "type": [
+              "number"
+            ]
+          },
+          "backend": {
+            "type": [
+              "string"
+            ]
+          },
+          "plane": {
+            "type": [
+              "string"
+            ]
+          },
+          "schema_version": {
+            "type": [
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

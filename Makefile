@@ -1,4 +1,4 @@
-.PHONY: demo demo-check install test test-unit test-contract test-integration typecheck lint snapshot
+.PHONY: demo demo-check install test test-unit test-contract test-integration typecheck lint snapshot verify hooks
 
 install:
 	poetry install
@@ -26,6 +26,14 @@ test-contract:
 
 test-integration:
 	poetry run pytest tests/integration -v
+
+# Fast local gate (no CI workflow): lint + frozen contract + unit tests.
+verify: lint test-contract test-unit
+
+# Install the git pre-push hook that runs `make verify`.
+hooks:
+	git config core.hooksPath .githooks
+	@echo "pre-push hook installed (.githooks/pre-push runs make verify)"
 
 typecheck:
 	poetry run mypy mcp_server tools pipelines

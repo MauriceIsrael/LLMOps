@@ -1,0 +1,146 @@
+{
+  "interface": "rest.POST /api/rfp/shred-to-candidates",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "candidates": {
+            "items": {
+              "keys": {
+                "candidateKind": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "normalizedText": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "originalText": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "routingConfidence": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "sourceFragment": {
+                  "keys": {
+                    "documentId": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "documentVersion": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "hash": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "originalText": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "sectionPath": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "suggestedDestination": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "verificationModes": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "documentId": {
+            "type": [
+              "string"
+            ]
+          },
+          "documentVersion": {
+            "type": [
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

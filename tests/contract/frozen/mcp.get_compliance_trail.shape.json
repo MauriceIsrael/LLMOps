@@ -1,0 +1,170 @@
+{
+  "interface": "mcp.get_compliance_trail",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "candidate_decisions": {
+            "items": {
+              "keys": {
+                "confidence": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "title": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "control": {
+            "keys": {
+              "domain": {
+                "type": [
+                  "string"
+                ]
+              },
+              "external_ref": {
+                "type": [
+                  "string"
+                ]
+              },
+              "framework": {
+                "type": [
+                  "string"
+                ]
+              },
+              "id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "markdown_content": {
+                "type": [
+                  "string"
+                ]
+              },
+              "severity": {
+                "type": [
+                  "string"
+                ]
+              },
+              "target_entities": {
+                "type": [
+                  "string"
+                ]
+              },
+              "title": {
+                "type": [
+                  "string"
+                ]
+              },
+              "version": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "governing_principles": {
+            "items": {
+              "keys": {
+                "confidence": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "title": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "implementing_patterns": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          },
+          "other_assets": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          },
+          "total_coverage": {
+            "type": [
+              "number"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

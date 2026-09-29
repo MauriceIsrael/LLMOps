@@ -1,0 +1,57 @@
+{
+  "interface": "rest.GET /api/compliance/frameworks/applicable",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "applicable_frameworks": {
+            "items": {
+              "type": [
+                "string"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "engagement": {
+            "type": [
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

@@ -1,0 +1,366 @@
+{
+  "interface": "rest.GET /snapshot/latest",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "applicability_index": {
+            "type": [
+              "object"
+            ],
+            "values": {
+              "keys": {
+                "domains": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "phases": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "rules": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            }
+          },
+          "assets": {
+            "items": {
+              "keys": {
+                "confidence": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "domain": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "last_reviewed": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "owner": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "phase": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "provenance": {
+                  "keys": {
+                    "document": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "section": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "text_sha256": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "version": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "superseded_by": {
+                  "items": {
+                    "keys": {
+                      "id": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "title": {
+                        "type": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "supersedes": {
+                  "items": {
+                    "keys": {
+                      "id": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "title": {
+                        "type": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "title": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "typed_id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "vendor": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "compliance_index": {
+            "type": [
+              "object"
+            ],
+            "values": {
+              "type": [
+                "object"
+              ],
+              "values": {
+                "keys": {
+                  "implemented_by": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "severity": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "version": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            }
+          },
+          "controls": {
+            "items": {
+              "keys": {
+                "domain": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "framework": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "implemented_by": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "severity": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "title": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "version": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "created_at": {
+            "type": [
+              "string"
+            ]
+          },
+          "frameworks": {
+            "items": {
+              "keys": {
+                "controls_count": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "framework": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "version": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "glossary": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          },
+          "payload_sha256": {
+            "type": [
+              "string"
+            ]
+          },
+          "schema_version": {
+            "type": [
+              "string"
+            ]
+          },
+          "snapshot_id": {
+            "type": [
+              "string"
+            ]
+          },
+          "source_revision": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "string"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

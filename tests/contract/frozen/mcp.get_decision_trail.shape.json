@@ -1,0 +1,244 @@
+{
+  "interface": "mcp.get_decision_trail",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "asset": {
+            "keys": {
+              "confidence": {
+                "type": [
+                  "string"
+                ]
+              },
+              "domain": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "external_ref": {
+                "type": [
+                  "string"
+                ]
+              },
+              "framework": {
+                "type": [
+                  "string"
+                ]
+              },
+              "frontmatter": {
+                "keys": {
+                  "confidence": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "domain": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "id": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "implements_controls": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "last_reviewed": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "owner": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "phase": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "related": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "sources": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "status": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "jurisdiction": {
+                "type": [
+                  "string"
+                ]
+              },
+              "last_reviewed": {
+                "type": [
+                  "string"
+                ]
+              },
+              "owner": {
+                "type": [
+                  "string"
+                ]
+              },
+              "phase": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "raw_body": {
+                "type": [
+                  "string"
+                ]
+              },
+              "sections": {
+                "type": [
+                  "object"
+                ],
+                "values": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "severity": {
+                "type": [
+                  "string"
+                ]
+              },
+              "source_path": {
+                "type": [
+                  "string"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "target_entities": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "title": {
+                "type": [
+                  "string"
+                ]
+              },
+              "type": {
+                "type": [
+                  "string"
+                ]
+              },
+              "version": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "superseded_by": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          },
+          "supersedes": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

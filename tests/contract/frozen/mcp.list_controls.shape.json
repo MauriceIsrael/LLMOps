@@ -1,0 +1,87 @@
+{
+  "interface": "mcp.list_controls",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "items": {
+          "keys": {
+            "domain": {
+              "type": [
+                "string"
+              ]
+            },
+            "external_ref": {
+              "type": [
+                "string"
+              ]
+            },
+            "framework": {
+              "type": [
+                "string"
+              ]
+            },
+            "id": {
+              "type": [
+                "string"
+              ]
+            },
+            "implemented_by": {
+              "items": {
+                "type": [
+                  "string"
+                ]
+              },
+              "type": [
+                "array"
+              ]
+            },
+            "severity": {
+              "type": [
+                "string"
+              ]
+            },
+            "status": {
+              "type": [
+                "string"
+              ]
+            },
+            "target_entities": {
+              "type": [
+                "string"
+              ]
+            },
+            "title": {
+              "type": [
+                "string"
+              ]
+            },
+            "version": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        },
+        "type": [
+          "array"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

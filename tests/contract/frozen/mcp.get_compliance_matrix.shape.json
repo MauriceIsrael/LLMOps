@@ -1,0 +1,105 @@
+{
+  "interface": "mcp.get_compliance_matrix",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "coverage_percentage": {
+            "type": [
+              "number"
+            ]
+          },
+          "covered_controls": {
+            "type": [
+              "number"
+            ]
+          },
+          "engagement": {
+            "type": [
+              "string"
+            ]
+          },
+          "framework": {
+            "type": [
+              "string"
+            ]
+          },
+          "matrix": {
+            "items": {
+              "keys": {
+                "control_id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "implementing_kb_assets": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "satisfying_statements": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "severity": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "title": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "total_controls": {
+            "type": [
+              "number"
+            ]
+          },
+          "unaddressed_controls": {
+            "type": [
+              "number"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}
