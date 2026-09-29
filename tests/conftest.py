@@ -17,6 +17,7 @@ the end, and removes the untracked (non-ignored) files it created there, so that
 artefacts, run the scenario test directly and commit the result.
 """
 
+import os
 import subprocess
 from collections.abc import Generator
 from pathlib import Path
@@ -63,3 +64,15 @@ def _preserve_working_tree() -> Generator[None, None, None]:
             path.write_bytes(content)
     for rel in _git_ls("--others", "--exclude-standard") - untracked_before:
         (ROOT_DIR / rel).unlink(missing_ok=True)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _isolated_candidate_queue(tmp_path_factory: pytest.TempPathFactory) -> Generator[None, None, None]:
+    """KB candidates created by tests (e.g. through suggestions) go to a temporary queue."""
+    previous = os.environ.get("CANDIDATES_DIR")
+    os.environ["CANDIDATES_DIR"] = str(tmp_path_factory.mktemp("candidates"))
+    yield
+    if previous is None:
+        os.environ.pop("CANDIDATES_DIR", None)
+    else:
+        os.environ["CANDIDATES_DIR"] = previous

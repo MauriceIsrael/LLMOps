@@ -46,6 +46,7 @@ mcp-server = "mcp_server.main:main"
 mcp-server-knowledge = "mcp_server.main_knowledge:main"
 mcp-server-engagement = "mcp_server.main_engagement:main"
 elicit = "tools.elicitation.cli:main"
+kb = "pipelines.kb_cli:main"
 
 
 

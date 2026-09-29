@@ -75,7 +75,9 @@ make demo-check
    Déconstruction atomique des cahiers des charges (`shred-rfp`), calcul de matrice triangulaire de conformité et génération instantanée du dossier d'architecture d'avant-vente (`zero-draft-hld`) en français ou en anglais sans écart résiduel. Modèles de livrables normalisés disponibles dans `templates/HLD-zero-draft-template.md` (FR) et `templates/HLD-zero-draft-template.en.md` (EN).
 7. **Paquet de Doctrine & Juge d'Option (contrat 1.1)**  
    `get_doctrine_context` / `GET /api/knowledge/context` renvoie la doctrine applicable à un sujet (principes actifs, contrôles réglementaires exigés, patterns, ADR) avec des extraits bornés ; `check_option` / `POST /api/knowledge/check` juge une option contre les clauses de contrôle structurées `checks` de la doctrine (`supports` / `violates` / `unassessed`, avec citations). Les deux sont 100 % déterministes — aucun LLM côté serveur. Évaluation : `make eval-check`.
-8. **Architecture Double-Mode & Contrat v1 Architecture Suite**  
+8. **Cycle d'Enrichissement de la Base (contrat 1.2)**  
+   Toute connaissance nouvelle passe par une file de candidats persistée (`/api/knowledge/candidates`, `submit_kb_candidate`…), des contrôles déterministes (gabarit, références, doublons, anonymisation, conflits de doctrine, contenu LLM non relu), un routage vers le propriétaire du domaine (`data/kb/owners.yaml`) et une revue humaine (seconde revue pour un principe), avant que `kb promote` / `kb publish` ne l'écrivent et ne la scellent. La confiance est calculée à partir des preuves, jamais de l'auteur.
+9. **Architecture Double-Mode & Contrat v1 Architecture Suite**  
    Fourniture simultanée d'endpoints REST synchrones (`/api/rfp/*`, `/api/compliance/*`, `/api/knowledge/*`, `/api/skills/*`) pour les interfaces interactives et CLI, et de snapshots canoniques scellés (`latest.json`) pour les sas d'admission hors-ligne (ADR-SUITE-05). Tous les contrats respectent une provenance stricte (`sourceSystem: "knowledge-hub"`), un scellement SHA-256 canonique et le principe de résilience *Fail Loud*.
 
 ---
@@ -94,6 +96,12 @@ make verify
 
 # Installer le hook git pre-push qui exécute `make verify`
 make hooks
+
+# Cycle des candidats de la base (mainteneurs)
+poetry run kb list --status in_review
+poetry run kb promote CAND-20261001-0007
+poetry run kb publish
+poetry run kb remind   # à planifier par cron
 ```
 
 ---

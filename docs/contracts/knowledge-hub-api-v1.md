@@ -609,6 +609,29 @@ Erreurs : `400` + `invalid_argument` (`subject`, `max_items`, `max_chars`, `doma
 
 ---
 
+### 5.2 Contrat 1.2 — Cycle d'enrichissement de la base (candidats)
+
+Toute connaissance nouvelle passe par une **file persistée**, des **contrôles automatiques déterministes** et une **revue humaine** avant publication. Modèle : [`schemas/kb_candidate.schema.json`](../../schemas/kb_candidate.schema.json) (types `KbCandidate*` de [`schemas/types.ts`](../../schemas/types.ts)).
+
+| Route | Outil MCP | Rôle | Codes |
+|---|---|---|---|
+| `POST /api/knowledge/candidates` | `submit_kb_candidate` | Créer un candidat ; les contrôles s'exécutent immédiatement | `201`, `400` |
+| `GET /api/knowledge/candidates?status=&source=&domain=&engagement=` | `list_kb_candidates` | Lister (plus récents d'abord) | `200` |
+| `GET /api/knowledge/candidates/{id}` | `get_kb_candidate` | Détail (contrôles, revues, historique) | `200`, `404` |
+| `PATCH /api/knowledge/candidates/{id}` | `review_kb_candidate` | Revue `{action: accept\|amend\|reject, reviewer, reason, amended_content?}` — **scope `kb:review` requis** | `200`, `400`, `403`, `404`, `409` |
+
+Cycle : `proposed` → (`checks_failed` \| `in_review`) → `accepted` \| `rejected` → `published`.
+
+- **Contrôles** (`checks[]`, `pass | fail | warn`) : `schema` (gabarit et front-matter du type), `references` (actifs cités existants), `duplicate` (warn, suggère un `amendment`), `anonymization` (**fail** : liste noire `data/kb/anonymization_denylist.txt`, adresses IPv4/IPv6 et CIDR hors plages de documentation ; warn : volumes identifiants), `doctrine_conflict` (warn : `check_option` sur le contenu ; l'acceptation exige alors `supersedes` ou un motif d'exception), `llm_unreviewed` (warn si `production_mode: llm-derived`), `previously_rejected` (warn). Un seul `fail` → `checks_failed`.
+- **Routage** : `assigned_owner` d'après le domaine (`data/kb/owners.yaml`, un sous-domaine hérite de son parent), notification Discord / ntfy / e-mail (SMTP désactivé par défaut). Relance au-delà de 5 jours ouvrés : `kb remind`.
+- **Revue** : le relecteur est un propriétaire déclaré ; motif obligatoire pour `amend` et `reject` ; `amend` = acceptation d'un contenu modifié (contrôles rejoués). **Seconde revue** par un **autre** propriétaire si le candidat touche un principe ou contient `supersedes`. Le jeton public de démo ne peut pas relire.
+- **Promotion / publication** (CLI hors ligne, mainteneur) : `kb promote <id>` écrit l'actif dans `data/kb/` avec `status: active`, `confidence` **calculée depuis les preuves** (mesure/audit ou ≥ 2 engagements → `verified` ; doc éditeur → `vendor-stated` ; sinon `assumed` ; `llm-derived` non relu → non publiable), `last_reviewed`, `validated_by`, `validated_at` ; `kb publish` réingère, scelle un instantané, écrit `data/kb/CHANGELOG.md`, notifie les consommateurs et passe les candidats en `published`. Le commit git reste manuel.
+- Pour un non-relecteur, le contenu d'un candidat bloqué par `anonymization` est masqué.
+
+**Compatibilité** : `suggest_knowledge_improvement` et `POST /api/knowledge/suggestions` gardent la même entrée et la même sortie ; en interne ils créent un candidat `kind: rex`, et `data` gagne le champ **optionnel** `candidate_id`. Champ d'entrée REST optionnel `source_system` (`document-studio` par défaut). La notification historique est conservée.
+
+---
+
 ## 4. Oracles & Vecteurs de Test Partagés
 
 Afin de garantir une interopérabilité sans faille entre implémentations Python et TypeScript, les vecteurs de référence suivants sont tenus à disposition dans le dépôt :

@@ -1,0 +1,11 @@
+# Anonymization denylist of the KB candidate cycle (check `anonymization`, plan L2 §5.4).
+#
+# One term per line: client, operator, site or programme names that must never appear in
+# the knowledge base. Matching is case- and accent-insensitive, on whole words; a match
+# blocks the candidate (status `checks_failed`). IP addresses and CIDR blocks are
+# detected separately (RFC 5737 / RFC 3849 documentation ranges are allowed).
+#
+# Maintainers: add real client and site names here (never in code).
+
+# Reference engagement used by the public demo (fictional client).
+Nordwave
