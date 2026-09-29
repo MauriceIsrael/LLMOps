@@ -1189,3 +1189,33 @@ def review_kb_candidate(
         return _candidate_error(exc)
     except Exception as e:
         return handle_exception_response(e, context_action="review_kb_candidate")
+
+
+# ---------------------------------------------------------------------------
+# Regulatory coverage (contract 1.3).
+# ---------------------------------------------------------------------------
+
+def get_framework_coverage(frameworks: list[str]) -> dict[str, Any]:
+    """Coverage of regulatory frameworks by the knowledge base.
+
+    For each framework: status ('covered' | 'partial' | 'missing'), version, number of
+    expected requirements (from the framework manifest, null when unknown), present and
+    validated requirements, missing requirement ids, and who declared the coverage.
+    'covered' requires every expected requirement present, active and validated, and an
+    expert declaration.
+
+    Args:
+        frameworks: Framework codes (e.g. ['NIS2', 'ISO27001']).
+    """
+    fws = _str_list(frameworks, "frameworks")
+    if isinstance(fws, dict):
+        return fws
+    if not fws:
+        return invalid_argument_response("frameworks", "At least one framework is required.")
+    try:
+        from pipelines.compliance_mapper import compute_framework_coverage
+
+        coverage = compute_framework_coverage(fws, server_config.kb_dir)
+        return ok_response(coverage, count=len(coverage))
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_framework_coverage")

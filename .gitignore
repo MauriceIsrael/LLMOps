@@ -25,6 +25,7 @@ data/snapshots/*
 graph_proc/
 data/suggestions/
 data/candidates/
+data/staging/
 
 # DeepEval / Promptfoo caches
 .deepeval/

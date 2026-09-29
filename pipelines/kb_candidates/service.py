@@ -285,7 +285,7 @@ class CandidateService:
             fm["validated_at"] = now_iso()
             if fm.get("checks"):
                 fm["checks_status"] = "validated"
-            if candidate["kind"] == "amendment":
+            if candidate.get("target_asset_id"):
                 target = next((a for a in load_assets(self.kb_dir) if a.id == candidate["target_asset_id"]), None)
                 if target is None:
                     raise CandidateError("target_asset_id", f"target asset '{candidate['target_asset_id']}' not found.")

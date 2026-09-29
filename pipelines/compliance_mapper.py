@@ -550,3 +550,14 @@ def to_conformity_snapshot(
         "data": data,
     }
 
+
+
+def compute_framework_coverage(frameworks: list[str], kb_dir: str | Path = "data/kb") -> dict[str, Any]:
+    """Coverage of each framework by the knowledge base (plan L3 §6.2).
+
+    ``{framework: {status: covered|partial|missing, version, expected, present, validated,
+    missing_ids, declared_by, ...}}`` — see ``pipelines/frameworks/coverage.py``.
+    """
+    from pipelines.frameworks.coverage import compute_framework_coverage as _compute
+
+    return _compute(frameworks, kb_dir)

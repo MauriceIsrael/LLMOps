@@ -1,0 +1,13 @@
+# Splitter of 3GPP stage 1 technical specifications: requirements are tagged
+# "[R-<clause>-<nnn>] text". Use --tag with the specification (e.g. TS22179).
+framework: 3GPP
+title: "3GPP Technical Specifications"
+jurisdiction: International
+mode: tagged
+requirement:
+  pattern: '^\[R-(?P<ref>[0-9.]+-\d+[a-z]?)\]\s*(?P<text>.+)$'
+id_template: "3GPP-{tag}-R{ref}"
+ref_template: "3GPP {tag} [R-{ref}]"
+defaults:
+  domain: [conformance]
+  severity: mandatory
