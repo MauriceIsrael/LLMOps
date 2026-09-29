@@ -2,7 +2,7 @@
 
 Migrates single kuzu_db layout to physical two-plane layout:
   - data/knowledge.kuzu                   (Asset, GlossaryTerm, SUPERSEDES)
-  - data/engagements/nordwave-mcx-2027.kuzu (Subject, Statement, Question, Conflict, Uncertainty)
+  - data/engagements/<LLMOPS_ENGAGEMENT>.lbug (Subject, Statement, Question, Conflict, Uncertainty)
 """
 
 import shutil
@@ -16,7 +16,11 @@ def migrate_to_adr0015(data_dir: Path | str = "data") -> dict[str, str]:
     base = Path(data_dir)
     knowledge_db = base / "knowledge.lbug"
     engagements_dir = base / "engagements"
-    ref_engagement_db = engagements_dir / "nordwave-mcx-2027.lbug"
+    from mcp_server.core.config import resolve_engagement
+
+    # Reference engagement of the deployment (LLMOPS_ENGAGEMENT); none -> knowledge plane only.
+    ref_engagement = resolve_engagement()
+    ref_engagement_db = engagements_dir / f"{ref_engagement}.lbug" if ref_engagement else None
 
     engagements_dir.mkdir(parents=True, exist_ok=True)
 
@@ -34,7 +38,7 @@ def migrate_to_adr0015(data_dir: Path | str = "data") -> dict[str, str]:
         pass
 
     # 2. Initialize reference engagement database
-    if not ref_engagement_db.exists():
+    if ref_engagement_db is not None and not ref_engagement_db.exists():
         schema_init = ElicitationSchemaInitializer(db_path=ref_engagement_db)
         del schema_init
 
@@ -45,10 +49,12 @@ def migrate_to_adr0015(data_dir: Path | str = "data") -> dict[str, str]:
     final_tables_k = {str(row["name"]) for row in res_k if row and "name" in row}
     store_k.close()
 
-    store_e = make_graph_store(str(ref_engagement_db))
-    res_e = store_e.execute_cypher("CALL show_tables() RETURN name;")
-    final_tables_e = {str(row["name"]) for row in res_e if row and "name" in row}
-    store_e.close()
+    final_tables_e: set[str] = set()
+    if ref_engagement_db is not None:
+        store_e = make_graph_store(str(ref_engagement_db))
+        res_e = store_e.execute_cypher("CALL show_tables() RETURN name;")
+        final_tables_e = {str(row["name"]) for row in res_e if row and "name" in row}
+        store_e.close()
 
     assert not (set(forbidden_in_knowledge) & final_tables_k), (
         f"Migration failed: knowledge database contains engagement tables: {set(forbidden_in_knowledge) & final_tables_k}"

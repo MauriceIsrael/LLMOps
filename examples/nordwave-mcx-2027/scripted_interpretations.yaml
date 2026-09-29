@@ -1,0 +1,65 @@
+# Scripted interpretations of the reference demo scenario (plan L3 §6.4.3).
+# Moved out of tools/elicitation/flows/intake.py: the engine is generic, the scenario
+# lives here. Loaded by ScriptedInterpreter when the engagement is nordwave-mcx-2027.
+defaults:
+  section: "4.1"
+  author: "Amina Duarte"
+  role: "mcx-service-architect"
+  subject: "mcx-services"
+
+rules:
+  # Act 2 — framing of the mission-critical service layer
+  - name: mcx-framing
+    when_any: ["boundary is the 3gpp mc service layer", "group voice"]
+    statements:
+      - section: "4.1"
+        subject: mcx-services
+        predicate: is_constrained_by
+        value: "3GPP MC service layer boundary"
+        confidence: designed
+      - section: "4.1"
+        subject: mcx-services
+        predicate: has_property
+        value: "group voice must survive site isolation from national data centres"
+        confidence: stated-by-client
+    advance_level_to: L1_framed
+    uncertainties:
+      - when_any: ["do not yet know"]
+        subject: mcx-services
+        text: "I do not yet know whether the platform we shortlist can do it without a local instance"
+
+  # Act 3 — decomposition of the service layer
+  - name: mcx-decomposition
+    when_any: ["four parts", "group and affiliation management"]
+    statements:
+      - section: "4.1"
+        subject: mcx-services
+        predicate: decomposes_into
+        value: "group-management, floor-control, media-distribution, lmr-interworking"
+        confidence: designed
+    advance_level_to: L2_decomposed
+    created_subjects: [group-management, floor-control, media-distribution, lmr-interworking]
+    candidate_patterns:
+      - id: PAT-006
+        name: "PAT-006 Vendor boundary through northbound interface"
+        when_not_to_use: "Ne pas utiliser si le fournisseur supporte un accès direct modèle."
+    no_pattern_for_decomposition: true
+
+  # Act 2b — framing of the mobile core (matched on the raw lower-cased answer)
+  - name: mobile-core-framing
+    match: raw
+    when_any: ["dedicated 5g standalone core", "mobile core"]
+    statements:
+      - section: "5.1"
+        subject: mobile-core
+        predicate: has_property
+        value: "dedicated 5G standalone core, 2 sites active-active, reserved slicing"
+        confidence: designed
+    advance_level_to: L1_framed
+
+# Any other answer of the scenario: one statement on the question's section and subject.
+fallback:
+  statements:
+    - predicate: has_property
+      value: $verbatim80
+      confidence: designed

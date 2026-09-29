@@ -73,131 +73,19 @@ def load_question_node(state: IntakeState) -> dict[str, Any]:
 
 
 def interpret_node(state: IntakeState) -> dict[str, Any]:
-    """Interprète la réponse de l'expert en candidats d'énoncés (Candidate Statements)."""
-    q = state.get("question", {})
+    """Interprète la réponse de l'expert en candidats d'énoncés (Candidate Statements).
+
+    Aucune règle propre à un engagement n'est codée ici : l'interprète est choisi par
+    ``get_interpreter`` (scénario scripté de l'engagement s'il existe, sinon passthrough
+    qui conserve la réponse verbatim en incertitude sans inventer d'énoncé).
+    """
+    from tools.elicitation.interpreters import get_interpreter
+
     text = state.get("answer_text", "")
     print(f"DEBUG INTERPRET_NODE TEXT: {repr(text)}")
-    norm_text = " ".join(text.lower().split())
-    sec = q.get("section", "4.1")
-    q_id = q.get("id", "Q-0001")
-    author = state.get("author", "Amina Duarte")
-    role = state.get("role", "mcx-service-architect")
+    q = state.get("question", {})
     eng = state.get("engagement") or q.get("engagement", "demo-2026")
-    sub = q.get("subject", "mcx-services")
-
-    candidates = []
-    uncertainties = []
-    candidate_patterns = []
-    no_pattern_for_decomposition = False
-    advance_level_to = None
-    created_subjects = []
-
-    # Cas 1 : Réponse de framing MCX (Acte 2)
-    if "boundary is the 3gpp mc service layer" in norm_text or "group voice" in norm_text:
-        candidates = [
-            {
-                "question_id": q_id,
-                "engagement": eng,
-                "section": "4.1",
-                "subject": "mcx-services",
-                "predicate": "is_constrained_by",
-                "value": "3GPP MC service layer boundary",
-                "author": author,
-                "role": role,
-                "confidence": "designed",
-                "verbatim": text,
-            },
-            {
-                "question_id": q_id,
-                "engagement": eng,
-                "section": "4.1",
-                "subject": "mcx-services",
-                "predicate": "has_property",
-                "value": "group voice must survive site isolation from national data centres",
-                "author": author,
-                "role": role,
-                "confidence": "stated-by-client",
-                "verbatim": text,
-            },
-        ]
-        advance_level_to = "L1_framed"
-
-        if "do not yet know" in norm_text:
-            uncertainties.append({
-                "engagement": eng,
-                "subject": "mcx-services",
-                "text": "I do not yet know whether the platform we shortlist can do it without a local instance",
-            })
-
-    # Cas 2 : Réponse de décomposition MCX (Acte 3)
-    elif "four parts" in norm_text or "group and affiliation management" in norm_text:
-        candidates = [
-            {
-                "question_id": q_id,
-                "engagement": eng,
-                "section": "4.1",
-                "subject": "mcx-services",
-                "predicate": "decomposes_into",
-                "value": "group-management, floor-control, media-distribution, lmr-interworking",
-                "author": author,
-                "role": role,
-                "confidence": "designed",
-                "verbatim": text,
-            }
-        ]
-        advance_level_to = "L2_decomposed"
-        created_subjects = ["group-management", "floor-control", "media-distribution", "lmr-interworking"]
-        candidate_patterns = [
-            {
-                "id": "PAT-006",
-                "name": "PAT-006 Vendor boundary through northbound interface",
-                "when_not_to_use": "Ne pas utiliser si le fournisseur supporte un accès direct modèle.",
-            }
-        ]
-        no_pattern_for_decomposition = True
-
-    # Cas 3 : Réponse de framing Mobile Core (Acte 2b)
-    elif "dedicated 5g standalone core" in text.lower() or "mobile core" in text.lower():
-        candidates = [
-            {
-                "question_id": q_id,
-                "engagement": eng,
-                "section": "5.1",
-                "subject": "mobile-core",
-                "predicate": "has_property",
-                "value": "dedicated 5G standalone core, 2 sites active-active, reserved slicing",
-                "author": author,
-                "role": role,
-                "confidence": "designed",
-                "verbatim": text,
-            }
-        ]
-        advance_level_to = "L1_framed"
-
-    else:
-        candidates = [
-            {
-                "question_id": q_id,
-                "engagement": eng,
-                "section": sec,
-                "subject": sub,
-                "predicate": "has_property",
-                "value": text[:80],
-                "author": author,
-                "role": role,
-                "confidence": "designed",
-                "verbatim": text,
-            }
-        ]
-
-    return {
-        "candidate_statements": candidates,
-        "uncertainties": uncertainties,
-        "candidate_patterns": candidate_patterns,
-        "no_pattern_for_decomposition": no_pattern_for_decomposition,
-        "advance_level_to": advance_level_to,
-        "created_subjects": created_subjects,
-    }
+    return get_interpreter(eng).interpret(dict(state))
 
 
 def confirm_node(state: IntakeState) -> dict[str, Any]:
@@ -251,12 +139,15 @@ def persist_node(state: IntakeState) -> dict[str, Any]:
 
     # Avancement de maturité du sujet principal
     adv_lvl = state.get("advance_level_to")
-    if adv_lvl:
-        target_sub = state.get("candidate_statements", [{}])[0].get("subject", "mcx-services")
+    candidates = state.get("candidate_statements") or []
+    if adv_lvl and candidates:
+        target_sub = candidates[0].get("subject") or (state.get("question") or {}).get("subject", "")
         repo.advance_subject_level(target_sub, adv_lvl)
 
     # Création des sous-sujets s'il s'agit d'une décomposition
-    eng = state.get("engagement", "nordwave-mcx-2027")
+    from mcp_server.core.config import resolve_engagement
+
+    eng = state.get("engagement") or resolve_engagement() or "default"
     for c_sub in state.get("created_subjects", []):
         repo.save_subject(c_sub, engagement=eng, origin="discovered")
 

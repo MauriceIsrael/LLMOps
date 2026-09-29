@@ -37,52 +37,24 @@ class RFPRequirement:
         return asdict(self)
 
 
-# Mots-clés de catégorisation thématique
-CATEGORY_KEYWORDS: dict[str, list[str]] = {
-    "security": [
-        "sécurité", "chiffrement", "authentification", "tls", "mtls", "hsm", "kms", "pki",
-        "bastion", "zero-trust", "secret", "rbac", "certificat", "vulnérabilité", "durcissement",
-        "isolation", "firewall", "filtrage", "anonymisation", "audit"
-    ],
-    "sovereignty": [
-        "souveraineté", "secnumcloud", "anssi", "extraterritorialité", "cloud de confiance",
-        "qualification", "hébergement européen", "rgpd", "localisation", "ue"
-    ],
-    "infrastructure": [
-        "infrastructure", "serveur", "bare-metal", "hyperviseur", "stockage", "san", "nvme",
-        "ceph", "datacenter", "site", "cluster", "hci", "hardware", "matériel"
-    ],
-    "cloud-platform": [
-        "kubernetes", "k8s", "conteneur", "docker", "rancher", "gitops", "argo", "flux",
-        "cni", "orchestration", "ingress", "pod", "helm"
-    ],
-    "network": [
-        "réseau", "bgp", "evpn", "underlay", "overlay", "routage", "commutateur", "vlan",
-        "mpls", "bande passante", "latence", "qos", "mtu"
-    ],
-    "observability": [
-        "observabilité", "monitoring", "métriques", "logs", "télémétrie", "prometheus",
-        "grafana", "opentelemetry", "siem", "soc", "alerte", "dashboard", "supervision"
-    ],
-    "resilience": [
-        "résilience", "pca", "pra", "bcp", "drp", "haute disponibilité", "secours",
-        "tolérance aux pannes", "sauvegarde", "backup", "rto", "rpo", "redondance"
-    ],
-    "telco-core": [
-        "3gpp", "5g", "core", "sba", "mcx", "mcptt", "mcdata", "mcvideo", "sip", "rtp",
-        "sim", "e-sim", "esim", "euicc", "sm-dp", "provisioning", "radio", "ran", "nef", "mda", "scas", "ics", "plugtests"
-    ],
-    "device-hardware": [
-        "terminal", "durci", "rugged", "mil-std-810", "mil-810", "ip68", "ip69k", "atex", "véhicule", "vehicular",
-        "v-device", "dmo", "prose", "band 68", "gov-68", "emc", "iso 11451", "antidéflagrant"
-    ],
-    "timing-sync": [
-        "ptp", "ieee 1588", "synce", "horloge", "rubidium", "ocxo", "gnss", "synchronisation", "holdover", "g.8275"
-    ],
-    "ai-assistance": [
-        "ia", "llm", "assistant", "modèle", "inférence", "agent", "rag", "prompt", "gpu"
-    ],
-}
+# Mots-clés de catégorisation thématique : données de la base de connaissance
+# (data/kb/taxonomy/rfp_categories.yaml), jamais dans le code.
+TAXONOMY_DIR = Path(__file__).resolve().parent.parent / "data" / "kb" / "taxonomy"
+
+
+def load_category_keywords(path: Path | str | None = None) -> dict[str, list[str]]:
+    """Catégories thématiques et mots-clés, dans l'ordre du fichier de taxonomie."""
+    import yaml
+
+    file = Path(path) if path else TAXONOMY_DIR / "rfp_categories.yaml"
+    if not file.is_file():
+        return {}
+    data = yaml.safe_load(file.read_text(encoding="utf-8")) or {}
+    return {str(k): [str(x) for x in v or []] for k, v in data.items()}
+
+
+CATEGORY_KEYWORDS: dict[str, list[str]] = load_category_keywords()
+
 
 # Patterns de détection de criticité
 CRITICALITY_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
@@ -319,11 +291,15 @@ class RFPShredder:
         self,
         engagement: str,
         requirements: list[RFPRequirement],
-        db_path: str | Path = "data/engagements/nordwave-mcx-2027.lbug",
+        db_path: str | Path | None = None,
     ) -> dict[str, Any]:
         """Persiste les exigences découpées dans la base d'engagement locale."""
         from tools.elicitation.repository import ElicitationRepository
 
+        if db_path is None:
+            from mcp_server.core.config import server_config
+
+            db_path = Path(server_config.engagements_dir) / f"{engagement}.lbug"
         repo = ElicitationRepository(db_path=db_path)
         saved_count = 0
         for req in requirements:

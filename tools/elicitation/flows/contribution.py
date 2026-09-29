@@ -29,7 +29,9 @@ class ContributionState(TypedDict, total=False):
 
 
 def contribution_node(state: ContributionState) -> dict[str, Any]:
-    engagement = state.get("engagement", "nordwave-mcx-2027")
+    from mcp_server.core.config import require_engagement
+
+    engagement = require_engagement(state.get("engagement"))
     db_path = state.get("db_path", "data/kuzu_db")
     action = state.get("action", "submit")
     as_person = state.get("as_person", "external:contributor")

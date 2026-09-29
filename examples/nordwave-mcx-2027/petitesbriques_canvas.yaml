@@ -1,0 +1,183 @@
+# PetitesBriques canvas template of the reference demo (moved out of
+# tools/adapters/petitesbriques_adapter.py). Blocks are included when their requirement
+# flag is raised by the engagement's active statements.
+name: Nordwave MCX 2027 (Mission-Critical 5G SA)
+description: 'Architecture générée automatiquement depuis l''engagement LLMOps ''{engagement}''. Exigences traduites : Survie Edge (S-0002), Cœur Bi-Site Actif-Actif (S-0003), Passerelle LMR (S-0004).'
+x_start: 50
+requirements:
+  edge_survivability:
+  - survive
+  - isolated site
+  - local talkgroup
+  active_active_core:
+  - active-active
+  - 2 sites
+  - two sites
+  lmr_interworking:
+  - lmr
+  - interworking
+  - tetra
+  dedicated_core:
+  - standalone
+  - dedicated
+blocks:
+- when: edge_survivability
+  sites:
+  - id: site-edge-survie
+    name: Site Edge Tactique (PPDR)
+    siteType: on-prem
+    columnCount: 1
+    bricks:
+    - instanceId: inst-edge-radio
+      templateId: spectre-radio
+      siteId: site-edge-survie
+      order: 0
+      columnIndex: 0
+    - instanceId: inst-edge-upf
+      templateId: gw-gtp
+      siteId: site-edge-survie
+      order: 1
+      columnIndex: 0
+    - instanceId: inst-edge-mcx
+      templateId: s-mcx-server
+      siteId: site-edge-survie
+      order: 2
+      columnIndex: 0
+    advance: 350
+  zones:
+  - id: zone-tactical-edge
+    label: Site Tactique Autonome (Survie S-0002)
+    brickInstanceIds:
+    - inst-edge-radio
+    - inst-edge-upf
+    - inst-edge-mcx
+    style: dashed
+    color: '#10B981'
+- when: active_active_core
+  sites:
+  - id: site-core-dc1
+    name: Cœur National DC-1 (Actif)
+    siteType: managed-self
+    columnCount: 2
+    bricks:
+    - instanceId: inst-dc1-fabric-up
+      templateId: t2-ip-fabric
+      siteId: site-core-dc1
+      order: 0
+      columnIndex: 0
+    - instanceId: inst-dc1-upf
+      templateId: gw-gtp
+      siteId: site-core-dc1
+      order: 1
+      columnIndex: 0
+    - instanceId: inst-dc1-mcx
+      templateId: s-mcx-server
+      siteId: site-core-dc1
+      order: 2
+      columnIndex: 0
+    - instanceId: inst-dc1-fabric-cp
+      templateId: t2-ip-fabric
+      siteId: site-core-dc1
+      order: 0
+      columnIndex: 1
+    - instanceId: inst-dc1-ctrl
+      templateId: t1-core-control
+      siteId: site-core-dc1
+      order: 1
+      columnIndex: 1
+    advance: 400
+  - id: site-core-dc2
+    name: Cœur National DC-2 (Actif)
+    siteType: managed-self
+    columnCount: 2
+    bricks:
+    - instanceId: inst-dc2-fabric-up
+      templateId: t2-ip-fabric
+      siteId: site-core-dc2
+      order: 0
+      columnIndex: 0
+    - instanceId: inst-dc2-upf
+      templateId: gw-gtp
+      siteId: site-core-dc2
+      order: 1
+      columnIndex: 0
+    - instanceId: inst-dc2-mcx
+      templateId: s-mcx-server
+      siteId: site-core-dc2
+      order: 2
+      columnIndex: 0
+    - instanceId: inst-dc2-fabric-cp
+      templateId: t2-ip-fabric
+      siteId: site-core-dc2
+      order: 0
+      columnIndex: 1
+    - instanceId: inst-dc2-ctrl
+      templateId: t1-core-control
+      siteId: site-core-dc2
+      order: 1
+      columnIndex: 1
+    advance: 400
+  zones:
+  - id: zone-core-national
+    label: Cœur 5G SA National Bi-Site (Active-Active S-0003)
+    brickInstanceIds:
+    - inst-dc1-fabric-up
+    - inst-dc1-upf
+    - inst-dc1-mcx
+    - inst-dc1-fabric-cp
+    - inst-dc1-ctrl
+    - inst-dc2-fabric-up
+    - inst-dc2-upf
+    - inst-dc2-mcx
+    - inst-dc2-fabric-cp
+    - inst-dc2-ctrl
+    style: solid
+    color: '#3B82F6'
+- when: lmr_interworking
+  sites:
+  - id: site-legacy-lmr
+    name: Flotte Historique LMR (TETRA/P25)
+    siteType: on-prem
+    columnCount: 1
+    bricks:
+    - instanceId: inst-lmr-fabric
+      templateId: t2-ip-fabric
+      siteId: site-legacy-lmr
+      order: 0
+      columnIndex: 0
+    - instanceId: inst-lmr-gw
+      templateId: vpn-ipsec
+      siteId: site-legacy-lmr
+      order: 1
+      columnIndex: 0
+    - instanceId: inst-lmr-app
+      templateId: appli-critique-sec
+      siteId: site-legacy-lmr
+      order: 2
+      columnIndex: 0
+    advance: 0
+  zones: []
+connections:
+- id: conn-n2-radio-core
+  sourceBrickId: inst-edge-radio
+  targetBrickId: inst-dc1-ctrl
+  sourceDirection: east
+  linkTypeId: n2-ngap
+- id: conn-n3-edge-core
+  sourceBrickId: inst-edge-upf
+  targetBrickId: inst-dc1-upf
+  sourceDirection: east
+  linkTypeId: n3-gtp-u
+- id: conn-inter-dc-fiber
+  sourceBrickId: inst-dc1-fabric-cp
+  targetBrickId: inst-dc2-fabric-cp
+  sourceDirection: east
+  linkTypeId: fiber-direct
+- id: conn-dc-lmr-iwf
+  sourceBrickId: inst-dc2-upf
+  targetBrickId: inst-lmr-gw
+  sourceDirection: east
+  linkTypeId: n4-pfcp
+perimeter:
+  name: Périmètre Souverain ({engagement})
+  color: '#3B82F6'

@@ -97,6 +97,16 @@ make verify
 # Installer le hook git pre-push qui exécute `make verify`
 make hooks
 
+# Scénarios de bout en bout de la démo de référence (examples/) et garde-fou des noms de projet
+make test-e2e
+make check-names
+
+# Ingestion hors ligne d'un référentiel et couverture
+poetry run kb ingest-framework --framework NIS2 --version 2022/2555 --source <texte officiel>
+poetry run kb review-sheet --framework NIS2 && poetry run kb apply-review data/staging/NIS2/2022-2555/review_sheet.csv
+poetry run kb declare-coverage --framework NIS2 --by @handle-expert
+poetry run kb coverage-report   # docs/COVERAGE.md
+
 # Cycle des candidats de la base (mainteneurs)
 poetry run kb list --status in_review
 poetry run kb promote CAND-20261001-0007
@@ -104,10 +114,17 @@ poetry run kb publish
 poetry run kb remind   # à planifier par cron
 ```
 
+> **Aucun projet n'est codé en dur.** Les outils, routes et commandes `elicit` qui ont besoin
+> d'un engagement ou d'un blueprint les reçoivent explicitement ou via `LLMOPS_ENGAGEMENT` /
+> `LLMOPS_BLUEPRINT` (environnement ou `.env` ; `make demo`, le Dockerfile et `cloudbuild.yaml`
+> les positionnent pour la démo de référence). La démo de référence vit dans
+> [`examples/`](examples/README.md).
+
 ---
 
 ## Liens vers la Documentation
 
+- **[Couverture réglementaire](docs/COVERAGE.md)** : couverture de chaque référentiel par la base (manifestes, exigences manquantes).
 - **[Versionnement](docs/VERSIONING.md)** et **[Politique de dépréciation](docs/DEPRECATION.md)** : garanties du contrat `1.x`, formes d'interfaces gelées (`tests/contract/frozen/`), signaux de dépréciation.
 - **[Contrat d'API Knowledge Hub v1](docs/contracts/knowledge-hub-api-v1.md)** : Spécification contractuelle pour l'Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).
 - **[Guide d'Intégration Tiers](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**

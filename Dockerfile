@@ -27,6 +27,9 @@ COPY data ./data
 COPY schemas ./schemas
 COPY fixtures ./fixtures
 COPY scripts ./scripts
+# Reference demo data (scripted interpretations, profile, canvas template): read at run time
+# for the demo engagement; the code itself hard-codes no project.
+COPY examples ./examples
 
 RUN poetry install --no-interaction --no-ansi --only-root
 
@@ -37,6 +40,9 @@ ENV LLMOPS_TRANSPORT=sse
 ENV PORT=8000
 ENV HOST=0.0.0.0
 ENV POETRY_VIRTUALENVS_CREATE=false
+# Default engagement and blueprint of the public demo instance (formerly hard-coded defaults).
+ENV LLMOPS_ENGAGEMENT=nordwave-mcx-2027
+ENV LLMOPS_BLUEPRINT=BLU-hla-mcx
 
 # Ingestion et migration déterministe de la base de connaissances (Knowledge Plane)
 RUN poetry run python -m pipelines.ingestion.migrate_adr0015

@@ -33,7 +33,7 @@ class SuggestionCatalogAdapter:
 
         Args:
             issue_kind: Category of detected issue (e.g. 'SPOF', 'LATENCY_RISK', 'SECURITY_ISOLATION').
-            domain: Target architectural domain (e.g. 'MCX', 'CORE', 'RADIO', 'STORAGE').
+            domain: Target architectural domain (e.g. 'CORE', 'RADIO', 'STORAGE', 'NETWORK').
             context_tags: Optional list of architectural keywords.
             limit: Maximum number of suggestions to return.
             prefer_offline: If True, uses the sealed snapshot file for sub-millisecond local resolution.

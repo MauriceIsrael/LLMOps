@@ -905,7 +905,7 @@ def create_starlette_app() -> Starlette:
             or request.query_params.get("engagement")
             or "default"
         ).strip()
-        blueprint_path = request.query_params.get("blueprint_path", "data/kb/blueprints/BLU-hla-mcx.yaml")
+        blueprint_path = request.query_params.get("blueprint_path") or None
         res = get_skills_matrix(engagement=engagement, blueprint_path=blueprint_path)
         status_code = 200 if res.get("status") == "ok" else 400
         return JSONResponse(res, status_code=status_code)

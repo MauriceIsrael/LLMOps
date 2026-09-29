@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from datetime import UTC
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -152,6 +153,16 @@ def load_all_controls(controls_dir: Path | str = "data/kb/controls") -> dict[str
     return controls
 
 
+@lru_cache(maxsize=4)
+def load_control_keywords(path: str | None = None) -> dict[str, list[str]]:
+    """Mots-clés additionnels par contrôle : données de la base de connaissance, jamais dans le code."""
+    file = Path(path) if path else Path(__file__).resolve().parent.parent / "data" / "kb" / "taxonomy" / "control_keywords.yaml"
+    if not file.is_file():
+        return {}
+    data = yaml.safe_load(file.read_text(encoding="utf-8")) or {}
+    return {str(k): [str(x) for x in v or []] for k, v in data.items()}
+
+
 def match_text_to_controls(
     title: str,
     text: str,
@@ -190,56 +201,8 @@ def match_text_to_controls(
                     score += 0.20
                     matched_domains.append(cd)
 
-        # 3. Mots-clés spécifiques par contrôle
-        kw_map: dict[str, list[str]] = {
-            "SNC-REQ-01": ["extraterritorial", "souverain", "cloud act", "on-premise", "trust boundary", "local inference"],
-            "SNC-REQ-02": ["bastion", "management cluster", "mtls", "segregation", "administration network"],
-            "SNC-REQ-03": ["hsm", "envelope encryption", "kms", "key management", "root of trust"],
-            "SNC-REQ-04": ["container", "hardened", "hypervisor", "rootless", "network policy", "kubernetes"],
-            "SNC-REQ-05": ["audit log", "siem", "soc", "immutable", "telemetry", "observability", "tamper"],
-            "SNC-REQ-06": ["disaster recovery", "bcp", "drp", "pra", "pca", "multi-site", "fallback", "failover"],
-            "ISO-27001-A5-15": ["supplier", "vendor", "sbom", "supply chain", "third-party"],
-            "ISO-27001-A8-01": ["endpoint", "fleet", "remote wipe", "device", "terminal"],
-            "ISO-27001-A8-08": ["vulnerability", "scanner", "patch", "shadow validation", "devsecops"],
-            "ISO-27001-A8-09": ["gitops", "source of truth", "drift", "configuration management", "declarative"],
-            "ISO-27001-A8-24": ["cryptography", "ciphers", "key lifecycle", "encryption"],
-            "ISO-27001-A8-28": ["log", "logging", "tamper-resistant", "retention", "non-repudiation"],
-            # CER & CRA
-            "CER-ART13-RESIL": ["cer", "entité critique", "critical entity", "physical security", "sabotage", "resilience plan"],
-            "CRA-REQ-VULN-01": ["cra", "sbom", "cyclonedx", "spdx", "cve", "vulnerability disclosure", "patch management", "remediation"],
-            "CRA-REQ-SECBYDES-02": ["cra", "secure by default", "secure boot", "root of trust", "hardening", "attack surface"],
-            # RGPD
-            "RGPD-REQ-PRIVACY-01": ["rgpd", "gdpr", "privacy by design", "location data", "cdr", "retention", "pseudonymization"],
-            "RGPD-REQ-BREACH-02": ["rgpd", "gdpr", "breach notification", "72-hour", "violation de données", "dpo"],
-            # GSMA
-            "GSMA-SGP22-RSP": ["rsp", "esim", "euicc", "sm-dp", "sm-ds", "profile download", "remote sim provisioning"],
-            "GSMA-SGP32-IOT": ["sgp.32", "sgp32", "esim iot", "eim", "headless", "in-vehicle router"],
-            "GSMA-CEIR-PEI": ["ceir", "eir", "imei", "pei", "blacklist", "stolen", "terminal volé"],
-            "GSMA-SAS-EAL4": ["sas-sm", "sas-up", "eal4+", "eal4", "common criteria", "critères communs"],
-            # ITIL & FCAPS
-            "ITIL-SERV-MGMT": ["itil", "cmdb", "incident", "change management", "problem management", "sla", "service management"],
-            "FCAPS-OAM-PROT": ["fcaps", "syslog", "rfc 5424", "snmpv3", "netconf", "restconf", "yang", "bastion"],
-            # TELCO RESILIENCE
-            "TELCO-RESIL-TIER4": ["tier iv", "tier 4", "en 50600", "class 4", "five-nines", "99.999%", "active-active", "géoredondant"],
-            "TELCO-RESIL-PTP-01": ["ptp", "ieee 1588", "synce", "g.8275", "g.8264", "grandmaster", "phase sync", "synchronisation"],
-            "TELCO-RESIL-GNSS-HOLDOVER": ["gnss", "holdover", "rubidium", "ocxo", "jamming", "spoofing", "anti-jamming", "déni gnss"],
-            "TELCO-RESIL-MTBF": ["mtbf", "mttr", "telcordia", "sr-332", "fides", "mil-hdbk-217f", "reliability prediction"],
-            # PPDR DEVICES & VEHICLES
-            "PPDR-RADIO-B68": ["band 68", "band 28", "b68", "gov-68", "gov-28", "cept/ecc", "ppdr", "700 mhz"],
-            "PPDR-DMO-LEGACY": ["dmo", "tetra dmo", "direct mode", "prose", "sidelink", "pc5", "off-network"],
-            "PPDR-DEVICE-RUGGED": ["mil-std-810h", "mil-810", "ip68", "ip69k", "rugged", "drop test", "chocs"],
-            "PPDR-DEVICE-ATEX": ["atex", "zone 1", "zone 21", "ex ib", "explosion-proof", "atmosphère explosive", "antidéflagrant"],
-            "PPDR-VEHICLE-CEM": ["iso 11451", "iso 16750", "sae j1455", "v-device", "vehicular", "cem véhicule", "règlement 2019/2144"],
-            # 3GPP Extensions
-            "3GPP-TS37579-ICS": ["ics", "conformance statement", "plugtests", "etsi ts 103 564", "gcf"],
-            "3GPP-TS28104-MDA": ["mda", "mdas", "management data analytics", "aiops", "analytics"],
-            "3GPP-TS29522-NEF": ["nef", "n33", "network exposure", "ts 29.522", "qos on demand"],
-            "3GPP-TS33926-SCAS": ["scas", "nesas", "security assurance specifications", "ts 33.926"],
-            # ISO Standards
-            "ISO-22301-BCP": ["iso 22301", "iso22301", "bcms", "continuity", "contingence", "disaster recovery plan"],
-            "ISO-27005-RISK": ["iso 27005", "iso27005", "monarc", "ebios", "risk assessment", "analyse de risque"],
-            "ISO-14001-DECOM": ["iso 14001", "iso14001", "decommissioning", "démantèlement", "recyclage", "weee", "carbon footprint"],
-        }
+        # 3. Mots-clés spécifiques par contrôle (data/kb/taxonomy/control_keywords.yaml)
+        kw_map = load_control_keywords()
 
         if cid in kw_map:
             for kw in kw_map[cid]:

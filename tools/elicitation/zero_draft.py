@@ -35,9 +35,13 @@ class ZeroDraftAssembler:
 
     def __init__(
         self,
-        db_path: str | Path = "data/engagements/nordwave-mcx-2027.lbug",
+        db_path: str | Path | None = None,
         kb_dir: Path | str = "data/kb",
     ) -> None:
+        if db_path is None:
+            from mcp_server.core.config import require_engagement, server_config
+
+            db_path = Path(server_config.engagements_dir) / f"{require_engagement()}.lbug"
         self.db_path = str(db_path)
         self.kb_dir = Path(kb_dir)
         self.repo = ElicitationRepository(db_path=self.db_path)

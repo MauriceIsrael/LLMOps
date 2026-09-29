@@ -81,7 +81,9 @@ def generate_schema_markdown(knowledge_path: Path | str, engagement_path: Path |
 
 def update_schema_doc(out_path: Path | str = "docs/SCHEMA.md") -> str:
     kb_p = server_config.knowledge_db_path
-    eng_p = server_config.engagements_dir / "nordwave-mcx-2027.kuzu"
+    from mcp_server.core.config import resolve_engagement
+
+    eng_p = server_config.engagements_dir / f"{resolve_engagement() or 'default'}.kuzu"
 
     content = generate_schema_markdown(kb_p, eng_p)
     out_file = Path(out_path)
