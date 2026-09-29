@@ -1,0 +1,32 @@
+# Synonym groups used by the deterministic doctrine engine (get_doctrine_context,
+# check_option) to match a subject or an option against the doctrine. Each group lists
+# equivalent terms (EN/FR); matching is case- and accent-insensitive, hyphens are spaces.
+# Glossary entries written "A / B" are synonyms too (see glossary.md).
+#
+# Status: draft — proposed by the coding agent (plan L1). Vocabulary only (no doctrine);
+# to be reviewed by the knowledge base maintainers.
+status: draft
+groups:
+  - [closed loop, boucle fermee]
+  - [auto-remediation, automated remediation, automatic remediation, self-healing, remediation automatique]
+  - [human approval, human-in-the-loop, human in the loop, manual approval, validation humaine, approbation humaine]
+  - [container, conteneur]
+  - [container orchestration, orchestration de conteneurs, kubernetes, k8s]
+  - [virtualization, virtualisation, hypervisor, hyperviseur]
+  - [bare metal, bare-metal, serveur physique, physical server]
+  - [paas, platform as a service]
+  - [encryption, chiffrement]
+  - [multi-factor authentication, mfa, authentification multifacteur, authentification forte]
+  - [authentication, authentification]
+  - [backup, sauvegarde]
+  - [supply chain, chaine d'approvisionnement]
+  - [vulnerability, vulnerabilite]
+  - [logging, journalisation]
+  - [risk analysis, analyse de risque, analyse des risques]
+  - [business continuity, continuite d'activite]
+  - [disaster recovery, reprise d'activite, reprise apres sinistre]
+  - [llm, large language model, language model, grand modele de langage]
+  - [gitops, git-ops]
+  - [break-glass, break glass, bris de glace]
+  - [observability, observabilite, monitoring, supervision]
+  - [network automation, automatisation reseau]

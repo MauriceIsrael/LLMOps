@@ -18,6 +18,7 @@ from mcp_server.core.envelope import (
     not_found_response,
     ok_response,
 )
+from mcp_server.core.version import CONTRACT_VERSION
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
 
 
@@ -283,7 +284,7 @@ def get_graph_summary() -> dict[str, Any]:
         })
 
     payload = {
-        "schema_version": "1.0",
+        "schema_version": CONTRACT_VERSION,
         "knowledge": {
             "dataset": str(server_config.knowledge_db_path),
             "node_counts": kb_counts,
@@ -888,3 +889,135 @@ def trigger_rfp_elicitation(
 
 
 
+
+
+# ---------------------------------------------------------------------------
+# Doctrine context & option judge (contract 1.1) — deterministic, no LLM.
+# ---------------------------------------------------------------------------
+
+def _doctrine_index():
+    from pipelines.doctrine import load_index
+
+    client = _get_db()
+    return load_index(lambda q, p: client.execute_cypher(q, p), server_config.kb_dir)
+
+
+def _latest_snapshot_id() -> str | None:
+    import json
+
+    latest = Path("data/snapshots/latest.json")
+    if not latest.exists():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8")).get("snapshot_id")
+    except Exception:
+        return None
+
+
+def _str_list(value: Any, name: str) -> list[str] | dict[str, Any]:
+    """Normalize a list-of-strings argument (a comma-separated string is accepted)."""
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [v.strip() for v in value.split(",") if v.strip()]
+    if isinstance(value, list) and all(isinstance(v, str) for v in value):
+        return [v.strip() for v in value if v.strip()]
+    return invalid_argument_response(name, f"'{name}' must be a list of strings.")
+
+
+def get_doctrine_context(
+    subject: str,
+    domains: list[str] | None = None,
+    frameworks: list[str] | None = None,
+    phase: str | None = None,
+    max_items: int = 20,
+    max_chars: int = 8000,
+) -> dict[str, Any]:
+    """Return the doctrine that applies to a subject: active principles, required regulatory
+    controls, patterns and ADRs, ranked deterministically, with bounded excerpts.
+
+    Args:
+        subject: Free text describing the architecture subject (required).
+        domains: Optional filter on asset domains (a parent domain matches its sub-domains).
+        frameworks: Required regulatory frameworks (e.g. 'NIS2'); all their active controls are included.
+        phase: Optional phase filter ('BID', 'BUILD', 'RUN').
+        max_items: Maximum number of items (default 20).
+        max_chars: Total character budget of the excerpts (default 8000).
+    """
+    if not subject or not isinstance(subject, str) or not subject.strip():
+        return invalid_argument_response("subject", "Parameter 'subject' is required.")
+    doms = _str_list(domains, "domains")
+    if isinstance(doms, dict):
+        return doms
+    fws = _str_list(frameworks, "frameworks")
+    if isinstance(fws, dict):
+        return fws
+    if not isinstance(max_items, int) or isinstance(max_items, bool) or not 1 <= max_items <= 200:
+        return invalid_argument_response("max_items", "'max_items' must be an integer between 1 and 200.")
+    if not isinstance(max_chars, int) or isinstance(max_chars, bool) or not 200 <= max_chars <= 100000:
+        return invalid_argument_response("max_chars", "'max_chars' must be an integer between 200 and 100000.")
+    try:
+        from pipelines.doctrine import build_doctrine_context
+
+        payload = build_doctrine_context(
+            _doctrine_index(),
+            subject=subject.strip(),
+            domains=doms,
+            frameworks=fws,
+            phase=phase.strip() if isinstance(phase, str) and phase.strip() else None,
+            max_items=max_items,
+            max_chars=max_chars,
+            snapshot_id=_latest_snapshot_id(),
+        )
+        return ok_response(payload, count=len(payload["items"]))
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_doctrine_context")
+
+
+def check_option(
+    option: dict[str, Any],
+    subject: str | None = None,
+    domains: list[str] | None = None,
+    frameworks: list[str] | None = None,
+) -> dict[str, Any]:
+    """Judge an architecture option against the doctrine with deterministic check clauses.
+
+    Returns one verdict per relevant asset: 'supports' or 'violates' when a structured
+    check clause applies, 'unassessed' otherwise (to be judged client-side). Every active
+    control of a required framework is always returned, at least as 'unassessed'.
+
+    Args:
+        option: {"title": str (required), "description": str, "statements": [{"subject", "predicate", "value"}]}.
+        subject: Optional free text describing the architecture subject.
+        domains: Optional filter on asset domains for the relevant (unassessed) doctrine.
+        frameworks: Required regulatory frameworks (e.g. ['NIS2', 'SecNumCloud']).
+    """
+    if not isinstance(option, dict):
+        return invalid_argument_response("option", "'option' must be an object with a 'title'.")
+    title = option.get("title")
+    if not isinstance(title, str) or not title.strip():
+        return invalid_argument_response("option.title", "'option.title' is required.")
+    if option.get("statements") is not None and not isinstance(option.get("statements"), list):
+        return invalid_argument_response("option.statements", "'option.statements' must be a list.")
+    if subject is not None and not isinstance(subject, str):
+        return invalid_argument_response("subject", "'subject' must be a string.")
+    doms = _str_list(domains, "domains")
+    if isinstance(doms, dict):
+        return doms
+    fws = _str_list(frameworks, "frameworks")
+    if isinstance(fws, dict):
+        return fws
+    try:
+        from pipelines.doctrine import check_option as judge
+
+        payload = judge(
+            _doctrine_index(),
+            option=option,
+            subject=subject,
+            domains=doms,
+            frameworks=fws,
+            snapshot_id=_latest_snapshot_id(),
+        )
+        return ok_response(payload, count=len(payload["verdicts"]))
+    except Exception as e:
+        return handle_exception_response(e, context_action="check_option")

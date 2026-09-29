@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.0")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.1")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -150,4 +150,78 @@ export interface SuggestionCatalogPort {
     context: SuggestionCatalogContext;
     suggestions: PatternSuggestion[];
   }>>;
+}
+
+/* ---- Contract 1.1: doctrine context & option judge ---------------------- */
+
+export type DoctrineItemType = "principle" | "pattern" | "decision" | "control";
+
+export interface DoctrineContextItem {
+  typed_id: string;
+  id: string;
+  type: DoctrineItemType;
+  title: string;
+  status: "active";
+  confidence: ConfidenceLevel | string;
+  domain: string[];
+  excerpt: string;
+  source_ref: string;
+  relevance: number;
+  has_checks: boolean;
+  framework?: string | null;
+  required?: boolean;
+}
+
+export interface DoctrineContext {
+  items: DoctrineContextItem[];
+  truncated: boolean;
+  snapshot_id: string | null;
+}
+
+export interface DoctrineContextRequest {
+  subject: string;
+  domains?: string[];
+  frameworks?: string[];
+  phase?: string | null;
+  max_items?: number;
+  max_chars?: number;
+}
+
+export interface OptionStatement {
+  subject: string;
+  predicate: string;
+  value: string;
+}
+
+export interface ArchitectureOption {
+  title: string;
+  description?: string;
+  statements?: OptionStatement[];
+}
+
+export interface CheckOptionRequest {
+  option: ArchitectureOption;
+  subject?: string;
+  domains?: string[];
+  frameworks?: string[];
+}
+
+export type CheckVerdictValue = "supports" | "violates" | "unassessed";
+
+export interface CheckVerdict {
+  typed_id: string;
+  check_id: string | null;
+  verdict: CheckVerdictValue;
+  message: string | null;
+  matched_terms: string[];
+  excerpt: string;
+  source_ref: string;
+  check_status?: "draft" | "validated" | null;
+}
+
+export interface CheckResult {
+  verdicts: CheckVerdict[];
+  summary: Record<CheckVerdictValue, number>;
+  method: "deterministic-checks-v1";
+  snapshot_id: string | null;
 }

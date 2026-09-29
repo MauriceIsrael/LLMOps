@@ -1,4 +1,4 @@
-.PHONY: demo demo-check install test test-unit test-contract test-integration typecheck lint snapshot verify hooks
+.PHONY: demo demo-check install test test-unit test-contract test-integration typecheck lint snapshot verify hooks eval-check
 
 install:
 	poetry install
@@ -29,6 +29,10 @@ test-integration:
 
 # Fast local gate (no CI workflow): lint + frozen contract + unit tests.
 verify: lint test-contract test-unit
+
+# Option judge evaluation: recall of expected violations on the annotated dataset.
+eval-check:
+	poetry run python scripts/eval/eval_check_option.py
 
 # Install the git pre-push hook that runs `make verify`.
 hooks:

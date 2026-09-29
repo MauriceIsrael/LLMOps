@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CheckOptionResponse",
+  "description": "Deterministic verdicts of an option against the doctrine's structured check clauses.",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "verdicts",
+        "summary",
+        "method",
+        "snapshot_id"
+      ],
+      "properties": {
+        "verdicts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "typed_id",
+              "check_id",
+              "verdict",
+              "message",
+              "matched_terms",
+              "excerpt",
+              "source_ref"
+            ],
+            "properties": {
+              "typed_id": {
+                "type": "string"
+              },
+              "check_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "verdict": {
+                "enum": [
+                  "supports",
+                  "violates",
+                  "unassessed"
+                ]
+              },
+              "message": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "matched_terms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "excerpt": {
+                "type": "string"
+              },
+              "source_ref": {
+                "type": "string"
+              },
+              "check_status": {
+                "enum": [
+                  "draft",
+                  "validated",
+                  null
+                ],
+                "description": "Review status of the clause that produced the verdict (null when unassessed)."
+              }
+            }
+          }
+        },
+        "summary": {
+          "type": "object",
+          "required": [
+            "supports",
+            "violates",
+            "unassessed"
+          ],
+          "properties": {
+            "supports": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "violates": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unassessed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "method": {
+          "const": "deterministic-checks-v1"
+        },
+        "snapshot_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

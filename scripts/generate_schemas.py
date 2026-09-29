@@ -47,6 +47,105 @@ def generate_envelope_schema() -> dict[str, Any]:
     }
 
 
+def generate_doctrine_context_schema() -> dict[str, Any]:
+    """Response of get_doctrine_context / GET /api/knowledge/context (contract 1.1)."""
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "DoctrineContextResponse",
+        "description": "Doctrine applicable to a subject: active principles, required controls, patterns and ADRs, ranked deterministically.",
+        "type": "object",
+        "required": ["status", "count", "data"],
+        "properties": {
+            "status": {"const": "ok"},
+            "count": {"type": "integer", "minimum": 0},
+            "data": {
+                "type": "object",
+                "required": ["items", "truncated", "snapshot_id"],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "typed_id", "id", "type", "title", "status", "confidence", "domain",
+                                "excerpt", "source_ref", "relevance", "has_checks",
+                            ],
+                            "properties": {
+                                "typed_id": {"type": "string", "pattern": "^(principle|pattern|decision|control):.+$"},
+                                "id": {"type": "string"},
+                                "type": {"enum": ["principle", "pattern", "decision", "control"]},
+                                "title": {"type": "string"},
+                                "status": {"const": "active"},
+                                "confidence": {"type": "string"},
+                                "domain": {"type": "array", "items": {"type": "string"}},
+                                "excerpt": {"type": "string"},
+                                "source_ref": {"type": "string"},
+                                "relevance": {"type": "number", "minimum": 0, "maximum": 1},
+                                "has_checks": {"type": "boolean"},
+                                "framework": {"type": ["string", "null"]},
+                                "required": {"type": "boolean", "description": "Control of a framework listed in 'frameworks'."},
+                            },
+                        },
+                    },
+                    "truncated": {"type": "boolean"},
+                    "snapshot_id": {"type": ["string", "null"]},
+                },
+            },
+        },
+    }
+
+
+def generate_check_result_schema() -> dict[str, Any]:
+    """Response of check_option / POST /api/knowledge/check (contract 1.1)."""
+    verdict_enum = ["supports", "violates", "unassessed"]
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "CheckOptionResponse",
+        "description": "Deterministic verdicts of an option against the doctrine's structured check clauses.",
+        "type": "object",
+        "required": ["status", "count", "data"],
+        "properties": {
+            "status": {"const": "ok"},
+            "count": {"type": "integer", "minimum": 0},
+            "data": {
+                "type": "object",
+                "required": ["verdicts", "summary", "method", "snapshot_id"],
+                "properties": {
+                    "verdicts": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "typed_id", "check_id", "verdict", "message", "matched_terms", "excerpt", "source_ref",
+                            ],
+                            "properties": {
+                                "typed_id": {"type": "string"},
+                                "check_id": {"type": ["string", "null"]},
+                                "verdict": {"enum": verdict_enum},
+                                "message": {"type": ["string", "null"]},
+                                "matched_terms": {"type": "array", "items": {"type": "string"}},
+                                "excerpt": {"type": "string"},
+                                "source_ref": {"type": "string"},
+                                "check_status": {
+                                    "enum": ["draft", "validated", None],
+                                    "description": "Review status of the clause that produced the verdict (null when unassessed).",
+                                },
+                            },
+                        },
+                    },
+                    "summary": {
+                        "type": "object",
+                        "required": verdict_enum,
+                        "properties": {v: {"type": "integer", "minimum": 0} for v in verdict_enum},
+                    },
+                    "method": {"const": "deterministic-checks-v1"},
+                    "snapshot_id": {"type": ["string", "null"]},
+                },
+            },
+        },
+    }
+
+
 def generate_typescript_types() -> str:
     conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
     subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
@@ -55,7 +154,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.0")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.1")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -207,6 +306,80 @@ export interface SuggestionCatalogPort {{
     suggestions: PatternSuggestion[];
   }}>>;
 }}
+
+/* ---- Contract 1.1: doctrine context & option judge ---------------------- */
+
+export type DoctrineItemType = "principle" | "pattern" | "decision" | "control";
+
+export interface DoctrineContextItem {{
+  typed_id: string;
+  id: string;
+  type: DoctrineItemType;
+  title: string;
+  status: "active";
+  confidence: ConfidenceLevel | string;
+  domain: string[];
+  excerpt: string;
+  source_ref: string;
+  relevance: number;
+  has_checks: boolean;
+  framework?: string | null;
+  required?: boolean;
+}}
+
+export interface DoctrineContext {{
+  items: DoctrineContextItem[];
+  truncated: boolean;
+  snapshot_id: string | null;
+}}
+
+export interface DoctrineContextRequest {{
+  subject: string;
+  domains?: string[];
+  frameworks?: string[];
+  phase?: string | null;
+  max_items?: number;
+  max_chars?: number;
+}}
+
+export interface OptionStatement {{
+  subject: string;
+  predicate: string;
+  value: string;
+}}
+
+export interface ArchitectureOption {{
+  title: string;
+  description?: string;
+  statements?: OptionStatement[];
+}}
+
+export interface CheckOptionRequest {{
+  option: ArchitectureOption;
+  subject?: string;
+  domains?: string[];
+  frameworks?: string[];
+}}
+
+export type CheckVerdictValue = "supports" | "violates" | "unassessed";
+
+export interface CheckVerdict {{
+  typed_id: string;
+  check_id: string | null;
+  verdict: CheckVerdictValue;
+  message: string | null;
+  matched_terms: string[];
+  excerpt: string;
+  source_ref: string;
+  check_status?: "draft" | "validated" | null;
+}}
+
+export interface CheckResult {{
+  verdicts: CheckVerdict[];
+  summary: Record<CheckVerdictValue, number>;
+  method: "deterministic-checks-v1";
+  snapshot_id: string | null;
+}}
 """
 
 
@@ -219,6 +392,13 @@ def main() -> None:
         json.dumps(envelope_schema, indent=2) + "\n", encoding="utf-8"
     )
     print("Generated: schemas/envelope.schema.json")
+
+    for filename, schema in (
+        ("doctrine_context.schema.json", generate_doctrine_context_schema()),
+        ("check_result.schema.json", generate_check_result_schema()),
+    ):
+        (schemas_dir / filename).write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
+        print(f"Generated: schemas/{filename}")
 
     ts_types = generate_typescript_types()
     (schemas_dir / "types.ts").write_text(ts_types, encoding="utf-8")

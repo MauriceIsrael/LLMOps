@@ -83,7 +83,9 @@ make demo-check
    Exhaustive technical compliance coverage across European and mission-critical standards: NIS2, CER (Critical Entities Resilience EU 2022/2557), CRA (Cyber Resilience Act EU 2024/2847), GDPR, GSMA (SGP.22/32 eSIM, Central EIR, SAS EAL4+), 3GPP Rel-18 (MCX, NEF, SCAS/NESAS, MDA AIOps), ITIL v4 / FCAPS O&M, Telco Resilience (Tier IV dual-datacenter, G.8275.1 PTP sync, >30d Rubidium holdover), and PPDR Tactical Terminals (ECC Band 68/28, TETRA DMO, MIL-STD-810H, ATEX, ISO 11451/UN R2144 vehicle EMC).
 9. **Automated RFP Shredder & Bilingual Zero-Draft HLD Engine (FR / EN)**  
    Deconstructs client tenders into atomic requirements (`shred-rfp`), builds the triangular compliance matrix against standard architecture decisions (ADRs) and regulatory controls, and auto-generates a High-Level Design pre-sales document (`zero-draft-hld`) in English or French with zero residual gaps. Ready-to-use deliverable templates are available in `templates/HLD-zero-draft-template.md` (FR) and `templates/HLD-zero-draft-template.en.md` (EN).
-10. **Dual-Mode Architecture & Architecture Suite Contract v1**  
+10. **Doctrine Context & Option Judge (contract 1.1)**  
+    `get_doctrine_context` / `GET /api/knowledge/context` returns the doctrine applicable to a subject (active principles, required regulatory controls, patterns, ADRs) with bounded excerpts; `check_option` / `POST /api/knowledge/check` judges an option against structured `checks` clauses of the doctrine (`supports` / `violates` / `unassessed`, with citations). Both are fully deterministic — no LLM on the server. Evaluation: `make eval-check`.
+11. **Dual-Mode Architecture & Architecture Suite Contract v1**  
     Provides both synchronous REST endpoints (`/api/rfp/*`, `/api/compliance/*`, `/api/knowledge/*`, `/api/skills/*`) for interactive web interfaces and CLI tools, as well as sealed canonical snapshots (`latest.json`) for offline-first admission gates (per ADR-SUITE-05). All contracts follow strict provenance (`sourceSystem: "knowledge-hub"`), canonical SHA-256 sealing, and Fail Loud resilience.
 
 ---
