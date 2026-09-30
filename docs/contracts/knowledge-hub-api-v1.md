@@ -666,6 +666,24 @@ Un client de confiance (Archinex) agit **au nom d'un expert** : il envoie son je
 - File des candidats : `CANDIDATES_BACKEND=sql` (SQLite ou PostgreSQL, `GOVERNANCE_DATABASE_URL`), le backend `gcs` jamais implémenté est retiré.
 - Limite connue : un jeton de service compromis permet d'usurper n'importe quel expert ; authentification forte et RBAC suivis par l'issue [#7](https://github.com/MauriceIsrael/LLMOps/issues/7).
 
+### 5.5 Contrat 1.5 — Revue et sollicitation des experts
+
+Toutes ces routes exigent le scope `kb:review`. Celles qui agissent pour un expert exigent aussi l'acteur du §5.4 (`kb:delegate` + `X-Actor-Email`). Sans base de gouvernance (`GOVERNANCE_DATABASE_URL`), les fonctions qui en dépendent répondent `503` (enveloppe `status: "unavailable"`) ; la boîte de revue reste calculée depuis la file.
+
+| Route | Outil MCP | Rôle |
+|---|---|---|
+| `GET /api/knowledge/reviews/inbox` | `get_review_inbox` | Candidats qui attendent l'acteur : `reason` = `review` (assigné), `second_review` (second relecteur requis) ou `advice` (avis demandé) ; du plus ancien au plus récent ; `due_at` = 5 jours ouvrés. |
+| `POST /api/knowledge/candidates/{id}/assign` `{handle, reason?}` | `assign_kb_candidate` | Réassigne un candidat `in_review` ; réservé au propriétaire assigné ou à `kb:maintain` (`403`), `handle` inconnu → `400`. |
+| `POST /api/knowledge/candidates/{id}/request-review` `{handle, kind, message?, due_at?}` | `request_kb_review` | Crée une demande `second_review` ou `advice` (`201`) ; réservé à un propriétaire du domaine ou `kb:maintain`. Un avis n'est pas une décision. |
+| `POST` / `GET /api/knowledge/candidates/{id}/comments` | `comment_kb_candidate` | Fil de discussion (`201`) ; un commentaire n'est pas une décision. |
+| `GET /api/knowledge/events?since=<curseur>&limit=` | — | Flux en ajout seul `{events, next_cursor}` ; chaque événement porte `recipients: [handle]`. Types : `candidate.submitted`, `candidate.assigned`, `review.requested`, `candidate.reviewed`, `candidate.commented`, `candidate.promoted`, `candidate.published`, `reminder.due`, `owners.updated` (`eval.updated` et `coverage.changed` arrivent avec les lots suivants). |
+| `GET /api/knowledge/owners` | `list_domain_owners` | Registre sans secrets de notification. |
+| `PUT /api/knowledge/owners` | — | Remplace le registre ; rôle `kb:admin` de l'expert, ou scope `kb:admin` du jeton quand aucun expert n'agit (amorçage). Validation : rôles connus, e-mails uniques, domaines et `default_owner` cohérents. Les webhooks Discord/ntfy existants sont conservés. Journalisé (`owners.updated`). |
+
+- La seconde revue d'un principe (ou d'un `supersedes`) crée automatiquement la demande `second_review` vers le second propriétaire ; la revue de cet expert la clôt.
+- `kb remind` émet `reminder.due`. Un propriétaire marqué `delegated` (compte Archinex) n'est plus notifié sur Discord, ntfy ou e-mail : Archinex délivre la notification depuis le flux.
+- Schémas : [`review_inbox`](../../schemas/review_inbox.schema.json), [`governance_event`](../../schemas/governance_event.schema.json).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

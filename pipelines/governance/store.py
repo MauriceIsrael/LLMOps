@@ -57,6 +57,40 @@ owner_domains = Table(
     Column("handle", String(128), nullable=False),
 )
 
+review_requests = Table(
+    "review_requests", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("candidate_id", String(24), nullable=False, index=True),
+    Column("requested_handle", String(128), nullable=False, index=True),
+    Column("kind", String(16), nullable=False),  # second_review | advice
+    Column("message", Text),
+    Column("requested_by", String(128), nullable=False),
+    Column("due_at", String(32), nullable=False),
+    Column("status", String(16), nullable=False, default="open"),  # open | done | cancelled
+    Column("created_at", String(32), nullable=False),
+    Column("closed_at", String(32)),
+)
+
+comments = Table(
+    "comments", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("candidate_id", String(24), nullable=False, index=True),
+    Column("author", String(256), nullable=False),
+    Column("body", Text, nullable=False),
+    Column("at", String(32), nullable=False),
+)
+
+governance_events = Table(
+    "governance_events", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("at", String(32), nullable=False),
+    Column("type", String(48), nullable=False, index=True),
+    Column("candidate_id", String(24), index=True),
+    Column("actor", String(256), nullable=False),
+    Column("recipients", Text, nullable=False, default="[]"),
+    Column("payload", Text, nullable=False, default="{}"),
+)
+
 counters = Table(
     "counters", metadata,
     Column("key", String(128), primary_key=True),

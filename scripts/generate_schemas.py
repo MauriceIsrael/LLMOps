@@ -306,6 +306,67 @@ def generate_kb_me_schema() -> dict[str, Any]:
     }
 
 
+def generate_review_inbox_schema() -> dict[str, Any]:
+    """Review inbox of the acting expert (get_review_inbox / GET /api/knowledge/reviews/inbox, contract 1.5)."""
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "ReviewInboxResponse",
+        "type": "object",
+        "required": ["status", "count", "data"],
+        "properties": {
+            "status": {"const": "ok"},
+            "count": {"type": "integer"},
+            "data": {
+                "type": "object",
+                "required": ["handle", "items"],
+                "properties": {
+                    "handle": {"type": "string"},
+                    "items": {"type": "array", "items": {
+                        "type": "object",
+                        "required": ["candidate_id", "title", "kind", "reason", "waiting_since", "due_at"],
+                        "properties": {
+                            "candidate_id": {"type": "string"}, "title": {"type": "string"}, "kind": {"type": "string"},
+                            "asset_type": {"type": ["string", "null"]},
+                            "domain": {"type": "array", "items": {"type": "string"}},
+                            "reason": {"enum": ["review", "second_review", "advice"]},
+                            "waiting_since": {"type": "string"}, "due_at": {"type": "string"},
+                            "message": {"type": ["string", "null"]},
+                            "checks_failed": {"type": "array", "items": {"type": "string"}},
+                        },
+                    }},
+                },
+            },
+        },
+    }
+
+
+def generate_governance_event_schema() -> dict[str, Any]:
+    """Event of the governance feed (GET /api/knowledge/events, contract 1.5)."""
+    from pipelines.governance.log import EVENT_TYPES
+
+    event = {
+        "type": "object",
+        "required": ["id", "at", "type", "actor", "recipients", "payload"],
+        "properties": {
+            "id": {"type": "integer"}, "at": {"type": "string"}, "type": {"enum": list(EVENT_TYPES)},
+            "candidate_id": {"type": ["string", "null"]}, "actor": {"type": "string"},
+            "recipients": {"type": "array", "items": {"type": "string"}}, "payload": {"type": "object"},
+        },
+    }
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "GovernanceEventFeed",
+        "type": "object",
+        "required": ["status", "count", "data"],
+        "properties": {
+            "status": {"const": "ok"}, "count": {"type": "integer"},
+            "data": {"type": "object", "required": ["events", "next_cursor"], "properties": {
+                "events": {"type": "array", "items": event}, "next_cursor": {"type": "integer"}}},
+        },
+        "definitions": {"GovernanceEvent": event},
+    }
+
+
 def generate_typescript_types() -> str:
     conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
     subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
@@ -314,11 +375,11 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.4")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.5")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
-export type EnvelopeStatus = "ok" | "not_found" | "invalid_argument" | "error" | "unauthorized";
+export type EnvelopeStatus = "ok" | "not_found" | "invalid_argument" | "error" | "unauthorized" | "unavailable";
 
 export type ConfidenceLevel = {conf_union};
 
@@ -629,6 +690,62 @@ export interface KbMe {{
   pending_reviews: number;
 }}
 
+/* ---- Contract 1.5: review and solicitation --------------------------------- */
+
+export type ReviewReason = "review" | "second_review" | "advice";
+
+export interface ReviewInboxItem {{
+  candidate_id: string;
+  title: string;
+  kind: string;
+  asset_type?: string | null;
+  domain: string[];
+  reason: ReviewReason;
+  waiting_since: string;
+  due_at: string;
+  message?: string | null;
+  checks_failed: string[];
+}}
+
+export interface ReviewRequest {{
+  id: number;
+  candidate_id: string;
+  requested_handle: string;
+  kind: "second_review" | "advice";
+  message: string | null;
+  requested_by: string;
+  due_at: string;
+  status: "open" | "done" | "cancelled";
+  created_at: string;
+  closed_at: string | null;
+}}
+
+export interface KbComment {{ id: number; candidate_id: string; author: string; body: string; at: string }}
+
+export type GovernanceEventType =
+  | "candidate.submitted" | "candidate.assigned" | "review.requested" | "candidate.reviewed"
+  | "candidate.commented" | "candidate.promoted" | "candidate.published" | "reminder.due"
+  | "owners.updated" | "eval.updated" | "coverage.changed";
+
+export interface GovernanceEvent {{
+  id: number;
+  at: string;
+  type: GovernanceEventType;
+  candidate_id: string | null;
+  actor: string;
+  recipients: string[];
+  payload: Record<string, unknown>;
+}}
+
+export interface DomainOwner {{
+  handle: string;
+  email: string | null;
+  roles: KbRole[];
+  delegated: boolean;
+}}
+
+export interface DomainOwnersRegistry {{ owners: DomainOwner[]; domains: Record<string, string>; default_owner: string }}
+
 export interface KbCandidateReviewRequest {{
   action: KbReviewAction;
   reviewer: string;
@@ -654,6 +771,8 @@ def main() -> None:
         ("kb_candidate.schema.json", generate_kb_candidate_schema()),
         ("framework_coverage.schema.json", generate_framework_coverage_schema()),
         ("kb_me.schema.json", generate_kb_me_schema()),
+        ("review_inbox.schema.json", generate_review_inbox_schema()),
+        ("governance_event.schema.json", generate_governance_event_schema()),
     ):
         (schemas_dir / filename).write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
         print(f"Generated: schemas/{filename}")

@@ -8,9 +8,13 @@
   "rest.GET /api/elicitation/questions": 200,
   "rest.GET /api/knowledge/candidates": 200,
   "rest.GET /api/knowledge/candidates/{candidate_id}": 200,
+  "rest.GET /api/knowledge/candidates/{candidate_id}/comments": 200,
   "rest.GET /api/knowledge/context": 200,
   "rest.GET /api/knowledge/engagements": 200,
+  "rest.GET /api/knowledge/events": 200,
   "rest.GET /api/knowledge/me": 200,
+  "rest.GET /api/knowledge/owners": 200,
+  "rest.GET /api/knowledge/reviews/inbox": 200,
   "rest.GET /api/knowledge/search": 200,
   "rest.GET /api/skills": 200,
   "rest.GET /api/skills/matrix": 200,
@@ -26,9 +30,13 @@
   "rest.POST /api/documents/zero-draft-blueprint": 200,
   "rest.POST /api/elicitation/trigger": 200,
   "rest.POST /api/knowledge/candidates": 201,
+  "rest.POST /api/knowledge/candidates/{candidate_id}/assign": 200,
+  "rest.POST /api/knowledge/candidates/{candidate_id}/comments": 201,
+  "rest.POST /api/knowledge/candidates/{candidate_id}/request-review": 201,
   "rest.POST /api/knowledge/check": 200,
   "rest.POST /api/knowledge/suggestions": 200,
   "rest.POST /api/prose/suggest-batch": 200,
   "rest.POST /api/rfp/shred-to-candidates": 200,
-  "rest.PUT /api/compliance/frameworks/applicable": 200
+  "rest.PUT /api/compliance/frameworks/applicable": 200,
+  "rest.PUT /api/knowledge/owners": 200
 }

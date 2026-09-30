@@ -1195,6 +1195,228 @@ def get_kb_me() -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Review and solicitation of experts (contract 1.5).
+# ---------------------------------------------------------------------------
+
+def _governance_error(exc: Exception) -> dict[str, Any]:
+    from pipelines.kb_candidates.service import CandidateForbiddenError, GovernanceUnavailableError
+
+    if isinstance(exc, CandidateForbiddenError):
+        return {"status": "unauthorized", "reason": exc.reason}
+    if isinstance(exc, GovernanceUnavailableError):
+        return {"status": "unavailable", "reason": exc.reason}
+    return _candidate_error(exc)
+
+
+def _acting_expert(need_review_scope: bool = True) -> tuple[Any, Any] | dict[str, Any]:
+    """(service, owner) of the acting expert, or an ``unauthorized`` envelope."""
+    from mcp_server.core.auth import delegated_actor_email, has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if need_review_scope and not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    email = delegated_actor_email()
+    if not email:
+        return {"status": "unauthorized",
+                "reason": "No acting expert: send X-Actor-Email with a token carrying the 'kb:delegate' scope."}
+    service = _candidate_service()
+    owner = service.owners().by_email(email)
+    if owner is None:
+        return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
+    return service, owner
+
+
+def get_review_inbox() -> dict[str, Any]:
+    """Candidates waiting for the acting expert (contract 1.5), oldest first, with a due date.
+
+    Requires the 'kb:review' scope and an acting expert (see ``get_kb_me``). Reasons: 'review'
+    (assigned), 'second_review' (a second reviewer is required), 'advice' (asked for an opinion).
+    """
+    try:
+        who = _acting_expert()
+        if isinstance(who, dict):
+            return who
+        service, owner = who
+        items = service.inbox(owner.handle)
+        return ok_response({"handle": owner.handle, "items": items}, count=len(items))
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_review_inbox")
+
+
+def assign_kb_candidate(candidate_id: str, handle: str, reason: str | None = None) -> dict[str, Any]:
+    """Reassign a candidate in review to another owner (acting expert: current owner or 'kb:maintain').
+
+    Args:
+        candidate_id: Candidate identifier.
+        handle: Owner handle receiving the candidate.
+        reason: Motive of the reassignment.
+    """
+    from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
+
+    try:
+        who = _acting_expert()
+        if isinstance(who, dict):
+            return who
+        service, owner = who
+        return ok_response(service.assign(candidate_id, handle, owner.handle, reason), count=1)
+    except CandidateNotFoundError:
+        return not_found_response(candidate_id)
+    except CandidateError as exc:
+        return _governance_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="assign_kb_candidate")
+
+
+def request_kb_review(candidate_id: str, handle: str, kind: str = "second_review", message: str | None = None,
+                      due_at: str | None = None) -> dict[str, Any]:
+    """Ask a specific expert for a second review or an advisory opinion on a candidate in review.
+
+    Needs the governance database. Args:
+        candidate_id: Candidate identifier.
+        handle: Owner handle asked.
+        kind: 'second_review' or 'advice' (an opinion is not a decision).
+        message: Message to the expert.
+        due_at: Due date (UTC, e.g. '2026-10-01T09:00:00Z'); default 5 business days.
+    """
+    from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
+
+    try:
+        who = _acting_expert()
+        if isinstance(who, dict):
+            return who
+        service, owner = who
+        return ok_response(service.request_review(candidate_id, handle, kind, owner.handle, message, due_at), count=1)
+    except CandidateNotFoundError:
+        return not_found_response(candidate_id)
+    except CandidateError as exc:
+        return _governance_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="request_kb_review")
+
+
+def comment_kb_candidate(candidate_id: str, body: str) -> dict[str, Any]:
+    """Add a comment to the discussion of a candidate (a comment is not a decision).
+
+    Needs the governance database and the 'kb:review' scope; the author is the acting expert
+    (or the calling token when there is none).
+
+    Args:
+        candidate_id: Candidate identifier.
+        body: Comment text.
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    try:
+        if not has_scope(REVIEW_SCOPE):
+            return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return ok_response(_candidate_service().comment(candidate_id, body, _actor()), count=1)
+    except CandidateNotFoundError:
+        return not_found_response(candidate_id)
+    except CandidateError as exc:
+        return _governance_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="comment_kb_candidate")
+
+
+def list_kb_comments(candidate_id: str) -> dict[str, Any]:
+    """Discussion of a candidate, oldest first (requires the 'kb:review' scope)."""
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.model import CandidateNotFoundError
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    try:
+        items = _candidate_service().comments(candidate_id)
+        return ok_response(items, count=len(items))
+    except CandidateNotFoundError:
+        return not_found_response(candidate_id)
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_kb_comments")
+
+
+def get_governance_events(since: int = 0, limit: int = 100) -> dict[str, Any]:
+    """Append-only feed of governance events after the cursor ``since`` (requires 'kb:review').
+
+    Each event has ``recipients`` (owner handles who must act or be informed). Poll with the
+    returned ``next_cursor``. Needs the governance database.
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.governance.log import get_log
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    try:
+        log = get_log()
+        if log is None:
+            return {"status": "unavailable", "reason": "this feature needs the governance database."}
+        feed = log.events_since(max(int(since), 0), min(max(int(limit), 1), 500))
+        return ok_response(feed, count=len(feed["events"]))
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_governance_events")
+
+
+def list_domain_owners() -> dict[str, Any]:
+    """Registry of domain owners: owners (without notification secrets), domains, default owner."""
+    try:
+        registry = _candidate_service().owners()
+        return ok_response({
+            "owners": [o.public_dict() for o in sorted(registry.owners.values(), key=lambda o: o.handle)],
+            "domains": dict(sorted(registry.domains.items())),
+            "default_owner": registry.default_owner,
+        }, count=len(registry.owners))
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_domain_owners")
+
+
+def update_domain_owners(payload: dict[str, Any]) -> dict[str, Any]:
+    """Replace the owners registry (REST ``PUT /api/knowledge/owners``; not an MCP tool).
+
+    Allowed to an acting expert with the 'kb:admin' role, or to a token carrying the
+    'kb:admin' scope when no expert acts (bootstrap). Needs the governance database; every
+    change is journalled (``owners.updated``).
+    """
+    from mcp_server.core.auth import delegated_actor_email, has_scope
+    from pipelines.governance.log import get_log
+    from pipelines.governance.registry import registry_from_payload, save_registry
+
+    try:
+        service = _candidate_service()
+        email = delegated_actor_email()
+        if email:
+            owner = service.owners().by_email(email)
+            if owner is None or "kb:admin" not in owner.roles:
+                return {"status": "unauthorized", "reason": "the 'kb:admin' role is required to edit the registry."}
+            actor = owner.handle
+        elif has_scope("kb:admin"):
+            actor = _actor()
+        else:
+            return {"status": "unauthorized", "reason": "the 'kb:admin' role or token scope is required."}
+        log = get_log()
+        if log is None:
+            return {"status": "unavailable", "reason": "this feature needs the governance database."}
+        current = service.owners()
+        for item in payload.get("owners") or []:  # the public view omits notification secrets: keep them
+            existing = current.owners.get(str(item.get("handle"))) if isinstance(item, dict) else None
+            if existing is not None:
+                item.setdefault("discord_webhook", existing.discord_webhook)
+                item.setdefault("ntfy_topic", existing.ntfy_topic)
+        try:
+            registry = registry_from_payload(payload)
+        except ValueError as exc:
+            return invalid_argument_response("owners", str(exc))
+        save_registry(registry)
+        log.emit("owners.updated", None, actor, [registry.default_owner], owners=len(registry.owners))
+        return ok_response({"owners": len(registry.owners), "domains": len(registry.domains),
+                            "default_owner": registry.default_owner}, count=1)
+    except Exception as e:
+        return handle_exception_response(e, context_action="update_domain_owners")
+
+
+# ---------------------------------------------------------------------------
 # Regulatory coverage (contract 1.3).
 # ---------------------------------------------------------------------------
 

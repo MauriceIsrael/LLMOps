@@ -1,0 +1,52 @@
+{
+  "interface": "mcp.comment_kb_candidate",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "at": {
+            "type": [
+              "string"
+            ]
+          },
+          "author": {
+            "type": [
+              "string"
+            ]
+          },
+          "body": {
+            "type": [
+              "string"
+            ]
+          },
+          "candidate_id": {
+            "type": [
+              "string"
+            ]
+          },
+          "id": {
+            "type": [
+              "number"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

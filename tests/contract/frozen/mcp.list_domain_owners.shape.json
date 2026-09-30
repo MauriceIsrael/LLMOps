@@ -1,0 +1,577 @@
+{
+  "interface": "mcp.list_domain_owners",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "default_owner": {
+            "type": [
+              "string"
+            ]
+          },
+          "domains": {
+            "keys": {
+              "5g-security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "ai-assistance": {
+                "type": [
+                  "string"
+                ]
+              },
+              "ai-security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "api": {
+                "type": [
+                  "string"
+                ]
+              },
+              "api-security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "architecture": {
+                "type": [
+                  "string"
+                ]
+              },
+              "asset-management": {
+                "type": [
+                  "string"
+                ]
+              },
+              "audit": {
+                "type": [
+                  "string"
+                ]
+              },
+              "audit-logging": {
+                "type": [
+                  "string"
+                ]
+              },
+              "automation": {
+                "type": [
+                  "string"
+                ]
+              },
+              "automation-devops": {
+                "type": [
+                  "string"
+                ]
+              },
+              "automotive": {
+                "type": [
+                  "string"
+                ]
+              },
+              "boundary-protection": {
+                "type": [
+                  "string"
+                ]
+              },
+              "business-continuity": {
+                "type": [
+                  "string"
+                ]
+              },
+              "certification": {
+                "type": [
+                  "string"
+                ]
+              },
+              "cloud-platform": {
+                "type": [
+                  "string"
+                ]
+              },
+              "cmdb": {
+                "type": [
+                  "string"
+                ]
+              },
+              "compliance": {
+                "type": [
+                  "string"
+                ]
+              },
+              "compliance-evaluation": {
+                "type": [
+                  "string"
+                ]
+              },
+              "configuration-management": {
+                "type": [
+                  "string"
+                ]
+              },
+              "conformance": {
+                "type": [
+                  "string"
+                ]
+              },
+              "container-security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "cryptography": {
+                "type": [
+                  "string"
+                ]
+              },
+              "cyber-hygiene": {
+                "type": [
+                  "string"
+                ]
+              },
+              "data-isolation": {
+                "type": [
+                  "string"
+                ]
+              },
+              "data-protection": {
+                "type": [
+                  "string"
+                ]
+              },
+              "delivery": {
+                "type": [
+                  "string"
+                ]
+              },
+              "device-management": {
+                "type": [
+                  "string"
+                ]
+              },
+              "device-security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "devsecops": {
+                "type": [
+                  "string"
+                ]
+              },
+              "disaster-recovery": {
+                "type": [
+                  "string"
+                ]
+              },
+              "electronic-warfare": {
+                "type": [
+                  "string"
+                ]
+              },
+              "endpoint-security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "engineering": {
+                "type": [
+                  "string"
+                ]
+              },
+              "environmental": {
+                "type": [
+                  "string"
+                ]
+              },
+              "fleet-management": {
+                "type": [
+                  "string"
+                ]
+              },
+              "governance": {
+                "type": [
+                  "string"
+                ]
+              },
+              "hardening": {
+                "type": [
+                  "string"
+                ]
+              },
+              "hardware": {
+                "type": [
+                  "string"
+                ]
+              },
+              "iam": {
+                "type": [
+                  "string"
+                ]
+              },
+              "identity": {
+                "type": [
+                  "string"
+                ]
+              },
+              "identity-access-management": {
+                "type": [
+                  "string"
+                ]
+              },
+              "incident-handling": {
+                "type": [
+                  "string"
+                ]
+              },
+              "incident-response": {
+                "type": [
+                  "string"
+                ]
+              },
+              "infrastructure": {
+                "type": [
+                  "string"
+                ]
+              },
+              "infrastructure-security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "interoperability": {
+                "type": [
+                  "string"
+                ]
+              },
+              "iot": {
+                "type": [
+                  "string"
+                ]
+              },
+              "isolated-operation": {
+                "type": [
+                  "string"
+                ]
+              },
+              "it-infrastructure": {
+                "type": [
+                  "string"
+                ]
+              },
+              "it-infrastructure/bare-metal": {
+                "type": [
+                  "string"
+                ]
+              },
+              "it-infrastructure/container-orchestration": {
+                "type": [
+                  "string"
+                ]
+              },
+              "it-infrastructure/paas": {
+                "type": [
+                  "string"
+                ]
+              },
+              "it-infrastructure/virtualization": {
+                "type": [
+                  "string"
+                ]
+              },
+              "key-management": {
+                "type": [
+                  "string"
+                ]
+              },
+              "legal-compliance": {
+                "type": [
+                  "string"
+                ]
+              },
+              "lifecycle": {
+                "type": [
+                  "string"
+                ]
+              },
+              "mcp": {
+                "type": [
+                  "string"
+                ]
+              },
+              "mcx": {
+                "type": [
+                  "string"
+                ]
+              },
+              "mcx-security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "mfa": {
+                "type": [
+                  "string"
+                ]
+              },
+              "mobile-core": {
+                "type": [
+                  "string"
+                ]
+              },
+              "network-automation": {
+                "type": [
+                  "string"
+                ]
+              },
+              "network-exposure": {
+                "type": [
+                  "string"
+                ]
+              },
+              "network-security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "network-transport": {
+                "type": [
+                  "string"
+                ]
+              },
+              "observability": {
+                "type": [
+                  "string"
+                ]
+              },
+              "observability-security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "operations": {
+                "type": [
+                  "string"
+                ]
+              },
+              "ppdr-radio": {
+                "type": [
+                  "string"
+                ]
+              },
+              "privacy": {
+                "type": [
+                  "string"
+                ]
+              },
+              "ran": {
+                "type": [
+                  "string"
+                ]
+              },
+              "reliability": {
+                "type": [
+                  "string"
+                ]
+              },
+              "resilience": {
+                "type": [
+                  "string"
+                ]
+              },
+              "resilience-continuity": {
+                "type": [
+                  "string"
+                ]
+              },
+              "risk-management": {
+                "type": [
+                  "string"
+                ]
+              },
+              "roaming": {
+                "type": [
+                  "string"
+                ]
+              },
+              "safety": {
+                "type": [
+                  "string"
+                ]
+              },
+              "sba": {
+                "type": [
+                  "string"
+                ]
+              },
+              "secure-communications": {
+                "type": [
+                  "string"
+                ]
+              },
+              "secure-development": {
+                "type": [
+                  "string"
+                ]
+              },
+              "security": {
+                "type": [
+                  "string"
+                ]
+              },
+              "security-architecture": {
+                "type": [
+                  "string"
+                ]
+              },
+              "security-cryptography": {
+                "type": [
+                  "string"
+                ]
+              },
+              "security-governance": {
+                "type": [
+                  "string"
+                ]
+              },
+              "security-monitoring": {
+                "type": [
+                  "string"
+                ]
+              },
+              "service-management": {
+                "type": [
+                  "string"
+                ]
+              },
+              "sim-identity": {
+                "type": [
+                  "string"
+                ]
+              },
+              "sovereignty": {
+                "type": [
+                  "string"
+                ]
+              },
+              "spectrum": {
+                "type": [
+                  "string"
+                ]
+              },
+              "supply-chain": {
+                "type": [
+                  "string"
+                ]
+              },
+              "tactical-comms": {
+                "type": [
+                  "string"
+                ]
+              },
+              "tactical-device": {
+                "type": [
+                  "string"
+                ]
+              },
+              "telecom-core": {
+                "type": [
+                  "string"
+                ]
+              },
+              "third-party-risk": {
+                "type": [
+                  "string"
+                ]
+              },
+              "training": {
+                "type": [
+                  "string"
+                ]
+              },
+              "transport": {
+                "type": [
+                  "string"
+                ]
+              },
+              "vehicle-gateway": {
+                "type": [
+                  "string"
+                ]
+              },
+              "vendor-management": {
+                "type": [
+                  "string"
+                ]
+              },
+              "vulnerability-management": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "owners": {
+            "items": {
+              "keys": {
+                "delegated": {
+                  "type": [
+                    "boolean"
+                  ]
+                },
+                "email": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "handle": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "roles": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

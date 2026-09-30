@@ -1,0 +1,77 @@
+{
+  "interface": "mcp.request_kb_review",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "candidate_id": {
+            "type": [
+              "string"
+            ]
+          },
+          "closed_at": {
+            "type": [
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": [
+              "string"
+            ]
+          },
+          "due_at": {
+            "type": [
+              "string"
+            ]
+          },
+          "id": {
+            "type": [
+              "number"
+            ]
+          },
+          "kind": {
+            "type": [
+              "string"
+            ]
+          },
+          "message": {
+            "type": [
+              "string"
+            ]
+          },
+          "requested_by": {
+            "type": [
+              "string"
+            ]
+          },
+          "requested_handle": {
+            "type": [
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}
