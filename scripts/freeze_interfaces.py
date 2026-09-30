@@ -60,6 +60,12 @@ REQ-003: Le système doit journaliser tous les accès administrateurs et les con
 REQ-004: The solution shall support geo-redundant deployment across two data centres.
 """
 
+SAMPLE_OPTION = {
+    "title": "Closed-loop auto-remediation of network incidents",
+    "description": "Automated remediation playbooks triggered by alarms, without human approval.",
+    "statements": [{"subject": "remediation", "predicate": "has_property", "value": "fully autonomous remediation"}],
+}
+
 
 # ---------------------------------------------------------------------------
 # Shapes
@@ -245,6 +251,11 @@ def build_catalogue() -> list[Interface]:
         _mcp("generate_zero_draft_hld", lambda: kn.generate_zero_draft_hld(engagement=scratch)),
         _mcp("get_rfp_compliance_matrix", lambda: kn.get_rfp_compliance_matrix(engagement=scratch)),
         _mcp("trigger_rfp_elicitation", lambda: kn.trigger_rfp_elicitation(engagement=scratch)),
+        # Contract 1.1 — doctrine context & option judge
+        _mcp("get_doctrine_context", lambda: kn.get_doctrine_context(
+            "closed loop remediation of network incidents", frameworks=["NIS2"], max_items=12)),
+        _mcp("check_option", lambda: kn.check_option(SAMPLE_OPTION, subject="Network incident remediation",
+                                                     frameworks=["NIS2"])),
         # --- MCP Engagement ------------------------------------------------
         _mcp("get_subject", lambda: eng.get_subject("mcx-services", engagement=demo)),
         _mcp("get_subject_trajectory", lambda: eng.get_subject_trajectory("mcx-services", engagement=demo)),
@@ -287,6 +298,10 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/arbitration/board", headers={"X-Engagement-Id": demo}),
         _rest("GET", "/api/arbitration/conflicts", headers={"X-Engagement-Id": demo}),
         _rest("GET", "/api/arbitration/statements", headers={"X-Engagement-Id": demo}),
+        _rest("GET", "/api/knowledge/context",
+              "/api/knowledge/context?subject=closed%20loop%20remediation&frameworks=NIS2&max_items=12"),
+        _rest("POST", "/api/knowledge/check", json_body={
+            "option": SAMPLE_OPTION, "subject": "Network incident remediation", "frameworks": ["NIS2"]}),
         _rest("GET", "/api/skills"),
         _rest("GET", "/api/skills/matrix", headers={"X-Engagement-Id": demo}),
     ]

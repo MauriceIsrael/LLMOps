@@ -5,6 +5,17 @@ from typing import Any
 from llama_index.core.graph_stores.types import EntityNode, Relation
 
 
+def _json_list(value: Any) -> str:
+    """Serialize an optional front matter list (``terms``, ``checks``) for a graph column."""
+    import json
+
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        value = [value]
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, default=str)
+
+
 class ArchitectureGraphExtractor:
     """Extracteur d'entités d'architecture et de relations pour Kùzu DB via LlamaIndex."""
 
@@ -62,6 +73,10 @@ class ArchitectureGraphExtractor:
                 "target_entities": ",".join(parsed_doc.get("target_entities", []))
                 if isinstance(parsed_doc.get("target_entities"), list)
                 else str(parsed_doc.get("target_entities", "")),
+                # Doctrine engine inputs (JSON-serialized, optional front matter blocks).
+                "terms": _json_list(parsed_doc.get("frontmatter", {}).get("terms")),
+                "checks": _json_list(parsed_doc.get("frontmatter", {}).get("checks")),
+                "checks_status": str(parsed_doc.get("frontmatter", {}).get("checks_status") or ""),
             },
         )
         nodes.append(main_node)

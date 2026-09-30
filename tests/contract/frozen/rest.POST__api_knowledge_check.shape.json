@@ -1,0 +1,141 @@
+{
+  "interface": "rest.POST /api/knowledge/check",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "method": {
+                "type": [
+                  "string"
+                ]
+              },
+              "snapshot_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "summary": {
+                "keys": {
+                  "supports": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "unassessed": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "violates": {
+                    "type": [
+                      "number"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "verdicts": {
+                "items": {
+                  "keys": {
+                    "check_id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "check_status": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "excerpt": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "matched_terms": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "message": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "source_ref": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "typed_id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "verdict": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

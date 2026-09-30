@@ -17,6 +17,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from mcp_server.core.config import server_config
 from mcp_server.core.db import ReadOnlyKuzuClient
+from mcp_server.core.version import SNAPSHOT_SCHEMA_VERSION
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
 
 
@@ -247,7 +248,7 @@ def export_sealed_snapshot(
         "created_at": now_utc,
         "source_revision": git_rev,
         "payload_sha256": f"sha256:{payload_sha256}",
-        "schema_version": "1.0",
+        "schema_version": SNAPSHOT_SCHEMA_VERSION,
         **payload_data,
     }
 

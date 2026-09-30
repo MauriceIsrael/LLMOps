@@ -515,6 +515,100 @@ Retourne un instantane scelle par son identifiant unique (meme format que sectio
 ---
 
 
+## 5. Ajouts v1.x
+
+Les versions mineures n'ajoutent que des interfaces ou des champs **optionnels** (voir [`VERSIONING.md`](../VERSIONING.md)). Les interfaces `1.0` restent gelées (`tests/contract/frozen/`). La version courante est exposée par `GET /health` et `get_graph_summary` (`schema_version`) ; le format de l'instantané scellé reste en `schema_version: "1.0"`.
+
+### 5.1 Contrat 1.1 — Paquet de doctrine et juge d'option
+
+Deux interfaces **100 % déterministes** (aucun LLM côté serveur) destinées aux agents consommateurs (Archinex) : *« quelle doctrine s'applique à ce sujet ? »* et *« cette option respecte-t-elle la doctrine ? »*. Seuls les actifs `status: active` sont servis.
+
+#### 5.1.1 `GET /api/knowledge/context` — outil MCP `get_doctrine_context`
+
+| Paramètre | Type | Défaut | Rôle |
+|---|---|---|---|
+| `subject` | string (requis) | — | Texte libre décrivant le sujet |
+| `domains` | list[str] | `[]` | Filtre sur le `domain` des actifs (un domaine parent couvre ses sous-domaines `parent/enfant`) |
+| `frameworks` | list[str] | `[]` | Référentiels exigés : **tous** leurs contrôles actifs sont inclus (`required: true`) |
+| `phase` | str | `null` | Filtre `phase` (`BID`, `BUILD`, `RUN`) |
+| `max_items` | int (1–200) | `20` | Nombre maximum d'éléments |
+| `max_chars` | int (200–100000) | `8000` | Budget total des extraits |
+
+En REST, les listes s'écrivent `?frameworks=NIS2&frameworks=SecNumCloud` ou `?frameworks=NIS2,SecNumCloud`.
+
+Classement : correspondance de termes (titre, `terms`, domaine, `applicability`, corps ; normalisation minuscules/accents/pluriels et synonymes du glossaire — entrées « A / B » et [`data/kb/glossary/synonyms.yaml`](../../data/kb/glossary/synonyms.yaml)), seuil de pertinence 0,2 ; ordre **principe > contrôle exigé > pattern > ADR > autre contrôle**, puis pertinence, puis identifiant. `excerpt` = section la plus pertinente, coupée proprement ; la somme des extraits ne dépasse pas `max_chars` ; `truncated: true` si un élément a été omis ou coupé.
+
+```json
+{
+  "status": "ok",
+  "count": 12,
+  "data": {
+    "items": [
+      {
+        "typed_id": "principle:P-002", "id": "P-002", "type": "principle", "title": "Human in the loop",
+        "status": "active", "confidence": "verified", "domain": ["network-automation", "security"],
+        "excerpt": "Detection is automatic, decision is human, execution is automated. …",
+        "source_ref": "data/kb/principles/P-002.md", "relevance": 0.43, "has_checks": true,
+        "framework": null, "required": false
+      }
+    ],
+    "truncated": false,
+    "snapshot_id": "snapshot-2026-09-29-…"
+  }
+}
+```
+
+Schéma : [`schemas/doctrine_context.schema.json`](../../schemas/doctrine_context.schema.json) — types `DoctrineContext*` de [`schemas/types.ts`](../../schemas/types.ts).
+
+#### 5.1.2 `POST /api/knowledge/check` — outil MCP `check_option`
+
+Corps : `{"option": {"title", "description", "statements": [{"subject", "predicate", "value"}]}, "subject", "domains", "frameworks"}` (seul `option.title` est requis).
+
+Le juge évalue les **clauses de contrôle structurées** (`checks`) du front-matter des actifs actifs :
+
+```yaml
+checks_status: draft          # draft | validated (seul un relecteur humain valide)
+checks:
+  - id: P-002-C1
+    kind: requires            # requires | forbids
+    when: {terms_any: [closed-loop, auto-remediation]}     # et/ou terms_all
+    expect: {terms_any: [human-approval, supervised]}      # requires uniquement
+    message: "Toute boucle fermée doit rester supervisée par un humain."
+```
+
+- `forbids` : si `when` correspond → `violates` ; `requires` : si `when` correspond → `supports` si `expect` correspond, sinon `violates` ; sinon la clause ne s'applique pas.
+- Correspondance lexicale sur `title`, `description` et les `statements`, même normalisation que 5.1.1 ; une occurrence précédée d'une négation (`no`, `not`, `without`, `sans`, `pas`…) ne compte pas.
+- Un actif pertinent sans clause applicable → `unassessed` (`check_id: null`) : c'est au vérificateur côté client de juger.
+- **Tout contrôle actif d'un référentiel de `frameworks` est toujours retourné**, au minimum en `unassessed`.
+- Ordre : `violates`, `supports`, `unassessed`, puis priorité de type et identifiant. Champ additionnel `check_status` (`draft` | `validated` | `null`).
+
+```json
+{
+  "status": "ok",
+  "count": 33,
+  "data": {
+    "verdicts": [
+      {"typed_id": "principle:P-002", "check_id": "P-002-C1", "verdict": "violates",
+       "message": "Any closed loop must stay supervised: …", "matched_terms": ["closed loop", "auto-remediation"],
+       "excerpt": "…", "source_ref": "data/kb/principles/P-002.md", "check_status": "draft"},
+      {"typed_id": "control:NIS2-ART21-2A", "check_id": null, "verdict": "unassessed", "message": null,
+       "matched_terms": [], "excerpt": "…", "source_ref": "data/kb/controls/NIS2/NIS2-ART21-2A.md", "check_status": null}
+    ],
+    "summary": {"supports": 0, "violates": 3, "unassessed": 30},
+    "method": "deterministic-checks-v1",
+    "snapshot_id": "snapshot-2026-09-29-…"
+  }
+}
+```
+
+Schéma : [`schemas/check_result.schema.json`](../../schemas/check_result.schema.json) — types `CheckOptionRequest`, `CheckResult`, `CheckVerdict` de [`schemas/types.ts`](../../schemas/types.ts).
+
+> Les clauses actuellement publiées (P-001, P-002, P-009, P-012, P-015) sont des **brouillons** (`checks_status: draft`) à valider par l'expert via le cycle de revue de la base. Évaluation : `make eval-check` (rappel des violations attendues sur `tests/evals/datasets/check_option_v1.jsonl`, annotations à valider).
+
+Erreurs : `400` + `invalid_argument` (`subject`, `max_items`, `max_chars`, `domains`, `frameworks`, `option`, `option.title`, `option.statements`).
+
+---
+
 ## 4. Oracles & Vecteurs de Test Partagés
 
 Afin de garantir une interopérabilité sans faille entre implémentations Python et TypeScript, les vecteurs de référence suivants sont tenus à disposition dans le dépôt :
