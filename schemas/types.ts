@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.3")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.4")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -300,6 +300,18 @@ export interface ApplicableFrameworksResponse {
   applicable_frameworks: string[];
   count: number;
   coverage?: FrameworkCoverageMap;
+}
+
+/* ---- Contract 1.4: identity of the acting expert --------------------------- */
+
+export type KbRole = "kb:review" | "kb:evaluate" | "kb:maintain" | "kb:admin";
+
+export interface KbMe {
+  handle: string;
+  email: string | null;
+  kb_roles: KbRole[];
+  owned_domains: string[];
+  pending_reviews: number;
 }
 
 export interface KbCandidateReviewRequest {

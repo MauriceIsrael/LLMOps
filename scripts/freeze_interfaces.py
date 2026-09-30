@@ -61,6 +61,7 @@ REQ-004: The solution shall support geo-redundant deployment across two data cen
 """
 
 REVIEWER_TOKEN = "contract-reviewer-token"
+ACTOR_EMAIL = "contract-expert@example.org"
 SAMPLE_CANDIDATE = {
     "kind": "rex",
     "title": "Contract freeze return of experience",
@@ -206,23 +207,28 @@ def _remember(key: str, result: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-def _as_reviewer(call: Callable[[], Any], set_caller: bool = True) -> Any:
+def _as_reviewer(call: Callable[[], Any], set_caller: bool = True, delegate: bool = False) -> Any:
     """Run ``call`` with a kb:review token declared (and, for MCP calls, as that caller).
 
     ENGAGEMENT_TOKENS is only set for the duration of the call: once set, it also makes
     engagement authorization strict for the other (local, unauthenticated) MCP calls.
+    With ``delegate`` the token also carries ``kb:delegate`` and, for MCP calls, the acting
+    expert's e-mail is set (contract 1.4).
     """
-    from mcp_server.core.auth import get_current_caller, set_current_caller
+    from mcp_server.core.auth import get_current_caller, set_current_actor_email, set_current_caller
 
     previous_caller = get_current_caller()
     previous_tokens = os.environ.get("ENGAGEMENT_TOKENS")
-    os.environ["ENGAGEMENT_TOKENS"] = f"{REVIEWER_TOKEN}:kb:review"
+    os.environ["ENGAGEMENT_TOKENS"] = f"{REVIEWER_TOKEN}:kb:review" + (",kb:delegate" if delegate else "")
     if set_caller:
         set_current_caller(REVIEWER_TOKEN)
+        if delegate:
+            set_current_actor_email(ACTOR_EMAIL)
     try:
         return call()
     finally:
         set_current_caller(previous_caller)
+        set_current_actor_email(None)
         if previous_tokens is None:
             os.environ.pop("ENGAGEMENT_TOKENS", None)
         else:
@@ -231,10 +237,10 @@ def _as_reviewer(call: Callable[[], Any], set_caller: bool = True) -> Any:
 
 def _rest(method: str, path: str, url: str | None = None, *, json_body: Any = None,
           headers: dict[str, str] | None = None, stream: bool = False, remember: str | None = None,
-          reviewer: bool = False) -> Interface:
+          reviewer: bool = False, delegate: bool = False) -> Interface:
     def call(client: Any) -> Any:
-        if reviewer:
-            return _as_reviewer(lambda: _call(client), set_caller=False)
+        if reviewer or delegate:
+            return _as_reviewer(lambda: _call(client), set_caller=False, delegate=delegate)
         return _call(client)
 
     def _call(client: Any) -> Any:
@@ -312,6 +318,8 @@ def build_catalogue() -> list[Interface]:
             _STATE["mcp"], "reject", "@maintainers", reason="Contract freeze"))),
         # Contract 1.3 — regulatory coverage
         _mcp("get_framework_coverage", lambda: kn.get_framework_coverage(["NIS2", "ISO27001", "UNKNOWN-FW"])),
+        # Contract 1.4 — acting expert (identity by e-mail)
+        _mcp("get_kb_me", lambda: _as_reviewer(lambda: kn.get_kb_me(), delegate=True)),
         # --- MCP Engagement ------------------------------------------------
         _mcp("get_subject", lambda: eng.get_subject("mcx-services", engagement=demo)),
         _mcp("get_subject_trajectory", lambda: eng.get_subject_trajectory("mcx-services", engagement=demo)),
@@ -366,6 +374,8 @@ def build_catalogue() -> list[Interface]:
               headers={"Authorization": f"Bearer {REVIEWER_TOKEN}"}, reviewer=True),
         _rest("GET", "/api/skills"),
         _rest("GET", "/api/skills/matrix", headers={"X-Engagement-Id": demo}),
+        _rest("GET", "/api/knowledge/me", headers={"Authorization": f"Bearer {REVIEWER_TOKEN}",
+                                                   "X-Actor-Email": ACTOR_EMAIL}, delegate=True),
     ]
 
 
@@ -396,21 +406,36 @@ def isolated_environment() -> Iterator[Any]:
     saved_eng_dir = server_config.engagements_dir
     saved_env = {k: os.environ.get(k) for k in ("SERVER_TOKEN", "LLMOPS_AUTH_TOKEN", "ENGAGEMENT_TOKENS", "KUZU_DB_PATH",
                                                   "CANDIDATES_DIR",
+                                                  "GOVERNANCE_DATABASE_URL", "CANDIDATES_BACKEND",
                                                   "OWNER_NOTIFICATION_WEBHOOK", "NOTIFICATION_WEBHOOK_URL")}
     os.environ["SERVER_TOKEN"] = CONTRACT_TOKEN
     os.environ.pop("ENGAGEMENT_TOKENS", None)
     # /visualize reads KUZU_DB_PATH (legacy default: data/kuzu_db); serve the knowledge graph.
     os.environ["KUZU_DB_PATH"] = str(server_config.knowledge_db_path)
     os.environ["CANDIDATES_DIR"] = str(tmp / "candidates")
+    # Owners registry in a scratch database, with the expert used for the acting-expert calls.
+    os.environ["GOVERNANCE_DATABASE_URL"] = f"sqlite:///{tmp / 'governance.db'}"
+    os.environ.pop("CANDIDATES_BACKEND", None)
     for k in ("LLMOPS_AUTH_TOKEN", "OWNER_NOTIFICATION_WEBHOOK", "NOTIFICATION_WEBHOOK_URL"):
         os.environ.pop(k, None)
     server_config.engagements_dir = eng_dir
     meta_file = Path("data/engagements") / f"{SCRATCH_ENGAGEMENT}.meta.json"
     try:
+        from dataclasses import replace
+
         from mcp_server.main import create_starlette_app
+        from pipelines.governance.registry import save_registry
+        from pipelines.kb_candidates.owners import load_owners_file
+
+        registry = load_owners_file(server_config.kb_dir)
+        registry.owners["@maintainers"] = replace(registry.owner("@maintainers"), email=ACTOR_EMAIL)
+        save_registry(registry)
 
         yield TestClient(create_starlette_app())
     finally:
+        from pipelines.governance.store import dispose_engines
+
+        dispose_engines()
         LadybugGraphStore.clear_cache()
         server_config.engagements_dir = saved_eng_dir
         for k, v in saved_env.items():

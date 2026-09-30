@@ -280,6 +280,32 @@ def generate_framework_coverage_schema() -> dict[str, Any]:
     }
 
 
+def generate_kb_me_schema() -> dict[str, Any]:
+    """Acting expert (get_kb_me / GET /api/knowledge/me, contract 1.4)."""
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "KbMeResponse",
+        "description": "Expert the calling client acts for (contract 1.4).",
+        "type": "object",
+        "required": ["status", "count", "data"],
+        "properties": {
+            "status": {"const": "ok"},
+            "count": {"type": "integer"},
+            "data": {
+                "type": "object",
+                "required": ["handle", "email", "kb_roles", "owned_domains", "pending_reviews"],
+                "properties": {
+                    "handle": {"type": "string"},
+                    "email": {"type": ["string", "null"]},
+                    "kb_roles": {"type": "array", "items": {"enum": ["kb:review", "kb:evaluate", "kb:maintain", "kb:admin"]}},
+                    "owned_domains": {"type": "array", "items": {"type": "string"}},
+                    "pending_reviews": {"type": "integer", "minimum": 0},
+                },
+            },
+        },
+    }
+
+
 def generate_typescript_types() -> str:
     conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
     subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
@@ -288,7 +314,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.3")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.4")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -591,6 +617,18 @@ export interface ApplicableFrameworksResponse {{
   coverage?: FrameworkCoverageMap;
 }}
 
+/* ---- Contract 1.4: identity of the acting expert --------------------------- */
+
+export type KbRole = "kb:review" | "kb:evaluate" | "kb:maintain" | "kb:admin";
+
+export interface KbMe {{
+  handle: string;
+  email: string | null;
+  kb_roles: KbRole[];
+  owned_domains: string[];
+  pending_reviews: number;
+}}
+
 export interface KbCandidateReviewRequest {{
   action: KbReviewAction;
   reviewer: string;
@@ -615,6 +653,7 @@ def main() -> None:
         ("check_result.schema.json", generate_check_result_schema()),
         ("kb_candidate.schema.json", generate_kb_candidate_schema()),
         ("framework_coverage.schema.json", generate_framework_coverage_schema()),
+        ("kb_me.schema.json", generate_kb_me_schema()),
     ):
         (schemas_dir / filename).write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
         print(f"Generated: schemas/{filename}")

@@ -99,15 +99,15 @@ The knowledge base enrichment cycle (`/api/knowledge/candidates`, `kb` CLI) pers
 
 | Variable | Default | Role |
 |---|---|---|
-| `CANDIDATES_BACKEND` | `file` | `file` (JSON documents) or `gcs` (Cloud Storage — **not implemented yet**, raises `NotImplementedError`) |
+| `CANDIDATES_BACKEND` | `file` | `file` (JSON documents) or `sql` (SQLite / PostgreSQL, see `GOVERNANCE_DATABASE_URL`) |
 | `CANDIDATES_DIR` | `data/candidates` | Directory of the `file` backend (ignored by git) |
-| `CANDIDATES_GCS_BUCKET` | — | Bucket of the future `gcs` backend |
-| `ENGAGEMENT_TOKENS` | — | Declares reviewer tokens with the `kb:review` scope, e.g. `reviewer-token:kb:review` |
+| `GOVERNANCE_DATABASE_URL` | `sqlite:///data/governance.db` with `sql` | SQLAlchemy URL; `postgresql://…` needs the `postgres` extra (`poetry install -E postgres`). Also holds the owners registry once `kb migrate-governance` was run |
+| `ENGAGEMENT_TOKENS` | — | Declares reviewer tokens with the `kb:review` scope, e.g. `reviewer-token:kb:review`; a delegating client (Archinex) adds `kb:delegate`: `archinex-token:kb:review,kb:delegate` and sends `X-Actor-Email` |
 | `KB_DUPLICATE_THRESHOLD` | `0.6` | Content similarity threshold of the `duplicate` check |
 | `KB_NOTIFY_EMAIL_ENABLED`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_STARTTLS` | disabled | E-mail notification of domain owners (`data/kb/owners.yaml`) |
 | `NTFY_BASE_URL` | `https://ntfy.sh` | Base URL of the owners' / consumers' ntfy topics |
 | `KB_CONSUMER_WEBHOOKS`, `KB_CONSUMER_NTFY_TOPIC` | — | "New version published" notification sent by `kb publish` |
 
-> ⚠️ **Cloud Run file systems are ephemeral.** With the `file` backend, candidates written in the container are lost at the next revision or scale-down. In production, mount a persistent volume at `CANDIDATES_DIR` (Cloud Storage FUSE or Filestore volume mount) or use the `gcs` backend once implemented.
+> ⚠️ **Cloud Run file systems are ephemeral.** With the `file` backend, candidates written in the container are lost at the next revision or scale-down. Use `CANDIDATES_BACKEND=sql` with a database that outlives the container (Cloud SQL), then run `kb migrate-governance` once. Promoted assets are still written to `data/kb/` of the container: on an ephemeral demo deployment they are lost at the next restart (known limitation of the demo mode).
 
 The public demo token (`SERVER_TOKEN`) can submit and read candidates (content that failed the anonymization check is redacted) but **cannot review**: reviews require a token carrying the `kb:review` scope. Promotion (`kb promote`) and publication (`kb publish`) are run offline by a maintainer, who then commits `data/kb/`, `data/knowledge.lbug` and the snapshot. `kb remind` can be scheduled (cron) to re-notify owners of candidates waiting more than 5 business days.

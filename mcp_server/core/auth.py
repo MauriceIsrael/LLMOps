@@ -5,6 +5,9 @@ from contextvars import ContextVar
 from enum import Enum
 
 _current_caller: ContextVar[str] = ContextVar("current_caller", default="default_user")
+_current_actor_email: ContextVar[str | None] = ContextVar("current_actor_email", default=None)
+
+DELEGATE_SCOPE = "kb:delegate"
 
 
 class Role(str, Enum):
@@ -121,3 +124,21 @@ def has_scope(scope: str, caller: str | None = None) -> bool:
     if not caller or not env_tokens:
         return False
     return scope in parse_engagement_tokens(env_tokens).get(caller, [])
+
+
+def set_current_actor_email(email: str | None) -> None:
+    """Record the ``X-Actor-Email`` header of the current request (``None`` clears it)."""
+    _current_actor_email.set((email or "").strip() or None)
+
+
+def delegated_actor_email(caller: str | None = None) -> str | None:
+    """E-mail of the person the caller acts for, or ``None``.
+
+    The e-mail is honoured only when the caller's token carries ``kb:delegate`` (the token of
+    a trusted client such as Archinex, plan governance §3.1); for any other token it is
+    ignored, so a header cannot be used to impersonate an owner.
+    """
+    email = _current_actor_email.get()
+    if email and has_scope(DELEGATE_SCOPE, caller):
+        return email
+    return None

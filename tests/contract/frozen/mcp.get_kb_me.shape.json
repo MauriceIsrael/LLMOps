@@ -1,0 +1,58 @@
+{
+  "interface": "mcp.get_kb_me",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "email": {
+            "type": [
+              "string"
+            ]
+          },
+          "handle": {
+            "type": [
+              "string"
+            ]
+          },
+          "kb_roles": {
+            "items": {
+              "type": [
+                "string"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "owned_domains": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          },
+          "pending_reviews": {
+            "type": [
+              "number"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

@@ -10,9 +10,12 @@ Minor versions only add interfaces or optional fields:
   optional ``candidate_id`` in the suggestion response.
 * ``1.3`` — regulatory coverage: ``get_framework_coverage`` and the optional ``coverage``
   field of ``GET /api/compliance/frameworks/applicable``.
+* ``1.4`` — identity of the acting expert (``X-Actor-Email`` with a ``kb:delegate`` token,
+  ``get_kb_me``, ``GET /api/knowledge/me``); reviews by that expert are authorised by the
+  owners registry.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.3"
+CONTRACT_VERSION = "1.4"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

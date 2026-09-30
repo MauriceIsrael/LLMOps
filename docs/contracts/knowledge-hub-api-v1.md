@@ -655,6 +655,17 @@ Cycle : `proposed` → (`checks_failed` \| `in_review`) → `accepted` \| `rejec
 - `covered` exige que toutes les exigences attendues du manifeste `data/kb/controls/<FW>/_manifest.yaml` (généré depuis une source par `kb ingest-framework`) soient présentes, `active`, validées (`validated_by`) **et** que l'expert ait déclaré la couverture (`kb declare-coverage`, refusé sinon). Un référentiel sans contrôle dans la base → `missing` ; un manifeste absent ou provisoire → `expected: null` ou `provisional: true`, jamais `covered`. Rapport : [`docs/COVERAGE.md`](../COVERAGE.md).
 - Chaîne hors ligne (mainteneur) : `kb ingest-framework` → `kb suggest-links` (LLM local optionnel, sorties `llm-derived`) → `kb review-sheet` → `kb apply-review` → `kb declare-coverage`. Un contrôle peut déclarer `satisfied_by: [P-…, PAT-…]` (relation `IMPLEMENTS` ingérée dans le graphe) et `covers: [...]` (exigences qu'il couvre).
 
+### 5.4 Contrat 1.4 — Identité de l'expert (client délégué)
+
+Un client de confiance (Archinex) agit **au nom d'un expert** : il envoie son jeton de service, qui porte le scope `kb:delegate` (à côté de `kb:review`), et l'en-tête `X-Actor-Email: <e-mail de l'expert>`.
+
+- L'e-mail n'est pris en compte **que** si le jeton porte `kb:delegate` ; sinon il est ignoré (aucune usurpation par simple en-tête). Il est résolu en handle par le registre des propriétaires (`data/kb/owners.yaml`, ou la base de gouvernance une fois `kb migrate-governance` exécuté). E-mail inconnu → `403`.
+- `PATCH /api/knowledge/candidates/{id}` avec un expert délégué : le relecteur **est** l'expert (`reviewer` peut être omis ; s'il est fourni et diffère → `403`). L'expert doit être propriétaire du domaine du candidat (ou d'un domaine parent), `default_owner`, ou porter le rôle `kb:maintain` ; sinon `403`. L'historique enregistre le handle, jamais l'e-mail.
+- Sans `X-Actor-Email`, le comportement 1.3 est inchangé.
+- **Outil MCP** `get_kb_me()` et `GET /api/knowledge/me` : `{handle, email, kb_roles, owned_domains, pending_reviews}` ; `403` sans acteur ou pour un e-mail inconnu. Schéma : [`schemas/kb_me.schema.json`](../../schemas/kb_me.schema.json). Un propriétaire du registre a implicitement `kb:review` ; `kb:evaluate`, `kb:maintain` et `kb:admin` sont portés par le champ `roles` du registre.
+- File des candidats : `CANDIDATES_BACKEND=sql` (SQLite ou PostgreSQL, `GOVERNANCE_DATABASE_URL`), le backend `gcs` jamais implémenté est retiré.
+- Limite connue : un jeton de service compromis permet d'usurper n'importe quel expert ; authentification forte et RBAC suivis par l'issue [#7](https://github.com/MauriceIsrael/LLMOps/issues/7).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

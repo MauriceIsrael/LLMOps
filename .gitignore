@@ -62,3 +62,4 @@ apps/kb-client-app/check_output.txt
 apps/kb-client-app/svelte-check-output.txt
 
 apps/kb-client-app/scratch/
+data/governance.db

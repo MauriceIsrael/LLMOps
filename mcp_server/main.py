@@ -22,6 +22,7 @@ from starlette.types import Receive, Scope, Send
 from mcp_server.config import settings
 from mcp_server.core.auth import (
     parse_engagement_tokens,
+    set_current_actor_email,
     set_current_caller,
 )
 from mcp_server.core.config import server_config
@@ -53,6 +54,7 @@ from mcp_server.knowledge.tools import (
     get_glossary_term,
     get_graph_summary,
     get_kb_candidate,
+    get_kb_me,
     get_principles_for,
     get_rfp_compliance_matrix,
     get_skills_matrix,
@@ -101,6 +103,7 @@ mcp.tool()(list_kb_candidates)
 mcp.tool()(get_kb_candidate)
 mcp.tool()(review_kb_candidate)
 mcp.tool()(get_framework_coverage)
+mcp.tool()(get_kb_me)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -196,6 +199,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 status_code=500,
             )
 
+        set_current_actor_email(request.headers.get("X-Actor-Email"))
         auth_header = request.headers.get("Authorization")
         header_token = request.headers.get("X-API-Key") or request.headers.get("X-Server-Token")
         session_id_str = request.query_params.get("session_id")
@@ -891,6 +895,11 @@ def create_starlette_app() -> Starlette:
         )
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_kb_me(request):
+        """Expert au nom duquel le client agit (jeton kb:delegate + X-Actor-Email)."""
+        res = get_kb_me()
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_skills_list(request):
         """Référentiel canonique des compétences d'ingénierie et niveaux de criticité."""
         domain = request.query_params.get("domain")
@@ -939,6 +948,7 @@ def create_starlette_app() -> Starlette:
             Route("/api/arbitration/statements", endpoint=handle_arbitration_statements, methods=["GET"]),
             Route("/api/knowledge/context", endpoint=handle_knowledge_context, methods=["GET"]),
             Route("/api/knowledge/check", endpoint=handle_knowledge_check, methods=["POST"]),
+            Route("/api/knowledge/me", endpoint=handle_kb_me, methods=["GET"]),
             Route("/api/knowledge/candidates", endpoint=handle_candidates_create, methods=["POST"]),
             Route("/api/knowledge/candidates", endpoint=handle_candidates_list, methods=["GET"]),
             Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_get, methods=["GET"]),

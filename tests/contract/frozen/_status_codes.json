@@ -10,6 +10,7 @@
   "rest.GET /api/knowledge/candidates/{candidate_id}": 200,
   "rest.GET /api/knowledge/context": 200,
   "rest.GET /api/knowledge/engagements": 200,
+  "rest.GET /api/knowledge/me": 200,
   "rest.GET /api/knowledge/search": 200,
   "rest.GET /api/skills": 200,
   "rest.GET /api/skills/matrix": 200,

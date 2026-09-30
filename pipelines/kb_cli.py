@@ -264,6 +264,23 @@ def declare_coverage_cmd(
     console.print(f"[bold green]✓ {framework} declared covered[/bold green] by {by} ({cov['expected']} requirements).")
 
 
+@app.command("migrate-governance")
+def migrate_governance_cmd(
+    kb_dir: Path = KB_DIR_OPTION,
+    candidates_dir: Path = typer.Option(Path("data/candidates"), help="File queue to import."),
+    force_owners: bool = typer.Option(False, "--force-owners", help="Replace the stored owners registry."),
+) -> None:
+    """Import the file queue and data/kb/owners.yaml into the governance database (idempotent)."""
+    from pipelines.governance.migrate import migrate_governance
+    from pipelines.governance.store import database_url
+
+    if not database_url():
+        _fail("No governance database: set GOVERNANCE_DATABASE_URL (or CANDIDATES_BACKEND=sql).")
+    res = migrate_governance(kb_dir, candidates_dir, force_owners)
+    console.print(f"candidates imported: {res['candidates_imported']} (already present: {res['candidates_skipped']}); "
+                  f"owners seeded: {res['owners_seeded']}")
+
+
 @app.command("coverage")
 def coverage_cmd(
     frameworks: list[str] = typer.Argument(..., help="Framework codes."),

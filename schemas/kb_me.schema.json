@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KbMeResponse",
+  "description": "Expert the calling client acts for (contract 1.4).",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "handle",
+        "email",
+        "kb_roles",
+        "owned_domains",
+        "pending_reviews"
+      ],
+      "properties": {
+        "handle": {
+          "type": "string"
+        },
+        "email": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kb_roles": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "kb:review",
+              "kb:evaluate",
+              "kb:maintain",
+              "kb:admin"
+            ]
+          }
+        },
+        "owned_domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pending_reviews": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

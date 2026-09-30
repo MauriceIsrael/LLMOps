@@ -1,0 +1,80 @@
+{
+  "interface": "rest.GET /api/knowledge/me",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "email": {
+                "type": [
+                  "string"
+                ]
+              },
+              "handle": {
+                "type": [
+                  "string"
+                ]
+              },
+              "kb_roles": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "owned_domains": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "pending_reviews": {
+                "type": [
+                  "number"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}
