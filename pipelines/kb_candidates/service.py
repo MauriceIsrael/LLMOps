@@ -14,6 +14,7 @@ from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from pipelines.governance.log import REQUEST_KINDS, GovernanceLog, default_due_at, get_log
 from pipelines.kb_candidates.checks import build_context, has_failure, run_checks
 from pipelines.kb_candidates.confidence import compute_confidence
 from pipelines.kb_candidates.kb import (
@@ -44,6 +45,14 @@ NotifyConsumers = Callable[[str, dict[str, Any]], list[str]]
 
 class CandidateStateError(CandidateError):
     """The requested transition is not allowed in the candidate's current status."""
+
+
+class CandidateForbiddenError(CandidateError):
+    """The acting expert is not allowed to do this (403)."""
+
+
+class GovernanceUnavailableError(CandidateError):
+    """The feature needs the governance database (``GOVERNANCE_DATABASE_URL``)."""
 
 
 def _default_notify_owner(owner: dict[str, Any], event: str, candidate: dict[str, Any]) -> list[str]:
@@ -90,8 +99,10 @@ class CandidateService:
         doctrine_index_loader: Callable[[], Any] | None = None,
         notify_owner: NotifyOwner | None = None,
         notify_consumers: NotifyConsumers | None = None,
+        log: GovernanceLog | None = None,
     ) -> None:
         self.repo = repository or get_repository()
+        self.log = log if log is not None else get_log()
         self.kb_dir = Path(kb_dir)
         self.doctrine_index_loader = doctrine_index_loader
         self.notify_owner = notify_owner or _default_notify_owner
@@ -147,11 +158,51 @@ class CandidateService:
         self._check(candidate)
         self._route(candidate, actor)
         self.repo.save(candidate)
+        owner = candidate.get("assigned_owner")
+        self._emit("candidate.submitted", candidate, actor, [owner] if owner else [], status=candidate["status"])
         return candidate
+
+    def _emit(self, type_: str, candidate: dict[str, Any], actor: str, recipients: list[str], **payload: Any) -> None:
+        if self.log is not None:
+            self.log.emit(type_, candidate["id"], actor, recipients, title=candidate.get("title"), **payload)
+
+    def _need_log(self) -> GovernanceLog:
+        if self.log is None:
+            raise GovernanceUnavailableError("governance", "this feature needs the governance database "
+                                             "(set GOVERNANCE_DATABASE_URL or CANDIDATES_BACKEND=sql).")
+        return self.log
 
     # ------------------------------------------------------------------- review
 
     def review(
+        self,
+        candidate_id: str,
+        action: str,
+        reviewer: str,
+        reason: str | None = None,
+        amended_content: str | None = None,
+        actor: str = "reviewer",
+    ) -> dict[str, Any]:
+        seen = len(self.repo.get(candidate_id).get("history") or [])
+        result = self._review(candidate_id, action, reviewer, reason, amended_content, actor)
+        if self.log is not None:
+            handle = reviewer.strip()
+            self.log.close_requests(candidate_id, handle)
+            new = (result.get("history") or [])[seen:]
+            owner = result.get("assigned_owner")
+            registry = self.owners()
+            self._emit("candidate.reviewed", result, handle,
+                       [h for h in (owner, registry.default_owner) if h and h != handle],
+                       action=action, status=result["status"])
+            second = next((h for h in new if h.get("event") == "second_review_requested"), None)
+            if second:
+                self.log.create_request(candidate_id, second["owner"], "second_review", handle,
+                                        message="Second review required (principle or supersedes).")
+                self._emit("review.requested", result, handle, [second["owner"]], kind="second_review",
+                           due_at=default_due_at())
+        return result
+
+    def _review(
         self,
         candidate_id: str,
         action: str,
@@ -256,6 +307,107 @@ class CandidateService:
         self.repo.save(candidate)
         return candidate
 
+    # -------------------------------------------------- inbox and solicitation
+
+    def _entered_review_at(self, candidate: dict[str, Any]) -> str:
+        history = candidate.get("history") or []
+        return next((h["at"] for h in reversed(history) if h.get("event") in (
+            "in_review", "first_review_accepted", "assigned")), candidate.get("created_at", now_iso()))
+
+    def inbox(self, handle: str) -> list[dict[str, Any]]:
+        """Candidates waiting for ``handle``: assigned, second review requested, or a request to advise.
+
+        Oldest first; ``due_at`` is five business days after the candidate entered the step.
+        """
+        items: list[dict[str, Any]] = []
+        requests = self.log.requests(handle=handle) if self.log is not None else []
+        by_candidate = {r["candidate_id"]: r for r in requests}
+        for c in self.repo.find(status="in_review"):
+            history = c.get("history") or []
+            second = next((h for h in reversed(history) if h.get("event") == "second_review_requested"), None)
+            first_reviewer = (c.get("review") or {}).get("reviewer")
+            if c.get("second_review_required") and first_reviewer and not c.get("second_review"):
+                waiting_on, reason = (second or {}).get("owner"), "second_review"
+            else:
+                waiting_on, reason = c.get("assigned_owner"), "review"
+            request = by_candidate.get(c["id"])
+            if waiting_on == handle:
+                entered = _parse_at(self._entered_review_at(c))
+                items.append({"candidate_id": c["id"], "title": c["title"], "kind": c["kind"],
+                              "asset_type": c.get("asset_type"), "domain": c.get("domain") or [],
+                              "reason": reason, "waiting_since": self._entered_review_at(c),
+                              "due_at": default_due_at(entered), "checks_failed": [
+                                  x["name"] for x in c.get("checks") or [] if x.get("status") == "fail"]})
+            elif request is not None:
+                items.append({"candidate_id": c["id"], "title": c["title"], "kind": c["kind"],
+                              "asset_type": c.get("asset_type"), "domain": c.get("domain") or [],
+                              "reason": request["kind"], "waiting_since": request["created_at"],
+                              "due_at": request["due_at"], "message": request["message"], "checks_failed": []})
+        return sorted(items, key=lambda i: (i["waiting_since"], i["candidate_id"]))
+
+    def assign(self, candidate_id: str, handle: str, actor_handle: str, reason: str | None = None) -> dict[str, Any]:
+        """Reassign a candidate in review to another owner (current owner or ``kb:maintain``)."""
+        candidate = self.repo.get(candidate_id)
+        registry = self.owners()
+        if candidate["status"] != "in_review":
+            raise CandidateStateError("status", f"only a candidate in review can be assigned (status '{candidate['status']}').")
+        if handle not in registry.owners:
+            raise CandidateError("handle", f"'{handle}' is not an owner of the registry.")
+        actor = registry.owners.get(actor_handle)
+        if actor is None or not (actor_handle == candidate.get("assigned_owner") or "kb:maintain" in actor.roles):
+            raise CandidateForbiddenError("actor", "only the assigned owner or a maintainer can reassign a candidate.")
+        previous = candidate.get("assigned_owner")
+        candidate["assigned_owner"] = handle
+        add_history(candidate, actor_handle, "assigned", owner=handle, previous=previous, reason=(reason or None))
+        channels = self.notify_owner(registry.owner(handle).as_dict(), "in_review", candidate)
+        add_history(candidate, "system", "owner_notified", owner=handle, channels=channels)
+        self.repo.save(candidate)
+        self._emit("candidate.assigned", candidate, actor_handle, [handle], previous=previous, reason=reason)
+        return candidate
+
+    def request_review(self, candidate_id: str, handle: str, kind: str, actor_handle: str,
+                       message: str | None = None, due_at: str | None = None) -> dict[str, Any]:
+        """Ask a specific expert for a second review or an advisory opinion."""
+        log = self._need_log()
+        candidate = self.repo.get(candidate_id)
+        registry = self.owners()
+        if kind not in REQUEST_KINDS:
+            raise CandidateError("kind", f"'kind' must be one of {list(REQUEST_KINDS)}.")
+        if candidate["status"] != "in_review":
+            raise CandidateStateError("status", f"only a candidate in review can be sent for review (status '{candidate['status']}').")
+        if handle not in registry.owners:
+            raise CandidateError("handle", f"'{handle}' is not an owner of the registry.")
+        actor = registry.owners.get(actor_handle)
+        if actor is None or not (registry.can_review(actor_handle, candidate.get("domain") or []) or "kb:maintain" in actor.roles):
+            raise CandidateForbiddenError("actor", "only an owner of the domain or a maintainer can request a review.")
+        if kind == "second_review" and handle == (candidate.get("review") or {}).get("reviewer"):
+            raise CandidateError("handle", "the second review must be done by another owner.")
+        if due_at is not None:
+            try:
+                _parse_at(due_at)
+            except ValueError as exc:
+                raise CandidateError("due_at", "'due_at' must look like 2026-10-01T09:00:00Z.") from exc
+        request = log.create_request(candidate_id, handle, kind, actor_handle, message=(message or None), due_at=due_at)
+        add_history(candidate, actor_handle, "review_requested", owner=handle, kind=kind)
+        self.repo.save(candidate)
+        self._emit("review.requested", candidate, actor_handle, [handle], kind=kind, due_at=request["due_at"])
+        return request
+
+    def comment(self, candidate_id: str, body: str, author: str) -> dict[str, Any]:
+        """Add a comment to the candidate's discussion (a comment is not a decision)."""
+        log = self._need_log()
+        candidate = self.repo.get(candidate_id)
+        if not isinstance(body, str) or not body.strip():
+            raise CandidateError("body", "'body' is required.")
+        comment = log.add_comment(candidate_id, author, body.strip())
+        owner = candidate.get("assigned_owner")
+        self._emit("candidate.commented", candidate, author, [owner] if owner else [], comment_id=comment["id"])
+        return comment
+
+    def comments(self, candidate_id: str) -> list[dict[str, Any]]:
+        self.repo.get(candidate_id)
+        return self.log.comments(candidate_id) if self.log is not None else []
+
     # ---------------------------------------------------------------- promotion
 
     def promote(self, candidate_id: str, actor: str = "maintainer", today: date | None = None) -> dict[str, Any]:
@@ -300,6 +452,7 @@ class CandidateService:
         add_history(candidate, actor, "promoted", path=str(path), asset=asset_id, confidence=confidence)
         candidate["promoted"] = {"path": str(path), "asset_id": asset_id, "confidence": confidence}
         self.repo.save(candidate)
+        self._emit("candidate.promoted", candidate, actor, [self.owners().default_owner], asset_id=asset_id)
         return candidate
 
     def _promote_glossary(self, candidate: dict[str, Any]) -> Path:
@@ -345,6 +498,8 @@ class CandidateService:
             c["published"] = {"snapshot_id": snapshot_id, "at": now_iso()}
             add_history(c, actor, "published", snapshot_id=snapshot_id, channels=channels)
             self.repo.save(c)
+            self._emit("candidate.published", c, actor, [r["reviewer"] for r in (c.get("review"), c.get("second_review")) if r],
+                       snapshot_id=snapshot_id)
         return {"published": [c["id"] for c in promoted], "snapshot_id": snapshot_id, "channels": channels}
 
     @staticmethod
@@ -386,6 +541,7 @@ class CandidateService:
             add_history(c, actor, "reminded", owner=owner.handle, channels=channels,
                         reminded_at=now.strftime("%Y-%m-%dT%H:%M:%SZ"))
             self.repo.save(c)
+            self._emit("reminder.due", c, actor, [owner.handle])
             reminded.append(c)
         return reminded
 
@@ -421,7 +577,9 @@ def rex_payload(
 
 __all__ = [
     "REVIEW_SCOPE",
+    "CandidateForbiddenError",
     "CandidateService",
+    "GovernanceUnavailableError",
     "CandidateStateError",
     "business_days_between",
     "redact",

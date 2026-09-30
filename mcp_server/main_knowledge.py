@@ -9,7 +9,9 @@ from fastmcp import FastMCP
 from mcp_server.core.config import server_config
 from mcp_server.core.registration import register_tools
 from mcp_server.knowledge.tools import (
+    assign_kb_candidate,
     check_option,
+    comment_kb_candidate,
     get_asset,
     get_assets,
     get_decision_trail,
@@ -22,9 +24,12 @@ from mcp_server.knowledge.tools import (
     get_kb_me,
     get_knowledge_analytics,
     get_principles_for,
+    get_review_inbox,
     list_assets,
+    list_domain_owners,
     list_kb_candidates,
     query_graph,
+    request_kb_review,
     review_kb_candidate,
     search_assets,
     submit_kb_candidate,
@@ -55,6 +60,11 @@ register_tools(
         review_kb_candidate,
         get_framework_coverage,
         get_kb_me,
+        get_review_inbox,
+        assign_kb_candidate,
+        request_kb_review,
+        comment_kb_candidate,
+        list_domain_owners,
     ],
 )
 

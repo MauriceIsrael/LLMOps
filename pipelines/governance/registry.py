@@ -41,3 +41,40 @@ def save_registry(registry: OwnersRegistry) -> None:
         for domain, handle in registry.domains.items():
             conn.execute(owner_domains.insert().values(domain=domain, handle=handle))
         conn.execute(governance_meta.insert().values(key="default_owner", value=registry.default_owner))
+
+
+KB_ROLES = ("kb:review", "kb:evaluate", "kb:maintain", "kb:admin")
+
+
+def registry_from_payload(payload: dict) -> OwnersRegistry:
+    """Validate an admin update: known roles, unique e-mails, consistent domains and default owner."""
+    raw_owners = payload.get("owners")
+    if not isinstance(raw_owners, list) or not raw_owners:
+        raise ValueError("'owners' must be a non-empty list.")
+    owners: dict[str, Owner] = {}
+    emails: set[str] = set()
+    for item in raw_owners:
+        if not isinstance(item, dict) or not str(item.get("handle") or "").startswith("@"):
+            raise ValueError("each owner needs a 'handle' starting with '@'.")
+        handle = str(item["handle"])
+        if handle in owners:
+            raise ValueError(f"duplicate owner '{handle}'.")
+        roles = tuple(item.get("roles") or ())
+        unknown = [r for r in roles if r not in KB_ROLES]
+        if unknown:
+            raise ValueError(f"unknown role(s) for {handle}: {unknown} (expected {list(KB_ROLES)}).")
+        email = (str(item["email"]).strip().lower() or None) if item.get("email") else None
+        if email and email in emails:
+            raise ValueError(f"the e-mail '{email}' is used by two owners.")
+        if email:
+            emails.add(email)
+        owners[handle] = Owner(handle=handle, email=email, discord_webhook=item.get("discord_webhook"),
+                               ntfy_topic=item.get("ntfy_topic"), roles=roles, delegated=bool(item.get("delegated")))
+    domains = {str(k): str(v) for k, v in (payload.get("domains") or {}).items()}
+    missing = sorted({h for h in domains.values() if h not in owners})
+    if missing:
+        raise ValueError(f"domains point to unknown owner(s): {missing}.")
+    default_owner = str(payload.get("default_owner") or "")
+    if default_owner not in owners:
+        raise ValueError("'default_owner' must be one of the owners.")
+    return OwnersRegistry(owners=owners, domains=domains, default_owner=default_owner)

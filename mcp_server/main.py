@@ -42,7 +42,9 @@ from mcp_server.engagement.tools import (
 )
 from mcp_server.knowledge.tools import (
     _suggest_knowledge_improvement,
+    assign_kb_candidate,
     check_option,
+    comment_kb_candidate,
     generate_zero_draft_hld,
     get_asset,
     get_assets,
@@ -52,24 +54,30 @@ from mcp_server.knowledge.tools import (
     get_doctrine_context,
     get_framework_coverage,
     get_glossary_term,
+    get_governance_events,
     get_graph_summary,
     get_kb_candidate,
     get_kb_me,
     get_principles_for,
+    get_review_inbox,
     get_rfp_compliance_matrix,
     get_skills_matrix,
     list_assets,
     list_controls,
+    list_domain_owners,
     list_frameworks,
     list_kb_candidates,
+    list_kb_comments,
     list_skills,
     query_graph,
+    request_kb_review,
     review_kb_candidate,
     search_assets,
     shred_rfp,
     submit_kb_candidate,
     suggest_knowledge_improvement,
     trigger_rfp_elicitation,
+    update_domain_owners,
 )
 
 active_plane = os.getenv("LLMOPS_PLANE", server_config.plane).lower()
@@ -104,6 +112,11 @@ mcp.tool()(get_kb_candidate)
 mcp.tool()(review_kb_candidate)
 mcp.tool()(get_framework_coverage)
 mcp.tool()(get_kb_me)
+mcp.tool()(get_review_inbox)
+mcp.tool()(assign_kb_candidate)
+mcp.tool()(request_kb_review)
+mcp.tool()(comment_kb_candidate)
+mcp.tool()(list_domain_owners)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -844,6 +857,8 @@ def create_starlette_app() -> Starlette:
             return 404
         if status == "unauthorized":
             return 403
+        if status == "unavailable":
+            return 503
         if status == "invalid_argument":
             return 409 if res.get("conflict") else 400
         return 500
@@ -893,6 +908,70 @@ def create_starlette_app() -> Starlette:
             reason=body.get("reason"),
             amended_content=body.get("amended_content"),
         )
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def _json_body(request):
+        try:
+            body = await request.json()
+        except Exception:
+            body = None
+        return body if isinstance(body, dict) else None
+
+    def _bad_body():
+        return JSONResponse(
+            invalid_argument_response("body", "Le corps de requête doit être un objet JSON"), status_code=400
+        )
+
+    async def handle_review_inbox(request):
+        res = get_review_inbox()
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_candidate_assign(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = assign_kb_candidate(request.path_params["candidate_id"], str(body.get("handle") or ""),
+                                  body.get("reason"))
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_candidate_request_review(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = request_kb_review(request.path_params["candidate_id"], str(body.get("handle") or ""),
+                                str(body.get("kind") or "second_review"), body.get("message"), body.get("due_at"))
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_candidate_comment_create(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = comment_kb_candidate(request.path_params["candidate_id"], str(body.get("body") or ""))
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_candidate_comments_list(request):
+        res = list_kb_comments(request.path_params["candidate_id"])
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_governance_events(request):
+        params = request.query_params
+        try:
+            since, limit = int(params.get("since") or 0), int(params.get("limit") or 100)
+        except ValueError:
+            return JSONResponse(invalid_argument_response("since", "'since' and 'limit' must be integers"),
+                                status_code=400)
+        res = get_governance_events(since, limit)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_owners_list(request):
+        res = list_domain_owners()
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_owners_update(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = update_domain_owners(body)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     async def handle_kb_me(request):
@@ -949,6 +1028,17 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/context", endpoint=handle_knowledge_context, methods=["GET"]),
             Route("/api/knowledge/check", endpoint=handle_knowledge_check, methods=["POST"]),
             Route("/api/knowledge/me", endpoint=handle_kb_me, methods=["GET"]),
+            Route("/api/knowledge/reviews/inbox", endpoint=handle_review_inbox, methods=["GET"]),
+            Route("/api/knowledge/events", endpoint=handle_governance_events, methods=["GET"]),
+            Route("/api/knowledge/owners", endpoint=handle_owners_list, methods=["GET"]),
+            Route("/api/knowledge/owners", endpoint=handle_owners_update, methods=["PUT"]),
+            Route("/api/knowledge/candidates/{candidate_id}/assign", endpoint=handle_candidate_assign, methods=["POST"]),
+            Route("/api/knowledge/candidates/{candidate_id}/request-review",
+                  endpoint=handle_candidate_request_review, methods=["POST"]),
+            Route("/api/knowledge/candidates/{candidate_id}/comments",
+                  endpoint=handle_candidate_comment_create, methods=["POST"]),
+            Route("/api/knowledge/candidates/{candidate_id}/comments",
+                  endpoint=handle_candidate_comments_list, methods=["GET"]),
             Route("/api/knowledge/candidates", endpoint=handle_candidates_create, methods=["POST"]),
             Route("/api/knowledge/candidates", endpoint=handle_candidates_list, methods=["GET"]),
             Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_get, methods=["GET"]),

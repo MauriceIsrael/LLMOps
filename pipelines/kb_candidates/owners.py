@@ -22,7 +22,7 @@ class Owner:
 
     def as_dict(self) -> dict[str, Any]:
         return {"handle": self.handle, "email": self.email, "discord_webhook": self.discord_webhook,
-                "ntfy_topic": self.ntfy_topic}
+                "ntfy_topic": self.ntfy_topic, "delegated": self.delegated}
 
     def public_dict(self) -> dict[str, Any]:
         """Registry entry without notification secrets (webhook URLs)."""

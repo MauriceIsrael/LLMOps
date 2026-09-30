@@ -1,9 +1,9 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.4")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.5")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
-export type EnvelopeStatus = "ok" | "not_found" | "invalid_argument" | "error" | "unauthorized";
+export type EnvelopeStatus = "ok" | "not_found" | "invalid_argument" | "error" | "unauthorized" | "unavailable";
 
 export type ConfidenceLevel = "assumed" | "designed" | "stated-by-client" | "vendor-stated" | "verified";
 
@@ -313,6 +313,62 @@ export interface KbMe {
   owned_domains: string[];
   pending_reviews: number;
 }
+
+/* ---- Contract 1.5: review and solicitation --------------------------------- */
+
+export type ReviewReason = "review" | "second_review" | "advice";
+
+export interface ReviewInboxItem {
+  candidate_id: string;
+  title: string;
+  kind: string;
+  asset_type?: string | null;
+  domain: string[];
+  reason: ReviewReason;
+  waiting_since: string;
+  due_at: string;
+  message?: string | null;
+  checks_failed: string[];
+}
+
+export interface ReviewRequest {
+  id: number;
+  candidate_id: string;
+  requested_handle: string;
+  kind: "second_review" | "advice";
+  message: string | null;
+  requested_by: string;
+  due_at: string;
+  status: "open" | "done" | "cancelled";
+  created_at: string;
+  closed_at: string | null;
+}
+
+export interface KbComment { id: number; candidate_id: string; author: string; body: string; at: string }
+
+export type GovernanceEventType =
+  | "candidate.submitted" | "candidate.assigned" | "review.requested" | "candidate.reviewed"
+  | "candidate.commented" | "candidate.promoted" | "candidate.published" | "reminder.due"
+  | "owners.updated" | "eval.updated" | "coverage.changed";
+
+export interface GovernanceEvent {
+  id: number;
+  at: string;
+  type: GovernanceEventType;
+  candidate_id: string | null;
+  actor: string;
+  recipients: string[];
+  payload: Record<string, unknown>;
+}
+
+export interface DomainOwner {
+  handle: string;
+  email: string | null;
+  roles: KbRole[];
+  delegated: boolean;
+}
+
+export interface DomainOwnersRegistry { owners: DomainOwner[]; domains: Record<string, string>; default_owner: string }
 
 export interface KbCandidateReviewRequest {
   action: KbReviewAction;

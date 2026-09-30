@@ -98,3 +98,16 @@ def test_can_review_rules():
     assert reg.can_review("@m", ["anything"]) and reg.can_review("@d", ["anything"])
     assert not reg.can_review("@unknown", ["network"])
     assert reg.owned_domains("@a") == ["network"]
+
+
+def test_delegated_owner_is_not_notified_on_external_channels(monkeypatch):
+    import mcp_server.core.notifier as notifier
+
+    def boom(*args, **kwargs):
+        raise AssertionError("no external channel expected")
+
+    monkeypatch.setattr(notifier, "_post", boom)
+    monkeypatch.setattr(notifier, "_send_email", boom)
+    owner = {"handle": "@a", "email": "a@example.org", "discord_webhook": "https://example.invalid", "ntfy_topic": "t",
+             "delegated": True}
+    assert notifier.notify_owner(owner, "in_review", {"id": "CAND-20260101-0001", "title": "t"}) == ["log", "archinex"]

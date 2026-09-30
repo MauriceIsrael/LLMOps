@@ -1,0 +1,148 @@
+{
+  "interface": "rest.GET /api/knowledge/events",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "events": {
+                "items": {
+                  "keys": {
+                    "actor": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "at": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "candidate_id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "payload": {
+                      "keys": {
+                        "action": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "comment_id": {
+                          "type": [
+                            "number"
+                          ]
+                        },
+                        "due_at": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "kind": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "previous": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "reason": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "status": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "title": {
+                          "type": [
+                            "string"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "recipients": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "type": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "next_cursor": {
+                "type": [
+                  "number"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

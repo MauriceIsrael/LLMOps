@@ -1,0 +1,99 @@
+{
+  "interface": "rest.POST /api/knowledge/candidates/{candidate_id}/request-review",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "candidate_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "closed_at": {
+                "type": [
+                  "null"
+                ]
+              },
+              "created_at": {
+                "type": [
+                  "string"
+                ]
+              },
+              "due_at": {
+                "type": [
+                  "string"
+                ]
+              },
+              "id": {
+                "type": [
+                  "number"
+                ]
+              },
+              "kind": {
+                "type": [
+                  "string"
+                ]
+              },
+              "message": {
+                "type": [
+                  "string"
+                ]
+              },
+              "requested_by": {
+                "type": [
+                  "string"
+                ]
+              },
+              "requested_handle": {
+                "type": [
+                  "string"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

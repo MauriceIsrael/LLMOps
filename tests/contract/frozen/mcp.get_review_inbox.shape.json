@@ -1,0 +1,91 @@
+{
+  "interface": "mcp.get_review_inbox",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "handle": {
+            "type": [
+              "string"
+            ]
+          },
+          "items": {
+            "items": {
+              "keys": {
+                "asset_type": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "candidate_id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "checks_failed": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "domain": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "due_at": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "kind": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "reason": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "title": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "waiting_since": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

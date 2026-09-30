@@ -226,6 +226,9 @@ def notify_owner(owner: dict[str, Any], event: str, candidate: dict[str, Any]) -
     )
     logger.warning("📥 [KB_CANDIDATE_%s] %s -> %s | %s", event.upper(), candidate.get("id"), handle, title)
     sent = ["log"]
+    if owner.get("delegated"):
+        # The owner has an Archinex account: Archinex delivers the notification from the event feed.
+        return sent + ["archinex"]
     try:
         if owner.get("discord_webhook"):
             payload = {"username": "Knowledge Hub Bot", "content": f"{handle} — **{title}**\n{body}"}

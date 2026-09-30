@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GovernanceEventFeed",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "events",
+        "next_cursor"
+      ],
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "at",
+              "type",
+              "actor",
+              "recipients",
+              "payload"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "at": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "candidate.submitted",
+                  "candidate.assigned",
+                  "review.requested",
+                  "candidate.reviewed",
+                  "candidate.commented",
+                  "candidate.promoted",
+                  "candidate.published",
+                  "reminder.due",
+                  "owners.updated",
+                  "eval.updated",
+                  "coverage.changed"
+                ]
+              },
+              "candidate_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "actor": {
+                "type": "string"
+              },
+              "recipients": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "payload": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "next_cursor": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "GovernanceEvent": {
+      "type": "object",
+      "required": [
+        "id",
+        "at",
+        "type",
+        "actor",
+        "recipients",
+        "payload"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "at": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "candidate.submitted",
+            "candidate.assigned",
+            "review.requested",
+            "candidate.reviewed",
+            "candidate.commented",
+            "candidate.promoted",
+            "candidate.published",
+            "reminder.due",
+            "owners.updated",
+            "eval.updated",
+            "coverage.changed"
+          ]
+        },
+        "candidate_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "actor": {
+          "type": "string"
+        },
+        "recipients": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "payload": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

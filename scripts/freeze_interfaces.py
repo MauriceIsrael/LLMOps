@@ -62,6 +62,7 @@ REQ-004: The solution shall support geo-redundant deployment across two data cen
 
 REVIEWER_TOKEN = "contract-reviewer-token"
 ACTOR_EMAIL = "contract-expert@example.org"
+DELEGATED = {"Authorization": f"Bearer {REVIEWER_TOKEN}", "X-Actor-Email": ACTOR_EMAIL}
 SAMPLE_CANDIDATE = {
     "kind": "rex",
     "title": "Contract freeze return of experience",
@@ -314,6 +315,15 @@ def build_catalogue() -> list[Interface]:
         _mcp("submit_kb_candidate", lambda: _remember("mcp", kn.submit_kb_candidate(SAMPLE_CANDIDATE))),
         _mcp("list_kb_candidates", lambda: kn.list_kb_candidates(source="mcp")),
         _mcp("get_kb_candidate", lambda: kn.get_kb_candidate(_STATE["mcp"])),
+        # Contract 1.5 — review and solicitation of experts
+        _mcp("get_review_inbox", lambda: _as_reviewer(lambda: kn.get_review_inbox(), delegate=True)),
+        _mcp("assign_kb_candidate", lambda: _as_reviewer(lambda: kn.assign_kb_candidate(
+            _STATE["mcp"], "@ciso-office", "Contract freeze"), delegate=True)),
+        _mcp("request_kb_review", lambda: _as_reviewer(lambda: kn.request_kb_review(
+            _STATE["mcp"], "@core-owner-architecture", "advice", "Contract freeze"), delegate=True)),
+        _mcp("comment_kb_candidate", lambda: _as_reviewer(lambda: kn.comment_kb_candidate(
+            _STATE["mcp"], "Contract freeze"), delegate=True)),
+        _mcp("list_domain_owners", lambda: kn.list_domain_owners()),
         _mcp("review_kb_candidate", lambda: _as_reviewer(lambda: kn.review_kb_candidate(
             _STATE["mcp"], "reject", "@maintainers", reason="Contract freeze"))),
         # Contract 1.3 — regulatory coverage
@@ -369,6 +379,20 @@ def build_catalogue() -> list[Interface]:
         _rest("POST", "/api/knowledge/candidates", json_body=SAMPLE_CANDIDATE, remember="rest"),
         _rest("GET", "/api/knowledge/candidates", "/api/knowledge/candidates?source=mcp"),
         _rest("GET", "/api/knowledge/candidates/{candidate_id}", "/api/knowledge/candidates/{rest}"),
+        # Contract 1.5
+        _rest("GET", "/api/knowledge/reviews/inbox", headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/candidates/{candidate_id}/assign", "/api/knowledge/candidates/{rest}/assign",
+              json_body={"handle": "@ciso-office", "reason": "Contract freeze"}, headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/candidates/{candidate_id}/request-review",
+              "/api/knowledge/candidates/{rest}/request-review",
+              json_body={"handle": "@core-owner-architecture", "kind": "advice", "message": "Contract freeze"},
+              headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/candidates/{candidate_id}/comments", "/api/knowledge/candidates/{rest}/comments",
+              json_body={"body": "Contract freeze"}, headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/candidates/{candidate_id}/comments", "/api/knowledge/candidates/{rest}/comments",
+              headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/events", headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/owners"),
         _rest("PATCH", "/api/knowledge/candidates/{candidate_id}", "/api/knowledge/candidates/{rest}",
               json_body={"action": "reject", "reviewer": "@maintainers", "reason": "Contract freeze"},
               headers={"Authorization": f"Bearer {REVIEWER_TOKEN}"}, reviewer=True),
@@ -376,6 +400,9 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/skills/matrix", headers={"X-Engagement-Id": demo}),
         _rest("GET", "/api/knowledge/me", headers={"Authorization": f"Bearer {REVIEWER_TOKEN}",
                                                    "X-Actor-Email": ACTOR_EMAIL}, delegate=True),
+        _rest("PUT", "/api/knowledge/owners", json_body={
+            "owners": [{"handle": "@maintainers", "email": ACTOR_EMAIL, "roles": ["kb:maintain", "kb:admin"]}],
+            "domains": {}, "default_owner": "@maintainers"}, headers=DELEGATED, delegate=True),
     ]
 
 
@@ -428,7 +455,8 @@ def isolated_environment() -> Iterator[Any]:
         from pipelines.kb_candidates.owners import load_owners_file
 
         registry = load_owners_file(server_config.kb_dir)
-        registry.owners["@maintainers"] = replace(registry.owner("@maintainers"), email=ACTOR_EMAIL)
+        registry.owners["@maintainers"] = replace(registry.owner("@maintainers"), email=ACTOR_EMAIL,
+                                                   roles=("kb:maintain", "kb:admin"))
         save_registry(registry)
 
         yield TestClient(create_starlette_app())
