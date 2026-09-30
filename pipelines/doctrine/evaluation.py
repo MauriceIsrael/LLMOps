@@ -16,11 +16,13 @@ Judge = Callable[[dict[str, Any], str | None, list[str]], list[dict[str, Any]]]
 
 def evaluate_cases(cases: list[dict[str, Any]], judge: Judge) -> dict[str, Any]:
     rows: list[tuple[str, str, str, str, list[str], bool]] = []
+    counts = {"supports": 0, "violates": 0, "unassessed": 0}
     tp = fn = sup_ok = sup_total = unexpected = 0
     for case in cases:
         verdicts = judge(case["option"], case.get("subject"), case.get("frameworks") or [])
         got: dict[str, set[str]] = {}
         for v in verdicts:
+            counts[v["verdict"]] = counts.get(v["verdict"], 0) + 1
             got.setdefault(v["typed_id"], set()).add(v["verdict"])
         for typed_id, expected in case["expected"].items():
             seen = got.get(typed_id, set())
@@ -42,6 +44,7 @@ def evaluate_cases(cases: list[dict[str, Any]], judge: Judge) -> dict[str, Any]:
         "violation_recall": tp / expected_violations if expected_violations else 1.0,
         "supports_recall": sup_ok / sup_total if sup_total else 1.0,
         "unexpected_violations": unexpected,
+        "verdict_counts": counts,
         "rows": rows,
     }
 

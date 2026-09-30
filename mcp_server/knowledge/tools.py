@@ -1863,6 +1863,71 @@ def declare_framework_coverage(framework: str) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Promotion, publication and health (contract 1.8) — REST only.
+# ---------------------------------------------------------------------------
+
+def promote_kb_candidate(candidate_id: str) -> dict[str, Any]:
+    """Write an accepted candidate into the knowledge base on the server ('kb:maintain').
+
+    ``warnings`` contains ``ephemeral-storage`` on a demo deployment: the promoted asset is lost
+    at the next restart unless the maintainer exports it.
+    """
+    from pipelines.kb_candidates.confidence import NotPublishableError
+    from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
+    from pipelines.publication.local_publisher import storage_warnings
+
+    who = _actor_with_role("kb:maintain")
+    if isinstance(who, dict):
+        return who
+    service, owner = who
+    try:
+        promoted = service.promote(candidate_id, actor=owner.handle)
+        return {**ok_response(promoted, count=1), "warnings": storage_warnings()}
+    except CandidateNotFoundError:
+        return not_found_response(candidate_id)
+    except NotPublishableError as exc:
+        return invalid_argument_response("candidate", str(exc))
+    except CandidateError as exc:
+        return _governance_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="promote_kb_candidate")
+
+
+def publish_kb_candidates() -> dict[str, Any]:
+    """Publish the promoted candidates ('kb:maintain'): rebuild the graph, seal a snapshot, write the
+    changelog, notify the consumers, mark the candidates ``published``."""
+    from pipelines.publication.local_publisher import publish, storage_warnings
+
+    who = _actor_with_role("kb:maintain")
+    if isinstance(who, dict):
+        return who
+    service, owner = who
+    try:
+        result = publish(service, Path(server_config.kb_dir), Path(server_config.knowledge_db_path),
+                         Path("data/snapshots"), owner.handle)
+        return {**ok_response(result, count=len(result.get("published") or [])), "warnings": storage_warnings()}
+    except Exception as e:
+        return handle_exception_response(e, context_action="publish_kb_candidates")
+
+
+def get_kb_health() -> dict[str, Any]:
+    """Health indicators of the knowledge base (requires 'kb:review'): assets by type and domain,
+    unvalidated assets, draft clauses, coverage per framework, review queue age per owner, overdue
+    candidates, last evaluation, last snapshot and storage mode (``persistent`` is false on the demo)."""
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+    from pipelines.publication.health import kb_health
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    try:
+        report = kb_health(_candidate_service(), Path(server_config.kb_dir), Path("data/snapshots"))
+        return ok_response(report, count=1)
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_kb_health")
+
+
+# ---------------------------------------------------------------------------
 # Regulatory coverage (contract 1.3).
 # ---------------------------------------------------------------------------
 

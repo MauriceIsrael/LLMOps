@@ -1,0 +1,1154 @@
+{
+  "interface": "rest.GET /api/knowledge/health",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "assets": {
+                "keys": {
+                  "active": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "by_domain": {
+                    "keys": {
+                      "5g-security": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "ai-assistance": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "ai-security": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "api": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "api-security": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "architecture": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "asset-management": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "audit": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "audit-logging": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "automation": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "automotive": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "boundary-protection": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "business-continuity": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "certification": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "cloud-platform": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "cmdb": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "compliance": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "compliance-evaluation": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "configuration-management": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "conformance": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "container-security": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "cryptography": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "cyber-hygiene": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "data-isolation": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "data-protection": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "device-management": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "device-security": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "devsecops": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "disaster-recovery": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "electronic-warfare": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "endpoint-security": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "engineering": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "environmental": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "fleet-management": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "governance": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "hardening": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "hardware": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "iam": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "identity": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "identity-access-management": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "incident-handling": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "incident-response": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "infrastructure": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "infrastructure-security": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "interoperability": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "iot": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "isolated-operation": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "key-management": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "legal-compliance": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "lifecycle": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "mcp": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "mcx": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "mcx-security": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "mfa": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "mobile-core": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "network-automation": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "network-exposure": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "network-security": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "observability": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "operations": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "ppdr-radio": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "privacy": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "ran": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "reliability": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "resilience": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "risk-management": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "roaming": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "safety": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "sba": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "secure-communications": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "secure-development": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "security": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "security-architecture": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "security-governance": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "security-monitoring": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "service-management": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "sim-identity": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "sovereignty": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "spectrum": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "supply-chain": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "tactical-comms": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "tactical-device": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "telecom-core": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "third-party-risk": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "training": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "transport": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "vehicle-gateway": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "vendor-management": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "vulnerability-management": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "by_type": {
+                    "keys": {
+                      "control": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "decision": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "pattern": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "principle": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "unvalidated": {
+                    "keys": {
+                      "count": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "ids": {
+                        "items": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "type": [
+                          "array"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "clauses": {
+                "keys": {
+                  "draft": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "total": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "unassessed_verdict_share": {
+                    "type": [
+                      "null"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "coverage": {
+                "keys": {
+                  "3GPP": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "boolean"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "CER": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "CRA": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "GSMA": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "ISO14001": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "ISO22301": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "ISO27001": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "boolean"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "ISO27005": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "ITIL-FCAPS": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "NIS2": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "boolean"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "PPDR-DEVICE": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "RGPD": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "boolean"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "SecNumCloud": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "boolean"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "TELCO-RESIL": {
+                    "keys": {
+                      "expected": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "present": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "provisional": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "evaluation": {
+                "keys": {
+                  "cases": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "last_run": {
+                    "type": [
+                      "null"
+                    ]
+                  },
+                  "validated_cases": {
+                    "type": [
+                      "number"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "generated_at": {
+                "type": [
+                  "string"
+                ]
+              },
+              "last_snapshot": {
+                "keys": {
+                  "generated_at": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "snapshot_id": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "queue": {
+                "keys": {
+                  "by_status": {
+                    "keys": {
+                      "in_review": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "rejected": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "overdue": {
+                    "items": null,
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "per_owner": {
+                    "keys": {
+                      "@maintainers": {
+                        "keys": {
+                          "oldest_business_days": {
+                            "type": [
+                              "number"
+                            ]
+                          },
+                          "waiting": {
+                            "type": [
+                              "number"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "storage": {
+                "keys": {
+                  "mode": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "persistent": {
+                    "type": [
+                      "boolean"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

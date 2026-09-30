@@ -1,0 +1,71 @@
+{
+  "interface": "rest.POST /api/knowledge/publications",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "message": {
+                "type": [
+                  "string"
+                ]
+              },
+              "published": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "snapshot_id": {
+                "type": [
+                  "null"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          },
+          "warnings": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

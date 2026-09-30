@@ -69,6 +69,7 @@ from mcp_server.knowledge.tools import (
     get_governance_events,
     get_graph_summary,
     get_kb_candidate,
+    get_kb_health,
     get_kb_me,
     get_principles_for,
     get_review_inbox,
@@ -83,6 +84,8 @@ from mcp_server.knowledge.tools import (
     list_kb_comments,
     list_skills,
     list_verdict_feedback,
+    promote_kb_candidate,
+    publish_kb_candidates,
     query_graph,
     request_kb_review,
     review_kb_candidate,
@@ -1118,6 +1121,18 @@ def create_starlette_app() -> Starlette:
         res = declare_framework_coverage(request.path_params["framework"])
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_candidate_promote(request):
+        res = promote_kb_candidate(request.path_params["candidate_id"])
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_publications_create(request):
+        res = publish_kb_candidates()
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_kb_health(request):
+        res = get_kb_health()
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_kb_me(request):
         """Expert au nom duquel le client agit (jeton kb:delegate + X-Actor-Email)."""
         res = get_kb_me()
@@ -1172,6 +1187,10 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/context", endpoint=handle_knowledge_context, methods=["GET"]),
             Route("/api/knowledge/check", endpoint=handle_knowledge_check, methods=["POST"]),
             Route("/api/knowledge/me", endpoint=handle_kb_me, methods=["GET"]),
+            Route("/api/knowledge/health", endpoint=handle_kb_health, methods=["GET"]),
+            Route("/api/knowledge/publications", endpoint=handle_publications_create, methods=["POST"]),
+            Route("/api/knowledge/candidates/{candidate_id}/promote", endpoint=handle_candidate_promote,
+                  methods=["POST"]),
             Route("/api/frameworks/ingestions", endpoint=handle_ingestion_create, methods=["POST"]),
             Route("/api/frameworks/ingestions", endpoint=handle_ingestion_list, methods=["GET"]),
             Route("/api/frameworks/ingestions/{ingestion_id}", endpoint=handle_ingestion_get, methods=["GET"]),

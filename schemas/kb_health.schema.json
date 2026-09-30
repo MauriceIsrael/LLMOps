@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KbHealthResponse",
+  "description": "Health indicators of the knowledge base (GET /api/knowledge/health, contract 1.8).",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "generated_at",
+        "assets",
+        "clauses",
+        "coverage",
+        "queue",
+        "storage"
+      ],
+      "properties": {
+        "generated_at": {
+          "type": "string"
+        },
+        "assets": {
+          "type": "object",
+          "properties": {
+            "active": {
+              "type": "integer"
+            },
+            "by_type": {
+              "type": "object"
+            },
+            "by_domain": {
+              "type": "object"
+            },
+            "unvalidated": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "clauses": {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "integer"
+            },
+            "draft": {
+              "type": "integer"
+            },
+            "unassessed_verdict_share": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          }
+        },
+        "coverage": {
+          "type": "object"
+        },
+        "queue": {
+          "type": "object",
+          "properties": {
+            "by_status": {
+              "type": "object"
+            },
+            "per_owner": {
+              "type": "object"
+            },
+            "overdue": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "evaluation": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "last_snapshot": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "storage": {
+          "type": "object",
+          "properties": {
+            "persistent": {
+              "type": "boolean"
+            },
+            "mode": {
+              "enum": [
+                "normal",
+                "demo"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

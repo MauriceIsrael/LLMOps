@@ -405,6 +405,11 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/skills/matrix", headers={"X-Engagement-Id": demo}),
         _rest("GET", "/api/knowledge/me", headers={"Authorization": f"Bearer {REVIEWER_TOKEN}",
                                                    "X-Actor-Email": ACTOR_EMAIL}, delegate=True),
+        # Contract 1.8 — promotion, publication and health
+        _rest("POST", "/api/knowledge/candidates/{candidate_id}/promote", "/api/knowledge/candidates/{rest}/promote",
+              headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/publications", headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/health", headers=DELEGATED, delegate=True),
         # Contract 1.7 — framework ingestion through the API
         _rest("POST", "/api/frameworks/ingestions", form={"framework": "NIS2", "version": "2022/2555"},
               files={"file": ("nis2_excerpt.txt", Path("tests/fixtures/frameworks/nis2_excerpt.txt").read_bytes(), "text/plain")},

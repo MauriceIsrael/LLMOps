@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.7")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.8")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -485,6 +485,34 @@ export interface FrameworkIngestion {
 export interface IngestionApplyResult {
   promoted: string[]; rejected: string[]; failed: Array<{ requirement: string; reason: string }>;
   skipped: string[]; status: FrameworkIngestion["status"]; applied_by: string;
+}
+
+/* ---- Contract 1.8: promotion, publication and health ----------------------- */
+
+export interface StorageStatus { persistent: boolean; mode: "normal" | "demo" }
+
+/** Responses of promote / publications carry ``warnings`` (``ephemeral-storage`` on the demo deployment). */
+export interface WarningsMixin { warnings: Array<"ephemeral-storage"> }
+
+export interface KbHealth {
+  generated_at: string;
+  assets: {
+    active: number; by_type: Record<string, number>; by_domain: Record<string, number>;
+    unvalidated: { count: number; ids: string[] };
+  };
+  clauses: { total: number; draft: number; unassessed_verdict_share: number | null };
+  coverage: Record<string, {
+    status: "covered" | "partial" | "missing"; expected: number | null; present: number; validated: number;
+    provisional: boolean | null;
+  }>;
+  queue: {
+    by_status: Record<string, number>;
+    per_owner: Record<string, { waiting: number; oldest_business_days: number }>;
+    overdue: Array<{ candidate_id: string; owner: string | null; business_days: number }>;
+  };
+  evaluation: { cases: number; validated_cases: number; last_run: Record<string, unknown> | null } | null;
+  last_snapshot: { snapshot_id: string | null; generated_at: string | null } | null;
+  storage: StorageStatus;
 }
 
 export interface KbCandidateReviewRequest {
