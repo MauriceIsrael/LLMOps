@@ -1,0 +1,141 @@
+{
+  "interface": "rest.GET /api/knowledge/templates/{asset_type}",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "asset_type": {
+                "type": [
+                  "string"
+                ]
+              },
+              "fields": {
+                "items": {
+                  "keys": {
+                    "help": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "name": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "pattern": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "required": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "type": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "values": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array",
+                        "null"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "help": {
+                "type": [
+                  "string"
+                ]
+              },
+              "next_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "sections": {
+                "items": {
+                  "keys": {
+                    "heading": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "required": {
+                      "type": [
+                        "boolean"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "skeleton": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

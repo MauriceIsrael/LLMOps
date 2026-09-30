@@ -278,7 +278,7 @@ def migrate_governance_cmd(
         _fail("No governance database: set GOVERNANCE_DATABASE_URL (or CANDIDATES_BACKEND=sql).")
     res = migrate_governance(kb_dir, candidates_dir, force_owners)
     console.print(f"candidates imported: {res['candidates_imported']} (already present: {res['candidates_skipped']}); "
-                  f"owners seeded: {res['owners_seeded']}")
+                  f"owners seeded: {res['owners_seeded']}; evaluation cases: {res.get('eval_cases')}")
 
 
 @app.command("coverage")

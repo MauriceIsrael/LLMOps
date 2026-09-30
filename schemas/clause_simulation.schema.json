@@ -1,0 +1,182 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ClauseSimulationResponse",
+  "description": "Deterministic simulation of proposed clauses (POST /api/knowledge/checks/simulate, contract 1.6).",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "asset_id",
+        "typed_id",
+        "clause_problems",
+        "metrics",
+        "regressions",
+        "cases"
+      ],
+      "properties": {
+        "asset_id": {
+          "type": "string"
+        },
+        "typed_id": {
+          "type": "string"
+        },
+        "clause_problems": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "cases": {
+              "type": "integer"
+            },
+            "before": {
+              "type": "object",
+              "properties": {
+                "violation_recall": {
+                  "type": "number"
+                },
+                "supports_recall": {
+                  "type": "number"
+                },
+                "unexpected_violations": {
+                  "type": "integer"
+                },
+                "expected_violations": {
+                  "type": "integer"
+                }
+              }
+            },
+            "after": {
+              "type": "object",
+              "properties": {
+                "violation_recall": {
+                  "type": "number"
+                },
+                "supports_recall": {
+                  "type": "number"
+                },
+                "unexpected_violations": {
+                  "type": "integer"
+                },
+                "expected_violations": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "regressions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "improvements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "case_id": {
+                "type": "string"
+              },
+              "expected": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "before": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "check_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "verdict": {
+                      "enum": [
+                        "supports",
+                        "violates"
+                      ]
+                    },
+                    "matched_terms": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "check_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "verdict": {
+                      "enum": [
+                        "supports",
+                        "violates"
+                      ]
+                    },
+                    "matched_terms": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "changed": {
+                "type": "boolean"
+              },
+              "regression": {
+                "type": "boolean"
+              },
+              "improvement": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "interface": "rest.GET /api/knowledge/evals/{dataset}",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "cases": {
+                "items": {
+                  "keys": {
+                    "annotated_at": {
+                      "type": [
+                        "null"
+                      ]
+                    },
+                    "annotated_by": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "annotation_status": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "expected": {
+                      "keys": {
+                        "principle:P-001": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "principle:P-002": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "principle:P-009": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "principle:P-012": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "principle:P-015": {
+                          "type": [
+                            "string"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "frameworks": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "option": {
+                      "keys": {
+                        "description": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "title": {
+                          "type": [
+                            "string"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "sector": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "subject": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "dataset": {
+                "type": [
+                  "string"
+                ]
+              },
+              "runs": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "validated": {
+                "type": [
+                  "number"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

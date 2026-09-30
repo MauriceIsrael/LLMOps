@@ -146,7 +146,8 @@ class CandidateService:
         channels = self.notify_owner(owner.as_dict(), "in_review", candidate)
         add_history(candidate, "system", "owner_notified", owner=owner.handle, channels=channels)
 
-    def submit(self, payload: Any, actor: str = "anonymous") -> dict[str, Any]:
+    @staticmethod
+    def _prepare(payload: Any) -> dict[str, Any]:
         fields = validate_submission(payload)
         fm, _ = split_frontmatter(fields["proposed_content"])
         if fields["asset_type"] is None and fm and fm.get("type") in ASSET_TYPES:
@@ -154,6 +155,20 @@ class CandidateService:
         if not fields["domain"] and fm and fm.get("domain"):
             dom = fm["domain"]
             fields["domain"] = [str(d) for d in (dom if isinstance(dom, list) else [dom])]
+        return fields
+
+    def dry_run(self, payload: Any, actor: str = "anonymous") -> dict[str, Any]:
+        """Run the automatic checks on a submission without creating a candidate or notifying anyone."""
+        candidate = new_candidate("CAND-00000000-0000", self._prepare(payload), actor)
+        self._check(candidate)
+        failed = has_failure(candidate["checks"])
+        owner = None if failed else self.owners().owner_for_domains(candidate.get("domain") or []).handle
+        return {"checks": candidate["checks"], "would_be_status": "checks_failed" if failed else "in_review",
+                "assigned_owner": owner, "second_review_required": candidate["second_review_required"],
+                "asset_type": candidate.get("asset_type"), "domain": candidate.get("domain") or []}
+
+    def submit(self, payload: Any, actor: str = "anonymous") -> dict[str, Any]:
+        fields = self._prepare(payload)
         candidate = new_candidate(self.repo.next_id(), fields, actor)
         self._check(candidate)
         self._route(candidate, actor)

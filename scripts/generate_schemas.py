@@ -367,6 +367,68 @@ def generate_governance_event_schema() -> dict[str, Any]:
     }
 
 
+def _envelope(title: str, data: dict[str, Any], description: str) -> dict[str, Any]:
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#", "title": title, "description": description,
+        "type": "object", "required": ["status", "count", "data"],
+        "properties": {"status": {"const": "ok"}, "count": {"type": "integer"}, "data": data},
+    }
+
+
+def generate_asset_template_schema() -> dict[str, Any]:
+    return _envelope("AssetTemplateResponse", {
+        "type": "object", "required": ["asset_type", "fields", "sections", "skeleton"],
+        "properties": {
+            "asset_type": {"type": "string"},
+            "fields": {"type": "array", "items": {"type": "object", "required": ["name", "required", "type"], "properties": {
+                "name": {"type": "string"}, "required": {"type": "boolean"}, "type": {"type": "string"},
+                "values": {"type": ["array", "null"], "items": {"type": "string"}},
+                "pattern": {"type": ["string", "null"]}, "help": {"type": ["string", "null"]}}}},
+            "sections": {"type": "array", "items": {"type": "object", "properties": {
+                "heading": {"type": "string"}, "required": {"type": "boolean"}}}},
+            "next_id": {"type": ["string", "null"]}, "skeleton": {"type": "string"}, "help": {"type": "string"},
+        }}, "Structured template of an asset type (GET /api/knowledge/templates/{type}, contract 1.6).")
+
+
+def generate_simulation_schema() -> dict[str, Any]:
+    verdicts = {"type": "array", "items": {"type": "object", "properties": {
+        "check_id": {"type": ["string", "null"]}, "verdict": {"enum": ["supports", "violates"]},
+        "matched_terms": {"type": "array", "items": {"type": "string"}}}}}
+    metrics = {"type": "object", "properties": {
+        "violation_recall": {"type": "number"}, "supports_recall": {"type": "number"},
+        "unexpected_violations": {"type": "integer"}, "expected_violations": {"type": "integer"}}}
+    return _envelope("ClauseSimulationResponse", {
+        "type": "object", "required": ["asset_id", "typed_id", "clause_problems", "metrics", "regressions", "cases"],
+        "properties": {
+            "asset_id": {"type": "string"}, "typed_id": {"type": "string"},
+            "clause_problems": {"type": "array", "items": {"type": "object"}},
+            "metrics": {"type": "object", "properties": {"cases": {"type": "integer"}, "before": metrics, "after": metrics}},
+            "regressions": {"type": "array", "items": {"type": "string"}},
+            "improvements": {"type": "array", "items": {"type": "string"}},
+            "cases": {"type": "array", "items": {"type": "object", "properties": {
+                "case_id": {"type": "string"}, "expected": {"type": ["string", "null"]}, "before": verdicts,
+                "after": verdicts, "changed": {"type": "boolean"}, "regression": {"type": "boolean"},
+                "improvement": {"type": "boolean"}}}},
+            "options": {"type": "array", "items": {"type": "object"}},
+        }}, "Deterministic simulation of proposed clauses (POST /api/knowledge/checks/simulate, contract 1.6).")
+
+
+def generate_eval_dataset_schema() -> dict[str, Any]:
+    return _envelope("EvalDatasetResponse", {
+        "type": "object", "required": ["dataset", "cases", "validated"],
+        "properties": {
+            "dataset": {"type": "string"}, "validated": {"type": "integer"},
+            "cases": {"type": "array", "items": {"type": "object", "required": ["id", "option", "expected", "annotation_status"],
+                "properties": {"id": {"type": "string"}, "sector": {"type": "string"},
+                               "subject": {"type": ["string", "null"]}, "frameworks": {"type": "array"},
+                               "option": {"type": "object"},
+                               "expected": {"type": "object", "additionalProperties": {"enum": ["violates", "supports"]}},
+                               "annotation_status": {"enum": ["proposed", "validated", "rejected"]},
+                               "annotated_by": {"type": ["string", "null"]}, "annotated_at": {"type": ["string", "null"]}}}},
+            "runs": {"type": "array", "items": {"type": "object"}},
+        }}, "Evaluation dataset of the option judge (GET /api/knowledge/evals/{dataset}, contract 1.6).")
+
+
 def generate_typescript_types() -> str:
     conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
     subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
@@ -375,7 +437,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.5")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.6")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -746,6 +808,79 @@ export interface DomainOwner {{
 
 export interface DomainOwnersRegistry {{ owners: DomainOwner[]; domains: Record<string, string>; default_owner: string }}
 
+/* ---- Contract 1.6: doctrine workshop and evaluations ------------------------ */
+
+export interface AssetTemplateField {{
+  name: string; required: boolean; type: string; values?: string[] | null; pattern?: string | null; help?: string | null;
+}}
+
+export interface AssetTemplate {{
+  asset_type: string;
+  fields: AssetTemplateField[];
+  sections: Array<{{ heading: string; required: boolean }}>;
+  next_id: string | null;
+  skeleton: string;
+  help: string;
+}}
+
+export interface CandidateDryRun {{
+  checks: Array<{{ name: string; status: "pass" | "fail" | "warn"; detail: string }}>;
+  would_be_status: "in_review" | "checks_failed";
+  assigned_owner: string | null;
+  second_review_required: boolean;
+  asset_type: string | null;
+  domain: string[];
+}}
+
+export type ExpectedVerdict = "violates" | "supports";
+
+export interface ClauseVerdictView {{ check_id: string | null; verdict: ExpectedVerdict; matched_terms: string[] }}
+
+export interface JudgeMetrics {{
+  violation_recall: number; supports_recall: number; unexpected_violations: number; expected_violations: number;
+}}
+
+export interface ClauseSimulation {{
+  asset_id: string;
+  typed_id: string;
+  clause_problems: Array<{{ clause: string | null; problems: string[] }}>;
+  metrics: {{ cases: number; before: JudgeMetrics; after: JudgeMetrics }};
+  regressions: string[];
+  improvements: string[];
+  cases: Array<{{
+    case_id: string; title?: string; expected: ExpectedVerdict | null; before: ClauseVerdictView[];
+    after: ClauseVerdictView[]; changed: boolean; regression: boolean; improvement: boolean;
+  }}>;
+  options: Array<{{ title: string; before: ClauseVerdictView[]; after: ClauseVerdictView[] }}>;
+}}
+
+export interface EvalCase {{
+  id: string;
+  sector?: string;
+  subject?: string | null;
+  frameworks?: string[];
+  option: {{ title: string; description?: string }};
+  expected: Record<string, ExpectedVerdict>;
+  annotation_status: "proposed" | "validated" | "rejected";
+  annotated_by: string | null;
+  annotated_at: string | null;
+}}
+
+export interface EvalDataset {{ dataset: string; cases: EvalCase[]; validated: number; runs: Array<Record<string, unknown>> }}
+
+export interface EvalRun extends JudgeMetrics {{
+  id: number; dataset: string; at: string; run_by: string; cases: number; validated_cases: number;
+  misses: Array<{{ case_id: string; typed_id: string; expected: string; got: string[] }}>;
+}}
+
+export type VerdictFeedbackKind = "wrong_violation" | "missed_violation" | "correct";
+
+export interface VerdictFeedback {{
+  id: number; at: string; reporter: string; typed_id: string; check_id: string | null;
+  feedback: VerdictFeedbackKind; justification: string; status: "open" | "converted" | "dismissed";
+  converted_to: string | null; option: {{ title: string; description?: string }}; subject?: string | null; frameworks: string[];
+}}
+
 export interface KbCandidateReviewRequest {{
   action: KbReviewAction;
   reviewer: string;
@@ -773,6 +908,9 @@ def main() -> None:
         ("kb_me.schema.json", generate_kb_me_schema()),
         ("review_inbox.schema.json", generate_review_inbox_schema()),
         ("governance_event.schema.json", generate_governance_event_schema()),
+        ("asset_template.schema.json", generate_asset_template_schema()),
+        ("clause_simulation.schema.json", generate_simulation_schema()),
+        ("eval_dataset.schema.json", generate_eval_dataset_schema()),
     ):
         (schemas_dir / filename).write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
         print(f"Generated: schemas/{filename}")

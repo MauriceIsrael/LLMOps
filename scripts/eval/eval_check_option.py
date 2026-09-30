@@ -34,48 +34,38 @@ def load_cases(path: Path) -> list[dict[str, Any]]:
 
 def evaluate(cases: list[dict[str, Any]]) -> dict[str, Any]:
     from mcp_server.knowledge.tools import check_option
+    from pipelines.doctrine.evaluation import evaluate_cases
 
-    rows = []
-    tp = fn = sup_ok = sup_total = unexpected = 0
-    for case in cases:
-        res = check_option(case["option"], subject=case.get("subject"), frameworks=case.get("frameworks") or [])
+    def judge(option: dict[str, Any], subject: str | None, frameworks: list[str]) -> list[dict[str, Any]]:
+        res = check_option(option, subject=subject, frameworks=frameworks)
         if res.get("status") != "ok":
-            raise RuntimeError(f"{case['id']}: check_option failed: {res}")
-        got: dict[str, set[str]] = {}
-        for v in res["data"]["verdicts"]:
-            got.setdefault(v["typed_id"], set()).add(v["verdict"])
-        for typed_id, expected in case["expected"].items():
-            verdicts = got.get(typed_id, set())
-            if expected == "violates":
-                hit = "violates" in verdicts
-                tp += hit
-                fn += not hit
-            else:
-                sup_total += 1
-                hit = "supports" in verdicts and "violates" not in verdicts
-                sup_ok += hit
-                unexpected += "violates" in verdicts
-            rows.append((case["id"], case.get("sector", ""), typed_id, expected, sorted(verdicts) or ["-"], hit))
-    expected_violations = tp + fn
-    return {
-        "cases": len(cases),
-        "validated_cases": sum(1 for c in cases if c.get("annotation_status") == "validated"),
-        "expected_violations": expected_violations,
-        "violation_recall": tp / expected_violations if expected_violations else 1.0,
-        "supports_recall": sup_ok / sup_total if sup_total else 1.0,
-        "unexpected_violations": unexpected,
-        "rows": rows,
-    }
+            raise RuntimeError(f"check_option failed: {res}")
+        verdicts: list[dict[str, Any]] = res["data"]["verdicts"]
+        return verdicts
+
+    return evaluate_cases(cases, judge)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET)
+    parser.add_argument("--db", action="store_true",
+                        help="Read the dataset 'check_option_v1' from the governance database (default when configured).")
     parser.add_argument("--min-recall", type=float, default=None, help="Fail (exit 1) below this violation recall.")
     parser.add_argument("--verbose", action="store_true", help="Print every annotated verdict.")
     args = parser.parse_args()
 
-    report = evaluate(load_cases(args.dataset))
+    from pipelines.governance.store import database_url
+
+    use_db = (args.db or (database_url() is not None and args.dataset == DEFAULT_DATASET)) and args.dataset == DEFAULT_DATASET
+    if use_db:
+        from pipelines.governance.evals import EvalStore
+
+        store = EvalStore()
+        cases = store.cases("check_option_v1") if store.has_dataset("check_option_v1") else load_cases(args.dataset)
+    else:
+        cases = load_cases(args.dataset)
+    report = evaluate(cases)
     misses = [r for r in report["rows"] if not r[5]]
     for case_id, sector, typed_id, expected, got, hit in (report["rows"] if args.verbose else misses):
         print(f"{'OK  ' if hit else 'MISS'} {case_id} [{sector}] {typed_id}: expected {expected}, got {', '.join(got)}")

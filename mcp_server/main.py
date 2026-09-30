@@ -42,16 +42,22 @@ from mcp_server.engagement.tools import (
 )
 from mcp_server.knowledge.tools import (
     _suggest_knowledge_improvement,
+    add_eval_case,
+    annotate_eval_case,
     assign_kb_candidate,
     check_option,
     comment_kb_candidate,
+    convert_verdict_feedback,
     generate_zero_draft_hld,
     get_asset,
+    get_asset_template,
     get_assets,
     get_compliance_matrix,
     get_compliance_trail,
     get_decision_trail,
     get_doctrine_context,
+    get_eval_dataset,
+    get_eval_run,
     get_framework_coverage,
     get_glossary_term,
     get_governance_events,
@@ -69,15 +75,20 @@ from mcp_server.knowledge.tools import (
     list_kb_candidates,
     list_kb_comments,
     list_skills,
+    list_verdict_feedback,
     query_graph,
     request_kb_review,
     review_kb_candidate,
+    run_eval,
     search_assets,
     shred_rfp,
+    simulate_checks,
     submit_kb_candidate,
+    submit_verdict_feedback,
     suggest_knowledge_improvement,
     trigger_rfp_elicitation,
     update_domain_owners,
+    validate_kb_candidate,
 )
 
 active_plane = os.getenv("LLMOPS_PLANE", server_config.plane).lower()
@@ -974,6 +985,77 @@ def create_starlette_app() -> Starlette:
         res = update_domain_owners(body)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_template(request):
+        res = get_asset_template(request.path_params["asset_type"])
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_candidate_validate(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = validate_kb_candidate(body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_checks_simulate(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = simulate_checks(body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_eval_dataset(request):
+        res = get_eval_dataset(request.path_params["dataset"])
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_eval_case_annotate(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = annotate_eval_case(request.path_params["dataset"], request.path_params["case_id"], body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_eval_case_add(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = add_eval_case(request.path_params["dataset"], body)
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_eval_run_create(request):
+        body = await _json_body(request) or {}
+        res = run_eval(request.path_params["dataset"], bool(body.get("validated_only")))
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_eval_run_get(request):
+        try:
+            run_id = int(request.path_params["run_id"])
+        except ValueError:
+            return JSONResponse(invalid_argument_response("run_id", "'run_id' must be an integer"), status_code=400)
+        res = get_eval_run(request.path_params["dataset"], run_id)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_feedback_create(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = submit_verdict_feedback(body)
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_feedback_list(request):
+        res = list_verdict_feedback(request.query_params.get("status") or None)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_feedback_convert(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        try:
+            feedback_id = int(request.path_params["feedback_id"])
+        except ValueError:
+            return JSONResponse(invalid_argument_response("feedback_id", "must be an integer"), status_code=400)
+        res = convert_verdict_feedback(feedback_id, body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_kb_me(request):
         """Expert au nom duquel le client agit (jeton kb:delegate + X-Actor-Email)."""
         res = get_kb_me()
@@ -1028,6 +1110,18 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/context", endpoint=handle_knowledge_context, methods=["GET"]),
             Route("/api/knowledge/check", endpoint=handle_knowledge_check, methods=["POST"]),
             Route("/api/knowledge/me", endpoint=handle_kb_me, methods=["GET"]),
+            Route("/api/knowledge/templates/{asset_type}", endpoint=handle_template, methods=["GET"]),
+            Route("/api/knowledge/candidates/validate", endpoint=handle_candidate_validate, methods=["POST"]),
+            Route("/api/knowledge/checks/simulate", endpoint=handle_checks_simulate, methods=["POST"]),
+            Route("/api/knowledge/evals/{dataset}", endpoint=handle_eval_dataset, methods=["GET"]),
+            Route("/api/knowledge/evals/{dataset}/cases", endpoint=handle_eval_case_add, methods=["POST"]),
+            Route("/api/knowledge/evals/{dataset}/cases/{case_id}", endpoint=handle_eval_case_annotate, methods=["PATCH"]),
+            Route("/api/knowledge/evals/{dataset}/runs", endpoint=handle_eval_run_create, methods=["POST"]),
+            Route("/api/knowledge/evals/{dataset}/runs/{run_id}", endpoint=handle_eval_run_get, methods=["GET"]),
+            Route("/api/knowledge/verdict-feedback", endpoint=handle_feedback_create, methods=["POST"]),
+            Route("/api/knowledge/verdict-feedback", endpoint=handle_feedback_list, methods=["GET"]),
+            Route("/api/knowledge/verdict-feedback/{feedback_id}/convert", endpoint=handle_feedback_convert,
+                  methods=["POST"]),
             Route("/api/knowledge/reviews/inbox", endpoint=handle_review_inbox, methods=["GET"]),
             Route("/api/knowledge/events", endpoint=handle_governance_events, methods=["GET"]),
             Route("/api/knowledge/owners", endpoint=handle_owners_list, methods=["GET"]),

@@ -684,6 +684,25 @@ Toutes ces routes exigent le scope `kb:review`. Celles qui agissent pour un expe
 - `kb remind` émet `reminder.due`. Un propriétaire marqué `delegated` (compte Archinex) n'est plus notifié sur Discord, ntfy ou e-mail : Archinex délivre la notification depuis le flux.
 - Schémas : [`review_inbox`](../../schemas/review_inbox.schema.json), [`governance_event`](../../schemas/governance_event.schema.json).
 
+### 5.6 Contrat 1.6 — Atelier de doctrine et évaluations
+
+REST uniquement. `kb:review` est exigé partout sauf pour les gabarits, le contrôle à blanc, la simulation et le dépôt de retours (comme la soumission). Les routes d'évaluation et de retours exigent la base de gouvernance (`503` sinon) ; la simulation retombe sur le JSONL de `check_option_v1`. Les actions d'évaluateur exigent un expert agissant (§5.4) avec le rôle `kb:evaluate` (ou `kb:maintain`) ; l'annotateur enregistré est cet expert.
+
+| Route | Rôle |
+|---|---|
+| `GET /api/knowledge/templates/{asset_type}` | Gabarit : champs de front matter avec vocabulaires (domaines, phases, confiance), sections attendues, prochain identifiant libre, squelette Markdown. Types : `principle`, `pattern`, `decision`, `control`, `glossary`. |
+| `POST /api/knowledge/candidates/validate` | Contrôles à blanc d'une soumission (mêmes 7 contrôles) : `would_be_status`, propriétaire qui serait assigné, seconde revue requise. Ne crée rien, ne notifie personne. |
+| `POST /api/knowledge/checks/simulate` `{asset_id, checks, dataset?, only_validated?, options?, frameworks?}` | Remplace les clauses de l'actif dans un index temporaire et compare avant/après sur les cas d'évaluation et sur des options libres : régressions, améliorations, rappel et précision. Déterministe, sans écriture. |
+| `GET /api/knowledge/evals/{dataset}` | Cas (avec `annotation_status`, annotateur, date) et dernières exécutions. |
+| `POST …/cases`, `PATCH …/cases/{id}` | Ajouter un cas `proposed` ; annoter (`expected`, `annotation_status` ∈ `proposed|validated|rejected`, un cas validé exige des verdicts attendus). |
+| `POST …/runs` `{validated_only?}`, `GET …/runs/{id}` | Exécute l'évaluation (celle de `make eval-check`), historise rappel, précision et cas manqués, émet `eval.updated`. |
+| `POST /api/knowledge/verdict-feedback` | Retour d'un humain sur un verdict (`wrong_violation` \| `missed_violation` \| `correct`, justification, option). Rapporteur = expert agissant, sinon jeton. |
+| `GET /api/knowledge/verdict-feedback?status=` | Retours à traiter. |
+| `POST …/verdict-feedback/{id}/convert` | Par un évaluateur : `{to: eval_case, dataset, expected}` (nouveau cas `proposed`), `{to: amendment, asset_type, target_asset_id, proposed_content}` (candidat d'amendement) ou `{to: dismiss}` ; un retour déjà traité → `409`. |
+
+- `kb migrate-governance` importe `tests/evals/datasets/check_option_v1.jsonl` (idempotent) ; `make eval-check` lit la base quand elle est configurée.
+- Schémas : [`asset_template`](../../schemas/asset_template.schema.json), [`clause_simulation`](../../schemas/clause_simulation.schema.json), [`eval_dataset`](../../schemas/eval_dataset.schema.json).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

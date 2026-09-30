@@ -17,9 +17,12 @@ Minor versions only add interfaces or optional fields:
   ``request_kb_review``, ``comment_kb_candidate``, ``list_domain_owners`` and the REST routes
   ``/api/knowledge/reviews/inbox``, ``.../candidates/{id}/{assign,request-review,comments}``,
   ``/api/knowledge/events``, ``/api/knowledge/owners``.
+* ``1.6`` — doctrine workshop and evaluations (REST): ``/api/knowledge/templates/{type}``,
+  ``/api/knowledge/candidates/validate``, ``/api/knowledge/checks/simulate``,
+  ``/api/knowledge/evals/{dataset}`` (cases, runs) and ``/api/knowledge/verdict-feedback``.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.5"
+CONTRACT_VERSION = "1.6"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

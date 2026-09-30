@@ -91,6 +91,46 @@ governance_events = Table(
     Column("payload", Text, nullable=False, default="{}"),
 )
 
+eval_datasets = Table(
+    "eval_datasets", metadata,
+    Column("name", String(64), primary_key=True),
+    Column("description", Text),
+    Column("created_at", String(32), nullable=False),
+)
+
+eval_cases = Table(
+    "eval_cases", metadata,
+    Column("dataset", String(64), primary_key=True),
+    Column("case_id", String(64), primary_key=True),
+    Column("doc", Text, nullable=False),
+    Column("annotation_status", String(16), nullable=False),  # proposed | validated | rejected
+    Column("annotated_by", String(128)),
+    Column("annotated_at", String(32)),
+)
+
+eval_runs = Table(
+    "eval_runs", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("dataset", String(64), nullable=False, index=True),
+    Column("at", String(32), nullable=False),
+    Column("run_by", String(256), nullable=False),
+    Column("metrics", Text, nullable=False),
+)
+
+verdict_feedback = Table(
+    "verdict_feedback", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("at", String(32), nullable=False),
+    Column("reporter", String(256), nullable=False),
+    Column("typed_id", String(128), nullable=False, index=True),
+    Column("check_id", String(128)),
+    Column("feedback", String(24), nullable=False),  # wrong_violation | missed_violation | correct
+    Column("justification", Text, nullable=False),
+    Column("context", Text, nullable=False),  # JSON: option, subject, frameworks
+    Column("status", String(16), nullable=False, default="open"),  # open | converted | dismissed
+    Column("converted_to", String(128)),
+)
+
 counters = Table(
     "counters", metadata,
     Column("key", String(128), primary_key=True),

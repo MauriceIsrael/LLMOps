@@ -400,6 +400,30 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/skills/matrix", headers={"X-Engagement-Id": demo}),
         _rest("GET", "/api/knowledge/me", headers={"Authorization": f"Bearer {REVIEWER_TOKEN}",
                                                    "X-Actor-Email": ACTOR_EMAIL}, delegate=True),
+        # Contract 1.6 — doctrine workshop and evaluations
+        _rest("GET", "/api/knowledge/templates/{asset_type}", "/api/knowledge/templates/pattern"),
+        _rest("POST", "/api/knowledge/candidates/validate", json_body=SAMPLE_CANDIDATE),
+        _rest("POST", "/api/knowledge/checks/simulate", json_body={"asset_id": "P-002", "checks": [], "options": [
+            {"title": "Fully autonomous remediation", "description": "no human approval"}]}),
+        _rest("GET", "/api/knowledge/evals/{dataset}", "/api/knowledge/evals/check_option_v1",
+              headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/evals/{dataset}/cases", "/api/knowledge/evals/check_option_v1/cases",
+              json_body={"option": {"title": "Manual hotfix in production", "description": "ssh into production"},
+                         "expected": {"principle:P-001": "violates"}}, headers=DELEGATED, delegate=True),
+        _rest("PATCH", "/api/knowledge/evals/{dataset}/cases/{case_id}",
+              "/api/knowledge/evals/check_option_v1/cases/CO-001",
+              json_body={"annotation_status": "validated"}, headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/evals/{dataset}/runs", "/api/knowledge/evals/check_option_v1/runs",
+              json_body={}, headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/evals/{dataset}/runs/{run_id}", "/api/knowledge/evals/check_option_v1/runs/1",
+              headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/verdict-feedback", json_body={
+            "typed_id": "principle:P-002", "feedback": "wrong_violation", "justification": "Contract freeze",
+            "option": {"title": "Board-approved remediation"}}, remember="feedback"),
+        _rest("GET", "/api/knowledge/verdict-feedback", headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/verdict-feedback/{feedback_id}/convert",
+              "/api/knowledge/verdict-feedback/{feedback}/convert", json_body={"to": "dismiss"},
+              headers=DELEGATED, delegate=True),
         _rest("PUT", "/api/knowledge/owners", json_body={
             "owners": [{"handle": "@maintainers", "email": ACTOR_EMAIL, "roles": ["kb:maintain", "kb:admin"]}],
             "domains": {}, "default_owner": "@maintainers"}, headers=DELEGATED, delegate=True),
@@ -458,6 +482,9 @@ def isolated_environment() -> Iterator[Any]:
         registry.owners["@maintainers"] = replace(registry.owner("@maintainers"), email=ACTOR_EMAIL,
                                                    roles=("kb:maintain", "kb:admin"))
         save_registry(registry)
+        from pipelines.governance.evals import EvalStore
+
+        EvalStore().import_jsonl("check_option_v1", "tests/evals/datasets/check_option_v1.jsonl")
 
         yield TestClient(create_starlette_app())
     finally:
