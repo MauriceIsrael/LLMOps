@@ -102,6 +102,7 @@ The knowledge base enrichment cycle (`/api/knowledge/candidates`, `kb` CLI) pers
 | `CANDIDATES_BACKEND` | `file` | `file` (JSON documents) or `sql` (SQLite / PostgreSQL, see `GOVERNANCE_DATABASE_URL`) |
 | `CANDIDATES_DIR` | `data/candidates` | Directory of the `file` backend (ignored by git) |
 | `GOVERNANCE_DATABASE_URL` | `sqlite:///data/governance.db` with `sql` | SQLAlchemy URL; `postgresql://…` needs the `postgres` extra (`poetry install -E postgres`). Also holds the owners registry once `kb migrate-governance` was run |
+| `LLMOPS_STORAGE_PERSISTENT` | `true` | Set to `false` on an ephemeral (demo) deployment: promotion and publication then warn that written doctrine is lost at restart (`GET /api/knowledge/health` → `storage.mode: demo`) |
 | `ENGAGEMENT_TOKENS` | — | Declares reviewer tokens with the `kb:review` scope, e.g. `reviewer-token:kb:review`; a delegating client (Archinex) adds `kb:delegate`: `archinex-token:kb:review,kb:delegate` and sends `X-Actor-Email` |
 | `KB_DUPLICATE_THRESHOLD` | `0.6` | Content similarity threshold of the `duplicate` check |
 | `KB_NOTIFY_EMAIL_ENABLED`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_STARTTLS` | disabled | E-mail notification of domain owners (`data/kb/owners.yaml`) |

@@ -458,6 +458,30 @@ def generate_framework_ingestion_schema() -> dict[str, Any]:
         }}, "Ingestion of a regulatory source (GET /api/frameworks/ingestions/{id}, contract 1.7).")
 
 
+def generate_kb_health_schema() -> dict[str, Any]:
+    return _envelope("KbHealthResponse", {
+        "type": "object",
+        "required": ["generated_at", "assets", "clauses", "coverage", "queue", "storage"],
+        "properties": {
+            "generated_at": {"type": "string"},
+            "assets": {"type": "object", "properties": {
+                "active": {"type": "integer"}, "by_type": {"type": "object"}, "by_domain": {"type": "object"},
+                "unvalidated": {"type": "object", "properties": {
+                    "count": {"type": "integer"}, "ids": {"type": "array", "items": {"type": "string"}}}}}},
+            "clauses": {"type": "object", "properties": {
+                "total": {"type": "integer"}, "draft": {"type": "integer"},
+                "unassessed_verdict_share": {"type": ["number", "null"]}}},
+            "coverage": {"type": "object"},
+            "queue": {"type": "object", "properties": {
+                "by_status": {"type": "object"}, "per_owner": {"type": "object"},
+                "overdue": {"type": "array", "items": {"type": "object"}}}},
+            "evaluation": {"type": ["object", "null"]},
+            "last_snapshot": {"type": ["object", "null"]},
+            "storage": {"type": "object", "properties": {
+                "persistent": {"type": "boolean"}, "mode": {"enum": ["normal", "demo"]}}},
+        }}, "Health indicators of the knowledge base (GET /api/knowledge/health, contract 1.8).")
+
+
 def generate_typescript_types() -> str:
     conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
     subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
@@ -466,7 +490,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.7")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.8")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -954,6 +978,34 @@ export interface IngestionApplyResult {{
   skipped: string[]; status: FrameworkIngestion["status"]; applied_by: string;
 }}
 
+/* ---- Contract 1.8: promotion, publication and health ----------------------- */
+
+export interface StorageStatus {{ persistent: boolean; mode: "normal" | "demo" }}
+
+/** Responses of promote / publications carry ``warnings`` (``ephemeral-storage`` on the demo deployment). */
+export interface WarningsMixin {{ warnings: Array<"ephemeral-storage"> }}
+
+export interface KbHealth {{
+  generated_at: string;
+  assets: {{
+    active: number; by_type: Record<string, number>; by_domain: Record<string, number>;
+    unvalidated: {{ count: number; ids: string[] }};
+  }};
+  clauses: {{ total: number; draft: number; unassessed_verdict_share: number | null }};
+  coverage: Record<string, {{
+    status: "covered" | "partial" | "missing"; expected: number | null; present: number; validated: number;
+    provisional: boolean | null;
+  }}>;
+  queue: {{
+    by_status: Record<string, number>;
+    per_owner: Record<string, {{ waiting: number; oldest_business_days: number }}>;
+    overdue: Array<{{ candidate_id: string; owner: string | null; business_days: number }}>;
+  }};
+  evaluation: {{ cases: number; validated_cases: number; last_run: Record<string, unknown> | null }} | null;
+  last_snapshot: {{ snapshot_id: string | null; generated_at: string | null }} | null;
+  storage: StorageStatus;
+}}
+
 export interface KbCandidateReviewRequest {{
   action: KbReviewAction;
   reviewer: string;
@@ -985,6 +1037,7 @@ def main() -> None:
         ("clause_simulation.schema.json", generate_simulation_schema()),
         ("eval_dataset.schema.json", generate_eval_dataset_schema()),
         ("framework_ingestion.schema.json", generate_framework_ingestion_schema()),
+        ("kb_health.schema.json", generate_kb_health_schema()),
     ):
         (schemas_dir / filename).write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
         print(f"Generated: schemas/{filename}")

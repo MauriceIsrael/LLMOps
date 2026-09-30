@@ -719,6 +719,19 @@ REST uniquement, sur la base de gouvernance (`503` sinon). C'est la chaîne hors
 - Schéma : [`framework_ingestion`](../../schemas/framework_ingestion.schema.json). Dépendance ajoutée : `python-multipart`.
 - Limite : la promotion écrit directement dans `data/kb/` du serveur (stockage persistant en exploitation normale ; perdue au redémarrage en mode démo, cf. D2).
 
+### 5.8 Contrat 1.8 — Promotion, publication et santé de la base
+
+REST uniquement. Actions réservées à un expert agissant avec `kb:maintain` (§5.4).
+
+| Route | Rôle |
+|---|---|
+| `POST /api/knowledge/candidates/{id}/promote` | Équivalent de `kb promote` : écrit l'actif accepté dans `data/kb/` du serveur (`status: active`, confiance calculée, `validated_by` = relecteurs). `409` si le candidat n'est pas accepté ou déjà promoté. |
+| `POST /api/knowledge/publications` | Équivalent de `kb publish` : reconstruit le graphe (dans un fichier voisin échangé atomiquement), scelle un instantané, écrit le `CHANGELOG`, notifie les consommateurs, passe les candidats promus en `published` avec l'identifiant d'instantané. Rien à publier → `200`, `published: []`. |
+| `GET /api/knowledge/health` | Indicateurs (scope `kb:review`) : actifs par type et domaine, actifs sans `validated_by`, clauses (dont brouillons) et part de verdicts `unassessed` de la dernière exécution d'évaluation, couverture par référentiel, file par propriétaire (attente la plus longue) et candidats en retard (≥ 5 jours ouvrés), dernière évaluation, dernier instantané, `storage: {persistent, mode}`. |
+
+- **Mode démo** : avec `LLMOPS_STORAGE_PERSISTENT=false` (déploiement Cloud Run sans volume), `promote` et `publications` répondent avec `warnings: ["ephemeral-storage"]` — la doctrine écrite est perdue au prochain redémarrage — et `health.storage.mode` vaut `demo`. L'état de gouvernance (candidats, revues, évaluations) reste en base. Décision D2 : aucun contournement.
+- La publication écrit sur le disque du serveur ; le commit git de `data/kb/` reste l'acte du mainteneur en exploitation normale. Schéma : [`kb_health`](../../schemas/kb_health.schema.json).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés
