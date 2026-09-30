@@ -1,0 +1,141 @@
+{
+  "interface": "rest.GET /api/knowledge/evals/{dataset}/runs/{run_id}",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "at": {
+                "type": [
+                  "string"
+                ]
+              },
+              "cases": {
+                "type": [
+                  "number"
+                ]
+              },
+              "dataset": {
+                "type": [
+                  "string"
+                ]
+              },
+              "expected_violations": {
+                "type": [
+                  "number"
+                ]
+              },
+              "id": {
+                "type": [
+                  "number"
+                ]
+              },
+              "misses": {
+                "items": {
+                  "keys": {
+                    "case_id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "expected": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "got": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "typed_id": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "run_by": {
+                "type": [
+                  "string"
+                ]
+              },
+              "supports_recall": {
+                "type": [
+                  "number"
+                ]
+              },
+              "unexpected_violations": {
+                "type": [
+                  "number"
+                ]
+              },
+              "validated_cases": {
+                "type": [
+                  "number"
+                ]
+              },
+              "validated_only": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "violation_recall": {
+                "type": [
+                  "number"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

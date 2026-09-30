@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvalDatasetResponse",
+  "description": "Evaluation dataset of the option judge (GET /api/knowledge/evals/{dataset}, contract 1.6).",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "dataset",
+        "cases",
+        "validated"
+      ],
+      "properties": {
+        "dataset": {
+          "type": "string"
+        },
+        "validated": {
+          "type": "integer"
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "option",
+              "expected",
+              "annotation_status"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "sector": {
+                "type": "string"
+              },
+              "subject": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "frameworks": {
+                "type": "array"
+              },
+              "option": {
+                "type": "object"
+              },
+              "expected": {
+                "type": "object",
+                "additionalProperties": {
+                  "enum": [
+                    "violates",
+                    "supports"
+                  ]
+                }
+              },
+              "annotation_status": {
+                "enum": [
+                  "proposed",
+                  "validated",
+                  "rejected"
+                ]
+              },
+              "annotated_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "annotated_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "runs": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

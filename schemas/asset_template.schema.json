@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AssetTemplateResponse",
+  "description": "Structured template of an asset type (GET /api/knowledge/templates/{type}, contract 1.6).",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "asset_type",
+        "fields",
+        "sections",
+        "skeleton"
+      ],
+      "properties": {
+        "asset_type": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "required",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "type": {
+                "type": "string"
+              },
+              "values": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "pattern": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "help": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "heading": {
+                "type": "string"
+              },
+              "required": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "next_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "skeleton": {
+          "type": "string"
+        },
+        "help": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

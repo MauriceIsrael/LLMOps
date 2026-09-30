@@ -1,0 +1,122 @@
+{
+  "interface": "rest.GET /api/knowledge/verdict-feedback",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "items": {
+              "keys": {
+                "at": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "check_id": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "converted_to": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "feedback": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "frameworks": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "justification": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "option": {
+                  "keys": {
+                    "title": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "reporter": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "subject": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "typed_id": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

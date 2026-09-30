@@ -1417,6 +1417,290 @@ def update_domain_owners(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Doctrine workshop and evaluations (contract 1.6) — REST only, no MCP tool.
+# ---------------------------------------------------------------------------
+
+def _eval_error(exc: Exception) -> dict[str, Any] | None:
+    from pipelines.governance.evals import EvalError, EvalNotFoundError
+
+    if isinstance(exc, EvalError):
+        return invalid_argument_response(exc.argument, exc.reason)
+    if isinstance(exc, EvalNotFoundError):
+        return not_found_response(str(exc))
+    return None
+
+
+def _eval_store():
+    from pipelines.governance.evals import EvalStore
+    from pipelines.governance.store import database_url
+
+    return EvalStore() if database_url() else None
+
+
+_NO_DB = {"status": "unavailable", "reason": "this feature needs the governance database."}
+
+
+def _evaluator() -> tuple[Any, Any] | dict[str, Any]:
+    """(service, owner) of an acting expert with the 'kb:evaluate' (or 'kb:maintain') role."""
+    who = _acting_expert()
+    if isinstance(who, dict):
+        return who
+    service, owner = who
+    if not ({"kb:evaluate", "kb:maintain"} & set(owner.roles)):
+        return {"status": "unauthorized", "reason": f"{owner.handle} needs the 'kb:evaluate' role."}
+    return service, owner
+
+
+def get_asset_template(asset_type: str) -> dict[str, Any]:
+    """Structured template of an asset type (fields with vocabularies, expected sections, skeleton)."""
+    from pipelines.kb_candidates.templates import TYPES, asset_template
+
+    try:
+        tpl = asset_template(asset_type, server_config.kb_dir)
+        if tpl is None:
+            return not_found_response(f"{asset_type} (expected one of {list(TYPES)})")
+        return ok_response(tpl, count=1)
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_asset_template")
+
+
+def validate_kb_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
+    """Dry run of the automatic checks on a submission: nothing is created, nobody is notified."""
+    from pipelines.kb_candidates.model import CandidateError
+
+    try:
+        return ok_response(_candidate_service().dry_run(candidate, actor=_actor()), count=1)
+    except CandidateError as exc:
+        return _candidate_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="validate_kb_candidate")
+
+
+def simulate_checks(body: dict[str, Any]) -> dict[str, Any]:
+    """Evaluate proposed clauses of an asset against the evaluation cases and free options.
+
+    Body: ``{asset_id, checks: [...], dataset?: 'check_option_v1', only_validated?: bool,
+    options?: [{title, description, subject?}], frameworks?: [...]}``. Deterministic; no write.
+    """
+    import json
+
+    from pipelines.doctrine.simulate import simulate
+
+    try:
+        asset_id, checks = body.get("asset_id"), body.get("checks")
+        if not isinstance(asset_id, str) or not asset_id.strip():
+            return invalid_argument_response("asset_id", "'asset_id' is required.")
+        if not isinstance(checks, list):
+            return invalid_argument_response("checks", "'checks' must be a list of clauses.")
+        options = body.get("options") or []
+        if not isinstance(options, list) or not all(isinstance(o, dict) and str(o.get("title") or "").strip() for o in options):
+            return invalid_argument_response("options", "'options' must be a list of objects with a 'title'.")
+        dataset = body.get("dataset", "check_option_v1")
+        cases: list[dict[str, Any]] = []
+        if dataset:
+            store = _eval_store()
+            if store is not None and store.has_dataset(dataset):
+                cases = store.cases(dataset)
+            elif dataset == "check_option_v1":
+                path = Path("tests/evals/datasets/check_option_v1.jsonl")
+                if path.is_file():
+                    cases = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+            else:
+                return not_found_response(str(dataset))
+        if body.get("only_validated"):
+            cases = [c for c in cases if c.get("annotation_status") == "validated"]
+        fws = _str_list(body.get("frameworks"), "frameworks")
+        if isinstance(fws, dict):
+            return fws
+        result = simulate(_doctrine_index(), asset_id.strip(), checks, cases, options, fws)
+        return ok_response(result, count=len(result["cases"]))
+    except LookupError as exc:
+        return not_found_response(str(exc))
+    except ValueError as exc:
+        return invalid_argument_response("checks", str(exc))
+    except Exception as e:
+        return handle_exception_response(e, context_action="simulate_checks")
+
+
+def get_eval_dataset(dataset: str) -> dict[str, Any]:
+    """Cases of an evaluation dataset with their annotation status (requires 'kb:review')."""
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    try:
+        cases = store.cases(dataset)
+        validated = sum(1 for c in cases if c["annotation_status"] == "validated")
+        return ok_response({"dataset": dataset, "cases": cases, "validated": validated, "runs": store.runs(dataset)[:10]},
+                           count=len(cases))
+    except Exception as e:
+        return _eval_error(e) or handle_exception_response(e, context_action="get_eval_dataset")
+
+
+def annotate_eval_case(dataset: str, case_id: str, body: dict[str, Any]) -> dict[str, Any]:
+    """Annotate a case: ``{expected?: {typed_id: violates|supports}, annotation_status?}``.
+
+    Requires an acting expert with the 'kb:evaluate' role; the annotator is that expert.
+    """
+    who = _evaluator()
+    if isinstance(who, dict):
+        return who
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    _, owner = who
+    try:
+        case = store.annotate(dataset, case_id, owner.handle, body.get("expected"), body.get("annotation_status"))
+        from pipelines.governance.log import get_log
+
+        log = get_log()
+        if log is not None:
+            log.emit("eval.updated", None, owner.handle, [], dataset=dataset, case_id=case_id,
+                     annotation_status=case["annotation_status"])
+        return ok_response(case, count=1)
+    except Exception as e:
+        return _eval_error(e) or handle_exception_response(e, context_action="annotate_eval_case")
+
+
+def add_eval_case(dataset: str, body: dict[str, Any]) -> dict[str, Any]:
+    """New case ``{option, subject?, frameworks?, sector?, expected}`` in status 'proposed' ('kb:evaluate')."""
+    who = _evaluator()
+    if isinstance(who, dict):
+        return who
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    try:
+        return ok_response(store.add_case(dataset, body, who[1].handle), count=1)
+    except Exception as e:
+        return _eval_error(e) or handle_exception_response(e, context_action="add_eval_case")
+
+
+def run_eval(dataset: str, validated_only: bool = False) -> dict[str, Any]:
+    """Run the option judge on the dataset ('kb:evaluate'); the run is stored and announced (``eval.updated``)."""
+    from pipelines.doctrine.evaluation import evaluate_cases, summarize
+    from pipelines.doctrine.simulate import judge_for
+    from pipelines.governance.log import get_log
+
+    who = _evaluator()
+    if isinstance(who, dict):
+        return who
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    try:
+        cases = [c for c in store.cases(dataset) if c.get("expected")]
+        if validated_only:
+            cases = [c for c in cases if c["annotation_status"] == "validated"]
+        metrics = summarize(evaluate_cases(cases, judge_for(_doctrine_index())))
+        metrics["validated_only"] = validated_only
+        run = store.save_run(dataset, who[1].handle, metrics)
+        log = get_log()
+        if log is not None:
+            log.emit("eval.updated", None, who[1].handle, [], dataset=dataset, run_id=run["id"],
+                     violation_recall=round(metrics["violation_recall"], 4))
+        return ok_response(run, count=1)
+    except Exception as e:
+        return _eval_error(e) or handle_exception_response(e, context_action="run_eval")
+
+
+def get_eval_run(dataset: str, run_id: int) -> dict[str, Any]:
+    """A stored evaluation run (requires 'kb:review')."""
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    try:
+        return ok_response(store.run(dataset, run_id), count=1)
+    except Exception as e:
+        return _eval_error(e) or handle_exception_response(e, context_action="get_eval_run")
+
+
+def submit_verdict_feedback(body: dict[str, Any]) -> dict[str, Any]:
+    """Human feedback on a verdict of ``check_option`` (any authenticated client).
+
+    Body: ``{typed_id, check_id?, feedback: wrong_violation|missed_violation|correct, justification,
+    option: {title, description?}, subject?, frameworks?}``. Stored for an evaluator to convert.
+    """
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    try:
+        reporter = _actor()
+        context = {"option": body.get("option"), "subject": body.get("subject"), "frameworks": body.get("frameworks") or []}
+        fb = store.add_feedback(reporter, str(body.get("typed_id") or ""), str(body.get("feedback") or ""),
+                                str(body.get("justification") or ""), context, body.get("check_id"))
+        return ok_response(fb, count=1)
+    except Exception as e:
+        return _eval_error(e) or handle_exception_response(e, context_action="submit_verdict_feedback")
+
+
+def list_verdict_feedback(status: str | None = None) -> dict[str, Any]:
+    """Verdict feedback waiting for an evaluator (requires 'kb:review')."""
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    try:
+        items = store.list_feedback(status or None)
+        return ok_response(items, count=len(items))
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_verdict_feedback")
+
+
+def convert_verdict_feedback(feedback_id: int, body: dict[str, Any]) -> dict[str, Any]:
+    """Convert feedback ('kb:evaluate'): ``{to: 'eval_case', dataset, expected: violates|supports}``,
+    ``{to: 'amendment', target_asset_id, asset_type, proposed_content}`` or ``{to: 'dismiss'}``."""
+    from pipelines.governance.evals import EvalError
+    from pipelines.kb_candidates.model import CandidateError
+
+    who = _evaluator()
+    if isinstance(who, dict):
+        return who
+    service, owner = who
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    try:
+        fb = store.feedback(feedback_id)
+        if fb["status"] != "open":
+            return {**invalid_argument_response("status", f"feedback already {fb['status']}."), "conflict": True}
+        target = body.get("to")
+        if target == "eval_case":
+            case = store.add_case(str(body.get("dataset") or "check_option_v1"), {
+                "option": fb["option"], "subject": fb.get("subject"), "frameworks": fb.get("frameworks"),
+                "expected": {fb["typed_id"]: body.get("expected")}}, owner.handle)
+            return ok_response(store.close_feedback(feedback_id, "converted", f"eval_case:{case['id']}"), count=1)
+        if target == "amendment":
+            candidate = service.submit({
+                "kind": "amendment", "asset_type": body.get("asset_type"), "target_asset_id": body.get("target_asset_id"),
+                "title": f"Verdict feedback on {fb['typed_id']}", "rationale": fb["justification"],
+                "proposed_content": body.get("proposed_content"),
+                "source": {"system": "archinex", "author": owner.handle},
+            }, actor=owner.handle)
+            return ok_response(store.close_feedback(feedback_id, "converted", f"candidate:{candidate['id']}"), count=1)
+        if target == "dismiss":
+            return ok_response(store.close_feedback(feedback_id, "dismissed"), count=1)
+        return invalid_argument_response("to", "'to' must be 'eval_case', 'amendment' or 'dismiss'.")
+    except (EvalError, CandidateError) as exc:
+        return invalid_argument_response(getattr(exc, "argument", "body"), getattr(exc, "reason", str(exc)))
+    except Exception as e:
+        return _eval_error(e) or handle_exception_response(e, context_action="convert_verdict_feedback")
+
+
+# ---------------------------------------------------------------------------
 # Regulatory coverage (contract 1.3).
 # ---------------------------------------------------------------------------
 

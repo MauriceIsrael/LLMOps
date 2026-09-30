@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.5"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.6"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.5"
+  "schema_version": "1.6"
 }
 ```
 
@@ -26,6 +26,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.3` | `get_framework_coverage` and the optional `coverage` field of `GET /api/compliance/frameworks/applicable` ([contract §5.3](contracts/knowledge-hub-api-v1.md)). |
 | `1.4` | Identity of the acting expert: `X-Actor-Email` header (token with `kb:delegate`), `get_kb_me` / `GET /api/knowledge/me` ([contract §5.4](contracts/knowledge-hub-api-v1.md)); SQL backend of the candidate queue. |
 | `1.5` | Review inbox, reassignment, review requests, comments, governance event feed, owners registry ([contract §5.5](contracts/knowledge-hub-api-v1.md)). |
+| `1.6` | Doctrine workshop and evaluations: templates, candidate dry run, clause simulation, evaluation dataset/runs, verdict feedback ([contract §5.6](contracts/knowledge-hub-api-v1.md)). |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

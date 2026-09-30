@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.5")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.6")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -369,6 +369,79 @@ export interface DomainOwner {
 }
 
 export interface DomainOwnersRegistry { owners: DomainOwner[]; domains: Record<string, string>; default_owner: string }
+
+/* ---- Contract 1.6: doctrine workshop and evaluations ------------------------ */
+
+export interface AssetTemplateField {
+  name: string; required: boolean; type: string; values?: string[] | null; pattern?: string | null; help?: string | null;
+}
+
+export interface AssetTemplate {
+  asset_type: string;
+  fields: AssetTemplateField[];
+  sections: Array<{ heading: string; required: boolean }>;
+  next_id: string | null;
+  skeleton: string;
+  help: string;
+}
+
+export interface CandidateDryRun {
+  checks: Array<{ name: string; status: "pass" | "fail" | "warn"; detail: string }>;
+  would_be_status: "in_review" | "checks_failed";
+  assigned_owner: string | null;
+  second_review_required: boolean;
+  asset_type: string | null;
+  domain: string[];
+}
+
+export type ExpectedVerdict = "violates" | "supports";
+
+export interface ClauseVerdictView { check_id: string | null; verdict: ExpectedVerdict; matched_terms: string[] }
+
+export interface JudgeMetrics {
+  violation_recall: number; supports_recall: number; unexpected_violations: number; expected_violations: number;
+}
+
+export interface ClauseSimulation {
+  asset_id: string;
+  typed_id: string;
+  clause_problems: Array<{ clause: string | null; problems: string[] }>;
+  metrics: { cases: number; before: JudgeMetrics; after: JudgeMetrics };
+  regressions: string[];
+  improvements: string[];
+  cases: Array<{
+    case_id: string; title?: string; expected: ExpectedVerdict | null; before: ClauseVerdictView[];
+    after: ClauseVerdictView[]; changed: boolean; regression: boolean; improvement: boolean;
+  }>;
+  options: Array<{ title: string; before: ClauseVerdictView[]; after: ClauseVerdictView[] }>;
+}
+
+export interface EvalCase {
+  id: string;
+  sector?: string;
+  subject?: string | null;
+  frameworks?: string[];
+  option: { title: string; description?: string };
+  expected: Record<string, ExpectedVerdict>;
+  annotation_status: "proposed" | "validated" | "rejected";
+  annotated_by: string | null;
+  annotated_at: string | null;
+}
+
+export interface EvalDataset { dataset: string; cases: EvalCase[]; validated: number; runs: Array<Record<string, unknown>> }
+
+export interface EvalRun extends JudgeMetrics {
+  id: number; dataset: string; at: string; run_by: string; cases: number; validated_cases: number;
+  misses: Array<{ case_id: string; typed_id: string; expected: string; got: string[] }>;
+}
+
+export type VerdictFeedbackKind = "wrong_violation" | "missed_violation" | "correct";
+
+export interface VerdictFeedback {
+  id: number; at: string; reporter: string; typed_id: string; check_id: string | null;
+  feedback: VerdictFeedbackKind; justification: string; status: "open" | "converted" | "dismissed";
+  converted_to: string | null; option: { title: string; description?: string }; subject?: string | null; frameworks: string[];
+}
 
 export interface KbCandidateReviewRequest {
   action: KbReviewAction;

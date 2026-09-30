@@ -1,0 +1,282 @@
+{
+  "interface": "rest.POST /api/knowledge/checks/simulate",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "asset_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "cases": {
+                "items": {
+                  "keys": {
+                    "after": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "before": {
+                      "items": {
+                        "keys": {
+                          "check_id": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "matched_terms": {
+                            "items": {
+                              "type": [
+                                "string"
+                              ]
+                            },
+                            "type": [
+                              "array"
+                            ]
+                          },
+                          "verdict": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "case_id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "changed": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "expected": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "improvement": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "regression": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "clause_problems": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "improvements": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "metrics": {
+                "keys": {
+                  "after": {
+                    "keys": {
+                      "expected_violations": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "supports_recall": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "unexpected_violations": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "violation_recall": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "before": {
+                    "keys": {
+                      "expected_violations": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "supports_recall": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "unexpected_violations": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "violation_recall": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "cases": {
+                    "type": [
+                      "number"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "options": {
+                "items": {
+                  "keys": {
+                    "after": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "before": {
+                      "items": {
+                        "keys": {
+                          "check_id": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "matched_terms": {
+                            "items": {
+                              "type": [
+                                "string"
+                              ]
+                            },
+                            "type": [
+                              "array"
+                            ]
+                          },
+                          "verdict": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "regressions": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "typed_id": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

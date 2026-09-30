@@ -1,0 +1,118 @@
+{
+  "interface": "rest.PATCH /api/knowledge/evals/{dataset}/cases/{case_id}",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "annotated_at": {
+                "type": [
+                  "string"
+                ]
+              },
+              "annotated_by": {
+                "type": [
+                  "string"
+                ]
+              },
+              "annotation_status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "expected": {
+                "keys": {
+                  "principle:P-002": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "frameworks": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "option": {
+                "keys": {
+                  "description": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "sector": {
+                "type": [
+                  "string"
+                ]
+              },
+              "subject": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}
