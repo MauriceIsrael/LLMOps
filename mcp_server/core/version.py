@@ -20,9 +20,11 @@ Minor versions only add interfaces or optional fields:
 * ``1.6`` — doctrine workshop and evaluations (REST): ``/api/knowledge/templates/{type}``,
   ``/api/knowledge/candidates/validate``, ``/api/knowledge/checks/simulate``,
   ``/api/knowledge/evals/{dataset}`` (cases, runs) and ``/api/knowledge/verdict-feedback``.
+* ``1.7`` — framework ingestion through the API (REST): ``/api/frameworks/ingestions`` (upload,
+  rows, link proposals, apply) and ``/api/frameworks/{fw}/coverage-declaration``.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.6"
+CONTRACT_VERSION = "1.7"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

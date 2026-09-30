@@ -1,0 +1,138 @@
+{
+  "interface": "rest.PATCH /api/frameworks/ingestions/{ingestion_id}/rows/{requirement_id}",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "acceptance_criteria": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "comment": {
+                "type": [
+                  "string"
+                ]
+              },
+              "decision": {
+                "type": [
+                  "string"
+                ]
+              },
+              "domain": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "in_kb": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "legal_text": {
+                "type": [
+                  "string"
+                ]
+              },
+              "links": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "links_production_mode": {
+                "type": [
+                  "string"
+                ]
+              },
+              "proposed_acceptance_criteria": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "proposed_links": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "requirement_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "result": {
+                "type": [
+                  "null"
+                ]
+              },
+              "reviewer": {
+                "type": [
+                  "string"
+                ]
+              },
+              "source_ref": {
+                "type": [
+                  "string"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "title": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

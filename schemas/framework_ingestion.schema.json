@@ -1,0 +1,170 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FrameworkIngestionResponse",
+  "description": "Ingestion of a regulatory source (GET /api/frameworks/ingestions/{id}, contract 1.7).",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "id",
+        "framework",
+        "version",
+        "status",
+        "requirements",
+        "decided",
+        "total"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "framework": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "tag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_name": {
+          "type": "string"
+        },
+        "source_sha256": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "reviewing",
+            "partially_applied",
+            "applied"
+          ]
+        },
+        "created_by": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "declaration_reset": {
+          "type": "boolean"
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "requirement_id",
+              "title",
+              "legal_text",
+              "decision",
+              "status"
+            ],
+            "properties": {
+              "requirement_id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "source_ref": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "in_kb": {
+                "type": "boolean"
+              },
+              "legal_text": {
+                "type": "string"
+              },
+              "proposed_links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "proposed_acceptance_criteria": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "links_production_mode": {
+                "enum": [
+                  "",
+                  "llm-derived"
+                ]
+              },
+              "decision": {
+                "enum": [
+                  "",
+                  "accept",
+                  "amend",
+                  "reject"
+                ]
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "acceptance_criteria": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "reviewer": {
+                "type": "string"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "pending",
+                  "decided",
+                  "applied",
+                  "failed"
+                ]
+              },
+              "result": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "decided": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

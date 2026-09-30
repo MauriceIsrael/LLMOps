@@ -131,6 +131,28 @@ verdict_feedback = Table(
     Column("converted_to", String(128)),
 )
 
+framework_ingestions = Table(
+    "framework_ingestions", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("framework", String(64), nullable=False, index=True),
+    Column("version", String(64), nullable=False),
+    Column("tag", String(64)),
+    Column("source_name", String(256), nullable=False),
+    Column("source_sha256", String(64), nullable=False),
+    Column("status", String(24), nullable=False),  # reviewing | applied | partially_applied
+    Column("created_by", String(128), nullable=False),
+    Column("created_at", String(32), nullable=False),
+    Column("declaration_reset", Boolean, nullable=False, default=False),
+)
+
+ingestion_rows = Table(
+    "ingestion_rows", metadata,
+    Column("ingestion_id", Integer, primary_key=True),
+    Column("requirement_id", String(128), primary_key=True),
+    Column("position", Integer, nullable=False),
+    Column("doc", Text, nullable=False),  # JSON: draft text, proposals, decision, result
+)
+
 counters = Table(
     "counters", metadata,
     Column("key", String(128), primary_key=True),

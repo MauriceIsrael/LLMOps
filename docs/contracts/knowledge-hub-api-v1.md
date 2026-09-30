@@ -703,6 +703,22 @@ REST uniquement. `kb:review` est exigé partout sauf pour les gabarits, le contr
 - `kb migrate-governance` importe `tests/evals/datasets/check_option_v1.jsonl` (idempotent) ; `make eval-check` lit la base quand elle est configurée.
 - Schémas : [`asset_template`](../../schemas/asset_template.schema.json), [`clause_simulation`](../../schemas/clause_simulation.schema.json), [`eval_dataset`](../../schemas/eval_dataset.schema.json).
 
+### 5.7 Contrat 1.7 — Ingestion des référentiels par l'API
+
+REST uniquement, sur la base de gouvernance (`503` sinon). C'est la chaîne hors ligne de la §5.3 rejouée ligne à ligne, sans CSV : le texte est extrait dans un sous-processus borné (20 Mo, 120 s), les brouillons et les décisions vivent en base, `apply` exécute le même `apply_review` que `kb apply-review`. Aucune route n'appelle un LLM.
+
+| Route | Rôle |
+|---|---|
+| `POST /api/frameworks/ingestions` (multipart : `file`, `framework`, `version`, `tag?`) | `kb:maintain`. Sources `.pdf .html .txt .md .docx` ; le référentiel doit avoir un splitter (`pipelines/frameworks/splitters/`), sinon `400` avec la liste disponible. Écrit le manifeste dans la KB, réinitialise la déclaration de couverture si la version ou la source change, émet `coverage.changed`. `201`. |
+| `GET /api/frameworks/ingestions`, `GET …/{id}` | Ingestions et référentiels disposant d'un splitter ; exigences avec texte légal, liens et critères proposés, décision et statut de chaque ligne (`pending`, `decided`, `applied`, `failed`). |
+| `PATCH …/{id}/rows/{requirement_id}` `{decision: accept\|amend\|reject\|"", links?, acceptance_criteria?, comment?}` | Le relecteur est l'expert agissant, propriétaire du domaine de l'exigence (ou `kb:maintain`). Liens inconnus → `400` ; `amend` exige liens ou critères. |
+| `POST …/{id}/link-proposals` `{model?, proposals: [{requirement_id, satisfied_by, acceptance_criteria}]}` | `kb:maintain`. Propositions du LLM local du client, enregistrées `llm-derived` ; identifiants inconnus écartés et comptés. Elles ne décident rien. |
+| `POST …/{id}/apply` | `kb:maintain`. Crée les candidats `framework_ingestion` revus et promeut les acceptés (écriture dans `data/kb/controls/<FW>/`). Statut `applied` ou `partially_applied`. |
+| `POST /api/frameworks/{fw}/coverage-declaration` | Déclaration par l'expert agissant ; `409` avec la liste de ce qui manque tant que tout n'est pas actif et validé ; émet `coverage.changed`. |
+
+- Schéma : [`framework_ingestion`](../../schemas/framework_ingestion.schema.json). Dépendance ajoutée : `python-multipart`.
+- Limite : la promotion écrit directement dans `data/kb/` du serveur (stockage persistant en exploitation normale ; perdue au redémarrage en mode démo, cf. D2).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

@@ -429,6 +429,35 @@ def generate_eval_dataset_schema() -> dict[str, Any]:
         }}, "Evaluation dataset of the option judge (GET /api/knowledge/evals/{dataset}, contract 1.6).")
 
 
+def generate_framework_ingestion_schema() -> dict[str, Any]:
+    row = {
+        "type": "object",
+        "required": ["requirement_id", "title", "legal_text", "decision", "status"],
+        "properties": {
+            "requirement_id": {"type": "string"}, "title": {"type": "string"}, "source_ref": {"type": "string"},
+            "domain": {"type": "array", "items": {"type": "string"}}, "in_kb": {"type": "boolean"},
+            "legal_text": {"type": "string"},
+            "proposed_links": {"type": "array", "items": {"type": "string"}},
+            "proposed_acceptance_criteria": {"type": "array", "items": {"type": "string"}},
+            "links_production_mode": {"enum": ["", "llm-derived"]},
+            "decision": {"enum": ["", "accept", "amend", "reject"]},
+            "links": {"type": "array", "items": {"type": "string"}},
+            "acceptance_criteria": {"type": "array", "items": {"type": "string"}},
+            "reviewer": {"type": "string"}, "comment": {"type": "string"},
+            "status": {"enum": ["pending", "decided", "applied", "failed"]}, "result": {"type": ["string", "null"]},
+        },
+    }
+    return _envelope("FrameworkIngestionResponse", {
+        "type": "object", "required": ["id", "framework", "version", "status", "requirements", "decided", "total"],
+        "properties": {
+            "id": {"type": "integer"}, "framework": {"type": "string"}, "version": {"type": "string"},
+            "tag": {"type": ["string", "null"]}, "source_name": {"type": "string"}, "source_sha256": {"type": "string"},
+            "status": {"enum": ["reviewing", "partially_applied", "applied"]},
+            "created_by": {"type": "string"}, "created_at": {"type": "string"}, "declaration_reset": {"type": "boolean"},
+            "requirements": {"type": "array", "items": row}, "decided": {"type": "integer"}, "total": {"type": "integer"},
+        }}, "Ingestion of a regulatory source (GET /api/frameworks/ingestions/{id}, contract 1.7).")
+
+
 def generate_typescript_types() -> str:
     conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
     subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
@@ -437,7 +466,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.6")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.7")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -881,6 +910,50 @@ export interface VerdictFeedback {{
   converted_to: string | null; option: {{ title: string; description?: string }}; subject?: string | null; frameworks: string[];
 }}
 
+/* ---- Contract 1.7: framework ingestion -------------------------------------- */
+
+export type IngestionDecision = "" | "accept" | "amend" | "reject";
+
+export interface IngestionRow {{
+  requirement_id: string;
+  title: string;
+  source_ref?: string;
+  domain?: string[];
+  in_kb?: boolean;
+  legal_text: string;
+  proposed_links: string[];
+  proposed_acceptance_criteria: string[];
+  links_production_mode: "" | "llm-derived";
+  decision: IngestionDecision;
+  links: string[];
+  acceptance_criteria: string[];
+  reviewer: string;
+  comment: string;
+  status: "pending" | "decided" | "applied" | "failed";
+  result: string | null;
+}}
+
+export interface FrameworkIngestion {{
+  id: number;
+  framework: string;
+  version: string;
+  tag: string | null;
+  source_name: string;
+  source_sha256: string;
+  status: "reviewing" | "partially_applied" | "applied";
+  created_by: string;
+  created_at: string;
+  declaration_reset: boolean;
+  requirements: IngestionRow[];
+  decided: number;
+  total: number;
+}}
+
+export interface IngestionApplyResult {{
+  promoted: string[]; rejected: string[]; failed: Array<{{ requirement: string; reason: string }}>;
+  skipped: string[]; status: FrameworkIngestion["status"]; applied_by: string;
+}}
+
 export interface KbCandidateReviewRequest {{
   action: KbReviewAction;
   reviewer: string;
@@ -911,6 +984,7 @@ def main() -> None:
         ("asset_template.schema.json", generate_asset_template_schema()),
         ("clause_simulation.schema.json", generate_simulation_schema()),
         ("eval_dataset.schema.json", generate_eval_dataset_schema()),
+        ("framework_ingestion.schema.json", generate_framework_ingestion_schema()),
     ):
         (schemas_dir / filename).write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
         print(f"Generated: schemas/{filename}")
