@@ -1,0 +1,72 @@
+{
+  "interface": "mcp.list_assets",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "items": {
+          "keys": {
+            "confidence": {
+              "type": [
+                "string"
+              ]
+            },
+            "domain": {
+              "type": [
+                "string"
+              ]
+            },
+            "id": {
+              "type": [
+                "string"
+              ]
+            },
+            "last_reviewed": {
+              "type": [
+                "string"
+              ]
+            },
+            "phase": {
+              "type": [
+                "string"
+              ]
+            },
+            "status": {
+              "type": [
+                "string"
+              ]
+            },
+            "title": {
+              "type": [
+                "string"
+              ]
+            },
+            "type": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        },
+        "type": [
+          "array"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

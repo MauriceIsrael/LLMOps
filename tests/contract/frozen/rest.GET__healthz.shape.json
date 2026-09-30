@@ -1,0 +1,89 @@
+{
+  "interface": "rest.GET /healthz",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "engine_commit": {
+            "type": [
+              "string"
+            ]
+          },
+          "engine_version": {
+            "type": [
+              "string"
+            ]
+          },
+          "kb": {
+            "keys": {
+              "created_at": {
+                "type": [
+                  "string"
+                ]
+              },
+              "payload_sha256": {
+                "type": [
+                  "string"
+                ]
+              },
+              "snapshot_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "source_revision": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "plane": {
+            "type": [
+              "string"
+            ]
+          },
+          "schema_version": {
+            "type": [
+              "string"
+            ]
+          },
+          "service": {
+            "type": [
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

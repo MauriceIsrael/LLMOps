@@ -1,0 +1,156 @@
+{
+  "interface": "mcp.shred_rfp",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "breakdown_by_category": {
+            "type": [
+              "object"
+            ],
+            "values": {
+              "keys": {
+                "covered": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "gap": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "partially_covered": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "total": {
+                  "type": [
+                    "number"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            }
+          },
+          "coverage_rate": {
+            "type": [
+              "number"
+            ]
+          },
+          "covered": {
+            "type": [
+              "number"
+            ]
+          },
+          "gaps": {
+            "type": [
+              "number"
+            ]
+          },
+          "matrix": {
+            "items": {
+              "keys": {
+                "category": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "criticality": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "engagement": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "matched_assets": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "matched_controls": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "rationale": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "section": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "text": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "partially_covered": {
+            "type": [
+              "number"
+            ]
+          },
+          "total_requirements": {
+            "type": [
+              "number"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

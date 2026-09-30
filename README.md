@@ -97,6 +97,12 @@ make test
 # Run linter
 make lint
 
+# Fast local gate: lint + frozen interface contract + unit tests
+make verify
+
+# Install the git pre-push hook running `make verify`
+make hooks
+
 # Run interactive CLI elicitation scan
 poetry run elicit scan --engagement demo-engagement-2027 --max-questions 3
 ```
@@ -106,6 +112,7 @@ poetry run elicit scan --engagement demo-engagement-2027 --max-questions 3
 ## Documentation Links
 
 - **[Knowledge Hub API v1 Contract](docs/contracts/knowledge-hub-api-v1.md)**: Formal contract specification for the Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).
+- **[Versioning](docs/VERSIONING.md)** and **[Deprecation Policy](docs/DEPRECATION.md)**: contract `1.x` guarantees, frozen interface shapes (`tests/contract/frozen/`), deprecation signals.
 - **[Third-Party Integration Guide](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**: Full guide to writing custom renderers (DOCX, PPTX, Web UI) and consuming sealed snapshots.
 - **[External Interface Specification (INTERFACE.md)](docs/INTERFACE.md)**: Technical MCP contract, response envelopes, JSON Schemas, and transport protocols.
 - **[Epistemic Alignment Guide (EPISTEMIC-ALIGNMENT.md)](docs/EPISTEMIC-ALIGNMENT.md)**: Correspondence table between KH confidence and Architecture Studio proof models.

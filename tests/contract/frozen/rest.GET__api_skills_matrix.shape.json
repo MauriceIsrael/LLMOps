@@ -1,0 +1,132 @@
+{
+  "interface": "rest.GET /api/skills/matrix",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "coverage_percentage": {
+                "type": [
+                  "number"
+                ]
+              },
+              "covered_skills_count": {
+                "type": [
+                  "number"
+                ]
+              },
+              "engagement": {
+                "type": [
+                  "string"
+                ]
+              },
+              "external_contractors": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "missing_skills": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "risk_level": {
+                "type": [
+                  "string"
+                ]
+              },
+              "sections": {
+                "type": [
+                  "object"
+                ],
+                "values": {
+                  "keys": {
+                    "covered": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "missing_skills": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "required_skills": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                }
+              },
+              "total_required_skills": {
+                "type": [
+                  "number"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

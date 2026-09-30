@@ -1,0 +1,105 @@
+{
+  "interface": "mcp.get_graph_summary",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "engagements": {
+            "items": {
+              "keys": {
+                "dataset": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "node_counts": {
+                  "keys": {
+                    "Conflict": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "Statement": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "Subject": {
+                      "type": [
+                        "number"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "knowledge": {
+            "keys": {
+              "dataset": {
+                "type": [
+                  "string"
+                ]
+              },
+              "node_counts": {
+                "keys": {
+                  "Asset": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "GlossaryTerm": {
+                    "type": [
+                      "number"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "schema_version": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

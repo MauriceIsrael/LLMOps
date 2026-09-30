@@ -1,0 +1,271 @@
+{
+  "interface": "mcp.get_render_payload",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "active_statements": {
+            "items": {
+              "keys": {
+                "author": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "based_on": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "confidence": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "predicate": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "role": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "section": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "subject": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "subject_direct": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "unit": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "value": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "verbatim": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "engagement": {
+            "type": [
+              "string"
+            ]
+          },
+          "is_provisional": {
+            "type": [
+              "boolean"
+            ]
+          },
+          "maturity_board": {
+            "items": {
+              "keys": {
+                "assigned_role": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "days_at_level": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "dependent_sections": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "is_stalled": {
+                  "type": [
+                    "boolean"
+                  ]
+                },
+                "level": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "name": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "open_question_ref": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "origin": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "subject": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "updated_at": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "open_conflicts": {
+            "items": {
+              "keys": {
+                "arbitrated_by": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "detail": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "kind": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "origin": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "resolution": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          },
+          "uncertainties": {
+            "items": {
+              "keys": {
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "subject": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "text": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "unripe_subjects": {
+            "items": {
+              "type": [
+                "string"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

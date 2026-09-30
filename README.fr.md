@@ -78,8 +78,27 @@ make demo-check
 
 ---
 
+## Développement & Tests
+
+```bash
+# Suite de tests (contrat, unitaires, intégration)
+make test
+
+# Lint (mypy + ruff)
+make lint
+
+# Contrôle local rapide : lint + contrat d'interfaces gelées + tests unitaires
+make verify
+
+# Installer le hook git pre-push qui exécute `make verify`
+make hooks
+```
+
+---
+
 ## Liens vers la Documentation
 
+- **[Versionnement](docs/VERSIONING.md)** et **[Politique de dépréciation](docs/DEPRECATION.md)** : garanties du contrat `1.x`, formes d'interfaces gelées (`tests/contract/frozen/`), signaux de dépréciation.
 - **[Contrat d'API Knowledge Hub v1](docs/contracts/knowledge-hub-api-v1.md)** : Spécification contractuelle pour l'Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).
 - **[Guide d'Intégration Tiers](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**
 - **[Spécification d'Interface Externe (INTERFACE.md)](docs/INTERFACE.md)**

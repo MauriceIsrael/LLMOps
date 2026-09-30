@@ -1,6 +1,7 @@
 """Integration tests for Knowledge REST endpoints (/api/knowledge/search and /api/knowledge/suggestions)."""
 
 import os
+from pathlib import Path
 from unittest.mock import patch
 
 from starlette.testclient import TestClient
@@ -261,8 +262,10 @@ def test_compliance_conformity_snapshot_rest_endpoint():
         assert snap_tuleap["snapshotId"].startswith("tuleap-kh-rrf-iso27001-")
 
 
-def test_compliance_frameworks_endpoints():
+def test_compliance_frameworks_endpoints(request):
     """Vérifie le listing et la configuration des référentiels applicables par engagement."""
+    meta_path = Path("data/engagements") / "test-fw-eng.meta.json"
+    request.addfinalizer(lambda: meta_path.unlink(missing_ok=True))
     with patch.dict(os.environ, {"LLMOPS_AUTH_TOKEN": "secret-test-token"}):
         app = create_starlette_app()
         client = TestClient(app)

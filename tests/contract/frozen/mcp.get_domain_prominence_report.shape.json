@@ -1,0 +1,55 @@
+{
+  "interface": "mcp.get_domain_prominence_report",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "cross_domain_dependencies": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          },
+          "domain_volumes": {
+            "items": {
+              "keys": {
+                "count": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "domain": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

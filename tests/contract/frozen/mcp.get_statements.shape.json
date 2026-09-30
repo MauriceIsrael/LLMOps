@@ -1,0 +1,98 @@
+{
+  "interface": "mcp.get_statements",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "items": {
+          "keys": {
+            "author": {
+              "type": [
+                "string"
+              ]
+            },
+            "based_on": {
+              "items": null,
+              "type": [
+                "array"
+              ]
+            },
+            "confidence": {
+              "type": [
+                "string"
+              ]
+            },
+            "id": {
+              "type": [
+                "string"
+              ]
+            },
+            "predicate": {
+              "type": [
+                "string"
+              ]
+            },
+            "role": {
+              "type": [
+                "string"
+              ]
+            },
+            "section": {
+              "type": [
+                "string"
+              ]
+            },
+            "status": {
+              "type": [
+                "string"
+              ]
+            },
+            "subject": {
+              "type": [
+                "string"
+              ]
+            },
+            "subject_direct": {
+              "type": [
+                "string"
+              ]
+            },
+            "unit": {
+              "type": [
+                "null"
+              ]
+            },
+            "value": {
+              "type": [
+                "string"
+              ]
+            },
+            "verbatim": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        },
+        "type": [
+          "array"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "interface": "mcp.get_subject_trajectory",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "items": {
+          "keys": {
+            "answer_excerpt": {
+              "type": [
+                "string"
+              ]
+            },
+            "level": {
+              "type": [
+                "string"
+              ]
+            },
+            "question": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        },
+        "type": [
+          "array"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

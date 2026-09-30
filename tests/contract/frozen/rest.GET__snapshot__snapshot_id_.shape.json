@@ -1,0 +1,37 @@
+{
+  "interface": "rest.GET /snapshot/{snapshot_id}",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "error": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

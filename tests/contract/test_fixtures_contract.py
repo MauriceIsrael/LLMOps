@@ -104,6 +104,15 @@ def test_fixtures_freshness(tmp_path):
         committed_json = json.loads(committed_file.read_text(encoding="utf-8"))
         generated_json = json.loads(generated_file.read_text(encoding="utf-8"))
 
+        if filename == "knowledge_snapshot.json":
+            # Engagement discovery depends on the .lbug files present locally (untracked
+            # engagements such as scratch databases may exist); only compare the
+            # engagement the fixtures are generated from.
+            for doc in (committed_json, generated_json):
+                doc["data"]["engagements"] = [
+                    e for e in doc["data"]["engagements"] if e["id"] == "nordwave-mcx-2027"
+                ]
+
         def strip_transient(obj):
             if isinstance(obj, dict):
                 return {k: strip_transient(v) for k, v in obj.items() if k not in ("updated_at", "created_at")}

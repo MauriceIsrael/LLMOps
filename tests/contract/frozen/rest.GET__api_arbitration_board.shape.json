@@ -1,0 +1,109 @@
+{
+  "interface": "rest.GET /api/arbitration/board",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "items": {
+              "keys": {
+                "assigned_role": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "days_at_level": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "dependent_sections": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "is_stalled": {
+                  "type": [
+                    "boolean"
+                  ]
+                },
+                "level": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "name": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "open_question_ref": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "origin": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "subject": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "updated_at": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

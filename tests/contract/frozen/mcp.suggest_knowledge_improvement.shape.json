@@ -1,0 +1,62 @@
+{
+  "interface": "mcp.suggest_knowledge_improvement",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "message": {
+            "type": [
+              "string"
+            ]
+          },
+          "notifications_sent": {
+            "items": {
+              "type": [
+                "string"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "owner_notified": {
+            "type": [
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          },
+          "suggestion_id": {
+            "type": [
+              "string"
+            ]
+          },
+          "timestamp": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

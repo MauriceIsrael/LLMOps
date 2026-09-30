@@ -1,0 +1,67 @@
+{
+  "interface": "mcp.get_conflicts",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "items": {
+          "keys": {
+            "arbitrated_by": {
+              "type": [
+                "string"
+              ]
+            },
+            "detail": {
+              "type": [
+                "string"
+              ]
+            },
+            "id": {
+              "type": [
+                "string"
+              ]
+            },
+            "kind": {
+              "type": [
+                "string"
+              ]
+            },
+            "origin": {
+              "type": [
+                "string"
+              ]
+            },
+            "resolution": {
+              "type": [
+                "string"
+              ]
+            },
+            "status": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        },
+        "type": [
+          "array"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

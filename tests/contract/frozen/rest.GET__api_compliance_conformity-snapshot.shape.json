@@ -1,0 +1,162 @@
+{
+  "interface": "rest.GET /api/compliance/conformity-snapshot",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "checksum": {
+            "type": [
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": [
+              "string"
+            ]
+          },
+          "data": {
+            "keys": {
+              "requirements": {
+                "items": {
+                  "keys": {
+                    "appliesTo": {
+                      "keys": {
+                        "lotRefs": {
+                          "items": null,
+                          "type": [
+                            "array"
+                          ]
+                        },
+                        "pbsRefs": {
+                          "items": null,
+                          "type": [
+                            "array"
+                          ]
+                        },
+                        "programRef": {
+                          "type": [
+                            "string"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "domain": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "evidence": {
+                      "items": {
+                        "keys": {
+                          "mode": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "reference": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "source": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "type": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "status": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "verificationModes": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "schemaVersion": {
+            "type": [
+              "string"
+            ]
+          },
+          "snapshotId": {
+            "type": [
+              "string"
+            ]
+          },
+          "sourceSystem": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}
