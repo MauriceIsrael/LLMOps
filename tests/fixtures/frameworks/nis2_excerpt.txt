@@ -1,0 +1,39 @@
+TEST FIXTURE — abridged excerpt of Directive (EU) 2022/2555 (NIS 2), Articles 20, 21 and 23,
+used to test the offline framework ingestion. Not an authoritative copy: always ingest the
+text published in the Official Journal of the European Union.
+
+CHAPTER IV
+CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS
+
+Article 20
+Governance
+1. Member States shall ensure that the management bodies of essential and important entities approve the cybersecurity risk-management measures taken by those entities in order to comply with Article 21, oversee its implementation and can be held liable for infringements by the entities of that Article.
+2. Member States shall ensure that the members of the management bodies of essential and important entities are required to follow training, and shall encourage essential and important entities to offer similar training to their employees on a regular basis, in order that they gain sufficient knowledge and skills to enable them to identify risks and assess cybersecurity risk-management practices and their impact on the services provided by the entity.
+
+Article 21
+Cybersecurity risk-management measures
+1. Member States shall ensure that essential and important entities take appropriate and proportionate technical, operational and organisational measures to manage the risks posed to the security of network and information systems which those entities use for their operations or for the provision of their services, and to prevent or minimise the impact of incidents on recipients of their services and on other services.
+2. The measures referred to in paragraph 1 shall be based on an all-hazards approach that aims to protect network and information systems and the physical environment of those systems from incidents, and shall include at least the following:
+(a) policies on risk analysis and information system security;
+(b) incident handling;
+(c) business continuity, such as backup management and disaster recovery, and crisis management;
+(d) supply chain security, including security-related aspects concerning the relationships between each entity and its direct suppliers or service providers;
+(e) security in network and information systems acquisition, development and maintenance, including vulnerability handling and disclosure;
+(f) policies and procedures to assess the effectiveness of cybersecurity risk-management measures;
+(g) basic cyber hygiene practices and cybersecurity training;
+(h) policies and procedures regarding the use of cryptography and, where appropriate, encryption;
+(i) human resources security, access control policies and asset management;
+(j) the use of multi-factor authentication or continuous authentication solutions, secured voice, video and text communications and secured emergency communication systems within the entity, where appropriate.
+3. Member States shall ensure that, when considering which measures referred to in paragraph 2, point (d), of this Article are appropriate, entities take into account the vulnerabilities specific to each direct supplier and service provider and the overall quality of products and cybersecurity practices of their suppliers and service providers, including their secure development procedures.
+4. Member States shall ensure that an entity that finds that it does not comply with the measures provided for in paragraph 2 takes, without undue delay, all necessary, appropriate and proportionate corrective measures.
+
+Article 22
+Union level coordinated security risk assessments of critical supply chains
+1. The Cooperation Group, in cooperation with the Commission and ENISA, may carry out coordinated security risk assessments of specific critical ICT services, ICT systems or ICT products supply chains.
+
+Article 23
+Reporting obligations
+1. Each Member State shall ensure that essential and important entities notify, without undue delay, its CSIRT or, where applicable, its competent authority of any incident that has a significant impact on the provision of their services.
+2. Where applicable, Member States shall ensure that essential and important entities communicate, without undue delay, to the recipients of their services that are potentially affected by a significant cyber threat any measures or remedies that those recipients are able to take in response to that threat.
+3. An incident shall be considered to be significant if it has caused or is capable of causing severe operational disruption of the services or financial loss for the entity concerned, or if it has affected or is capable of affecting other natural or legal persons by causing considerable material or non-material damage.
+4. Member States shall ensure that, for the purpose of notification under paragraph 1, the entities concerned submit to the CSIRT or, where applicable, the competent authority an early warning within 24 hours of becoming aware of the significant incident, an incident notification within 72 hours, and a final report not later than one month after the submission of the incident notification.

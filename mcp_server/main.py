@@ -25,6 +25,8 @@ from mcp_server.core.auth import (
     set_current_caller,
 )
 from mcp_server.core.config import server_config
+from mcp_server.core.envelope import invalid_argument_response
+from mcp_server.core.version import CONTRACT_VERSION
 from mcp_server.engagement.tools import (
     get_board,
     get_conflicts,
@@ -38,24 +40,32 @@ from mcp_server.engagement.tools import (
     get_subject_trajectory,
 )
 from mcp_server.knowledge.tools import (
+    _suggest_knowledge_improvement,
+    check_option,
     generate_zero_draft_hld,
     get_asset,
     get_assets,
     get_compliance_matrix,
     get_compliance_trail,
     get_decision_trail,
+    get_doctrine_context,
+    get_framework_coverage,
     get_glossary_term,
     get_graph_summary,
+    get_kb_candidate,
     get_principles_for,
     get_rfp_compliance_matrix,
     get_skills_matrix,
     list_assets,
     list_controls,
     list_frameworks,
+    list_kb_candidates,
     list_skills,
     query_graph,
+    review_kb_candidate,
     search_assets,
     shred_rfp,
+    submit_kb_candidate,
     suggest_knowledge_improvement,
     trigger_rfp_elicitation,
 )
@@ -84,6 +94,13 @@ mcp.tool()(shred_rfp)
 mcp.tool()(generate_zero_draft_hld)
 mcp.tool()(get_rfp_compliance_matrix)
 mcp.tool()(trigger_rfp_elicitation)
+mcp.tool()(get_doctrine_context)
+mcp.tool()(check_option)
+mcp.tool()(submit_kb_candidate)
+mcp.tool()(list_kb_candidates)
+mcp.tool()(get_kb_candidate)
+mcp.tool()(review_kb_candidate)
+mcp.tool()(get_framework_coverage)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -269,7 +286,7 @@ def create_starlette_app() -> Starlette:
             {
                 "status": "ok",
                 "plane": server_config.plane,
-                "schema_version": "1.0",
+                "schema_version": CONTRACT_VERSION,
                 "service": "llmops-mcp-server",
                 "engine_version": "0.1.0",
                 "engine_commit": engine_commit,
@@ -305,7 +322,7 @@ def create_starlette_app() -> Starlette:
                 {
                     "status": "ready",
                     "plane": server_config.plane,
-                    "schema_version": "1.0",
+                    "schema_version": CONTRACT_VERSION,
                     "asset_count": asset_count,
                     "backend": backend,
                 },
@@ -469,14 +486,23 @@ def create_starlette_app() -> Starlette:
             or request.query_params.get("engagement")
             or "default"
         ).strip()
-        from pipelines.compliance_mapper import get_applicable_frameworks
+        from pipelines.compliance_mapper import (
+            compute_framework_coverage,
+            get_applicable_frameworks,
+        )
         fws = get_applicable_frameworks(engagement=engagement)
-        return JSONResponse({
+        payload: dict[str, Any] = {
             "status": "ok",
             "engagement": engagement,
             "applicable_frameworks": fws,
             "count": len(fws),
-        }, status_code=200)
+        }
+        # Contract 1.3 (optional field): coverage of each applicable framework by the KB.
+        try:
+            payload["coverage"] = compute_framework_coverage(fws, server_config.kb_dir)
+        except Exception:
+            pass
+        return JSONResponse(payload, status_code=200)
 
     async def handle_compliance_applicable_frameworks_put(request):
         """Définit la liste des référentiels applicables pour un engagement donné."""
@@ -518,7 +544,11 @@ def create_starlette_app() -> Starlette:
         contact_email = body.get("contact_email")
         source_engagement = body.get("source_engagement")
 
-        res = suggest_knowledge_improvement(
+        source_system = str(body.get("source_system") or "document-studio").strip()
+        if source_system not in ("archinex", "document-studio", "mcp", "cli-ingestion"):
+            source_system = "document-studio"
+        res = _suggest_knowledge_improvement(
+            system=source_system,
             title=title,
             rationale=rationale,
             suggested_change=suggested_change,
@@ -753,6 +783,114 @@ def create_starlette_app() -> Starlette:
         status_code = 200 if res.get("status") == "ok" else 400
         return JSONResponse(res, status_code=status_code)
 
+    def _query_list(request, name: str) -> list[str]:
+        """List query parameter: repeated (?x=a&x=b) and/or comma-separated (?x=a,b)."""
+        values: list[str] = []
+        for raw in request.query_params.getlist(name):
+            values.extend(v.strip() for v in raw.split(",") if v.strip())
+        return values
+
+    async def handle_knowledge_context(request):
+        """Paquet de doctrine applicable à un sujet (déterministe, sans LLM)."""
+        params = request.query_params
+        try:
+            max_items = int(params.get("max_items", "20"))
+            max_chars = int(params.get("max_chars", "8000"))
+        except ValueError:
+            return JSONResponse(
+                invalid_argument_response("max_items", "'max_items' and 'max_chars' must be integers."),
+                status_code=400,
+            )
+        res = get_doctrine_context(
+            subject=params.get("subject", ""),
+            domains=_query_list(request, "domains"),
+            frameworks=_query_list(request, "frameworks"),
+            phase=params.get("phase"),
+            max_items=max_items,
+            max_chars=max_chars,
+        )
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
+    async def handle_knowledge_check(request):
+        """Juge d'option : clauses de contrôle structurées de la doctrine (déterministe, sans LLM)."""
+        try:
+            body = await request.json()
+        except Exception:
+            body = None
+        if not isinstance(body, dict):
+            return JSONResponse(
+                invalid_argument_response("body", "Le corps de requête doit être un objet JSON"),
+                status_code=400,
+            )
+        res = check_option(
+            option=body.get("option"),
+            subject=body.get("subject"),
+            domains=body.get("domains"),
+            frameworks=body.get("frameworks"),
+        )
+        status_code = 200 if res.get("status") == "ok" else 400
+        return JSONResponse(res, status_code=status_code)
+
+    def _candidate_status_code(res: dict, ok_code: int = 200) -> int:
+        status = res.get("status")
+        if status == "ok":
+            return ok_code
+        if status == "not_found":
+            return 404
+        if status == "unauthorized":
+            return 403
+        if status == "invalid_argument":
+            return 409 if res.get("conflict") else 400
+        return 500
+
+    async def handle_candidates_create(request):
+        """Soumission d'un candidat d'enrichissement de la base (contrôles automatiques immédiats)."""
+        try:
+            body = await request.json()
+        except Exception:
+            body = None
+        if not isinstance(body, dict):
+            return JSONResponse(
+                invalid_argument_response("body", "Le corps de requête doit être un objet JSON"), status_code=400
+            )
+        res = submit_kb_candidate(body)
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_candidates_list(request):
+        """File des candidats (filtres : status, source, domain, engagement)."""
+        params = request.query_params
+        res = list_kb_candidates(
+            status=params.get("status") or None,
+            source=params.get("source") or None,
+            domain=params.get("domain") or None,
+            engagement=params.get("engagement") or None,
+        )
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_candidate_get(request):
+        res = get_kb_candidate(request.path_params["candidate_id"])
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_candidate_review(request):
+        """Revue d'un candidat (scope de jeton kb:review requis)."""
+        try:
+            body = await request.json()
+        except Exception:
+            body = None
+        if not isinstance(body, dict):
+            return JSONResponse(
+                invalid_argument_response("body", "Le corps de requête doit être un objet JSON"), status_code=400
+            )
+        res = review_kb_candidate(
+            request.path_params["candidate_id"],
+            action=str(body.get("action") or ""),
+            reviewer=str(body.get("reviewer") or ""),
+            reason=body.get("reason"),
+            amended_content=body.get("amended_content"),
+        )
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_skills_list(request):
         """Référentiel canonique des compétences d'ingénierie et niveaux de criticité."""
         domain = request.query_params.get("domain")
@@ -767,7 +905,7 @@ def create_starlette_app() -> Starlette:
             or request.query_params.get("engagement")
             or "default"
         ).strip()
-        blueprint_path = request.query_params.get("blueprint_path", "data/kb/blueprints/BLU-hla-mcx.yaml")
+        blueprint_path = request.query_params.get("blueprint_path") or None
         res = get_skills_matrix(engagement=engagement, blueprint_path=blueprint_path)
         status_code = 200 if res.get("status") == "ok" else 400
         return JSONResponse(res, status_code=status_code)
@@ -799,6 +937,12 @@ def create_starlette_app() -> Starlette:
             Route("/api/arbitration/board", endpoint=handle_arbitration_board, methods=["GET"]),
             Route("/api/arbitration/conflicts", endpoint=handle_arbitration_conflicts, methods=["GET"]),
             Route("/api/arbitration/statements", endpoint=handle_arbitration_statements, methods=["GET"]),
+            Route("/api/knowledge/context", endpoint=handle_knowledge_context, methods=["GET"]),
+            Route("/api/knowledge/check", endpoint=handle_knowledge_check, methods=["POST"]),
+            Route("/api/knowledge/candidates", endpoint=handle_candidates_create, methods=["POST"]),
+            Route("/api/knowledge/candidates", endpoint=handle_candidates_list, methods=["GET"]),
+            Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_get, methods=["GET"]),
+            Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_review, methods=["PATCH"]),
             Route("/api/skills", endpoint=handle_skills_list, methods=["GET"]),
             Route("/api/skills/matrix", endpoint=handle_skills_matrix, methods=["GET"]),
         ],

@@ -1,0 +1,309 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KbCandidate",
+  "description": "Knowledge base candidate: proposed change going through automatic checks, human review, promotion and publication.",
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "asset_type",
+    "domain",
+    "title",
+    "rationale",
+    "proposed_content",
+    "source",
+    "evidence",
+    "status",
+    "checks",
+    "review",
+    "second_review_required",
+    "second_review",
+    "assigned_owner",
+    "history",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^CAND-\\d{8}-\\d{4}$"
+    },
+    "kind": {
+      "enum": [
+        "new_asset",
+        "amendment",
+        "rex",
+        "framework_ingestion"
+      ]
+    },
+    "target_asset_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "asset_type": {
+      "enum": [
+        "principle",
+        "pattern",
+        "decision",
+        "control",
+        "glossary",
+        null
+      ]
+    },
+    "domain": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rationale": {
+      "type": "string"
+    },
+    "proposed_content": {
+      "type": "string"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "system",
+        "production_mode"
+      ],
+      "properties": {
+        "system": {
+          "enum": [
+            "archinex",
+            "document-studio",
+            "mcp",
+            "cli-ingestion"
+          ]
+        },
+        "engagement": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decision_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "author": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contact": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "production_mode": {
+          "enum": [
+            "human-authored",
+            "llm-proposed-human-approved",
+            "llm-derived"
+          ]
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "measure",
+              "audit",
+              "engagement",
+              "vendor-doc"
+            ]
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "proposed",
+        "checks_failed",
+        "in_review",
+        "accepted",
+        "rejected",
+        "published"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "status",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail",
+              "warn"
+            ]
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "review": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "reviewer",
+        "action",
+        "at"
+      ],
+      "properties": {
+        "reviewer": {
+          "type": "string"
+        },
+        "action": {
+          "enum": [
+            "accept",
+            "amend",
+            "reject"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "at": {
+          "type": "string"
+        }
+      }
+    },
+    "second_review_required": {
+      "type": "boolean"
+    },
+    "second_review": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "reviewer",
+        "action",
+        "at"
+      ],
+      "properties": {
+        "reviewer": {
+          "type": "string"
+        },
+        "action": {
+          "enum": [
+            "accept",
+            "amend",
+            "reject"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "at": {
+          "type": "string"
+        }
+      }
+    },
+    "assigned_owner": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "at",
+          "actor",
+          "event"
+        ],
+        "properties": {
+          "at": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "promoted": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "asset_id": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "string"
+        }
+      }
+    },
+    "published": {
+      "type": "object",
+      "properties": {
+        "snapshot_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "at": {
+          "type": "string"
+        }
+      }
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  }
+}

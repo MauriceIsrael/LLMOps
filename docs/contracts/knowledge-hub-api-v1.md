@@ -515,6 +515,148 @@ Retourne un instantane scelle par son identifiant unique (meme format que sectio
 ---
 
 
+## 5. Ajouts v1.x
+
+Les versions mineures n'ajoutent que des interfaces ou des champs **optionnels** (voir [`VERSIONING.md`](../VERSIONING.md)). Les interfaces `1.0` restent gelées (`tests/contract/frozen/`). La version courante est exposée par `GET /health` et `get_graph_summary` (`schema_version`) ; le format de l'instantané scellé reste en `schema_version: "1.0"`.
+
+### 5.1 Contrat 1.1 — Paquet de doctrine et juge d'option
+
+Deux interfaces **100 % déterministes** (aucun LLM côté serveur) destinées aux agents consommateurs (Archinex) : *« quelle doctrine s'applique à ce sujet ? »* et *« cette option respecte-t-elle la doctrine ? »*. Seuls les actifs `status: active` sont servis.
+
+#### 5.1.1 `GET /api/knowledge/context` — outil MCP `get_doctrine_context`
+
+| Paramètre | Type | Défaut | Rôle |
+|---|---|---|---|
+| `subject` | string (requis) | — | Texte libre décrivant le sujet |
+| `domains` | list[str] | `[]` | Filtre sur le `domain` des actifs (un domaine parent couvre ses sous-domaines `parent/enfant`) |
+| `frameworks` | list[str] | `[]` | Référentiels exigés : **tous** leurs contrôles actifs sont inclus (`required: true`) |
+| `phase` | str | `null` | Filtre `phase` (`BID`, `BUILD`, `RUN`) |
+| `max_items` | int (1–200) | `20` | Nombre maximum d'éléments |
+| `max_chars` | int (200–100000) | `8000` | Budget total des extraits |
+
+En REST, les listes s'écrivent `?frameworks=NIS2&frameworks=SecNumCloud` ou `?frameworks=NIS2,SecNumCloud`.
+
+Classement : correspondance de termes (titre, `terms`, domaine, `applicability`, corps ; normalisation minuscules/accents/pluriels et synonymes du glossaire — entrées « A / B » et [`data/kb/glossary/synonyms.yaml`](../../data/kb/glossary/synonyms.yaml)), seuil de pertinence 0,2 ; ordre **principe > contrôle exigé > pattern > ADR > autre contrôle**, puis pertinence, puis identifiant. `excerpt` = section la plus pertinente, coupée proprement ; la somme des extraits ne dépasse pas `max_chars` ; `truncated: true` si un élément a été omis ou coupé.
+
+```json
+{
+  "status": "ok",
+  "count": 12,
+  "data": {
+    "items": [
+      {
+        "typed_id": "principle:P-002", "id": "P-002", "type": "principle", "title": "Human in the loop",
+        "status": "active", "confidence": "verified", "domain": ["network-automation", "security"],
+        "excerpt": "Detection is automatic, decision is human, execution is automated. …",
+        "source_ref": "data/kb/principles/P-002.md", "relevance": 0.43, "has_checks": true,
+        "framework": null, "required": false
+      }
+    ],
+    "truncated": false,
+    "snapshot_id": "snapshot-2026-09-29-…"
+  }
+}
+```
+
+Schéma : [`schemas/doctrine_context.schema.json`](../../schemas/doctrine_context.schema.json) — types `DoctrineContext*` de [`schemas/types.ts`](../../schemas/types.ts).
+
+#### 5.1.2 `POST /api/knowledge/check` — outil MCP `check_option`
+
+Corps : `{"option": {"title", "description", "statements": [{"subject", "predicate", "value"}]}, "subject", "domains", "frameworks"}` (seul `option.title` est requis).
+
+Le juge évalue les **clauses de contrôle structurées** (`checks`) du front-matter des actifs actifs :
+
+```yaml
+checks_status: draft          # draft | validated (seul un relecteur humain valide)
+checks:
+  - id: P-002-C1
+    kind: requires            # requires | forbids
+    when: {terms_any: [closed-loop, auto-remediation]}     # et/ou terms_all
+    expect: {terms_any: [human-approval, supervised]}      # requires uniquement
+    message: "Toute boucle fermée doit rester supervisée par un humain."
+```
+
+- `forbids` : si `when` correspond → `violates` ; `requires` : si `when` correspond → `supports` si `expect` correspond, sinon `violates` ; sinon la clause ne s'applique pas.
+- Correspondance lexicale sur `title`, `description` et les `statements`, même normalisation que 5.1.1 ; une occurrence précédée d'une négation (`no`, `not`, `without`, `sans`, `pas`…) ne compte pas.
+- Un actif pertinent sans clause applicable → `unassessed` (`check_id: null`) : c'est au vérificateur côté client de juger.
+- **Tout contrôle actif d'un référentiel de `frameworks` est toujours retourné**, au minimum en `unassessed`.
+- Ordre : `violates`, `supports`, `unassessed`, puis priorité de type et identifiant. Champ additionnel `check_status` (`draft` | `validated` | `null`).
+
+```json
+{
+  "status": "ok",
+  "count": 33,
+  "data": {
+    "verdicts": [
+      {"typed_id": "principle:P-002", "check_id": "P-002-C1", "verdict": "violates",
+       "message": "Any closed loop must stay supervised: …", "matched_terms": ["closed loop", "auto-remediation"],
+       "excerpt": "…", "source_ref": "data/kb/principles/P-002.md", "check_status": "draft"},
+      {"typed_id": "control:NIS2-ART21-2A", "check_id": null, "verdict": "unassessed", "message": null,
+       "matched_terms": [], "excerpt": "…", "source_ref": "data/kb/controls/NIS2/NIS2-ART21-2A.md", "check_status": null}
+    ],
+    "summary": {"supports": 0, "violates": 3, "unassessed": 30},
+    "method": "deterministic-checks-v1",
+    "snapshot_id": "snapshot-2026-09-29-…"
+  }
+}
+```
+
+Schéma : [`schemas/check_result.schema.json`](../../schemas/check_result.schema.json) — types `CheckOptionRequest`, `CheckResult`, `CheckVerdict` de [`schemas/types.ts`](../../schemas/types.ts).
+
+> Les clauses actuellement publiées (P-001, P-002, P-009, P-012, P-015) sont des **brouillons** (`checks_status: draft`) à valider par l'expert via le cycle de revue de la base. Évaluation : `make eval-check` (rappel des violations attendues sur `tests/evals/datasets/check_option_v1.jsonl`, annotations à valider).
+
+Erreurs : `400` + `invalid_argument` (`subject`, `max_items`, `max_chars`, `domains`, `frameworks`, `option`, `option.title`, `option.statements`).
+
+---
+
+### 5.2 Contrat 1.2 — Cycle d'enrichissement de la base (candidats)
+
+Toute connaissance nouvelle passe par une **file persistée**, des **contrôles automatiques déterministes** et une **revue humaine** avant publication. Modèle : [`schemas/kb_candidate.schema.json`](../../schemas/kb_candidate.schema.json) (types `KbCandidate*` de [`schemas/types.ts`](../../schemas/types.ts)).
+
+| Route | Outil MCP | Rôle | Codes |
+|---|---|---|---|
+| `POST /api/knowledge/candidates` | `submit_kb_candidate` | Créer un candidat ; les contrôles s'exécutent immédiatement | `201`, `400` |
+| `GET /api/knowledge/candidates?status=&source=&domain=&engagement=` | `list_kb_candidates` | Lister (plus récents d'abord) | `200` |
+| `GET /api/knowledge/candidates/{id}` | `get_kb_candidate` | Détail (contrôles, revues, historique) | `200`, `404` |
+| `PATCH /api/knowledge/candidates/{id}` | `review_kb_candidate` | Revue `{action: accept\|amend\|reject, reviewer, reason, amended_content?}` — **scope `kb:review` requis** | `200`, `400`, `403`, `404`, `409` |
+
+Cycle : `proposed` → (`checks_failed` \| `in_review`) → `accepted` \| `rejected` → `published`.
+
+- **Contrôles** (`checks[]`, `pass | fail | warn`) : `schema` (gabarit et front-matter du type), `references` (actifs cités existants), `duplicate` (warn, suggère un `amendment`), `anonymization` (**fail** : liste noire `data/kb/anonymization_denylist.txt`, adresses IPv4/IPv6 et CIDR hors plages de documentation ; warn : volumes identifiants), `doctrine_conflict` (warn : `check_option` sur le contenu ; l'acceptation exige alors `supersedes` ou un motif d'exception), `llm_unreviewed` (warn si `production_mode: llm-derived`), `previously_rejected` (warn). Un seul `fail` → `checks_failed`.
+- **Routage** : `assigned_owner` d'après le domaine (`data/kb/owners.yaml`, un sous-domaine hérite de son parent), notification Discord / ntfy / e-mail (SMTP désactivé par défaut). Relance au-delà de 5 jours ouvrés : `kb remind`.
+- **Revue** : le relecteur est un propriétaire déclaré ; motif obligatoire pour `amend` et `reject` ; `amend` = acceptation d'un contenu modifié (contrôles rejoués). **Seconde revue** par un **autre** propriétaire si le candidat touche un principe ou contient `supersedes`. Le jeton public de démo ne peut pas relire.
+- **Promotion / publication** (CLI hors ligne, mainteneur) : `kb promote <id>` écrit l'actif dans `data/kb/` avec `status: active`, `confidence` **calculée depuis les preuves** (mesure/audit ou ≥ 2 engagements → `verified` ; doc éditeur → `vendor-stated` ; sinon `assumed` ; `llm-derived` non relu → non publiable), `last_reviewed`, `validated_by`, `validated_at` ; `kb publish` réingère, scelle un instantané, écrit `data/kb/CHANGELOG.md`, notifie les consommateurs et passe les candidats en `published`. Le commit git reste manuel.
+- Pour un non-relecteur, le contenu d'un candidat bloqué par `anonymization` est masqué.
+
+**Compatibilité** : `suggest_knowledge_improvement` et `POST /api/knowledge/suggestions` gardent la même entrée et la même sortie ; en interne ils créent un candidat `kind: rex`, et `data` gagne le champ **optionnel** `candidate_id`. Champ d'entrée REST optionnel `source_system` (`document-studio` par défaut). La notification historique est conservée.
+
+---
+
+### 5.3 Contrat 1.3 — Couverture réglementaire
+
+- **Outil MCP** `get_framework_coverage(frameworks: list[str])` et **champ optionnel** `coverage` de `GET /api/compliance/frameworks/applicable` (la forme existante `status`, `engagement`, `applicable_frameworks`, `count` est inchangée). Schéma : [`schemas/framework_coverage.schema.json`](../../schemas/framework_coverage.schema.json).
+
+```json
+"coverage": {
+  "NIS2": {
+    "status": "covered | partial | missing",
+    "version": "2022/2555",
+    "expected": 19,
+    "present": 10,
+    "validated": 0,
+    "missing_ids": ["NIS2-ART20-1", "…"],
+    "declared_by": null,
+    "provisional": true,
+    "manifest": true
+  }
+}
+```
+
+- `covered` exige que toutes les exigences attendues du manifeste `data/kb/controls/<FW>/_manifest.yaml` (généré depuis une source par `kb ingest-framework`) soient présentes, `active`, validées (`validated_by`) **et** que l'expert ait déclaré la couverture (`kb declare-coverage`, refusé sinon). Un référentiel sans contrôle dans la base → `missing` ; un manifeste absent ou provisoire → `expected: null` ou `provisional: true`, jamais `covered`. Rapport : [`docs/COVERAGE.md`](../COVERAGE.md).
+- Chaîne hors ligne (mainteneur) : `kb ingest-framework` → `kb suggest-links` (LLM local optionnel, sorties `llm-derived`) → `kb review-sheet` → `kb apply-review` → `kb declare-coverage`. Un contrôle peut déclarer `satisfied_by: [P-…, PAT-…]` (relation `IMPLEMENTS` ingérée dans le graphe) et `covers: [...]` (exigences qu'il couvre).
+
+---
+
 ## 4. Oracles & Vecteurs de Test Partagés
 
 Afin de garantir une interopérabilité sans faille entre implémentations Python et TypeScript, les vecteurs de référence suivants sont tenus à disposition dans le dépôt :

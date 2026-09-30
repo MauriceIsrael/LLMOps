@@ -1,0 +1,25 @@
+# Engagement profile of the reference demo (plan L3 §6.4): engagement-specific settings
+# moved out of the elicitation engine. See tools/elicitation/profile.py.
+default_subject: mcx-services
+default_role: mcx-service-architect
+decomposition_route: mcx-service-architect
+mailbox_terms:
+  - mcx-services
+roster:
+  mcx-service-architect: amina
+  mobile-core-architect: rui
+  chief-architect: sofia
+projected_sequence:
+  - "1. Frame L1 subjects: mcx-services, mobile-core, transport"
+  - "2. Decompose mcx-services -> group-management, floor-control, media-distribution, lmr-interworking"
+  - "3. Frame and decide L2/L3 parameters for child MCX services & core QoS profile"
+  - "4. Specify L4 QoS pre-emption and finalise section readiness"
+harvest_candidates:
+  - title: "MCX Service Layer Decomposition (4 sub-domains)"
+    kind: decomposition
+    why: "First occurrence of 3GPP MC service layer decomposition on mission-critical voice."
+    source: decomposition
+  - title: "Element manager bulk export limit (2000 objects)"
+    kind: pattern
+    why: "General limitation observed on vendor element manager interface."
+    source: external-contribution

@@ -5,61 +5,23 @@ Per Workorder v2 §3.1 & User Directive:
 - Calculates SHA-256 hashes and generates docs/eval/SOURCES.md
 """
 
-import hashlib
 import json
-import re
-import zipfile
+import sys
 from pathlib import Path
 
+ROOT_DIR = Path(__file__).parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+# The extraction helpers live in pipelines/frameworks/extract.py (shared with `kb ingest-framework`).
+from pipelines.frameworks.extract import (  # noqa: E402
+    compute_hash,
+    extract_text_from_doc,
+    extract_text_from_docx,
+    format_file_size,
+)
+
 CONFIG_PATH = Path(__file__).parent / "eval_config.json"
-
-
-def compute_hash(file_path: Path) -> str:
-    hasher = hashlib.sha256()
-    with open(file_path, "rb") as f:
-        for chunk in iter(lambda: f.read(65536), b""):
-            hasher.update(chunk)
-    return hasher.hexdigest()
-
-
-def format_file_size(size_bytes: int) -> str:
-    if size_bytes >= 1048576:
-        return f"{size_bytes / 1048576:.1f} MB"
-    elif size_bytes >= 1024:
-        return f"{size_bytes / 1024:.1f} KB"
-    return f"{size_bytes} B"
-
-
-def extract_text_from_docx(file_path: Path) -> str:
-    """Extracts text from .docx file by parsing word/document.xml or python-docx."""
-    try:
-        import docx
-
-        doc = docx.Document(file_path)
-        paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
-        return "\n".join(paragraphs)
-    except Exception:
-        # Fallback to XML extraction from zip container
-        try:
-            with zipfile.ZipFile(file_path, "r") as z:
-                xml_content = z.read("word/document.xml").decode("utf-8", errors="ignore")
-                text = re.sub(r"<[^>]+>", " ", xml_content)
-                return re.sub(r"\s+", " ", text).strip()
-        except Exception as e:
-            print(f"Error extracting docx {file_path.name}: {e}")
-            return ""
-
-
-def extract_text_from_doc(file_path: Path) -> str:
-    """Extracts readable text strings from legacy .doc binary files."""
-    raw_data = file_path.read_bytes()
-    # Extract printable text strings
-    text_chunks = re.findall(rb"[\x20-\x7e\n\r\t]{4,}", raw_data)
-    decoded = [c.decode("ascii", errors="ignore") for c in text_chunks]
-    full_text = "\n".join(decoded)
-    # Filter noise
-    lines = [line.strip() for line in full_text.splitlines() if len(line.strip()) > 10]
-    return "\n".join(lines)
 
 
 def main() -> None:

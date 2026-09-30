@@ -11,7 +11,10 @@ from tools.elicitation.vocabulary_protector import map_material_vocabulary
 class ContributionRepository:
     """Gestionnaire de stockage et de tri des contributions spontanées."""
 
-    def __init__(self, engagement: str = "nordwave-mcx-2027", base_dir: str | Path = "artifacts") -> None:
+    def __init__(self, engagement: str | None = None, base_dir: str | Path = "artifacts") -> None:
+        from mcp_server.core.config import require_engagement
+
+        engagement = require_engagement(engagement)
         self.engagement = engagement
         self.dir = Path(base_dir) / engagement / "contributions"
         self.dir.mkdir(parents=True, exist_ok=True)

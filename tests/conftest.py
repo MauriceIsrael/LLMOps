@@ -17,6 +17,7 @@ the end, and removes the untracked (non-ignored) files it created there, so that
 artefacts, run the scenario test directly and commit the result.
 """
 
+import os
 import subprocess
 from collections.abc import Generator
 from pathlib import Path
@@ -24,6 +25,11 @@ from pathlib import Path
 import pytest
 
 ROOT_DIR = Path(__file__).parent.parent
+
+# The code hard-codes no project: the reference demo engagement and blueprint are
+# configured like in `make demo` (tests are allowed to name the demo project).
+os.environ.setdefault("LLMOPS_ENGAGEMENT", "nordwave-mcx-2027")
+os.environ.setdefault("LLMOPS_BLUEPRINT", "BLU-hla-mcx")
 
 _GUARDED_PATHS = (
     "data/*.lbug",
@@ -63,3 +69,38 @@ def _preserve_working_tree() -> Generator[None, None, None]:
             path.write_bytes(content)
     for rel in _git_ls("--others", "--exclude-standard") - untracked_before:
         (ROOT_DIR / rel).unlink(missing_ok=True)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _isolated_candidate_queue(tmp_path_factory: pytest.TempPathFactory) -> Generator[None, None, None]:
+    """KB candidates created by tests (e.g. through suggestions) go to a temporary queue."""
+    previous = os.environ.get("CANDIDATES_DIR")
+    os.environ["CANDIDATES_DIR"] = str(tmp_path_factory.mktemp("candidates"))
+    yield
+    if previous is None:
+        os.environ.pop("CANDIDATES_DIR", None)
+    else:
+        os.environ["CANDIDATES_DIR"] = previous
+
+
+@pytest.fixture
+def scripted_interpretation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Declare a scripted interpretation (tests/fixtures/elicitation/) for engagements.
+
+    Usage: ``scripted_interpretation("my-engagement")`` — the answers of that engagement
+    then become candidate statements, as a reference scenario would script them.
+    """
+    import shutil
+
+    examples = tmp_path / "examples"
+    monkeypatch.setenv("LLMOPS_EXAMPLES_DIR", str(examples))
+    script = ROOT_DIR / "tests" / "fixtures" / "elicitation" / "verbatim_statement_script.yaml"
+
+    def declare(*engagements: str) -> Path:
+        for engagement in engagements:
+            target = examples / engagement
+            target.mkdir(parents=True, exist_ok=True)
+            shutil.copy(script, target / "scripted_interpretations.yaml")
+        return examples
+
+    return declare

@@ -36,9 +36,15 @@ class ServerConfig(BaseSettings):
         default=Path("data/engagements"),
         validation_alias="LLMOPS_ENGAGEMENTS_DIR",
     )
+    # Default engagement and blueprint of this deployment. No project is hard-coded: they
+    # come from the environment or .env (the demo sets them, see Makefile / Dockerfile).
     engagement: str | None = Field(
-        default="nordwave-mcx-2027",
+        default=None,
         validation_alias="LLMOPS_ENGAGEMENT",
+    )
+    blueprint: str | None = Field(
+        default=None,
+        validation_alias="LLMOPS_BLUEPRINT",
     )
     kb_dir: Path = Field(
         default=Path("data/kb"),
@@ -109,3 +115,53 @@ class ServerConfig(BaseSettings):
 
 
 server_config = ServerConfig()
+
+
+class DeploymentDefaultMissing(ValueError):  # noqa: N818
+    """A command or tool needs an engagement / blueprint and none is configured."""
+
+
+def resolve_engagement(engagement: str | None = None) -> str | None:
+    """Explicit engagement, else ``LLMOPS_ENGAGEMENT`` (environment, then .env); None if unset."""
+    import os
+
+    return engagement or os.getenv("LLMOPS_ENGAGEMENT") or server_config.engagement or None
+
+
+def require_engagement(engagement: str | None = None) -> str:
+    eng = resolve_engagement(engagement)
+    if not eng:
+        raise DeploymentDefaultMissing(
+            "No engagement given: pass one explicitly or set LLMOPS_ENGAGEMENT (environment or .env)."
+        )
+    return eng
+
+
+def resolve_blueprint_path(blueprint: str | None = None) -> Path | None:
+    """Blueprint file from an explicit id or path, else ``LLMOPS_BLUEPRINT``; None if unset.
+
+    An identifier (``BLU-...``) resolves to ``<kb_dir>/blueprints/<id>.yaml``.
+    """
+    import os
+
+    value = blueprint or os.getenv("LLMOPS_BLUEPRINT") or server_config.blueprint
+    if not value:
+        return None
+    if value.endswith((".yaml", ".yml")) or "/" in value:
+        return Path(value)
+    return Path(server_config.kb_dir) / "blueprints" / f"{value}.yaml"
+
+
+def require_blueprint_path(blueprint: str | None = None) -> Path:
+    path = resolve_blueprint_path(blueprint)
+    if path is None:
+        raise DeploymentDefaultMissing(
+            "No blueprint given: pass one explicitly or set LLMOPS_BLUEPRINT (environment or .env)."
+        )
+    return path
+
+
+def resolve_blueprint_id(blueprint: str | None = None) -> str | None:
+    """Blueprint identifier (file stem) from an explicit id or path, else ``LLMOPS_BLUEPRINT``."""
+    path = resolve_blueprint_path(blueprint)
+    return path.stem if path else None

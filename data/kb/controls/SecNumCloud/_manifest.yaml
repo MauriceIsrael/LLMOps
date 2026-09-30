@@ -1,0 +1,14 @@
+# Coverage manifest of SecNumCloud (plan L3 §6.1). PROVISIONAL (no source ingested yet): replace it by running `kb ingest-framework` on the source.
+# `coverage_declared_by` is only set by the expert through `kb declare-coverage`.
+framework: SecNumCloud
+version: '3.2'
+title: ANSSI SecNumCloud 3.2
+source:
+  status: missing
+  expected: ANSSI SecNumCloud requirements repository v3.2 (PDF)
+  note: Expected requirements unknown until the source is ingested (a splitter must be written for its numbering). The current KB controls (SNC-REQ-*) use internal identifiers.
+source_sha256: null
+provisional: true
+expected_requirements: null
+coverage_declared_by: null
+coverage_declared_at: null

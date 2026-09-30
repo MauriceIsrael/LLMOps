@@ -24,6 +24,8 @@ data/snapshots/*
 *.wal
 graph_proc/
 data/suggestions/
+data/candidates/
+data/staging/
 
 # DeepEval / Promptfoo caches
 .deepeval/
@@ -34,11 +36,10 @@ data/suggestions/
 .coverage
 htmlcov/
 
-# Generated Artifacts & Local Projects
-/artifacts/*
-!/artifacts/nordwave-mcx-2027/
-/projects/*
-!/projects/nordwave-mcx-2027/
+# Generated Artifacts & Local Projects (engine outputs and test outputs; the reference
+# demo lives in examples/, see examples/README.md)
+/artifacts/
+/projects/
 data/project/
 Arborescence exemple/
 

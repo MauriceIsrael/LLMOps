@@ -1,0 +1,14 @@
+# Coverage manifest of 3GPP (plan L3 §6.1). PROVISIONAL (no source ingested yet): replace it by running `kb ingest-framework` on the source.
+# `coverage_declared_by` is only set by the expert through `kb declare-coverage`.
+framework: 3GPP
+version: Rel-18
+title: 3GPP Technical Specifications
+source:
+  status: missing
+  expected: The 3GPP specifications behind the KB controls (TS 33.179, TS 33.501, TS 33.926, TS 28.104, TS 29.522)
+  note: 'The specifications stored in data/eval/ (TS 22.179, 23.179, 23.280, 23.379, 24.380: mission-critical service stage 1-3) are not the ones the KB 3GPP controls derive from; ingest the relevant specifications with --tag to produce the expected list.'
+source_sha256: null
+provisional: true
+expected_requirements: null
+coverage_declared_by: null
+coverage_declared_at: null

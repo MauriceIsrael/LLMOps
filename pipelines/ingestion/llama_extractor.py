@@ -5,6 +5,17 @@ from typing import Any
 from llama_index.core.graph_stores.types import EntityNode, Relation
 
 
+def _json_list(value: Any) -> str:
+    """Serialize an optional front matter list (``terms``, ``checks``) for a graph column."""
+    import json
+
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        value = [value]
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, default=str)
+
+
 class ArchitectureGraphExtractor:
     """Extracteur d'entités d'architecture et de relations pour Kùzu DB via LlamaIndex."""
 
@@ -62,6 +73,10 @@ class ArchitectureGraphExtractor:
                 "target_entities": ",".join(parsed_doc.get("target_entities", []))
                 if isinstance(parsed_doc.get("target_entities"), list)
                 else str(parsed_doc.get("target_entities", "")),
+                # Doctrine engine inputs (JSON-serialized, optional front matter blocks).
+                "terms": _json_list(parsed_doc.get("frontmatter", {}).get("terms")),
+                "checks": _json_list(parsed_doc.get("frontmatter", {}).get("checks")),
+                "checks_status": str(parsed_doc.get("frontmatter", {}).get("checks_status") or ""),
             },
         )
         nodes.append(main_node)
@@ -123,6 +138,21 @@ class ArchitectureGraphExtractor:
                     Relation(
                         source_id=doc_id,
                         target_id=target_ctrl,
+                        label="IMPLEMENTS",
+                    )
+                )
+
+        # A control lists the assets that satisfy it (``satisfied_by``, set by the expert
+        # review of a framework ingestion): same IMPLEMENTS edge, declared from the control.
+        satisfied_by = frontmatter.get("satisfied_by")
+        if doc_type == "control" and satisfied_by:
+            if isinstance(satisfied_by, str):
+                satisfied_by = [satisfied_by]
+            for source_asset in satisfied_by:
+                relations.append(
+                    Relation(
+                        source_id=str(source_asset),
+                        target_id=doc_id,
                         label="IMPLEMENTS",
                     )
                 )

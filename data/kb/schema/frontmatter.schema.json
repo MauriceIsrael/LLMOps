@@ -74,7 +74,12 @@
           "mobile-core",
           "mcx",
           "transport",
-          "delivery"
+          "delivery",
+          "it-infrastructure",
+          "it-infrastructure/bare-metal",
+          "it-infrastructure/virtualization",
+          "it-infrastructure/container-orchestration",
+          "it-infrastructure/paas"
         ]
       },
       "minItems": 1
@@ -109,6 +114,105 @@
     },
     "applicability": {
       "type": "string"
+    },
+    "terms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Keywords used by the doctrine engine to match subjects and options."
+    },
+    "checks_status": {
+      "enum": [
+        "draft",
+        "validated"
+      ],
+      "description": "Review status of the 'checks' clauses; only a human reviewer sets 'validated'."
+    },
+    "checks": {
+      "type": "array",
+      "description": "Structured check clauses evaluated by check_option (deterministic-checks-v1).",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "when"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "requires",
+              "forbids"
+            ]
+          },
+          "when": {
+            "type": "object",
+            "properties": {
+              "terms_any": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              },
+              "terms_all": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              }
+            },
+            "additionalProperties": false,
+            "minProperties": 1
+          },
+          "expect": {
+            "type": "object",
+            "properties": {
+              "terms_any": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              },
+              "terms_all": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              }
+            },
+            "additionalProperties": false,
+            "minProperties": 1
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "requires"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "expect"
+          ]
+        }
+      }
     }
   },
   "additionalProperties": true

@@ -11,7 +11,7 @@ console = Console()
 
 
 def get_subject_trajectory(
-    subject_name: str, engagement: str = "nordwave-mcx-2027", db_path: str | Path = "data/kuzu_db"
+    subject_name: str, engagement: str | None = None, db_path: str | Path = "data/kuzu_db"
 ) -> dict[str, Any]:
     """Extrait la chaîne chronologique des questions et énoncés ayant fait évoluer la maturité d'un sujet."""
     repo = ElicitationRepository(db_path=db_path)

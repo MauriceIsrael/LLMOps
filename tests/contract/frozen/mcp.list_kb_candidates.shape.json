@@ -1,0 +1,236 @@
+{
+  "interface": "mcp.list_kb_candidates",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "items": {
+          "keys": {
+            "asset_type": {
+              "type": [
+                "null"
+              ]
+            },
+            "assigned_owner": {
+              "type": [
+                "string"
+              ]
+            },
+            "checks": {
+              "items": {
+                "keys": {
+                  "detail": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "status": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "type": [
+                "array"
+              ]
+            },
+            "created_at": {
+              "type": [
+                "string"
+              ]
+            },
+            "domain": {
+              "items": null,
+              "type": [
+                "array"
+              ]
+            },
+            "evidence": {
+              "items": {
+                "keys": {
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "ref": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "type": [
+                "array"
+              ]
+            },
+            "history": {
+              "items": {
+                "keys": {
+                  "actor": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "at": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "channels": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "event": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "owner": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "type": [
+                "array"
+              ]
+            },
+            "id": {
+              "type": [
+                "string"
+              ]
+            },
+            "kind": {
+              "type": [
+                "string"
+              ]
+            },
+            "proposed_content": {
+              "type": [
+                "string"
+              ]
+            },
+            "rationale": {
+              "type": [
+                "string"
+              ]
+            },
+            "review": {
+              "type": [
+                "null"
+              ]
+            },
+            "second_review": {
+              "type": [
+                "null"
+              ]
+            },
+            "second_review_required": {
+              "type": [
+                "boolean"
+              ]
+            },
+            "source": {
+              "keys": {
+                "author": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "contact": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "decision_id": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "engagement": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "production_mode": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "system": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "status": {
+              "type": [
+                "string"
+              ]
+            },
+            "target_asset_id": {
+              "type": [
+                "null"
+              ]
+            },
+            "title": {
+              "type": [
+                "string"
+              ]
+            },
+            "updated_at": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        },
+        "type": [
+          "array"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

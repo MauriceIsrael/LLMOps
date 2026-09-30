@@ -1,0 +1,120 @@
+{
+  "interface": "mcp.get_doctrine_context",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "items": {
+            "items": {
+              "keys": {
+                "confidence": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "domain": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "excerpt": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "framework": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "has_checks": {
+                  "type": [
+                    "boolean"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "relevance": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "required": {
+                  "type": [
+                    "boolean"
+                  ]
+                },
+                "source_ref": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "title": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "typed_id": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "snapshot_id": {
+            "type": [
+              "string"
+            ]
+          },
+          "truncated": {
+            "type": [
+              "boolean"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

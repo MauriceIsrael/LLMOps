@@ -86,8 +86,10 @@ class DiagramGraph:
 class RendererClient:
     """Client Python d'interface avec le moteur d'architecture LLMOps."""
 
-    def __init__(self, engagement: str = "nordwave-mcx-2027", db_path: str | None = None):
-        self.engagement = engagement
+    def __init__(self, engagement: str | None = None, db_path: str | None = None):
+        from mcp_server.core.config import require_engagement
+
+        self.engagement = require_engagement(engagement)
         self.db_path = db_path
 
     def fetch_render_payload(self) -> RenderPayload:

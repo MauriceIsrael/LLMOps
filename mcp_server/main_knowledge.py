@@ -9,17 +9,24 @@ from fastmcp import FastMCP
 from mcp_server.core.config import server_config
 from mcp_server.core.registration import register_tools
 from mcp_server.knowledge.tools import (
+    check_option,
     get_asset,
     get_assets,
     get_decision_trail,
+    get_doctrine_context,
     get_domain_prominence_report,
+    get_framework_coverage,
     get_glossary_term,
     get_graph_summary,
+    get_kb_candidate,
     get_knowledge_analytics,
     get_principles_for,
     list_assets,
+    list_kb_candidates,
     query_graph,
+    review_kb_candidate,
     search_assets,
+    submit_kb_candidate,
 )
 
 server_config.plane = "knowledge"
@@ -39,6 +46,13 @@ register_tools(
         get_graph_summary,
         get_knowledge_analytics,
         get_domain_prominence_report,
+        get_doctrine_context,
+        check_option,
+        submit_kb_candidate,
+        list_kb_candidates,
+        get_kb_candidate,
+        review_kb_candidate,
+        get_framework_coverage,
     ],
 )
 

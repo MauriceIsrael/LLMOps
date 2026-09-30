@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.0")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.3")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -150,4 +150,161 @@ export interface SuggestionCatalogPort {
     context: SuggestionCatalogContext;
     suggestions: PatternSuggestion[];
   }>>;
+}
+
+/* ---- Contract 1.1: doctrine context & option judge ---------------------- */
+
+export type DoctrineItemType = "principle" | "pattern" | "decision" | "control";
+
+export interface DoctrineContextItem {
+  typed_id: string;
+  id: string;
+  type: DoctrineItemType;
+  title: string;
+  status: "active";
+  confidence: ConfidenceLevel | string;
+  domain: string[];
+  excerpt: string;
+  source_ref: string;
+  relevance: number;
+  has_checks: boolean;
+  framework?: string | null;
+  required?: boolean;
+}
+
+export interface DoctrineContext {
+  items: DoctrineContextItem[];
+  truncated: boolean;
+  snapshot_id: string | null;
+}
+
+export interface DoctrineContextRequest {
+  subject: string;
+  domains?: string[];
+  frameworks?: string[];
+  phase?: string | null;
+  max_items?: number;
+  max_chars?: number;
+}
+
+export interface OptionStatement {
+  subject: string;
+  predicate: string;
+  value: string;
+}
+
+export interface ArchitectureOption {
+  title: string;
+  description?: string;
+  statements?: OptionStatement[];
+}
+
+export interface CheckOptionRequest {
+  option: ArchitectureOption;
+  subject?: string;
+  domains?: string[];
+  frameworks?: string[];
+}
+
+export type CheckVerdictValue = "supports" | "violates" | "unassessed";
+
+export interface CheckVerdict {
+  typed_id: string;
+  check_id: string | null;
+  verdict: CheckVerdictValue;
+  message: string | null;
+  matched_terms: string[];
+  excerpt: string;
+  source_ref: string;
+  check_status?: "draft" | "validated" | null;
+}
+
+export interface CheckResult {
+  verdicts: CheckVerdict[];
+  summary: Record<CheckVerdictValue, number>;
+  method: "deterministic-checks-v1";
+  snapshot_id: string | null;
+}
+
+/* ---- Contract 1.2: KB candidate cycle ------------------------------------ */
+
+export type KbCandidateKind = "new_asset" | "amendment" | "rex" | "framework_ingestion";
+export type KbAssetType = "principle" | "pattern" | "decision" | "control" | "glossary";
+export type KbCandidateStatus = "proposed" | "checks_failed" | "in_review" | "accepted" | "rejected" | "published";
+export type KbProductionMode = "human-authored" | "llm-proposed-human-approved" | "llm-derived";
+export type KbReviewAction = "accept" | "amend" | "reject";
+
+export interface KbCandidateReview {
+  reviewer: string;
+  action: KbReviewAction;
+  reason: string | null;
+  at: string;
+}
+
+export interface KbCandidateSubmission {
+  kind: KbCandidateKind;
+  target_asset_id?: string | null;
+  asset_type?: KbAssetType | null;
+  domain?: string[];
+  title: string;
+  rationale?: string;
+  proposed_content: string;
+  source: {
+    system: "archinex" | "document-studio" | "mcp" | "cli-ingestion";
+    engagement?: string | null;
+    decision_id?: string | null;
+    author?: string | null;
+    contact?: string | null;
+    production_mode?: KbProductionMode;
+  };
+  evidence?: Array<{ kind: "measure" | "audit" | "engagement" | "vendor-doc"; ref: string }>;
+}
+
+export interface KbCandidate extends KbCandidateSubmission {
+  id: string;
+  asset_type: KbAssetType | null;
+  domain: string[];
+  rationale: string;
+  status: KbCandidateStatus;
+  checks: Array<{ name: string; status: "pass" | "fail" | "warn"; detail: string }>;
+  review: KbCandidateReview | null;
+  second_review_required: boolean;
+  second_review: KbCandidateReview | null;
+  assigned_owner: string | null;
+  history: Array<{ at: string; actor: string; event: string; [detail: string]: unknown }>;
+  promoted?: { path: string; asset_id: string; confidence: string };
+  published?: { snapshot_id: string | null; at: string };
+  created_at: string;
+  updated_at: string;
+}
+
+/* ---- Contract 1.3: regulatory coverage ------------------------------------ */
+
+export interface FrameworkCoverage {
+  status: "covered" | "partial" | "missing";
+  version: string | null;
+  expected: number | null;
+  present: number;
+  validated: number;
+  missing_ids: string[];
+  declared_by: string | null;
+  provisional?: boolean | null;
+  manifest?: boolean;
+}
+
+export type FrameworkCoverageMap = Record<string, FrameworkCoverage>;
+
+export interface ApplicableFrameworksResponse {
+  status: "ok";
+  engagement: string;
+  applicable_frameworks: string[];
+  count: number;
+  coverage?: FrameworkCoverageMap;
+}
+
+export interface KbCandidateReviewRequest {
+  action: KbReviewAction;
+  reviewer: string;
+  reason?: string;
+  amended_content?: string;
 }

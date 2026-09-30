@@ -14,21 +14,14 @@ class HarvestState(TypedDict, total=False):
 
 
 def harvest_candidates_node(state: HarvestState) -> dict[str, Any]:
-    """Analyse le graphe d'engagement pour identifier les récurrences et patterns généralisables."""
-    candidates = [
-        {
-            "title": "MCX Service Layer Decomposition (4 sub-domains)",
-            "kind": "decomposition",
-            "why": "First occurrence of 3GPP MC service layer decomposition on mission-critical voice.",
-            "source": "decomposition",
-        },
-        {
-            "title": "Element manager bulk export limit (2000 objects)",
-            "kind": "pattern",
-            "why": "General limitation observed on vendor element manager interface.",
-            "source": "external-contribution",
-        },
-    ]
+    """Analyse le graphe d'engagement pour identifier les récurrences et patterns généralisables.
+
+    Les candidats à la promotion propres à un engagement sont déclarés dans son profil
+    (``examples/<engagement>/engagement_profile.yaml``) ; rien n'est codé en dur ici.
+    """
+    from tools.elicitation.profile import load_profile
+
+    candidates = [dict(c) for c in load_profile(state.get("engagement")).harvest_candidates]
     return {"promotion_candidates": candidates}
 
 

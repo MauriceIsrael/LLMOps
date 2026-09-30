@@ -74,6 +74,11 @@ class FileMailbox:
         artifacts_dir.mkdir(parents=True, exist_ok=True)
         filepath = artifacts_dir / f"{question.question_id}.md"
 
+        from tools.elicitation.profile import load_profile
+
+        subject = getattr(question, "subject", None)
+        terms = load_profile(self.engagement).mailbox_terms or ([str(subject)] if subject else [])
+        terms_md = "\n".join(f"- `{t}`" for t in terms) or "- _(the terms of the subject)_"
         card_md = f"""# ✉️ Question Card — {question.question_id}
 
 **Engagement:** `{question.engagement}`  
@@ -87,7 +92,7 @@ class FileMailbox:
 {question.why_it_matters}
 
 ## Please use these terms
-- `mcx-services`
+{terms_md}
 
 ## Your answer
 

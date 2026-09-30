@@ -60,6 +60,24 @@ REQ-003: Le système doit journaliser tous les accès administrateurs et les con
 REQ-004: The solution shall support geo-redundant deployment across two data centres.
 """
 
+REVIEWER_TOKEN = "contract-reviewer-token"
+SAMPLE_CANDIDATE = {
+    "kind": "rex",
+    "title": "Contract freeze return of experience",
+    "rationale": "Exercise the candidate contract.",
+    "proposed_content": "Break-glass access must be tested every quarter.",
+    "source": {"system": "mcp", "author": "contract-test"},
+    "evidence": [{"kind": "engagement", "ref": "contract-engagement"}],
+}
+# Candidate ids created during the run (MCP and REST flows).
+_STATE: dict[str, str] = {}
+
+SAMPLE_OPTION = {
+    "title": "Closed-loop auto-remediation of network incidents",
+    "description": "Automated remediation playbooks triggered by alarms, without human approval.",
+    "statements": [{"subject": "remediation", "predicate": "has_property", "value": "fully autonomous remediation"}],
+}
+
 
 # ---------------------------------------------------------------------------
 # Shapes
@@ -183,22 +201,58 @@ def _mcp(name: str, call: Callable[[], Any]) -> Interface:
     return Interface(name=f"mcp.{name}", kind="mcp", call=lambda _client: call())
 
 
+def _remember(key: str, result: dict[str, Any]) -> dict[str, Any]:
+    _STATE[key] = result["data"]["id"]
+    return result
+
+
+def _as_reviewer(call: Callable[[], Any], set_caller: bool = True) -> Any:
+    """Run ``call`` with a kb:review token declared (and, for MCP calls, as that caller).
+
+    ENGAGEMENT_TOKENS is only set for the duration of the call: once set, it also makes
+    engagement authorization strict for the other (local, unauthenticated) MCP calls.
+    """
+    from mcp_server.core.auth import get_current_caller, set_current_caller
+
+    previous_caller = get_current_caller()
+    previous_tokens = os.environ.get("ENGAGEMENT_TOKENS")
+    os.environ["ENGAGEMENT_TOKENS"] = f"{REVIEWER_TOKEN}:kb:review"
+    if set_caller:
+        set_current_caller(REVIEWER_TOKEN)
+    try:
+        return call()
+    finally:
+        set_current_caller(previous_caller)
+        if previous_tokens is None:
+            os.environ.pop("ENGAGEMENT_TOKENS", None)
+        else:
+            os.environ["ENGAGEMENT_TOKENS"] = previous_tokens
+
+
 def _rest(method: str, path: str, url: str | None = None, *, json_body: Any = None,
-          headers: dict[str, str] | None = None, stream: bool = False) -> Interface:
+          headers: dict[str, str] | None = None, stream: bool = False, remember: str | None = None,
+          reviewer: bool = False) -> Interface:
     def call(client: Any) -> Any:
+        if reviewer:
+            return _as_reviewer(lambda: _call(client), set_caller=False)
+        return _call(client)
+
+    def _call(client: Any) -> Any:
         if stream:
             return {"route_registered": True}
         hdrs = {"Authorization": f"Bearer {CONTRACT_TOKEN}", **(headers or {})}
         kwargs: dict[str, Any] = {"headers": hdrs}
         if json_body is not None:
             kwargs["json"] = json_body
-        res = client.request(method, url or path, **kwargs)
+        res = client.request(method, (url or path).format(**_STATE), **kwargs)
         content_type = res.headers.get("content-type", "").split(";")[0]
         body: Any
         if content_type == "application/json":
             body = res.json()
         else:
             body = {"text": res.text[:0]}
+        if remember and isinstance(body, dict) and isinstance(body.get("data"), dict):
+            _STATE[remember] = body["data"].get("id", "")
         return {
             "status_code": res.status_code,
             "content_type": content_type,
@@ -245,6 +299,19 @@ def build_catalogue() -> list[Interface]:
         _mcp("generate_zero_draft_hld", lambda: kn.generate_zero_draft_hld(engagement=scratch)),
         _mcp("get_rfp_compliance_matrix", lambda: kn.get_rfp_compliance_matrix(engagement=scratch)),
         _mcp("trigger_rfp_elicitation", lambda: kn.trigger_rfp_elicitation(engagement=scratch)),
+        # Contract 1.1 — doctrine context & option judge
+        _mcp("get_doctrine_context", lambda: kn.get_doctrine_context(
+            "closed loop remediation of network incidents", frameworks=["NIS2"], max_items=12)),
+        _mcp("check_option", lambda: kn.check_option(SAMPLE_OPTION, subject="Network incident remediation",
+                                                     frameworks=["NIS2"])),
+        # Contract 1.2 — KB candidate cycle
+        _mcp("submit_kb_candidate", lambda: _remember("mcp", kn.submit_kb_candidate(SAMPLE_CANDIDATE))),
+        _mcp("list_kb_candidates", lambda: kn.list_kb_candidates(source="mcp")),
+        _mcp("get_kb_candidate", lambda: kn.get_kb_candidate(_STATE["mcp"])),
+        _mcp("review_kb_candidate", lambda: _as_reviewer(lambda: kn.review_kb_candidate(
+            _STATE["mcp"], "reject", "@maintainers", reason="Contract freeze"))),
+        # Contract 1.3 — regulatory coverage
+        _mcp("get_framework_coverage", lambda: kn.get_framework_coverage(["NIS2", "ISO27001", "UNKNOWN-FW"])),
         # --- MCP Engagement ------------------------------------------------
         _mcp("get_subject", lambda: eng.get_subject("mcx-services", engagement=demo)),
         _mcp("get_subject_trajectory", lambda: eng.get_subject_trajectory("mcx-services", engagement=demo)),
@@ -287,6 +354,16 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/arbitration/board", headers={"X-Engagement-Id": demo}),
         _rest("GET", "/api/arbitration/conflicts", headers={"X-Engagement-Id": demo}),
         _rest("GET", "/api/arbitration/statements", headers={"X-Engagement-Id": demo}),
+        _rest("GET", "/api/knowledge/context",
+              "/api/knowledge/context?subject=closed%20loop%20remediation&frameworks=NIS2&max_items=12"),
+        _rest("POST", "/api/knowledge/check", json_body={
+            "option": SAMPLE_OPTION, "subject": "Network incident remediation", "frameworks": ["NIS2"]}),
+        _rest("POST", "/api/knowledge/candidates", json_body=SAMPLE_CANDIDATE, remember="rest"),
+        _rest("GET", "/api/knowledge/candidates", "/api/knowledge/candidates?source=mcp"),
+        _rest("GET", "/api/knowledge/candidates/{candidate_id}", "/api/knowledge/candidates/{rest}"),
+        _rest("PATCH", "/api/knowledge/candidates/{candidate_id}", "/api/knowledge/candidates/{rest}",
+              json_body={"action": "reject", "reviewer": "@maintainers", "reason": "Contract freeze"},
+              headers={"Authorization": f"Bearer {REVIEWER_TOKEN}"}, reviewer=True),
         _rest("GET", "/api/skills"),
         _rest("GET", "/api/skills/matrix", headers={"X-Engagement-Id": demo}),
     ]
@@ -318,11 +395,14 @@ def isolated_environment() -> Iterator[Any]:
     shutil.copytree(server_config.engagements_dir, eng_dir, ignore=shutil.ignore_patterns(f"{SCRATCH_ENGAGEMENT}*"))
     saved_eng_dir = server_config.engagements_dir
     saved_env = {k: os.environ.get(k) for k in ("SERVER_TOKEN", "LLMOPS_AUTH_TOKEN", "ENGAGEMENT_TOKENS", "KUZU_DB_PATH",
+                                                  "CANDIDATES_DIR",
                                                   "OWNER_NOTIFICATION_WEBHOOK", "NOTIFICATION_WEBHOOK_URL")}
     os.environ["SERVER_TOKEN"] = CONTRACT_TOKEN
+    os.environ.pop("ENGAGEMENT_TOKENS", None)
     # /visualize reads KUZU_DB_PATH (legacy default: data/kuzu_db); serve the knowledge graph.
     os.environ["KUZU_DB_PATH"] = str(server_config.knowledge_db_path)
-    for k in ("LLMOPS_AUTH_TOKEN", "ENGAGEMENT_TOKENS", "OWNER_NOTIFICATION_WEBHOOK", "NOTIFICATION_WEBHOOK_URL"):
+    os.environ["CANDIDATES_DIR"] = str(tmp / "candidates")
+    for k in ("LLMOPS_AUTH_TOKEN", "OWNER_NOTIFICATION_WEBHOOK", "NOTIFICATION_WEBHOOK_URL"):
         os.environ.pop(k, None)
     server_config.engagements_dir = eng_dir
     meta_file = Path("data/engagements") / f"{SCRATCH_ENGAGEMENT}.meta.json"

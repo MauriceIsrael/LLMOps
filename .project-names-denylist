@@ -1,0 +1,8 @@
+# Terms that must never appear in the generic code (plan L3 §6.4): project names and
+# engagement-specific vocabulary. They may appear in data/kb/ (knowledge), examples/ and
+# tests/. Checked by scripts/check_no_project_names.py (part of `make lint`).
+# One term per line, case-insensitive.
+nordwave
+mcx
+suse
+rubidium

@@ -14,16 +14,21 @@ console = Console()
 
 def generate_instruction_plan(
     engagement: str,
-    blueprint_path: str | Path = "data/kb/blueprints/BLU-hla-mcx.yaml",
+    blueprint_path: str | Path | None = None,
     db_path: str | Path = "data/kuzu_db",
     roster: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Génère le plan d'instructions complet à 4 blocs selon SPEC-PLANNING-AND-DEMO."""
-    roster = roster or {
-        "mcx-service-architect": "amina",
-        "mobile-core-architect": "rui",
-        "chief-architect": "sofia",
-    }
+    """Génère le plan d'instructions complet à 4 blocs selon SPEC-PLANNING-AND-DEMO.
+
+    Le roster par défaut et la séquence projetée viennent du profil de l'engagement
+    (``examples/<engagement>/engagement_profile.yaml``), jamais du code.
+    """
+    from mcp_server.core.config import require_blueprint_path
+    from tools.elicitation.profile import load_profile
+
+    profile = load_profile(engagement)
+    blueprint_path = blueprint_path or require_blueprint_path()
+    roster = roster or dict(profile.roster)
 
     blueprint = load_blueprint(blueprint_path)
     repo = ElicitationRepository(db_path=db_path)
@@ -87,12 +92,7 @@ def generate_instruction_plan(
         })
 
     # 4. Projected Sequence
-    projected_seq = [
-        "1. Frame L1 subjects: mcx-services, mobile-core, transport",
-        "2. Decompose mcx-services -> group-management, floor-control, media-distribution, lmr-interworking",
-        "3. Frame and decide L2/L3 parameters for child MCX services & core QoS profile",
-        "4. Specify L4 QoS pre-emption and finalise section readiness",
-    ]
+    projected_seq = list(profile.projected_sequence)
 
     return {
         "blueprint_id": blueprint.id,

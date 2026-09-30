@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DoctrineContextResponse",
+  "description": "Doctrine applicable to a subject: active principles, required controls, patterns and ADRs, ranked deterministically.",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "items",
+        "truncated",
+        "snapshot_id"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "typed_id",
+              "id",
+              "type",
+              "title",
+              "status",
+              "confidence",
+              "domain",
+              "excerpt",
+              "source_ref",
+              "relevance",
+              "has_checks"
+            ],
+            "properties": {
+              "typed_id": {
+                "type": "string",
+                "pattern": "^(principle|pattern|decision|control):.+$"
+              },
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "principle",
+                  "pattern",
+                  "decision",
+                  "control"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "status": {
+                "const": "active"
+              },
+              "confidence": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "excerpt": {
+                "type": "string"
+              },
+              "source_ref": {
+                "type": "string"
+              },
+              "relevance": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "has_checks": {
+                "type": "boolean"
+              },
+              "framework": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Control of a framework listed in 'frameworks'."
+              }
+            }
+          }
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "snapshot_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

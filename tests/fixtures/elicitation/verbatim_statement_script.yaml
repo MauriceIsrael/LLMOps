@@ -1,0 +1,13 @@
+# Synthetic scripted interpretation for tests: every answer becomes one candidate statement
+# on the question's section and subject (value = first 80 characters of the answer).
+# The engine default (PassthroughInterpreter) invents no statement; tests exercising the
+# statement/conflict machinery declare this script for their engagement.
+defaults:
+  section: "general"
+  role: "architect"
+rules: []
+fallback:
+  statements:
+    - predicate: has_property
+      value: $verbatim80
+      confidence: designed

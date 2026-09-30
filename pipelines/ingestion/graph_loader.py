@@ -43,12 +43,16 @@ class LadybugGraphLoader:
                     markdown_content STRING,
                     sha256 STRING,
                     external_ref STRING,
+                    terms STRING,
+                    checks STRING,
+                    checks_status STRING,
                     PRIMARY KEY (id)
                 );
                 """
             )
         else:
-            for col in ("phase", "domain", "version", "markdown_content", "sha256", "external_ref"):
+            for col in ("phase", "domain", "version", "markdown_content", "sha256", "external_ref",
+                        "terms", "checks", "checks_status"):
                 try:
                     self.store.execute_cypher(f"ALTER TABLE Asset ADD {col} STRING;")
                 except Exception:
@@ -88,12 +92,19 @@ class LadybugGraphLoader:
                     target_entities STRING,
                     external_ref STRING,
                     markdown_content STRING,
+                    source_path STRING,
+                    confidence STRING,
+                    phase STRING,
+                    terms STRING,
+                    checks STRING,
+                    checks_status STRING,
                     PRIMARY KEY (id)
                 );
                 """
             )
         else:
-            for col in ("framework", "version", "domain", "severity", "target_entities", "external_ref", "markdown_content"):
+            for col in ("framework", "version", "domain", "severity", "target_entities", "external_ref", "markdown_content",
+                        "source_path", "confidence", "phase", "terms", "checks", "checks_status"):
                 try:
                     self.store.execute_cypher(f"ALTER TABLE Control ADD {col} STRING;")
                 except Exception:
@@ -135,7 +146,13 @@ class LadybugGraphLoader:
                     c.status = $status,
                     c.target_entities = $target_entities,
                     c.external_ref = $external_ref,
-                    c.markdown_content = $markdown_content;
+                    c.markdown_content = $markdown_content,
+                    c.source_path = $source_path,
+                    c.confidence = $confidence,
+                    c.phase = $phase,
+                    c.terms = $terms,
+                    c.checks = $checks,
+                    c.checks_status = $checks_status;
                 """
                 self.store.execute_cypher(
                     query,
@@ -150,6 +167,12 @@ class LadybugGraphLoader:
                         "target_entities": target_entities,
                         "external_ref": external_ref,
                         "markdown_content": markdown_content,
+                        "source_path": str(props.get("source_path", "")),
+                        "confidence": str(props.get("confidence", "")),
+                        "phase": str(props.get("phase", "")),
+                        "terms": str(props.get("terms", "")),
+                        "checks": str(props.get("checks", "")),
+                        "checks_status": str(props.get("checks_status", "")),
                     },
                 )
             else:
@@ -182,7 +205,10 @@ class LadybugGraphLoader:
                     a.version = $version,
                     a.markdown_content = $markdown_content,
                     a.sha256 = $sha256,
-                    a.external_ref = $external_ref;
+                    a.external_ref = $external_ref,
+                    a.terms = $terms,
+                    a.checks = $checks,
+                    a.checks_status = $checks_status;
                 """
                 self.store.execute_cypher(
                     query,
@@ -201,6 +227,9 @@ class LadybugGraphLoader:
                         "markdown_content": markdown_content,
                         "sha256": sha256,
                         "external_ref": external_ref,
+                        "terms": str(props.get("terms", "")),
+                        "checks": str(props.get("checks", "")),
+                        "checks_status": str(props.get("checks_status", "")),
                     },
                 )
 

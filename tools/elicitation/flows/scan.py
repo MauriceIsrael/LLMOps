@@ -163,7 +163,9 @@ def load_frame_node(state: ScanState) -> dict[str, Any]:
             bp_path = Path(bp_path_str)
             bp_id = state.get("blueprint_id", bp_path.stem)
         else:
-            bp_id = state.get("blueprint_id", "BLU-hla-mcx")
+            from mcp_server.core.config import resolve_blueprint_id
+
+            bp_id = state.get("blueprint_id") or resolve_blueprint_id() or ""
             bp_path = Path(bp_id)
             if not bp_path.exists():
                 bp_path = Path("data/kb/blueprints") / f"{bp_id}.yaml"
@@ -261,6 +263,9 @@ def detect_gaps_node(state: ScanState) -> dict[str, Any]:
     gaps_dicts = [g.to_dict() for g in gap_objects]
 
     # Génération dynamique des manques de décomposition L2 pour tous les sujets à L1_framed
+    from tools.elicitation.profile import load_profile
+
+    decomposition_route = load_profile(engagement).decomposition_route
     for sub, lvl in levels.items():
         if lvl == "L1_framed":
             gaps_dicts.append({
@@ -274,7 +279,7 @@ def detect_gaps_node(state: ScanState) -> dict[str, Any]:
                 "hold_reason": None,
                 "blocking_count": 4,
                 "blocking": ["4.2", "4.4", "4.5"],
-                "routes_to": "mcx-service-architect",
+                "routes_to": decomposition_route,
                 "must_answer": f"Comment se décompose l'architecture de {sub} (Section 4.1) ?",
             })
 

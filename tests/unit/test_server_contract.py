@@ -236,7 +236,11 @@ def test_schema_version_in_get_graph_summary():
     res = kb_tools.get_graph_summary()
     assert res.get("status") == "ok"
     data = res.get("data", {})
-    assert data.get("schema_version") == "1.0", f"Expected schema_version '1.0', got: {data.get('schema_version')}"
+    # Minor versions are backward compatible (docs/VERSIONING.md): the contract stays 1.x.
+    from mcp_server.core.version import CONTRACT_VERSION
+
+    assert data.get("schema_version") == CONTRACT_VERSION
+    assert str(data.get("schema_version")).split(".")[0] == "1", f"Unexpected major version: {data.get('schema_version')}"
 
 
 def test_get_engagement_export_returns_all():

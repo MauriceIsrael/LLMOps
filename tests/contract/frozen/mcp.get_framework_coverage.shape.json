@@ -1,0 +1,194 @@
+{
+  "interface": "mcp.get_framework_coverage",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "ISO27001": {
+            "keys": {
+              "declared_by": {
+                "type": [
+                  "null"
+                ]
+              },
+              "expected": {
+                "type": [
+                  "number"
+                ]
+              },
+              "manifest": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "missing_ids": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "present": {
+                "type": [
+                  "number"
+                ]
+              },
+              "provisional": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "validated": {
+                "type": [
+                  "number"
+                ]
+              },
+              "version": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "NIS2": {
+            "keys": {
+              "declared_by": {
+                "type": [
+                  "null"
+                ]
+              },
+              "expected": {
+                "type": [
+                  "number"
+                ]
+              },
+              "manifest": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "missing_ids": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "present": {
+                "type": [
+                  "number"
+                ]
+              },
+              "provisional": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "validated": {
+                "type": [
+                  "number"
+                ]
+              },
+              "version": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "UNKNOWN-FW": {
+            "keys": {
+              "declared_by": {
+                "type": [
+                  "null"
+                ]
+              },
+              "expected": {
+                "type": [
+                  "null"
+                ]
+              },
+              "manifest": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "missing_ids": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "present": {
+                "type": [
+                  "number"
+                ]
+              },
+              "provisional": {
+                "type": [
+                  "null"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "validated": {
+                "type": [
+                  "number"
+                ]
+              },
+              "version": {
+                "type": [
+                  "null"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

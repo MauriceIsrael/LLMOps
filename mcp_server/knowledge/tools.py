@@ -18,6 +18,7 @@ from mcp_server.core.envelope import (
     not_found_response,
     ok_response,
 )
+from mcp_server.core.version import CONTRACT_VERSION
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
 
 
@@ -283,7 +284,7 @@ def get_graph_summary() -> dict[str, Any]:
         })
 
     payload = {
-        "schema_version": "1.0",
+        "schema_version": CONTRACT_VERSION,
         "knowledge": {
             "dataset": str(server_config.knowledge_db_path),
             "node_counts": kb_counts,
@@ -371,6 +372,17 @@ def get_domain_prominence_report() -> dict[str, Any]:
     return ok_response(payload, count=1)
 
 
+def _framework_metadata() -> dict[str, dict[str, str]]:
+    """Descriptive metadata of the frameworks: data/kb/controls/frameworks.yaml (KB data, not code)."""
+    import yaml
+
+    path = Path(server_config.kb_dir) / "controls" / "frameworks.yaml"
+    if not path.is_file():
+        return {}
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return {str(k): {kk: str(vv) for kk, vv in (v or {}).items()} for k, v in data.items()}
+
+
 def list_frameworks() -> dict[str, Any]:
     """List regulatory and security frameworks embedded in the knowledge base along with their versions and control counts."""
     kb_client = _get_db()
@@ -380,78 +392,7 @@ def list_frameworks() -> dict[str, Any]:
         RETURN c.framework as framework, c.version as version, count(c) as control_count;
         """
         rows = kb_client.execute_cypher(query)
-        meta = {
-            "NIS2": {
-                "title": "Directive (UE) 2022/2555 (NIS 2)",
-                "jurisdiction": "EU",
-                "description": "Mesures de gestion des risques de cybersécurité pour les entités essentielles et importantes.",
-            },
-            "3GPP": {
-                "title": "3GPP Telecom & Security Specifications (Rel-18 / TS 33.179 / TS 23.501)",
-                "jurisdiction": "International",
-                "description": "Sécurité et architecture des services 5G et communications critiques mission-critical (MCX).",
-            },
-            "ISO27001": {
-                "title": "ISO/IEC 27001:2022",
-                "jurisdiction": "International",
-                "description": "Système de management de la sécurité de l'information (SMSI) et contrôles Annexe A.",
-            },
-            "SecNumCloud": {
-                "title": "ANSSI SecNumCloud 3.2",
-                "jurisdiction": "France / EU",
-                "description": "Référentiel de qualification des prestataires de services de cloud de confiance et immunité extraterritoriale.",
-            },
-            "CER": {
-                "title": "Directive (UE) 2022/2557 (CER)",
-                "jurisdiction": "EU",
-                "description": "Résilience des entités critiques, protection physique des infrastructures et plans de continuité.",
-            },
-            "CRA": {
-                "title": "Règlement (UE) 2024/2847 (Cyber Resilience Act)",
-                "jurisdiction": "EU",
-                "description": "Exigences essentielles de cybersécurité pour produits avec éléments numériques, SBOM et gestion des vulnérabilités.",
-            },
-            "RGPD": {
-                "title": "Règlement (UE) 2016/679 (RGPD / GDPR)",
-                "jurisdiction": "EU",
-                "description": "Protection des données à caractère personnel, Privacy by Design et notification des violations sous 72h.",
-            },
-            "GSMA": {
-                "title": "GSMA eSIM, Remote SIM Provisioning (SGP.22/32) & Central EIR",
-                "jurisdiction": "International",
-                "description": "Spécifications de provisioning distant eSIM/eUICC, sécurité SAS et blocage des terminaux volés via Central EIR.",
-            },
-            "ITIL-FCAPS": {
-                "title": "ITIL v4 & FCAPS Telemetry Standards",
-                "jurisdiction": "International",
-                "description": "Gouvernance des opérations de service ITIL v4, supervision FCAPS, Syslog RFC 5424 et protocoles O&M.",
-            },
-            "TELCO-RESIL": {
-                "title": "Datacenter Tier IV / EN 50600 & Resilient PTP/GNSS Timing",
-                "jurisdiction": "International",
-                "description": "Résilience des datacenters classe 4, synchronisation déterministe PTP v2.1 et holdover GNSS > 30 jours.",
-            },
-            "PPDR-DEVICE": {
-                "title": "PPDR Spectrum (Band 68/28), Tactical Hardening & In-Vehicle Standards",
-                "jurisdiction": "Europe / International",
-                "description": "Terminaux durcis MIL-STD-810H, IP68/69K, ATEX, spectre PPDR CEPT (16)02 et CEM véhicules ISO 11451.",
-            },
-            "ISO22301": {
-                "title": "ISO 22301:2019",
-                "jurisdiction": "International",
-                "description": "Système de management de la continuité d'activité (SMCA) et plans de reprise d'activité (PRA/PCA).",
-            },
-            "ISO27005": {
-                "title": "ISO/IEC 27005:2022",
-                "jurisdiction": "International",
-                "description": "Gestion des risques de sécurité de l'information et méthodologies nationales (MONARC, EBIOS RM).",
-            },
-            "ISO14001": {
-                "title": "ISO 14001:2015",
-                "jurisdiction": "International",
-                "description": "Management environnemental, démantèlement durable et recyclage des actifs télécoms.",
-            },
-        }
+        meta = _framework_metadata()
         res = []
         for r in rows:
             fw = r.get("framework", "")
@@ -560,7 +501,7 @@ def get_compliance_matrix(engagement: str, framework: str) -> dict[str, Any]:
     """Evaluate compliance coverage of an engagement project against a regulatory framework.
 
     Args:
-        engagement: Engagement identifier (e.g. 'nordwave-mcx-2027').
+        engagement: Engagement identifier (e.g. 'my-engagement-2027').
         framework: Regulatory framework code (e.g. 'NIS2', '3GPP').
     """
     kb_client = _get_db()
@@ -641,6 +582,7 @@ def suggest_knowledge_improvement(
 
     The proposal will be archived, reviewed by the Knowledge Hub owner (Maurice Israel),
     and evaluated for promotion into the enterprise standard via the Harvest loop.
+    It is also queued as a KB candidate (kind 'rex'); its id is returned as 'candidate_id'.
 
     Args:
         title: Short descriptive title of the suggested knowledge improvement.
@@ -650,6 +592,20 @@ def suggest_knowledge_improvement(
         contact_email: Optional email address to receive feedback on the review.
         source_engagement: Optional engagement or project where this pattern was proven.
     """
+    return _suggest_knowledge_improvement(
+        title, rationale, suggested_change, author, contact_email, source_engagement, system="mcp"
+    )
+
+
+def _suggest_knowledge_improvement(
+    title: str,
+    rationale: str,
+    suggested_change: str,
+    author: str = "external-contributor",
+    contact_email: str | None = None,
+    source_engagement: str | None = None,
+    system: str = "mcp",
+) -> dict[str, Any]:
     if not title or not title.strip():
         return invalid_argument_response("title", "title must not be empty")
     if not rationale or not rationale.strip():
@@ -667,6 +623,28 @@ def suggest_knowledge_improvement(
         contact=contact_email.strip() if contact_email else None,
         source_engagement=source_engagement.strip() if source_engagement else None,
     )
+
+    # Contract 1.2: the suggestion also enters the KB candidate queue (kind 'rex').
+    try:
+        from pipelines.kb_candidates.service import rex_payload
+
+        candidate = _candidate_service().submit(
+            rex_payload(
+                title=title.strip(),
+                rationale=rationale.strip(),
+                suggested_change=suggested_change.strip(),
+                author=author.strip() or None,
+                contact=contact_email.strip() if contact_email else None,
+                source_engagement=source_engagement.strip() if source_engagement else None,
+                system=system,
+            ),
+            actor=_actor(),
+        )
+        res["candidate_id"] = candidate["id"]
+    except Exception as exc:  # the suggestion itself must never fail because of the queue
+        import logging
+
+        logging.getLogger("mcp_server").warning("KB candidate creation failed for suggestion: %s", exc)
     return ok_response(res, count=1)
 
 
@@ -703,19 +681,26 @@ def list_skills(domain: str | None = None) -> dict[str, Any]:
 
 
 def get_skills_matrix(
-    engagement: str = "nordwave-mcx-2027",
-    blueprint_path: str = "data/kb/blueprints/BLU-hla-mcx.yaml",
+    engagement: str | None = None,
+    blueprint_path: str | None = None,
 ) -> dict[str, Any]:
     """Calculate the staffing skill coverage matrix and risk index for an engagement.
 
     Args:
-        engagement: Target engagement identifier.
-        blueprint_path: Optional path to the architecture blueprint.
+        engagement: Target engagement identifier (default: the deployment's LLMOPS_ENGAGEMENT).
+        blueprint_path: Optional path or id of the architecture blueprint (default: LLMOPS_BLUEPRINT).
     """
+    from mcp_server.core.config import resolve_blueprint_path, resolve_engagement
     from tools.elicitation.mailbox.roster import RosterManager
     from tools.elicitation.models.blueprint_schema import load_blueprint
 
-    bp = load_blueprint(blueprint_path)
+    engagement = resolve_engagement(engagement)
+    if not engagement:
+        return invalid_argument_response("engagement", "No engagement given and LLMOPS_ENGAGEMENT is not set.")
+    bp_path = resolve_blueprint_path(blueprint_path)
+    if bp_path is None:
+        return invalid_argument_response("blueprint_path", "No blueprint given and LLMOPS_BLUEPRINT is not set.")
+    bp = load_blueprint(bp_path)
     mgr = RosterManager(engagement=engagement)
     covered = mgr.get_all_covered_skills()
 
@@ -888,3 +873,296 @@ def trigger_rfp_elicitation(
 
 
 
+
+
+# ---------------------------------------------------------------------------
+# Doctrine context & option judge (contract 1.1) — deterministic, no LLM.
+# ---------------------------------------------------------------------------
+
+def _doctrine_index():
+    from pipelines.doctrine import load_index
+
+    client = _get_db()
+    return load_index(lambda q, p: client.execute_cypher(q, p), server_config.kb_dir)
+
+
+def _latest_snapshot_id() -> str | None:
+    import json
+
+    latest = Path("data/snapshots/latest.json")
+    if not latest.exists():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8")).get("snapshot_id")
+    except Exception:
+        return None
+
+
+def _str_list(value: Any, name: str) -> list[str] | dict[str, Any]:
+    """Normalize a list-of-strings argument (a comma-separated string is accepted)."""
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [v.strip() for v in value.split(",") if v.strip()]
+    if isinstance(value, list) and all(isinstance(v, str) for v in value):
+        return [v.strip() for v in value if v.strip()]
+    return invalid_argument_response(name, f"'{name}' must be a list of strings.")
+
+
+def get_doctrine_context(
+    subject: str,
+    domains: list[str] | None = None,
+    frameworks: list[str] | None = None,
+    phase: str | None = None,
+    max_items: int = 20,
+    max_chars: int = 8000,
+) -> dict[str, Any]:
+    """Return the doctrine that applies to a subject: active principles, required regulatory
+    controls, patterns and ADRs, ranked deterministically, with bounded excerpts.
+
+    Args:
+        subject: Free text describing the architecture subject (required).
+        domains: Optional filter on asset domains (a parent domain matches its sub-domains).
+        frameworks: Required regulatory frameworks (e.g. 'NIS2'); all their active controls are included.
+        phase: Optional phase filter ('BID', 'BUILD', 'RUN').
+        max_items: Maximum number of items (default 20).
+        max_chars: Total character budget of the excerpts (default 8000).
+    """
+    if not subject or not isinstance(subject, str) or not subject.strip():
+        return invalid_argument_response("subject", "Parameter 'subject' is required.")
+    doms = _str_list(domains, "domains")
+    if isinstance(doms, dict):
+        return doms
+    fws = _str_list(frameworks, "frameworks")
+    if isinstance(fws, dict):
+        return fws
+    if not isinstance(max_items, int) or isinstance(max_items, bool) or not 1 <= max_items <= 200:
+        return invalid_argument_response("max_items", "'max_items' must be an integer between 1 and 200.")
+    if not isinstance(max_chars, int) or isinstance(max_chars, bool) or not 200 <= max_chars <= 100000:
+        return invalid_argument_response("max_chars", "'max_chars' must be an integer between 200 and 100000.")
+    try:
+        from pipelines.doctrine import build_doctrine_context
+
+        payload = build_doctrine_context(
+            _doctrine_index(),
+            subject=subject.strip(),
+            domains=doms,
+            frameworks=fws,
+            phase=phase.strip() if isinstance(phase, str) and phase.strip() else None,
+            max_items=max_items,
+            max_chars=max_chars,
+            snapshot_id=_latest_snapshot_id(),
+        )
+        return ok_response(payload, count=len(payload["items"]))
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_doctrine_context")
+
+
+def check_option(
+    option: dict[str, Any],
+    subject: str | None = None,
+    domains: list[str] | None = None,
+    frameworks: list[str] | None = None,
+) -> dict[str, Any]:
+    """Judge an architecture option against the doctrine with deterministic check clauses.
+
+    Returns one verdict per relevant asset: 'supports' or 'violates' when a structured
+    check clause applies, 'unassessed' otherwise (to be judged client-side). Every active
+    control of a required framework is always returned, at least as 'unassessed'.
+
+    Args:
+        option: {"title": str (required), "description": str, "statements": [{"subject", "predicate", "value"}]}.
+        subject: Optional free text describing the architecture subject.
+        domains: Optional filter on asset domains for the relevant (unassessed) doctrine.
+        frameworks: Required regulatory frameworks (e.g. ['NIS2', 'SecNumCloud']).
+    """
+    if not isinstance(option, dict):
+        return invalid_argument_response("option", "'option' must be an object with a 'title'.")
+    title = option.get("title")
+    if not isinstance(title, str) or not title.strip():
+        return invalid_argument_response("option.title", "'option.title' is required.")
+    if option.get("statements") is not None and not isinstance(option.get("statements"), list):
+        return invalid_argument_response("option.statements", "'option.statements' must be a list.")
+    if subject is not None and not isinstance(subject, str):
+        return invalid_argument_response("subject", "'subject' must be a string.")
+    doms = _str_list(domains, "domains")
+    if isinstance(doms, dict):
+        return doms
+    fws = _str_list(frameworks, "frameworks")
+    if isinstance(fws, dict):
+        return fws
+    try:
+        from pipelines.doctrine import check_option as judge
+
+        payload = judge(
+            _doctrine_index(),
+            option=option,
+            subject=subject,
+            domains=doms,
+            frameworks=fws,
+            snapshot_id=_latest_snapshot_id(),
+        )
+        return ok_response(payload, count=len(payload["verdicts"]))
+    except Exception as e:
+        return handle_exception_response(e, context_action="check_option")
+
+
+# ---------------------------------------------------------------------------
+# KB candidate cycle (contract 1.2) — queue, automatic checks, human review.
+# ---------------------------------------------------------------------------
+
+def _candidate_service():
+    from pipelines.kb_candidates.service import CandidateService
+
+    return CandidateService(kb_dir=server_config.kb_dir, doctrine_index_loader=_doctrine_index)
+
+
+def _actor() -> str:
+    """Caller identity for the candidate history, without ever recording a raw token."""
+    import hashlib
+
+    from mcp_server.core.auth import get_current_caller
+
+    caller = get_current_caller() or "anonymous"
+    if caller in ("server_admin", "system", "admin", "default_user", "local_dev", "anonymous"):
+        return caller
+    return "token:" + hashlib.sha256(caller.encode("utf-8")).hexdigest()[:10]
+
+
+def _candidate_error(exc: Exception) -> dict[str, Any]:
+    from pipelines.kb_candidates.service import CandidateStateError
+
+    res = invalid_argument_response(getattr(exc, "argument", "candidate"), getattr(exc, "reason", str(exc)))
+    if isinstance(exc, CandidateStateError):
+        res["conflict"] = True
+    return res
+
+
+def submit_kb_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
+    """Submit a knowledge base candidate (new asset, amendment, return of experience,
+    framework ingestion). Automatic checks run immediately; the candidate then waits for a
+    human review by the owner of its domain (status 'in_review') or is blocked ('checks_failed').
+
+    Args:
+        candidate: see schemas/kb_candidate.schema.json — required: kind, title, proposed_content,
+            source.system; asset_type (except kind 'rex'); target_asset_id for an amendment.
+    """
+    from pipelines.kb_candidates.model import CandidateError
+
+    try:
+        created = _candidate_service().submit(candidate, actor=_actor())
+        return ok_response(created, count=1)
+    except CandidateError as exc:
+        return _candidate_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="submit_kb_candidate")
+
+
+def list_kb_candidates(
+    status: str | None = None,
+    source: str | None = None,
+    domain: str | None = None,
+    engagement: str | None = None,
+) -> dict[str, Any]:
+    """List knowledge base candidates, newest first.
+
+    Args:
+        status: proposed | checks_failed | in_review | accepted | rejected | published.
+        source: Source system (archinex, document-studio, mcp, cli-ingestion).
+        domain: Domain filter (a parent domain matches its sub-domains).
+        engagement: Source engagement.
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE, redact
+
+    try:
+        items = _candidate_service().find(status=status, source=source, domain=domain, engagement=engagement)
+        if not has_scope(REVIEW_SCOPE):
+            items = [redact(c) for c in items]
+        return ok_response(items, count=len(items))
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_kb_candidates")
+
+
+def get_kb_candidate(candidate_id: str) -> dict[str, Any]:
+    """Retrieve a knowledge base candidate with its checks, review and history.
+
+    Args:
+        candidate_id: Candidate identifier (e.g. 'CAND-20261001-0007').
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.model import CandidateNotFoundError
+    from pipelines.kb_candidates.service import REVIEW_SCOPE, redact
+
+    try:
+        candidate = _candidate_service().get(candidate_id)
+    except CandidateNotFoundError:
+        return not_found_response(candidate_id)
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_kb_candidate")
+    return ok_response(candidate if has_scope(REVIEW_SCOPE) else redact(candidate), count=1)
+
+
+def review_kb_candidate(
+    candidate_id: str,
+    action: str,
+    reviewer: str,
+    reason: str | None = None,
+    amended_content: str | None = None,
+) -> dict[str, Any]:
+    """Review a knowledge base candidate (requires the 'kb:review' token scope).
+
+    Args:
+        candidate_id: Candidate identifier.
+        action: 'accept', 'amend' (accept a modified content) or 'reject'.
+        reviewer: Owner handle of the reviewer (declared in data/kb/owners.yaml).
+        reason: Motive — required to amend or reject, and to accept content that conflicts with the doctrine.
+        amended_content: Full replacement content (front matter + Markdown) for 'amend'.
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required to review candidates."}
+    try:
+        reviewed = _candidate_service().review(
+            candidate_id, action, reviewer, reason=reason, amended_content=amended_content, actor=_actor()
+        )
+        return ok_response(reviewed, count=1)
+    except CandidateNotFoundError:
+        return not_found_response(candidate_id)
+    except CandidateError as exc:
+        return _candidate_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="review_kb_candidate")
+
+
+# ---------------------------------------------------------------------------
+# Regulatory coverage (contract 1.3).
+# ---------------------------------------------------------------------------
+
+def get_framework_coverage(frameworks: list[str]) -> dict[str, Any]:
+    """Coverage of regulatory frameworks by the knowledge base.
+
+    For each framework: status ('covered' | 'partial' | 'missing'), version, number of
+    expected requirements (from the framework manifest, null when unknown), present and
+    validated requirements, missing requirement ids, and who declared the coverage.
+    'covered' requires every expected requirement present, active and validated, and an
+    expert declaration.
+
+    Args:
+        frameworks: Framework codes (e.g. ['NIS2', 'ISO27001']).
+    """
+    fws = _str_list(frameworks, "frameworks")
+    if isinstance(fws, dict):
+        return fws
+    if not fws:
+        return invalid_argument_response("frameworks", "At least one framework is required.")
+    try:
+        from pipelines.compliance_mapper import compute_framework_coverage
+
+        coverage = compute_framework_coverage(fws, server_config.kb_dir)
+        return ok_response(coverage, count=len(coverage))
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_framework_coverage")

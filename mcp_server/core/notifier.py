@@ -163,3 +163,113 @@ def notify_owner_of_suggestion(
         "notifications_sent": notifications_sent,
         "message": f"Merci pour votre contribution ! Votre suggestion '{title}' a été enregistrée sous l'ID {suggestion_id} et transmise au propriétaire du Knowledge Hub (Maurice Israel).",
     }
+
+
+# ---------------------------------------------------------------------------
+# KB candidate cycle (plan L2): owner routing and consumer notifications.
+# ---------------------------------------------------------------------------
+
+OWNER_EVENT_TITLES = {
+    "in_review": "Candidat à relire",
+    "second_review": "Seconde revue requise",
+    "reminder": "Relance : candidat en attente de revue",
+}
+
+
+def _truthy(value: str | None) -> bool:
+    return str(value or "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _post(url: str, data: bytes, headers: dict[str, str]) -> bool:
+    req = urllib.request.Request(url, data=data, headers={"User-Agent": "LLMOps-Notifier/1.0", **headers})
+    with urllib.request.urlopen(req, timeout=5) as resp:
+        return 200 <= resp.status < 300
+
+
+def _send_email(to: str, subject: str, body: str) -> bool:
+    """SMTP e-mail, disabled unless KB_NOTIFY_EMAIL_ENABLED=true and SMTP_HOST is set."""
+    host = os.getenv("SMTP_HOST")
+    if not _truthy(os.getenv("KB_NOTIFY_EMAIL_ENABLED")) or not host or not to:
+        return False
+    import smtplib
+    from email.message import EmailMessage
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = os.getenv("SMTP_FROM", "knowledge-hub@localhost")
+    msg["To"] = to
+    msg.set_content(body)
+    with smtplib.SMTP(host, int(os.getenv("SMTP_PORT", "587")), timeout=10) as smtp:
+        if _truthy(os.getenv("SMTP_STARTTLS", "true")):
+            smtp.starttls()
+        if os.getenv("SMTP_USER"):
+            smtp.login(os.getenv("SMTP_USER", ""), os.getenv("SMTP_PASSWORD", ""))
+        smtp.send_message(msg)
+    return True
+
+
+def notify_owner(owner: dict[str, Any], event: str, candidate: dict[str, Any]) -> list[str]:
+    """Notify a domain owner about a KB candidate on the owner's configured channels.
+
+    ``owner``: ``{"handle", "email", "discord_webhook", "ntfy_topic"}`` (data/kb/owners.yaml).
+    Returns the channels actually used (``log`` is always used).
+    """
+    handle = owner.get("handle") or "@maintainers"
+    title = f"{OWNER_EVENT_TITLES.get(event, event)} : {candidate.get('title', '')}"
+    failed = [c["name"] for c in candidate.get("checks") or [] if c.get("status") != "pass"]
+    body = (
+        f"Candidat {candidate.get('id')} ({candidate.get('kind')}, {candidate.get('asset_type') or 'n/a'})\n"
+        f"Domaines : {', '.join(candidate.get('domain') or []) or 'n/a'}\n"
+        f"Source : {(candidate.get('source') or {}).get('system')} / {(candidate.get('source') or {}).get('author') or 'n/a'}\n"
+        f"Contrôles à examiner : {', '.join(failed) or 'aucun'}\n"
+        f"Revue : PATCH /api/knowledge/candidates/{candidate.get('id')}"
+    )
+    logger.warning("📥 [KB_CANDIDATE_%s] %s -> %s | %s", event.upper(), candidate.get("id"), handle, title)
+    sent = ["log"]
+    try:
+        if owner.get("discord_webhook"):
+            payload = {"username": "Knowledge Hub Bot", "content": f"{handle} — **{title}**\n{body}"}
+            if _post(owner["discord_webhook"], json.dumps(payload).encode("utf-8"), {"Content-Type": "application/json"}):
+                sent.append("discord")
+    except Exception as err:
+        logger.debug("Discord notification to %s failed: %s", handle, err)
+    try:
+        if owner.get("ntfy_topic"):
+            base = os.getenv("NTFY_BASE_URL", "https://ntfy.sh").rstrip("/")
+            if _post(f"{base}/{owner['ntfy_topic']}", body.encode("utf-8"), {"Title": title[:200], "Tags": "books"}):
+                sent.append("ntfy")
+    except Exception as err:
+        logger.debug("ntfy notification to %s failed: %s", handle, err)
+    try:
+        if _send_email(str(owner.get("email") or ""), f"[Knowledge Hub] {title}", body):
+            sent.append("email")
+    except Exception as err:
+        logger.debug("E-mail notification to %s failed: %s", handle, err)
+    return sent
+
+
+def notify_consumers(event: str, payload: dict[str, Any]) -> list[str]:
+    """Notify knowledge base consumers (e.g. a new published version).
+
+    Channels: ``KB_CONSUMER_WEBHOOKS`` (comma-separated JSON webhooks) and
+    ``KB_CONSUMER_NTFY_TOPIC``. Returns the channels actually used (``log`` always).
+    """
+    logger.warning("📦 [KB_%s] %s", event.upper(), json.dumps(payload, ensure_ascii=False, default=str)[:500])
+    sent = ["log"]
+    for url in [u.strip() for u in os.getenv("KB_CONSUMER_WEBHOOKS", "").split(",") if u.strip()]:
+        try:
+            if _post(url, json.dumps({"event": event, **payload}, default=str).encode("utf-8"),
+                     {"Content-Type": "application/json"}):
+                sent.append("webhook")
+        except Exception as err:
+            logger.debug("Consumer webhook %s failed: %s", url, err)
+    topic = os.getenv("KB_CONSUMER_NTFY_TOPIC")
+    if topic:
+        base = os.getenv("NTFY_BASE_URL", "https://ntfy.sh").rstrip("/")
+        try:
+            text = f"{event}: {payload.get('snapshot_id') or ''} ({len(payload.get('candidates') or [])} candidate(s))"
+            if _post(f"{base}/{topic}", text.encode("utf-8"), {"Title": "Knowledge Hub"}):
+                sent.append("ntfy")
+        except Exception as err:
+            logger.debug("Consumer ntfy notification failed: %s", err)
+    return sent

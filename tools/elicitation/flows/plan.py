@@ -22,8 +22,10 @@ class PlanState(TypedDict, total=False):
 
 
 def plan_node(state: PlanState) -> dict[str, Any]:
-    engagement = state.get("engagement", "nordwave-mcx-2027")
-    bp_path = state.get("blueprint_path", "data/kb/blueprints/BLU-hla-mcx.yaml")
+    from mcp_server.core.config import require_blueprint_path, require_engagement
+
+    engagement = require_engagement(state.get("engagement"))
+    bp_path = state.get("blueprint_path") or require_blueprint_path()
     db_path = state.get("db_path", "data/kuzu_db")
     roster_path = state.get("roster_path")
 

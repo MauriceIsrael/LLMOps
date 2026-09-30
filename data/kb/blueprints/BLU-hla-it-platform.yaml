@@ -1,0 +1,165 @@
+id: BLU-hla-it-platform
+title: High-level solution architecture — IT infrastructure platform (bare metal to PaaS)
+type: blueprint
+version: 1
+status: draft
+confidence: assumed
+owner: infrastructure-architecture-wg
+last_reviewed: 2026-09-29
+domain:
+  - it-infrastructure
+  - it-infrastructure/bare-metal
+  - it-infrastructure/virtualization
+  - it-infrastructure/container-orchestration
+  - it-infrastructure/paas
+compliance_targets:
+  - NIS2
+  - ISO27001
+  - SecNumCloud
+derived_from:
+  - generic IT platform layering (bare metal, virtualization, container orchestration, PaaS)
+
+notes: >-
+  DRAFT proposed by the coding agent (plan L3 §6.3) — to be reviewed by the
+  infrastructure architecture owners before use. Generic blueprint: no client, site or
+  product name. Section numbering is local to this blueprint.
+
+  `roots` are created at `L0_named` when the blueprint is bound; the other subjects are
+  discovered by decomposition.
+
+roots:
+  - name: platform-scope
+    definition: What the platform hosts, for which tenants, and where its boundaries fall.
+  - name: bare-metal-layer
+    definition: Physical servers, their provisioning and out-of-band management.
+  - name: virtualization-layer
+    definition: Hypervisor clusters, virtual machine lifecycle and host maintenance.
+  - name: container-platform
+    definition: Container orchestration clusters, node pools and their fleet management.
+  - name: paas-layer
+    definition: Platform services and self-service offered to application teams.
+  - name: platform-network
+    definition: Underlay, overlay, ingress and egress of the platform.
+  - name: platform-storage
+    definition: Block, file and object storage, and data protection.
+  - name: platform-security
+    definition: Tenant isolation, identity, secrets, hardening and accreditation.
+  - name: platform-observability
+    definition: Metrics, logs, traces and capacity signals of every layer.
+  - name: platform-operations
+    definition: Run model, lifecycle, upgrades and incident management.
+
+sections:
+- id: '1'
+  title: Scope, Tenants & Service Boundaries
+  must_answer: Which workloads and tenants does the platform host, what is out of scope, and which service levels are committed?
+  requires:
+  - subject: platform-scope
+    level: L2_decomposed
+  unlocks: ['2', '3', '4', '5']
+  routes_to: chief-architect
+  informed_by: [principle]
+- id: '2'
+  title: Bare-Metal Provisioning
+  must_answer: How are physical servers discovered, provisioned from images, reached out-of-band and retired?
+  requires:
+  - subject: bare-metal-layer
+    level: L3_decided
+  unlocks: ['3']
+  routes_to: cloud-platform-architect
+  informed_by: [principle, pattern, decision]
+- id: '3'
+  title: Virtualization Layer
+  must_answer: Which hypervisor clusters exist, how are hosts maintained without workload loss, and which workloads stay on bare metal?
+  requires:
+  - subject: virtualization-layer
+    level: L3_decided
+  unlocks: ['4']
+  routes_to: cloud-platform-architect
+  informed_by: [pattern, decision]
+- id: '4'
+  title: Container Orchestration
+  must_answer: How many clusters, per environment and security zone, how are they reconciled and upgraded, and how are node pools segregated?
+  requires:
+  - subject: container-platform
+    level: L3_decided
+  unlocks: ['5', '8.2']
+  routes_to: cloud-platform-architect
+  informed_by: [principle, pattern, decision]
+- id: '5'
+  title: Platform as a Service & Golden Paths
+  must_answer: Which platform services are self-service, through which declarative API, and with which guardrails?
+  requires:
+  - subject: paas-layer
+    level: L2_decomposed
+  unlocks: []
+  routes_to: cloud-platform-architect
+  informed_by: [pattern, decision]
+- id: '6'
+  title: Platform Network (Underlay, Overlay, Ingress, Egress)
+  must_answer: How is traffic segmented between layers and tenants, and how are north-south flows controlled?
+  requires:
+  - subject: platform-network
+    level: L3_decided
+  unlocks: ['8.1']
+  routes_to: transport-architect
+  informed_by: [pattern]
+- id: '7'
+  title: Storage & Data Protection
+  must_answer: Which storage classes exist per layer, and how are stateful workloads backed up and restored outside their cluster?
+  requires:
+  - subject: platform-storage
+    level: L3_decided
+  unlocks: ['10.2']
+  routes_to: cloud-platform-architect
+  informed_by: [pattern]
+- id: '8.1'
+  title: Tenant Isolation & Security Zoning
+  must_answer: At which layer is each isolation boundary enforced, and how is it verified?
+  requires:
+  - subject: platform-security
+    level: L3_decided
+  unlocks: ['8.2']
+  routes_to: security-architect
+  informed_by: [principle, decision]
+  compliance_controls: [NIS2-ART21-2A, NIS2-ART21-2I]
+- id: '8.2'
+  title: Images, Hardening & Supply Chain
+  must_answer: How are bare-metal, virtual machine and container base images built, scanned, signed and replaced?
+  requires:
+  - subject: platform-security
+    level: L3_decided
+  unlocks: []
+  routes_to: security-architect
+  informed_by: [principle, pattern]
+  compliance_controls: [NIS2-ART21-2D, NIS2-ART21-2E]
+- id: '9'
+  title: Observability & Capacity Management
+  must_answer: Which signals does each layer emit, and how is headroom per failure domain tracked?
+  requires:
+  - subject: platform-observability
+    level: L3_decided
+  unlocks: ['10.1']
+  routes_to: observability-architect
+  informed_by: [principle]
+- id: '10.1'
+  title: Run Model, Lifecycle & Upgrades
+  must_answer: Who operates each layer, with which supported-version window and upgrade cadence?
+  requires:
+  - subject: platform-operations
+    level: L3_decided
+  unlocks: []
+  routes_to: delivery-lead
+  informed_by: [principle, decision]
+- id: '10.2'
+  title: Business Continuity & Disaster Recovery
+  must_answer: Which failure domains does the platform survive, with which recovery objectives, and how is restoration tested?
+  requires:
+  - subject: platform-operations
+    level: L3_decided
+  - subject: platform-storage
+    level: L3_decided
+  unlocks: []
+  routes_to: chief-architect
+  informed_by: [principle, pattern]
+  compliance_controls: [NIS2-ART21-2C]

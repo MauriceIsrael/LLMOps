@@ -83,7 +83,11 @@ make demo-check
    Exhaustive technical compliance coverage across European and mission-critical standards: NIS2, CER (Critical Entities Resilience EU 2022/2557), CRA (Cyber Resilience Act EU 2024/2847), GDPR, GSMA (SGP.22/32 eSIM, Central EIR, SAS EAL4+), 3GPP Rel-18 (MCX, NEF, SCAS/NESAS, MDA AIOps), ITIL v4 / FCAPS O&M, Telco Resilience (Tier IV dual-datacenter, G.8275.1 PTP sync, >30d Rubidium holdover), and PPDR Tactical Terminals (ECC Band 68/28, TETRA DMO, MIL-STD-810H, ATEX, ISO 11451/UN R2144 vehicle EMC).
 9. **Automated RFP Shredder & Bilingual Zero-Draft HLD Engine (FR / EN)**  
    Deconstructs client tenders into atomic requirements (`shred-rfp`), builds the triangular compliance matrix against standard architecture decisions (ADRs) and regulatory controls, and auto-generates a High-Level Design pre-sales document (`zero-draft-hld`) in English or French with zero residual gaps. Ready-to-use deliverable templates are available in `templates/HLD-zero-draft-template.md` (FR) and `templates/HLD-zero-draft-template.en.md` (EN).
-10. **Dual-Mode Architecture & Architecture Suite Contract v1**  
+10. **Doctrine Context & Option Judge (contract 1.1)**  
+    `get_doctrine_context` / `GET /api/knowledge/context` returns the doctrine applicable to a subject (active principles, required regulatory controls, patterns, ADRs) with bounded excerpts; `check_option` / `POST /api/knowledge/check` judges an option against structured `checks` clauses of the doctrine (`supports` / `violates` / `unassessed`, with citations). Both are fully deterministic — no LLM on the server. Evaluation: `make eval-check`.
+11. **Knowledge Enrichment Cycle (contract 1.2)**  
+    Every new piece of knowledge goes through a persisted candidate queue (`/api/knowledge/candidates`, `submit_kb_candidate`…), deterministic checks (schema, references, duplicates, anonymization, doctrine conflicts, unreviewed LLM content), routing to the domain owner (`data/kb/owners.yaml`) and a human review (second review for principles), before `kb promote` / `kb publish` write and seal it. Confidence is computed from evidence, never from the author.
+12. **Dual-Mode Architecture & Architecture Suite Contract v1**  
     Provides both synchronous REST endpoints (`/api/rfp/*`, `/api/compliance/*`, `/api/knowledge/*`, `/api/skills/*`) for interactive web interfaces and CLI tools, as well as sealed canonical snapshots (`latest.json`) for offline-first admission gates (per ADR-SUITE-05). All contracts follow strict provenance (`sourceSystem: "knowledge-hub"`), canonical SHA-256 sealing, and Fail Loud resilience.
 
 ---
@@ -103,15 +107,37 @@ make verify
 # Install the git pre-push hook running `make verify`
 make hooks
 
+# End-to-end scenarios of the reference demo (examples/), and the project-name guard
+make test-e2e
+make check-names
+
+# Regulatory framework ingestion (offline) and coverage
+poetry run kb ingest-framework --framework NIS2 --version 2022/2555 --source <official text>
+poetry run kb review-sheet --framework NIS2 && poetry run kb apply-review data/staging/NIS2/2022-2555/review_sheet.csv
+poetry run kb declare-coverage --framework NIS2 --by @expert-handle
+poetry run kb coverage-report   # docs/COVERAGE.md
+
+# Knowledge base candidate cycle (maintainers)
+poetry run kb list --status in_review
+poetry run kb promote CAND-20261001-0007
+poetry run kb publish
+poetry run kb remind   # schedule with cron
+
 # Run interactive CLI elicitation scan
 poetry run elicit scan --engagement demo-engagement-2027 --max-questions 3
 ```
+
+> **No project is hard-coded.** Tools, routes and `elicit` commands that need an engagement or a
+> blueprint take them explicitly or from `LLMOPS_ENGAGEMENT` / `LLMOPS_BLUEPRINT` (environment or
+> `.env`; `make demo`, the Dockerfile and `cloudbuild.yaml` set them for the reference demo). The
+> reference demo lives in [`examples/`](examples/README.md).
 
 ---
 
 ## Documentation Links
 
 - **[Knowledge Hub API v1 Contract](docs/contracts/knowledge-hub-api-v1.md)**: Formal contract specification for the Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).
+- **[Regulatory Coverage](docs/COVERAGE.md)**: coverage of each framework by the knowledge base (manifests, missing requirements).
 - **[Versioning](docs/VERSIONING.md)** and **[Deprecation Policy](docs/DEPRECATION.md)**: contract `1.x` guarantees, frozen interface shapes (`tests/contract/frozen/`), deprecation signals.
 - **[Third-Party Integration Guide](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**: Full guide to writing custom renderers (DOCX, PPTX, Web UI) and consuming sealed snapshots.
 - **[External Interface Specification (INTERFACE.md)](docs/INTERFACE.md)**: Technical MCP contract, response envelopes, JSON Schemas, and transport protocols.
