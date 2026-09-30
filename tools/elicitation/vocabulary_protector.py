@@ -5,13 +5,16 @@ from tools.elicitation.repository import ElicitationRepository
 
 
 def map_material_vocabulary(
-    material_text: str, repo: ElicitationRepository, engagement: str = "nordwave-mcx-2027"
+    material_text: str, repo: ElicitationRepository, engagement: str | None = None
 ) -> tuple[list[str], list[str]]:
     """Cartographie les termes du matériel externe sur les sujets canoniques existants.
 
     Retourne:
       (mapped_subjects, unmapped_terms)
     """
+    from mcp_server.core.config import resolve_engagement
+
+    engagement = engagement or resolve_engagement() or "default"
     board = repo.get_subjects_maturity_board(engagement)
     existing_subjects = {b["subject"] for b in board}
 

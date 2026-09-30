@@ -248,6 +248,38 @@ def generate_kb_candidate_schema() -> dict[str, Any]:
     }
 
 
+def generate_framework_coverage_schema() -> dict[str, Any]:
+    """Coverage entry (get_framework_coverage / coverage of GET /api/compliance/frameworks/applicable)."""
+    entry = {
+        "type": "object",
+        "required": ["status", "version", "expected", "present", "validated", "missing_ids", "declared_by"],
+        "properties": {
+            "status": {"enum": ["covered", "partial", "missing"]},
+            "version": {"type": ["string", "null"]},
+            "expected": {"type": ["integer", "null"], "minimum": 0},
+            "present": {"type": "integer", "minimum": 0},
+            "validated": {"type": "integer", "minimum": 0},
+            "missing_ids": {"type": "array", "items": {"type": "string"}},
+            "declared_by": {"type": ["string", "null"]},
+            "provisional": {"type": ["boolean", "null"]},
+            "manifest": {"type": "boolean"},
+        },
+    }
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "FrameworkCoverageResponse",
+        "description": "Coverage of regulatory frameworks by the knowledge base (contract 1.3).",
+        "type": "object",
+        "required": ["status", "count", "data"],
+        "properties": {
+            "status": {"const": "ok"},
+            "count": {"type": "integer", "minimum": 0},
+            "data": {"type": "object", "additionalProperties": entry},
+        },
+        "definitions": {"FrameworkCoverage": entry},
+    }
+
+
 def generate_typescript_types() -> str:
     conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
     subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
@@ -256,7 +288,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.2")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.3")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -535,6 +567,30 @@ export interface KbCandidate extends KbCandidateSubmission {{
   updated_at: string;
 }}
 
+/* ---- Contract 1.3: regulatory coverage ------------------------------------ */
+
+export interface FrameworkCoverage {{
+  status: "covered" | "partial" | "missing";
+  version: string | null;
+  expected: number | null;
+  present: number;
+  validated: number;
+  missing_ids: string[];
+  declared_by: string | null;
+  provisional?: boolean | null;
+  manifest?: boolean;
+}}
+
+export type FrameworkCoverageMap = Record<string, FrameworkCoverage>;
+
+export interface ApplicableFrameworksResponse {{
+  status: "ok";
+  engagement: string;
+  applicable_frameworks: string[];
+  count: number;
+  coverage?: FrameworkCoverageMap;
+}}
+
 export interface KbCandidateReviewRequest {{
   action: KbReviewAction;
   reviewer: string;
@@ -558,6 +614,7 @@ def main() -> None:
         ("doctrine_context.schema.json", generate_doctrine_context_schema()),
         ("check_result.schema.json", generate_check_result_schema()),
         ("kb_candidate.schema.json", generate_kb_candidate_schema()),
+        ("framework_coverage.schema.json", generate_framework_coverage_schema()),
     ):
         (schemas_dir / filename).write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
         print(f"Generated: schemas/{filename}")

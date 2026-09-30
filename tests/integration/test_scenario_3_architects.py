@@ -11,10 +11,11 @@ from tools.elicitation.repository import ElicitationRepository
 pytestmark = pytest.mark.stochastic
 
 
-def test_end_to_end_3_architects_scenario(tmp_path):
+def test_end_to_end_3_architects_scenario(tmp_path, scripted_interpretation):
     """Déroule le scénario complet entre Alice (cloud-architect), Bob (storage-expert) et Charlie (chief-architect)."""
     db_path = tmp_path / "kuzu_db"
     engagement = "test-3-arch"
+    scripted_interpretation(engagement)
     repo = ElicitationRepository(db_path=db_path)
 
     # 1. SCAN : Détection des manques

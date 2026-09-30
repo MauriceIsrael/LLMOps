@@ -142,4 +142,19 @@ class ArchitectureGraphExtractor:
                     )
                 )
 
+        # A control lists the assets that satisfy it (``satisfied_by``, set by the expert
+        # review of a framework ingestion): same IMPLEMENTS edge, declared from the control.
+        satisfied_by = frontmatter.get("satisfied_by")
+        if doc_type == "control" and satisfied_by:
+            if isinstance(satisfied_by, str):
+                satisfied_by = [satisfied_by]
+            for source_asset in satisfied_by:
+                relations.append(
+                    Relation(
+                        source_id=str(source_asset),
+                        target_id=doc_id,
+                        label="IMPLEMENTS",
+                    )
+                )
+
         return nodes, relations

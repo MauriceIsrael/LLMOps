@@ -9,8 +9,11 @@ from tools.elicitation.repository import ElicitationRepository
 __all__ = ["bind_blueprint", "load_blueprint", "Blueprint"]
 
 
-def bind_blueprint(target: Any = None, engagement: str = "nordwave-mcx-2027", blueprint: Any = None, db_path: str | Path = "data/kuzu_db") -> None:
+def bind_blueprint(target: Any = None, engagement: str | None = None, blueprint: Any = None, db_path: str | Path = "data/kuzu_db") -> None:
     """Lie un blueprint à un engagement dans le repository."""
+    from mcp_server.core.config import require_engagement
+
+    engagement = require_engagement(engagement)
     if isinstance(target, ElicitationRepository):
         repo = target
         bp = blueprint

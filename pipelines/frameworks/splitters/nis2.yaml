@@ -1,0 +1,24 @@
+# Splitter of Directive (EU) 2022/2555 (NIS 2) — one requirement per article paragraph,
+# or per point when the paragraph lists points (Article 21(2)(a)...(j)).
+framework: NIS2
+title: "Directive (EU) 2022/2555 (NIS 2)"
+jurisdiction: EU
+mode: structured
+levels:
+  - name: article
+    pattern: '^Article\s+(?P<num>\d+)\s*$'
+    title_next_line: true
+  - name: paragraph
+    pattern: '^(?P<num>\d+)\.\s+(?P<text>.+)$'
+  - name: point
+    pattern: '^\((?P<num>[a-z])\)\s+(?P<text>.+)$'
+id_template: "NIS2-ART{article}-{paragraph}{point_upper}"
+ref_template: "Directive (EU) 2022/2555 (NIS 2), Article {article}{paragraph_paren}{point_paren}"
+# Obligations of essential and important entities (governance, risk-management measures,
+# reporting). Extend the list to ingest more articles.
+include:
+  article: ["20", "21", "23"]
+defaults:
+  domain: [security-governance]
+  severity: mandatory
+  target_entities: [essential, important]

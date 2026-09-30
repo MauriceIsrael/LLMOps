@@ -1,0 +1,33 @@
+# Coverage manifest of NIS2 (plan L3 §6.1). PROVISIONAL (no source ingested yet): replace it by running `kb ingest-framework` on the source.
+# `coverage_declared_by` is only set by the expert through `kb declare-coverage`.
+framework: NIS2
+version: 2022/2555
+title: Directive (EU) 2022/2555 (NIS 2)
+source:
+  status: missing
+  expected: Official Journal of the EU text of Directive (EU) 2022/2555 (EUR-Lex HTML or PDF)
+  note: 'Provisional list: one unit per paragraph/point of Articles 20, 21 and 23 (entity obligations), from the directive structure. Run `kb ingest-framework --framework NIS2` on the official text to replace it.'
+source_sha256: null
+provisional: true
+expected_requirements:
+- NIS2-ART20-1
+- NIS2-ART20-2
+- NIS2-ART21-1
+- NIS2-ART21-2A
+- NIS2-ART21-2B
+- NIS2-ART21-2C
+- NIS2-ART21-2D
+- NIS2-ART21-2E
+- NIS2-ART21-2F
+- NIS2-ART21-2G
+- NIS2-ART21-2H
+- NIS2-ART21-2I
+- NIS2-ART21-2J
+- NIS2-ART21-3
+- NIS2-ART21-4
+- NIS2-ART23-1
+- NIS2-ART23-2
+- NIS2-ART23-3
+- NIS2-ART23-4
+coverage_declared_by: null
+coverage_declared_at: null

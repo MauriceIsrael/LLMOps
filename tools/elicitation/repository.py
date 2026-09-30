@@ -9,6 +9,13 @@ from tools.elicitation.db_schema import ElicitationSchemaInitializer
 from tools.ports.graph_store import GraphStore
 
 
+def _default_engagement() -> str:
+    """Engagement of the deployment (LLMOPS_ENGAGEMENT), or 'default' — never a hard-coded project."""
+    from mcp_server.core.config import resolve_engagement
+
+    return resolve_engagement() or "default"
+
+
 class ElicitationRepository:
     """Repository d'accès aux données pour l'élicitation avec validation stricte."""
 
@@ -44,11 +51,12 @@ class ElicitationRepository:
     def save_subject(
         self,
         name: str,
-        engagement: str = "nordwave-mcx-2027",
+        engagement: str | None = None,
         definition: str = "",
         origin: str = "blueprint",
     ) -> None:
         """Enregistre ou met à jour un sujet d'architecture dans Kùzu DB scopé par engagement."""
+        engagement = engagement or _default_engagement()
         check_query = (
             "MATCH (s:Subject) WHERE s.name = $name AND (s.engagement = $engagement OR s.engagement = 'default') "
             "RETURN s.name as name, s.level as level;"
@@ -185,7 +193,7 @@ class ElicitationRepository:
             count = len(res) + 1 if res and "error" not in res[0] else 1
             s_id = f"S-{count:04d}"
 
-        engagement = statement.get("engagement", "nordwave-mcx-2027")
+        engagement = statement.get("engagement") or _default_engagement()
         sec = statement.get("section", "general")
         val = statement.get("value", "")
         author = statement.get("author", "unknown")
@@ -471,9 +479,12 @@ class ElicitationRepository:
         query = "MATCH (s:Statement {engagement: $engagement}) OPTIONAL MATCH (s)-[:ABOUT]->(sub:Subject) RETURN s.id as id, s.section as section, sub.name as subject, s.subject as subject_direct, s.predicate as predicate, s.value as value, s.unit as unit, s.author as author, s.role as role, s.confidence as confidence, s.verbatim as verbatim, s.status as status, s.based_on as based_on;"
         rows = self.db_client.execute_cypher(query, params={"engagement": engagement})
         if rows and "error" not in rows[0]:
+            from tools.elicitation.profile import load_profile
+
+            default_subject = load_profile(engagement).default_subject
             for r in rows:
                 if not r.get("subject"):
-                    r["subject"] = r.get("subject_direct") or "mcx-services"
+                    r["subject"] = r.get("subject_direct") or default_subject
                 bo = r.get("based_on")
                 if bo and isinstance(bo, str):
                     try:
@@ -504,7 +515,7 @@ class ElicitationRepository:
             raise ValueError(f"Niveau de maturité inconnu '{target_level}'. Niveaux valides : {SUBJECT_LEVELS}")
 
         now_str = datetime.now().isoformat()
-        eng = engagement or "nordwave-mcx-2027"
+        eng = engagement or _default_engagement()
         self.save_subject(target_name, engagement=eng)
         sub_id = f"{eng}:{target_name}"
 
@@ -587,8 +598,9 @@ class ElicitationRepository:
 
         return trajectory
 
-    def get_subject_maturity(self, subject_name: str = "", engagement: str = "nordwave-mcx-2027", name: str | None = None) -> dict[str, Any]:
+    def get_subject_maturity(self, subject_name: str = "", engagement: str | None = None, name: str | None = None) -> dict[str, Any]:
         """Récupère les détails de maturité d'un sujet scopé par engagement (avec fallback)."""
+        engagement = engagement or _default_engagement()
         target_name = name or subject_name
         query = (
             "MATCH (s:Subject) WHERE s.name = $target_name AND (s.engagement = $engagement OR s.engagement = 'default' OR s.engagement IS NULL) "
@@ -653,9 +665,10 @@ class ElicitationRepository:
         return board
 
     def contest_statement(
-        self, target_statement_id: str, author: str, role: str, text: str, engagement: str = "nordwave-mcx-2027"
+        self, target_statement_id: str, author: str, role: str, text: str, engagement: str | None = None
     ) -> tuple[str, str]:
         """Conteste un énoncé existant sans l'écraser et génère un conflit d'architecture."""
+        engagement = engagement or _default_engagement()
         # 1. Enregistrer le nouvel énoncé contestateur
         s_id = self.save_statement({
             "engagement": engagement,
@@ -683,11 +696,12 @@ class ElicitationRepository:
         return s_id, c_id
 
     def demote_subject(
-        self, subject_name: str | None = None, to_level: str | None = None, author: str | None = None, reason: str | None = None, engagement: str = "nordwave-mcx-2027", *, name: str | None = None, by: str | None = None
+        self, subject_name: str | None = None, to_level: str | None = None, author: str | None = None, reason: str | None = None, engagement: str | None = None, *, name: str | None = None, by: str | None = None
     ) -> dict[str, Any]:
         """Rétrograde la maturité d'un sujet (demotion non-monotone).
         Marque les énoncés de niveau supérieur en 'under_review' et réouvre les questions fermées.
         """
+        engagement = engagement or _default_engagement()
         target_name = name or subject_name or ""
         target_to_level = to_level or ""
         now_str = datetime.now().isoformat()

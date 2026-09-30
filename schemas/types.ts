@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.2")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.3")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -276,6 +276,30 @@ export interface KbCandidate extends KbCandidateSubmission {
   published?: { snapshot_id: string | null; at: string };
   created_at: string;
   updated_at: string;
+}
+
+/* ---- Contract 1.3: regulatory coverage ------------------------------------ */
+
+export interface FrameworkCoverage {
+  status: "covered" | "partial" | "missing";
+  version: string | null;
+  expected: number | null;
+  present: number;
+  validated: number;
+  missing_ids: string[];
+  declared_by: string | null;
+  provisional?: boolean | null;
+  manifest?: boolean;
+}
+
+export type FrameworkCoverageMap = Record<string, FrameworkCoverage>;
+
+export interface ApplicableFrameworksResponse {
+  status: "ok";
+  engagement: string;
+  applicable_frameworks: string[];
+  count: number;
+  coverage?: FrameworkCoverageMap;
 }
 
 export interface KbCandidateReviewRequest {

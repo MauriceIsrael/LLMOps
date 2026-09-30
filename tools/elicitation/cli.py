@@ -17,10 +17,31 @@ app = typer.Typer(help="CLI d'élicitation d'architecture pilotée par les manqu
 console = Console()
 
 
+# No project is hard-coded: the engagement and the blueprint come from the options or from
+# LLMOPS_ENGAGEMENT / LLMOPS_BLUEPRINT (environment or .env, as set by `make demo`).
+def _require_engagement(value: str | None) -> str:
+    if not value:
+        raise typer.BadParameter("no engagement: pass --engagement or set LLMOPS_ENGAGEMENT (environment or .env).")
+    return value
+
+
+def _require_blueprint(value: str | None) -> str:
+    if not value:
+        raise typer.BadParameter("no blueprint: pass --blueprint or set LLMOPS_BLUEPRINT (environment or .env).")
+    return value
+
+
+def _require_blueprint_path(value: str | None) -> str:
+    from mcp_server.core.config import resolve_blueprint_path
+
+    path = resolve_blueprint_path(_require_blueprint(value))
+    return str(path)
+
+
 @app.command()
 def plan(
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement projet"),
-    blueprint_path: str = typer.Option("data/kb/blueprints/BLU-hla-mcx.yaml", "--blueprint", "-b", help="Fichier blueprint structuré"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement projet"),
+    blueprint_path: str = typer.Option(None, "--blueprint", "-b", envvar="LLMOPS_BLUEPRINT", callback=_require_blueprint_path, help="Fichier blueprint structuré"),
 ) -> None:
     """Affiche le plan d'instructions complet (Instruction Plan) à 4 blocs selon SPEC-PLANNING-AND-DEMO."""
     from tools.elicitation.plan import generate_instruction_plan, render_plan_cli
@@ -30,8 +51,8 @@ def plan(
 
 @app.command()
 def scan(
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement projet"),
-    blueprint: str = typer.Option("BLU-hla-mcx", "--blueprint", "-b", help="Identifiant ou chemin du blueprint d'architecture"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement projet"),
+    blueprint: str = typer.Option(None, "--blueprint", "-b", envvar="LLMOPS_BLUEPRINT", callback=_require_blueprint, help="Identifiant ou chemin du blueprint d'architecture"),
     max_questions: int = typer.Option(8, "--max-questions", "-m", help="Nombre maximal de questions à émettre"),
     strategy: str = typer.Option("breadth", "--strategy", help="Stratégie de dispatch : breadth (défaut pour BID) ou depth (pour BUILD)"),
 ) -> None:
@@ -226,7 +247,7 @@ def arbitrate(
 def subject(
     name: str = typer.Argument(..., help="Nom du sujet canonique (ex: floor-control)"),
     trajectory: bool = typer.Option(True, "--trajectory", help="Aicher la trajectoire de maturité chronologique du sujet"),
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Affiche la trajectoire de maturité d'un sujet (questions et énoncés chronologiques)."""
     from tools.elicitation.trajectory import get_subject_trajectory, render_trajectory_cli
@@ -240,7 +261,7 @@ def demote(
     to: str = typer.Option("L2_decomposed", "--to", help="Niveau de cible après rétrogradation (ex: L2_decomposed)"),
     as_user: str | None = typer.Option(None, "--as", help="Auteur de la rétrogradation (ex: --as sofia)"),
     reason: str = typer.Option(..., "--reason", "-r", help="Raison explicite de la rétrogradation"),
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Rétrograde la maturité d'un sujet (demotion non-monotone) et réouvre les questions fermées."""
     author, _ = resolve_impersonation(as_user, "sofia", "chief-architect", engagement)
@@ -252,7 +273,7 @@ def demote(
 
 @app.command()
 def submit(
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
     as_user: str = typer.Option("external:m.okonkwo", "--as", help="Identifiant du contributeur externe (ex: --as external:m.okonkwo)"),
     title: str = typer.Option(..., "--title", help="Titre explicatif du matériel proposé"),
     material: str = typer.Option(..., "--material", help="Texte ou chemin vers le fichier de matériel"),
@@ -276,7 +297,7 @@ def submit(
 
 @app.command()
 def contributions(
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
     status: str | None = typer.Option(None, "--status", help="Filtrer par statut (submitted, triaged, accepted, declined)"),
 ) -> None:
     """Lister les contributions spontanées de l'engagement."""
@@ -307,7 +328,7 @@ def triage(
     accept: bool = typer.Option(True, "--accept/--decline", help="Accepter ou refuser le tri de la contribution"),
     reason: str = typer.Option("", "--reason", help="Raison en cas de refus ou de réorientation"),
     to_subject: str | None = typer.Option(None, "--to-subject", help="Sujet canonique cible"),
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Effectuer le tri d'une contribution spontanée par l'architecte lead."""
     from tools.elicitation.contribution_repository import ContributionRepository
@@ -320,7 +341,7 @@ def triage(
 @app.command()
 def crystallise(
     contribution_id: str = typer.Argument(..., help="Identifiant de la contribution (ex: CT-0001)"),
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Formuler les énoncés candidats et cartographier le vocabulaire d'une contribution triée."""
     from tools.elicitation.contribution_repository import ContributionRepository
@@ -336,7 +357,7 @@ def confirm_contribution(
     contribution_id: str = typer.Argument(..., help="Identifiant de la contribution (ex: CT-0001)"),
     as_user: str = typer.Option(..., "--as", help="Auteur de la contribution confirmant le sens (ex: --as external:m.okonkwo)"),
     accept: bool = typer.Option(True, "--accept/--reject", help="Confirmer ou rejeter la fidélité du sens extrait"),
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Confirmation du SENS par l'auteur d'une contribution externe."""
     from tools.elicitation.contribution_repository import ContributionRepository
@@ -350,7 +371,7 @@ def accept(
     contribution_id: str = typer.Argument(..., help="Identifiant de la contribution (ex: CT-0001)"),
     as_user: str = typer.Option("sofia", "--as", help="Architecte lead validant l'entrée dans le graphe (ex: --as sofia)"),
     section: str = typer.Option("4.5", "--section", help="Section documentaire cible"),
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Validation finale de l'ENTRÉE dans le graphe par l'architecte lead."""
     from tools.elicitation.contribution_repository import ContributionRepository
@@ -481,7 +502,7 @@ def harvest(
 
 @app.command()
 def publish(
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Engagement identifier to publish"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Engagement identifier to publish"),
     db_path: str | None = typer.Option(None, "--db-path", "-d", help="Optional working database source path"),
 ) -> None:
     """Takes a consistent snapshot of the working graph and installs it atomically at data/engagements/<id>.kuzu."""
@@ -586,7 +607,7 @@ app.add_typer(engagement_app, name="engagement")
 
 @engagement_app.command(name="create")
 def engagement_create(
-    engagement_id: str = typer.Argument(..., help="Identifier for new engagement (e.g. nordwave-mcx-2027)"),
+    engagement_id: str = typer.Argument(..., help="Identifier for new engagement (e.g. my-engagement-2027)"),
 ) -> None:
     """Creates a new empty engagement database with engagement schema."""
     from mcp_server.core.db import get_engagement_path, validate_engagement_id
@@ -641,7 +662,7 @@ def staff_add_skill(
     skill: str = typer.Option(..., "--skill", "-s", help="Identifiant de la compétence (ex: SKL-CRYPTO-HSM)"),
     level: str = typer.Option("senior", "--level", "-l", help="Niveau d'expertise (novice, intermediate, senior, expert)"),
     evidence: str = typer.Option("Attestation d'expérience / formation", "--evidence", help="Preuve d'expertise"),
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Ajouter une compétence vérifiée à un profil du roster."""
     from tools.elicitation.mailbox.roster import RosterManager
@@ -659,7 +680,7 @@ def staff_assign(
     name: str | None = typer.Option(None, "--name", "-n", help="Nom complet du collaborateur"),
     role: str = typer.Option("architect", "--role", "-r", help="Rôle principal"),
     skills: str = typer.Option("", "--skills", "-k", help="Compétences séparées par des virgules (ex: SKL-1,SKL-2)"),
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Affecter un nouveau collaborateur au projet avec ses rôles et compétences."""
     from tools.elicitation.mailbox.roster import RosterManager
@@ -674,7 +695,7 @@ def staff_contract_expertise(
     skill: str = typer.Option(..., "--skill", "-s", help="Identifiant de la compétence externalisée"),
     provider: str = typer.Option(..., "--provider", "-p", help="Nom du cabinet ou prestataire"),
     ref: str = typer.Option(..., "--ref", help="Référence du bon de commande ou contrat"),
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Enregistrer une prestation d'assistance technique ou expertise externe."""
     from tools.elicitation.mailbox.roster import RosterManager
@@ -685,8 +706,8 @@ def staff_contract_expertise(
 
 @app.command(name="audit-skills")
 def audit_skills(
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement"),
-    blueprint_path: str = typer.Option("data/kb/blueprints/BLU-hla-mcx.yaml", "--blueprint", "-b", help="Chemin vers le blueprint"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
+    blueprint_path: str = typer.Option(None, "--blueprint", "-b", envvar="LLMOPS_BLUEPRINT", callback=_require_blueprint_path, help="Chemin vers le blueprint"),
 ) -> None:
     """Auditer la couverture des compétences requises par le Blueprint face aux profils de l'équipe."""
     from rich.table import Table
@@ -747,7 +768,7 @@ def audit_skills(
 
 @app.command(name="compliance")
 def compliance_cmd(
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement projet"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement projet"),
     framework: str = typer.Option("NIS2", "--framework", "-f", help="Référentiel réglementaire cible (NIS2, SecNumCloud, ISO27001, 3GPP)"),
     emit_gaps: bool = typer.Option(False, "--emit-gaps", help="Émettre automatiquement des questions d'élicitation pour les contrôles non satisfaits"),
 ) -> None:
@@ -811,7 +832,7 @@ def compliance_cmd(
 
 @app.command(name="canvas")
 def canvas_cmd(
-    engagement: str = typer.Option("nordwave-mcx-2027", "--engagement", "-e", help="Identifiant de l'engagement projet"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement projet"),
     sync_library: bool = typer.Option(True, "--sync-library/--no-sync", help="Synchroniser directement dans la bibliothèque PetitesBriques"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Chemin d'export JSON explicite"),
 ) -> None:
@@ -848,6 +869,9 @@ def canvas_cmd(
 
 
 def main() -> None:
+    from dotenv import load_dotenv
+
+    load_dotenv()
     app()
 
 

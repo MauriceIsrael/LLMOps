@@ -632,6 +632,31 @@ Cycle : `proposed` → (`checks_failed` \| `in_review`) → `accepted` \| `rejec
 
 ---
 
+### 5.3 Contrat 1.3 — Couverture réglementaire
+
+- **Outil MCP** `get_framework_coverage(frameworks: list[str])` et **champ optionnel** `coverage` de `GET /api/compliance/frameworks/applicable` (la forme existante `status`, `engagement`, `applicable_frameworks`, `count` est inchangée). Schéma : [`schemas/framework_coverage.schema.json`](../../schemas/framework_coverage.schema.json).
+
+```json
+"coverage": {
+  "NIS2": {
+    "status": "covered | partial | missing",
+    "version": "2022/2555",
+    "expected": 19,
+    "present": 10,
+    "validated": 0,
+    "missing_ids": ["NIS2-ART20-1", "…"],
+    "declared_by": null,
+    "provisional": true,
+    "manifest": true
+  }
+}
+```
+
+- `covered` exige que toutes les exigences attendues du manifeste `data/kb/controls/<FW>/_manifest.yaml` (généré depuis une source par `kb ingest-framework`) soient présentes, `active`, validées (`validated_by`) **et** que l'expert ait déclaré la couverture (`kb declare-coverage`, refusé sinon). Un référentiel sans contrôle dans la base → `missing` ; un manifeste absent ou provisoire → `expected: null` ou `provisional: true`, jamais `covered`. Rapport : [`docs/COVERAGE.md`](../COVERAGE.md).
+- Chaîne hors ligne (mainteneur) : `kb ingest-framework` → `kb suggest-links` (LLM local optionnel, sorties `llm-derived`) → `kb review-sheet` → `kb apply-review` → `kb declare-coverage`. Un contrôle peut déclarer `satisfied_by: [P-…, PAT-…]` (relation `IMPLEMENTS` ingérée dans le graphe) et `covers: [...]` (exigences qu'il couvre).
+
+---
+
 ## 4. Oracles & Vecteurs de Test Partagés
 
 Afin de garantir une interopérabilité sans faille entre implémentations Python et TypeScript, les vecteurs de référence suivants sont tenus à disposition dans le dépôt :

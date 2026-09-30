@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from mcp_server.core.auth import authorise
-from mcp_server.core.config import server_config
+from mcp_server.core.config import resolve_engagement
 from mcp_server.core.db import (
     get_engagement_path,
     open_connection,
@@ -19,6 +19,12 @@ from mcp_server.core.envelope import (
     ok_response,
 )
 from tools.elicitation.repository import ElicitationRepository
+
+
+def _no_engagement() -> dict[str, Any]:
+    return invalid_argument_response(
+        "engagement", "No engagement given and no default configured (set LLMOPS_ENGAGEMENT)."
+    )
 
 
 def _mermaid_label(text: str, max_len: int = 48) -> str:
@@ -34,7 +40,7 @@ def _get_repo(engagement: str | None = None, db_path: str | Path | None = None) 
     if db_path:
         p = Path(db_path)
     else:
-        eng_id = engagement or server_config.engagement or "nordwave-mcx-2027"
+        eng_id = resolve_engagement(engagement) or ""
         p = get_engagement_path(eng_id)
     return ElicitationRepository(db_path=p)
 
@@ -43,11 +49,13 @@ def get_subject(subject: str, engagement: str | None = None, db_path: str | Path
     """Retrieve details, maturity level, and framing definition for an architecture subject.
 
     Args:
-        subject: Name of the architecture subject (e.g. 'mcx-services').
+        subject: Name of the architecture subject (e.g. 'transport-network').
         engagement: Unique engagement identifier (defaults to deployment configuration).
         db_path: Optional explicit database path override.
     """
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     if not subject:
@@ -72,11 +80,13 @@ def get_subject_trajectory(subject: str, engagement: str | None = None, db_path:
     """Retrieve maturity level progression trajectory (timeline of questions and answer excerpts) for a subject.
 
     Args:
-        subject: Name of the architecture subject (e.g. 'mcx-services').
+        subject: Name of the architecture subject (e.g. 'transport-network').
         engagement: Unique engagement identifier (defaults to deployment configuration).
         db_path: Optional explicit database path override.
     """
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     if not subject:
@@ -100,7 +110,9 @@ def get_board(engagement: str | None = None) -> dict[str, Any]:
     Args:
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     try:
@@ -123,7 +135,9 @@ def get_statements(engagement: str | None = None, subject: str | None = None, se
         section: Optional document section filter.
         status: Optional statement status filter ('active', 'under_review', 'contested').
     """
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     try:
@@ -152,7 +166,9 @@ def get_conflicts(engagement: str | None = None, status: str = "open") -> dict[s
         engagement: Unique engagement identifier (defaults to deployment configuration).
         status: Conflict status filter ('open', 'arbitrated').
     """
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     try:
@@ -171,9 +187,11 @@ def get_open_questions(engagement: str | None = None, role: str | None = None) -
 
     Args:
         engagement: Unique engagement identifier (defaults to deployment configuration).
-        role: Optional architect role filter (e.g. 'mcx-architect', 'chief-architect').
+        role: Optional architect role filter (e.g. 'security-architect', 'chief-architect').
     """
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     try:
@@ -201,7 +219,9 @@ def get_diagram_graph(
         format: Desired output format ('json' for nodes & edges array, 'mermaid' for Mermaid flowchart).
         db_path: Optional explicit database path override.
     """
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     try:
@@ -254,7 +274,9 @@ def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
     Args:
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     try:
@@ -287,7 +309,9 @@ def get_render_payload(engagement: str | None = None, db_path: str | Path | None
         engagement: Unique engagement identifier (defaults to deployment configuration).
         db_path: Optional explicit database path override.
     """
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     try:
@@ -334,7 +358,9 @@ def get_engagement_export(engagement: str | None = None) -> dict[str, Any]:
     Args:
         engagement: Unique engagement identifier (defaults to deployment configuration).
     """
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     board_res = get_board(engagement=eng)
@@ -353,7 +379,9 @@ def get_engagement_export(engagement: str | None = None) -> dict[str, Any]:
 
 def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, Any]:
     """Executes a read-only Cypher query against the engagement graph when engagement is specified, or against the active server database. Contains no reusable assets."""
-    eng = engagement or server_config.engagement or "nordwave-mcx-2027"
+    eng = resolve_engagement(engagement)
+    if not eng:
+        return _no_engagement()
     authorise(engagement=eng)
 
     try:
@@ -371,6 +399,6 @@ def get_graph_summary() -> dict[str, Any]:
 
     This server is read-only by design. Project data is written only through the elicitation engine's human-confirmation flow; see TPL-elicitation-proto for how to produce an engagement graph (E5).
     """
-    authorise(engagement="nordwave-mcx-2027")
+    authorise(engagement=resolve_engagement() or "default")
     from mcp_server.knowledge.tools import get_graph_summary as kb_summary
     return kb_summary()

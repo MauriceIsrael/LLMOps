@@ -310,6 +310,8 @@ def build_catalogue() -> list[Interface]:
         _mcp("get_kb_candidate", lambda: kn.get_kb_candidate(_STATE["mcp"])),
         _mcp("review_kb_candidate", lambda: _as_reviewer(lambda: kn.review_kb_candidate(
             _STATE["mcp"], "reject", "@maintainers", reason="Contract freeze"))),
+        # Contract 1.3 — regulatory coverage
+        _mcp("get_framework_coverage", lambda: kn.get_framework_coverage(["NIS2", "ISO27001", "UNKNOWN-FW"])),
         # --- MCP Engagement ------------------------------------------------
         _mcp("get_subject", lambda: eng.get_subject("mcx-services", engagement=demo)),
         _mcp("get_subject_trajectory", lambda: eng.get_subject_trajectory("mcx-services", engagement=demo)),

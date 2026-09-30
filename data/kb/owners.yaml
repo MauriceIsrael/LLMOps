@@ -201,3 +201,9 @@ domains:
   vehicle-gateway: "@vehicle-engineering-wg"
   vendor-management: "@security-compliance-team"
   vulnerability-management: "@security-compliance-team"
+  # IT infrastructure platform (plan L3 §6.3)
+  it-infrastructure: "@infrastructure-architecture-wg"
+  it-infrastructure/bare-metal: "@infrastructure-architecture-wg"
+  it-infrastructure/virtualization: "@infrastructure-architecture-wg"
+  it-infrastructure/container-orchestration: "@infrastructure-architecture-wg"
+  it-infrastructure/paas: "@infrastructure-architecture-wg"

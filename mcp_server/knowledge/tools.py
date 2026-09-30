@@ -372,6 +372,17 @@ def get_domain_prominence_report() -> dict[str, Any]:
     return ok_response(payload, count=1)
 
 
+def _framework_metadata() -> dict[str, dict[str, str]]:
+    """Descriptive metadata of the frameworks: data/kb/controls/frameworks.yaml (KB data, not code)."""
+    import yaml
+
+    path = Path(server_config.kb_dir) / "controls" / "frameworks.yaml"
+    if not path.is_file():
+        return {}
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return {str(k): {kk: str(vv) for kk, vv in (v or {}).items()} for k, v in data.items()}
+
+
 def list_frameworks() -> dict[str, Any]:
     """List regulatory and security frameworks embedded in the knowledge base along with their versions and control counts."""
     kb_client = _get_db()
@@ -381,78 +392,7 @@ def list_frameworks() -> dict[str, Any]:
         RETURN c.framework as framework, c.version as version, count(c) as control_count;
         """
         rows = kb_client.execute_cypher(query)
-        meta = {
-            "NIS2": {
-                "title": "Directive (UE) 2022/2555 (NIS 2)",
-                "jurisdiction": "EU",
-                "description": "Mesures de gestion des risques de cybersécurité pour les entités essentielles et importantes.",
-            },
-            "3GPP": {
-                "title": "3GPP Telecom & Security Specifications (Rel-18 / TS 33.179 / TS 23.501)",
-                "jurisdiction": "International",
-                "description": "Sécurité et architecture des services 5G et communications critiques mission-critical (MCX).",
-            },
-            "ISO27001": {
-                "title": "ISO/IEC 27001:2022",
-                "jurisdiction": "International",
-                "description": "Système de management de la sécurité de l'information (SMSI) et contrôles Annexe A.",
-            },
-            "SecNumCloud": {
-                "title": "ANSSI SecNumCloud 3.2",
-                "jurisdiction": "France / EU",
-                "description": "Référentiel de qualification des prestataires de services de cloud de confiance et immunité extraterritoriale.",
-            },
-            "CER": {
-                "title": "Directive (UE) 2022/2557 (CER)",
-                "jurisdiction": "EU",
-                "description": "Résilience des entités critiques, protection physique des infrastructures et plans de continuité.",
-            },
-            "CRA": {
-                "title": "Règlement (UE) 2024/2847 (Cyber Resilience Act)",
-                "jurisdiction": "EU",
-                "description": "Exigences essentielles de cybersécurité pour produits avec éléments numériques, SBOM et gestion des vulnérabilités.",
-            },
-            "RGPD": {
-                "title": "Règlement (UE) 2016/679 (RGPD / GDPR)",
-                "jurisdiction": "EU",
-                "description": "Protection des données à caractère personnel, Privacy by Design et notification des violations sous 72h.",
-            },
-            "GSMA": {
-                "title": "GSMA eSIM, Remote SIM Provisioning (SGP.22/32) & Central EIR",
-                "jurisdiction": "International",
-                "description": "Spécifications de provisioning distant eSIM/eUICC, sécurité SAS et blocage des terminaux volés via Central EIR.",
-            },
-            "ITIL-FCAPS": {
-                "title": "ITIL v4 & FCAPS Telemetry Standards",
-                "jurisdiction": "International",
-                "description": "Gouvernance des opérations de service ITIL v4, supervision FCAPS, Syslog RFC 5424 et protocoles O&M.",
-            },
-            "TELCO-RESIL": {
-                "title": "Datacenter Tier IV / EN 50600 & Resilient PTP/GNSS Timing",
-                "jurisdiction": "International",
-                "description": "Résilience des datacenters classe 4, synchronisation déterministe PTP v2.1 et holdover GNSS > 30 jours.",
-            },
-            "PPDR-DEVICE": {
-                "title": "PPDR Spectrum (Band 68/28), Tactical Hardening & In-Vehicle Standards",
-                "jurisdiction": "Europe / International",
-                "description": "Terminaux durcis MIL-STD-810H, IP68/69K, ATEX, spectre PPDR CEPT (16)02 et CEM véhicules ISO 11451.",
-            },
-            "ISO22301": {
-                "title": "ISO 22301:2019",
-                "jurisdiction": "International",
-                "description": "Système de management de la continuité d'activité (SMCA) et plans de reprise d'activité (PRA/PCA).",
-            },
-            "ISO27005": {
-                "title": "ISO/IEC 27005:2022",
-                "jurisdiction": "International",
-                "description": "Gestion des risques de sécurité de l'information et méthodologies nationales (MONARC, EBIOS RM).",
-            },
-            "ISO14001": {
-                "title": "ISO 14001:2015",
-                "jurisdiction": "International",
-                "description": "Management environnemental, démantèlement durable et recyclage des actifs télécoms.",
-            },
-        }
+        meta = _framework_metadata()
         res = []
         for r in rows:
             fw = r.get("framework", "")
@@ -561,7 +501,7 @@ def get_compliance_matrix(engagement: str, framework: str) -> dict[str, Any]:
     """Evaluate compliance coverage of an engagement project against a regulatory framework.
 
     Args:
-        engagement: Engagement identifier (e.g. 'nordwave-mcx-2027').
+        engagement: Engagement identifier (e.g. 'my-engagement-2027').
         framework: Regulatory framework code (e.g. 'NIS2', '3GPP').
     """
     kb_client = _get_db()
@@ -741,19 +681,26 @@ def list_skills(domain: str | None = None) -> dict[str, Any]:
 
 
 def get_skills_matrix(
-    engagement: str = "nordwave-mcx-2027",
-    blueprint_path: str = "data/kb/blueprints/BLU-hla-mcx.yaml",
+    engagement: str | None = None,
+    blueprint_path: str | None = None,
 ) -> dict[str, Any]:
     """Calculate the staffing skill coverage matrix and risk index for an engagement.
 
     Args:
-        engagement: Target engagement identifier.
-        blueprint_path: Optional path to the architecture blueprint.
+        engagement: Target engagement identifier (default: the deployment's LLMOPS_ENGAGEMENT).
+        blueprint_path: Optional path or id of the architecture blueprint (default: LLMOPS_BLUEPRINT).
     """
+    from mcp_server.core.config import resolve_blueprint_path, resolve_engagement
     from tools.elicitation.mailbox.roster import RosterManager
     from tools.elicitation.models.blueprint_schema import load_blueprint
 
-    bp = load_blueprint(blueprint_path)
+    engagement = resolve_engagement(engagement)
+    if not engagement:
+        return invalid_argument_response("engagement", "No engagement given and LLMOPS_ENGAGEMENT is not set.")
+    bp_path = resolve_blueprint_path(blueprint_path)
+    if bp_path is None:
+        return invalid_argument_response("blueprint_path", "No blueprint given and LLMOPS_BLUEPRINT is not set.")
+    bp = load_blueprint(bp_path)
     mgr = RosterManager(engagement=engagement)
     covered = mgr.get_all_covered_skills()
 
@@ -1189,3 +1136,33 @@ def review_kb_candidate(
         return _candidate_error(exc)
     except Exception as e:
         return handle_exception_response(e, context_action="review_kb_candidate")
+
+
+# ---------------------------------------------------------------------------
+# Regulatory coverage (contract 1.3).
+# ---------------------------------------------------------------------------
+
+def get_framework_coverage(frameworks: list[str]) -> dict[str, Any]:
+    """Coverage of regulatory frameworks by the knowledge base.
+
+    For each framework: status ('covered' | 'partial' | 'missing'), version, number of
+    expected requirements (from the framework manifest, null when unknown), present and
+    validated requirements, missing requirement ids, and who declared the coverage.
+    'covered' requires every expected requirement present, active and validated, and an
+    expert declaration.
+
+    Args:
+        frameworks: Framework codes (e.g. ['NIS2', 'ISO27001']).
+    """
+    fws = _str_list(frameworks, "frameworks")
+    if isinstance(fws, dict):
+        return fws
+    if not fws:
+        return invalid_argument_response("frameworks", "At least one framework is required.")
+    try:
+        from pipelines.compliance_mapper import compute_framework_coverage
+
+        coverage = compute_framework_coverage(fws, server_config.kb_dir)
+        return ok_response(coverage, count=len(coverage))
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_framework_coverage")

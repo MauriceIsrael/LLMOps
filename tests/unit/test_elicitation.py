@@ -78,9 +78,10 @@ def test_prior_answer_offered(setup_test_db):
 
 
 @pytest.mark.stochastic
-def test_interrupt_resumes_across_processes(setup_test_db, tmp_path):
+def test_interrupt_resumes_across_processes(setup_test_db, tmp_path, scripted_interpretation):
     """Test 5 (CRITIQUE) : Exécute intake jusqu'à l'interrupt, détruit le graphe, recrée un nouveau graphe et reprend."""
     engagement = "test-eng-durability"
+    scripted_interpretation(engagement)
     q_id = "Q-durability-1"
 
     # --- PROCESSUS 1 : Lancement jusqu'à l'interrupt ---

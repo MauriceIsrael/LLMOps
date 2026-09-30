@@ -74,7 +74,12 @@
           "mobile-core",
           "mcx",
           "transport",
-          "delivery"
+          "delivery",
+          "it-infrastructure",
+          "it-infrastructure/bare-metal",
+          "it-infrastructure/virtualization",
+          "it-infrastructure/container-orchestration",
+          "it-infrastructure/paas"
         ]
       },
       "minItems": 1

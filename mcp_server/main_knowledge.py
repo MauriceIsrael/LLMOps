@@ -15,6 +15,7 @@ from mcp_server.knowledge.tools import (
     get_decision_trail,
     get_doctrine_context,
     get_domain_prominence_report,
+    get_framework_coverage,
     get_glossary_term,
     get_graph_summary,
     get_kb_candidate,
@@ -51,6 +52,7 @@ register_tools(
         list_kb_candidates,
         get_kb_candidate,
         review_kb_candidate,
+        get_framework_coverage,
     ],
 )
 

@@ -107,6 +107,16 @@ make verify
 # Install the git pre-push hook running `make verify`
 make hooks
 
+# End-to-end scenarios of the reference demo (examples/), and the project-name guard
+make test-e2e
+make check-names
+
+# Regulatory framework ingestion (offline) and coverage
+poetry run kb ingest-framework --framework NIS2 --version 2022/2555 --source <official text>
+poetry run kb review-sheet --framework NIS2 && poetry run kb apply-review data/staging/NIS2/2022-2555/review_sheet.csv
+poetry run kb declare-coverage --framework NIS2 --by @expert-handle
+poetry run kb coverage-report   # docs/COVERAGE.md
+
 # Knowledge base candidate cycle (maintainers)
 poetry run kb list --status in_review
 poetry run kb promote CAND-20261001-0007
@@ -117,11 +127,17 @@ poetry run kb remind   # schedule with cron
 poetry run elicit scan --engagement demo-engagement-2027 --max-questions 3
 ```
 
+> **No project is hard-coded.** Tools, routes and `elicit` commands that need an engagement or a
+> blueprint take them explicitly or from `LLMOPS_ENGAGEMENT` / `LLMOPS_BLUEPRINT` (environment or
+> `.env`; `make demo`, the Dockerfile and `cloudbuild.yaml` set them for the reference demo). The
+> reference demo lives in [`examples/`](examples/README.md).
+
 ---
 
 ## Documentation Links
 
 - **[Knowledge Hub API v1 Contract](docs/contracts/knowledge-hub-api-v1.md)**: Formal contract specification for the Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).
+- **[Regulatory Coverage](docs/COVERAGE.md)**: coverage of each framework by the knowledge base (manifests, missing requirements).
 - **[Versioning](docs/VERSIONING.md)** and **[Deprecation Policy](docs/DEPRECATION.md)**: contract `1.x` guarantees, frozen interface shapes (`tests/contract/frozen/`), deprecation signals.
 - **[Third-Party Integration Guide](docs/THIRD-PARTY-INTEGRATION-GUIDE.md)**: Full guide to writing custom renderers (DOCX, PPTX, Web UI) and consuming sealed snapshots.
 - **[External Interface Specification (INTERFACE.md)](docs/INTERFACE.md)**: Technical MCP contract, response envelopes, JSON Schemas, and transport protocols.

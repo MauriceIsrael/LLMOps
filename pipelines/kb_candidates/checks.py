@@ -47,7 +47,7 @@ CONTROL_ID = re.compile(r"^[A-Z0-9]+(?:-[A-Za-z0-9]+)+$")
 GLOSSARY_ENTRY = re.compile(r"^\*\*(.+?)\*\*\s*[—\-]\s*\S", re.MULTILINE)
 TYPED_ID = re.compile(r"\b(principle|pattern|decision|control):([A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9])")
 BARE_ID = re.compile(r"\b(ADR-\d{4}|P-\d{3}|PAT-\d{3})\b")
-REFERENCE_FIELDS = ("related", "implements_controls", "supersedes", "requires")
+REFERENCE_FIELDS = ("related", "implements_controls", "supersedes", "requires", "satisfied_by")
 
 # An address may end a sentence ("... is 10.0.0.1."): only a following digit (or ".digit") excludes it.
 IPV4 = re.compile(r"(?<![\d.])(\d{1,3}(?:\.\d{1,3}){3})(/\d{1,2})?(?!\d|\.\d)")
@@ -208,7 +208,8 @@ def check_schema(candidate: dict[str, Any], ctx: CheckContext) -> dict[str, str]
         return _result("schema", "fail", f"unknown asset type '{asset_type}'")
     problems = _schema_problems(fm, asset_type, ctx)
     asset_id = str(fm.get("id") or "")
-    if candidate.get("kind") == "amendment":
+    # An amendment, or a framework ingestion of an existing control, updates its target in place.
+    if candidate.get("kind") == "amendment" or candidate.get("target_asset_id"):
         target = candidate.get("target_asset_id")
         if asset_id != target:
             problems.append(f"amendment front matter id '{asset_id}' differs from target_asset_id '{target}'")

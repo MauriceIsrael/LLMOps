@@ -49,6 +49,7 @@ from mcp_server.knowledge.tools import (
     get_compliance_trail,
     get_decision_trail,
     get_doctrine_context,
+    get_framework_coverage,
     get_glossary_term,
     get_graph_summary,
     get_kb_candidate,
@@ -99,6 +100,7 @@ mcp.tool()(submit_kb_candidate)
 mcp.tool()(list_kb_candidates)
 mcp.tool()(get_kb_candidate)
 mcp.tool()(review_kb_candidate)
+mcp.tool()(get_framework_coverage)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -484,14 +486,23 @@ def create_starlette_app() -> Starlette:
             or request.query_params.get("engagement")
             or "default"
         ).strip()
-        from pipelines.compliance_mapper import get_applicable_frameworks
+        from pipelines.compliance_mapper import (
+            compute_framework_coverage,
+            get_applicable_frameworks,
+        )
         fws = get_applicable_frameworks(engagement=engagement)
-        return JSONResponse({
+        payload: dict[str, Any] = {
             "status": "ok",
             "engagement": engagement,
             "applicable_frameworks": fws,
             "count": len(fws),
-        }, status_code=200)
+        }
+        # Contract 1.3 (optional field): coverage of each applicable framework by the KB.
+        try:
+            payload["coverage"] = compute_framework_coverage(fws, server_config.kb_dir)
+        except Exception:
+            pass
+        return JSONResponse(payload, status_code=200)
 
     async def handle_compliance_applicable_frameworks_put(request):
         """Définit la liste des référentiels applicables pour un engagement donné."""
@@ -894,7 +905,7 @@ def create_starlette_app() -> Starlette:
             or request.query_params.get("engagement")
             or "default"
         ).strip()
-        blueprint_path = request.query_params.get("blueprint_path", "data/kb/blueprints/BLU-hla-mcx.yaml")
+        blueprint_path = request.query_params.get("blueprint_path") or None
         res = get_skills_matrix(engagement=engagement, blueprint_path=blueprint_path)
         status_code = 200 if res.get("status") == "ok" else 400
         return JSONResponse(res, status_code=status_code)

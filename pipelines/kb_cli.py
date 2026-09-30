@@ -6,6 +6,16 @@ Candidate cycle (plan L2):
     kb promote <candidate_id>           write an accepted candidate into data/kb (status: active)
     kb publish                          re-ingest, seal a snapshot, changelog, notify consumers
     kb remind                           re-notify owners of candidates waiting > 5 business days
+    kb submit <file.jsonl>              submit candidate payloads (one JSON object per line)
+
+Framework ingestion (plan L3):
+
+    kb ingest-framework --framework NIS2 --version 2022/2555 --source <pdf|html|txt|docx>
+    kb suggest-links --framework NIS2   (optional, offline LLM: LLM_ENDPOINT / LLM_MODEL)
+    kb review-sheet --framework NIS2    (CSV + Markdown for the expert)
+    kb apply-review <review_sheet.csv>  (candidates reviewed by the expert, promoted)
+    kb declare-coverage --framework NIS2 --by @expert
+    kb coverage NIS2 ISO27001 ...
 
 The commit of the knowledge base is left to the maintainer.
 """
@@ -138,6 +148,143 @@ def remind_cmd(kb_dir: Path = KB_DIR_OPTION, db_path: Path = DB_PATH_OPTION) -> 
     """Re-notify owners of candidates in review for more than 5 business days (for cron)."""
     reminded = _service(kb_dir, db_path).remind()
     console.print(f"{len(reminded)} reminder(s) sent" + (": " + ", ".join(c["id"] for c in reminded) if reminded else ""))
+
+
+@app.command("submit")
+def submit_cmd(
+    payloads: Path = typer.Argument(..., help="JSONL file: one candidate payload per line."),
+    kb_dir: Path = KB_DIR_OPTION,
+    db_path: Path = DB_PATH_OPTION,
+) -> None:
+    """Submit candidate payloads to the queue (automatic checks run immediately)."""
+    service = _service(kb_dir, db_path)
+    for n, line in enumerate(payloads.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            c = service.submit(json.loads(line), actor="kb submit")
+        except (CandidateError, ValueError) as exc:
+            console.print(f"[red]line {n}: {exc}[/red]")
+            continue
+        flags = [ch["name"] for ch in c["checks"] if ch["status"] != "pass"]
+        console.print(f"{c['id']}  {c['status']:<13} {c['title']}  [dim]{', '.join(flags)}[/dim]")
+
+
+STAGING_OPTION = typer.Option(Path("data/staging"), "--staging-dir", help="Staging directory (ignored by git).")
+
+
+@app.command("ingest-framework")
+def ingest_framework_cmd(
+    framework: str = typer.Option(..., "--framework", help="Framework code (e.g. NIS2)."),
+    version: str = typer.Option(..., "--version", help="Version of the source (e.g. 2022/2555)."),
+    source: Path = typer.Option(..., "--source", help="Source document: pdf, html, txt, md, docx or doc."),
+    tag: str = typer.Option("", "--tag", help="Document tag used by some splitters (e.g. TS22179)."),
+    splitter: Path = typer.Option(None, "--splitter", help="Splitter configuration (default: splitters/<fw>.yaml)."),
+    kb_dir: Path = KB_DIR_OPTION,
+    staging_dir: Path = STAGING_OPTION,
+) -> None:
+    """Split a regulatory source into draft controls (staging) and update the framework manifest."""
+    from pipelines.frameworks.ingest import ingest_framework
+
+    try:
+        res = ingest_framework(framework, version, source, kb_dir=kb_dir, staging_dir=staging_dir,
+                               splitter=splitter, tag=tag)
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        _fail(str(exc))
+    console.print(f"[bold green]✓ {res['requirements']} draft control(s)[/bold green] in {res['staging_dir']}; "
+                  f"manifest {res['manifest']} (source sha256 {res['source_sha256'][:12]}…).")
+    if res["declaration_reset"]:
+        console.print("[yellow]The previous coverage declaration was reset (new version or source).[/yellow]")
+
+
+@app.command("suggest-links")
+def suggest_links_cmd(
+    framework: str = typer.Option(..., "--framework"),
+    kb_dir: Path = KB_DIR_OPTION,
+    staging_dir: Path = STAGING_OPTION,
+) -> None:
+    """Offline LLM proposals of links and acceptance criteria (llm-derived); skipped without LLM_ENDPOINT."""
+    from pipelines.frameworks.ingest import latest_staging
+    from pipelines.frameworks.links import suggest_links
+
+    load_dotenv()
+    res = suggest_links(latest_staging(staging_dir, framework), kb_dir)
+    if res["skipped"]:
+        console.print(f"[yellow]{res['reason']}[/yellow]")
+    else:
+        console.print(f"[bold green]✓ {res['updated']} draft(s) annotated[/bold green] by {res['model']} "
+                      "(links_production_mode: llm-derived — to be reviewed).")
+
+
+@app.command("review-sheet")
+def review_sheet_cmd(
+    framework: str = typer.Option(..., "--framework"),
+    kb_dir: Path = KB_DIR_OPTION,
+    staging_dir: Path = STAGING_OPTION,
+) -> None:
+    """Write the expert review sheet (CSV to fill in + Markdown view)."""
+    from pipelines.frameworks.ingest import latest_staging
+    from pipelines.frameworks.review import write_review_sheet
+
+    res = write_review_sheet(latest_staging(staging_dir, framework), kb_dir)
+    console.print(f"[bold green]✓ {res['rows']} row(s)[/bold green]: {res['csv']} (and {res['markdown']}).")
+
+
+@app.command("apply-review")
+def apply_review_cmd(
+    sheet: Path = typer.Argument(..., help="Filled review_sheet.csv."),
+    kb_dir: Path = KB_DIR_OPTION,
+    db_path: Path = DB_PATH_OPTION,
+) -> None:
+    """Create the reviewed framework_ingestion candidates and promote the accepted ones."""
+    from pipelines.frameworks.review import apply_review
+
+    res = apply_review(sheet, _service(kb_dir, db_path))
+    console.print(f"promoted: {len(res['promoted'])}, rejected: {len(res['rejected'])}, "
+                  f"skipped (no decision): {len(res['skipped'])}, failed: {len(res['failed'])}")
+    for f in res["failed"]:
+        console.print(f"[red]  {f['requirement']}: {f['reason']}[/red]")
+    if res["failed"]:
+        raise typer.Exit(code=1)
+
+
+@app.command("declare-coverage")
+def declare_coverage_cmd(
+    framework: str = typer.Option(..., "--framework"),
+    by: str = typer.Option(..., "--by", help="Owner handle of the expert (data/kb/owners.yaml)."),
+    kb_dir: Path = KB_DIR_OPTION,
+) -> None:
+    """Declare a framework covered; refused unless every expected requirement is active and validated."""
+    from pipelines.frameworks.coverage import CoverageDeclarationError, declare_coverage
+
+    try:
+        cov = declare_coverage(framework, by, kb_dir)
+    except CoverageDeclarationError as exc:
+        _fail(str(exc))
+    console.print(f"[bold green]✓ {framework} declared covered[/bold green] by {by} ({cov['expected']} requirements).")
+
+
+@app.command("coverage")
+def coverage_cmd(
+    frameworks: list[str] = typer.Argument(..., help="Framework codes."),
+    kb_dir: Path = KB_DIR_OPTION,
+) -> None:
+    """Print the coverage of frameworks by the knowledge base."""
+    from pipelines.compliance_mapper import compute_framework_coverage
+
+    console.print_json(json.dumps(compute_framework_coverage(frameworks, kb_dir), ensure_ascii=False))
+
+
+@app.command("coverage-report")
+def coverage_report_cmd(
+    output: Path = typer.Option(Path("docs/COVERAGE.md"), "--output", help="Markdown report path."),
+    kb_dir: Path = KB_DIR_OPTION,
+) -> None:
+    """Write the regulatory coverage report (docs/COVERAGE.md)."""
+    from pipelines.frameworks.coverage import render_coverage_report
+
+    output.write_text(render_coverage_report(kb_dir), encoding="utf-8")
+    console.print(f"[bold green]✓ coverage report[/bold green] → {output}")
 
 
 def main() -> None:
