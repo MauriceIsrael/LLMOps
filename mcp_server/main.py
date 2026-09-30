@@ -40,6 +40,7 @@ from mcp_server.engagement.tools import (
     get_subject_trajectory,
 )
 from mcp_server.knowledge.tools import (
+    _suggest_knowledge_improvement,
     check_option,
     generate_zero_draft_hld,
     get_asset,
@@ -50,16 +51,20 @@ from mcp_server.knowledge.tools import (
     get_doctrine_context,
     get_glossary_term,
     get_graph_summary,
+    get_kb_candidate,
     get_principles_for,
     get_rfp_compliance_matrix,
     get_skills_matrix,
     list_assets,
     list_controls,
     list_frameworks,
+    list_kb_candidates,
     list_skills,
     query_graph,
+    review_kb_candidate,
     search_assets,
     shred_rfp,
+    submit_kb_candidate,
     suggest_knowledge_improvement,
     trigger_rfp_elicitation,
 )
@@ -90,6 +95,10 @@ mcp.tool()(get_rfp_compliance_matrix)
 mcp.tool()(trigger_rfp_elicitation)
 mcp.tool()(get_doctrine_context)
 mcp.tool()(check_option)
+mcp.tool()(submit_kb_candidate)
+mcp.tool()(list_kb_candidates)
+mcp.tool()(get_kb_candidate)
+mcp.tool()(review_kb_candidate)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -524,7 +533,11 @@ def create_starlette_app() -> Starlette:
         contact_email = body.get("contact_email")
         source_engagement = body.get("source_engagement")
 
-        res = suggest_knowledge_improvement(
+        source_system = str(body.get("source_system") or "document-studio").strip()
+        if source_system not in ("archinex", "document-studio", "mcp", "cli-ingestion"):
+            source_system = "document-studio"
+        res = _suggest_knowledge_improvement(
+            system=source_system,
             title=title,
             rationale=rationale,
             suggested_change=suggested_change,
@@ -808,6 +821,65 @@ def create_starlette_app() -> Starlette:
         status_code = 200 if res.get("status") == "ok" else 400
         return JSONResponse(res, status_code=status_code)
 
+    def _candidate_status_code(res: dict, ok_code: int = 200) -> int:
+        status = res.get("status")
+        if status == "ok":
+            return ok_code
+        if status == "not_found":
+            return 404
+        if status == "unauthorized":
+            return 403
+        if status == "invalid_argument":
+            return 409 if res.get("conflict") else 400
+        return 500
+
+    async def handle_candidates_create(request):
+        """Soumission d'un candidat d'enrichissement de la base (contrôles automatiques immédiats)."""
+        try:
+            body = await request.json()
+        except Exception:
+            body = None
+        if not isinstance(body, dict):
+            return JSONResponse(
+                invalid_argument_response("body", "Le corps de requête doit être un objet JSON"), status_code=400
+            )
+        res = submit_kb_candidate(body)
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_candidates_list(request):
+        """File des candidats (filtres : status, source, domain, engagement)."""
+        params = request.query_params
+        res = list_kb_candidates(
+            status=params.get("status") or None,
+            source=params.get("source") or None,
+            domain=params.get("domain") or None,
+            engagement=params.get("engagement") or None,
+        )
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_candidate_get(request):
+        res = get_kb_candidate(request.path_params["candidate_id"])
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_candidate_review(request):
+        """Revue d'un candidat (scope de jeton kb:review requis)."""
+        try:
+            body = await request.json()
+        except Exception:
+            body = None
+        if not isinstance(body, dict):
+            return JSONResponse(
+                invalid_argument_response("body", "Le corps de requête doit être un objet JSON"), status_code=400
+            )
+        res = review_kb_candidate(
+            request.path_params["candidate_id"],
+            action=str(body.get("action") or ""),
+            reviewer=str(body.get("reviewer") or ""),
+            reason=body.get("reason"),
+            amended_content=body.get("amended_content"),
+        )
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_skills_list(request):
         """Référentiel canonique des compétences d'ingénierie et niveaux de criticité."""
         domain = request.query_params.get("domain")
@@ -856,6 +928,10 @@ def create_starlette_app() -> Starlette:
             Route("/api/arbitration/statements", endpoint=handle_arbitration_statements, methods=["GET"]),
             Route("/api/knowledge/context", endpoint=handle_knowledge_context, methods=["GET"]),
             Route("/api/knowledge/check", endpoint=handle_knowledge_check, methods=["POST"]),
+            Route("/api/knowledge/candidates", endpoint=handle_candidates_create, methods=["POST"]),
+            Route("/api/knowledge/candidates", endpoint=handle_candidates_list, methods=["GET"]),
+            Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_get, methods=["GET"]),
+            Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_review, methods=["PATCH"]),
             Route("/api/skills", endpoint=handle_skills_list, methods=["GET"]),
             Route("/api/skills/matrix", endpoint=handle_skills_matrix, methods=["GET"]),
         ],

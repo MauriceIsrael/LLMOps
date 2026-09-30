@@ -642,6 +642,7 @@ def suggest_knowledge_improvement(
 
     The proposal will be archived, reviewed by the Knowledge Hub owner (Maurice Israel),
     and evaluated for promotion into the enterprise standard via the Harvest loop.
+    It is also queued as a KB candidate (kind 'rex'); its id is returned as 'candidate_id'.
 
     Args:
         title: Short descriptive title of the suggested knowledge improvement.
@@ -651,6 +652,20 @@ def suggest_knowledge_improvement(
         contact_email: Optional email address to receive feedback on the review.
         source_engagement: Optional engagement or project where this pattern was proven.
     """
+    return _suggest_knowledge_improvement(
+        title, rationale, suggested_change, author, contact_email, source_engagement, system="mcp"
+    )
+
+
+def _suggest_knowledge_improvement(
+    title: str,
+    rationale: str,
+    suggested_change: str,
+    author: str = "external-contributor",
+    contact_email: str | None = None,
+    source_engagement: str | None = None,
+    system: str = "mcp",
+) -> dict[str, Any]:
     if not title or not title.strip():
         return invalid_argument_response("title", "title must not be empty")
     if not rationale or not rationale.strip():
@@ -668,6 +683,28 @@ def suggest_knowledge_improvement(
         contact=contact_email.strip() if contact_email else None,
         source_engagement=source_engagement.strip() if source_engagement else None,
     )
+
+    # Contract 1.2: the suggestion also enters the KB candidate queue (kind 'rex').
+    try:
+        from pipelines.kb_candidates.service import rex_payload
+
+        candidate = _candidate_service().submit(
+            rex_payload(
+                title=title.strip(),
+                rationale=rationale.strip(),
+                suggested_change=suggested_change.strip(),
+                author=author.strip() or None,
+                contact=contact_email.strip() if contact_email else None,
+                source_engagement=source_engagement.strip() if source_engagement else None,
+                system=system,
+            ),
+            actor=_actor(),
+        )
+        res["candidate_id"] = candidate["id"]
+    except Exception as exc:  # the suggestion itself must never fail because of the queue
+        import logging
+
+        logging.getLogger("mcp_server").warning("KB candidate creation failed for suggestion: %s", exc)
     return ok_response(res, count=1)
 
 
@@ -1021,3 +1058,134 @@ def check_option(
         return ok_response(payload, count=len(payload["verdicts"]))
     except Exception as e:
         return handle_exception_response(e, context_action="check_option")
+
+
+# ---------------------------------------------------------------------------
+# KB candidate cycle (contract 1.2) — queue, automatic checks, human review.
+# ---------------------------------------------------------------------------
+
+def _candidate_service():
+    from pipelines.kb_candidates.service import CandidateService
+
+    return CandidateService(kb_dir=server_config.kb_dir, doctrine_index_loader=_doctrine_index)
+
+
+def _actor() -> str:
+    """Caller identity for the candidate history, without ever recording a raw token."""
+    import hashlib
+
+    from mcp_server.core.auth import get_current_caller
+
+    caller = get_current_caller() or "anonymous"
+    if caller in ("server_admin", "system", "admin", "default_user", "local_dev", "anonymous"):
+        return caller
+    return "token:" + hashlib.sha256(caller.encode("utf-8")).hexdigest()[:10]
+
+
+def _candidate_error(exc: Exception) -> dict[str, Any]:
+    from pipelines.kb_candidates.service import CandidateStateError
+
+    res = invalid_argument_response(getattr(exc, "argument", "candidate"), getattr(exc, "reason", str(exc)))
+    if isinstance(exc, CandidateStateError):
+        res["conflict"] = True
+    return res
+
+
+def submit_kb_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
+    """Submit a knowledge base candidate (new asset, amendment, return of experience,
+    framework ingestion). Automatic checks run immediately; the candidate then waits for a
+    human review by the owner of its domain (status 'in_review') or is blocked ('checks_failed').
+
+    Args:
+        candidate: see schemas/kb_candidate.schema.json — required: kind, title, proposed_content,
+            source.system; asset_type (except kind 'rex'); target_asset_id for an amendment.
+    """
+    from pipelines.kb_candidates.model import CandidateError
+
+    try:
+        created = _candidate_service().submit(candidate, actor=_actor())
+        return ok_response(created, count=1)
+    except CandidateError as exc:
+        return _candidate_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="submit_kb_candidate")
+
+
+def list_kb_candidates(
+    status: str | None = None,
+    source: str | None = None,
+    domain: str | None = None,
+    engagement: str | None = None,
+) -> dict[str, Any]:
+    """List knowledge base candidates, newest first.
+
+    Args:
+        status: proposed | checks_failed | in_review | accepted | rejected | published.
+        source: Source system (archinex, document-studio, mcp, cli-ingestion).
+        domain: Domain filter (a parent domain matches its sub-domains).
+        engagement: Source engagement.
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE, redact
+
+    try:
+        items = _candidate_service().find(status=status, source=source, domain=domain, engagement=engagement)
+        if not has_scope(REVIEW_SCOPE):
+            items = [redact(c) for c in items]
+        return ok_response(items, count=len(items))
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_kb_candidates")
+
+
+def get_kb_candidate(candidate_id: str) -> dict[str, Any]:
+    """Retrieve a knowledge base candidate with its checks, review and history.
+
+    Args:
+        candidate_id: Candidate identifier (e.g. 'CAND-20261001-0007').
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.model import CandidateNotFoundError
+    from pipelines.kb_candidates.service import REVIEW_SCOPE, redact
+
+    try:
+        candidate = _candidate_service().get(candidate_id)
+    except CandidateNotFoundError:
+        return not_found_response(candidate_id)
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_kb_candidate")
+    return ok_response(candidate if has_scope(REVIEW_SCOPE) else redact(candidate), count=1)
+
+
+def review_kb_candidate(
+    candidate_id: str,
+    action: str,
+    reviewer: str,
+    reason: str | None = None,
+    amended_content: str | None = None,
+) -> dict[str, Any]:
+    """Review a knowledge base candidate (requires the 'kb:review' token scope).
+
+    Args:
+        candidate_id: Candidate identifier.
+        action: 'accept', 'amend' (accept a modified content) or 'reject'.
+        reviewer: Owner handle of the reviewer (declared in data/kb/owners.yaml).
+        reason: Motive — required to amend or reject, and to accept content that conflicts with the doctrine.
+        amended_content: Full replacement content (front matter + Markdown) for 'amend'.
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required to review candidates."}
+    try:
+        reviewed = _candidate_service().review(
+            candidate_id, action, reviewer, reason=reason, amended_content=amended_content, actor=_actor()
+        )
+        return ok_response(reviewed, count=1)
+    except CandidateNotFoundError:
+        return not_found_response(candidate_id)
+    except CandidateError as exc:
+        return _candidate_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="review_kb_candidate")

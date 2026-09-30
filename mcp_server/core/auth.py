@@ -105,3 +105,19 @@ def authorise(caller: str | None = None, engagement: str = "default-engagement")
         return
 
     raise Unauthorised(engagement)
+
+
+def has_scope(scope: str, caller: str | None = None) -> bool:
+    """Whether the caller's token carries an explicit scope (e.g. ``kb:review``).
+
+    Scopes are declared next to the engagement scopes in ``ENGAGEMENT_TOKENS``
+    (``reviewer-token:kb:review;tenant-token:eng-1,eng-2``). The ``*`` engagement
+    wildcard and the server admin token do **not** grant such scopes: in particular the
+    public demo token (``SERVER_TOKEN``) cannot review knowledge base candidates.
+    """
+    if caller is None:
+        caller = get_current_caller()
+    env_tokens = os.getenv("ENGAGEMENT_TOKENS", "").strip()
+    if not caller or not env_tokens:
+        return False
+    return scope in parse_engagement_tokens(env_tokens).get(caller, [])

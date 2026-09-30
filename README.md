@@ -85,7 +85,9 @@ make demo-check
    Deconstructs client tenders into atomic requirements (`shred-rfp`), builds the triangular compliance matrix against standard architecture decisions (ADRs) and regulatory controls, and auto-generates a High-Level Design pre-sales document (`zero-draft-hld`) in English or French with zero residual gaps. Ready-to-use deliverable templates are available in `templates/HLD-zero-draft-template.md` (FR) and `templates/HLD-zero-draft-template.en.md` (EN).
 10. **Doctrine Context & Option Judge (contract 1.1)**  
     `get_doctrine_context` / `GET /api/knowledge/context` returns the doctrine applicable to a subject (active principles, required regulatory controls, patterns, ADRs) with bounded excerpts; `check_option` / `POST /api/knowledge/check` judges an option against structured `checks` clauses of the doctrine (`supports` / `violates` / `unassessed`, with citations). Both are fully deterministic — no LLM on the server. Evaluation: `make eval-check`.
-11. **Dual-Mode Architecture & Architecture Suite Contract v1**  
+11. **Knowledge Enrichment Cycle (contract 1.2)**  
+    Every new piece of knowledge goes through a persisted candidate queue (`/api/knowledge/candidates`, `submit_kb_candidate`…), deterministic checks (schema, references, duplicates, anonymization, doctrine conflicts, unreviewed LLM content), routing to the domain owner (`data/kb/owners.yaml`) and a human review (second review for principles), before `kb promote` / `kb publish` write and seal it. Confidence is computed from evidence, never from the author.
+12. **Dual-Mode Architecture & Architecture Suite Contract v1**  
     Provides both synchronous REST endpoints (`/api/rfp/*`, `/api/compliance/*`, `/api/knowledge/*`, `/api/skills/*`) for interactive web interfaces and CLI tools, as well as sealed canonical snapshots (`latest.json`) for offline-first admission gates (per ADR-SUITE-05). All contracts follow strict provenance (`sourceSystem: "knowledge-hub"`), canonical SHA-256 sealing, and Fail Loud resilience.
 
 ---
@@ -104,6 +106,12 @@ make verify
 
 # Install the git pre-push hook running `make verify`
 make hooks
+
+# Knowledge base candidate cycle (maintainers)
+poetry run kb list --status in_review
+poetry run kb promote CAND-20261001-0007
+poetry run kb publish
+poetry run kb remind   # schedule with cron
 
 # Run interactive CLI elicitation scan
 poetry run elicit scan --engagement demo-engagement-2027 --max-questions 3

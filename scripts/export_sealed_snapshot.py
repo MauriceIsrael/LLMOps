@@ -60,6 +60,7 @@ def compute_sha256(data: str | bytes) -> str:
 def export_sealed_snapshot(
     output_fixtures_path: Path | None = None,
     output_snapshot_dir: Path | None = None,
+    db_path: Path | None = None,
 ) -> dict[str, Any]:
     """Generates a canonical sealed snapshot of the knowledge base."""
     if output_fixtures_path is None:
@@ -74,7 +75,7 @@ def export_sealed_snapshot(
     now_utc = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     snapshot_id = f"snapshot-{now_utc[:10]}-{git_rev[:7]}"
 
-    client = ReadOnlyKuzuClient(db_path=server_config.knowledge_db_path)
+    client = ReadOnlyKuzuClient(db_path=db_path or server_config.knowledge_db_path)
     parser = MarkdownDocParser()
 
     # 1. Assets

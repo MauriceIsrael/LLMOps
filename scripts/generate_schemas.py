@@ -146,6 +146,108 @@ def generate_check_result_schema() -> dict[str, Any]:
     }
 
 
+def generate_kb_candidate_schema() -> dict[str, Any]:
+    """KB candidate (contract 1.2), see pipelines/kb_candidates/model.py."""
+    from pipelines.kb_candidates.model import (
+        ASSET_TYPES,
+        CHECK_STATUSES,
+        EVIDENCE_KINDS,
+        KINDS,
+        PRODUCTION_MODES,
+        REVIEW_ACTIONS,
+        SOURCE_SYSTEMS,
+        STATUSES,
+    )
+
+    nullable_str = {"type": ["string", "null"]}
+    review = {
+        "type": ["object", "null"],
+        "required": ["reviewer", "action", "at"],
+        "properties": {
+            "reviewer": {"type": "string"},
+            "action": {"enum": list(REVIEW_ACTIONS)},
+            "reason": nullable_str,
+            "at": {"type": "string"},
+        },
+    }
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "KbCandidate",
+        "description": "Knowledge base candidate: proposed change going through automatic checks, human review, promotion and publication.",
+        "type": "object",
+        "required": [
+            "id", "kind", "asset_type", "domain", "title", "rationale", "proposed_content", "source", "evidence",
+            "status", "checks", "review", "second_review_required", "second_review", "assigned_owner", "history",
+            "created_at", "updated_at",
+        ],
+        "properties": {
+            "id": {"type": "string", "pattern": "^CAND-\\d{8}-\\d{4}$"},
+            "kind": {"enum": list(KINDS)},
+            "target_asset_id": nullable_str,
+            "asset_type": {"enum": [*ASSET_TYPES, None]},
+            "domain": {"type": "array", "items": {"type": "string"}},
+            "title": {"type": "string", "minLength": 1},
+            "rationale": {"type": "string"},
+            "proposed_content": {"type": "string"},
+            "source": {
+                "type": "object",
+                "required": ["system", "production_mode"],
+                "properties": {
+                    "system": {"enum": list(SOURCE_SYSTEMS)},
+                    "engagement": nullable_str,
+                    "decision_id": nullable_str,
+                    "author": nullable_str,
+                    "contact": nullable_str,
+                    "production_mode": {"enum": list(PRODUCTION_MODES)},
+                },
+            },
+            "evidence": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["kind", "ref"],
+                    "properties": {"kind": {"enum": list(EVIDENCE_KINDS)}, "ref": {"type": "string", "minLength": 1}},
+                },
+            },
+            "status": {"enum": list(STATUSES)},
+            "checks": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["name", "status", "detail"],
+                    "properties": {
+                        "name": {"type": "string"},
+                        "status": {"enum": list(CHECK_STATUSES)},
+                        "detail": {"type": "string"},
+                    },
+                },
+            },
+            "review": review,
+            "second_review_required": {"type": "boolean"},
+            "second_review": review,
+            "assigned_owner": nullable_str,
+            "history": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["at", "actor", "event"],
+                    "properties": {"at": {"type": "string"}, "actor": {"type": "string"}, "event": {"type": "string"}},
+                },
+            },
+            "promoted": {
+                "type": "object",
+                "properties": {"path": {"type": "string"}, "asset_id": {"type": "string"}, "confidence": {"type": "string"}},
+            },
+            "published": {
+                "type": "object",
+                "properties": {"snapshot_id": nullable_str, "at": {"type": "string"}},
+            },
+            "created_at": {"type": "string"},
+            "updated_at": {"type": "string"},
+        },
+    }
+
+
 def generate_typescript_types() -> str:
     conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
     subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
@@ -154,7 +256,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.1")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.2")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -380,6 +482,65 @@ export interface CheckResult {{
   method: "deterministic-checks-v1";
   snapshot_id: string | null;
 }}
+
+/* ---- Contract 1.2: KB candidate cycle ------------------------------------ */
+
+export type KbCandidateKind = "new_asset" | "amendment" | "rex" | "framework_ingestion";
+export type KbAssetType = "principle" | "pattern" | "decision" | "control" | "glossary";
+export type KbCandidateStatus = "proposed" | "checks_failed" | "in_review" | "accepted" | "rejected" | "published";
+export type KbProductionMode = "human-authored" | "llm-proposed-human-approved" | "llm-derived";
+export type KbReviewAction = "accept" | "amend" | "reject";
+
+export interface KbCandidateReview {{
+  reviewer: string;
+  action: KbReviewAction;
+  reason: string | null;
+  at: string;
+}}
+
+export interface KbCandidateSubmission {{
+  kind: KbCandidateKind;
+  target_asset_id?: string | null;
+  asset_type?: KbAssetType | null;
+  domain?: string[];
+  title: string;
+  rationale?: string;
+  proposed_content: string;
+  source: {{
+    system: "archinex" | "document-studio" | "mcp" | "cli-ingestion";
+    engagement?: string | null;
+    decision_id?: string | null;
+    author?: string | null;
+    contact?: string | null;
+    production_mode?: KbProductionMode;
+  }};
+  evidence?: Array<{{ kind: "measure" | "audit" | "engagement" | "vendor-doc"; ref: string }}>;
+}}
+
+export interface KbCandidate extends KbCandidateSubmission {{
+  id: string;
+  asset_type: KbAssetType | null;
+  domain: string[];
+  rationale: string;
+  status: KbCandidateStatus;
+  checks: Array<{{ name: string; status: "pass" | "fail" | "warn"; detail: string }}>;
+  review: KbCandidateReview | null;
+  second_review_required: boolean;
+  second_review: KbCandidateReview | null;
+  assigned_owner: string | null;
+  history: Array<{{ at: string; actor: string; event: string; [detail: string]: unknown }}>;
+  promoted?: {{ path: string; asset_id: string; confidence: string }};
+  published?: {{ snapshot_id: string | null; at: string }};
+  created_at: string;
+  updated_at: string;
+}}
+
+export interface KbCandidateReviewRequest {{
+  action: KbReviewAction;
+  reviewer: string;
+  reason?: string;
+  amended_content?: string;
+}}
 """
 
 
@@ -396,6 +557,7 @@ def main() -> None:
     for filename, schema in (
         ("doctrine_context.schema.json", generate_doctrine_context_schema()),
         ("check_result.schema.json", generate_check_result_schema()),
+        ("kb_candidate.schema.json", generate_kb_candidate_schema()),
     ):
         (schemas_dir / filename).write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
         print(f"Generated: schemas/{filename}")

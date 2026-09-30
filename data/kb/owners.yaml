@@ -1,0 +1,203 @@
+# Domain owners of the knowledge base: who reviews a KB candidate (plan L2, §5.5).
+#
+# - `owners`: one entry per owner handle (consistent with data/kb/CODEOWNERS), with the
+#   notification channels used when a candidate enters review (`kb remind` for reminders):
+#   `email` (SMTP, disabled by default), optional `discord_webhook` and `ntfy_topic`.
+#   Channels left empty are not used. TODO(maintainers): fill in the real e-mail addresses.
+# - `domains`: owner of each domain used by an asset (a sub-domain `parent/child` inherits
+#   the owner of `parent` unless it has its own entry). tests/unit/test_kb_owners.py checks
+#   that every domain used in data/kb has an owner.
+# - `default_owner`: fallback when a candidate has no owned domain.
+
+default_owner: "@maintainers"
+
+owners:
+  "@3gpp-conformance-wg":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@3gpp-core-wg":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@3gpp-security-wg":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@ciso-office":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@core-owner-architecture":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@core-owner-automation":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@core-owner-delivery":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@data-protection-officer":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@engagement-architects":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@infrastructure-architecture-wg":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@maintainers":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@operations-directorate":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@quality-directorate":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@resilience-council":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@safety-certification-wg":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@security-compliance-team":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@security-office":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@spectrum-engineering-wg":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@sustainability-directorate":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@tactical-communications-wg":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@telecom-architecture-wg":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@transmission-architecture-wg":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+  "@vehicle-engineering-wg":
+    email: null
+    discord_webhook: null
+    ntfy_topic: null
+
+domains:
+  5g-security: "@3gpp-security-wg"
+  ai-assistance: "@core-owner-architecture"
+  ai-security: "@security-compliance-team"
+  api: "@core-owner-architecture"
+  api-security: "@3gpp-security-wg"
+  architecture: "@core-owner-architecture"
+  asset-management: "@security-compliance-team"
+  audit: "@security-compliance-team"
+  audit-logging: "@security-compliance-team"
+  automation: "@security-compliance-team"
+  automation-devops: "@core-owner-architecture"
+  automotive: "@vehicle-engineering-wg"
+  boundary-protection: "@3gpp-security-wg"
+  business-continuity: "@security-compliance-team"
+  certification: "@security-office"
+  cloud-platform: "@core-owner-architecture"
+  cmdb: "@operations-directorate"
+  compliance: "@3gpp-security-wg"
+  compliance-evaluation: "@security-compliance-team"
+  configuration-management: "@security-compliance-team"
+  conformance: "@3gpp-conformance-wg"
+  container-security: "@security-compliance-team"
+  cryptography: "@security-compliance-team"
+  cyber-hygiene: "@security-compliance-team"
+  data-isolation: "@core-owner-architecture"
+  data-protection: "@data-protection-officer"
+  delivery: "@core-owner-architecture"
+  device-management: "@core-owner-architecture"
+  device-security: "@security-office"
+  devsecops: "@security-compliance-team"
+  disaster-recovery: "@resilience-council"
+  electronic-warfare: "@transmission-architecture-wg"
+  endpoint-security: "@security-compliance-team"
+  engineering: "@quality-directorate"
+  environmental: "@sustainability-directorate"
+  fleet-management: "@security-compliance-team"
+  governance: "@ciso-office"
+  hardening: "@security-office"
+  hardware: "@safety-certification-wg"
+  iam: "@security-compliance-team"
+  identity: "@3gpp-security-wg"
+  identity-access-management: "@security-compliance-team"
+  incident-handling: "@security-compliance-team"
+  incident-response: "@data-protection-officer"
+  infrastructure: "@infrastructure-architecture-wg"
+  infrastructure-security: "@security-compliance-team"
+  interoperability: "@3gpp-conformance-wg"
+  iot: "@telecom-architecture-wg"
+  isolated-operation: "@3gpp-security-wg"
+  key-management: "@3gpp-security-wg"
+  legal-compliance: "@security-compliance-team"
+  lifecycle: "@sustainability-directorate"
+  mcp: "@core-owner-architecture"
+  mcx: "@core-owner-architecture"
+  mcx-security: "@3gpp-security-wg"
+  mfa: "@security-compliance-team"
+  mobile-core: "@core-owner-architecture"
+  network-automation: "@core-owner-architecture"
+  network-exposure: "@3gpp-core-wg"
+  network-security: "@security-compliance-team"
+  network-transport: "@core-owner-architecture"
+  observability: "@core-owner-architecture"
+  observability-security: "@core-owner-architecture"
+  operations: "@operations-directorate"
+  ppdr-radio: "@spectrum-engineering-wg"
+  privacy: "@data-protection-officer"
+  ran: "@spectrum-engineering-wg"
+  reliability: "@quality-directorate"
+  resilience: "@resilience-council"
+  resilience-continuity: "@core-owner-architecture"
+  risk-management: "@ciso-office"
+  roaming: "@3gpp-security-wg"
+  safety: "@safety-certification-wg"
+  sba: "@3gpp-security-wg"
+  secure-communications: "@security-compliance-team"
+  secure-development: "@security-compliance-team"
+  security: "@core-owner-architecture"
+  security-architecture: "@core-owner-architecture"
+  security-cryptography: "@core-owner-architecture"
+  security-governance: "@security-compliance-team"
+  security-monitoring: "@security-compliance-team"
+  service-management: "@core-owner-architecture"
+  sim-identity: "@telecom-architecture-wg"
+  sovereignty: "@security-compliance-team"
+  spectrum: "@spectrum-engineering-wg"
+  supply-chain: "@security-compliance-team"
+  tactical-comms: "@tactical-communications-wg"
+  tactical-device: "@safety-certification-wg"
+  telecom-core: "@3gpp-security-wg"
+  third-party-risk: "@security-compliance-team"
+  training: "@security-compliance-team"
+  transport: "@transmission-architecture-wg"
+  vehicle-gateway: "@vehicle-engineering-wg"
+  vendor-management: "@security-compliance-team"
+  vulnerability-management: "@security-compliance-team"
