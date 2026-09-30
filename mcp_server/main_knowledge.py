@@ -19,6 +19,7 @@ from mcp_server.knowledge.tools import (
     get_glossary_term,
     get_graph_summary,
     get_kb_candidate,
+    get_kb_me,
     get_knowledge_analytics,
     get_principles_for,
     list_assets,
@@ -53,6 +54,7 @@ register_tools(
         get_kb_candidate,
         review_kb_candidate,
         get_framework_coverage,
+        get_kb_me,
     ],
 )
 

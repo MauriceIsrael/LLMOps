@@ -1018,11 +1018,19 @@ def _candidate_service():
 
 
 def _actor() -> str:
-    """Caller identity for the candidate history, without ever recording a raw token."""
+    """Identity for the candidate history, without ever recording a raw token.
+
+    A person acting through a delegating client (``X-Actor-Email`` with a ``kb:delegate``
+    token) is recorded by owner handle, or by e-mail when not in the registry.
+    """
     import hashlib
 
-    from mcp_server.core.auth import get_current_caller
+    from mcp_server.core.auth import delegated_actor_email, get_current_caller
 
+    email = delegated_actor_email()
+    if email:
+        owner = _candidate_service().owners().by_email(email)
+        return owner.handle if owner else f"email:{email}"
     caller = get_current_caller() or "anonymous"
     if caller in ("server_admin", "system", "admin", "default_user", "local_dev", "anonymous"):
         return caller
@@ -1119,13 +1127,26 @@ def review_kb_candidate(
         reason: Motive — required to amend or reject, and to accept content that conflicts with the doctrine.
         amended_content: Full replacement content (front matter + Markdown) for 'amend'.
     """
-    from mcp_server.core.auth import has_scope
+    from mcp_server.core.auth import delegated_actor_email, has_scope
     from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
         return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required to review candidates."}
     try:
+        email = delegated_actor_email()
+        if email:
+            # The reviewer is the person the client acts for, never a free field (plan governance §3.1).
+            service = _candidate_service()
+            owner = service.owners().by_email(email)
+            if owner is None:
+                return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
+            if (reviewer or "").strip() not in ("", owner.handle):
+                return {"status": "unauthorized", "reason": "'reviewer' does not match the authenticated expert."}
+            reviewer = owner.handle
+            if not service.owners().can_review(owner.handle, service.get(candidate_id).get("domain") or []):
+                return {"status": "unauthorized",
+                        "reason": f"{owner.handle} does not own the domain of this candidate."}
         reviewed = _candidate_service().review(
             candidate_id, action, reviewer, reason=reason, amended_content=amended_content, actor=_actor()
         )
@@ -1136,6 +1157,41 @@ def review_kb_candidate(
         return _candidate_error(exc)
     except Exception as e:
         return handle_exception_response(e, context_action="review_kb_candidate")
+
+
+def get_kb_me() -> dict[str, Any]:
+    """Expert the calling client acts for (contract 1.4).
+
+    Requires a token with the 'kb:delegate' scope and an ``X-Actor-Email`` header naming an
+    expert of the registry. Returns the handle, e-mail, KB roles, owned domains and the number
+    of candidates waiting for this expert's review.
+    """
+    from mcp_server.core.auth import delegated_actor_email
+
+    try:
+        email = delegated_actor_email()
+        if not email:
+            return {"status": "unauthorized",
+                    "reason": "No acting expert: send X-Actor-Email with a token carrying the 'kb:delegate' scope."}
+        service = _candidate_service()
+        registry = service.owners()
+        owner = registry.by_email(email)
+        if owner is None:
+            return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
+        pending = [
+            c for c in service.find(status="in_review")
+            if registry.can_review(owner.handle, c.get("domain") or [])
+            and (c.get("review") or {}).get("reviewer") != owner.handle
+        ]
+        return ok_response({
+            "handle": owner.handle,
+            "email": owner.email,
+            "kb_roles": sorted({"kb:review", *owner.roles}),
+            "owned_domains": registry.owned_domains(owner.handle),
+            "pending_reviews": len(pending),
+        }, count=1)
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_kb_me")
 
 
 # ---------------------------------------------------------------------------

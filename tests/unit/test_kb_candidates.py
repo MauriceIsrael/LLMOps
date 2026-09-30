@@ -355,8 +355,8 @@ def test_repository_backend_selection(monkeypatch, tmp_path):
     monkeypatch.setenv("CANDIDATES_DIR", str(tmp_path))
     assert isinstance(get_repository(), FileCandidateRepository)
     monkeypatch.setenv("CANDIDATES_BACKEND", "gcs")
-    with pytest.raises(NotImplementedError):
-        get_repository().all()
+    with pytest.raises(ValueError):  # the never-implemented gcs backend was removed (contract 1.4)
+        get_repository()
 
 
 # ---------------------------------------------------------------------------

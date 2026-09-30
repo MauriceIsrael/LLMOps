@@ -4,10 +4,10 @@ Backends (``CANDIDATES_BACKEND``):
 
 * ``file`` (default): one JSON document per candidate in ``CANDIDATES_DIR``
   (default ``data/candidates/``, ignored by git). Survives restarts on a persistent
-  disk. **On Cloud Run the container file system is ephemeral**: mount a volume
-  (e.g. a Cloud Storage FUSE or Filestore volume) at ``CANDIDATES_DIR``, or use the
-  ``gcs`` backend.
-* ``gcs``: Google Cloud Storage bucket (``CANDIDATES_GCS_BUCKET``) — not implemented yet.
+  disk. **On Cloud Run the container file system is ephemeral**: use the ``sql`` backend
+  (or mount a volume at ``CANDIDATES_DIR``).
+* ``sql``: SQLite or PostgreSQL (``GOVERNANCE_DATABASE_URL``), the backend for a hosted
+  deployment: the queue survives restarts as long as the database does.
 """
 
 from __future__ import annotations
@@ -103,41 +103,75 @@ class FileCandidateRepository(CandidateRepository):
         return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(self.base_dir.glob("CAND-*.json"))]
 
 
-class GcsCandidateRepository(CandidateRepository):
-    """Cloud Storage backend (production on Cloud Run).
+class SqlCandidateRepository(CandidateRepository):
+    """SQLite / PostgreSQL backend (``CANDIDATES_BACKEND=sql``, see pipelines/governance/store.py).
 
-    TODO(L2): implement with google-cloud-storage — one object per candidate under
-    ``gs://$CANDIDATES_GCS_BUCKET/candidates/<id>.json``, generation-match
-    preconditions for atomic updates, and a daily counter object for ``next_id``.
+    The whole candidate is kept as a JSON document; status, source, engagement and assigned
+    owner are copied into columns for filtering.
     """
 
-    def __init__(self, bucket: str | None = None) -> None:
-        self.bucket = bucket or os.getenv("CANDIDATES_GCS_BUCKET")
+    def __init__(self, url: str | None = None) -> None:
+        from pipelines.governance.store import get_engine
 
-    def _unavailable(self) -> NotImplementedError:
-        return NotImplementedError(
-            "CANDIDATES_BACKEND=gcs is not implemented yet; use CANDIDATES_BACKEND=file with a persistent "
-            "volume mounted at CANDIDATES_DIR (see docs/deployment.md)."
-        )
+        self.engine = get_engine(url)
 
     def next_id(self) -> str:
-        raise self._unavailable()
+        from pipelines.governance.store import next_counter
+
+        day = datetime.now(UTC).strftime("%Y%m%d")
+        return f"CAND-{day}-{next_counter(self.engine, 'candidate:' + day):04d}"
 
     def save(self, candidate: dict[str, Any]) -> None:
-        raise self._unavailable()
+        from sqlalchemy import select
+
+        from pipelines.governance.store import candidates
+
+        if not _ID_PATTERN.match(candidate["id"]):
+            raise CandidateNotFoundError(candidate["id"])
+        values = {
+            "status": candidate.get("status", ""),
+            "source_system": (candidate.get("source") or {}).get("system"),
+            "engagement": (candidate.get("source") or {}).get("engagement"),
+            "assigned_owner": candidate.get("assigned_owner"),
+            "doc": json.dumps(candidate, ensure_ascii=False),
+            "updated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
+        with self.engine.begin() as conn:
+            exists = conn.execute(select(candidates.c.id).where(candidates.c.id == candidate["id"])).first()
+            if exists:
+                conn.execute(candidates.update().where(candidates.c.id == candidate["id"]).values(**values))
+            else:
+                conn.execute(candidates.insert().values(id=candidate["id"], **values))
 
     def get(self, candidate_id: str) -> dict[str, Any]:
-        raise self._unavailable()
+        from sqlalchemy import select
+
+        from pipelines.governance.store import candidates
+
+        if not _ID_PATTERN.match(candidate_id):
+            raise CandidateNotFoundError(candidate_id)
+        with self.engine.connect() as conn:
+            row = conn.execute(select(candidates.c.doc).where(candidates.c.id == candidate_id)).first()
+        if row is None:
+            raise CandidateNotFoundError(candidate_id)
+        data: dict[str, Any] = json.loads(row.doc)
+        return data
 
     def all(self) -> list[dict[str, Any]]:
-        raise self._unavailable()
+        from sqlalchemy import select
+
+        from pipelines.governance.store import candidates
+
+        with self.engine.connect() as conn:
+            rows = conn.execute(select(candidates.c.doc).order_by(candidates.c.id)).all()
+        return [json.loads(r.doc) for r in rows]
 
 
 def get_repository() -> CandidateRepository:
     """Repository configured by ``CANDIDATES_BACKEND`` / ``CANDIDATES_DIR`` (read at call time)."""
     backend = os.getenv("CANDIDATES_BACKEND", "file").strip().lower()
-    if backend == "gcs":
-        return GcsCandidateRepository()
+    if backend == "sql":
+        return SqlCandidateRepository()
     if backend != "file":
-        raise ValueError(f"Unknown CANDIDATES_BACKEND '{backend}' (expected 'file' or 'gcs').")
+        raise ValueError(f"Unknown CANDIDATES_BACKEND '{backend}' (expected 'file' or 'sql').")
     return FileCandidateRepository(os.getenv("CANDIDATES_DIR", "data/candidates"))
