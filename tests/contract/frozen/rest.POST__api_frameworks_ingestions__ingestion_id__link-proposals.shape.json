@@ -1,0 +1,65 @@
+{
+  "interface": "rest.POST /api/frameworks/ingestions/{ingestion_id}/link-proposals",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "dropped_unknown_links": {
+                "type": [
+                  "number"
+                ]
+              },
+              "unknown_requirements": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "updated": {
+                "type": [
+                  "number"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

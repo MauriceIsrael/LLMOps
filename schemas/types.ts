@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.6")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.7")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -441,6 +441,50 @@ export interface VerdictFeedback {
   id: number; at: string; reporter: string; typed_id: string; check_id: string | null;
   feedback: VerdictFeedbackKind; justification: string; status: "open" | "converted" | "dismissed";
   converted_to: string | null; option: { title: string; description?: string }; subject?: string | null; frameworks: string[];
+}
+
+/* ---- Contract 1.7: framework ingestion -------------------------------------- */
+
+export type IngestionDecision = "" | "accept" | "amend" | "reject";
+
+export interface IngestionRow {
+  requirement_id: string;
+  title: string;
+  source_ref?: string;
+  domain?: string[];
+  in_kb?: boolean;
+  legal_text: string;
+  proposed_links: string[];
+  proposed_acceptance_criteria: string[];
+  links_production_mode: "" | "llm-derived";
+  decision: IngestionDecision;
+  links: string[];
+  acceptance_criteria: string[];
+  reviewer: string;
+  comment: string;
+  status: "pending" | "decided" | "applied" | "failed";
+  result: string | null;
+}
+
+export interface FrameworkIngestion {
+  id: number;
+  framework: string;
+  version: string;
+  tag: string | null;
+  source_name: string;
+  source_sha256: string;
+  status: "reviewing" | "partially_applied" | "applied";
+  created_by: string;
+  created_at: string;
+  declaration_reset: boolean;
+  requirements: IngestionRow[];
+  decided: number;
+  total: number;
+}
+
+export interface IngestionApplyResult {
+  promoted: string[]; rejected: string[]; failed: Array<{ requirement: string; reason: string }>;
+  skipped: string[]; status: FrameworkIngestion["status"]; applied_by: string;
 }
 
 export interface KbCandidateReviewRequest {

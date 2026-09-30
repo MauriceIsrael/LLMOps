@@ -43,11 +43,16 @@ from mcp_server.engagement.tools import (
 from mcp_server.knowledge.tools import (
     _suggest_knowledge_improvement,
     add_eval_case,
+    add_ingestion_link_proposals,
     annotate_eval_case,
+    apply_framework_ingestion,
     assign_kb_candidate,
     check_option,
     comment_kb_candidate,
     convert_verdict_feedback,
+    create_framework_ingestion,
+    decide_ingestion_row,
+    declare_framework_coverage,
     generate_zero_draft_hld,
     get_asset,
     get_asset_template,
@@ -59,6 +64,7 @@ from mcp_server.knowledge.tools import (
     get_eval_dataset,
     get_eval_run,
     get_framework_coverage,
+    get_framework_ingestion,
     get_glossary_term,
     get_governance_events,
     get_graph_summary,
@@ -71,6 +77,7 @@ from mcp_server.knowledge.tools import (
     list_assets,
     list_controls,
     list_domain_owners,
+    list_framework_ingestions,
     list_frameworks,
     list_kb_candidates,
     list_kb_comments,
@@ -1056,6 +1063,61 @@ def create_starlette_app() -> Starlette:
         res = convert_verdict_feedback(feedback_id, body)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_ingestion_create(request):
+        try:
+            form = await request.form()
+        except Exception:
+            return JSONResponse(invalid_argument_response("body", "multipart/form-data expected"), status_code=400)
+        upload = form.get("file")
+        if upload is None or not hasattr(upload, "read"):
+            return JSONResponse(invalid_argument_response("file", "'file' is required (multipart field)"), status_code=400)
+        data = await upload.read(21 * 1024 * 1024)
+        res = create_framework_ingestion(str(form.get("framework") or ""), str(form.get("version") or ""),
+                                         str(form.get("tag") or ""), getattr(upload, "filename", "") or "", data)
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_ingestion_list(request):
+        res = list_framework_ingestions()
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    def _ingestion_id(request):
+        try:
+            return int(request.path_params["ingestion_id"])
+        except ValueError:
+            return None
+
+    async def handle_ingestion_get(request):
+        ingestion_id = _ingestion_id(request)
+        if ingestion_id is None:
+            return JSONResponse(invalid_argument_response("ingestion_id", "must be an integer"), status_code=400)
+        res = get_framework_ingestion(ingestion_id)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_ingestion_row(request):
+        ingestion_id, body = _ingestion_id(request), await _json_body(request)
+        if ingestion_id is None or body is None:
+            return _bad_body()
+        res = decide_ingestion_row(ingestion_id, request.path_params["requirement_id"], body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_ingestion_proposals(request):
+        ingestion_id, body = _ingestion_id(request), await _json_body(request)
+        if ingestion_id is None or body is None:
+            return _bad_body()
+        res = add_ingestion_link_proposals(ingestion_id, body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_ingestion_apply(request):
+        ingestion_id = _ingestion_id(request)
+        if ingestion_id is None:
+            return _bad_body()
+        res = apply_framework_ingestion(ingestion_id)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_coverage_declaration(request):
+        res = declare_framework_coverage(request.path_params["framework"])
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_kb_me(request):
         """Expert au nom duquel le client agit (jeton kb:delegate + X-Actor-Email)."""
         res = get_kb_me()
@@ -1110,6 +1172,16 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/context", endpoint=handle_knowledge_context, methods=["GET"]),
             Route("/api/knowledge/check", endpoint=handle_knowledge_check, methods=["POST"]),
             Route("/api/knowledge/me", endpoint=handle_kb_me, methods=["GET"]),
+            Route("/api/frameworks/ingestions", endpoint=handle_ingestion_create, methods=["POST"]),
+            Route("/api/frameworks/ingestions", endpoint=handle_ingestion_list, methods=["GET"]),
+            Route("/api/frameworks/ingestions/{ingestion_id}", endpoint=handle_ingestion_get, methods=["GET"]),
+            Route("/api/frameworks/ingestions/{ingestion_id}/rows/{requirement_id}", endpoint=handle_ingestion_row,
+                  methods=["PATCH"]),
+            Route("/api/frameworks/ingestions/{ingestion_id}/link-proposals", endpoint=handle_ingestion_proposals,
+                  methods=["POST"]),
+            Route("/api/frameworks/ingestions/{ingestion_id}/apply", endpoint=handle_ingestion_apply, methods=["POST"]),
+            Route("/api/frameworks/{framework}/coverage-declaration", endpoint=handle_coverage_declaration,
+                  methods=["POST"]),
             Route("/api/knowledge/templates/{asset_type}", endpoint=handle_template, methods=["GET"]),
             Route("/api/knowledge/candidates/validate", endpoint=handle_candidate_validate, methods=["POST"]),
             Route("/api/knowledge/checks/simulate", endpoint=handle_checks_simulate, methods=["POST"]),

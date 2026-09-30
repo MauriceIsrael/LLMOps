@@ -1440,15 +1440,19 @@ def _eval_store():
 _NO_DB = {"status": "unavailable", "reason": "this feature needs the governance database."}
 
 
-def _evaluator() -> tuple[Any, Any] | dict[str, Any]:
-    """(service, owner) of an acting expert with the 'kb:evaluate' (or 'kb:maintain') role."""
+def _actor_with_role(*roles: str) -> tuple[Any, Any] | dict[str, Any]:
+    """(service, owner) of an acting expert holding one of ``roles`` (``kb:maintain`` always suffices)."""
     who = _acting_expert()
     if isinstance(who, dict):
         return who
     service, owner = who
-    if not ({"kb:evaluate", "kb:maintain"} & set(owner.roles)):
-        return {"status": "unauthorized", "reason": f"{owner.handle} needs the 'kb:evaluate' role."}
+    if not ({*roles, "kb:maintain"} & set(owner.roles)):
+        return {"status": "unauthorized", "reason": f"{owner.handle} needs the '{roles[0]}' role."}
     return service, owner
+
+
+def _evaluator() -> tuple[Any, Any] | dict[str, Any]:
+    return _actor_with_role("kb:evaluate")
 
 
 def get_asset_template(asset_type: str) -> dict[str, Any]:
@@ -1698,6 +1702,164 @@ def convert_verdict_feedback(feedback_id: int, body: dict[str, Any]) -> dict[str
         return invalid_argument_response(getattr(exc, "argument", "body"), getattr(exc, "reason", str(exc)))
     except Exception as e:
         return _eval_error(e) or handle_exception_response(e, context_action="convert_verdict_feedback")
+
+
+# ---------------------------------------------------------------------------
+# Framework ingestion through the API (contract 1.7) — REST only.
+# ---------------------------------------------------------------------------
+
+def _ingestion_service(service: Any = None):
+    from pipelines.frameworks.api import IngestionService
+    from pipelines.governance.store import database_url
+
+    if not database_url():
+        return None
+    return IngestionService(server_config.kb_dir, service)
+
+
+def _ingestion_error(exc: Exception) -> dict[str, Any] | None:
+    from pipelines.frameworks.api import IngestionError, IngestionNotFoundError
+
+    if isinstance(exc, IngestionError):
+        return invalid_argument_response(exc.argument, exc.reason)
+    if isinstance(exc, IngestionNotFoundError):
+        return not_found_response(str(exc))
+    return None
+
+
+def create_framework_ingestion(framework: str, version: str, tag: str, filename: str, data: bytes) -> dict[str, Any]:
+    """Upload a regulatory source and split it into draft requirements ('kb:maintain').
+
+    The extraction runs in a bounded subprocess (20 MB, 120 s). The framework needs a splitter
+    (``pipelines/frameworks/splitters/<framework>.yaml``). Re-ingesting a new version or source
+    resets the coverage declaration.
+    """
+    from pipelines.governance.log import get_log
+
+    who = _actor_with_role("kb:maintain")
+    if isinstance(who, dict):
+        return who
+    ingestion = _ingestion_service(who[0])
+    if ingestion is None:
+        return _NO_DB
+    try:
+        created = ingestion.create(framework, version, tag, filename, data, who[1].handle)
+        log = get_log()
+        if log is not None:
+            log.emit("coverage.changed", None, who[1].handle, [], framework=created["framework"],
+                     reason="ingested", version=created["version"])
+        return ok_response(created, count=created["total"])
+    except Exception as e:
+        return _ingestion_error(e) or handle_exception_response(e, context_action="create_framework_ingestion")
+
+
+def list_framework_ingestions() -> dict[str, Any]:
+    """Ingestions in progress or done, and the frameworks that have a splitter (requires 'kb:review')."""
+    from mcp_server.core.auth import has_scope
+    from pipelines.frameworks.api import supported_frameworks
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    ingestion = _ingestion_service()
+    if ingestion is None:
+        return _NO_DB
+    try:
+        items = ingestion.list()
+        return ok_response({"ingestions": items, "splitters": supported_frameworks()}, count=len(items))
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_framework_ingestions")
+
+
+def get_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
+    """Requirements of an ingestion with legal text, proposals and the decision of each row ('kb:review')."""
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    ingestion = _ingestion_service()
+    if ingestion is None:
+        return _NO_DB
+    try:
+        res = ingestion.get(ingestion_id)
+        return ok_response(res, count=res["total"])
+    except Exception as e:
+        return _ingestion_error(e) or handle_exception_response(e, context_action="get_framework_ingestion")
+
+
+def decide_ingestion_row(ingestion_id: int, requirement_id: str, body: dict[str, Any]) -> dict[str, Any]:
+    """Decision on one requirement: ``{decision: accept|amend|reject|'', links?, acceptance_criteria?, comment?}``.
+
+    The reviewer is the acting expert, who must own the domain of the requirement (or be a maintainer).
+    """
+    who = _acting_expert()
+    if isinstance(who, dict):
+        return who
+    service, owner = who
+    ingestion = _ingestion_service(service)
+    if ingestion is None:
+        return _NO_DB
+    try:
+        row = ingestion._row(ingestion_id, requirement_id)
+        if not service.owners().can_review(owner.handle, row.get("domain") or []):
+            return {"status": "unauthorized", "reason": f"{owner.handle} does not own the domain of {requirement_id}."}
+        return ok_response(ingestion.decide(ingestion_id, requirement_id, owner.handle, body), count=1)
+    except Exception as e:
+        return _ingestion_error(e) or handle_exception_response(e, context_action="decide_ingestion_row")
+
+
+def add_ingestion_link_proposals(ingestion_id: int, body: dict[str, Any]) -> dict[str, Any]:
+    """Links proposed by the client's own LLM (stored as 'llm-derived'; unknown asset ids are dropped).
+
+    Body: ``{model?, proposals: [{requirement_id, satisfied_by: [ids], acceptance_criteria: [text]}]}``.
+    """
+    who = _actor_with_role("kb:maintain")
+    if isinstance(who, dict):
+        return who
+    ingestion = _ingestion_service(who[0])
+    if ingestion is None:
+        return _NO_DB
+    try:
+        return ok_response(ingestion.add_link_proposals(ingestion_id, body.get("proposals"), body.get("model")), count=1)
+    except Exception as e:
+        return _ingestion_error(e) or handle_exception_response(e, context_action="add_ingestion_link_proposals")
+
+
+def apply_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
+    """Same as ``kb apply-review``: create the reviewed candidates and promote the accepted ones ('kb:maintain')."""
+    who = _actor_with_role("kb:maintain")
+    if isinstance(who, dict):
+        return who
+    ingestion = _ingestion_service(who[0])
+    if ingestion is None:
+        return _NO_DB
+    try:
+        return ok_response(ingestion.apply(ingestion_id, who[1].handle), count=1)
+    except Exception as e:
+        return _ingestion_error(e) or handle_exception_response(e, context_action="apply_framework_ingestion")
+
+
+def declare_framework_coverage(framework: str) -> dict[str, Any]:
+    """Declare a framework covered, as the acting expert; refused with the list of what is missing (409)."""
+    from pipelines.frameworks.coverage import CoverageDeclarationError, declare_coverage
+    from pipelines.governance.log import get_log
+
+    who = _acting_expert()
+    if isinstance(who, dict):
+        return who
+    _, owner = who
+    try:
+        try:
+            cov = declare_coverage(framework, owner.handle, server_config.kb_dir)
+        except CoverageDeclarationError as exc:
+            return {**invalid_argument_response("framework", str(exc)), "conflict": True}
+        log = get_log()
+        if log is not None:
+            log.emit("coverage.changed", None, owner.handle, [], framework=framework, reason="declared")
+        return ok_response(cov, count=1)
+    except Exception as e:
+        return handle_exception_response(e, context_action="declare_framework_coverage")
 
 
 # ---------------------------------------------------------------------------

@@ -238,7 +238,8 @@ def _as_reviewer(call: Callable[[], Any], set_caller: bool = True, delegate: boo
 
 def _rest(method: str, path: str, url: str | None = None, *, json_body: Any = None,
           headers: dict[str, str] | None = None, stream: bool = False, remember: str | None = None,
-          reviewer: bool = False, delegate: bool = False) -> Interface:
+          reviewer: bool = False, delegate: bool = False, form: dict[str, str] | None = None,
+          files: dict[str, Any] | None = None) -> Interface:
     def call(client: Any) -> Any:
         if reviewer or delegate:
             return _as_reviewer(lambda: _call(client), set_caller=False, delegate=delegate)
@@ -251,6 +252,10 @@ def _rest(method: str, path: str, url: str | None = None, *, json_body: Any = No
         kwargs: dict[str, Any] = {"headers": hdrs}
         if json_body is not None:
             kwargs["json"] = json_body
+        if form is not None:
+            kwargs["data"] = form
+        if files is not None:
+            kwargs["files"] = files
         res = client.request(method, (url or path).format(**_STATE), **kwargs)
         content_type = res.headers.get("content-type", "").split(";")[0]
         body: Any
@@ -400,6 +405,25 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/skills/matrix", headers={"X-Engagement-Id": demo}),
         _rest("GET", "/api/knowledge/me", headers={"Authorization": f"Bearer {REVIEWER_TOKEN}",
                                                    "X-Actor-Email": ACTOR_EMAIL}, delegate=True),
+        # Contract 1.7 — framework ingestion through the API
+        _rest("POST", "/api/frameworks/ingestions", form={"framework": "NIS2", "version": "2022/2555"},
+              files={"file": ("nis2_excerpt.txt", Path("tests/fixtures/frameworks/nis2_excerpt.txt").read_bytes(), "text/plain")},
+              headers=DELEGATED, delegate=True, remember="ingestion"),
+        _rest("GET", "/api/frameworks/ingestions", headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/frameworks/ingestions/{ingestion_id}", "/api/frameworks/ingestions/{ingestion}",
+              headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/frameworks/ingestions/{ingestion_id}/link-proposals",
+              "/api/frameworks/ingestions/{ingestion}/link-proposals", json_body={"proposals": [
+                  {"requirement_id": "NIS2-ART21-2B", "satisfied_by": ["P-002"], "acceptance_criteria": ["Contract freeze"]}]},
+              headers=DELEGATED, delegate=True),
+        _rest("PATCH", "/api/frameworks/ingestions/{ingestion_id}/rows/{requirement_id}",
+              "/api/frameworks/ingestions/{ingestion}/rows/NIS2-ART21-2A", json_body={"decision": "accept",
+                                                                                    "comment": "Contract freeze"},
+              headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/frameworks/ingestions/{ingestion_id}/apply", "/api/frameworks/ingestions/{ingestion}/apply",
+              headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/frameworks/{framework}/coverage-declaration", "/api/frameworks/NIS2/coverage-declaration",
+              headers=DELEGATED, delegate=True),
         # Contract 1.6 — doctrine workshop and evaluations
         _rest("GET", "/api/knowledge/templates/{asset_type}", "/api/knowledge/templates/pattern"),
         _rest("POST", "/api/knowledge/candidates/validate", json_body=SAMPLE_CANDIDATE),
@@ -455,6 +479,10 @@ def isolated_environment() -> Iterator[Any]:
     eng_dir = tmp / "engagements"
     shutil.copytree(server_config.engagements_dir, eng_dir, ignore=shutil.ignore_patterns(f"{SCRATCH_ENGAGEMENT}*"))
     saved_eng_dir = server_config.engagements_dir
+    saved_kb_dir = server_config.kb_dir
+    kb_copy = tmp / "kb"
+    shutil.copytree(saved_kb_dir, kb_copy)
+    server_config.kb_dir = kb_copy
     saved_env = {k: os.environ.get(k) for k in ("SERVER_TOKEN", "LLMOPS_AUTH_TOKEN", "ENGAGEMENT_TOKENS", "KUZU_DB_PATH",
                                                   "CANDIDATES_DIR",
                                                   "GOVERNANCE_DATABASE_URL", "CANDIDATES_BACKEND",
@@ -493,6 +521,7 @@ def isolated_environment() -> Iterator[Any]:
         dispose_engines()
         LadybugGraphStore.clear_cache()
         server_config.engagements_dir = saved_eng_dir
+        server_config.kb_dir = saved_kb_dir
         for k, v in saved_env.items():
             if v is None:
                 os.environ.pop(k, None)

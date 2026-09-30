@@ -1,0 +1,121 @@
+{
+  "interface": "rest.GET /api/frameworks/ingestions",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "ingestions": {
+                "items": {
+                  "keys": {
+                    "created_at": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "created_by": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "declaration_reset": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "framework": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "source_name": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "source_sha256": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "status": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "tag": {
+                      "type": [
+                        "null"
+                      ]
+                    },
+                    "version": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "splitters": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

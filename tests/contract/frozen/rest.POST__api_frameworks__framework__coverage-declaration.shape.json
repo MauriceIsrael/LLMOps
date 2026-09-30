@@ -1,0 +1,52 @@
+{
+  "interface": "rest.POST /api/frameworks/{framework}/coverage-declaration",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "argument": {
+            "type": [
+              "string"
+            ]
+          },
+          "conflict": {
+            "type": [
+              "boolean"
+            ]
+          },
+          "reason": {
+            "type": [
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}
