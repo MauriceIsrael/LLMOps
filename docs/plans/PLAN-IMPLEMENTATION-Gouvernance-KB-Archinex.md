@@ -43,15 +43,15 @@ Les experts **n'utilisent plus de ligne de commande ni de fichier** pour enrichi
 Conséquences :
 
 - La règle A5 « Archinex ne notifie personne » est remplacée ainsi : **LLMOps désigne le destinataire et émet un événement ; Archinex délivre la notification à ses utilisateurs.** Les canaux Discord, ntfy et e-mail de LLMOps restent un repli pour les handles sans compte Archinex.
-- L'écran `/governance/candidates` de `apps/kb-client-app` passe en **console de secours du mainteneur**, sans évolution (voir D4).
+- L'écran `/governance/candidates` de `apps/kb-client-app` est **retiré** une fois la boîte de revue d'Archinex livrée (voir D4, lot L10).
 
 ### 0.4 Règles non négociables (en plus de celles des plans compagnons)
 
 1. **Compatibilité ascendante** : les interfaces LLMOps 1.0 à 1.3 sont gelées (`tests/contract/frozen/`). Tout ajout est optionnel ; le contrat passe en 1.4, 1.5…
-2. **Aucune autorité déclarative** : un relecteur, un évaluateur ou un mainteneur est identifié par une **assertion signée** (§3.1), jamais par un champ du corps de la requête. Le champ `reviewer` de `PATCH /api/knowledge/candidates/{id}` reste accepté pour les clients existants, mais il est ignoré (et doit correspondre, sinon 403) dès qu'une assertion est présente.
+2. **Aucune autorité déclarative** : un relecteur, un évaluateur ou un mainteneur est identifié par l'**adresse e-mail d'acteur** transmise par Archinex avec son jeton de service (§3.1, D3), jamais par un champ du corps de la requête. Le champ `reviewer` de `PATCH /api/knowledge/candidates/{id}` reste accepté pour les clients existants, mais doit correspondre à l'acteur (sinon 403) dès qu'un acteur est présent.
 3. **Rien de `llm-derived` ne devient doctrine sans action humaine tracée** (auteur, rôle, date) ; un actif n'est jamais `active` ni `verified` sans revue.
 4. **Chaque action d'expert est un événement** (Archinex : `DomainEvent` ; LLMOps : `history` du candidat ou journal de gouvernance), en ajout seul.
-5. **Aucun secret dans le navigateur** : le jeton de service Archinex → LLMOps et la clé de signature restent côté serveur.
+5. **Aucun secret dans le navigateur** : le jeton de service Archinex → LLMOps reste côté serveur.
 
 ---
 
@@ -61,11 +61,13 @@ Chaque décision a une recommandation. Le mainteneur valide ou corrige, puis la 
 
 | # | Question | Recommandation | Alternative |
 |---|---|---|---|
-| **D1** | Où persister l'état de gouvernance LLMOps (candidats, propriétaires, évaluations, ingestions, journal) ? | **PostgreSQL** (Cloud SQL en production, SQLite en dev) via SQLAlchemy + Alembic, derrière l'interface `CandidateRepository` existante. Le backend `file` reste pour le dev et les tests. | Volume persistant monté sur Cloud Run + fichiers JSON (plus simple, moins robuste en concurrence). |
-| **D2** | Comment publier la doctrine depuis un serveur au disque éphémère ? | **Publication par pull request git** : `kb promote` / `kb publish` côté serveur ouvrent une branche et une PR sur le dépôt de la KB via une GitHub App ; la fusion déclenche la reconstruction (`cloudbuild.yaml`) et le nouvel instantané scellé. Git reste la source de vérité et la trace d'audit. | Écriture sur un volume persistant + synchronisation git périodique (risque de divergence). |
-| **D3** | Comment LLMOps connaît-il l'identité d'un expert ? | **Assertion d'acteur signée par Archinex** (JWT court, EdDSA, clé publique publiée par Archinex et configurée dans LLMOps), transmise avec le jeton de service Archinex. | Un jeton LLMOps par expert, géré par une API d'administration (plus de secrets à distribuer, révocation plus lourde). |
-| **D4** | Que devient l'écran de revue de `apps/kb-client-app` ? | **Console de secours du mainteneur**, gelée. Toute nouvelle fonction de gouvernance se fait dans Archinex. | Le supprimer après A7. |
-| **D5** | Qui fait autorité sur la liste des propriétaires de domaine ? | **LLMOps** (table `domain_owners`, amorcée depuis `data/kb/owners.yaml`, modifiable par un `kb:admin` via Archinex, chaque changement journalisé). Archinex ne fait que lier un compte à un handle. | Archinex (mais alors LLMOps dépend d'Archinex pour router les candidats venant d'autres systèmes). |
+| **D1** | Où persister l'état de gouvernance LLMOps ? | **PostgreSQL** (Cloud SQL en production, SQLite en dev) via SQLAlchemy + Alembic, derrière `CandidateRepository`. Le backend `file` reste pour le dev et les tests. | — |
+| **D2** | Comment publier la doctrine ? | **Écriture dans `data/kb/` du serveur, sur stockage persistant** (cas d'une exploitation normale). Pas de contournement du disque éphémère : en **mode démo** (Cloud Run), les actifs promus sont perdus au redémarrage, et l'interface l'annonce (§3.5, `storage.persistent`). L'état de gouvernance (candidats, revues, évaluations) survit grâce à D1. | Publication par PR git via une GitHub App (écartée : sur-conception pour une démo). |
+| **D3** | Comment LLMOps connaît-il l'identité d'un expert ? | **Par son adresse e-mail**, transmise par Archinex avec son jeton de service (§3.1). Version simple, adaptée au prototype ; RBAC et authentification renforcés si le prototype est retenu, suivi par l'issue [MauriceIsrael/LLMOps#7](https://github.com/MauriceIsrael/LLMOps/issues/7). | Assertion signée (JWT EdDSA) : repoussée à cette issue. |
+| **D4** | Que devient l'écran de revue de `apps/kb-client-app` ? | **Retiré** une fois A7 livré : toute la gouvernance se fait dans Archinex (lot L10 ci-dessous). | Console de secours gelée. |
+| **D5** | Qui fait autorité sur les propriétaires de domaine ? | **LLMOps** (table `domain_owners`, amorcée depuis `data/kb/owners.yaml`, modifiable par un `kb:admin` via Archinex, journalisé). Archinex lie un compte à un handle. | — |
+
+**Décisions validées par le mainteneur.** Limitation connue du mode démo : sans stockage persistant, la doctrine promue n'est pas conservée d'un redémarrage à l'autre.
 
 ---
 
@@ -77,13 +79,14 @@ Chaque décision a une recommandation. Le mainteneur valide ou corrige, puis la 
 | **L6** | LLMOps | API de revue et de sollicitation (boîte, assignation, événements, propriétaires) | L5 |
 | **L7** | LLMOps | Atelier de doctrine et évaluations (modèles d'actifs, simulation de clauses, jeu d'évaluation, retours de verdicts) | L5 |
 | **L8** | LLMOps | Ingestion des référentiels par API (téléversement, feuille de revue en ligne, déclaration de couverture) | L5, L6 |
-| **L9** | LLMOps | Promotion et publication serveur par PR git, métriques de santé | L6, D2 |
-| **A6** | Archinex | Comptes, rôles KB et assertion d'acteur | A1, L5 |
+| **L9** | LLMOps | Promotion serveur et métriques de santé (annonce du mode démo) | L6 |
+| **A6** | Archinex | Comptes, rôles KB et acteur par e-mail | A1, L5 |
 | **A7** | Archinex | Boîte de revue et sollicitation des experts | A6, L6 |
 | **A8** | Archinex | Atelier de doctrine (création, amendement, clauses) | A7, L7 |
 | **A9** | Archinex | Évaluations (jeu d'évaluation, retours des débats) | A3, A8, L7 |
 | **A10** | Archinex | Référentiels (ingestion, revue, couverture) | A7, L8 |
 | **A11** | Archinex | Tableau de bord de la KB et campagnes d'enrichissement | A7, L9 |
+| **L10** | LLMOps | Retrait de l'écran de revue de `apps/kb-client-app` (D4) | A7 livré et validé |
 
 Ordre recommandé : L5 → A6 → L6 → A7 (premier jalon utile : les experts relisent dans Archinex), puis L7 ∥ L8 → A8 ∥ A10, puis A9, L9, A11.
 
@@ -99,32 +102,21 @@ Portes :
 
 ### 3.1 Authentification des personnes (L5, A6)
 
-Chaque appel d'Archinex porte :
+Chaque appel d'Archinex fait au nom d'un utilisateur porte :
 
 - `Authorization: Bearer <jeton de service Archinex>` : un jeton de `ENGAGEMENT_TOKENS` avec le scope `kb:delegate` (nouveau). Il authentifie **le système**.
-- `X-Actor-Assertion: <JWT>` : l'identité de **la personne**, signée par Archinex. Claims :
-
-```json
-{
-  "iss": "archinex",
-  "aud": "llmops",
-  "sub": "user:4f1c…",
-  "handle": "@security-compliance-team",
-  "name": "…",
-  "email": "…",
-  "kb_roles": ["kb:review", "kb:evaluate", "kb:maintain", "kb:admin"],
-  "iat": 1790000000,
-  "exp": 1790000300,
-  "jti": "…"
-}
-```
+- `X-Actor-Email: <adresse e-mail de l'expert>` : l'identité de **la personne**, connue d'Archinex (compte activé par lien d'invitation).
 
 Règles LLMOps :
 
-- Assertion acceptée seulement si le jeton de service a `kb:delegate`, si la signature est valide (clés `ARCHINEX_JWKS_URL` ou `ARCHINEX_PUBLIC_KEY`), si `aud = llmops` et si `exp - iat ≤ 300 s`. Le `jti` est mémorisé jusqu'à `exp` (anti-rejeu).
-- Le **rôle déclaré ne suffit pas** : pour relire un candidat, le `handle` doit aussi être propriétaire du domaine du candidat (ou d'un parent), ou `default_owner`, ou porter `kb:maintain`. C'est LLMOps qui tranche (règle déterministe, testée).
-- L'acteur de l'assertion devient `actor`, `reviewer` ou `author` dans l'historique ; le jeton brut n'est jamais journalisé (déjà le cas en L2).
-- Sans assertion, le comportement 1.3 est inchangé (jetons `kb:review` existants).
+- L'e-mail n'est pris en compte que si le jeton de service porte `kb:delegate` ; sinon il est ignoré. La confiance repose sur le jeton de service (secret côté serveur d'Archinex).
+- LLMOps résout l'e-mail en **handle** via `domain_owners` (colonne `email`, amorcée depuis `owners.yaml`). E-mail inconnu → l'acteur n'a aucun droit de revue (403 sur les actions d'expert).
+- Les rôles KB (`kb:review`, `kb:evaluate`, `kb:maintain`, `kb:admin`) sont portés par le registre LLMOps, modifiable par un `kb:admin` ; Archinex les affiche mais n'en est pas l'autorité.
+- Le **rôle ne suffit pas** : pour relire un candidat, le handle doit être propriétaire du domaine du candidat (ou d'un parent), `default_owner`, ou porter `kb:maintain`. C'est LLMOps qui tranche (règle déterministe, testée).
+- L'acteur devient `actor`, `reviewer` ou `author` dans l'historique ; le jeton brut n'est jamais journalisé.
+- Sans `X-Actor-Email`, le comportement 1.3 est inchangé (jetons `kb:review` existants).
+
+Limite assumée : un jeton de service compromis permet d'usurper n'importe quel expert. Acceptable pour le prototype, à traiter avec l'issue de suivi (authentification et RBAC).
 
 Nouvelle interface : `GET /api/knowledge/me` → `{handle, kb_roles, owned_domains, pending_reviews}`, pour vérifier l'intégration.
 
@@ -159,7 +151,7 @@ Nouvelle interface : `GET /api/knowledge/me` → `{handle, kb_roles, owned_domai
 |---|---|
 | `POST /api/frameworks/ingestions` (multipart) | Téléverser une source (pdf, html, txt, docx) avec `framework`, `version`, `tag` ; exécute l'ingestion de L3 (extraction, SHA-256, découpage) dans le stockage de gouvernance ; renvoie un `ingestion_id`. Rôle `kb:maintain`. |
 | `GET /api/frameworks/ingestions/{id}` | Exigences découpées, avec texte légal, liens proposés, critères proposés, décision de revue par ligne. **Remplace la feuille CSV.** |
-| `PATCH /api/frameworks/ingestions/{id}/rows/{requirement_id}` | Décision de l'expert sur une ligne (`accept`, `amend`, `reject`, liens, critères, commentaire) ; relecteur = acteur de l'assertion. |
+| `PATCH /api/frameworks/ingestions/{id}/rows/{requirement_id}` | Décision de l'expert sur une ligne (`accept`, `amend`, `reject`, liens, critères, commentaire) ; relecteur = acteur de la requête. |
 | `POST /api/frameworks/ingestions/{id}/link-proposals` | Archinex dépose les **liens proposés par son LLM local** (`llm-derived`), validés contre les identifiants existants. LLMOps n'appelle aucun LLM. |
 | `POST /api/frameworks/ingestions/{id}/apply` | Équivalent de `kb apply-review` : crée les candidats `framework_ingestion` revus et les promeut (via L9). |
 | `POST /api/frameworks/{fw}/coverage-declaration` | Équivalent de `kb declare-coverage` ; refusé avec la liste des manques, comme en CLI. |
@@ -168,9 +160,9 @@ Nouvelle interface : `GET /api/knowledge/me` → `{handle, kb_roles, owned_domai
 
 | Route (contrat 1.8) | Rôle |
 |---|---|
-| `POST /api/knowledge/candidates/{id}/promote` | Rôle `kb:maintain`. Écrit l'actif dans une branche de travail du dépôt de KB (D2). |
+| `POST /api/knowledge/candidates/{id}/promote` | Rôle `kb:maintain`. Écrit l'actif dans `data/kb/` du serveur (D2). |
 | `POST /api/knowledge/publications` | Rôle `kb:maintain`. Regroupe les candidats promus, ouvre la PR de KB (titre, `CHANGELOG`, liste des relecteurs), renvoie son URL. À la fusion (webhook GitHub ou polling), les candidats passent en `published` avec l'identifiant de l'instantané. |
-| `GET /api/knowledge/health` | Indicateurs : volume par type et domaine, actifs `validated_by` vide, part de verdicts `unassessed`, couverture par référentiel, âge de la file par propriétaire, candidats en retard, dernier instantané. |
+| `GET /api/knowledge/health` | Indicateurs : volume par type et domaine, actifs `validated_by` vide, part de verdicts `unassessed`, couverture par référentiel, âge de la file par propriétaire, candidats en retard, dernier instantané, `storage: {persistent, mode}` (le mode démo annonce que la doctrine promue est perdue au redémarrage). |
 
 ---
 
@@ -180,9 +172,9 @@ Nouvelle interface : `GET /api/knowledge/me` → `{handle, kb_roles, owned_domai
 
 1. Stockage de gouvernance selon D1 : `pipelines/governance/store.py` (SQLAlchemy), migrations Alembic, tables `candidates`, `candidate_events`, `review_requests`, `comments`, `domain_owners`, `governance_events`, `eval_datasets`, `eval_cases`, `eval_runs`, `verdict_feedback`, `framework_ingestions`, `ingestion_rows`. `CandidateRepository` gagne une implémentation `sql` (`CANDIDATES_BACKEND=sql`), et le stub `gcs` est retiré.
 2. Commande `kb migrate-governance` : importe `data/candidates/*.json`, `data/kb/owners.yaml` et `tests/evals/datasets/check_option_v1.jsonl`. Idempotente.
-3. Vérification des assertions (§3.1) dans `mcp_server/core/auth.py` : `resolve_actor(request) -> Actor | None`, scope `kb:delegate`, anti-rejeu. L'autorisation de revue se base sur `domain_owners` et non plus sur `owners.yaml` lu à chaque appel.
+3. Résolution de l'acteur (§3.1) dans `mcp_server/core/auth.py` : `resolve_actor(request) -> Actor | None`, scope `kb:delegate`, e-mail → handle. L'autorisation de revue se base sur `domain_owners` et non plus sur `owners.yaml` lu à chaque appel.
 4. `GET /api/knowledge/me`.
-5. Tests : signature invalide, audience fausse, assertion expirée ou rejouée → 401 ; jeton sans `kb:delegate` → assertion ignorée ; `reviewer` du corps différent de l'acteur → 403 ; relecteur hors domaine → 403.
+5. Tests : e-mail inconnu → 403 ; jeton sans `kb:delegate` → `X-Actor-Email` ignoré ; `reviewer` du corps différent de l'acteur → 403 ; relecteur hors domaine → 403.
 
 **Critères** : tests gelés verts ; les tests L2 passent avec le backend `sql` (SQLite) et `file` ; la file survit à un redémarrage.
 
@@ -209,26 +201,33 @@ Nouvelle interface : `GET /api/knowledge/me` → `{handle, kb_roles, owned_domai
 3. `apply` passe par le cycle des candidats (L2) puis par la promotion de L9.
 4. Tests : le scénario de bout en bout de L3 (`tests/integration/test_framework_ingestion.py`) est rejoué via l'API.
 
-### L9 — Promotion et publication par PR git, santé
+### L9 — Promotion serveur et santé
 
-1. `pipelines/publication/git_publisher.py` : client GitHub App (clé en secret), branche `kb/publication-<date>-<n>`, un commit par actif, PR avec `CHANGELOG` et relecteurs. Mode `local` conservé pour le dev (écriture directe, commande `kb publish`).
-2. Réception de la fusion (webhook GitHub signé, ou polling) → candidats `published`, événement `candidate.published`.
-3. `GET /api/knowledge/health`.
-4. Tests : publisher simulé (faux client GitHub) ; aucune écriture dans `data/kb/` du conteneur en mode `github`.
+1. `POST .../promote` et `POST /api/knowledge/publications` écrivent dans `data/kb/` (module `pipelines/publication/local_publisher.py`, réutilise `pipelines/kb_candidates/kb.py`) ; les candidats passent en `published` avec l'identifiant de l'instantané.
+2. `GET /api/knowledge/health` (§3.5) inclut `storage: {persistent: bool, mode: "demo"|"normal"}`, déduit de `LLMOPS_STORAGE_PERSISTENT` (défaut : vrai ; `false` sur le déploiement démo). En mode démo, `promote` répond avec un avertissement (`warnings: ["ephemeral-storage"]`) et Archinex affiche un bandeau.
+3. Tests : promotion écrit l'actif attendu ; le mode démo renvoie l'avertissement ; l'état de gouvernance (SQL) survit à un redémarrage simulé.
+
+### L10 — Retrait de l'écran de revue de `kb-client-app`
+
+1. Supprimer `apps/kb-client-app/src/routes/governance/candidates/` et les routes proxy `api/kb/candidates` ; retirer `LLMOPS_REVIEW_TOKEN` de la configuration et de la documentation.
+2. Les scopes `kb:review` par jeton restent acceptés par l'API (compatibilité 1.3) ; seul le client disparaît.
+3. Documenter le parcours de revue dans le guide utilisateur d'Archinex.
+
+**Critères** : `npm run check` et le build du client passent ; aucun renvoi restant vers l'écran retiré.
 
 ---
 
 ## 5. Lots Archinex
 
-### A6 — Comptes, rôles KB et assertion d'acteur
+### A6 — Comptes, rôles KB et acteur par e-mail
 
 1. Modèle Prisma `User` étendu (ou `KbProfile`) : `kbHandle` (unique), `kbRoles` (`kb:review`, `kb:evaluate`, `kb:maintain`, `kb:admin`), `kbDomains` (lecture seule, synchronisés depuis `GET /api/knowledge/owners`).
-2. Écran **Administration › Experts** (rôle admin Archinex) : inviter un expert par e-mail (lien d'activation à usage unique, expiration 7 jours), lui attribuer un handle et des rôles KB, désactiver un compte. Pour `kb:admin` : modifier le registre des propriétaires (`PUT /api/knowledge/owners`), chaque changement tracé en `DomainEvent`.
-3. `src/lib/server/llmops/actorAssertion.ts` : signature EdDSA des assertions (clé privée en secret serveur), JWKS publié sur `/.well-known/jwks.json`. `llmopsClient` ajoute `X-Actor-Assertion` à chaque appel fait **au nom d'un utilisateur** ; les appels système (seed, polling) n'en portent pas.
+2. Écran **Administration › Experts** (rôle admin Archinex) : inviter un expert par e-mail (lien d'activation à usage unique, expiration 7 jours), lui attribuer un handle et des rôles KB, désactiver un compte. Pour `kb:admin` : modifier le registre des propriétaires et des rôles KB (`PUT /api/knowledge/owners`), chaque changement tracé en `DomainEvent`.
+3. `llmopsClient` ajoute `X-Actor-Email` (e-mail du compte activé) à chaque appel fait **au nom d'un utilisateur** ; les appels système (seed, polling) n'en portent pas.
 4. Casbin : ressources `kb:*` alignées sur les rôles KB ; un utilisateur sans rôle KB ne voit pas les écrans de gouvernance.
 5. Page **Mon profil KB** : `GET /api/knowledge/me` (handle, domaines possédés, revues en attente).
 
-**Critères** : un expert invité active son compte et voit ses domaines ; l'assertion est refusée par LLMOps si la clé est fausse (test d'intégration avec le faux LLMOps) ; aucun secret dans le bundle client (test).
+**Critères** : un expert invité active son compte et voit ses domaines ; l'e-mail d'un compte non déclaré dans le registre est refusé par LLMOps (test d'intégration avec le faux LLMOps) ; aucun secret dans le bundle client (test).
 
 ### A7 — Boîte de revue et sollicitation
 
@@ -299,14 +298,14 @@ Pour chaque PR, en plus des règles des plans compagnons :
 
 - [ ] LLMOps : `make verify` et `make test` verts, tests gelés inchangés, nouvelles interfaces gelées, schémas et types TS publiés, contrat `knowledge-hub-api-v1.md` §5.x mis à jour, `schema_version` en version mineure suivante.
 - [ ] Archinex : `npm run verify` vert, proposition OpenSpec du lot, faux LLMOps (`tests/helpers/fakeLlmops.ts`) étendu aux nouvelles routes.
-- [ ] Chaque action d'expert est attribuée à une personne identifiée par assertion, jamais par un champ libre.
+- [ ] Chaque action d'expert est attribuée à une personne identifiée par son e-mail d'acteur, jamais par un champ libre.
 - [ ] Aucun LLM appelé par une route servie de LLMOps ; toute sortie de LLM d'Archinex est validée par zod et marquée `llm-derived`.
-- [ ] Aucun secret (jeton de service, clé de signature, clé GitHub App) dans le navigateur ni dans le dépôt.
+- [ ] Aucun secret (jeton de service) dans le navigateur ni dans le dépôt.
 - [ ] Documentation utilisateur (`USER_GUIDE.md` d'Archinex) : un parcours par rôle (expert relecteur, évaluateur, mainteneur, administrateur).
 
 ## 8. Hors périmètre
 
 - Générer ou valider de la doctrine sans humain (auto-acceptation, seuils automatiques).
-- Déplacer la doctrine elle-même hors de git (voir D2).
-- Faire évoluer l'écran de revue de `apps/kb-client-app` (D4).
+- Contourner le disque éphémère du mode démo (D2) : limitation annoncée, non corrigée.
+- Authentification forte et RBAC (D3) : suivis par l'issue [MauriceIsrael/LLMOps#7](https://github.com/MauriceIsrael/LLMOps/issues/7).
 - L'assemblage du HLD.
