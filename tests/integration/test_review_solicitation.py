@@ -190,3 +190,24 @@ def test_governance_features_need_the_database(env, monkeypatch, tmp_path):
     monkeypatch.setenv("CANDIDATES_DIR", str(tmp_path / "file-queue"))
     assert env.get("/api/knowledge/events", headers=CLIENT).status_code == 503
     assert env.get("/api/knowledge/reviews/inbox", headers=_as(ALICE)).status_code == 200  # derived from the queue
+
+
+def test_assignment_and_second_review_request_grant_the_right_to_decide(env):
+    cid = _submit(env)["id"]
+    url = f"/api/knowledge/candidates/{cid}"
+    # @ciso-office owns neither the domain nor the candidate: refused.
+    assert env.patch(url, headers=_as(BOB), json={"action": "accept"}).status_code == 403
+    # Once the candidate is assigned to them, they may decide (it is in their inbox).
+    assert env.post(f"{url}/assign", headers=_as(MAINT), json={"handle": "@ciso-office"}).status_code == 200
+    assert [i["candidate_id"] for i in _inbox(env, BOB)] == [cid]
+    assert env.patch(url, headers=_as(BOB), json={"action": "reject", "reason": "Out of scope"}).status_code == 200
+
+
+def test_expert_asked_for_a_second_review_may_decide_it(env):
+    cand = _principle(env)
+    url = f"/api/knowledge/candidates/{cand['id']}"
+    assert env.patch(url, headers=_as(ALICE), json={"action": "accept"}).status_code == 200
+    # The maintainers got the automatic request; another expert is asked explicitly and may answer too.
+    ask = env.post(f"{url}/request-review", headers=_as(MAINT), json={"handle": "@ciso-office", "kind": "second_review"})
+    assert ask.status_code == 201
+    assert env.patch(url, headers=_as(BOB), json={"action": "accept"}).status_code == 200

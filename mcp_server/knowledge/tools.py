@@ -1144,9 +1144,9 @@ def review_kb_candidate(
             if (reviewer or "").strip() not in ("", owner.handle):
                 return {"status": "unauthorized", "reason": "'reviewer' does not match the authenticated expert."}
             reviewer = owner.handle
-            if not service.owners().can_review(owner.handle, service.get(candidate_id).get("domain") or []):
+            if not service.may_review(owner.handle, service.get(candidate_id)):
                 return {"status": "unauthorized",
-                        "reason": f"{owner.handle} does not own the domain of this candidate."}
+                        "reason": f"{owner.handle} does not own the domain of this candidate and is not assigned to it."}
         reviewed = _candidate_service().review(
             candidate_id, action, reviewer, reason=reason, amended_content=amended_content, actor=_actor()
         )
