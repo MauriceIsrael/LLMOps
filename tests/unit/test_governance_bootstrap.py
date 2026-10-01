@@ -53,6 +53,8 @@ def test_contract_server_personas_are_consistent(tmp_path):
     env = module.prepare(tmp_path)
     import yaml
 
+    assert Path(env["LLMOPS_KB_DIR"]) == tmp_path / "data" / "kb"  # the relative path data/kb works from the scratch cwd
+    assert (tmp_path / "data" / "kb" / "controls").is_dir()
     owners = yaml.safe_load((Path(env["LLMOPS_KB_DIR"]) / "owners.yaml").read_text())["owners"]
     assert owners["@maintainers"]["roles"] == ["kb:maintain", "kb:admin"]
     assert owners["@security-compliance-team"]["email"] == "sec@example.org"
