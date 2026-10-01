@@ -12,6 +12,7 @@
   "rest.GET /api/knowledge/candidates/{candidate_id}": 200,
   "rest.GET /api/knowledge/candidates/{candidate_id}/comments": 200,
   "rest.GET /api/knowledge/context": 200,
+  "rest.GET /api/knowledge/embeddings/pending": 200,
   "rest.GET /api/knowledge/engagements": 200,
   "rest.GET /api/knowledge/evals/{dataset}": 200,
   "rest.GET /api/knowledge/evals/{dataset}/runs/{run_id}": 200,
@@ -53,11 +54,13 @@
   "rest.POST /api/knowledge/evals/{dataset}/cases": 201,
   "rest.POST /api/knowledge/evals/{dataset}/runs": 201,
   "rest.POST /api/knowledge/publications": 200,
+  "rest.POST /api/knowledge/similar": 200,
   "rest.POST /api/knowledge/suggestions": 200,
   "rest.POST /api/knowledge/verdict-feedback": 201,
   "rest.POST /api/knowledge/verdict-feedback/{feedback_id}/convert": 200,
   "rest.POST /api/prose/suggest-batch": 200,
   "rest.POST /api/rfp/shred-to-candidates": 200,
   "rest.PUT /api/compliance/frameworks/applicable": 200,
+  "rest.PUT /api/knowledge/embeddings": 200,
   "rest.PUT /api/knowledge/owners": 200
 }

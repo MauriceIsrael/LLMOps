@@ -1,0 +1,112 @@
+{
+  "interface": "rest.GET /api/knowledge/embeddings/pending",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "dim": {
+                "type": [
+                  "null"
+                ]
+              },
+              "model": {
+                "type": [
+                  "string"
+                ]
+              },
+              "model_version": {
+                "type": [
+                  "null"
+                ]
+              },
+              "models": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "pending": {
+                "items": {
+                  "keys": {
+                    "reason": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "ref": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "text": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "text_sha256": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

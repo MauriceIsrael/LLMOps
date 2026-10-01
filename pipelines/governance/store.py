@@ -153,6 +153,20 @@ ingestion_rows = Table(
     Column("doc", Text, nullable=False),  # JSON: draft text, proposals, decision, result
 )
 
+embeddings = Table(
+    "embeddings", metadata,
+    Column("ref", String(128), primary_key=True),
+    Column("model_id", String(128), primary_key=True),
+    Column("kind", String(16), nullable=False),
+    Column("model_version", String(64), nullable=False),
+    Column("dim", Integer, nullable=False),
+    Column("vector", Text, nullable=False),  # JSON array of floats
+    Column("text_sha256", String(64), nullable=False),
+    Column("language", String(8)),
+    Column("created_by", String(256), nullable=False),
+    Column("created_at", String(32), nullable=False),
+)
+
 counters = Table(
     "counters", metadata,
     Column("key", String(128), primary_key=True),

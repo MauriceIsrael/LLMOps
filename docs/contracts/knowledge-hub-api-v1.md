@@ -732,6 +732,18 @@ REST uniquement. Actions réservées à un expert agissant avec `kb:maintain` (�
 - **Mode démo** : avec `LLMOPS_STORAGE_PERSISTENT=false` (déploiement Cloud Run sans volume), `promote` et `publications` répondent avec `warnings: ["ephemeral-storage"]` — la doctrine écrite est perdue au prochain redémarrage — et `health.storage.mode` vaut `demo`. L'état de gouvernance (candidats, revues, évaluations) reste en base. Décision D2 : aucun contournement.
 - La publication écrit sur le disque du serveur ; le commit git de `data/kb/` reste l'acte du mainteneur en exploitation normale. Schéma : [`kb_health`](../../schemas/kb_health.schema.json).
 
+### 5.9 Contrat 1.9 — Similarité sémantique (vecteurs calculés par le client)
+
+Plan : [`PLAN-IMPLEMENTATION-Similarite-Reutilisation.md`](../plans/PLAN-IMPLEMENTATION-Similarite-Reutilisation.md). REST uniquement, base de gouvernance requise (`503` sinon), scope `kb:review`. **LLMOps ne contient aucun modèle** : le client (Archinex) calcule les vecteurs ; LLMOps les stocke avec le nom et la version du modèle et calcule un cosinus, de façon déterministe.
+
+| Route | Rôle |
+|---|---|
+| `GET /api/knowledge/embeddings/pending?model=` | Actifs et contrôles **actifs** dont le vecteur manque (`missing`) ou est périmé (`stale`), avec le **texte à encoder** (titre, puis sections qui énoncent l'actif ; titre français des contrôles) et son SHA-256. `models` liste les modèles déjà stockés. |
+| `PUT /api/knowledge/embeddings` `{model, model_version, items:[{ref, text_sha256, vector, language?}]}` | Dépôt par lot (≤ 500). **Refus (`400`)** si le SHA-256 ne correspond plus au texte courant (vecteur périmé), si l'actif n'est pas actif, si la dimension diffère de celle du modèle, si le vecteur est nul ou non fini, ou si `model_version` diffère de celle déjà stockée (deux versions ne sont jamais mélangées). Avec un expert agissant : rôle `kb:maintain` ; sans expert (synchronisation système) : le jeton de service suffit. |
+| `POST /api/knowledge/similar` `{model, vector, query_text?, types?, domains?, top_k?}` | Classement **hybride** : cosinus + pertinence lexicale du moteur de doctrine (synonymes FR/EN, seulement avec `query_text`) + domaine ; poids et seuils dans `data/kb/taxonomy/similarity.yaml` (`status: uncalibrated` tant qu'aucune évaluation ne les a fixés). |
+
+**Un résultat n'est jamais une décision.** Chaque élément porte `requires_confirmation: true` quel que soit le score (décision D8 : tolérance zéro), sa `zone` (`strong`, `possible`, `weak`, ou `superseded` pour un actif remplacé, jamais présenté comme valide), `stale`, sa provenance (`status`, `last_reviewed`, `review_by`, `validated_by`, `validated_at`, `superseded_by`) et ses **hypothèses de validité** (`assumptions`, `assumptions_documented`). `GET /api/knowledge/health` ajoute `embeddings` : par modèle, vecteurs, manquants et périmés. Schéma : [`similar_knowledge`](../../schemas/similar_knowledge.schema.json).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

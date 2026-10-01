@@ -405,6 +405,15 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/skills/matrix", headers={"X-Engagement-Id": demo}),
         _rest("GET", "/api/knowledge/me", headers={"Authorization": f"Bearer {REVIEWER_TOKEN}",
                                                    "X-Actor-Email": ACTOR_EMAIL}, delegate=True),
+        # Contract 1.9 — semantic similarity (vectors computed by the client)
+        _rest("GET", "/api/knowledge/embeddings/pending", "/api/knowledge/embeddings/pending?model=contract-model",
+              headers=DELEGATED, delegate=True),
+        _rest("PUT", "/api/knowledge/embeddings", json_body={
+            "model": "contract-model", "model_version": "1",
+            "items": [{"ref": "P-002", "text_sha256": _p002_sha(), "vector": [0.1, 0.2, 0.3]}]},
+              headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/similar", json_body={"model": "contract-model", "vector": [0.1, 0.2, 0.3]},
+              headers=DELEGATED, delegate=True),
         # Contract 1.8 — promotion, publication and health
         _rest("POST", "/api/knowledge/candidates/{candidate_id}/promote", "/api/knowledge/candidates/{rest}/promote",
               headers=DELEGATED, delegate=True),
@@ -457,6 +466,13 @@ def build_catalogue() -> list[Interface]:
             "owners": [{"handle": "@maintainers", "email": ACTOR_EMAIL, "roles": ["kb:maintain", "kb:admin"]}],
             "domains": {}, "default_owner": "@maintainers"}, headers=DELEGATED, delegate=True),
     ]
+
+
+def _p002_sha() -> str:
+    """SHA-256 of the text to encode for P-002 (the freeze environment serves a copy of data/kb)."""
+    from pipelines.similarity.text import embeddable_assets
+
+    return next(a["text_sha256"] for a in embeddable_assets("data/kb") if a["ref"] == "P-002")
 
 
 def file_name(interface_name: str) -> str:

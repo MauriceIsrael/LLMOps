@@ -24,9 +24,11 @@ Minor versions only add interfaces or optional fields:
   rows, link proposals, apply) and ``/api/frameworks/{fw}/coverage-declaration``.
 * ``1.8`` — promotion, publication and health (REST): ``POST /api/knowledge/candidates/{id}/promote``,
   ``POST /api/knowledge/publications`` and ``GET /api/knowledge/health``.
+* ``1.9`` — semantic similarity over vectors computed by the client (REST):
+  ``/api/knowledge/embeddings/pending``, ``PUT /api/knowledge/embeddings``, ``POST /api/knowledge/similar``.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.8"
+CONTRACT_VERSION = "1.9"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

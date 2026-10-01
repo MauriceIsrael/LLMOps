@@ -91,6 +91,21 @@ def kb_health(service: CandidateService, kb_dir: Path, snapshot_dir: Path, now: 
             evaluation = {"cases": len(cases), "validated_cases": sum(1 for c in cases if c["annotation_status"] == "validated"),
                           "last_run": None if last is None else {k: last.get(k) for k in (
                               "id", "at", "run_by", "violation_recall", "supports_recall", "cases")}}
+    embeddings_state: list[dict[str, Any]] = []
+    if database_url():
+        from pipelines.similarity.store import EmbeddingStore
+        from pipelines.similarity.text import embeddable_assets
+
+        emb_store = EmbeddingStore()
+        current = {a["ref"]: a["text_sha256"] for a in embeddable_assets(kb_dir)}
+        for m in emb_store.models():
+            stored = emb_store.hashes(m["model_id"])
+            embeddings_state.append({
+                "model_id": m["model_id"], "versions": m["versions"], "dim": m["dim"], "active_assets": len(current),
+                "vectors": len([r for r in stored if r in current]),
+                "missing": len([r for r in current if r not in stored]),
+                "stale": len([r for r, h in stored.items() if r in current and current[r] != h]),
+            })
     return {
         "generated_at": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "assets": {"active": len(assets), "by_type": dict(sorted(by_type.items())), "by_domain": dict(sorted(by_domain.items())),
@@ -101,5 +116,6 @@ def kb_health(service: CandidateService, kb_dir: Path, snapshot_dir: Path, now: 
         "queue": _queue(service, now),
         "evaluation": evaluation,
         "last_snapshot": _last_snapshot(snapshot_dir),
+        "embeddings": embeddings_state,
         "storage": storage_status(),
     }

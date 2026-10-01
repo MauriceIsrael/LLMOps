@@ -1,0 +1,13 @@
+# Parameters of the semantic similarity search (POST /api/knowledge/similar, plan similarity, lot L11).
+# Data, not code: the weights and thresholds are fixed by a documented evaluation run (lot L13), never by eye.
+#
+# status: uncalibrated — no evaluation run has justified these values yet. Until it does, the zones are
+# indicative only, and in every case a human confirms every reuse (decision D8: no automatic reuse, ever).
+status: uncalibrated
+weights:
+  vector: 0.70      # cosine similarity of the vectors computed by the client
+  lexical: 0.25     # deterministic relevance of the doctrine engine (synonyms EN/FR included); only with query_text
+  domain: 0.05      # the asset belongs to a requested domain
+thresholds:
+  strong: 0.80      # at or above: listed first, "strong" — still requires confirmation
+  possible: 0.60    # at or above: "possible"; below: "weak"

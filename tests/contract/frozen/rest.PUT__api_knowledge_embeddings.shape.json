@@ -1,0 +1,69 @@
+{
+  "interface": "rest.PUT /api/knowledge/embeddings",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "dim": {
+                "type": [
+                  "number"
+                ]
+              },
+              "model": {
+                "type": [
+                  "string"
+                ]
+              },
+              "model_version": {
+                "type": [
+                  "string"
+                ]
+              },
+              "stored": {
+                "type": [
+                  "number"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}
