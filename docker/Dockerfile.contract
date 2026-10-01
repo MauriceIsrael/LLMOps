@@ -1,0 +1,34 @@
+# Image of the seeded contract server (scripts/contract_server.py) for client end-to-end tests, e.g. Archinex
+# with testcontainers: real LLMOps, scratch copy of the knowledge base, SQLite governance database, a delegating
+# service token and four test experts. NOT for deployment. Build from the repository root:
+#   docker build -f docker/Dockerfile.contract -t llmops-contract:latest .
+# Service token: contract-service-token (kb:review, kb:delegate); experts: see scripts/contract_server.py.
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl build-essential g++ libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir poetry
+
+COPY pyproject.toml poetry.lock* README.md ./
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi --no-root --without dev,eval
+
+COPY mcp_server ./mcp_server
+COPY pipelines ./pipelines
+COPY tools ./tools
+COPY data ./data
+COPY schemas ./schemas
+COPY fixtures ./fixtures
+COPY scripts ./scripts
+COPY examples ./examples
+COPY tests/evals/datasets/check_option_v1.jsonl ./tests/evals/datasets/check_option_v1.jsonl
+COPY tests/fixtures/frameworks ./tests/fixtures/frameworks
+RUN poetry install --no-interaction --no-ansi --only-root
+
+ENV PYTHONPATH=/app
+EXPOSE 8000
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=6 \
+  CMD curl -f http://localhost:8000/health || exit 1
+CMD ["python", "scripts/contract_server.py", "--host", "0.0.0.0", "--port", "8000"]
