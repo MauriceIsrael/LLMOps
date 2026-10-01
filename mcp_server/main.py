@@ -1255,6 +1255,9 @@ def main() -> None:
     host = os.getenv("HOST", settings.HOST)
 
     if transport in ("sse", "http"):
+        from pipelines.governance.bootstrap import ensure_governance_ready
+
+        ensure_governance_ready(server_config.kb_dir)
         expected_token = os.getenv("SERVER_TOKEN") or os.getenv("LLMOPS_AUTH_TOKEN") or settings.AUTH_TOKEN
         if not expected_token or not expected_token.strip():
             raise RuntimeError(

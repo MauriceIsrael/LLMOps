@@ -112,3 +112,29 @@ The knowledge base enrichment cycle (`/api/knowledge/candidates`, `kb` CLI) pers
 > ⚠️ **Cloud Run file systems are ephemeral.** With the `file` backend, candidates written in the container are lost at the next revision or scale-down. Use `CANDIDATES_BACKEND=sql` with a database that outlives the container (Cloud SQL), then run `kb migrate-governance` once. Promoted assets are still written to `data/kb/` of the container: on an ephemeral demo deployment they are lost at the next restart (known limitation of the demo mode).
 
 The public demo token (`SERVER_TOKEN`) can submit and read candidates (content that failed the anonymization check is redacted) but **cannot review**: reviews require a token carrying the `kb:review` scope. Promotion (`kb promote`) and publication (`kb publish`) are run offline by a maintainer, who then commits `data/kb/`, `data/knowledge.lbug` and the snapshot. `kb remind` can be scheduled (cron) to re-notify owners of candidates waiting more than 5 business days.
+
+
+## 5. Governance deployment (Archinex integration, contracts 1.4 to 1.8)
+
+The experts act through Archinex, which calls LLMOps with a **service token** and the expert's e-mail
+(`X-Actor-Email`). `cloudbuild.yaml` expects the following, created once:
+
+| Resource | Content |
+|---|---|
+| Cloud SQL (PostgreSQL) instance | Governance state (candidates, reviews, owners registry, evaluations, ingestions). Pass it as `_CLOUDSQL_INSTANCE=PROJECT:REGION:INSTANCE`. |
+| Secret `llmops-governance-db-url` | `postgresql://USER:PASSWORD@/DB?host=/cloudsql/PROJECT:REGION:INSTANCE` (the `postgres` extra is installed in the image). |
+| Secret `llmops-engagement-tokens` | The whole `ENGAGEMENT_TOKENS` value, e.g. `demo-public-2026-08:nordwave-mcx-2027;ARCHINEX_SERVICE_TOKEN:kb:review,kb:delegate,nordwave-mcx-2027`. Archinex must use `ARCHINEX_SERVICE_TOKEN`; the demo token never carries a governance scope. |
+
+At start the server creates the tables, seeds the owners registry from `data/kb/owners.yaml` when the
+database has none (never overwrites it) and imports the evaluation dataset (`pipelines/governance/bootstrap.py`).
+**The e-mail addresses and roles of the experts must be filled in** (`owners.yaml` before the first start, or
+afterwards `PUT /api/knowledge/owners` with a `kb:admin` token): an expert without a registered e-mail gets `403`.
+`kb:maintain` and `kb:admin` are roles of the registry entry of the maintainers.
+
+The demo deployment sets `LLMOPS_STORAGE_PERSISTENT=false`: promoted doctrine written to the container disk is lost
+at restart (announced by the API, see §4). Cloud Run is configured with a 300 s request timeout and 1 GiB (source
+extraction and graph rebuild).
+
+**Client contract tests**: `make contract-server` starts the real server on a scratch copy with a SQLite governance
+database, the service token `contract-service-token` and four test experts (see `scripts/contract_server.py`), so a
+client such as Archinex can be tested against the real contract instead of a fake.

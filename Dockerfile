@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir poetry
 COPY pyproject.toml poetry.lock* README.md ./
 
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --no-root --without dev,eval
+    && poetry install --no-interaction --no-ansi --no-root --without dev,eval -E postgres
 
 # Copie des dossiers de l'application
 COPY mcp_server ./mcp_server
@@ -30,6 +30,8 @@ COPY scripts ./scripts
 # Reference demo data (scripted interpretations, profile, canvas template): read at run time
 # for the demo engagement; the code itself hard-codes no project.
 COPY examples ./examples
+# Evaluation dataset imported into the governance database at start (pipelines/governance/bootstrap.py).
+COPY tests/evals/datasets/check_option_v1.jsonl ./tests/evals/datasets/check_option_v1.jsonl
 
 RUN poetry install --no-interaction --no-ansi --only-root
 
