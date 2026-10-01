@@ -773,6 +773,16 @@ Plan : §3.5. **Aucun seuil de `similarity.yaml` n'est justifié tant qu'une ex�
 - Correctif de conception intégré à ce lot (contrat 1.9) : les preuves lexicale et de domaine **relèvent** le score du cosinus sans jamais l'abaisser (d'une langue à l'autre la preuve lexicale est absente ; la pondération initiale pénalisait justement les rapprochements FR ↔ EN). `similarity.yaml` porte désormais `boosts` au lieu de `weights`.
 - Schéma : [`similarity_eval_run`](../../schemas/similarity_eval_run.schema.json).
 
+### 5.12 Contrat 1.12 — Métadonnées bilingues à l'ingestion
+
+Complète l'ingestion par l'API (§5.7) pour qu'un contrôle ingéré soit trouvable en français comme en anglais (plan de similarité §3.6). Champs **optionnels** ; la forme existante est inchangée.
+
+- `POST /api/frameworks/ingestions/{id}/link-proposals` : chaque proposition accepte aussi `terms` (termes de recherche FR et EN, au plus 20 de 60 caractères, dédoublonnés et mis en minuscules) et `title_fr` (≤ 200 caractères). Ils sont enregistrés comme **proposés par le modèle du client** (`llm-derived`) et ne décident rien.
+- `PATCH …/rows/{requirement_id}` : `terms` et `title_fr` de l'expert (avec `amend`) **remplacent** la proposition. Un `amend` exige au moins un lien, un critère, des termes ou un titre français.
+- À l'application : les termes sont **fusionnés** à ceux d'un contrôle existant (jamais remplacés) ; `title_fr` n'est écrit que s'il est absent, **sauf** s'il vient de l'expert (un titre curé n'est jamais écrasé par une proposition de modèle). Le contrôle porte `terms_production_mode` : `llm-proposed-human-approved` ou `human-authored`.
+- Un contrôle issu d'une source (`source_sha256`) garde l'appariement par texte légal du découpeur de RFP même une fois qu'il porte des `terms` ; un contrôle curé jamais ingéré n'est apparié que sur ses termes.
+- La réponse `GET …/ingestions/{id}` ajoute par exigence `proposed_terms`, `proposed_title_fr`, `terms`, `title_fr`.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

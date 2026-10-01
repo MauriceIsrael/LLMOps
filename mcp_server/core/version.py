@@ -30,9 +30,11 @@ Minor versions only add interfaces or optional fields:
   search remembers the judgements of a subject; optional ``assumptions`` and ``review_by`` in the front matter.
 * ``1.11`` — similarity evaluation (REST): ``/api/knowledge/similarity-evals/{dataset}`` (FR/EN cases, annotation,
   runs with vectors supplied by the client, threshold sweep).
+* ``1.12`` — bilingual search metadata at framework ingestion: optional ``terms`` and ``title_fr`` in the
+  link proposals and in the row decisions (applied to the control only when the expert accepts or amends).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.11"
+CONTRACT_VERSION = "1.12"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

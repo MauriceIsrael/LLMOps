@@ -155,3 +155,65 @@ def test_needs_the_governance_database(env, monkeypatch, tmp_path):
     monkeypatch.setenv("CANDIDATES_BACKEND", "file")
     monkeypatch.setenv("CANDIDATES_DIR", str(tmp_path / "file-queue"))
     assert env["client"].get(BASE, headers=CLIENT).status_code == 503
+
+
+def test_bilingual_terms_and_french_title_are_proposed_then_applied_by_the_expert(env):
+    from pipelines.compliance_mapper import load_all_controls, match_text_to_controls
+
+    client, kb = env["client"], env["kb"]
+    iid = _upload(client).json()["data"]["id"]
+    curated = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2B.md").read_text().split("---")[1])
+    props = client.post(f"{BASE}/{iid}/link-proposals", headers=_as(MAINT), json={"model": "local-llm", "proposals": [
+        {"requirement_id": "NIS2-ART23-4", "title_fr": "Obligations de notification des incidents",
+         "terms": ["early warning", "alerte précoce", "notification d'incident", "Early  Warning"]},
+        {"requirement_id": "NIS2-ART21-2B", "title_fr": "Titre français proposé par le modèle", "terms": ["gestion des incidents"]},
+        {"requirement_id": "NIS2-ART20-1", "terms": [f"t{i}" for i in range(25)]}]})
+    assert props.status_code == 400  # too many terms
+    ok = client.post(f"{BASE}/{iid}/link-proposals", headers=_as(MAINT), json={"model": "local-llm", "proposals": [
+        {"requirement_id": "NIS2-ART23-4", "title_fr": "Obligations de notification des incidents",
+         "terms": ["early warning", "alerte précoce", "notification d'incident", "Early  Warning"]},
+        {"requirement_id": "NIS2-ART21-2B", "title_fr": "Titre français proposé par le modèle", "terms": ["gestion des incidents"]}]})
+    assert ok.status_code == 200 and ok.json()["data"]["updated"] == 2
+    row = next(r for r in client.get(f"{BASE}/{iid}", headers=CLIENT).json()["data"]["requirements"]
+               if r["requirement_id"] == "NIS2-ART23-4")
+    assert row["proposed_terms"] == ["early warning", "alerte précoce", "notification d'incident"]  # deduplicated, lower-cased
+    assert row["proposed_title_fr"] == "Obligations de notification des incidents" and row["terms"] == []
+
+    def decide(req, body):
+        return client.patch(f"{BASE}/{iid}/rows/{req}", headers=_as(SEC), json=body)
+
+    assert decide("NIS2-ART23-4", {"decision": "accept"}).status_code == 200  # the proposal is accepted as it is
+    assert decide("NIS2-ART21-2B", {"decision": "amend", "terms": ["traitement des incidents"], "title_fr": "Gestion des incidents"}).status_code == 200
+    assert decide("NIS2-ART21-2A", {"decision": "amend"}).status_code == 400  # nothing to amend
+    assert decide("NIS2-ART21-2A", {"decision": "amend", "terms": ["x" * 70]}).status_code == 400
+    assert client.post(f"{BASE}/{iid}/apply", headers=_as(MAINT)).status_code == 200
+
+    new = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART23-4.md").read_text().split("---")[1])
+    assert new["title_fr"] == "Obligations de notification des incidents"
+    assert new["terms"] == ["early warning", "alerte précoce", "notification d'incident"]
+    assert new["terms_production_mode"] == "llm-proposed-human-approved"  # a model proposed it, a person approved it
+    amended = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2B.md").read_text().split("---")[1])
+    assert set(curated.get("terms") or []) <= set(amended["terms"]) and "traitement des incidents" in amended["terms"]
+    assert "gestion des incidents" not in amended["terms"]  # the expert's own terms replaced the model's proposal
+    assert amended["terms_production_mode"] == "human-authored"
+    assert amended["title_fr"] == "Gestion des incidents"  # the expert's title; never the model's over a curated one
+    assert curated["title_fr"] == "Traitement des incidents"
+
+    # The French terms make the control findable from a French requirement (lexical matching, no model needed).
+    controls = load_all_controls(kb / "controls")
+    ids = [m.control_id for m in match_text_to_controls(
+        "Incidents", "Le titulaire émet une alerte précoce sous 24 heures.", controls=controls, threshold=0.30)]
+    assert "NIS2-ART23-4" in ids
+
+
+def test_a_model_proposed_french_title_never_replaces_a_curated_one(env):
+    client, kb = env["client"], env["kb"]
+    iid = _upload(client).json()["data"]["id"]
+    before = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2C.md").read_text().split("---")[1])
+    assert before.get("title_fr")
+    client.post(f"{BASE}/{iid}/link-proposals", headers=_as(MAINT), json={"proposals": [
+        {"requirement_id": "NIS2-ART21-2C", "title_fr": "Un autre titre", "terms": ["continuité d'activité"]}]})
+    client.patch(f"{BASE}/{iid}/rows/NIS2-ART21-2C", headers=_as(SEC), json={"decision": "accept"})
+    assert client.post(f"{BASE}/{iid}/apply", headers=_as(MAINT)).status_code == 200
+    after = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2C.md").read_text().split("---")[1])
+    assert after["title_fr"] == before["title_fr"] and "continuité d'activité" in after["terms"]
