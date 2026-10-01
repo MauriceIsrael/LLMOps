@@ -1,4 +1,4 @@
-.PHONY: demo demo-check install test test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names
+.PHONY: demo demo-check install test test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
 
 install:
 	poetry install
@@ -37,6 +37,10 @@ test-e2e:
 
 # Fast local gate (no CI workflow): lint + frozen contract + unit tests.
 verify: lint test-contract test-unit
+
+# Seeded server (scratch copy, SQLite governance) for client contract tests, e.g. Archinex.
+contract-server:
+	poetry run python scripts/contract_server.py
 
 # Option judge evaluation: recall of expected violations on the annotated dataset.
 eval-check:

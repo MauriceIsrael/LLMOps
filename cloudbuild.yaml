@@ -1,5 +1,8 @@
 substitutions:
   _TAG: 'latest'
+  # Cloud SQL (PostgreSQL) instance holding the governance state: PROJECT:REGION:INSTANCE.
+  # Required: the candidate queue, reviews, evaluations and the owners registry live there (decision D1).
+  _CLOUDSQL_INSTANCE: ''
 
 steps:
   # 1. Builder l'image Docker de mcp_server
@@ -42,13 +45,15 @@ steps:
       - '--max-instances=2'
       - '--min-instances=0'
       - '--concurrency=20'
-      - '--timeout=30s'
+      # Uploads (extraction up to 120 s) and publications (graph rebuild) exceed 30 s.
+      - '--timeout=300s'
       - '--cpu=1'
-      - '--memory=512Mi'
+      - '--memory=1Gi'
+      - '--add-cloudsql-instances=${_CLOUDSQL_INSTANCE}'
       - '--set-env-vars'
-      - 'GRAPH_BACKEND=ladybug,LLMOPS_TRANSPORT=sse,LLMOPS_PLANE=all,ENGAGEMENT_TOKENS=demo-public-2026-08:nordwave-mcx-2027,LLMOPS_ENGAGEMENT=nordwave-mcx-2027,LLMOPS_BLUEPRINT=BLU-hla-mcx'
+      - 'GRAPH_BACKEND=ladybug,LLMOPS_TRANSPORT=sse,LLMOPS_PLANE=all,LLMOPS_ENGAGEMENT=nordwave-mcx-2027,LLMOPS_BLUEPRINT=BLU-hla-mcx,CANDIDATES_BACKEND=sql,LLMOPS_STORAGE_PERSISTENT=false'
       - '--set-secrets'
-      - 'SERVER_TOKEN=llmops-auth-token:latest,OWNER_NOTIFICATION_WEBHOOK=llmops-discord-webhook:latest'
+      - 'SERVER_TOKEN=llmops-auth-token:latest,OWNER_NOTIFICATION_WEBHOOK=llmops-discord-webhook:latest,ENGAGEMENT_TOKENS=llmops-engagement-tokens:latest,GOVERNANCE_DATABASE_URL=llmops-governance-db-url:latest'
       - '--port'
       - '8000'
 
