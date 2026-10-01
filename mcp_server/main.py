@@ -45,6 +45,7 @@ from mcp_server.knowledge.tools import (
     add_eval_case,
     add_ingestion_link_proposals,
     annotate_eval_case,
+    annotate_similarity_case,
     apply_framework_ingestion,
     assign_kb_candidate,
     check_option,
@@ -76,6 +77,8 @@ from mcp_server.knowledge.tools import (
     get_principles_for,
     get_review_inbox,
     get_rfp_compliance_matrix,
+    get_similarity_eval,
+    get_similarity_eval_run,
     get_skills_matrix,
     list_assets,
     list_controls,
@@ -94,6 +97,7 @@ from mcp_server.knowledge.tools import (
     request_kb_review,
     review_kb_candidate,
     run_eval,
+    run_similarity_eval,
     search_assets,
     shred_rfp,
     similar_knowledge,
@@ -1169,6 +1173,32 @@ def create_starlette_app() -> Starlette:
         res = list_reuse_confirmations(q.get("matched_ref"), q.get("outcome"), q.get("subject_fingerprint"))
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_simeval_get(request):
+        res = get_similarity_eval(request.path_params["dataset"])
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_simeval_annotate(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = annotate_similarity_case(request.path_params["dataset"], request.path_params["case_id"], body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_simeval_run(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = run_similarity_eval(request.path_params["dataset"], body)
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_simeval_run_get(request):
+        try:
+            run_id = int(request.path_params["run_id"])
+        except ValueError:
+            return JSONResponse(invalid_argument_response("run_id", "must be an integer"), status_code=400)
+        res = get_similarity_eval_run(request.path_params["dataset"], run_id)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_kb_me(request):
         """Expert au nom duquel le client agit (jeton kb:delegate + X-Actor-Email)."""
         res = get_kb_me()
@@ -1226,6 +1256,12 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/embeddings/pending", endpoint=handle_embeddings_pending, methods=["GET"]),
             Route("/api/knowledge/embeddings", endpoint=handle_embeddings_put, methods=["PUT"]),
             Route("/api/knowledge/similar", endpoint=handle_similar, methods=["POST"]),
+            Route("/api/knowledge/similarity-evals/{dataset}", endpoint=handle_simeval_get, methods=["GET"]),
+            Route("/api/knowledge/similarity-evals/{dataset}/cases/{case_id}", endpoint=handle_simeval_annotate,
+                  methods=["PATCH"]),
+            Route("/api/knowledge/similarity-evals/{dataset}/runs", endpoint=handle_simeval_run, methods=["POST"]),
+            Route("/api/knowledge/similarity-evals/{dataset}/runs/{run_id}", endpoint=handle_simeval_run_get,
+                  methods=["GET"]),
             Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_confirm, methods=["POST"]),
             Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_list, methods=["GET"]),
             Route("/api/knowledge/health", endpoint=handle_kb_health, methods=["GET"]),

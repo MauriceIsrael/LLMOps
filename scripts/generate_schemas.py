@@ -523,6 +523,22 @@ def generate_reuse_confirmation_schema() -> dict[str, Any]:
         }}, "Judgement of a person on a reuse proposal (POST /api/knowledge/reuse-confirmations, contract 1.10).")
 
 
+def generate_similarity_eval_schema() -> dict[str, Any]:
+    return _envelope("SimilarityEvalRunResponse", {
+        "type": "object", "required": ["id", "dataset", "cases", "false_strong", "by_family", "sweep"],
+        "properties": {
+            "id": {"type": "integer"}, "dataset": {"type": "string"}, "model": {"type": "string"},
+            "cases": {"type": "integer"}, "validated_cases": {"type": "integer"},
+            "same_subject_expected": {"type": "integer"}, "recall_at_3": {"type": ["number", "null"]},
+            "false_strong": {"type": "integer"}, "reuse_trap_strong": {"type": "integer"}, "missed_strong": {"type": "integer"},
+            "by_family": {"type": "object"}, "by_language": {"type": "object"},
+            "sweep": {"type": "array", "items": {"type": "object", "properties": {
+                "threshold": {"type": "number"}, "false_strong": {"type": "integer"}, "recall": {"type": ["number", "null"]}}}},
+            "recommended_strong_threshold": {"type": ["number", "null"]}, "recommendation_note": {"type": "string"},
+            "per_case": {"type": "array", "items": {"type": "object"}},
+        }}, "Run of the similarity evaluation (POST /api/knowledge/similarity-evals/{dataset}/runs, contract 1.11).")
+
+
 def generate_typescript_types() -> str:
     conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
     subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
@@ -531,7 +547,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.10")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.11")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -1104,6 +1120,34 @@ export interface PastJudgement {{
   assumptions_changed_since: boolean;
 }}
 
+/* ---- Contract 1.11: similarity evaluation (FR/EN dataset) -------------------- */
+
+export type SimilarityFamily =
+  | "cross_lingual" | "same_words_different_subject" | "same_topic_different_assumptions" | "out_of_base";
+export type SimilarityRelation = "same_subject" | "related_not_same" | "same_topic_different_assumptions" | "unrelated";
+
+export interface SimilarityCase {{
+  id: string; family: SimilarityFamily; language: "fr" | "en"; query_text: string;
+  expected: Array<{{ ref: string; relation: SimilarityRelation }}>;
+  annotation_status: "proposed" | "validated" | "rejected"; annotated_by: string | null; annotated_at: string | null;
+}}
+
+export interface SimilarityRunBucket {{
+  cases: number; same_subject_expected: number; recall_at_3: number | null;
+  false_strong: number; reuse_trap_strong: number; missed_strong: number;
+}}
+
+/** ``false_strong`` is the number that matters: a wrong strong proposal is the failure the design exists to prevent. */
+export interface SimilarityRun extends SimilarityRunBucket {{
+  id: number; dataset: string; at: string; run_by: string; model: string; validated_cases: number;
+  by_family: Record<SimilarityFamily, SimilarityRunBucket>; by_language: Record<"fr" | "en", SimilarityRunBucket>;
+  sweep: Array<{{ threshold: number; false_strong: number; recall: number | null }}>;
+  recommended_strong_threshold: number | null; recommendation_note: string;
+  per_case: Array<{{ case_id: string; family: string; language: string; false_strong: string[];
+                    reuse_trap_strong: string[]; missed_strong: string[];
+                    top: Array<{{ ref: string; score: number; zone: SimilarityZone }}> }}>;
+}}
+
 export interface KbCandidateReviewRequest {{
   action: KbReviewAction;
   reviewer: string;
@@ -1138,6 +1182,7 @@ def main() -> None:
         ("kb_health.schema.json", generate_kb_health_schema()),
         ("similar_knowledge.schema.json", generate_similar_schema()),
         ("reuse_confirmation.schema.json", generate_reuse_confirmation_schema()),
+        ("similarity_eval_run.schema.json", generate_similarity_eval_schema()),
     ):
         (schemas_dir / filename).write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
         print(f"Generated: schemas/{filename}")

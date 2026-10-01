@@ -32,6 +32,7 @@ COPY scripts ./scripts
 COPY examples ./examples
 # Evaluation dataset imported into the governance database at start (pipelines/governance/bootstrap.py).
 COPY tests/evals/datasets/check_option_v1.jsonl ./tests/evals/datasets/check_option_v1.jsonl
+COPY tests/evals/datasets/similarity_v1.jsonl ./tests/evals/datasets/similarity_v1.jsonl
 
 RUN poetry install --no-interaction --no-ansi --only-root
 

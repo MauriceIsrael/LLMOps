@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SimilarityEvalRunResponse",
+  "description": "Run of the similarity evaluation (POST /api/knowledge/similarity-evals/{dataset}/runs, contract 1.11).",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "id",
+        "dataset",
+        "cases",
+        "false_strong",
+        "by_family",
+        "sweep"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "dataset": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "cases": {
+          "type": "integer"
+        },
+        "validated_cases": {
+          "type": "integer"
+        },
+        "same_subject_expected": {
+          "type": "integer"
+        },
+        "recall_at_3": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "false_strong": {
+          "type": "integer"
+        },
+        "reuse_trap_strong": {
+          "type": "integer"
+        },
+        "missed_strong": {
+          "type": "integer"
+        },
+        "by_family": {
+          "type": "object"
+        },
+        "by_language": {
+          "type": "object"
+        },
+        "sweep": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "threshold": {
+                "type": "number"
+              },
+              "false_strong": {
+                "type": "integer"
+              },
+              "recall": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "recommended_strong_threshold": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "recommendation_note": {
+          "type": "string"
+        },
+        "per_case": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,471 @@
+{
+  "interface": "rest.GET /api/knowledge/similarity-evals/{dataset}/runs/{run_id}",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "at": {
+                "type": [
+                  "string"
+                ]
+              },
+              "by_family": {
+                "keys": {
+                  "cross_lingual": {
+                    "keys": {
+                      "cases": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "false_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "missed_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "recall_at_3": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "reuse_trap_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "same_subject_expected": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "out_of_base": {
+                    "keys": {
+                      "cases": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "false_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "missed_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "recall_at_3": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "reuse_trap_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "same_subject_expected": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "same_topic_different_assumptions": {
+                    "keys": {
+                      "cases": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "false_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "missed_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "recall_at_3": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "reuse_trap_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "same_subject_expected": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "same_words_different_subject": {
+                    "keys": {
+                      "cases": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "false_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "missed_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "recall_at_3": {
+                        "type": [
+                          "null"
+                        ]
+                      },
+                      "reuse_trap_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "same_subject_expected": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "by_language": {
+                "keys": {
+                  "en": {
+                    "keys": {
+                      "cases": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "false_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "missed_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "recall_at_3": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "reuse_trap_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "same_subject_expected": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "fr": {
+                    "keys": {
+                      "cases": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "false_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "missed_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "recall_at_3": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "reuse_trap_strong": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "same_subject_expected": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "cases": {
+                "type": [
+                  "number"
+                ]
+              },
+              "dataset": {
+                "type": [
+                  "string"
+                ]
+              },
+              "false_strong": {
+                "type": [
+                  "number"
+                ]
+              },
+              "id": {
+                "type": [
+                  "number"
+                ]
+              },
+              "missed_strong": {
+                "type": [
+                  "number"
+                ]
+              },
+              "model": {
+                "type": [
+                  "string"
+                ]
+              },
+              "per_case": {
+                "items": {
+                  "keys": {
+                    "case_id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "false_strong": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "family": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "language": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "missed_strong": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "reuse_trap_strong": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "top": {
+                      "items": {
+                        "keys": {
+                          "ref": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "score": {
+                            "type": [
+                              "number"
+                            ]
+                          },
+                          "zone": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "recall_at_3": {
+                "type": [
+                  "number"
+                ]
+              },
+              "recommendation_note": {
+                "type": [
+                  "string"
+                ]
+              },
+              "recommended_strong_threshold": {
+                "type": [
+                  "null"
+                ]
+              },
+              "reuse_trap_strong": {
+                "type": [
+                  "number"
+                ]
+              },
+              "run_by": {
+                "type": [
+                  "string"
+                ]
+              },
+              "same_subject_expected": {
+                "type": [
+                  "number"
+                ]
+              },
+              "sweep": {
+                "items": {
+                  "keys": {
+                    "false_strong": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "recall": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "threshold": {
+                      "type": [
+                        "number"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "validated_cases": {
+                "type": [
+                  "number"
+                ]
+              },
+              "validated_only": {
+                "type": [
+                  "boolean"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

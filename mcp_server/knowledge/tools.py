@@ -2009,6 +2009,21 @@ def put_embeddings(body: dict[str, Any]) -> dict[str, Any]:
         return handle_exception_response(e, context_action="put_embeddings")
 
 
+def _lexical_factory():
+    """``factory(query_text) -> lexical(ref)``: relevance of the doctrine engine (synonyms EN/FR), index loaded once."""
+    from pipelines.doctrine.context import relevance
+    from pipelines.doctrine.text import query_concepts
+
+    index = _doctrine_index()
+    entries = {e.id: e for e in index.entries}
+
+    def factory(query_text: str):
+        concepts = query_concepts(query_text, index.vocabulary)
+        return lambda ref: relevance(entries[ref], concepts) if ref in entries else None
+
+    return factory
+
+
 def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
     """Validated knowledge close to a subject: ``{model, vector, query_text?, types?, domains?, top_k?}`` ('kb:review').
 
@@ -2035,13 +2050,7 @@ def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
             return domains
         lexical = None
         if isinstance(query_text, str) and query_text.strip():
-            from pipelines.doctrine.context import relevance
-            from pipelines.doctrine.text import query_concepts
-
-            index = _doctrine_index()
-            concepts = query_concepts(query_text, index.vocabulary)
-            entries = {e.id: e for e in index.entries}
-            lexical = lambda ref: relevance(entries[ref], concepts) if ref in entries else None  # noqa: E731
+            lexical = _lexical_factory()(query_text)
         judgements = summary = None
         fingerprint = body.get("subject_fingerprint")
         if isinstance(fingerprint, str) and fingerprint:
@@ -2114,6 +2123,91 @@ def list_reuse_confirmations(matched_ref: str | None = None, outcome: str | None
         return ok_response(items, count=len(items))
     except Exception as e:
         return handle_exception_response(e, context_action="list_reuse_confirmations")
+
+
+def get_similarity_eval(dataset: str) -> dict[str, Any]:
+    """Cases of a similarity dataset: text to encode, language, family, expected relations, annotation status ('kb:review')."""
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    try:
+        cases = store.cases(dataset)
+        return ok_response({"dataset": dataset, "cases": cases,
+                            "validated": sum(1 for c in cases if c["annotation_status"] == "validated"),
+                            "runs": store.runs(dataset)[:10]}, count=len(cases))
+    except Exception as e:
+        return _eval_error(e) or handle_exception_response(e, context_action="get_similarity_eval")
+
+
+def annotate_similarity_case(dataset: str, case_id: str, body: dict[str, Any]) -> dict[str, Any]:
+    """Annotate a case: ``{expected: [{ref, relation}], annotation_status}`` (acting expert with 'kb:evaluate')."""
+    from pipelines.similarity.evals import annotate
+
+    who = _evaluator()
+    if isinstance(who, dict):
+        return who
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    if body.get("expected") is None and body.get("annotation_status") is None:
+        return invalid_argument_response("body", "send 'expected' and/or 'annotation_status'.")
+    try:
+        return ok_response(annotate(store, dataset, case_id, who[1].handle, server_config.kb_dir,
+                                    body.get("expected"), body.get("annotation_status")), count=1)
+    except Exception as e:
+        return _eval_error(e) or handle_exception_response(e, context_action="annotate_similarity_case")
+
+
+def run_similarity_eval(dataset: str, body: dict[str, Any]) -> dict[str, Any]:
+    """Run the similarity search on a dataset with vectors supplied by the client ('kb:evaluate').
+
+    Body: ``{model, vectors: {case_id: vector}, validated_only?}``. Reports recall@3, **wrong strong proposals**,
+    per family and language, and a threshold sweep with the lowest threshold that avoids every wrong strong proposal.
+    """
+    from pipelines.governance.log import get_log
+    from pipelines.similarity.evals import check_vectors, evaluate
+    from pipelines.similarity.store import EmbeddingStore
+
+    who = _evaluator()
+    if isinstance(who, dict):
+        return who
+    store = _eval_store()
+    if store is None:
+        return _NO_DB
+    try:
+        model = str(body.get("model") or "")
+        embeddings = EmbeddingStore()
+        space = embeddings.model_space(model)
+        if space is None:
+            return invalid_argument_response("model", f"no vector stored for model '{model}' (known: "
+                                             f"{[m['model_id'] for m in embeddings.models()]}).")
+        cases = store.cases(dataset)
+        if body.get("validated_only"):
+            cases = [c for c in cases if c["annotation_status"] == "validated"]
+        if not cases:
+            return invalid_argument_response("dataset", "no case to evaluate (none validated yet?).")
+        vectors = check_vectors(cases, body.get("vectors"), space[0])
+        metrics = evaluate(cases, vectors, embeddings, server_config.kb_dir, model, _lexical_factory())
+        metrics["validated_only"] = bool(body.get("validated_only"))
+        metrics["validated_cases"] = sum(1 for c in cases if c["annotation_status"] == "validated")
+        run = store.save_run(dataset, who[1].handle, metrics)
+        log = get_log()
+        if log is not None:
+            log.emit("eval.updated", None, who[1].handle, [], dataset=dataset, run_id=run["id"],
+                     false_strong=metrics["false_strong"])
+        return ok_response(run, count=1)
+    except Exception as e:
+        return _eval_error(e) or handle_exception_response(e, context_action="run_similarity_eval")
+
+
+def get_similarity_eval_run(dataset: str, run_id: int) -> dict[str, Any]:
+    """A stored similarity run with its per-case detail ('kb:review')."""
+    return get_eval_run(dataset, run_id)
 
 
 # ---------------------------------------------------------------------------

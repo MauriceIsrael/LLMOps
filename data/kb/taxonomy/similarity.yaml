@@ -4,8 +4,10 @@
 # status: uncalibrated — no evaluation run has justified these values yet. Until it does, the zones are
 # indicative only, and in every case a human confirms every reuse (decision D8: no automatic reuse, ever).
 status: uncalibrated
-weights:
-  vector: 0.70      # cosine similarity of the vectors computed by the client
+# The score is the cosine similarity of the vectors computed by the client (primary evidence). Lexical and domain
+# evidence can only RAISE it: score = 1 - (1 - cosine) * (1 - boost_lexical * lexical) * (1 - boost_domain * domain).
+# They never lower it, because across languages (French query, English asset) the lexical evidence is absent by nature.
+boosts:
   lexical: 0.25     # deterministic relevance of the doctrine engine (synonyms EN/FR included); only with query_text
   domain: 0.05      # the asset belongs to a requested domain
 thresholds:

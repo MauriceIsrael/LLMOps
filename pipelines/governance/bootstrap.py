@@ -15,9 +15,11 @@ from typing import Any
 logger = logging.getLogger("llmops.governance")
 
 EVAL_DATASET = Path("tests/evals/datasets/check_option_v1.jsonl")
+SIMILARITY_DATASET = Path("tests/evals/datasets/similarity_v1.jsonl")
 
 
-def ensure_governance_ready(kb_dir: str | Path = "data/kb", eval_dataset: str | Path | None = EVAL_DATASET) -> dict[str, Any] | None:
+def ensure_governance_ready(kb_dir: str | Path = "data/kb", eval_dataset: str | Path | None = EVAL_DATASET,
+                            similarity_dataset: str | Path | None = SIMILARITY_DATASET) -> dict[str, Any] | None:
     from pipelines.governance.store import database_url
 
     if not database_url():
@@ -25,7 +27,8 @@ def ensure_governance_ready(kb_dir: str | Path = "data/kb", eval_dataset: str | 
     try:
         from pipelines.governance.migrate import migrate_governance
 
-        result = migrate_governance(kb_dir, candidates_dir="data/candidates", eval_dataset=eval_dataset)
+        result = migrate_governance(kb_dir, candidates_dir="data/candidates", eval_dataset=eval_dataset,
+                                    similarity_dataset=similarity_dataset)
         logger.warning("governance bootstrap: %s", result)
         return result
     except Exception as exc:  # the server must still start

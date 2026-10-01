@@ -15,11 +15,13 @@ from pipelines.kb_candidates.owners import load_owners_file
 from pipelines.kb_candidates.repository import FileCandidateRepository, SqlCandidateRepository
 
 DEFAULT_EVAL_DATASET = Path("tests/evals/datasets/check_option_v1.jsonl")
+DEFAULT_SIMILARITY_DATASET = Path("tests/evals/datasets/similarity_v1.jsonl")
 
 
 def migrate_governance(kb_dir: str | Path = "data/kb", candidates_dir: str | Path = "data/candidates",
                        force_owners: bool = False, url: str | None = None,
-                       eval_dataset: str | Path | None = DEFAULT_EVAL_DATASET) -> dict[str, Any]:
+                       eval_dataset: str | Path | None = DEFAULT_EVAL_DATASET,
+                       similarity_dataset: str | Path | None = DEFAULT_SIMILARITY_DATASET) -> dict[str, Any]:
     target = SqlCandidateRepository(url)
     imported, skipped = 0, 0
     for candidate in FileCandidateRepository(candidates_dir).all():
@@ -41,4 +43,9 @@ def migrate_governance(kb_dir: str | Path = "data/kb", candidates_dir: str | Pat
 
         result["eval_cases"] = EvalStore(url).import_jsonl(
             "check_option_v1", eval_dataset, "Annotated cases of the option judge (check_option).")
+    if similarity_dataset is not None and Path(similarity_dataset).is_file():
+        from pipelines.governance.evals import EvalStore
+
+        result["similarity_cases"] = EvalStore(url).import_jsonl(
+            "similarity_v1", similarity_dataset, "Annotated FR/EN cases of the similarity search (plan similarity, L13).")
     return result
