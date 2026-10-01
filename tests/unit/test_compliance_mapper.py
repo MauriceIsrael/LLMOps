@@ -69,3 +69,81 @@ def test_audit_compliance_gaps_100_percent():
     assert fw["TELCO-RESIL"]["uncovered"] == 0
     assert fw["PPDR-DEVICE"]["uncovered"] == 0
     assert fw["3GPP"]["uncovered"] == 0
+
+
+# --- Controls ingested from a source are matched on their legal text -------------------------------
+
+INGESTED = """---
+id: NIS2-ART23-4
+title: Reporting obligations
+type: control
+framework: NIS2
+version: "2022/2555"
+domain: [security-governance]
+severity: mandatory
+status: active
+---
+
+# NIS2-ART23-4
+
+## Legal Requirement
+Entities shall submit an early warning within 24 hours of becoming aware of the significant incident, an incident notification within 72 hours, and a final report not later than one month after the incident notification.
+
+## Architecture Acceptance Criteria
+_To be proposed._
+"""
+CURATED = """---
+id: NIS2-ART21-2B
+title: Incident handling
+type: control
+framework: NIS2
+version: "2022/2555"
+domain: [security-governance]
+severity: mandatory
+status: active
+terms: [incident-handling]
+---
+
+# NIS2-ART21-2B
+
+## Legal Requirement
+Incident handling.
+"""
+
+
+def _controls(tmp_path):
+    d = tmp_path / "controls" / "NIS2"
+    d.mkdir(parents=True)
+    (d / "NIS2-ART23-4.md").write_text(INGESTED, encoding="utf-8")
+    (d / "NIS2-ART21-2B.md").write_text(CURATED, encoding="utf-8")
+    return load_all_controls(tmp_path / "controls")
+
+
+def test_ingested_control_is_matched_on_its_legal_text(tmp_path):
+    controls = _controls(tmp_path)
+    text = ("The supplier shall issue an early warning of any significant incident within 24 hours, "
+            "an incident notification within 72 hours and a final report within one month.")
+    ids = [m.control_id for m in match_text_to_controls("Incident handling", text, controls=controls, threshold=0.30)]
+    assert "NIS2-ART23-4" in ids
+    match = next(m for m in match_text_to_controls("Incident handling", text, controls=controls, threshold=0.30)
+                 if m.control_id == "NIS2-ART23-4")
+    assert any(k.startswith("legal:") for k in match.matched_keywords)
+
+
+def test_unrelated_text_does_not_match_the_ingested_control(tmp_path):
+    controls = _controls(tmp_path)
+    text = "The supplier shall provide a user manual, a training plan and a delivery calendar for the new building."
+    assert match_text_to_controls("Deliverables", text, controls=controls, threshold=0.30) == []
+
+
+def test_function_words_alone_do_not_match(tmp_path):
+    controls = _controls(tmp_path)
+    assert match_text_to_controls("x", "the of and to in shall be within", controls=controls, threshold=0.30) == []
+
+
+def test_curated_control_matching_is_unchanged(tmp_path):
+    controls = _controls(tmp_path)
+    # A curated control (with terms) never gets a legal-text score: only its terms count.
+    text = "Incident handling with early warning within 24 hours and incident notification within 72 hours"
+    scores = {m.control_id: m.matched_keywords for m in match_text_to_controls("t", text, controls=controls, threshold=0.0)}
+    assert not any(k.startswith("legal:") for k in scores.get("NIS2-ART21-2B", []))

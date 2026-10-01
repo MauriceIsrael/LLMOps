@@ -34,6 +34,7 @@ class RegulatoryControl:
     terms: list[str]
     source_ref: str | None
     summary_text: str = ""
+    legal_text: str = ""
     file_path: Path | None = None
 
 
@@ -101,6 +102,37 @@ EXPLICIT_KB_ALIGNMENTS: dict[str, list[str]] = {
 }
 
 
+_LEGAL_SECTION = re.compile(r"## Legal Requirement\n(.*?)(?:\n## |\Z)", re.DOTALL)
+_WORD = re.compile(r"[a-zà-ÿ0-9]+")
+# Function words of the two working languages: a phrase made only of these carries no information.
+_STOPWORDS = frozenset(
+    "the a an and or of to in on for by with from that this these those as at is are be been shall may must not "
+    "any all such their its it which who whom where when than then under over into within without upon per "
+    "le la les un une des du de et ou en dans sur pour par avec sans que qui dont où au aux ce cette ces son "
+    "sa ses leur leurs est sont être doit doivent peut peuvent ne pas plus".split()
+)
+
+
+def _legal_text(title: str, body: str) -> str:
+    """Title and legal text of a control (the ``Legal Requirement`` section of an ingested control)."""
+    section = _LEGAL_SECTION.search(body)
+    return f"{title}\n{section.group(1) if section else ''}".lower()
+
+
+def _phrases(text: str) -> set[str]:
+    """Pairs of consecutive content words, and numbers with their unit (``24 hours``): the distinctive
+    phrases two texts about the same obligation share, whatever the order of the surrounding words."""
+    words = [w for w in _WORD.findall(text.lower()) if w not in _STOPWORDS and len(w) > 1]
+    return {f"{a} {b}" for a, b in zip(words, words[1:], strict=False)}
+
+
+def legal_text_matches(requirement_text: str, control: RegulatoryControl) -> list[str]:
+    """Distinctive phrases shared by a requirement text and the legal text of a control."""
+    if not control.legal_text:
+        return []
+    return sorted(_phrases(requirement_text) & _phrases(control.legal_text))
+
+
 def load_all_controls(controls_dir: Path | str = "data/kb/controls") -> dict[str, RegulatoryControl]:
     """Charge l'ensemble des contrôles réglementaires depuis les fichiers Markdown."""
     base = Path(controls_dir)
@@ -145,6 +177,7 @@ def load_all_controls(controls_dir: Path | str = "data/kb/controls") -> dict[str
                 terms=[t.lower() for t in terms],
                 source_ref=fm.get("source_ref"),
                 summary_text=body[:1000].lower(),
+                legal_text=_legal_text(str(fm.get("title") or ""), body),
                 file_path=file_path,
             )
         except Exception:
@@ -209,6 +242,15 @@ def match_text_to_controls(
                 if kw in full_text:
                     score += 0.15
                     matched_keywords.append(kw)
+
+        # 4. Controls without curated ``terms`` (ingested from a source, `kb ingest-framework`) are matched on
+        #    their legal text: each distinctive phrase shared with the text counts, up to a cap. Curated
+        #    controls keep their own terms, so their matching is unchanged.
+        if not ctrl.terms:
+            shared = legal_text_matches(f"{title}\n{text}", ctrl)
+            if shared:
+                score += min(0.15 * len(shared), 0.60)
+                matched_keywords.extend(f"legal:{s}" for s in shared[:6])
 
         if score >= threshold:
             results.append(
