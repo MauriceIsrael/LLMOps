@@ -471,6 +471,16 @@ def build_catalogue() -> list[Interface]:
         _rest("PUT", "/api/knowledge/owners", json_body={
             "owners": [{"handle": "@maintainers", "email": ACTOR_EMAIL, "roles": ["kb:maintain", "kb:admin"]}],
             "domains": {}, "default_owner": "@maintainers"}, headers=DELEGATED, delegate=True),
+        # Contract 1.11 — similarity evaluation (FR/EN dataset, vectors supplied by the client)
+        _rest("GET", "/api/knowledge/similarity-evals/{dataset}", "/api/knowledge/similarity-evals/similarity_v1",
+              headers=DELEGATED, delegate=True),
+        _rest("PATCH", "/api/knowledge/similarity-evals/{dataset}/cases/{case_id}",
+              "/api/knowledge/similarity-evals/similarity_v1/cases/SIM-001",
+              json_body={"annotation_status": "validated"}, headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/similarity-evals/{dataset}/runs", "/api/knowledge/similarity-evals/similarity_v1/runs",
+              json_body={"model": "contract-model", "vectors": _similarity_vectors()}, headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/similarity-evals/{dataset}/runs/{run_id}",
+              "/api/knowledge/similarity-evals/similarity_v1/runs/2", headers=DELEGATED, delegate=True),
     ]
 
 
@@ -479,6 +489,12 @@ def _p002_sha() -> str:
     from pipelines.similarity.text import embeddable_assets
 
     return next(a["text_sha256"] for a in embeddable_assets("data/kb") if a["ref"] == "P-002")
+
+
+def _similarity_vectors() -> dict[str, list[float]]:
+    """One vector per case of the similarity dataset (dimension of the contract model deposited earlier)."""
+    cases = [json.loads(line) for line in Path("tests/evals/datasets/similarity_v1.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
+    return {c["id"]: [0.1, 0.2, 0.3] for c in cases}
 
 
 def file_name(interface_name: str) -> str:
@@ -540,6 +556,7 @@ def isolated_environment() -> Iterator[Any]:
         from pipelines.governance.evals import EvalStore
 
         EvalStore().import_jsonl("check_option_v1", "tests/evals/datasets/check_option_v1.jsonl")
+        EvalStore().import_jsonl("similarity_v1", "tests/evals/datasets/similarity_v1.jsonl")
 
         yield TestClient(create_starlette_app())
     finally:

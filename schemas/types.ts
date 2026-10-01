@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.10")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.11")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -570,6 +570,34 @@ export interface ReuseConfirmation extends ReuseConfirmationRequest {
 export interface PastJudgement {
   id: number; at: string; actor: string; outcome: ReuseOutcome; comment: string | null;
   assumptions_changed_since: boolean;
+}
+
+/* ---- Contract 1.11: similarity evaluation (FR/EN dataset) -------------------- */
+
+export type SimilarityFamily =
+  | "cross_lingual" | "same_words_different_subject" | "same_topic_different_assumptions" | "out_of_base";
+export type SimilarityRelation = "same_subject" | "related_not_same" | "same_topic_different_assumptions" | "unrelated";
+
+export interface SimilarityCase {
+  id: string; family: SimilarityFamily; language: "fr" | "en"; query_text: string;
+  expected: Array<{ ref: string; relation: SimilarityRelation }>;
+  annotation_status: "proposed" | "validated" | "rejected"; annotated_by: string | null; annotated_at: string | null;
+}
+
+export interface SimilarityRunBucket {
+  cases: number; same_subject_expected: number; recall_at_3: number | null;
+  false_strong: number; reuse_trap_strong: number; missed_strong: number;
+}
+
+/** ``false_strong`` is the number that matters: a wrong strong proposal is the failure the design exists to prevent. */
+export interface SimilarityRun extends SimilarityRunBucket {
+  id: number; dataset: string; at: string; run_by: string; model: string; validated_cases: number;
+  by_family: Record<SimilarityFamily, SimilarityRunBucket>; by_language: Record<"fr" | "en", SimilarityRunBucket>;
+  sweep: Array<{ threshold: number; false_strong: number; recall: number | null }>;
+  recommended_strong_threshold: number | null; recommendation_note: string;
+  per_case: Array<{ case_id: string; family: string; language: string; false_strong: string[];
+                    reuse_trap_strong: string[]; missed_strong: string[];
+                    top: Array<{ ref: string; score: number; zone: SimilarityZone }> }>;
 }
 
 export interface KbCandidateReviewRequest {

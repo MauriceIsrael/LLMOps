@@ -13,6 +13,23 @@
             "keys": {
               "config": {
                 "keys": {
+                  "boosts": {
+                    "keys": {
+                      "domain": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "lexical": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
                   "status": {
                     "type": [
                       "string"
@@ -26,28 +43,6 @@
                         ]
                       },
                       "strong": {
-                        "type": [
-                          "number"
-                        ]
-                      }
-                    },
-                    "type": [
-                      "object"
-                    ]
-                  },
-                  "weights": {
-                    "keys": {
-                      "domain": {
-                        "type": [
-                          "number"
-                        ]
-                      },
-                      "lexical": {
-                        "type": [
-                          "number"
-                        ]
-                      },
-                      "vector": {
                         "type": [
                           "number"
                         ]
@@ -101,9 +96,20 @@
                         "array"
                       ]
                     },
+                    "judgements": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
                     "last_reviewed": {
                       "type": [
                         "string"
+                      ]
+                    },
+                    "previous_confirmation_outdated": {
+                      "type": [
+                        "boolean"
                       ]
                     },
                     "ref": {
@@ -114,6 +120,12 @@
                     "requires_confirmation": {
                       "type": [
                         "boolean"
+                      ]
+                    },
+                    "reuse_summary": {
+                      "keys": {},
+                      "type": [
+                        "object"
                       ]
                     },
                     "review_by": {
