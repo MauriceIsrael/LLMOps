@@ -48,6 +48,26 @@ def supported_frameworks() -> list[str]:
     return sorted(p.stem.upper() for p in SPLITTERS_DIR.glob("*.yaml"))
 
 
+MAX_TERMS = 20
+
+
+def _terms(value: Any, argument: str = "terms") -> list[str]:
+    """Search terms of a control (French and English): short, deduplicated, lower-cased."""
+    items = _list(value, argument)
+    clean = list(dict.fromkeys(" ".join(x.lower().split()) for x in items))
+    if len(clean) > MAX_TERMS or any(len(x) > 60 for x in clean):
+        raise IngestionError(argument, f"at most {MAX_TERMS} terms of 60 characters.")
+    return clean
+
+
+def _title_fr(value: Any) -> str:
+    if value in (None, ""):
+        return ""
+    if not isinstance(value, str) or len(value.strip()) > 200:
+        raise IngestionError("title_fr", "'title_fr' must be a string of at most 200 characters.")
+    return value.strip()
+
+
 def _list(value: Any, argument: str) -> list[str]:
     if value is None:
         return []
@@ -150,6 +170,7 @@ class IngestionService:
                              "in_kb": (self.kb_dir / "controls" / meta["framework"] / f"{req_id}.md").exists(),
                              "legal_text": _legal_text(body), "draft": text,
                              "proposed_links": [], "proposed_acceptance_criteria": [], "links_production_mode": "",
+                             "proposed_terms": [], "proposed_title_fr": "", "terms": [], "title_fr": "",
                              "decision": "", "links": [], "acceptance_criteria": [], "reviewer": "", "comment": "",
                              "status": "pending", "result": None})
         after = (load_manifest(self.kb_dir, framework) or {}).get("coverage_declared_by")
@@ -189,9 +210,10 @@ class IngestionService:
         unknown = sorted(set(links) - {a.id for a in load_assets(self.kb_dir)})
         if unknown:
             raise IngestionError("links", f"unknown asset(s): {unknown}.")
-        if decision == "amend" and not (links or criteria):
-            raise IngestionError("decision", "'amend' needs links and/or acceptance_criteria.")
-        row.update(decision=decision, links=links, acceptance_criteria=criteria,
+        terms, title_fr = _terms(body.get("terms")), _title_fr(body.get("title_fr"))
+        if decision == "amend" and not (links or criteria or terms or title_fr):
+            raise IngestionError("decision", "'amend' needs links, acceptance_criteria, terms and/or title_fr.")
+        row.update(decision=decision, links=links, acceptance_criteria=criteria, terms=terms, title_fr=title_fr,
                    reviewer=reviewer if decision else "", comment=str(body.get("comment") or "").strip(),
                    status="decided" if decision else "pending", result=None)
         self._save_row(ingestion_id, row)
@@ -214,6 +236,7 @@ class IngestionService:
             dropped += len(_list(item.get("satisfied_by"), "satisfied_by")) - len(links)
             rows[req].update(proposed_links=links, proposed_acceptance_criteria=_list(item.get("acceptance_criteria"),
                                                                                     "acceptance_criteria"),
+                             proposed_terms=_terms(item.get("terms")), proposed_title_fr=_title_fr(item.get("title_fr")),
                              links_production_mode="llm-derived", links_model=model)
             self._save_row(ingestion_id, rows[req])
             updated += 1
@@ -269,12 +292,24 @@ class IngestionService:
     @staticmethod
     def _draft_with_proposals(row: dict[str, Any]) -> str:
         text: str = row["draft"]
-        if not row.get("proposed_links") and not row.get("proposed_acceptance_criteria"):
+        # What the expert decided wins over what the model proposed (amend); an accepted proposal is applied as is.
+        terms = row.get("terms") or row.get("proposed_terms") or []
+        title_fr = row.get("title_fr") or row.get("proposed_title_fr") or ""
+        if not (row.get("proposed_links") or row.get("proposed_acceptance_criteria") or terms or title_fr):
             return text
         from pipelines.kb_candidates.kb import join_frontmatter
 
         fm, body = split_frontmatter(text)
         fm = fm or {}
+        if terms:
+            fm["proposed_terms"] = terms
+        if title_fr:
+            fm["proposed_title_fr"] = title_fr
+            if row.get("title_fr"):
+                fm["title_fr_override"] = True  # an expert's own title replaces a curated one; a proposal never does
+        if terms or title_fr:
+            from_expert = bool(row.get("terms") or row.get("title_fr"))
+            fm["terms_production_mode"] = "human-authored" if from_expert else "llm-proposed-human-approved"
         fm["proposed_links"] = row.get("proposed_links") or []
         fm["proposed_acceptance_criteria"] = row.get("proposed_acceptance_criteria") or []
         fm["links_production_mode"] = row.get("links_production_mode") or "llm-derived"

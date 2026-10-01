@@ -115,6 +115,24 @@
                   "llm-derived"
                 ]
               },
+              "proposed_terms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "proposed_title_fr": {
+                "type": "string"
+              },
+              "terms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "title_fr": {
+                "type": "string"
+              },
               "decision": {
                 "enum": [
                   "",

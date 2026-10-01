@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.11")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.12")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -457,6 +457,10 @@ export interface IngestionRow {
   proposed_links: string[];
   proposed_acceptance_criteria: string[];
   links_production_mode: "" | "llm-derived";
+  proposed_terms: string[];      // contract 1.12: search terms (FR and EN) proposed by the client's model
+  proposed_title_fr: string;
+  terms: string[];               // the expert's own terms (amend); they replace the proposal
+  title_fr: string;
   decision: IngestionDecision;
   links: string[];
   acceptance_criteria: string[];

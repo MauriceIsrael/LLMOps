@@ -117,8 +117,19 @@ def _content_for(row: dict[str, str], staging: Path, kb_dir: Path, meta: dict[st
         fm, body, target = dict(draft_fm), draft_body, None
         if criteria:
             body = _with_criteria(body, criteria)
-    for key in ("proposed_links", "proposed_acceptance_criteria", "links_model", "links_production_mode"):
+    proposed_terms = [str(x) for x in draft_fm.get("proposed_terms") or []]
+    proposed_title_fr = str(draft_fm.get("proposed_title_fr") or "")
+    terms_mode = draft_fm.get("terms_production_mode")
+    title_override = bool(draft_fm.get("title_fr_override"))
+    for key in ("proposed_links", "proposed_acceptance_criteria", "links_model", "links_production_mode",
+                "proposed_terms", "proposed_title_fr", "terms_production_mode", "title_fr_override"):
         fm.pop(key, None)
+    if proposed_terms:
+        # Search terms are merged with those of an existing (curated) control, never replaced.
+        fm["terms"] = list(dict.fromkeys([*[str(x) for x in fm.get("terms") or []], *proposed_terms]))
+        fm["terms_production_mode"] = terms_mode or "human-authored"
+    if proposed_title_fr and (title_override or not fm.get("title_fr")):  # a proposal never overwrites a curated title
+        fm["title_fr"] = proposed_title_fr
     if links:
         fm["satisfied_by"] = links
         fm["links_production_mode"] = "llm-proposed-human-approved" if llm_links else "human-authored"

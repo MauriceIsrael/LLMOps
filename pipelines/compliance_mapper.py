@@ -35,6 +35,7 @@ class RegulatoryControl:
     source_ref: str | None
     summary_text: str = ""
     legal_text: str = ""
+    from_source: bool = False
     file_path: Path | None = None
 
 
@@ -178,6 +179,7 @@ def load_all_controls(controls_dir: Path | str = "data/kb/controls") -> dict[str
                 source_ref=fm.get("source_ref"),
                 summary_text=body[:1000].lower(),
                 legal_text=_legal_text(str(fm.get("title") or ""), body),
+                from_source=bool(fm.get("source_sha256")),
                 file_path=file_path,
             )
         except Exception:
@@ -243,10 +245,11 @@ def match_text_to_controls(
                     score += 0.15
                     matched_keywords.append(kw)
 
-        # 4. Controls without curated ``terms`` (ingested from a source, `kb ingest-framework`) are matched on
-        #    their legal text: each distinctive phrase shared with the text counts, up to a cap. Curated
-        #    controls keep their own terms, so their matching is unchanged.
-        if not ctrl.terms:
+        # 4. Controls without ``terms``, or ingested from a source (`source_sha256`: `kb ingest-framework`, even once
+        #    terms were added to them), are also matched on their legal text: each distinctive phrase shared with
+        #    the text counts, up to a cap. Hand-curated controls that never went through an ingestion keep
+        #    matching on their own terms only.
+        if not ctrl.terms or ctrl.from_source:
             shared = legal_text_matches(f"{title}\n{text}", ctrl)
             if shared:
                 score += min(0.15 * len(shared), 0.60)
