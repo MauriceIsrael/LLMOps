@@ -360,6 +360,21 @@ class CandidateService:
                               "due_at": request["due_at"], "message": request["message"], "checks_failed": []})
         return sorted(items, key=lambda i: (i["waiting_since"], i["candidate_id"]))
 
+    def may_review(self, handle: str, candidate: dict[str, Any]) -> bool:
+        """Who may decide on a candidate: an owner of its domain (or a parent), the default owner, a
+        maintainer, **the owner it is assigned to**, or an expert with an open second-review request.
+
+        Assignment and solicitation must grant the right to act, otherwise a reassigned or solicited
+        expert would see the candidate in the inbox and be refused (403) when deciding.
+        """
+        if self.owners().can_review(handle, candidate.get("domain") or []):
+            return True
+        if candidate.get("assigned_owner") == handle:
+            return True
+        if self.log is not None:
+            return any(r["kind"] == "second_review" for r in self.log.requests(handle=handle, candidate_id=candidate["id"]))
+        return False
+
     def assign(self, candidate_id: str, handle: str, actor_handle: str, reason: str | None = None) -> dict[str, Any]:
         """Reassign a candidate in review to another owner (current owner or ``kb:maintain``)."""
         candidate = self.repo.get(candidate_id)

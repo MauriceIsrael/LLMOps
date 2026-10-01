@@ -121,7 +121,18 @@ class IngestionService:
             if tag:
                 cmd += ["--tag", tag]
             try:
-                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=EXTRACTION_TIMEOUT_SECONDS, check=False)
+                import os
+                sub_env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1")
+                proc = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    env=sub_env,
+                    timeout=EXTRACTION_TIMEOUT_SECONDS,
+                    check=False,
+                )
             except subprocess.TimeoutExpired as exc:
                 raise IngestionError("file", f"extraction exceeded {EXTRACTION_TIMEOUT_SECONDS} s.") from exc
             if proc.returncode != 0:
