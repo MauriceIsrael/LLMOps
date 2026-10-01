@@ -1,0 +1,226 @@
+{
+  "interface": "rest.POST /api/knowledge/similar",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "config": {
+                "keys": {
+                  "status": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "thresholds": {
+                    "keys": {
+                      "possible": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "strong": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "weights": {
+                    "keys": {
+                      "domain": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "lexical": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "vector": {
+                        "type": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "dim": {
+                "type": [
+                  "number"
+                ]
+              },
+              "model": {
+                "type": [
+                  "string"
+                ]
+              },
+              "model_version": {
+                "type": [
+                  "string"
+                ]
+              },
+              "results": {
+                "items": {
+                  "keys": {
+                    "assumptions": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "assumptions_documented": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "domain": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "last_reviewed": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "ref": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "requires_confirmation": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "review_by": {
+                      "type": [
+                        "null"
+                      ]
+                    },
+                    "score": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "scores": {
+                      "keys": {
+                        "vector": {
+                          "type": [
+                            "number"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "stale": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "status": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "superseded_by": {
+                      "type": [
+                        "null"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "validated_at": {
+                      "type": [
+                        "null"
+                      ]
+                    },
+                    "validated_by": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "zone": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

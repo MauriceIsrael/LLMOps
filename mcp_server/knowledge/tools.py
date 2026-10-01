@@ -1931,6 +1931,128 @@ def get_kb_health() -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Semantic similarity (contract 1.9) — vectors computed by the client, REST only.
+# ---------------------------------------------------------------------------
+
+def _embedding_store():
+    from pipelines.governance.store import database_url
+    from pipelines.similarity.store import EmbeddingStore
+
+    return EmbeddingStore() if database_url() else None
+
+
+def get_embeddings_pending(model: str) -> dict[str, Any]:
+    """Assets and controls whose vector the client must (re)compute for ``model`` (requires 'kb:review').
+
+    Each item carries the **text to encode** and its SHA-256; a vector deposited for another text is refused.
+    ``reason`` is ``missing`` (no vector) or ``stale`` (the asset changed since its vector was computed).
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+    from pipelines.similarity.text import embeddable_assets
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    if not isinstance(model, str) or not model.strip():
+        return invalid_argument_response("model", "'model' is required (identifier of the embedding model).")
+    store = _embedding_store()
+    if store is None:
+        return _NO_DB
+    try:
+        stored = store.hashes(model)
+        items = []
+        for a in embeddable_assets(server_config.kb_dir):
+            if a["ref"] not in stored:
+                items.append({**a, "reason": "missing"})
+            elif stored[a["ref"]] != a["text_sha256"]:
+                items.append({**a, "reason": "stale"})
+        space = store.model_space(model)
+        return ok_response({"model": model, "dim": space[0] if space else None,
+                            "model_version": space[1] if space else None,
+                            "pending": items, "models": store.models()}, count=len(items))
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_embeddings_pending")
+
+
+def put_embeddings(body: dict[str, Any]) -> dict[str, Any]:
+    """Deposit vectors computed by the client: ``{model, model_version, items: [{ref, text_sha256, vector, language?}]}``.
+
+    Requires 'kb:review'. With an acting expert the role 'kb:maintain' is needed; without one (system
+    synchronisation by the client) the service token suffices. Stale or foreign vectors are refused (400).
+    """
+    from mcp_server.core.auth import delegated_actor_email, has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+    from pipelines.similarity.store import EmbeddingError
+    from pipelines.similarity.text import embeddable_assets
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    store = _embedding_store()
+    if store is None:
+        return _NO_DB
+    try:
+        email = delegated_actor_email()
+        if email:
+            who = _actor_with_role("kb:maintain")
+            if isinstance(who, dict):
+                return who
+            created_by = who[1].handle
+        else:
+            created_by = "system"
+        current = {a["ref"]: a for a in embeddable_assets(server_config.kb_dir)}
+        res = store.put(body.get("items"), str(body.get("model") or ""), str(body.get("model_version") or ""),
+                        created_by, current)
+        return ok_response(res, count=res["stored"])
+    except EmbeddingError as exc:
+        return invalid_argument_response(exc.argument, exc.reason)
+    except Exception as e:
+        return handle_exception_response(e, context_action="put_embeddings")
+
+
+def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
+    """Validated knowledge close to a subject: ``{model, vector, query_text?, types?, domains?, top_k?}`` ('kb:review').
+
+    The client computes ``vector`` with the same model as the stored vectors. The result is **never a decision**:
+    every item has ``requires_confirmation: true`` and shows its provenance and its documented assumptions.
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+    from pipelines.similarity.search import similar
+    from pipelines.similarity.store import EmbeddingError
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    store = _embedding_store()
+    if store is None:
+        return _NO_DB
+    try:
+        query_text = body.get("query_text")
+        types = _str_list(body.get("types"), "types")
+        if isinstance(types, dict):
+            return types
+        domains = _str_list(body.get("domains"), "domains")
+        if isinstance(domains, dict):
+            return domains
+        lexical = None
+        if isinstance(query_text, str) and query_text.strip():
+            from pipelines.doctrine.context import relevance
+            from pipelines.doctrine.text import query_concepts
+
+            index = _doctrine_index()
+            concepts = query_concepts(query_text, index.vocabulary)
+            entries = {e.id: e for e in index.entries}
+            lexical = lambda ref: relevance(entries[ref], concepts) if ref in entries else None  # noqa: E731
+        res = similar(store, server_config.kb_dir, str(body.get("model") or ""), body.get("vector"),
+                      query_text if isinstance(query_text, str) else None, types or None, domains or None,
+                      body.get("top_k") or 10, lexical)
+        return ok_response(res, count=len(res["results"]))
+    except EmbeddingError as exc:
+        return invalid_argument_response(exc.argument, exc.reason)
+    except Exception as e:
+        return handle_exception_response(e, context_action="similar_knowledge")
+
+
+# ---------------------------------------------------------------------------
 # Regulatory coverage (contract 1.3).
 # ---------------------------------------------------------------------------
 

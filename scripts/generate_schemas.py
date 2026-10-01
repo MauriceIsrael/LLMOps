@@ -482,6 +482,30 @@ def generate_kb_health_schema() -> dict[str, Any]:
         }}, "Health indicators of the knowledge base (GET /api/knowledge/health, contract 1.8).")
 
 
+def generate_similar_schema() -> dict[str, Any]:
+    result = {
+        "type": "object",
+        "required": ["ref", "type", "title", "score", "scores", "zone", "requires_confirmation", "assumptions_documented"],
+        "properties": {
+            "ref": {"type": "string"}, "type": {"type": "string"}, "title": {"type": "string"},
+            "score": {"type": "number"}, "scores": {"type": "object", "additionalProperties": {"type": "number"}},
+            "zone": {"enum": ["strong", "possible", "weak", "superseded"]},
+            "requires_confirmation": {"const": True},
+            "stale": {"type": "boolean"}, "status": {"type": "string"},
+            "domain": {"type": "array", "items": {"type": "string"}},
+            "last_reviewed": {"type": ["string", "null"]}, "review_by": {"type": ["string", "null"]},
+            "validated_by": {"type": "array", "items": {"type": "string"}}, "validated_at": {"type": ["string", "null"]},
+            "superseded_by": {"type": ["string", "null"]},
+            "assumptions": {"type": "array", "items": {"type": "string"}}, "assumptions_documented": {"type": "boolean"},
+        },
+    }
+    return _envelope("SimilarKnowledgeResponse", {
+        "type": "object", "required": ["model", "dim", "config", "results"],
+        "properties": {"model": {"type": "string"}, "dim": {"type": "integer"}, "model_version": {"type": "string"},
+                       "config": {"type": "object"}, "results": {"type": "array", "items": result}}},
+        "Validated knowledge close to a subject (POST /api/knowledge/similar, contract 1.9). Never a decision.")
+
+
 def generate_typescript_types() -> str:
     conf_union = " | ".join(f'"{c}"' for c in sorted(CONFIDENCE_LEVELS))
     subj_levels_union = " | ".join(f'"{lvl}"' for lvl in SUBJECT_LEVELS)
@@ -490,7 +514,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.8")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.9")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -1006,6 +1030,32 @@ export interface KbHealth {{
   storage: StorageStatus;
 }}
 
+/* ---- Contract 1.9: semantic similarity (vectors computed by the client) ----- */
+
+export type SimilarityZone = "strong" | "possible" | "weak" | "superseded";
+
+export interface EmbeddingPendingItem {{
+  ref: string; type: "principle" | "pattern" | "decision" | "control"; title: string;
+  text: string; text_sha256: string; reason: "missing" | "stale";
+}}
+
+export interface EmbeddingDeposit {{
+  model: string; model_version: string;
+  items: Array<{{ ref: string; text_sha256: string; vector: number[]; language?: "fr" | "en" }}>;
+}}
+
+export interface SimilarKnowledgeRequest {{
+  model: string; vector: number[]; query_text?: string; types?: string[]; domains?: string[]; top_k?: number;
+}}
+
+/** A proposal, never a decision: ``requires_confirmation`` is always true, whatever the score. */
+export interface SimilarKnowledgeItem {{
+  ref: string; type: string; title: string; score: number; scores: Record<string, number>;
+  zone: SimilarityZone; requires_confirmation: true; stale: boolean; status: string; domain: string[];
+  last_reviewed: string | null; review_by: string | null; validated_by: string[]; validated_at: string | null;
+  superseded_by: string | null; assumptions: string[]; assumptions_documented: boolean;
+}}
+
 export interface KbCandidateReviewRequest {{
   action: KbReviewAction;
   reviewer: string;
@@ -1038,6 +1088,7 @@ def main() -> None:
         ("eval_dataset.schema.json", generate_eval_dataset_schema()),
         ("framework_ingestion.schema.json", generate_framework_ingestion_schema()),
         ("kb_health.schema.json", generate_kb_health_schema()),
+        ("similar_knowledge.schema.json", generate_similar_schema()),
     ):
         (schemas_dir / filename).write_text(json.dumps(schema, indent=2) + "\n", encoding="utf-8")
         print(f"Generated: schemas/{filename}")

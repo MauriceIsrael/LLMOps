@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.8")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.9")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -513,6 +513,32 @@ export interface KbHealth {
   evaluation: { cases: number; validated_cases: number; last_run: Record<string, unknown> | null } | null;
   last_snapshot: { snapshot_id: string | null; generated_at: string | null } | null;
   storage: StorageStatus;
+}
+
+/* ---- Contract 1.9: semantic similarity (vectors computed by the client) ----- */
+
+export type SimilarityZone = "strong" | "possible" | "weak" | "superseded";
+
+export interface EmbeddingPendingItem {
+  ref: string; type: "principle" | "pattern" | "decision" | "control"; title: string;
+  text: string; text_sha256: string; reason: "missing" | "stale";
+}
+
+export interface EmbeddingDeposit {
+  model: string; model_version: string;
+  items: Array<{ ref: string; text_sha256: string; vector: number[]; language?: "fr" | "en" }>;
+}
+
+export interface SimilarKnowledgeRequest {
+  model: string; vector: number[]; query_text?: string; types?: string[]; domains?: string[]; top_k?: number;
+}
+
+/** A proposal, never a decision: ``requires_confirmation`` is always true, whatever the score. */
+export interface SimilarKnowledgeItem {
+  ref: string; type: string; title: string; score: number; scores: Record<string, number>;
+  zone: SimilarityZone; requires_confirmation: true; stale: boolean; status: string; domain: string[];
+  last_reviewed: string | null; review_by: string | null; validated_by: string[]; validated_at: string | null;
+  superseded_by: string | null; assumptions: string[]; assumptions_documented: boolean;
 }
 
 export interface KbCandidateReviewRequest {

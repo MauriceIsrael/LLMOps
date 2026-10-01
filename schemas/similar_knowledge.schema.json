@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SimilarKnowledgeResponse",
+  "description": "Validated knowledge close to a subject (POST /api/knowledge/similar, contract 1.9). Never a decision.",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "model",
+        "dim",
+        "config",
+        "results"
+      ],
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "dim": {
+          "type": "integer"
+        },
+        "model_version": {
+          "type": "string"
+        },
+        "config": {
+          "type": "object"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ref",
+              "type",
+              "title",
+              "score",
+              "scores",
+              "zone",
+              "requires_confirmation",
+              "assumptions_documented"
+            ],
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number"
+              },
+              "scores": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              "zone": {
+                "enum": [
+                  "strong",
+                  "possible",
+                  "weak",
+                  "superseded"
+                ]
+              },
+              "requires_confirmation": {
+                "const": true
+              },
+              "stale": {
+                "type": "boolean"
+              },
+              "status": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "last_reviewed": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "review_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "validated_by": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "validated_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "superseded_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "assumptions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "assumptions_documented": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

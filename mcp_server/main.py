@@ -61,6 +61,7 @@ from mcp_server.knowledge.tools import (
     get_compliance_trail,
     get_decision_trail,
     get_doctrine_context,
+    get_embeddings_pending,
     get_eval_dataset,
     get_eval_run,
     get_framework_coverage,
@@ -86,12 +87,14 @@ from mcp_server.knowledge.tools import (
     list_verdict_feedback,
     promote_kb_candidate,
     publish_kb_candidates,
+    put_embeddings,
     query_graph,
     request_kb_review,
     review_kb_candidate,
     run_eval,
     search_assets,
     shred_rfp,
+    similar_knowledge,
     simulate_checks,
     submit_kb_candidate,
     submit_verdict_feedback,
@@ -1134,6 +1137,24 @@ def create_starlette_app() -> Starlette:
         res = get_kb_health()
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_embeddings_pending(request):
+        res = get_embeddings_pending(request.query_params.get("model") or "")
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_embeddings_put(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = put_embeddings(body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_similar(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = similar_knowledge(body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_kb_me(request):
         """Expert au nom duquel le client agit (jeton kb:delegate + X-Actor-Email)."""
         res = get_kb_me()
@@ -1188,6 +1209,9 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/context", endpoint=handle_knowledge_context, methods=["GET"]),
             Route("/api/knowledge/check", endpoint=handle_knowledge_check, methods=["POST"]),
             Route("/api/knowledge/me", endpoint=handle_kb_me, methods=["GET"]),
+            Route("/api/knowledge/embeddings/pending", endpoint=handle_embeddings_pending, methods=["GET"]),
+            Route("/api/knowledge/embeddings", endpoint=handle_embeddings_put, methods=["PUT"]),
+            Route("/api/knowledge/similar", endpoint=handle_similar, methods=["POST"]),
             Route("/api/knowledge/health", endpoint=handle_kb_health, methods=["GET"]),
             Route("/api/knowledge/publications", endpoint=handle_publications_create, methods=["POST"]),
             Route("/api/knowledge/candidates/{candidate_id}/promote", endpoint=handle_candidate_promote,
