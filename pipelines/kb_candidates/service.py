@@ -369,7 +369,7 @@ class CandidateService:
         """
         if self.owners().can_review(handle, candidate.get("domain") or []):
             return True
-        if candidate.get("status") == "in_review" and candidate.get("assigned_owner") == handle:
+        if candidate.get("assigned_owner") == handle:
             return True
         if self.log is not None:
             return any(r["kind"] == "second_review" for r in self.log.requests(handle=handle, candidate_id=candidate["id"]))
