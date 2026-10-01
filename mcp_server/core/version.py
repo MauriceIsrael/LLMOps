@@ -26,9 +26,11 @@ Minor versions only add interfaces or optional fields:
   ``POST /api/knowledge/publications`` and ``GET /api/knowledge/health``.
 * ``1.9`` — semantic similarity over vectors computed by the client (REST):
   ``/api/knowledge/embeddings/pending``, ``PUT /api/knowledge/embeddings``, ``POST /api/knowledge/similar``.
+* ``1.10`` — reuse of validated knowledge (REST): ``/api/knowledge/reuse-confirmations``; the similarity
+  search remembers the judgements of a subject; optional ``assumptions`` and ``review_by`` in the front matter.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.9"
+CONTRACT_VERSION = "1.10"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

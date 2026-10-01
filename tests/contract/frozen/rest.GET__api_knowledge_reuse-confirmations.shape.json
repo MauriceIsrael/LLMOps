@@ -1,0 +1,116 @@
+{
+  "interface": "rest.GET /api/knowledge/reuse-confirmations",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "items": {
+              "keys": {
+                "actor": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "assumptions": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "assumptions_digest": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "at": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "comment": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "matched_ref": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "model": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "outcome": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "scores": {
+                  "keys": {},
+                  "type": [
+                    "object"
+                  ]
+                },
+                "subject_fingerprint": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "subject_label": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

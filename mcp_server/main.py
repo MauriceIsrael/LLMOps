@@ -49,6 +49,7 @@ from mcp_server.knowledge.tools import (
     assign_kb_candidate,
     check_option,
     comment_kb_candidate,
+    confirm_reuse,
     convert_verdict_feedback,
     create_framework_ingestion,
     decide_ingestion_row,
@@ -83,6 +84,7 @@ from mcp_server.knowledge.tools import (
     list_frameworks,
     list_kb_candidates,
     list_kb_comments,
+    list_reuse_confirmations,
     list_skills,
     list_verdict_feedback,
     promote_kb_candidate,
@@ -1154,6 +1156,18 @@ def create_starlette_app() -> Starlette:
         res = similar_knowledge(body)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_reuse_confirm(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = confirm_reuse(body)
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_reuse_list(request):
+        q = request.query_params
+        res = list_reuse_confirmations(q.get("matched_ref"), q.get("outcome"), q.get("subject_fingerprint"))
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_kb_me(request):
         """Expert au nom duquel le client agit (jeton kb:delegate + X-Actor-Email)."""
         res = get_kb_me()
@@ -1211,6 +1225,8 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/embeddings/pending", endpoint=handle_embeddings_pending, methods=["GET"]),
             Route("/api/knowledge/embeddings", endpoint=handle_embeddings_put, methods=["PUT"]),
             Route("/api/knowledge/similar", endpoint=handle_similar, methods=["POST"]),
+            Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_confirm, methods=["POST"]),
+            Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_list, methods=["GET"]),
             Route("/api/knowledge/health", endpoint=handle_kb_health, methods=["GET"]),
             Route("/api/knowledge/publications", endpoint=handle_publications_create, methods=["POST"]),
             Route("/api/knowledge/candidates/{candidate_id}/promote", endpoint=handle_candidate_promote,

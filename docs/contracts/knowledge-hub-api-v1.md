@@ -744,6 +744,22 @@ Plan : [`PLAN-IMPLEMENTATION-Similarite-Reutilisation.md`](../plans/PLAN-IMPLEME
 
 **Un résultat n'est jamais une décision.** Chaque élément porte `requires_confirmation: true` quel que soit le score (décision D8 : tolérance zéro), sa `zone` (`strong`, `possible`, `weak`, ou `superseded` pour un actif remplacé, jamais présenté comme valide), `stale`, sa provenance (`status`, `last_reviewed`, `review_by`, `validated_by`, `validated_at`, `superseded_by`) et ses **hypothèses de validité** (`assumptions`, `assumptions_documented`). `GET /api/knowledge/health` ajoute `embeddings` : par modèle, vecteurs, manquants et périmés. Schéma : [`similar_knowledge`](../../schemas/similar_knowledge.schema.json).
 
+### 5.10 Contrat 1.10 — Réutilisation de la connaissance validée
+
+Plan : [`PLAN-IMPLEMENTATION-Similarite-Reutilisation.md`](../plans/PLAN-IMPLEMENTATION-Similarite-Reutilisation.md) §3.3 et §3.4. **Une réutilisation n'est jamais automatique** (décision D8) : une recherche de similarité (§5.9) ne produit qu'une proposition ; la réutilisation est acquise quand une **personne** a confirmé, une par une, les hypothèses sous lesquelles la décision d'origine est valable.
+
+- **Hypothèses** : champ optionnel `assumptions: [..]` (une hypothèse vérifiable par ligne) et `review_by` (date de réexamen) dans le front matter des décisions, principes et patterns ; schéma `data/kb/schema/frontmatter.schema.json`, gabarit et aide à jour. Une décision soumise **sans** `assumptions` reçoit un avertissement du contrôle `schema`. `GET /api/knowledge/health` liste `assets.decisions_without_assumptions`.
+- `POST /api/knowledge/reuse-confirmations` (`201`) : `{subject_fingerprint (SHA-256 du sujet normalisé), subject_label (court, anonymisé), matched_ref, model?, scores?, outcome, assumptions:[{text, status: holds|does_not_hold|unknown, note?}], comment?}`. **Exige une personne agissante** (§5.4, jeton `kb:delegate` + `X-Actor-Email`) ; l'auteur est enregistré (handle s'il est dans le registre, sinon `email:<adresse>`). Journal **en ajout seul**. Aucun texte d'engagement n'est conservé : une empreinte et un libellé anonymisé (les adresses IP, e-mails et noms de la liste d'anonymisation sont refusés).
+- **Règles appliquées par le serveur** (`400` / `409`) :
+  - `reused` exige que **toutes** les hypothèses documentées de l'actif soient jugées **exactement** (mêmes énoncés qu'à cet instant) et `holds` ;
+  - un actif **sans hypothèse documentée** ne peut être ni `reused`, ni `reused_with_exception`, ni `rejected_assumption_fails` (les documenter d'abord par un amendement) ;
+  - `reused_with_exception` exige au moins une hypothèse non tenue ou inconnue **et** un commentaire motivé ; `rejected_assumption_fails` exige au moins une hypothèse `does_not_hold` ; `rejected_not_same` exige un commentaire (la raison est mémorisée) ;
+  - un actif non `active` ou remplacé ne peut pas être réutilisé (il peut être rejeté) ;
+  - `deferred` ne demande rien.
+- `GET /api/knowledge/reuse-confirmations?matched_ref=&outcome=&subject_fingerprint=` (`kb:review`) : historique, base de calibration et piste d'audit.
+- **Mémoire dans la recherche** : `POST /api/knowledge/similar` accepte `subject_fingerprint` et ajoute à chaque résultat `judgements` (jugements antérieurs de ce sujet, le plus récent d'abord), `previous_confirmation_outdated` (**vrai** si les hypothèses de l'actif ont changé depuis une confirmation : elle ne tient plus, il faut juger la nouvelle liste) et `reuse_summary` (issues par actif, tous sujets confondus). Rien n'est masqué : un rejet passé est **affiché** avec sa raison.
+- Schéma : [`reuse_confirmation`](../../schemas/reuse_confirmation.schema.json).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ReuseConfirmationResponse",
+  "description": "Judgement of a person on a reuse proposal (POST /api/knowledge/reuse-confirmations, contract 1.10).",
+  "type": "object",
+  "required": [
+    "status",
+    "count",
+    "data"
+  ],
+  "properties": {
+    "status": {
+      "const": "ok"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "id",
+        "at",
+        "actor",
+        "subject_fingerprint",
+        "matched_ref",
+        "outcome",
+        "assumptions"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "at": {
+          "type": "string"
+        },
+        "actor": {
+          "type": "string"
+        },
+        "subject_fingerprint": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "subject_label": {
+          "type": "string"
+        },
+        "matched_ref": {
+          "type": "string"
+        },
+        "assumptions_digest": {
+          "type": "string"
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "scores": {
+          "type": "object"
+        },
+        "outcome": {
+          "enum": [
+            "reused",
+            "reused_with_exception",
+            "rejected_not_same",
+            "rejected_assumption_fails",
+            "deferred"
+          ]
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "status"
+            ],
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "holds",
+                  "does_not_hold",
+                  "unknown"
+                ]
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

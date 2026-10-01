@@ -75,6 +75,8 @@ def similar(
     domains: list[str] | None = None,
     top_k: int = 10,
     lexical: Any = None,
+    judgements: dict[str, list[dict[str, Any]]] | None = None,
+    summary: dict[str, dict[str, int]] | None = None,
 ) -> dict[str, Any]:
     """``lexical(asset_id) -> float | None`` is the deterministic relevance of the doctrine engine for the query."""
     space = store.model_space(model)
@@ -110,6 +112,12 @@ def similar(
             "stale": item["text_sha256"] != _current_hash(asset),
             **prov,
         })
+        past = (judgements or {}).get(asset.id, [])
+        results[-1]["judgements"] = past
+        # A confirmation made on other hypotheses than the asset's current ones no longer stands.
+        results[-1]["previous_confirmation_outdated"] = any(
+            j["outcome"] in ("reused", "reused_with_exception") and j["assumptions_changed_since"] for j in past)
+        results[-1]["reuse_summary"] = (summary or {}).get(asset.id, {})
     results.sort(key=lambda r: (-r["score"], r["ref"]))
     return {"model": model, "dim": space[0], "model_version": space[1], "config": config,
             "results": results[: max(1, min(int(top_k), MAX_TOP_K))]}
