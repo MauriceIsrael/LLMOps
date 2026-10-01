@@ -167,6 +167,22 @@ embeddings = Table(
     Column("created_at", String(32), nullable=False),
 )
 
+reuse_confirmations = Table(
+    "reuse_confirmations", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("at", String(32), nullable=False),
+    Column("actor", String(256), nullable=False),
+    Column("subject_fingerprint", String(64), nullable=False, index=True),
+    Column("subject_label", String(200), nullable=False),
+    Column("matched_ref", String(128), nullable=False, index=True),
+    Column("assumptions_digest", String(64), nullable=False),
+    Column("model", String(128)),
+    Column("scores", Text, nullable=False),  # JSON
+    Column("assumptions", Text, nullable=False),  # JSON: [{text, status, note}]
+    Column("outcome", String(32), nullable=False, index=True),
+    Column("comment", Text),
+)
+
 counters = Table(
     "counters", metadata,
     Column("key", String(128), primary_key=True),

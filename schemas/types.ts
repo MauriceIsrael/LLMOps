@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.9")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.10")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -531,6 +531,7 @@ export interface EmbeddingDeposit {
 
 export interface SimilarKnowledgeRequest {
   model: string; vector: number[]; query_text?: string; types?: string[]; domains?: string[]; top_k?: number;
+  subject_fingerprint?: string;
 }
 
 /** A proposal, never a decision: ``requires_confirmation`` is always true, whatever the score. */
@@ -539,6 +540,36 @@ export interface SimilarKnowledgeItem {
   zone: SimilarityZone; requires_confirmation: true; stale: boolean; status: string; domain: string[];
   last_reviewed: string | null; review_by: string | null; validated_by: string[]; validated_at: string | null;
   superseded_by: string | null; assumptions: string[]; assumptions_documented: boolean;
+  judgements?: PastJudgement[]; previous_confirmation_outdated?: boolean; reuse_summary?: Record<string, number>;
+}
+
+/* ---- Contract 1.10: reuse of validated knowledge ----------------------------- */
+
+export type AssumptionStatus = "holds" | "does_not_hold" | "unknown";
+export type ReuseOutcome =
+  | "reused" | "reused_with_exception" | "rejected_not_same" | "rejected_assumption_fails" | "deferred";
+
+export interface AssumptionJudgement { text: string; status: AssumptionStatus; note?: string | null }
+
+/** ``assumptions`` must be exactly the asset's current ones; ``reused`` needs all of them to hold. */
+export interface ReuseConfirmationRequest {
+  subject_fingerprint: string;   // SHA-256 (64 hex) of the normalised subject
+  subject_label: string;         // short and anonymised
+  matched_ref: string;
+  model?: string;
+  scores?: Record<string, number>;
+  outcome: ReuseOutcome;
+  assumptions: AssumptionJudgement[];
+  comment?: string;              // required for reused_with_exception and rejected_not_same
+}
+
+export interface ReuseConfirmation extends ReuseConfirmationRequest {
+  id: number; at: string; actor: string; assumptions_digest: string;
+}
+
+export interface PastJudgement {
+  id: number; at: string; actor: string; outcome: ReuseOutcome; comment: string | null;
+  assumptions_changed_since: boolean;
 }
 
 export interface KbCandidateReviewRequest {

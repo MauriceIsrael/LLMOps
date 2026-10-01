@@ -22,6 +22,10 @@ HELP = {
     "status": "Always 'draft' or 'proposed' when authoring: only a reviewed promotion makes it 'active'.",
     "confidence": "'assumed' until measured or vendor-stated evidence is attached.",
     "terms": "Keywords used by the doctrine engine to match subjects and options.",
+    "assumptions": "Hypotheses under which this asset holds, one verifiable statement each (volumes, latency, "
+                   "regulatory context, state of the existing system…). A reuse on another subject is confirmed "
+                   "hypothesis by hypothesis: without them the asset cannot be reused.",
+    "review_by": "Date by which the asset must be reviewed again (YYYY-MM-DD).",
     "checks": "Testable clauses (requires / forbids) — write them in the doctrine workshop and simulate them first.",
 }
 

@@ -57,6 +57,7 @@ def kb_health(service: CandidateService, kb_dir: Path, snapshot_dir: Path, now: 
     by_type: dict[str, int] = {}
     by_domain: dict[str, int] = {}
     unvalidated = []
+    no_assumptions = []
     clauses = draft_clauses = 0
     for a in assets:
         by_type[a.type] = by_type.get(a.type, 0) + 1
@@ -65,6 +66,8 @@ def kb_health(service: CandidateService, kb_dir: Path, snapshot_dir: Path, now: 
             by_domain[str(d)] = by_domain.get(str(d), 0) + 1
         if not a.frontmatter.get("validated_by"):
             unvalidated.append(a.id)
+        if a.type == "decision" and not a.frontmatter.get("assumptions"):
+            no_assumptions.append(a.id)
         checks = a.frontmatter.get("checks") or []
         if isinstance(checks, list) and checks:
             clauses += len(checks)
@@ -109,7 +112,8 @@ def kb_health(service: CandidateService, kb_dir: Path, snapshot_dir: Path, now: 
     return {
         "generated_at": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "assets": {"active": len(assets), "by_type": dict(sorted(by_type.items())), "by_domain": dict(sorted(by_domain.items())),
-                   "unvalidated": {"count": len(unvalidated), "ids": unvalidated[:50]}},
+                   "unvalidated": {"count": len(unvalidated), "ids": unvalidated[:50]},
+                   "decisions_without_assumptions": {"count": len(no_assumptions), "ids": no_assumptions[:50]}},
         "clauses": {"total": clauses, "draft": draft_clauses, "unassessed_verdict_share": unassessed_share},
         "coverage": {fw: {"status": c["status"], "expected": c["expected"], "present": c["present"],
                           "validated": c["validated"], "provisional": c["provisional"]} for fw, c in coverage.items()},

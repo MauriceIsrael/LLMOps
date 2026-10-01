@@ -2042,14 +2042,78 @@ def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
             concepts = query_concepts(query_text, index.vocabulary)
             entries = {e.id: e for e in index.entries}
             lexical = lambda ref: relevance(entries[ref], concepts) if ref in entries else None  # noqa: E731
+        judgements = summary = None
+        fingerprint = body.get("subject_fingerprint")
+        if isinstance(fingerprint, str) and fingerprint:
+            from pipelines.kb_candidates.kb import load_assets
+            from pipelines.similarity.reuse import ReuseStore
+
+            reuse = ReuseStore()
+            judgements = reuse.judgements(fingerprint, {a.id: a for a in load_assets(server_config.kb_dir)})
+            summary = reuse.summary()
         res = similar(store, server_config.kb_dir, str(body.get("model") or ""), body.get("vector"),
                       query_text if isinstance(query_text, str) else None, types or None, domains or None,
-                      body.get("top_k") or 10, lexical)
+                      body.get("top_k") or 10, lexical, judgements, summary)
         return ok_response(res, count=len(res["results"]))
     except EmbeddingError as exc:
         return invalid_argument_response(exc.argument, exc.reason)
     except Exception as e:
         return handle_exception_response(e, context_action="similar_knowledge")
+
+
+def confirm_reuse(body: dict[str, Any]) -> dict[str, Any]:
+    """Record the judgement of a person on a reuse proposal (append-only; requires an acting person).
+
+    Body: ``{subject_fingerprint, subject_label (anonymised), matched_ref, model?, scores?, outcome,
+    assumptions: [{text, status: holds|does_not_hold|unknown, note?}], comment?}``. The server refuses
+    (400/409) any confirmation that skips the hypotheses: ``reused`` needs every documented assumption judged
+    and holding; an asset without documented assumptions cannot be reused; a superseded asset cannot be reused.
+    """
+    from mcp_server.core.auth import delegated_actor_email
+    from pipelines.similarity.reuse import (
+        ReuseConflictError,
+        ReuseError,
+        ReuseStore,
+        find_asset,
+        validate_confirmation,
+    )
+
+    store = _embedding_store()
+    if store is None:
+        return _NO_DB
+    try:
+        if not delegated_actor_email():
+            return {"status": "unauthorized",
+                    "reason": "No acting person: send X-Actor-Email with a token carrying the 'kb:delegate' scope."}
+        record = validate_confirmation(body, find_asset(server_config.kb_dir, str(body.get("matched_ref") or "")),
+                                       server_config.kb_dir)
+        return ok_response(ReuseStore().add(_actor(), record), count=1)
+    except ReuseConflictError as exc:
+        return {**invalid_argument_response(exc.argument, exc.reason), "conflict": True}
+    except ReuseError as exc:
+        return invalid_argument_response(exc.argument, exc.reason)
+    except Exception as e:
+        return handle_exception_response(e, context_action="confirm_reuse")
+
+
+def list_reuse_confirmations(matched_ref: str | None = None, outcome: str | None = None,
+                             subject_fingerprint: str | None = None) -> dict[str, Any]:
+    """History of reuse judgements (requires 'kb:review'): calibration base and audit trail."""
+    from mcp_server.core.auth import has_scope
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+    from pipelines.similarity.reuse import OUTCOMES, ReuseStore
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    if _embedding_store() is None:
+        return _NO_DB
+    if outcome and outcome not in OUTCOMES:
+        return invalid_argument_response("outcome", f"'outcome' must be one of {list(OUTCOMES)}.")
+    try:
+        items = ReuseStore().history(matched_ref or None, outcome or None, subject_fingerprint or None)
+        return ok_response(items, count=len(items))
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_reuse_confirmations")
 
 
 # ---------------------------------------------------------------------------

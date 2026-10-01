@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.9"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.10"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.9"
+  "schema_version": "1.10"
 }
 ```
 
@@ -30,6 +30,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.7` | Framework ingestion through the API: upload, row review, link proposals, apply, coverage declaration ([contract §5.7](contracts/knowledge-hub-api-v1.md)). |
 | `1.8` | Server-side promotion and publication, health indicators ([contract §5.8](contracts/knowledge-hub-api-v1.md)). |
 | `1.9` | Semantic similarity over vectors computed by the client: pending texts, vector deposit, hybrid search ([contract §5.9](contracts/knowledge-hub-api-v1.md)). |
+| `1.10` | Reuse of validated knowledge: assumptions, reuse confirmations with server-side rules, memory of judgements ([contract §5.10](contracts/knowledge-hub-api-v1.md)). |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

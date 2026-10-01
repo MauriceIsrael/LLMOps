@@ -405,6 +405,12 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/skills/matrix", headers={"X-Engagement-Id": demo}),
         _rest("GET", "/api/knowledge/me", headers={"Authorization": f"Bearer {REVIEWER_TOKEN}",
                                                    "X-Actor-Email": ACTOR_EMAIL}, delegate=True),
+        # Contract 1.10 — reuse of validated knowledge (judgement of a person, append-only)
+        _rest("POST", "/api/knowledge/reuse-confirmations", json_body={
+            "subject_fingerprint": "a" * 64, "subject_label": "Restoration of network configuration after an outage",
+            "matched_ref": "ADR-0001", "outcome": "deferred", "assumptions": [], "comment": "Contract freeze"},
+              headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/reuse-confirmations", headers=DELEGATED, delegate=True),
         # Contract 1.9 — semantic similarity (vectors computed by the client)
         _rest("GET", "/api/knowledge/embeddings/pending", "/api/knowledge/embeddings/pending?model=contract-model",
               headers=DELEGATED, delegate=True),

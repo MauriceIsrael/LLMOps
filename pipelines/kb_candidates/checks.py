@@ -222,6 +222,9 @@ def check_schema(candidate: dict[str, Any], ctx: CheckContext) -> dict[str, str]
     missing = [s for s in EXPECTED_SECTIONS[asset_type] if s not in _sections(body)]
     if missing:
         return _result("schema", "warn", f"missing template sections: {missing}")
+    if asset_type == "decision" and not _as_list(fm.get("assumptions")):
+        return _result("schema", "warn", "no 'assumptions' documented: without the hypotheses under which this decision "
+                       "holds, nobody can tell whether it applies to another subject (plan similarity, D8)")
     return _result("schema", "pass", f"{asset_type} front matter and sections are valid")
 
 
