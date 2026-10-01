@@ -113,6 +113,8 @@ def test_evaluation_dataset_annotation_and_runs(env):
     assert env.patch(patch, headers=_as(ALICE), json={"annotation_status": "validated"}).status_code == 403  # no kb:evaluate
     assert env.patch(patch, headers=_as(EVALUATOR), json={"annotation_status": "bogus"}).status_code == 400
     assert env.patch(patch, headers=_as(EVALUATOR), json={"expected": {"P-002": "violates"}}).status_code == 400
+    # A payload carrying neither field is refused, not silently ignored.
+    assert env.patch(patch, headers=_as(EVALUATOR), json={"expected_status": "violates", "notes": "x"}).status_code == 400
     ok = env.patch(patch, headers=_as(EVALUATOR), json={"annotation_status": "validated"})
     assert ok.status_code == 200 and ok.json()["data"]["annotated_by"] == "@ciso-office"
     assert env.patch(f"{DS}/cases/NOPE", headers=_as(EVALUATOR), json={"annotation_status": "validated"}).status_code == 404

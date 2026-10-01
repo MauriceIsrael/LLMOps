@@ -1557,6 +1557,9 @@ def annotate_eval_case(dataset: str, case_id: str, body: dict[str, Any]) -> dict
     if store is None:
         return _NO_DB
     _, owner = who
+    if body.get("expected") is None and body.get("annotation_status") is None:
+        # An unknown payload must not look like a successful annotation (silent no-op).
+        return invalid_argument_response("body", "send 'expected' and/or 'annotation_status'.")
     try:
         case = store.annotate(dataset, case_id, owner.handle, body.get("expected"), body.get("annotation_status"))
         from pipelines.governance.log import get_log
