@@ -373,5 +373,11 @@ def to_extracted_candidates(
             "suggestedDestination": destination,
             "routingConfidence": 0.95 if req.status == "covered" else 0.85,
             "verificationModes": modes,
+            "matched_controls": req.matched_controls,
+            "section": req.section,
+            "category": req.category,
+            "status": req.status,
+            "matched_assets": req.matched_assets,
+            "rationale": req.rationale,
         })
     return candidates

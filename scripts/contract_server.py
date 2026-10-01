@@ -41,7 +41,10 @@ def prepare(tmp: Path) -> dict[str, str]:
     """Scratch copy of the knowledge base and graph, owners with e-mails, environment variables."""
     import yaml
 
-    kb = tmp / "kb"
+    # The scratch KB lives at ./data/kb: parts of the engine (RFP shredder, compliance mapper) read the relative
+    # path data/kb from the working directory, which is the scratch directory.
+    (tmp / "data").mkdir()
+    kb = tmp / "data" / "kb"
     shutil.copytree(ROOT / "data" / "kb", kb)
     registry = yaml.safe_load((kb / "owners.yaml").read_text(encoding="utf-8"))
     for handle, (email, roles) in PERSONAS.items():
@@ -51,7 +54,6 @@ def prepare(tmp: Path) -> dict[str, str]:
     (kb / "owners.yaml").write_text(yaml.safe_dump(registry), encoding="utf-8")
     db = tmp / "knowledge.lbug"
     shutil.copy(ROOT / "data" / "knowledge.lbug", db)
-    (tmp / "data").mkdir()
     return {
         "LLMOPS_KB_DIR": str(kb),
         "LLMOPS_KNOWLEDGE_DB_PATH": str(db),
@@ -67,6 +69,7 @@ def prepare(tmp: Path) -> dict[str, str]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=8099)
+    parser.add_argument("--host", default="127.0.0.1", help="0.0.0.0 inside a container")
     args = parser.parse_args()
     sys.path.insert(0, str(ROOT))
     tmp = Path(tempfile.mkdtemp(prefix="llmops-contract-"))
@@ -81,9 +84,9 @@ def main() -> None:
         from mcp_server.main import create_starlette_app
         from pipelines.governance.bootstrap import ensure_governance_ready
 
-        ensure_governance_ready(tmp / "kb", eval_dataset)
-        print(f"contract server on http://127.0.0.1:{args.port} (service token: {SERVICE_TOKEN})", flush=True)
-        uvicorn.run(create_starlette_app(), host="127.0.0.1", port=args.port, log_level="warning")
+        ensure_governance_ready(tmp / "data" / "kb", eval_dataset)
+        print(f"contract server on http://{args.host}:{args.port} (service token: {SERVICE_TOKEN})", flush=True)
+        uvicorn.run(create_starlette_app(), host=args.host, port=args.port, log_level="warning")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

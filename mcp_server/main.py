@@ -653,6 +653,7 @@ def create_starlette_app() -> Starlette:
                     "count": len(candidates),
                     "documentId": document_id,
                     "documentVersion": document_version,
+                    "requirements": [r.to_dict() for r in requirements],
                 },
                 status_code=200,
             )
