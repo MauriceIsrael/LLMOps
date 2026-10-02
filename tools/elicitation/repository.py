@@ -1,5 +1,6 @@
 """Module de stockage (Repository) — Seul composant autorisé à écrire dans Kùzu DB / LadybugDB."""
 
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -432,15 +433,18 @@ class ElicitationRepository:
 
     def run_checks(self, engagement: str, statement_ids: list[str] | None = None) -> list[dict[str, Any]]:
         """Détecte automatiquement les contradictions dans le graphe (check_node)."""
+        # CONFLICT_DETECTION_MODE=legacy (default, current behaviour) also flags two authors writing the SAME value
+        # for a predicate; ``strict`` only flags different values (docs/migration-archinex.md §4).
+        legacy = os.getenv("CONFLICT_DETECTION_MODE", "legacy").strip().lower() != "strict"
+        legacy_clause = " OR\n            (s1.author <> s2.author AND s1.predicate = s2.predicate)" if legacy else ""
         query = """
         MATCH (s1:Statement {engagement: $engagement, status: 'active'}),
               (s2:Statement {engagement: $engagement, status: 'active'})
         WHERE s1.id < s2.id AND s1.subject = s2.subject AND (
-            (s1.predicate = s2.predicate AND s1.value <> s2.value) OR
-            (s1.author <> s2.author AND s1.predicate = s2.predicate)
+            (s1.predicate = s2.predicate AND s1.value <> s2.value)__LEGACY__
         )
         RETURN s1.id as s1_id, s2.id as s2_id, s1.subject as subject, s1.predicate as pred, s1.value as v1, s2.value as v2;
-        """
+        """.replace("__LEGACY__", legacy_clause)
         rows = self.db_client.execute_cypher(query, params={"engagement": engagement})
         detected_conflicts = []
         if rows and "error" not in rows[0]:

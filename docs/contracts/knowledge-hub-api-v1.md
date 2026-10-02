@@ -783,6 +783,16 @@ Complète l'ingestion par l'API (§5.7) pour qu'un contrôle ingéré soit trouv
 - Un contrôle issu d'une source (`source_sha256`) garde l'appariement par texte légal du découpeur de RFP même une fois qu'il porte des `terms` ; un contrôle curé jamais ingéré n'est apparié que sur ses termes.
 - La réponse `GET …/ingestions/{id}` ajoute par exigence `proposed_terms`, `proposed_title_fr`, `terms`, `title_fr`.
 
+### 5.13 Contrat 1.13 — Dépréciation de la partie engagement
+
+Les consommateurs qui gèrent les engagements (Archinex, lots A1 à A4) n'ont plus besoin de ces interfaces ; elles restent servies **à l'identique** (mêmes entrées, mêmes formes, mêmes codes) pendant au moins deux versions mineures, selon [`docs/DEPRECATION.md`](../DEPRECATION.md).
+
+- **Routes dépréciées** : `POST /api/elicitation/trigger`, `GET /api/elicitation/questions`, `GET /api/arbitration/board`, `GET /api/arbitration/conflicts`, `GET /api/arbitration/statements`. Chaque réponse porte l'en-tête `Deprecation: true` et `Link: <…/migration-archinex.md>; rel="deprecation"`.
+- **Outils MCP dépréciés** (plan d'engagement) : `get_subject`, `get_subject_trajectory`, `get_board`, `get_statements`, `get_conflicts`, `get_open_questions`, `get_diagram_graph`, `get_render_payload`, `get_dangling_references`, `get_engagement_export`.
+- **Champ d'enveloppe** `deprecation: {since, replaced_by, doc}` (optionnel, ajouté aux réponses ci-dessus) ; une ligne `WARNING` est écrite sur le journal `mcp_server.deprecation` (interface, appelant) à chaque appel.
+- **Legacy (non déprécié, sans évolution)** : `/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint`, `/api/prose/suggest-batch`, `shred_rfp`, `generate_zero_draft_hld`, `trigger_rfp_elicitation`, le catalogue de compétences. Aucun signal de dépréciation.
+- **Détection de conflits** : `CONFLICT_DETECTION_MODE=legacy|strict` (défaut `legacy`, comportement inchangé). `strict` ne signale que des valeurs **différentes** pour un même prédicat ; `legacy` signale aussi deux auteurs qui écrivent la même valeur. Ne pas changer le défaut sans l'accord écrit de l'équipe Archinex.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

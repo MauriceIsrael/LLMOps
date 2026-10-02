@@ -32,9 +32,12 @@ Minor versions only add interfaces or optional fields:
   runs with vectors supplied by the client, threshold sweep).
 * ``1.12`` — bilingual search metadata at framework ingestion: optional ``terms`` and ``title_fr`` in the
   link proposals and in the row decisions (applied to the control only when the expert accepts or amends).
+* ``1.13`` — deprecation of the engagement part (L4): ``Deprecation`` header, ``deprecation`` envelope field and a
+  log line on the elicitation/arbitration routes and the engagement MCP tools; ``CONFLICT_DETECTION_MODE`` flag.
+  No change of behaviour or shape.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.12"
+CONTRACT_VERSION = "1.13"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
