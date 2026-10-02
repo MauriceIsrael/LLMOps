@@ -3,6 +3,7 @@
 > Destinataires : agents de codage IA travaillant dans `MauriceIsrael/LLMOps` (lots **L5 à L9**) et dans `MauriceIsrael/archinex` (lots **A6 à A11**).
 > Plans compagnons : `PLAN-IMPLEMENTATION-LLMOps.md` (lots L0 à L4) et `PLAN-IMPLEMENTATION-Archinex.md` (lots A0 à A5).
 > Date de référence : 30/09/2026.
+> **État au 02/10/2026** : L5 à L9 fusionnés ; **L4** (dépréciation de la partie engagement, contrat 1.13, `docs/migration-archinex.md`) et **L10** (retrait de l'écran de revue de `kb-client-app`) réalisés ; A6 à A11 livrés côté Archinex. Archinex appelle encore `getBoard`, `getStatements`, `getConflicts` (voir le guide de migration §3).
 
 ---
 
