@@ -65,7 +65,7 @@ avec une base de gouvernance persistante (SQLite) et un jeton de service délég
 
 ```bash
 poetry install
-poetry run python scripts/serve_local.py      # ou : make serve   (Windows : pas de make, utiliser la première forme)
+poetry run python scripts/serve_local.py      # ou : make serve   (Linux/macOS ; Windows n'a pas make, utiliser la première forme)
 ```
 
 - **Redémarrer** = `Ctrl+C` puis relancer : l'état (candidats, revues, propriétaires, embeddings, journal de réutilisation)
@@ -78,6 +78,7 @@ poetry run python scripts/serve_local.py      # ou : make serve   (Windows : pas
   compte Archinex) vont dans l'environnement ou `.env`, **jamais** dans `data/kb/owners.yaml`.
 - Les experts sont identifiés par e-mail (`X-Actor-Email`, envoyé par Archinex) : chaque e-mail doit figurer sur **un seul**
   propriétaire de `data/kb/owners.yaml` ; les rôles (`kb:maintain`, `kb:admin`, `kb:evaluate`) y sont déclarés.
+- **Linux** : en service `systemd` (redémarrage automatique, journaux avec `journalctl`) ou avec Docker, voir [`docs/deployment.md`](docs/deployment.md) §6, qui donne aussi les équivalents Windows de chaque commande.
 - Tester sans instance déployée : `poetry run python scripts/contract_server.py --port 8099` (copie jetable de la base, experts
   fictifs) ou l'image `docker build -f docker/Dockerfile.contract -t llmops-contract:latest .` (voir
   [`docs/deployment.md`](docs/deployment.md) pour Cloud Run / Cloud SQL).
