@@ -28,6 +28,7 @@ langgraph-checkpoint-sqlite = "^3.1.0"
 sqlalchemy = "^2.0"
 psycopg = {version = "^3.2", extras = ["binary"], optional = true}
 python-multipart = "^0.0.32"
+jsonschema = "^4.0"
 
 
 [tool.poetry.extras]

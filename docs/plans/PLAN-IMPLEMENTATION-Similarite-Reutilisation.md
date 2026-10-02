@@ -12,6 +12,8 @@ Lots LLMOps **L11 à L14**, lots Archinex **A12 à A15** (issues dans le dépôt
 | A12 à A15 (Archinex) | réalisés en partie : synchronisation, recherche, confirmation d'hypothèses, évaluation, « deuxième RFP » ; encodeur honnête et tests négatifs en revue (archinex#22, #24) |
 | Porte G8 | **non franchie** : manquent un modèle d'embeddings réel mesuré sur le jeu annoté, des seuils calibrés (`status: uncalibrated`), une règle capitalisée avec assertion formelle prouvant un changement de verdict, et l'E2E API « deuxième RFP » sur le serveur réel (archinex#23) |
 
+**Modèle candidat mesuré (2 octobre 2026)** : `bge-m3` (Ollama, dimension 1024) ; test de bon sens FR/EN : traduction 0,901 contre sujet voisin 0,530 (écart 0,372). Ce n'est pas la calibration : les seuils restent `uncalibrated` jusqu'à l'exécution du jeu annoté (A14).
+
 Modèle d'embeddings : calculé par Archinex sur un serveur local (Ollama ou API compatible OpenAI, `EMBEDDING_OLLAMA_URL`) ; inventaire et test de bon sens FR/EN par `scripts/ollama-models.mjs` côté Archinex ; le choix se fait sur **mesure** (A14), pas sur ce test.
 
 ---
