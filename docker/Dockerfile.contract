@@ -23,7 +23,7 @@ COPY schemas ./schemas
 COPY fixtures ./fixtures
 COPY scripts ./scripts
 COPY examples ./examples
-COPY tests/evals/datasets/check_option_v1.jsonl ./tests/evals/datasets/check_option_v1.jsonl
+COPY tests/evals/datasets ./tests/evals/datasets
 COPY tests/fixtures/frameworks ./tests/fixtures/frameworks
 RUN poetry install --no-interaction --no-ansi --only-root
 
