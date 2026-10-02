@@ -57,7 +57,7 @@ décision affirmée ; `is_provisional` et ses raisons **dérivés, jamais décla
 | **D11** | Que contient le bundle ? | Le texte des exigences du client est légitime, jamais son nom ; `confidentiality` obligatoire. **Validé.** |
 | **D12** | OSCAL | **Validé en principe** : export de la matrice de conformité au format OSCAL, produit par Archinex ; lot A19 |
 | **D13** | DOCX / PDF | **Sans objet** : le Document Engine produit déjà les formats ; il n'y a rien à convertir ici |
-| **D14** | Qui possède le schéma du bundle ? | **À trancher** (Q3 de l'alignement) : le producteur (Archinex) par défaut ; copie de référence dans LLMOps tant qu'aucun propriétaire n'est désigné |
+| **D14** | Qui possède le schéma du bundle ? | **LLMOps (Knowledge Hub)**, décision du mainteneur du 2 octobre : le schéma est tenu ici ; le **contenu** d'un engagement reste chez son producteur (Archinex) et n'est jamais envoyé à LLMOps. À consigner dans l'amendement d'`ADR-KH-01` (Q4) |
 
 ## 4. Lots
 
