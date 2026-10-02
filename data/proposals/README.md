@@ -16,5 +16,5 @@ poetry run kb submit data/proposals/it-infrastructure.jsonl
 ```
 
 Being `llm-derived`, they carry the `llm_unreviewed` warning and can only be published after a
-human review (`review_kb_candidate` / the /governance/candidates screen), then `kb promote` and
+human review (`review_kb_candidate` / the review inbox in Archinex (/kb/reviews)), then `kb promote` and
 `kb publish`. Principles also require a second review.
