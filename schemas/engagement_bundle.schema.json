@@ -1,0 +1,1041 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/MauriceIsrael/LLMOps/schemas/engagement_bundle.schema.json",
+  "title": "EngagementBundle",
+  "description": "PROPOSED contract, owner to be confirmed (the producer, not the knowledge hub: the hub holds no programme data). Sealed, versioned outcome of an engagement (requirements, subjects, validated decisions with their assumptions, compliance matrix, architecture model) from which documents, diagrams and decision cards are DERIVED. Every claim carries its epistemic status; a generator may only write as fact what has assertion_level 'asserted'. Sealed as a suite ExternalSnapshotEnvelope: checksum = sha256 of `data` under the suite canonical-json profile v1. Rules JSON Schema cannot express (identifiers resolve, levels derive from statuses, reuse is backed by a confirmation, no e-mail addresses...) are checked by pipelines/bundle/verify.py. Plan: docs/plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "enum": [
+        "1.0"
+      ]
+    },
+    "snapshotId": {
+      "$ref": "#/definitions/id"
+    },
+    "sourceSystem": {
+      "type": "string",
+      "description": "Producer, e.g. 'archinex'."
+    },
+    "createdAt": {
+      "$ref": "#/definitions/date_time"
+    },
+    "sourceRevision": {
+      "type": "string",
+      "description": "Revision of the producer's state this bundle was built from."
+    },
+    "checksum": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "sha256:<hex> of `data` serialised with the suite canonical-json profile v1 (pipelines/canonical.py). Provenance lives in the envelope and is not hashed."
+    },
+    "expiresAt": {
+      "$ref": "#/definitions/date_time"
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "engagement": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/id"
+            },
+            "title": {
+              "type": "string"
+            },
+            "language": {
+              "enum": [
+                "fr",
+                "en"
+              ]
+            },
+            "confidentiality": {
+              "enum": [
+                "public",
+                "internal",
+                "confidential"
+              ]
+            },
+            "client_label": {
+              "type": "string",
+              "description": "Anonymised label, never the client's name."
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "language",
+            "confidentiality"
+          ]
+        },
+        "is_provisional": {
+          "type": "boolean",
+          "description": "True when a subject is below L3_decided or a conflict is open: the whole bundle is then provisional, whatever the status of its items (suite two-stage rule)."
+        },
+        "provisional_reasons": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "unripe_subjects": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/id"
+              },
+              "uniqueItems": true
+            },
+            "open_conflicts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/id"
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "unripe_subjects",
+            "open_conflicts"
+          ]
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "kind": {
+                "enum": [
+                  "contradiction",
+                  "principle_violation",
+                  "stale_basis"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "arbitrated"
+                ]
+              },
+              "statement_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/id"
+                },
+                "uniqueItems": true
+              },
+              "detail": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "status"
+            ]
+          }
+        },
+        "pins": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "llmops_contract_version": {
+              "type": "string",
+              "pattern": "^1\\.\\d+$"
+            },
+            "kb": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "snapshot_id": {
+                  "type": "string"
+                },
+                "payload_sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "snapshot_id",
+                "payload_sha256"
+              ],
+              "description": "The knowledge base version the doctrine comes from."
+            },
+            "frameworks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "framework_id": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "source_sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "coverage": {
+                    "enum": [
+                      "covered",
+                      "partial",
+                      "none"
+                    ]
+                  }
+                },
+                "required": [
+                  "framework_id",
+                  "version",
+                  "coverage"
+                ]
+              }
+            },
+            "embedding": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "model": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "model",
+                "version"
+              ],
+              "description": "Model that proposed similarity, if any (recorded for reproducibility)."
+            }
+          },
+          "required": [
+            "llmops_contract_version",
+            "kb"
+          ]
+        },
+        "source_documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "kind": {
+                "enum": [
+                  "rfp",
+                  "cctp",
+                  "regulation",
+                  "interview",
+                  "other"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "language": {
+                "enum": [
+                  "fr",
+                  "en"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "title",
+              "sha256"
+            ]
+          }
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "source_document_id": {
+                "$ref": "#/definitions/id"
+              },
+              "clause_ref": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "language": {
+                "enum": [
+                  "fr",
+                  "en"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "source_document_id",
+              "text"
+            ]
+          }
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "domains": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "maturity": {
+                "enum": [
+                  "L0_named",
+                  "L1_framed",
+                  "L2_decomposed",
+                  "L3_decided",
+                  "L4_specified"
+                ],
+                "description": "Suite vocabulary; L3_decided is the threshold at which a section is complete."
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "decided",
+                  "deferred",
+                  "reopened"
+                ]
+              },
+              "requirement_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/id"
+                },
+                "uniqueItems": true
+              },
+              "decision_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/id"
+                },
+                "uniqueItems": true
+              },
+              "open_questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "$ref": "#/definitions/id"
+                    },
+                    "question": {
+                      "type": "string"
+                    },
+                    "blocking": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "question"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "status"
+            ]
+          }
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "subject_id": {
+                "$ref": "#/definitions/id"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "validated",
+                  "reused",
+                  "proposed",
+                  "superseded"
+                ]
+              },
+              "decision": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rationale": {
+                "type": "string"
+              },
+              "alternatives": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "rejected_because": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "title"
+                  ]
+                }
+              },
+              "assumptions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/assumption"
+                },
+                "description": "Hypotheses under which the decision holds, judged in THIS engagement."
+              },
+              "consequences": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "derived_from": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "kb_ref": {
+                    "$ref": "#/definitions/kb_ref"
+                  },
+                  "reuse_log_id": {
+                    "$ref": "#/definitions/id"
+                  }
+                },
+                "required": [
+                  "kb_ref"
+                ],
+                "description": "Present when the decision comes from a validated KB decision."
+              },
+              "review_by": {
+                "type": "string",
+                "format": "date"
+              },
+              "kb_candidate_id": {
+                "type": "string",
+                "description": "Candidate through which the decision was capitalised in the KB, if it was."
+              },
+              "epistemic_status": {
+                "$ref": "#/definitions/epistemic_status"
+              },
+              "assertion_level": {
+                "$ref": "#/definitions/assertion_level"
+              },
+              "provenance": {
+                "$ref": "#/definitions/provenance"
+              }
+            },
+            "required": [
+              "id",
+              "subject_id",
+              "title",
+              "status",
+              "decision",
+              "epistemic_status",
+              "assertion_level",
+              "provenance"
+            ]
+          }
+        },
+        "statements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "subject_id": {
+                "$ref": "#/definitions/id"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "predicate": {
+                "type": "string"
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean",
+                  "null"
+                ]
+              },
+              "unit": {
+                "type": "string"
+              },
+              "epistemic_status": {
+                "$ref": "#/definitions/epistemic_status"
+              },
+              "assertion_level": {
+                "$ref": "#/definitions/assertion_level"
+              },
+              "provenance": {
+                "$ref": "#/definitions/provenance"
+              }
+            },
+            "required": [
+              "id",
+              "subject_id",
+              "text",
+              "epistemic_status",
+              "assertion_level",
+              "provenance"
+            ]
+          }
+        },
+        "compliance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "requirement_id": {
+                "$ref": "#/definitions/id"
+              },
+              "control_ref": {
+                "$ref": "#/definitions/kb_ref"
+              },
+              "relation": {
+                "enum": [
+                  "satisfies",
+                  "partially_satisfies",
+                  "gap",
+                  "not_applicable"
+                ]
+              },
+              "matched_by": {
+                "enum": [
+                  "lexical",
+                  "legal_text",
+                  "vector",
+                  "human"
+                ]
+              },
+              "decision_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/id"
+                },
+                "uniqueItems": true
+              },
+              "epistemic_status": {
+                "$ref": "#/definitions/epistemic_status"
+              },
+              "assertion_level": {
+                "$ref": "#/definitions/assertion_level"
+              },
+              "provenance": {
+                "$ref": "#/definitions/provenance"
+              }
+            },
+            "required": [
+              "id",
+              "requirement_id",
+              "control_ref",
+              "relation",
+              "epistemic_status",
+              "assertion_level",
+              "provenance"
+            ]
+          },
+          "description": "Requirement to control matrix. A link found by lexical, legal_text or vector matching is only 'proposed' until a person confirms it."
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "kind": {
+                "enum": [
+                  "G1_empty_section",
+                  "G2_unanswered_blocking",
+                  "G3_principle_unaddressed",
+                  "uncovered_requirement",
+                  "missing_assumption",
+                  "unreviewed_proposal",
+                  "other"
+                ]
+              },
+              "description": {
+                "type": "string"
+              },
+              "subject_id": {
+                "$ref": "#/definitions/id"
+              },
+              "requirement_id": {
+                "$ref": "#/definitions/id"
+              },
+              "blocking": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "description"
+            ]
+          }
+        },
+        "architecture": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "elements": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/id"
+                  },
+                  "kind": {
+                    "enum": [
+                      "actor",
+                      "system",
+                      "component",
+                      "datastore",
+                      "network",
+                      "interface",
+                      "boundary"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "technology": {
+                    "type": "string"
+                  },
+                  "boundary_id": {
+                    "$ref": "#/definitions/id"
+                  },
+                  "decision_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/id"
+                    },
+                    "uniqueItems": true
+                  },
+                  "epistemic_status": {
+                    "$ref": "#/definitions/epistemic_status"
+                  },
+                  "assertion_level": {
+                    "$ref": "#/definitions/assertion_level"
+                  },
+                  "provenance": {
+                    "$ref": "#/definitions/provenance"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "name",
+                  "epistemic_status",
+                  "assertion_level",
+                  "provenance"
+                ]
+              }
+            },
+            "relations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/id"
+                  },
+                  "from": {
+                    "$ref": "#/definitions/id"
+                  },
+                  "to": {
+                    "$ref": "#/definitions/id"
+                  },
+                  "kind": {
+                    "enum": [
+                      "uses",
+                      "depends_on",
+                      "data_flow",
+                      "deploys_to",
+                      "protects",
+                      "contains"
+                    ]
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "protocol": {
+                    "type": "string"
+                  },
+                  "decision_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/id"
+                    },
+                    "uniqueItems": true
+                  },
+                  "epistemic_status": {
+                    "$ref": "#/definitions/epistemic_status"
+                  },
+                  "assertion_level": {
+                    "$ref": "#/definitions/assertion_level"
+                  },
+                  "provenance": {
+                    "$ref": "#/definitions/provenance"
+                  }
+                },
+                "required": [
+                  "id",
+                  "from",
+                  "to",
+                  "kind",
+                  "epistemic_status",
+                  "assertion_level",
+                  "provenance"
+                ]
+              }
+            }
+          },
+          "required": [],
+          "description": "Model from which diagrams are drawn (components, flows, boundaries). Every diagram element is traceable to decisions and carries its assertion level."
+        },
+        "kb_references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "ref": {
+                "$ref": "#/definitions/kb_ref"
+              },
+              "knowledge_ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "source_id": {
+                    "const": "knowledge-hub"
+                  },
+                  "knowledge_key": {
+                    "type": "string",
+                    "description": "Suite ExternalRef {type}:{slug}, e.g. decision:ADR-0001"
+                  },
+                  "version": {
+                    "type": "string",
+                    "description": "Citable version of the element. Absent while the knowledge hub does not publish one per element: a reference without version is NOT citable in a frozen document."
+                  }
+                },
+                "required": [
+                  "source_id",
+                  "knowledge_key"
+                ]
+              },
+              "confidence": {
+                "enum": [
+                  "verified",
+                  "designed",
+                  "vendor-stated",
+                  "stated-by-client",
+                  "assumed"
+                ],
+                "description": "Knowledge hub confidence, kept as published (vendor-stated is never lost)."
+              },
+              "type": {
+                "enum": [
+                  "principle",
+                  "pattern",
+                  "decision",
+                  "control",
+                  "glossary",
+                  "other"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "kb_status": {
+                "type": "string"
+              },
+              "validated_at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref",
+              "type",
+              "title"
+            ]
+          },
+          "description": "Every KB asset cited, so a generator can cite it without calling the server."
+        },
+        "reuse_log": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "matched_ref": {
+                "$ref": "#/definitions/kb_ref"
+              },
+              "outcome": {
+                "enum": [
+                  "reused",
+                  "reused_with_exception",
+                  "rejected_not_same",
+                  "rejected_assumption_fails",
+                  "deferred"
+                ]
+              },
+              "assumptions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/assumption"
+                }
+              },
+              "comment": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "by": {
+                "$ref": "#/definitions/handle"
+              },
+              "at": {
+                "$ref": "#/definitions/date_time"
+              }
+            },
+            "required": [
+              "id",
+              "matched_ref",
+              "outcome",
+              "by",
+              "at"
+            ]
+          },
+          "description": "Reuse confirmations of the engagement (LLMOps /api/knowledge/reuse-confirmations)."
+        },
+        "glossary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "term": {
+                "type": "string"
+              },
+              "definition": {
+                "type": "string"
+              },
+              "kb_ref": {
+                "$ref": "#/definitions/kb_ref"
+              }
+            },
+            "required": [
+              "term",
+              "definition"
+            ]
+          }
+        }
+      },
+      "required": [
+        "engagement",
+        "pins",
+        "source_documents",
+        "requirements",
+        "subjects",
+        "decisions",
+        "statements",
+        "compliance",
+        "gaps",
+        "conflicts",
+        "is_provisional",
+        "provisional_reasons",
+        "kb_references",
+        "reuse_log"
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "snapshotId",
+    "sourceSystem",
+    "createdAt",
+    "sourceRevision",
+    "checksum",
+    "data"
+  ],
+  "definitions": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:\\-/]*$",
+      "maxLength": 120
+    },
+    "handle": {
+      "type": "string",
+      "pattern": "^@[a-z0-9][a-z0-9\\-]*$"
+    },
+    "date_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "epistemic_status": {
+      "enum": [
+        "validated",
+        "reused_confirmed",
+        "ai_proposed",
+        "assumption",
+        "contested"
+      ],
+      "description": "What is known about the item. Only a person (or a confirmed reuse) can make it validated."
+    },
+    "assertion_level": {
+      "enum": [
+        "asserted",
+        "proposed",
+        "assumption",
+        "open"
+      ],
+      "description": "What a generator may do with the item. DERIVED from epistemic_status (validated, reused_confirmed -> asserted; ai_proposed -> proposed; assumption -> assumption; contested -> open) and checked by the verifier: only 'asserted' may be written as a fact, every other level must be rendered with its marking."
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "enum": [
+            "human_validation",
+            "reuse_confirmation",
+            "ai_proposal",
+            "declared_assumption",
+            "source_document",
+            "kb_snapshot"
+          ]
+        },
+        "by": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/handle"
+          },
+          "uniqueItems": true,
+          "description": "Owner handles of the people who validated; never e-mail addresses."
+        },
+        "at": {
+          "$ref": "#/definitions/date_time"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/id"
+          },
+          "description": "Identifiers (in this bundle) of the evidence: source documents, reuse_log entries, statements..."
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "basis"
+      ]
+    },
+    "assumption": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "holds",
+            "does_not_hold",
+            "unknown"
+          ]
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "text",
+        "status"
+      ]
+    },
+    "kb_ref": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:\\-]*$",
+      "description": "Identifier of a KB asset (principle, pattern, decision, control...) that MUST be listed in data.kb_references."
+    }
+  }
+}

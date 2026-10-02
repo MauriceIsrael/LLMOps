@@ -1,0 +1,407 @@
+{
+  "schemaVersion": "1.0",
+  "snapshotId": "bundle-eng-netops-nis2-20261002T140000Z",
+  "sourceSystem": "archinex",
+  "createdAt": "2026-10-02T14:00:00Z",
+  "sourceRevision": "example",
+  "data": {
+    "engagement": {
+      "id": "eng-netops-nis2",
+      "title": "Network operations platform under NIS2 (illustrative example)",
+      "language": "en",
+      "confidentiality": "internal",
+      "client_label": "Operator A"
+    },
+    "is_provisional": true,
+    "provisional_reasons": {
+      "unripe_subjects": [
+        "SUBJ-incident-notification"
+      ],
+      "open_conflicts": []
+    },
+    "conflicts": [],
+    "pins": {
+      "llmops_contract_version": "1.13",
+      "kb": {
+        "snapshot_id": "snapshot-2026-10-02-example",
+        "payload_sha256": "db07996b49af0b2c782fd8831a115807764189c730bfb09b2853ba5db953f856"
+      },
+      "frameworks": [
+        {
+          "framework_id": "NIS2",
+          "version": "2022/2555",
+          "source_sha256": "0e79ae6a0af38a2ffbe2decdfe7ee283200a2d18e7c5bd381de595fa916ca59b",
+          "coverage": "covered"
+        }
+      ],
+      "embedding": {
+        "model": "bge-m3",
+        "version": "sha256:7907646426070047a77"
+      }
+    },
+    "source_documents": [
+      {
+        "id": "DOC-rfp-1",
+        "kind": "rfp",
+        "title": "Network operations RFP",
+        "language": "en",
+        "sha256": "0e6c1ef7cf614ff607ff8a16d7ec2071d0ca975d31ae7acee9f80d8949488766"
+      }
+    ],
+    "requirements": [
+      {
+        "id": "REQ-4.1",
+        "source_document_id": "DOC-rfp-1",
+        "clause_ref": "4.1",
+        "text": "Significant incidents must be notified to the competent authority within 24 hours.",
+        "language": "en"
+      },
+      {
+        "id": "REQ-4.2",
+        "source_document_id": "DOC-rfp-1",
+        "clause_ref": "4.2",
+        "text": "Operations staff must be trained on incident response every year.",
+        "language": "en"
+      },
+      {
+        "id": "REQ-1.1",
+        "source_document_id": "DOC-rfp-1",
+        "clause_ref": "1.1",
+        "text": "Network configuration must be restorable after an outage without manual intervention.",
+        "language": "en"
+      }
+    ],
+    "subjects": [
+      {
+        "id": "SUBJ-config-restore",
+        "title": "Restoration of network configuration",
+        "domains": [
+          "network-automation"
+        ],
+        "maturity": "L3_decided",
+        "status": "decided",
+        "requirement_ids": [
+          "REQ-1.1"
+        ],
+        "decision_ids": [
+          "DEC-001"
+        ]
+      },
+      {
+        "id": "SUBJ-incident-notification",
+        "title": "Incident notification to the authority",
+        "domains": [
+          "security-governance"
+        ],
+        "maturity": "L1_framed",
+        "status": "open",
+        "requirement_ids": [
+          "REQ-4.1"
+        ],
+        "decision_ids": [
+          "DEC-002"
+        ],
+        "open_questions": [
+          {
+            "id": "Q-001",
+            "question": "Who is the competent authority and through which channel is the notification sent?",
+            "blocking": true
+          }
+        ]
+      }
+    ],
+    "decisions": [
+      {
+        "id": "DEC-001",
+        "subject_id": "SUBJ-config-restore",
+        "title": "Git as the source of truth for network configuration",
+        "status": "reused",
+        "decision": "Network configuration is versioned in Git and restored by pipeline; manual changes on devices are not allowed.",
+        "rationale": "Reuse of the validated decision ADR-0001, both of its assumptions confirmed for this engagement.",
+        "alternatives": [
+          {
+            "title": "Device-local backups",
+            "rejected_because": "No review trail and no automated restore."
+          }
+        ],
+        "assumptions": [
+          {
+            "text": "The control plane handles fewer than 10000 managed devices.",
+            "status": "holds"
+          },
+          {
+            "text": "Every site keeps an out-of-band access path to its routers.",
+            "status": "holds"
+          }
+        ],
+        "consequences": [
+          "A restore pipeline must be exercised at least once per quarter."
+        ],
+        "derived_from": {
+          "kb_ref": "ADR-0001",
+          "reuse_log_id": "RL-001"
+        },
+        "review_by": "2027-10-02",
+        "epistemic_status": "reused_confirmed",
+        "assertion_level": "asserted",
+        "provenance": {
+          "basis": "reuse_confirmation",
+          "at": "2026-10-02T14:00:00Z",
+          "by": [
+            "@core-owner-architecture"
+          ],
+          "references": [
+            "RL-001"
+          ]
+        }
+      },
+      {
+        "id": "DEC-002",
+        "subject_id": "SUBJ-incident-notification",
+        "title": "Automated draft of the 24 h notification",
+        "status": "proposed",
+        "decision": "Generate a draft notification from the incident record for the on-call manager to approve and send.",
+        "alternatives": [],
+        "assumptions": [
+          {
+            "text": "A named on-call manager exists 24 hours a day.",
+            "status": "unknown"
+          }
+        ],
+        "epistemic_status": "ai_proposed",
+        "assertion_level": "proposed",
+        "provenance": {
+          "basis": "ai_proposal",
+          "at": "2026-10-02T14:00:00Z",
+          "note": "Proposed by the assistant; not reviewed by a person."
+        }
+      }
+    ],
+    "statements": [
+      {
+        "id": "ST-001",
+        "subject_id": "SUBJ-config-restore",
+        "text": "The fleet is expected to stay below 10000 managed devices for the contract duration.",
+        "predicate": "fleet_size_max",
+        "value": 10000,
+        "unit": "devices",
+        "epistemic_status": "validated",
+        "assertion_level": "asserted",
+        "provenance": {
+          "basis": "human_validation",
+          "at": "2026-10-02T14:00:00Z",
+          "by": [
+            "@core-owner-architecture"
+          ],
+          "references": [
+            "DOC-rfp-1"
+          ]
+        }
+      },
+      {
+        "id": "ST-002",
+        "subject_id": "SUBJ-incident-notification",
+        "text": "The notification channel is probably the national CSIRT portal.",
+        "epistemic_status": "assumption",
+        "assertion_level": "assumption",
+        "provenance": {
+          "basis": "declared_assumption",
+          "at": "2026-10-02T14:00:00Z",
+          "note": "To confirm with the client."
+        }
+      }
+    ],
+    "compliance": [
+      {
+        "id": "CMP-001",
+        "requirement_id": "REQ-4.1",
+        "control_ref": "NIS2-ART21-2B",
+        "relation": "partially_satisfies",
+        "matched_by": "human",
+        "decision_ids": [
+          "DEC-002"
+        ],
+        "epistemic_status": "validated",
+        "assertion_level": "asserted",
+        "provenance": {
+          "basis": "human_validation",
+          "at": "2026-10-02T14:00:00Z",
+          "by": [
+            "@security-compliance-team"
+          ]
+        }
+      },
+      {
+        "id": "CMP-002",
+        "requirement_id": "REQ-4.1",
+        "control_ref": "NIS2-ART23-4",
+        "relation": "satisfies",
+        "matched_by": "legal_text",
+        "epistemic_status": "ai_proposed",
+        "assertion_level": "proposed",
+        "provenance": {
+          "basis": "ai_proposal",
+          "at": "2026-10-02T14:00:00Z",
+          "note": "Found by legal-text matching; to confirm."
+        }
+      }
+    ],
+    "gaps": [
+      {
+        "id": "GAP-001",
+        "kind": "G3_principle_unaddressed",
+        "description": "No decision covers staff training.",
+        "requirement_id": "REQ-4.2",
+        "blocking": false
+      },
+      {
+        "id": "GAP-002",
+        "kind": "unreviewed_proposal",
+        "description": "CMP-002 and DEC-002 are proposals not yet reviewed by a person.",
+        "subject_id": "SUBJ-incident-notification",
+        "blocking": true
+      }
+    ],
+    "architecture": {
+      "elements": [
+        {
+          "id": "EL-ctrl",
+          "kind": "component",
+          "name": "Automation control plane",
+          "technology": "GitOps pipeline",
+          "decision_ids": [
+            "DEC-001"
+          ],
+          "epistemic_status": "validated",
+          "assertion_level": "asserted",
+          "provenance": {
+            "basis": "human_validation",
+            "at": "2026-10-02T14:00:00Z",
+            "by": [
+              "@core-owner-architecture"
+            ]
+          }
+        },
+        {
+          "id": "EL-oob",
+          "kind": "network",
+          "name": "Out-of-band management network",
+          "decision_ids": [
+            "DEC-001"
+          ],
+          "epistemic_status": "validated",
+          "assertion_level": "asserted",
+          "provenance": {
+            "basis": "human_validation",
+            "at": "2026-10-02T14:00:00Z",
+            "by": [
+              "@core-owner-architecture"
+            ]
+          }
+        },
+        {
+          "id": "EL-router",
+          "kind": "system",
+          "name": "Site routers",
+          "boundary_id": "EL-oob",
+          "decision_ids": [
+            "DEC-001"
+          ],
+          "epistemic_status": "validated",
+          "assertion_level": "asserted",
+          "provenance": {
+            "basis": "human_validation",
+            "at": "2026-10-02T14:00:00Z",
+            "by": [
+              "@core-owner-architecture"
+            ]
+          }
+        }
+      ],
+      "relations": [
+        {
+          "id": "REL-1",
+          "from": "EL-ctrl",
+          "to": "EL-router",
+          "kind": "data_flow",
+          "label": "configuration push",
+          "protocol": "NETCONF over SSH",
+          "decision_ids": [
+            "DEC-001"
+          ],
+          "epistemic_status": "validated",
+          "assertion_level": "asserted",
+          "provenance": {
+            "basis": "human_validation",
+            "at": "2026-10-02T14:00:00Z",
+            "by": [
+              "@core-owner-architecture"
+            ]
+          }
+        }
+      ]
+    },
+    "kb_references": [
+      {
+        "ref": "ADR-0001",
+        "knowledge_ref": {
+          "source_id": "knowledge-hub",
+          "knowledge_key": "decision:ADR-0001"
+        },
+        "confidence": "verified",
+        "type": "decision",
+        "title": "Git as the source of truth for network and platform configuration",
+        "kb_status": "active"
+      },
+      {
+        "ref": "NIS2-ART21-2B",
+        "knowledge_ref": {
+          "source_id": "knowledge-hub",
+          "knowledge_key": "control:NIS2-ART21-2B"
+        },
+        "confidence": "verified",
+        "type": "control",
+        "title": "Incident Handling and Remediation",
+        "kb_status": "active"
+      },
+      {
+        "ref": "NIS2-ART23-4",
+        "knowledge_ref": {
+          "source_id": "knowledge-hub",
+          "knowledge_key": "control:NIS2-ART23-4"
+        },
+        "confidence": "designed",
+        "type": "control",
+        "title": "Incident notification (illustrative)",
+        "kb_status": "active"
+      }
+    ],
+    "reuse_log": [
+      {
+        "id": "RL-001",
+        "matched_ref": "ADR-0001",
+        "outcome": "reused",
+        "assumptions": [
+          {
+            "text": "The control plane handles fewer than 10000 managed devices.",
+            "status": "holds"
+          },
+          {
+            "text": "Every site keeps an out-of-band access path to its routers.",
+            "status": "holds"
+          }
+        ],
+        "comment": null,
+        "by": "@core-owner-architecture",
+        "at": "2026-10-02T14:00:00Z"
+      }
+    ],
+    "glossary": [
+      {
+        "term": "Out-of-band management",
+        "definition": "Access to network devices through a path independent of the production network."
+      }
+    ]
+  },
+  "checksum": "sha256:474341b304aa04ca16e53a6dfb51106fc833b48faafe537086a9ebc05f49b313"
+}
