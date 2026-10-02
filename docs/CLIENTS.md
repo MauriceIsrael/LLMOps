@@ -69,6 +69,7 @@ Types for TypeScript clients: [`schemas/types.ts`](../schemas/types.ts); JSON Sc
 | Similarity and reuse | `/api/knowledge/embeddings`, `/similar`, `/reuse-confirmations`, `/similarity-evals/…` (vectors are computed by **your** client; LLMOps has no model) | 1.9–1.12 |
 | Doctrine workshop and evaluations | `/api/knowledge/checks/simulate`, `/evals/…`, `/verdict-feedback` | 1.6 |
 | RFP helpers (legacy) | `/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint` | supported, frozen |
+| Writing assistance | `POST /api/prose/suggest-batch` (used by the Document Engine): grounded excerpts of the doctrine, or no draft | 1.x |
 | Health, publication | `GET /api/knowledge/health`, `POST /api/knowledge/publications` | 1.8 |
 | Engagement part | `/api/elicitation/*`, `/api/arbitration/*` | **deprecated since 1.13**: [migration](migration-archinex.md) |
 

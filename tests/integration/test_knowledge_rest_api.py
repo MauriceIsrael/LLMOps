@@ -145,7 +145,7 @@ def test_zero_draft_blueprint_rest_endpoint():
 
 
 def test_prose_suggest_batch_rest_endpoint():
-    """Vérifie POST /api/prose/suggest-batch conforme à ADR-DE-02 de document-engine."""
+    """POST /api/prose/suggest-batch (ADR-DE-02): grounded excerpts of the doctrine, or NO draft and a warning."""
     with patch.dict(os.environ, {"LLMOPS_AUTH_TOKEN": "secret-test-token"}):
         app = create_starlette_app()
         client = TestClient(app)
@@ -154,24 +154,27 @@ def test_prose_suggest_batch_rest_endpoint():
         payload = {
             "requests": [
                 {
-                    "blockId": "block-sec-1",
-                    "anchorIds": ["securite", "mtls"],
-                    "instructions": "Préciser le chiffrement.",
+                    "blockId": "block-gitops",
+                    "anchorIds": ["gitops-pipeline"],
+                    "instructions": "Préciser le versionnement des configurations.",
+                    "context": {"anchoredItems": [{"id": "gitops-pipeline", "attributes": {"label": "GitOps configuration pipeline"}}]},
                 },
-                {
-                    "blockId": "block-core-2",
-                    "anchorIds": ["core-5g"],
-                },
+                {"blockId": "block-no-label", "anchorIds": ["core-5g"]},
+                {"blockId": "block-unknown", "anchorIds": ["x"], "context": {"anchoredItems": [{"id": "x", "attributes": {"label": "zzqxv unmatched wibble"}}]}},
             ]
         }
         res = client.post("/api/prose/suggest-batch", json=payload, headers=headers)
         assert res.status_code == 200
         data = res.json()
-        assert "drafts" in data
-        assert "block-sec-1" in data["drafts"]
-        assert "block-core-2" in data["drafts"]
-        assert "generatedAt" in data
-        assert "basedOnModelHash" in data
+        assert {"drafts", "warnings", "generatedAt", "basedOnModelHash"} <= set(data)
+
+        draft = data["drafts"]["block-gitops"]
+        assert "ne démontrent pas" in draft and "[P-001]" in draft  # cites knowledge with identifiers, claims nothing about the project
+        assert "validée" not in draft.lower().replace("à valider", "")  # never states a validation it did not do
+
+        # Nothing applicable or nothing to query with: NO draft (a fabricated sentence would be believed), a warning instead.
+        assert "block-no-label" not in data["drafts"] and "block-unknown" not in data["drafts"]
+        assert {w["blockId"] for w in data["warnings"]} == {"block-no-label", "block-unknown"}
 
 
 def test_knowledge_engagements_rest_endpoint():

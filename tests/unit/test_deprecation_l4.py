@@ -17,7 +17,7 @@ DEPRECATED_ROUTES = [
     ("GET", "/api/arbitration/conflicts"),
     ("GET", "/api/arbitration/statements"),
 ]
-LEGACY_ROUTES = ["/api/rfp/shred-to-candidates", "/api/documents/zero-draft-blueprint", "/api/prose/suggest-batch"]
+LEGACY_ROUTES = ["/api/rfp/shred-to-candidates", "/api/documents/zero-draft-blueprint"]
 
 
 @pytest.fixture
