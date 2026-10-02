@@ -88,6 +88,10 @@ poetry run python scripts/serve_local.py      # or: make serve   (Linux/macOS; W
 
 ---
 
+> **Building your own client?** Start with [`docs/CLIENTS.md`](docs/CLIENTS.md) (REST, MCP, snapshot, tokens); the full documentation index is [`docs/README.md`](docs/README.md).
+
+---
+
 ## Key Differentiators
 
 1. **100% Deterministic & Auditable Core (0 Server LLM Costs)**  

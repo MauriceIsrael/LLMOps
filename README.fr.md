@@ -85,6 +85,10 @@ poetry run python scripts/serve_local.py      # ou : make serve   (Linux/macOS ;
 
 ---
 
+> **Vous construisez votre propre client ?** Commencez par [`docs/CLIENTS.md`](docs/CLIENTS.md) (REST, MCP, instantané, jetons) ; l'index de toute la documentation est [`docs/README.md`](docs/README.md) (en anglais).
+
+---
+
 ## Points Clés & Différenciateurs
 
 1. **Cœur Déterministe et Auditable (0 Coût LLM Serveur)**  
