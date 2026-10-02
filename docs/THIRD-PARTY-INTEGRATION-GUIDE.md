@@ -13,6 +13,8 @@ related: [ADR-0014, ADR-0015, TPL-mcp-spec, TPL-planning-and-demo]
 
 # Third-party integration guide
 
+> **Start with [`CLIENTS.md`](CLIENTS.md)** (connect, tokens, routes by area). This guide goes deeper on generating documents and diagrams. Its engagement-plane parts (sections 1, 3 and 12 to 14) predate contract 1.13, where the engagement part is **deprecated** in favour of Archinex: see [`migration-archinex.md`](migration-archinex.md).
+
 For a team that wants to build its own document generator, diagram renderer or
 custom interface on top of this knowledge base, without adopting our CLI or our
 templates. Verified against the deployed server on 2026-09-17.
