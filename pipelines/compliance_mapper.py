@@ -250,10 +250,6 @@ def match_text_to_controls(
         #    the text counts, up to a cap. Hand-curated controls that never went through an ingestion keep
         #    matching on their own terms only.
         if not ctrl.terms or ctrl.from_source:
-        # 4. Controls without curated ``terms`` (ingested from a source, `kb ingest-framework`) are matched on
-        #    their legal text: each distinctive phrase shared with the text counts, up to a cap. Curated
-        #    controls keep their own terms, so their matching is unchanged.
-        if not ctrl.terms:
             shared = legal_text_matches(f"{title}\n{text}", ctrl)
             if shared:
                 score += min(0.15 * len(shared), 0.60)
