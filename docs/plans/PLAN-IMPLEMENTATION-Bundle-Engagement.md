@@ -67,14 +67,15 @@ décision affirmée ; `is_provisional` et ses raisons **dérivés, jamais décla
 | **K1** | LLMOps | Tous les sceaux au profil canonical-json v1 (instantané scellé, instantané de conformité) ; régénération des fixtures ; contrat 1.14 | B1 |
 | **K2** | LLMOps | Enveloppe de canal : `emitter`, `rebuiltByEmitterTest`, `is_provisional` + raisons, `checksum` canonique (additif : champs actuels conservés) ; test de fraîcheur à l'octet | K1 |
 | **K3** | LLMOps | `version` citable par élément, résolution **depuis l'instantané scellé**, `GET /api/knowledge/assets/{id}`, `KnowledgeRef` documenté | K2 |
-| **K4** | LLMOps | Hub sans prose de livrable : gel puis retrait planifié du générateur « zero-draft HLD » et des gabarits, guide de migration vers le Document Engine | — |
+| **K4** | LLMOps | Hub sans prose de livrable : gel puis retrait planifié du générateur « zero-draft HLD » et des gabarits (guide de migration vers le Document Engine). **Hors périmètre : `POST /api/prose/suggest-batch`**, assistance consommée par le Document Engine, corrigée par la PR #39 (citations de la doctrine ou aucun brouillon) | — |
 | **C1** | LLMOps | OpenAPI généré depuis le catalogue gelé, `docs/CLIENTS.md` à jour (instantané d'abord pour les composants de la suite) | K3 |
 | **A16** | Archinex | Export du bundle comme instantané scellé de la suite (TypeScript, vecteurs partagés), construit **sans rien inventer** ; refus si la vérification échoue ou si `confidentiality` manque | B1, K1 |
 | **A17** | Archinex | Publication : fichier et référence `SnapshotRef` (`sourceSystem`, `snapshotId`, `checksum`, `producedAt`) pour les consommateurs ; bouton « Exporter le dossier », bandeau « provisoire » et liste des écarts bloquants | A16 |
 | **A18** | Archinex | E2E « acte 7 » (API et navigateur) sur le vrai LLMOps | A17, K3 |
 | **A19** | Archinex | Export OSCAL de la matrice de conformité (D12), ré-export et différence entre deux bundles, retour vers la capitalisation | A18 |
+| **A20** | à désigner | **Adaptateur vers le Document Engine** : `bundle.architecture` → `ProjectedGraph`, `bundle.compliance` → instantané de conformité, `bundle.requirements` → instantané d'exigences (ADR-DE-05) ; correspondance des types d'éléments (`actor/system/component/datastore/network…`) vers `layer` et `c4Type` ; propriétaire à décider avec les équipes du moteur (Q2, D15) | A18 |
 
-Aucun lot ne rend de document : le **consommateur** (Document Engine / Document Studio) est hors de ces dépôts. Son contrat d'entrée est la question **Q2**.
+Aucun lot ne rend de document. Le **consommateur** (Document Engine) prend `compile(ProjectedGraph, Blueprint, GenerationContext)` et des snapshots externes demandés : le bundle ne s'y branche donc pas tel quel, d'où le lot **A20** (adaptateur, propriétaire à désigner, question **Q2** répondue dans le rapport d'alignement).
 
 ### B1 — livré
 `schemas/engagement_bundle.schema.json`, `schemas/examples/engagement_bundle.example.json` (scénario illustratif, scellé), `pipelines/bundle/verify.py`, `pipelines/canonical.py`
@@ -99,11 +100,11 @@ Constat : le générateur « zero-draft HLD » (`generate_zero_draft_hld`, `/api
 
 Sur le scénario de bout en bout, Archinex exporte un bundle **scellé au profil de la suite** ; il passe la vérification (TypeScript et référence Python, mêmes cas de conformité) ; ses références à la base sont citables (version) et
 résolvent depuis l'instantané épinglé ; `is_provisional` est juste ; un bundle altéré (sceau, niveau, réutilisation sans confirmation) est refusé ; aucune adresse e-mail ; deux exports du même état ont le même `checksum`.
-Le rendu d'un document à partir du bundle relève du Document Engine / Studio et se démontre avec leurs propriétaires (Q2).
+Le rendu d'un document relève du Document Engine / Studio et se démontre avec leurs propriétaires, via l'adaptateur A20.
 
 ## 6. Risques et limites
 
-- **Contrat non validé par son consommateur** : le schéma est une proposition tant que le contrat d'entrée du Document Engine n'est pas connu (Q2).
+- **Contrat non validé par son consommateur** : le schéma est une proposition ; le Document Engine consomme un `ProjectedGraph` et des snapshots, pas ce dossier : sa valeur directe est la provenance et le contrôle (statuts, `is_provisional`), l'entrée du moteur passe par l'adaptateur A20.
 - **Textes de la suite non opposables** : `ADR-KH-01` est « proposé » ; K1 à K4 s'y réfèrent, mais seuls l'amendement KH-1 et le profil canonical-json sont opposables. L'adopter est une décision du propriétaire du Hub (Q4).
 - **Un bundle prouve la provenance, pas la vérité** ; la double revue n'est une garantie que si les validateurs sont des personnes distinctes.
 - **Q1** (le journal de réutilisation est-il une donnée de programme ?) peut déplacer une partie du stockage d'LLMOps vers Archinex.
