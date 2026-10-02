@@ -27,7 +27,7 @@ review, framework ingestion, option judge (`check_option`), similarity and reuse
 
 ## 2. Legacy (supported, no functional evolution)
 
-`/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint`, `/api/prose/suggest-batch`, MCP
+`/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint`, MCP
 `shred_rfp`, `generate_zero_draft_hld`, `trigger_rfp_elicitation`, the skills catalogue. They have other
 consumers and carry no deprecation signal; do not build new features on them.
 

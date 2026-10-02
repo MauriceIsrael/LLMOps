@@ -720,38 +720,23 @@ def create_starlette_app() -> Starlette:
         import hashlib
         from datetime import datetime
 
-        drafts = {}
-        warnings = []
+        # The hub provides knowledge, never narrative: grounded excerpts of the doctrine or NO draft (a warning).
+        from pipelines.prose_grounding import ground_block
+
+        drafts: dict[str, str] = {}
+        warnings: list[dict[str, str]] = []
 
         for req in requests:
             if not isinstance(req, dict):
                 continue
             block_id = req.get("blockId", "")
-            if not block_id:
+            if not isinstance(block_id, str) or not block_id:
                 continue
-            anchor_ids = req.get("anchorIds", [])
-            instructions = req.get("instructions", "")
-
-            matched_text = []
-            for anchor in anchor_ids:
-                res = search_assets(query=anchor)
-                if res.get("status") == "ok" and res.get("assets"):
-                    for a in res["assets"][:2]:
-                        matched_text.append(f"{a.get('title', '')} : {a.get('summary', '')}")
-
-            if matched_text:
-                draft_content = (
-                    f"Conception validée pour le bloc '{block_id}' : "
-                    + " ".join(matched_text)
-                    + (" " + instructions if instructions else "")
-                )
+            draft, reason = ground_block(req, get_doctrine_context)
+            if draft:
+                drafts[block_id] = draft
             else:
-                draft_content = (
-                    f"Le bloc '{block_id}' implémente les composants ({', '.join(anchor_ids) if anchor_ids else 'génériques'}) "
-                    f"conformément aux motifs d'architecture du Knowledge Hub et aux exigences contractuelles."
-                )
-
-            drafts[block_id] = draft_content
+                warnings.append({"blockId": block_id, "message": reason or "Aucun brouillon."})
 
         model_hash = hashlib.sha256(str(body).encode()).hexdigest()[:16]
         now_str = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

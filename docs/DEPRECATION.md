@@ -97,4 +97,4 @@ signal.
 | `GET /api/arbitration/conflicts` | deprecated | 1.13 | Archinex (A3 · conflits) | [migration-archinex.md](migration-archinex.md) |
 | `GET /api/arbitration/statements` | deprecated | 1.13 | Archinex (A3 · énoncés) | [migration-archinex.md](migration-archinex.md) |
 | MCP tools `get_subject`, `get_subject_trajectory`, `get_board`, `get_statements`, `get_conflicts`, `get_open_questions`, `get_diagram_graph`, `get_render_payload`, `get_dangling_references`, `get_engagement_export` | deprecated | 1.13 | Archinex (A2–A4) | [migration-archinex.md](migration-archinex.md) |
-| `/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint`, `/api/prose/suggest-batch`, `shred_rfp`, `generate_zero_draft_hld`, `trigger_rfp_elicitation`, skills catalogue | legacy | 1.13 | — (other consumers) | — |
+| `/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint`, `shred_rfp`, `generate_zero_draft_hld`, `trigger_rfp_elicitation`, skills catalogue | legacy | 1.13 | — (other consumers) | — |

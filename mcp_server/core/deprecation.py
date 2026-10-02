@@ -38,7 +38,6 @@ DEPRECATED: dict[str, str] = {
 LEGACY: tuple[str, ...] = (
     "POST /api/rfp/shred-to-candidates",
     "POST /api/documents/zero-draft-blueprint",
-    "POST /api/prose/suggest-batch",
     "shred_rfp",
     "generate_zero_draft_hld",
     "trigger_rfp_elicitation",
