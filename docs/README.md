@@ -7,4 +7,5 @@
 | **Governing the knowledge** (reviewers, maintainers) | [`user_manual.md`](user_manual.md), [`COVERAGE.md`](COVERAGE.md), Archinex user guide |
 | **Maintaining the contract** | [`VERSIONING.md`](VERSIONING.md), [`DEPRECATION.md`](DEPRECATION.md), [`migration-archinex.md`](migration-archinex.md), [`SCHEMA.md`](SCHEMA.md) |
 | **Understanding the design** | [`architecture.md`](architecture.md), [`EPISTEMIC-ALIGNMENT.md`](EPISTEMIC-ALIGNMENT.md), [`plans/`](plans/) (governance, similarity and reuse, [engagement bundle](plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md), [alignment with Document Studio](plans/ALIGNEMENT-Document-Studio-Knowledge-Hub.md)) |
+| **Deciding on the hub's commitments to the suite** | [`adr/ADR-KH-01-contrats-exposes.md`](adr/ADR-KH-01-contrats-exposes.md) (draft amendment, adoption pending) |
 | Looking at history | [`archive/`](archive/) (not maintained) |
