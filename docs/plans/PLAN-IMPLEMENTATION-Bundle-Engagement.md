@@ -1,109 +1,109 @@
-# Plan d'implémentation — Dossier d'engagement scellé (« bundle ») et génération de documents, schémas et briques
+# Plan d'implémentation — Dossier d'engagement scellé (« bundle ») et alignement sur la suite Document Studio
 
-Statut : plan, **à valider** (décisions D9 à D13 proposées). Complète
+Statut : plan **révisé le 2 octobre 2026** après lecture des principes de Document Studio
+([`ALIGNEMENT-Document-Studio-Knowledge-Hub.md`](ALIGNEMENT-Document-Studio-Knowledge-Hub.md)). Complète
 [`PLAN-IMPLEMENTATION-Gouvernance-KB-Archinex.md`](PLAN-IMPLEMENTATION-Gouvernance-KB-Archinex.md) et
 [`PLAN-IMPLEMENTATION-Similarite-Reutilisation.md`](PLAN-IMPLEMENTATION-Similarite-Reutilisation.md).
-Lots LLMOps **B1 à B4**, lots Archinex **A16 à A19**, porte **G9**. Le lot **B1** (schéma, vérificateur, exemple) est livré avec ce plan.
+Lots LLMOps **K1 à K4** et **C1**, lots Archinex **A16 à A19**, porte **G9**. Le lot **B1** (schéma de référence, vérificateur, module `canonical`) est livré avec ce plan.
+
+> **Ce qui a changé par rapport à la première version** : le rôle de LLMOps est celui du **Knowledge Hub** de la suite. Il ne génère aucune prose de livrable
+> et ne détient aucune donnée de programme. Les anciens lots B2 (service de vérification) et B3 (rendus HLD, fiches, diagrammes dans LLMOps) sont **supprimés** : la composition d'un
+> document appartient au Document Engine, la rédaction au Document Studio. Le bundle est un produit d'**Archinex**, publié comme instantané scellé.
 
 ---
 
 ## 0. Pourquoi
 
-Le bout en bout (réglementation → RFP → délibération → décision → capitalisation) produit de la connaissance validée, mais sa **sortie** n'est pas
-encore un objet que l'on peut donner à un générateur. La partie « rendu » de LLMOps (`get_render_payload`, `get_diagram_graph`,
-`get_engagement_export`) est dépréciée depuis la 1.13 : l'engagement vit dans Archinex.
-
-Il faut donc un artefact unique, **lisible par machine, scellé et tracé**, dont tout le reste est **dérivé** : document de conception, schémas, fiches de décision,
-exports de conformité. Sans lui, chaque générateur réinterprète l'état de l'engagement et risque de présenter comme acquis ce qui ne l'est pas, c'est-à-dire
-le défaut que la règle de tolérance zéro (D8) cherche à supprimer, déplacé de la réutilisation vers le document livré.
+Le bout en bout (réglementation → RFP → délibération → décision → capitalisation) produit de la connaissance validée, mais sa **sortie** n'est pas encore un objet qu'un générateur
+(Document Engine, Document Studio) peut consommer sans risque. Sans lui, chaque générateur réinterprète l'état de l'engagement et peut présenter comme acquis ce qui ne l'est pas : le défaut
+que la règle de tolérance zéro (D8) supprime côté réutilisation, déplacé vers le document livré.
 
 ## 1. Principes
 
-1. **Une source, des projections.** Le bundle est la seule source ; HLD, schémas, fiches ADR, exports sont des **fonctions pures et déterministes** du bundle (mêmes entrées, mêmes octets).
-2. **Chaque affirmation porte son statut.** `epistemic_status` (validé, réutilisé confirmé, proposé par IA, hypothèse, contesté) dont découle, **de façon déterministe**, un `assertion_level` (`asserted`, `proposed`, `assumption`, `open`). Un générateur n'écrit comme un fait que ce qui est `asserted` ; tout le reste est rendu **avec son marquage**.
-3. **Seul un humain valide.** Un élément `asserted` exige une personne (handle propriétaire) et une base `human_validation` ou `reuse_confirmation`. Une correspondance trouvée par un lexique, un texte légal ou un vecteur reste **proposée** tant qu'une personne ne l'a pas confirmée.
-4. **La réutilisation est prouvée.** Une décision reprise de la base renvoie à une entrée du journal de réutilisation dont **chaque hypothèse** a été jugée ; `reused` exige que toutes tiennent, `reused_with_exception` un commentaire.
-5. **Épinglé et reproductible.** Le bundle fixe la version de la base de connaissances (empreinte de l'instantané), les référentiels (version, empreinte du texte source) et le modèle d'embeddings ayant proposé des rapprochements.
-6. **Échec bruyant.** Un export ou un rendu refuse un bundle qui ne passe pas la vérification ; il ne « répare » jamais en silence.
-7. **Pas de donnée personnelle.** Des handles de propriétaires, jamais d'adresses e-mail ; un libellé client anonymisé ; un niveau de confidentialité obligatoire.
+1. **Une source, des projections.** Le bundle est la seule source ; documents, schémas, fiches en sont dérivés **par les composants dont c'est le métier** (Document Engine / Studio), jamais par le Hub.
+2. **Chaque affirmation porte son statut.** `epistemic_status` (validé, réutilisé confirmé, proposé par IA, hypothèse, contesté) dont découle, **de façon déterministe**, un `assertion_level` (`asserted`, `proposed`, `assumption`, `open`). Un générateur n'écrit comme un fait que ce qui est `asserted`.
+3. **Seul un humain valide.** `asserted` exige une personne (handle) et une base `human_validation` ou `reuse_confirmation`. Une correspondance lexicale, par texte légal ou vectorielle reste **proposée** tant qu'une personne ne l'a pas confirmée.
+4. **La réutilisation est prouvée** : renvoi à une entrée du journal dont **chaque hypothèse** est jugée.
+5. **Deux étages épistémiques** (suite) : `is_provisional` pour le bundle entier (un sujet sous `L3_decided` ou un conflit ouvert) **en plus** du statut de chaque élément ; vocabulaires de la suite (maturité `L0_named`…`L4_specified`, confiance `verified / designed / vendor-stated / stated-by-client / assumed`, conflits `contradiction / principle_violation / stale_basis`).
+6. **Scellé selon la suite** : enveloppe `ExternalSnapshotEnvelope` (`snapshotId`, `sourceSystem`, `schemaVersion`, `createdAt`, `sourceRevision`, `checksum`), empreinte `sha256:<hex>` de `data` au profil **canonical-json v1** de la suite.
+7. **Épinglé** : version de la base de connaissances et `KnowledgeRef` `{source_id: 'knowledge-hub', knowledge_key, version}` ; une référence sans version n'est **pas citable** dans un document figé.
+8. **Échec bruyant** : un export est refusé s'il ne passe pas la vérification.
+9. **Pas de donnée personnelle** : handles de propriétaires, libellé client anonymisé, `confidentiality` obligatoire.
 
-## 2. Le bundle (schéma `schemas/engagement_bundle.schema.json`, version `1.0`)
+## 2. Le bundle (schéma `schemas/engagement_bundle.schema.json`, version `1.0`, contrat **proposé**)
 
-Enveloppe scellée comme l'instantané de la base : `schema_version`, `bundle_id`, `source_system` (producteur), `created_at`, `canonicalization: canonical-json-v1`,
-`payload_sha256` (`sha256:<hex>` sur la sérialisation canonique de `data` : clés triées, séparateurs `,` `:`, UTF-8), `engagement`, `data`.
+| Section de `data` | Contenu |
+|---|---|
+| `engagement`, `pins` | identité (libellé anonymisé, confidentialité), version du contrat LLMOps, instantané de la base (id + empreinte), référentiels, modèle d'embeddings |
+| `source_documents`, `requirements` | documents sources (empreinte seulement), exigences |
+| `subjects` | sujets, maturité (`L0_named`…`L4_specified`), statut, questions ouvertes |
+| `decisions` | décision, justification, alternatives, **hypothèses jugées**, conséquences, `derived_from` (actif de la base + entrée du journal) |
+| `statements`, `conflicts` | énoncés ; conflits (`contradiction`, `principle_violation`, `stale_basis`) |
+| `compliance`, `gaps` | matrice exigence → contrôle ; écarts (`G1_empty_section`, `G2_unanswered_blocking`, `G3_principle_unaddressed`, …) |
+| `architecture` | éléments et relations (composants, flux, frontières) tracés à des décisions |
+| `is_provisional`, `provisional_reasons` | dérivés (vérifiés) : sujets sous `L3_decided`, conflits ouverts |
+| `kb_references`, `glossary`, `reuse_log` | actifs de la base cités (`knowledge_ref`, confiance), glossaire, confirmations de réutilisation |
 
-| Section de `data` | Contenu | Sert à |
+Invariants vérifiés par `pipelines/bundle/verify.py` en plus du schéma : sceau exact au profil de la suite ; identifiants uniques et résolus ; niveau dérivé du statut ; élément affirmé = personne +
+base humaine ; décision réutilisée = entrée du journal cohérente (même actif, issue de réutilisation, hypothèses jugées et valides, commentaire si exception) ; actifs cités listés ; sujet « décidé » =
+décision affirmée ; `is_provisional` et ses raisons **dérivés, jamais déclarés** ; aucune adresse e-mail.
+
+## 3. Décisions
+
+| # | Question | Décision |
 |---|---|---|
-| `pins` | version du contrat LLMOps, instantané de la base (id + empreinte), référentiels (version, couverture, empreinte du texte), modèle d'embeddings | reproductibilité, citation |
-| `source_documents`, `requirements` | documents sources (empreinte seulement) et exigences (texte, clause) | traçabilité amont |
-| `subjects` | sujets, maturité L0 à L4, statut, questions ouvertes (bloquantes ou non) | plan du document, écarts |
-| `decisions` | décision, justification, alternatives, **hypothèses jugées**, conséquences, `derived_from` (actif de la base + entrée du journal), date de réexamen | fiches ADR, HLD |
-| `statements` | énoncés (texte, prédicat, valeur, unité) | HLD |
-| `compliance` | matrice exigence → contrôle (relation, `matched_by`, statut) | annexe de conformité |
-| `gaps` | écarts (exigence non couverte, hypothèse manquante, conflit, proposition non revue), bloquants ou non | liste de réserves |
-| `architecture` | éléments et relations (composants, flux, frontières), chacun tracé à des décisions | **schémas** |
-| `kb_references`, `glossary` | actifs de la base cités (titre, statut), glossaire | citations sans appel serveur |
-| `reuse_log` | confirmations de réutilisation de l'engagement | preuve des reprises |
-
-Invariants vérifiés par `pipelines/bundle/verify.py` (en plus du schéma) : sceau exact ; identifiants uniques et tous résolus ; niveau d'affirmation dérivé du statut ;
-élément affirmé = personne + base humaine ; décision réutilisée = entrée du journal cohérente (même actif, issue de réutilisation, hypothèses jugées et valides, commentaire si exception) ;
-actifs de la base cités = listés ; sujet « décidé » = au moins une décision affirmée ; aucune adresse e-mail.
-
-## 3. Décisions à prendre (proposées)
-
-| # | Question | Proposition | Alternative |
-|---|---|---|---|
-| **D9** | Où vivent les rendus ? | **LLMOps**, comme bibliothèque et service sans état (`kb bundle render`, `POST /api/bundles/render`) : tout client tiers en profite, Archinex n'a rien à dupliquer | dans Archinex seul |
-| **D10** | Un LLM écrit-il la prose ? | **Non en v1** : gabarits déterministes. Une aide rédactionnelle ultérieure ne reçoit que les éléments `asserted` et ne peut rien ajouter | prose générée dès la v1 |
-| **D11** | Que peut contenir le bundle ? | Le texte des exigences du client est **légitime** (c'est le dossier de l'engagement) mais jamais son nom ; `confidentiality` obligatoire ; export refusé sans elle | anonymiser aussi les exigences |
-| **D12** | OSCAL ? | Reporté : un export de la matrice de conformité au format OSCAL si un client l'exige | dès B3 |
-| **D13** | DOCX / PDF ? | Reportés : le rendu produit du Markdown et du Mermaid ; la conversion passe par un outil externe (Pandoc, moteur de documents existant) | rendu natif |
+| **D9** | Où vivent les rendus ? | **Révisée : ni dans LLMOps ni dans Archinex.** Document Engine / Document Studio (alignement). LLMOps = Knowledge Hub : aucune prose de livrable |
+| **D10** | Qui écrit la prose ? | **Document Studio / Document Engine** (module de rédaction), à partir du bundle : seuls les éléments `asserted` sont écrits comme des faits |
+| **D11** | Que contient le bundle ? | Le texte des exigences du client est légitime, jamais son nom ; `confidentiality` obligatoire. **Validé.** |
+| **D12** | OSCAL | **Validé en principe** : export de la matrice de conformité au format OSCAL, produit par Archinex ; lot A19 |
+| **D13** | DOCX / PDF | **Sans objet** : le Document Engine produit déjà les formats ; il n'y a rien à convertir ici |
+| **D14** | Qui possède le schéma du bundle ? | **À trancher** (Q3 de l'alignement) : le producteur (Archinex) par défaut ; copie de référence dans LLMOps tant qu'aucun propriétaire n'est désigné |
 
 ## 4. Lots
 
 | Lot | Dépôt | Objet | Prérequis |
 |---|---|---|---|
-| **B1** | LLMOps | Schéma, vérificateur, exemple scellé, tests (**livré avec ce plan**) | — |
-| **B2** | LLMOps | `kb bundle verify`, `POST /api/bundles/verify` (sans état), contrat 1.14, types TypeScript, vecteur d'essai partagé (sceau) pour les implémentations TypeScript | B1 |
-| **B3** | LLMOps | Rendus de référence : HLD (EN/FR), fiches ADR (une par décision, format MADR), diagrammes Mermaid depuis `architecture`, annexe de conformité ; `kb bundle render`, `POST /api/bundles/render` ; règles de marquage par niveau | B2, D9, D10 |
-| **B4** | LLMOps | Facilités pour les clients : OpenAPI généré depuis le catalogue gelé, `GET /api/knowledge/assets/{id}`, schéma du bundle publié dans `docs/CLIENTS.md` | B2 |
-| **A16** | Archinex | Export du bundle : construire depuis l'état de l'engagement, les décisions (hypothèses, journal de réutilisation lu dans LLMOps) et les pins ; sceller ; **vérifier via LLMOps avant d'offrir le téléchargement** ; bouton « Exporter le dossier » avec la liste des écarts bloquants | B2 |
-| **A17** | Archinex | Vues de génération : aperçu HLD, fiches ADR, diagrammes (appel B3), marquage visible des éléments non affirmés, archive (`bundle.json`, fichiers générés, manifeste d'empreintes) | A16, B3 |
-| **A18** | Archinex | E2E « acte 7 », API et navigateur, sur le vrai LLMOps | A17 |
-| **A19** | Archinex | Ré-export et différence entre deux bundles, signature, retour vers la capitalisation (décisions du bundle → candidats de la base) | A18 |
+| **B1** | LLMOps | Schéma de référence, vérificateur, exemple scellé, **module `pipelines/canonical.py` conforme au profil de la suite**, vecteurs partagés (**livré**) | — |
+| **K1** | LLMOps | Tous les sceaux au profil canonical-json v1 (instantané scellé, instantané de conformité) ; régénération des fixtures ; contrat 1.14 | B1 |
+| **K2** | LLMOps | Enveloppe de canal : `emitter`, `rebuiltByEmitterTest`, `is_provisional` + raisons, `checksum` canonique (additif : champs actuels conservés) ; test de fraîcheur à l'octet | K1 |
+| **K3** | LLMOps | `version` citable par élément, résolution **depuis l'instantané scellé**, `GET /api/knowledge/assets/{id}`, `KnowledgeRef` documenté | K2 |
+| **K4** | LLMOps | Hub sans prose de livrable : gel puis retrait planifié du générateur « zero-draft HLD » et des gabarits, guide de migration vers le Document Engine | — |
+| **C1** | LLMOps | OpenAPI généré depuis le catalogue gelé, `docs/CLIENTS.md` à jour (instantané d'abord pour les composants de la suite) | K3 |
+| **A16** | Archinex | Export du bundle comme instantané scellé de la suite (TypeScript, vecteurs partagés), construit **sans rien inventer** ; refus si la vérification échoue ou si `confidentiality` manque | B1, K1 |
+| **A17** | Archinex | Publication : fichier et référence `SnapshotRef` (`sourceSystem`, `snapshotId`, `checksum`, `producedAt`) pour les consommateurs ; bouton « Exporter le dossier », bandeau « provisoire » et liste des écarts bloquants | A16 |
+| **A18** | Archinex | E2E « acte 7 » (API et navigateur) sur le vrai LLMOps | A17, K3 |
+| **A19** | Archinex | Export OSCAL de la matrice de conformité (D12), ré-export et différence entre deux bundles, retour vers la capitalisation | A18 |
+
+Aucun lot ne rend de document : le **consommateur** (Document Engine / Document Studio) est hors de ces dépôts. Son contrat d'entrée est la question **Q2**.
 
 ### B1 — livré
-`schemas/engagement_bundle.schema.json`, `schemas/examples/engagement_bundle.example.json` (scénario illustratif, scellé), `pipelines/bundle/verify.py`
-(`canonical_json`, `payload_sha256`, `seal`, `verify_bundle`), `tests/unit/test_engagement_bundle.py` (un test par règle, par mutation).
+`schemas/engagement_bundle.schema.json`, `schemas/examples/engagement_bundle.example.json` (scénario illustratif, scellé), `pipelines/bundle/verify.py`, `pipelines/canonical.py`
+(profil canonical-json v1 de la suite, **48 vecteurs partagés** acceptés/refusés comme prévu), `tests/fixtures/canonical-json.vectors.json`, `tests/unit/test_engagement_bundle.py` (un test par règle, par mutation),
+`tests/unit/test_canonical_json_profile.py`.
 
-### B2 — vérification publique
-1. `kb bundle verify <fichier>` : code de sortie 0 si aucun problème, liste lisible sinon.
-2. `POST /api/bundles/verify` : corps = le bundle, réponse = `{valid, problems:[{code,path,message}]}` ; aucune écriture, aucun état ; limite de taille.
-3. Contrat 1.14 (additif), `schemas/types.ts`, `docs/contracts/knowledge-hub-api-v1.md` §5.14, `docs/CLIENTS.md`.
-4. Vecteur d'essai (`schemas/examples/`) : un bundle et son sceau attendu, pour que les implémentations TypeScript prouvent qu'elles calculent le même sceau.
-**Critères** : l'exemple est vérifié ; chaque mutation du test unitaire est refusée par l'API avec le même code ; tests gelés inchangés.
+### K1 — sceaux conformes
+1. Remplacer `json.dumps(…)` par `pipelines.canonical` dans `scripts/export_sealed_snapshot.py` et `pipelines/compliance_mapper.py` ; refuser (erreur de construction de l'instantané) ce que le profil refuse.
+2. Régénérer `fixtures/`, `data/snapshots/latest.json` et le vecteur de conformité ; pour les données actuelles (chaînes, entiers) les empreintes ne changent que si l'instantané scellé passait de `indent=2` au compact : **annoncer le changement de checksum** dans `VERSIONING.md`.
+3. **Critères** : les 48 vecteurs passent sur le code de production ; un test échoue si un nouveau sceau est calculé hors du module ; tests gelés inchangés.
 
-### B3 — rendus de référence
-1. Fonctions pures `render_hld(bundle, lang)`, `render_adr_cards(bundle)`, `render_diagrams(bundle)`, `render_compliance_annex(bundle)` ; refus si le bundle ne passe pas `verify_bundle`.
-2. **Règles de marquage** : `asserted` écrit tel quel avec sa référence (`DEC-001`, valideur, date) ; `proposed` précédé de « Proposition non validée » ; `assumption` listée comme hypothèse à confirmer ; `open` comme point ouvert ; jamais d'affirmation sans identifiant source.
-3. Chaque fichier généré se termine par `bundle_id` et `payload_sha256`.
-4. Diagrammes Mermaid : éléments non affirmés en pointillés avec leur niveau dans la légende.
-**Critères** : mêmes octets pour le même bundle (test) ; aucun élément non affirmé n'apparaît sans marquage (test par mutation : on abaisse le niveau d'un élément, le texte change) ; chaque phrase du HLD porte un identifiant du bundle ; la sortie Mermaid se parse.
+### K2 — enveloppe de canal
+Champs additifs sur l'instantané scellé et sur `GET /snapshot/*` : `emitter`, `rebuiltByEmitterTest: true` (le test de CI régénère et compare), `is_provisional` + `provisional_reasons` (sujets sous `L3_decided`, conflits ouverts dans la base), `checksum` au profil. **Critères** : un consommateur de la suite valide l'enveloppe sans connaître LLMOps ; la CI échoue si l'instantané publié n'est pas celui que le code régénère.
 
-### B4 — clients tiers
-OpenAPI depuis `scripts/freeze_interfaces.py` (chemins, méthodes, formes gelées) publié dans `schemas/openapi.json` et testé contre le serveur ; route `GET /api/knowledge/assets/{id}` ; mise à jour de `docs/CLIENTS.md`.
+### K3 — référence citable
+`version` par élément (incrémentée à chaque amendement accepté, stockée dans l'en-tête), `content_sha256`, présentes dans l'instantané ; `get_asset` et la nouvelle route REST résolvent **depuis l'instantané désigné**, jamais la base vivante ; `source_path` n'est plus exposé. **Critères** : le même `{knowledge_key, version}` résout toujours les mêmes octets ; un amendement change la version.
 
-### A16 à A19 (Archinex, issues à créer après validation de ce plan)
-- **A16** : le jeu des éléments est construit **sans rien inventer** : tout élément dont l'origine n'est pas une validation humaine ou une réutilisation confirmée est exporté `ai_proposed` ou `assumption`. Un export est refusé (message précis) si `verify` échoue ou si `confidentiality` manque.
-- **A18 — acte 7** : à partir du scénario du bout en bout, exporter le bundle, le vérifier, générer HLD, fiches ADR, diagrammes ; asserter que (i) le bundle est valide, (ii) la décision réutilisée renvoie à son entrée du journal et à ses hypothèses, (iii) la proposition non revue apparaît marquée comme telle dans chaque rendu, (iv) deux générations donnent les mêmes octets, (v) l'export est refusé quand on retire une confirmation de réutilisation.
+### K4 — Hub sans prose
+Constat : le générateur « zero-draft HLD » (`generate_zero_draft_hld`, `/api/documents/zero-draft-blueprint`, gabarits `templates/`) produit de la prose de livrable. Gel (déjà *legacy*), guide de migration, calendrier de retrait en version majeure avec l'accord des consommateurs (`DEPRECATION.md`).
 
 ## 5. Porte G9
 
-Sur le scénario de bout en bout, un dossier est exporté, **vérifié par LLMOps** puis rendu en document, schémas et fiches ; aucun élément non validé n'y figure sans marquage ; les rendus sont reproductibles à l'octet près ; un bundle altéré (sceau, niveau, réutilisation sans confirmation) est refusé ; aucune adresse e-mail n'y figure.
+Sur le scénario de bout en bout, Archinex exporte un bundle **scellé au profil de la suite** ; il passe la vérification (TypeScript et référence Python, mêmes cas de conformité) ; ses références à la base sont citables (version) et
+résolvent depuis l'instantané épinglé ; `is_provisional` est juste ; un bundle altéré (sceau, niveau, réutilisation sans confirmation) est refusé ; aucune adresse e-mail ; deux exports du même état ont le même `checksum`.
+Le rendu d'un document à partir du bundle relève du Document Engine / Studio et se démontre avec leurs propriétaires (Q2).
 
 ## 6. Risques et limites
 
-- **Le schéma est le contrat** : toute évolution est additive en `1.x` ; un changement de sens exige une version majeure et l'accord des producteurs.
-- **Qualité des diagrammes** : ils ne sont aussi bons que le modèle `architecture` que le producteur renseigne ; B3 ne l'invente pas.
-- **Un bundle prouve la provenance, pas la vérité** : un validateur peut se tromper ; le bundle dit qui a validé et sur quelles hypothèses.
-- **Deuxième humain** : la double revue n'est une garantie que si les validateurs sont des personnes distinctes.
+- **Contrat non validé par son consommateur** : le schéma est une proposition tant que le contrat d'entrée du Document Engine n'est pas connu (Q2).
+- **Textes de la suite non opposables** : `ADR-KH-01` est « proposé » ; K1 à K4 s'y réfèrent, mais seuls l'amendement KH-1 et le profil canonical-json sont opposables. L'adopter est une décision du propriétaire du Hub (Q4).
+- **Un bundle prouve la provenance, pas la vérité** ; la double revue n'est une garantie que si les validateurs sont des personnes distinctes.
+- **Q1** (le journal de réutilisation est-il une donnée de programme ?) peut déplacer une partie du stockage d'LLMOps vers Archinex.

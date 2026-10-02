@@ -1,17 +1,25 @@
 {
-  "schema_version": "1.0",
-  "bundle_id": "bundle-eng-netops-nis2-20261002T140000Z",
-  "source_system": "archinex",
-  "producer_version": "example",
-  "created_at": "2026-10-02T14:00:00Z",
-  "engagement": {
-    "id": "eng-netops-nis2",
-    "title": "Network operations platform under NIS2 (illustrative example)",
-    "language": "en",
-    "confidentiality": "internal",
-    "client_label": "Operator A"
-  },
+  "schemaVersion": "1.0",
+  "snapshotId": "bundle-eng-netops-nis2-20261002T140000Z",
+  "sourceSystem": "archinex",
+  "createdAt": "2026-10-02T14:00:00Z",
+  "sourceRevision": "example",
   "data": {
+    "engagement": {
+      "id": "eng-netops-nis2",
+      "title": "Network operations platform under NIS2 (illustrative example)",
+      "language": "en",
+      "confidentiality": "internal",
+      "client_label": "Operator A"
+    },
+    "is_provisional": true,
+    "provisional_reasons": {
+      "unripe_subjects": [
+        "SUBJ-incident-notification"
+      ],
+      "open_conflicts": []
+    },
+    "conflicts": [],
     "pins": {
       "llmops_contract_version": "1.13",
       "kb": {
@@ -70,7 +78,7 @@
         "domains": [
           "network-automation"
         ],
-        "maturity": "L3",
+        "maturity": "L3_decided",
         "status": "decided",
         "requirement_ids": [
           "REQ-1.1"
@@ -85,7 +93,7 @@
         "domains": [
           "security-governance"
         ],
-        "maturity": "L1",
+        "maturity": "L1_framed",
         "status": "open",
         "requirement_ids": [
           "REQ-4.1"
@@ -241,7 +249,7 @@
     "gaps": [
       {
         "id": "GAP-001",
-        "kind": "uncovered_requirement",
+        "kind": "G3_principle_unaddressed",
         "description": "No decision covers staff training.",
         "requirement_id": "REQ-4.2",
         "blocking": false
@@ -336,18 +344,33 @@
     "kb_references": [
       {
         "ref": "ADR-0001",
+        "knowledge_ref": {
+          "source_id": "knowledge-hub",
+          "knowledge_key": "decision:ADR-0001"
+        },
+        "confidence": "verified",
         "type": "decision",
         "title": "Git as the source of truth for network and platform configuration",
         "kb_status": "active"
       },
       {
         "ref": "NIS2-ART21-2B",
+        "knowledge_ref": {
+          "source_id": "knowledge-hub",
+          "knowledge_key": "control:NIS2-ART21-2B"
+        },
+        "confidence": "verified",
         "type": "control",
         "title": "Incident Handling and Remediation",
         "kb_status": "active"
       },
       {
         "ref": "NIS2-ART23-4",
+        "knowledge_ref": {
+          "source_id": "knowledge-hub",
+          "knowledge_key": "control:NIS2-ART23-4"
+        },
+        "confidence": "designed",
         "type": "control",
         "title": "Incident notification (illustrative)",
         "kb_status": "active"
@@ -380,6 +403,5 @@
       }
     ]
   },
-  "canonicalization": "canonical-json-v1",
-  "payload_sha256": "sha256:f3a5564b7e3b4735dcc2ddb42db7e32dfdf56c686c1c4a707c2e198774999e57"
+  "checksum": "sha256:474341b304aa04ca16e53a6dfb51106fc833b48faafe537086a9ebc05f49b313"
 }

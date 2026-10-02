@@ -2,77 +2,144 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/MauriceIsrael/LLMOps/schemas/engagement_bundle.schema.json",
   "title": "EngagementBundle",
-  "description": "Sealed, versioned outcome of an engagement (requirements, subjects, validated decisions with their assumptions, compliance matrix, architecture model) from which documents, diagrams and decision cards are DERIVED. Every claim carries its epistemic status; a generator may only write as fact what has assertion_level 'asserted'. Sealed like the knowledge snapshot: payload_sha256 = sha256 of the canonical-json-v1 serialisation of `data`. Rules JSON Schema cannot express (identifiers resolve, levels derive from statuses, reuse is backed by a confirmation, no e-mail addresses...) are checked by pipelines/bundle/verify.py. Plan: docs/plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md.",
+  "description": "PROPOSED contract, owner to be confirmed (the producer, not the knowledge hub: the hub holds no programme data). Sealed, versioned outcome of an engagement (requirements, subjects, validated decisions with their assumptions, compliance matrix, architecture model) from which documents, diagrams and decision cards are DERIVED. Every claim carries its epistemic status; a generator may only write as fact what has assertion_level 'asserted'. Sealed as a suite ExternalSnapshotEnvelope: checksum = sha256 of `data` under the suite canonical-json profile v1. Rules JSON Schema cannot express (identifiers resolve, levels derive from statuses, reuse is backed by a confirmation, no e-mail addresses...) are checked by pipelines/bundle/verify.py. Plan: docs/plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "schema_version": {
+    "schemaVersion": {
       "enum": [
         "1.0"
       ]
     },
-    "bundle_id": {
+    "snapshotId": {
       "$ref": "#/definitions/id"
     },
-    "source_system": {
+    "sourceSystem": {
       "type": "string",
       "description": "Producer, e.g. 'archinex'."
     },
-    "producer_version": {
-      "type": "string"
-    },
-    "created_at": {
+    "createdAt": {
       "$ref": "#/definitions/date_time"
     },
-    "canonicalization": {
-      "enum": [
-        "canonical-json-v1"
-      ]
+    "sourceRevision": {
+      "type": "string",
+      "description": "Revision of the producer's state this bundle was built from."
     },
-    "payload_sha256": {
+    "checksum": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$",
-      "description": "sha256:<hex> over the canonical-json-v1 serialisation of `data` (sorted keys, separators ',' ':', UTF-8)."
+      "description": "sha256:<hex> of `data` serialised with the suite canonical-json profile v1 (pipelines/canonical.py). Provenance lives in the envelope and is not hashed."
     },
-    "engagement": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "$ref": "#/definitions/id"
-        },
-        "title": {
-          "type": "string"
-        },
-        "language": {
-          "enum": [
-            "fr",
-            "en"
-          ]
-        },
-        "confidentiality": {
-          "enum": [
-            "public",
-            "internal",
-            "confidential"
-          ]
-        },
-        "client_label": {
-          "type": "string",
-          "description": "Anonymised label, never the client's name."
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "language",
-        "confidentiality"
-      ]
+    "expiresAt": {
+      "$ref": "#/definitions/date_time"
     },
     "data": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "engagement": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/id"
+            },
+            "title": {
+              "type": "string"
+            },
+            "language": {
+              "enum": [
+                "fr",
+                "en"
+              ]
+            },
+            "confidentiality": {
+              "enum": [
+                "public",
+                "internal",
+                "confidential"
+              ]
+            },
+            "client_label": {
+              "type": "string",
+              "description": "Anonymised label, never the client's name."
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "language",
+            "confidentiality"
+          ]
+        },
+        "is_provisional": {
+          "type": "boolean",
+          "description": "True when a subject is below L3_decided or a conflict is open: the whole bundle is then provisional, whatever the status of its items (suite two-stage rule)."
+        },
+        "provisional_reasons": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "unripe_subjects": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/id"
+              },
+              "uniqueItems": true
+            },
+            "open_conflicts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/id"
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "unripe_subjects",
+            "open_conflicts"
+          ]
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/id"
+              },
+              "kind": {
+                "enum": [
+                  "contradiction",
+                  "principle_violation",
+                  "stale_basis"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "arbitrated"
+                ]
+              },
+              "statement_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/id"
+                },
+                "uniqueItems": true
+              },
+              "detail": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "status"
+            ]
+          }
+        },
         "pins": {
           "type": "object",
           "additionalProperties": false,
@@ -247,12 +314,13 @@
               },
               "maturity": {
                 "enum": [
-                  "L0",
-                  "L1",
-                  "L2",
-                  "L3",
-                  "L4"
-                ]
+                  "L0_named",
+                  "L1_framed",
+                  "L2_decomposed",
+                  "L3_decided",
+                  "L4_specified"
+                ],
+                "description": "Suite vocabulary; L3_decided is the threshold at which a section is complete."
               },
               "status": {
                 "enum": [
@@ -535,9 +603,11 @@
               },
               "kind": {
                 "enum": [
+                  "G1_empty_section",
+                  "G2_unanswered_blocking",
+                  "G3_principle_unaddressed",
                   "uncovered_requirement",
                   "missing_assumption",
-                  "unresolved_conflict",
                   "unreviewed_proposal",
                   "other"
                 ]
@@ -698,6 +768,37 @@
               "ref": {
                 "$ref": "#/definitions/kb_ref"
               },
+              "knowledge_ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "source_id": {
+                    "const": "knowledge-hub"
+                  },
+                  "knowledge_key": {
+                    "type": "string",
+                    "description": "Suite ExternalRef {type}:{slug}, e.g. decision:ADR-0001"
+                  },
+                  "version": {
+                    "type": "string",
+                    "description": "Citable version of the element. Absent while the knowledge hub does not publish one per element: a reference without version is NOT citable in a frozen document."
+                  }
+                },
+                "required": [
+                  "source_id",
+                  "knowledge_key"
+                ]
+              },
+              "confidence": {
+                "enum": [
+                  "verified",
+                  "designed",
+                  "vendor-stated",
+                  "stated-by-client",
+                  "assumed"
+                ],
+                "description": "Knowledge hub confidence, kept as published (vendor-stated is never lost)."
+              },
               "type": {
                 "enum": [
                   "principle",
@@ -800,6 +901,7 @@
         }
       },
       "required": [
+        "engagement",
         "pins",
         "source_documents",
         "requirements",
@@ -808,19 +910,21 @@
         "statements",
         "compliance",
         "gaps",
+        "conflicts",
+        "is_provisional",
+        "provisional_reasons",
         "kb_references",
         "reuse_log"
       ]
     }
   },
   "required": [
-    "schema_version",
-    "bundle_id",
-    "source_system",
-    "created_at",
-    "canonicalization",
-    "payload_sha256",
-    "engagement",
+    "schemaVersion",
+    "snapshotId",
+    "sourceSystem",
+    "createdAt",
+    "sourceRevision",
+    "checksum",
     "data"
   ],
   "definitions": {

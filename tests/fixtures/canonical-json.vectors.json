@@ -1,0 +1,297 @@
+{
+  "profile": "architecture-suite/canonical-json",
+  "version": 1,
+  "note": "Vecteurs partages, recopies octet pour octet dans les six depots. Voir canonical-json.md. Chaque cas donne un TEXTE JSON en entree, jamais une valeur : c'est la seule entree que les deux langages recoivent a l'identique.",
+  "accept": [
+    {
+      "name": "objet-vide",
+      "json": "{}",
+      "canonical": "{}",
+      "sha256": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "name": "tableau-vide",
+      "json": "[]",
+      "canonical": "[]",
+      "sha256": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "racine-null",
+      "json": "null",
+      "canonical": "null",
+      "sha256": "sha256:74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+    },
+    {
+      "name": "racine-nombre",
+      "json": "42",
+      "canonical": "42",
+      "sha256": "sha256:73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049"
+    },
+    {
+      "name": "racine-chaine",
+      "json": "\"bonjour\"",
+      "canonical": "\"bonjour\"",
+      "sha256": "sha256:69a5c9d5c8a8a36c69f77fdfd022da706e5020c467f1007b566d076fb3ea44d9"
+    },
+    {
+      "name": "null-valeur-objet",
+      "json": "{\"a\":null,\"b\":1}",
+      "canonical": "{\"a\":null,\"b\":1}",
+      "sha256": "sha256:c0bf82ad036cb0a5a03d6759c1b7b8b1f70a39b32dd96ed3977c7f2831ee3b56"
+    },
+    {
+      "name": "null-imbrique",
+      "json": "{\"a\":{\"b\":null},\"c\":1}",
+      "canonical": "{\"a\":{\"b\":null},\"c\":1}",
+      "sha256": "sha256:f21044bb4eaeefee32a2d2ed3f38b2c584752427c20c285f01e427c3a6642789"
+    },
+    {
+      "name": "tout-null",
+      "json": "{\"a\":null,\"b\":null}",
+      "canonical": "{\"a\":null,\"b\":null}",
+      "sha256": "sha256:052c4bd5e6ded53bd884485af8b1667a7b70ba3a8573b54bd878f6d2c705c2df"
+    },
+    {
+      "name": "null-dans-tableau",
+      "json": "{\"a\":[1,null,2]}",
+      "canonical": "{\"a\":[1,null,2]}",
+      "sha256": "sha256:26bc150a8aceea6f585b351983c98e2460b12a2b1f60f4e0678a7148737d697a"
+    },
+    {
+      "name": "objet-sans-la-cle",
+      "json": "{\"b\":1}",
+      "canonical": "{\"b\":1}",
+      "sha256": "sha256:eb8ed3ccb5023093b56f490a46501e88d09736687e609fdbc1c71b3df8b9ccd3"
+    },
+    {
+      "name": "ordre-des-cles-inverse",
+      "json": "{\"z\":1,\"a\":2,\"m\":3}",
+      "canonical": "{\"a\":2,\"m\":3,\"z\":1}",
+      "sha256": "sha256:ebba85cfdc0a724b6cc327ecc545faeb38b9fe02eca603b430eb872f5cf75370"
+    },
+    {
+      "name": "cles-hors-bmp",
+      "json": "{\"\\ufffd\":1,\"\\ud83d\\ude00\":2}",
+      "canonical": "{\"😀\":2,\"�\":1}",
+      "sha256": "sha256:ee25c27251f38d1794ae1ce44d35d4e801cd43fb05e12f1b34aff3de57a69848"
+    },
+    {
+      "name": "cles-accentuees",
+      "json": "{\"zone\":1,\"\\u00e9quipement\":2,\"lot\":3}",
+      "canonical": "{\"lot\":3,\"zone\":1,\"équipement\":2}",
+      "sha256": "sha256:fb77967717277a64da8bec7effe78856ea14bf45730125cfdffa641ab504ffe9"
+    },
+    {
+      "name": "cle-vide",
+      "json": "{\"\":1,\"a\":2}",
+      "canonical": "{\"\":1,\"a\":2}",
+      "sha256": "sha256:9cf535828d5dbc2d87d9c4c0b99d9e7308b5fdbd22aac02bac1d60f6ac9aa127"
+    },
+    {
+      "name": "accents-precompose-vs-decompose",
+      "json": "{\"cl\\u00e9\":1,\"cle\\u0301\":2}",
+      "canonical": "{\"clé\":2,\"clé\":1}",
+      "sha256": "sha256:d97b0f35e15e5530a597123230b97ef7219a76429a5644662474ab344ebeaedb"
+    },
+    {
+      "name": "flottant-entier",
+      "json": "{\"x\":1.0}",
+      "canonical": "{\"x\":1}",
+      "sha256": "sha256:5041bf1f713df204784353e82f6a4a535931cb64f1f4b4a5aeaffcb720918b22"
+    },
+    {
+      "name": "entier",
+      "json": "{\"x\":1}",
+      "canonical": "{\"x\":1}",
+      "sha256": "sha256:5041bf1f713df204784353e82f6a4a535931cb64f1f4b4a5aeaffcb720918b22"
+    },
+    {
+      "name": "entier-negatif",
+      "json": "{\"x\":-7}",
+      "canonical": "{\"x\":-7}",
+      "sha256": "sha256:c8ccc3bd8f9f8b471e6898f0296305004154b16893b0c18872d074bdfd316b46"
+    },
+    {
+      "name": "notation-exponentielle-entiere",
+      "json": "{\"x\":1e2}",
+      "canonical": "{\"x\":100}",
+      "sha256": "sha256:6ae8ec2b1e8338f7511a7ea1366734f52ad540e10118fdb4a1221f10b9026f77"
+    },
+    {
+      "name": "moins-zero",
+      "json": "{\"x\":-0.0}",
+      "canonical": "{\"x\":0}",
+      "sha256": "sha256:5bff452c5ed93f2e87a23984db5a15050c6477335fdec955b70063bb2d692bf1"
+    },
+    {
+      "name": "exposant-negatif-7",
+      "json": "{\"x\":1e-7}",
+      "canonical": "{\"x\":1e-7}",
+      "sha256": "sha256:43c8e92bd5552bd45030718eb9366d6d6500623793c248666d77dca01ba337c0"
+    },
+    {
+      "name": "exposant-negatif-6",
+      "json": "{\"x\":1e-6}",
+      "canonical": "{\"x\":0.000001}",
+      "sha256": "sha256:2d6412ab0155bb89d63b73dbf83334b26b39d03e8c832cc253c6a6caceba9733"
+    },
+    {
+      "name": "exposant-negatif-5",
+      "json": "{\"x\":1e-5}",
+      "canonical": "{\"x\":0.00001}",
+      "sha256": "sha256:8a532d80ed64868e7d2786e6a6339b465fe0f03db6399590aa520d054875ce8c"
+    },
+    {
+      "name": "pourcentage",
+      "json": "{\"taux\":0.85}",
+      "canonical": "{\"taux\":0.85}",
+      "sha256": "sha256:49e9749e4b5c8956c2d33587cbb4843f6d00903f63b25724462bba1af0a9df1c"
+    },
+    {
+      "name": "somme-flottante",
+      "json": "{\"x\":0.30000000000000004}",
+      "canonical": "{\"x\":0.30000000000000004}",
+      "sha256": "sha256:65b5c2b75dd049c607da86614690e4e9d2d95b4c92775b134c684e0ed64cb706"
+    },
+    {
+      "name": "tiers",
+      "json": "{\"x\":0.3333333333333333}",
+      "canonical": "{\"x\":0.3333333333333333}",
+      "sha256": "sha256:955687406530358bcf0340194d5495fe5f10d84290eb930598275725f1697996"
+    },
+    {
+      "name": "borne-entier-sur",
+      "json": "{\"x\":9007199254740991}",
+      "canonical": "{\"x\":9007199254740991}",
+      "sha256": "sha256:e9b5e276a84ec2efb237123ad920232fb71e5e9c60f60aa2cd3f75b822db9628"
+    },
+    {
+      "name": "borne-entier-sur-negatif",
+      "json": "{\"x\":-9007199254740991}",
+      "canonical": "{\"x\":-9007199254740991}",
+      "sha256": "sha256:a9643339ca632beddc1c7b6d588f915fe9aa0cd1d6e0561b7f7550b50ecc8e5a"
+    },
+    {
+      "name": "grand-mais-sur",
+      "json": "{\"x\":1000000000000000}",
+      "canonical": "{\"x\":1000000000000000}",
+      "sha256": "sha256:3488e0e1f0dd04c7343fc0b937974e907c7fd0fb2b34e5420b37ddbff9bb0c5f"
+    },
+    {
+      "name": "booleens",
+      "json": "{\"vrai\":true,\"faux\":false}",
+      "canonical": "{\"faux\":false,\"vrai\":true}",
+      "sha256": "sha256:3355e0e198c113d1169b3be1e495fdffae8ea987c5ffaaf68d76493a95f97f41"
+    },
+    {
+      "name": "controle-01",
+      "json": "{\"a\":\"\\u0001\"}",
+      "canonical": "{\"a\":\"\\u0001\"}",
+      "sha256": "sha256:cdb4909e9996a7f541b72c340918f49c974b149a80b95000960ae324a8b8c628"
+    },
+    {
+      "name": "tabulation-et-saut",
+      "json": "{\"a\":\"x\\ty\\nz\"}",
+      "canonical": "{\"a\":\"x\\ty\\nz\"}",
+      "sha256": "sha256:147549f024ce8c6c62f1b47b3b34a02f8350108f89e2cbc412a05e278818cc46"
+    },
+    {
+      "name": "del-7f",
+      "json": "{\"a\":\"\\u007f\"}",
+      "canonical": "{\"a\":\"\"}",
+      "sha256": "sha256:599df87d312c1247f328cf89d9fbd469522aa6424298636df84ef7a4985dd6bb"
+    },
+    {
+      "name": "separateur-ligne-u2028",
+      "json": "{\"a\":\"x\\u2028y\\u2029z\"}",
+      "canonical": "{\"a\":\"x y z\"}",
+      "sha256": "sha256:f4cd581be3f4596e7074ce9c8461d72ac1b0c42ae80c977b2f1d99f49c9bf25c"
+    },
+    {
+      "name": "solidus-non-echappe",
+      "json": "{\"a\":\"a/b\"}",
+      "canonical": "{\"a\":\"a/b\"}",
+      "sha256": "sha256:6af97e068868f1784ed86718bb0fe550e9454dee6b0493ac5f49700b0a13fc50"
+    },
+    {
+      "name": "guillemet-et-antislash",
+      "json": "{\"a\":\"il a dit \\\"non\\\" \\\\ ici\"}",
+      "canonical": "{\"a\":\"il a dit \\\"non\\\" \\\\ ici\"}",
+      "sha256": "sha256:e5d5ca9dbde5b2c1e38f6447e296aa22b7f75525cb087238d82de1fc8815dc7e"
+    },
+    {
+      "name": "non-ascii-litteral",
+      "json": "{\"a\":\"caf\\u00e9 \\u4e2d\\u6587 \\ud83d\\ude80\"}",
+      "canonical": "{\"a\":\"café 中文 🚀\"}",
+      "sha256": "sha256:f18a18ac17c52ecb4277f4a0451999e50fd49d52173fd87297acaceaac6c7439"
+    },
+    {
+      "name": "imbrication-profonde",
+      "json": "{\"a\":{\"b\":{\"c\":{\"d\":[1,{\"e\":null}]}}}}",
+      "canonical": "{\"a\":{\"b\":{\"c\":{\"d\":[1,{\"e\":null}]}}}}",
+      "sha256": "sha256:97d227b1943b8b2b80ec4052ae649de351150b6eb8f15dd4aba8abbcfbfa1504"
+    },
+    {
+      "name": "tableau-d-objets",
+      "json": "[{\"b\":1,\"a\":2},{\"a\":3,\"b\":4}]",
+      "canonical": "[{\"a\":2,\"b\":1},{\"a\":3,\"b\":4}]",
+      "sha256": "sha256:708777b0e706bfa980401d472dac01de6e01ce8db4f0c25be53eef208f702c13"
+    },
+    {
+      "name": "enveloppe-realiste",
+      "json": "{\"schemaVersion\":\"1.0\",\"items\":[{\"id\":\"i-2\",\"layer\":\"application\",\"scope\":null},{\"id\":\"i-1\",\"layer\":\"context\",\"scope\":{\"lotRefs\":[\"lot-b\",\"lot-a\"]}}],\"diff\":null}",
+      "canonical": "{\"diff\":null,\"items\":[{\"id\":\"i-2\",\"layer\":\"application\",\"scope\":null},{\"id\":\"i-1\",\"layer\":\"context\",\"scope\":{\"lotRefs\":[\"lot-b\",\"lot-a\"]}}],\"schemaVersion\":\"1.0\"}",
+      "sha256": "sha256:c73c15956afc3a49c11396022d2834a1bebab7f0943b2ff76314d247851dce4f"
+    }
+  ],
+  "reject": [
+    {
+      "name": "nan-litteral",
+      "json": "{\"x\":NaN}",
+      "code": "CANONICAL_NON_FINITE_NUMBER",
+      "refusedAt": "parse"
+    },
+    {
+      "name": "infinity-litteral",
+      "json": "{\"x\":Infinity}",
+      "code": "CANONICAL_NON_FINITE_NUMBER",
+      "refusedAt": "parse"
+    },
+    {
+      "name": "infinity-negatif-litteral",
+      "json": "{\"x\":-Infinity}",
+      "code": "CANONICAL_NON_FINITE_NUMBER",
+      "refusedAt": "parse"
+    },
+    {
+      "name": "entier-hors-plage-sure",
+      "json": "{\"x\":12345678901234567890}",
+      "code": "CANONICAL_UNSAFE_INTEGER",
+      "refusedAt": "serialize"
+    },
+    {
+      "name": "entier-hors-plage-sure-negatif",
+      "json": "{\"x\":-12345678901234567890}",
+      "code": "CANONICAL_UNSAFE_INTEGER",
+      "refusedAt": "serialize"
+    },
+    {
+      "name": "juste-au-dessus-de-la-borne",
+      "json": "{\"x\":9007199254740993}",
+      "code": "CANONICAL_UNSAFE_INTEGER",
+      "refusedAt": "serialize"
+    },
+    {
+      "name": "exposant-21",
+      "json": "{\"x\":1e21}",
+      "code": "CANONICAL_UNSAFE_INTEGER",
+      "refusedAt": "serialize"
+    },
+    {
+      "name": "tres-grand-flottant",
+      "json": "{\"x\":1.5e300}",
+      "code": "CANONICAL_UNSAFE_INTEGER",
+      "refusedAt": "serialize"
+    }
+  ]
+}

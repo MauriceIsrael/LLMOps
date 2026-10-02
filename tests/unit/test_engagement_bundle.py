@@ -7,7 +7,7 @@ from pathlib import Path
 import jsonschema
 import pytest
 
-from pipelines.bundle.verify import canonical_json, load_schema, payload_sha256, seal, verify_bundle
+from pipelines.bundle.verify import load_schema, payload_sha256, seal, verify_bundle
 
 ROOT = Path(__file__).parent.parent.parent
 EXAMPLE = json.loads((ROOT / "schemas" / "examples" / "engagement_bundle.example.json").read_text(encoding="utf-8"))
@@ -29,17 +29,40 @@ def test_schema_is_a_valid_json_schema_and_the_example_verifies():
     assert [str(p) for p in verify_bundle(EXAMPLE)] == []
 
 
-def test_canonical_json_v1_oracle():
-    # Same profile as the conformity snapshot: sorted keys, compact separators, UTF-8 kept.
-    assert canonical_json({"b": [1, "é"], "a": {"z": None, "y": True}}) == '{"a":{"y":true,"z":null},"b":[1,"é"]}'
-    assert payload_sha256({"b": [1, "é"], "a": {"z": None, "y": True}}).startswith("sha256:")
-    assert payload_sha256({"a": 1, "b": 2}) == payload_sha256({"b": 2, "a": 1})  # key order never changes the seal
+def test_the_seal_uses_the_suite_canonical_profile():
+    # Same checksum for any key order, and the suite profile for numbers (1.0 is written 1, so 1.0 and 1 seal alike).
+    assert payload_sha256({"a": 1.0, "b": 2}) == payload_sha256({"b": 2, "a": 1})
+    assert EXAMPLE["checksum"] == payload_sha256(EXAMPLE["data"])
+
+
+def test_a_value_the_profile_refuses_cannot_be_sealed():
+    bundle = copy.deepcopy(EXAMPLE)
+    bundle["data"]["statements"][0]["value"] = 12345678901234567890  # beyond 2**53 - 1: write it as a string
+    assert codes(bundle) & {"CANONICAL", "SCHEMA"}
 
 
 def test_a_changed_payload_breaks_the_seal():
     bundle = copy.deepcopy(EXAMPLE)
     bundle["data"]["decisions"][0]["decision"] += " (edited)"
     assert codes(bundle) == {"SEAL"}
+
+
+def test_provisional_is_derived_not_declared():
+    def lie(d):
+        d["is_provisional"] = False  # one subject is still L1_framed
+
+    def ripen(d):  # all subjects at L3_decided and no conflict: the bundle is no longer provisional
+        d["subjects"][1]["maturity"] = "L3_decided"
+        d["is_provisional"], d["provisional_reasons"]["unripe_subjects"] = False, []
+
+    def open_conflict(d):
+        ripen(d)
+        d["conflicts"] = [{"id": "CON-1", "kind": "contradiction", "status": "open", "statement_ids": ["ST-001", "ST-002"]}]
+
+    assert "PROVISIONAL" in codes(mutated(lie))
+    assert codes(mutated(ripen)) == set()
+    assert "PROVISIONAL" in codes(mutated(open_conflict))  # an open conflict makes it provisional again
+    assert "DANGLING_REF" in codes(mutated(lambda d: (d.update(conflicts=[{"id": "CON-1", "kind": "stale_basis", "status": "arbitrated", "statement_ids": ["ST-404"]}]))))
 
 
 def test_shape_errors_are_reported_first():

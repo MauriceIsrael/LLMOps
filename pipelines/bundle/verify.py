@@ -1,13 +1,13 @@
 """Seal and verify an engagement bundle (schemas/engagement_bundle.schema.json).
 
 JSON Schema checks the shape; this module checks what a schema cannot express and what the zero-tolerance rule
-needs: the seal, unique and resolving identifiers, assertion levels DERIVED from epistemic statuses, claims backed by a
-person, reuse backed by a confirmation, cited KB assets listed, no e-mail address.
+needs: the seal (suite canonical-json profile, ``pipelines/canonical.py``), unique and resolving identifiers, assertion
+levels DERIVED from epistemic statuses, claims backed by a person, reuse backed by a confirmation, cited KB assets listed,
+the two-stage provisional rule, no e-mail address.
 """
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import Any
 
 import jsonschema
+
+from pipelines import canonical
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "engagement_bundle.schema.json"
 
@@ -26,6 +28,7 @@ ASSERTION_OF = {
     "contested": "open",
 }
 HUMAN_BASES = ("human_validation", "reuse_confirmation")
+UNRIPE = ("L0_named", "L1_framed", "L2_decomposed")  # below L3_decided
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+")
 CLAIM_COLLECTIONS = ("decisions", "statements", "compliance")
 
@@ -40,19 +43,14 @@ class Problem:
         return f"[{self.code}] {self.path}: {self.message}"
 
 
-def canonical_json(data: Any) -> str:
-    """canonical-json v1: sorted keys, compact separators, UTF-8 characters kept (same as the conformity snapshot)."""
-    return json.dumps(data, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
-
-
 def payload_sha256(data: Any) -> str:
-    return "sha256:" + hashlib.sha256(canonical_json(data).encode("utf-8")).hexdigest()
+    """Checksum of ``data`` under the suite canonical-json profile v1 (raises ``canonical.CanonicalError`` if refused)."""
+    return canonical.sha256(data)
 
 
 def seal(bundle: dict[str, Any]) -> dict[str, Any]:
-    """Set the canonicalization profile and the seal over ``data`` (returns the same dict)."""
-    bundle["canonicalization"] = "canonical-json-v1"
-    bundle["payload_sha256"] = payload_sha256(bundle["data"])
+    """Set the checksum over ``data`` (returns the same dict)."""
+    bundle["checksum"] = payload_sha256(bundle["data"])
     return bundle
 
 
@@ -83,8 +81,11 @@ def _walk_strings(node: Any, path: str = ""):
 def invariant_problems(bundle: dict[str, Any]) -> list[Problem]:
     out: list[Problem] = []
     data = bundle.get("data", {})
-    if bundle.get("payload_sha256") != payload_sha256(data):
-        out.append(Problem("SEAL", "/payload_sha256", "does not match the canonical-json-v1 serialisation of data"))
+    try:
+        if bundle.get("checksum") != payload_sha256(data):
+            out.append(Problem("SEAL", "/checksum", "does not match the suite canonical-json serialisation of data"))
+    except canonical.CanonicalError as err:
+        out.append(Problem("CANONICAL", "/data", str(err)))
 
     # identifiers: one namespace, unique, and every reference resolves
     owners: dict[str, str] = {}
@@ -99,7 +100,7 @@ def invariant_problems(bundle: dict[str, Any]) -> list[Problem]:
         "source_documents": data.get("source_documents", []), "requirements": data.get("requirements", []),
         "subjects": data.get("subjects", []), "decisions": data.get("decisions", []),
         "statements": data.get("statements", []), "compliance": data.get("compliance", []),
-        "gaps": data.get("gaps", []), "reuse_log": data.get("reuse_log", []),
+        "gaps": data.get("gaps", []), "reuse_log": data.get("reuse_log", []), "conflicts": data.get("conflicts", []),
         "elements": arch.get("elements", []), "relations": arch.get("relations", []),
     }
     for name, items in collections.items():
@@ -131,6 +132,9 @@ def invariant_problems(bundle: dict[str, Any]) -> list[Problem]:
         for i, it in enumerate(collections[name]):
             for did in it.get("decision_ids", []):
                 must_resolve(did, "decisions", f"/data/{name}/{i}/decision_ids")
+    for i, c in enumerate(collections["conflicts"]):
+        for sid in c.get("statement_ids", []):
+            must_resolve(sid, "statements", f"/data/conflicts/{i}/statement_ids")
     for i, g in enumerate(collections["gaps"]):
         must_resolve(g.get("subject_id"), "subjects", f"/data/gaps/{i}/subject_id")
         must_resolve(g.get("requirement_id"), "requirements", f"/data/gaps/{i}/requirement_id")
@@ -199,6 +203,15 @@ def invariant_problems(bundle: dict[str, Any]) -> list[Problem]:
     for i, s in enumerate(collections["subjects"]):
         if s.get("status") == "decided" and not any(decisions.get(x, {}).get("assertion_level") == "asserted" for x in s.get("decision_ids", [])):
             out.append(Problem("DECIDED_WITHOUT_DECISION", f"/data/subjects/{i}", "a decided subject needs at least one asserted decision"))
+
+    # two-stage epistemics: one unripe subject or open conflict makes the whole bundle provisional
+    unripe = sorted(s["id"] for s in collections["subjects"] if s.get("maturity") in UNRIPE)
+    open_conflicts = sorted(c["id"] for c in collections["conflicts"] if c.get("status") == "open")
+    reasons = data.get("provisional_reasons") or {}
+    if bool(data.get("is_provisional")) != bool(unripe or open_conflicts):
+        out.append(Problem("PROVISIONAL", "/data/is_provisional", f"must be {bool(unripe or open_conflicts)}: unripe subjects {unripe}, open conflicts {open_conflicts}"))
+    if sorted(reasons.get("unripe_subjects", [])) != unripe or sorted(reasons.get("open_conflicts", [])) != open_conflicts:
+        out.append(Problem("PROVISIONAL", "/data/provisional_reasons", "must list exactly the subjects below L3_decided and the open conflicts"))
 
     # privacy: owner handles only
     for path, text in _walk_strings(bundle):
