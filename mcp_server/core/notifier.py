@@ -230,9 +230,12 @@ def notify_owner(owner: dict[str, Any], event: str, candidate: dict[str, Any]) -
         # The owner has an Archinex account: Archinex delivers the notification from the event feed.
         return sent + ["archinex"]
     try:
-        if owner.get("discord_webhook"):
+        # The webhook is a credential: besides the per-owner value, OWNER_DISCORD_WEBHOOK (environment / secret
+        # manager, never git) serves every owner that has none of its own.
+        webhook = owner.get("discord_webhook") or os.getenv("OWNER_DISCORD_WEBHOOK", "").strip()
+        if webhook:
             payload = {"username": "Knowledge Hub Bot", "content": f"{handle} — **{title}**\n{body}"}
-            if _post(owner["discord_webhook"], json.dumps(payload).encode("utf-8"), {"Content-Type": "application/json"}):
+            if _post(webhook, json.dumps(payload).encode("utf-8"), {"Content-Type": "application/json"}):
                 sent.append("discord")
     except Exception as err:
         logger.debug("Discord notification to %s failed: %s", handle, err)
