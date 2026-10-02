@@ -38,3 +38,32 @@ def test_codeowners_handles_are_declared():
     handles = set(re.findall(r"@[\w.-]+", (KB / "CODEOWNERS").read_text(encoding="utf-8")))
     missing = sorted(h for h in handles if h not in owners.owners)
     assert not missing, f"CODEOWNERS handles missing from data/kb/owners.yaml: {missing}"
+
+
+def test_owners_file_holds_no_credential_and_no_shared_email():
+    """A webhook URL is a credential (OWNER_DISCORD_WEBHOOK instead) and an e-mail must identify one owner."""
+    import collections
+
+    text = (KB / "owners.yaml").read_text(encoding="utf-8")
+    assert "discord.com/api/webhooks" not in text and "hooks.slack.com" not in text
+    owners = load_owners(KB)
+    counts = collections.Counter(o.email.lower() for o in owners.owners.values() if o.email)
+    shared = sorted(e for e, n in counts.items() if n > 1)
+    assert not shared, f"the acting expert is resolved from the e-mail: shared addresses are ambiguous: {shared}"
+
+
+def test_owner_discord_webhook_falls_back_to_the_environment(monkeypatch):
+    import mcp_server.core.notifier as notifier
+
+    posted = []
+    monkeypatch.setattr(notifier, "_post", lambda url, data, headers: posted.append(url) or True)
+    monkeypatch.setattr(notifier, "_send_email", lambda *a, **k: False)
+    candidate = {"id": "CAND-20261002-0001", "title": "t"}
+    monkeypatch.delenv("OWNER_DISCORD_WEBHOOK", raising=False)
+    assert "discord" not in notifier.notify_owner({"handle": "@a"}, "in_review", candidate)
+    monkeypatch.setenv("OWNER_DISCORD_WEBHOOK", "https://example.invalid/env-hook")
+    assert "discord" in notifier.notify_owner({"handle": "@a"}, "in_review", candidate)
+    assert posted == ["https://example.invalid/env-hook"]
+    posted.clear()  # an owner's own webhook wins over the environment value
+    notifier.notify_owner({"handle": "@a", "discord_webhook": "https://example.invalid/own"}, "in_review", candidate)
+    assert posted == ["https://example.invalid/own"]

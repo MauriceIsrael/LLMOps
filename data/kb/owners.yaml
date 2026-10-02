@@ -3,7 +3,12 @@
 # - `owners`: one entry per owner handle (consistent with data/kb/CODEOWNERS), with the
 #   notification channels used when a candidate enters review (`kb remind` for reminders):
 #   `email` (SMTP, disabled by default), optional `discord_webhook` and `ntfy_topic`.
-#   Channels left empty are not used. TODO(maintainers): fill in the real e-mail addresses.
+#   Channels left empty are not used.
+#   NEVER put a webhook URL here (it is a credential, and this file is in git): set OWNER_DISCORD_WEBHOOK in the
+#   environment / secret manager, it serves every owner without a `discord_webhook` of its own.
+#   An e-mail must identify ONE owner: the acting expert is resolved from the e-mail (X-Actor-Email), so the
+#   same address on several handles would always resolve to the first one.
+#   TODO(maintainers): fill in the real e-mail addresses (the four below are test aliases).
 # - `domains`: owner of each domain used by an asset (a sub-domain `parent/child` inherits
 #   the owner of `parent` unless it has its own entry). tests/unit/test_kb_owners.py checks
 #   that every domain used in data/kb has an owner.
@@ -13,96 +18,98 @@ default_owner: "@maintainers"
 
 owners:
   "@3gpp-conformance-wg":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@3gpp-core-wg":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@3gpp-security-wg":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@ciso-office":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: maurice.israel+eval@free.fr
+    discord_webhook: null
     ntfy_topic: null
+    roles: ["kb:evaluate"]
   "@core-owner-architecture":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: maurice.israel+archi@free.fr
+    discord_webhook: null
     ntfy_topic: null
   "@core-owner-automation":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@core-owner-delivery":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@data-protection-officer":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@engagement-architects":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@infrastructure-architecture-wg":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@maintainers":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: maurice.israel+maint@free.fr
+    discord_webhook: null
     ntfy_topic: null
+    roles: ["kb:maintain", "kb:admin"]
   "@operations-directorate":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@quality-directorate":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@resilience-council":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@safety-certification-wg":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@security-compliance-team":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: maurice.israel+secu@free.fr
+    discord_webhook: null
     ntfy_topic: null
   "@security-office":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@spectrum-engineering-wg":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@sustainability-directorate":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@tactical-communications-wg":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@telecom-architecture-wg":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@transmission-architecture-wg":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
   "@vehicle-engineering-wg":
-    email: maurice.israel@free.fr
-    discord_webhook: https://discord.com/api/webhooks/1546205685132427304/iVgC9arwEXUE8DoZBq6fs0ZZghaMXLJUgAX_S_gyq9I_9Qj4OTtMRD08BFTHA7TiTaXC
+    email: null
+    discord_webhook: null
     ntfy_topic: null
 
 domains:
