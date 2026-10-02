@@ -4,6 +4,16 @@ Statut : plan, décisions D6 à D8 validées par le mainteneur. Complète
 [`PLAN-IMPLEMENTATION-Gouvernance-KB-Archinex.md`](PLAN-IMPLEMENTATION-Gouvernance-KB-Archinex.md).
 Lots LLMOps **L11 à L14**, lots Archinex **A12 à A15** (issues dans le dépôt Archinex), porte **G8**.
 
+## État d'avancement (2 octobre 2026)
+
+| Lot | État |
+|---|---|
+| L11, L12, L13, L14 (LLMOps) | **fusionnés** (contrats 1.9 à 1.12) |
+| A12 à A15 (Archinex) | réalisés en partie : synchronisation, recherche, confirmation d'hypothèses, évaluation, « deuxième RFP » ; encodeur honnête et tests négatifs en revue (archinex#22, #24) |
+| Porte G8 | **non franchie** : manquent un modèle d'embeddings réel mesuré sur le jeu annoté, des seuils calibrés (`status: uncalibrated`), une règle capitalisée avec assertion formelle prouvant un changement de verdict, et l'E2E API « deuxième RFP » sur le serveur réel (archinex#23) |
+
+Modèle d'embeddings : calculé par Archinex sur un serveur local (Ollama ou API compatible OpenAI, `EMBEDDING_OLLAMA_URL`) ; inventaire et test de bon sens FR/EN par `scripts/ollama-models.mjs` côté Archinex ; le choix se fait sur **mesure** (A14), pas sur ce test.
+
 ---
 
 ## 0. Pourquoi
