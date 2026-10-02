@@ -4,7 +4,7 @@ This document defines how an interface of the LLMOps contract (MCP tool, REST ro
 response field, CLI command) is deprecated and eventually withdrawn. It complements
 [`VERSIONING.md`](VERSIONING.md).
 
-> **Status (contract `1.0`): no interface is deprecated.**
+> **Status (contract `1.13`): the engagement part is deprecated** (see the register in §4). Everything else is stable.
 
 ---
 
@@ -91,4 +91,10 @@ signal.
 
 | Interface | Status | Since | Replaced by | Guide |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| `POST /api/elicitation/trigger` | deprecated | 1.13 | Archinex (A2 · élicitation) | [migration-archinex.md](migration-archinex.md) |
+| `GET /api/elicitation/questions` | deprecated | 1.13 | Archinex (A2 · questions) | [migration-archinex.md](migration-archinex.md) |
+| `GET /api/arbitration/board` | deprecated | 1.13 | Archinex (A3 · maturité) | [migration-archinex.md](migration-archinex.md) |
+| `GET /api/arbitration/conflicts` | deprecated | 1.13 | Archinex (A3 · conflits) | [migration-archinex.md](migration-archinex.md) |
+| `GET /api/arbitration/statements` | deprecated | 1.13 | Archinex (A3 · énoncés) | [migration-archinex.md](migration-archinex.md) |
+| MCP tools `get_subject`, `get_subject_trajectory`, `get_board`, `get_statements`, `get_conflicts`, `get_open_questions`, `get_diagram_graph`, `get_render_payload`, `get_dangling_references`, `get_engagement_export` | deprecated | 1.13 | Archinex (A2–A4) | [migration-archinex.md](migration-archinex.md) |
+| `/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint`, `/api/prose/suggest-batch`, `shred_rfp`, `generate_zero_draft_hld`, `trigger_rfp_elicitation`, skills catalogue | legacy | 1.13 | — (other consumers) | — |
