@@ -182,7 +182,7 @@ Le Hub est la **mémoire d'ingénierie transverse** de la suite (`ADR-SUITE-05` 
 | 8 | Provenance sur tout élément, identifiants stables | Partielle : provenance des actifs dans l'instantané, valideur et date des amendements ; identifiants jamais recyclés **non testé** | K3 |
 
 ### A5 — D4 (vocabulaires) : état
-- **Confiance** : le schéma des actifs de la base n'accepte que `verified`, `vendor-stated` et `assumed` (**3 valeurs sur 5**) ; `designed` et `stated-by-client` ne sont pas exprimables. La convergence vers l'énumération complète est à faire (lot **K5** proposé). `vendor-stated` n'est jamais perdue.
+- **Confiance** : le schéma des actifs de la base n'accepte que `verified`, `vendor-stated` et `assumed` (**3 valeurs sur 5**) ; `designed` et `stated-by-client` ne sont pas exprimables. La convergence vers l'énumération complète est à faire (lot **K5**, issue `#42`). `vendor-stated` n'est jamais perdue.
 - **Maturité, conflits, manques** : vocabulaires du plan d'engagement (déprécié) ; le dossier d'engagement les reprend tels que publiés par la suite.
 - **`is_provisional`** par instantané : à publier (K2).
 
@@ -204,7 +204,7 @@ Le Hub est la **mémoire d'ingénierie transverse** de la suite (`ADR-SUITE-05` 
 Le Hub comme socle sémantique ; Cypher libre comme contrat ; **prose de livrable générée** (précisée par A3-a et A3-e) ; absorption d'objets possédés par la suite ; dépendance dure ; **RPC synchrone comme mécanisme d'intégration applicative de la suite**.
 
 ### A9 — Conséquences et suivi
-- Lots **K1** (sceaux), **K2** (enveloppe), **K3** (version citable), **K4** (retrait planifié du générateur de document), **K5** (confiance à 5 valeurs, à créer), **C1** (OpenAPI, types réels) : issues `LLMOps#33` à `#37`, suivi `#38`, adaptateur `#40`.
+- Lots **K1** (sceaux), **K2** (enveloppe), **K3** (version citable), **K4** (retrait planifié du générateur de document), **K5** (confiance à 5 valeurs, `#42`), **C1** (OpenAPI, types réels) : issues `LLMOps#33` à `#37`, suivi `#38`, adaptateur `#40`.
 - PR `LLMOps#39` (assistance honnête).
 - Chaque engagement de la Partie II est **testable** : K1 par les vecteurs partagés, K2 par le test de fraîcheur à l'octet, K3 par la résolution depuis l'instantané. Un engagement sans test reste une intention.
 - À vérifier avant adoption : A4 lignes 3, 5, 6 (cloisonnement), 7.
