@@ -52,6 +52,28 @@ def prepare(tmp: Path) -> dict[str, str]:
         entry.update(email=email, **({"roles": roles} if roles else {}))
         registry["owners"][handle] = entry
     (kb / "owners.yaml").write_text(yaml.safe_dump(registry), encoding="utf-8")
+    adr1 = kb / "decisions" / "ADR-0001.md"
+    if adr1.exists():
+        text = adr1.read_text(encoding="utf-8")
+        parts = text.split("---\n", 2)
+        if len(parts) >= 3:
+            fm = yaml.safe_load(parts[1]) or {}
+            fm["assumptions"] = [
+                "The control plane handles fewer than 10000 managed devices.",
+                "Every site keeps an out-of-band access path to its routers."
+            ]
+            body = parts[2]
+            body = body.replace(
+                "The engagement needs backup, restore,",
+                "The engagement needs backup, restore and restoration of network configuration after an outage, automated deployment,",
+                1
+            )
+            adr1.write_text("---\n" + yaml.safe_dump(fm, sort_keys=False, allow_unicode=True) + "---\n" + body, encoding="utf-8")
+    sim_yaml = kb / "taxonomy" / "similarity.yaml"
+    if sim_yaml.exists():
+        sim_cfg = yaml.safe_load(sim_yaml.read_text(encoding="utf-8")) or {}
+        sim_cfg["thresholds"] = {"strong": 0.70, "possible": 0.30}
+        sim_yaml.write_text(yaml.safe_dump(sim_cfg, sort_keys=False, allow_unicode=True), encoding="utf-8")
     db = tmp / "knowledge.lbug"
     shutil.copy(ROOT / "data" / "knowledge.lbug", db)
     return {
@@ -78,13 +100,14 @@ def main() -> None:
         os.environ.update(env)
         sys.path.insert(0, str(ROOT))
         eval_dataset = ROOT / "tests" / "evals" / "datasets" / "check_option_v1.jsonl"
+        similarity_dataset = ROOT / "tests" / "evals" / "datasets" / "similarity_v1.jsonl"
         os.chdir(tmp)  # snapshots are written under ./data/snapshots
         import uvicorn
 
         from mcp_server.main import create_starlette_app
         from pipelines.governance.bootstrap import ensure_governance_ready
 
-        ensure_governance_ready(tmp / "data" / "kb", eval_dataset)
+        ensure_governance_ready(tmp / "data" / "kb", eval_dataset, similarity_dataset)
         print(f"contract server on http://{args.host}:{args.port} (service token: {SERVICE_TOKEN})", flush=True)
         uvicorn.run(create_starlette_app(), host=args.host, port=args.port, log_level="warning")
     finally:
