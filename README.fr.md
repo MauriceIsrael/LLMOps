@@ -57,6 +57,31 @@ make demo-check
 
 **Nombres de Nœuds Attendus (`make demo-check`) :**
 - **Plan de Connaissances (`data/knowledge.kuzu`)** : `Asset`: ~46 nœuds, `GlossaryTerm`: ~10 nœuds.
+
+### 4. Lancer le serveur de gouvernance en local (pour Archinex)
+
+La base de connaissances s'enrichit et se gouverne depuis Archinex, qui parle à ce serveur en REST. Une commande le démarre
+avec une base de gouvernance persistante (SQLite) et un jeton de service délégant :
+
+```bash
+poetry install
+poetry run python scripts/serve_local.py      # ou : make serve   (Windows : pas de make, utiliser la première forme)
+```
+
+- **Redémarrer** = `Ctrl+C` puis relancer : l'état (candidats, revues, propriétaires, embeddings, journal de réutilisation)
+  est dans `data/governance.db`, pas dans le processus. Après une modification de `data/kb/owners.yaml`, appliquez-la à une
+  base déjà initialisée avec `poetry run kb migrate-governance --force-owners`.
+- Le script affiche le **jeton de service** à configurer dans Archinex (`LLMOPS_AUTH_TOKEN`) ; il est généré une fois et conservé
+  dans `.llmops-local-service-token` (ignoré par git) : un redémarrage ne le change pas. Archinex a aussi besoin de
+  `LLMOPS_BASE_URL` (`http://127.0.0.1:8000`) et de `LLMOPS_ALLOWED_HOSTS` si l'hôte n'est pas local.
+- Il lit d'abord `.env` dans l'environnement. Les secrets comme `OWNER_DISCORD_WEBHOOK` (Discord pour les propriétaires sans
+  compte Archinex) vont dans l'environnement ou `.env`, **jamais** dans `data/kb/owners.yaml`.
+- Les experts sont identifiés par e-mail (`X-Actor-Email`, envoyé par Archinex) : chaque e-mail doit figurer sur **un seul**
+  propriétaire de `data/kb/owners.yaml` ; les rôles (`kb:maintain`, `kb:admin`, `kb:evaluate`) y sont déclarés.
+- Tester sans instance déployée : `poetry run python scripts/contract_server.py --port 8099` (copie jetable de la base, experts
+  fictifs) ou l'image `docker build -f docker/Dockerfile.contract -t llmops-contract:latest .` (voir
+  [`docs/deployment.md`](docs/deployment.md) pour Cloud Run / Cloud SQL).
+
 ---
 
 ## Points Clés & Différenciateurs

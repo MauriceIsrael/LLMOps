@@ -1,4 +1,4 @@
-.PHONY: demo demo-check install test test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
+.PHONY: serve demo demo-check install test test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
 
 install:
 	poetry install
@@ -65,3 +65,7 @@ build-gcp:
 	gcloud builds submit --config=cloudbuild.yaml --substitutions=_TAG=latest .
 
 deploy-gcp: build-gcp
+
+# Local HTTP server for Archinex (governance, persistent SQLite): see README "Run the governance server locally"
+serve:
+	poetry run python scripts/serve_local.py

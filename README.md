@@ -61,6 +61,30 @@ make demo-check
 - **Knowledge Plane (`data/knowledge.kuzu`)**: `Asset`: ~46 nodes, `GlossaryTerm`: ~10 nodes.
 - **Engagement Plane (`demo-engagement-2027`)**: `Subject`: 8 nodes, `Statement`: 9 nodes, `Conflict`: 2 nodes.
 
+### 4. Run the governance server locally (for Archinex)
+
+The KB is enriched and governed from Archinex, which talks to this server over REST. One command starts it with a
+persistent governance database (SQLite) and a delegating service token:
+
+```bash
+poetry install
+poetry run python scripts/serve_local.py      # or: make serve   (Windows: no make, use the first form)
+```
+
+- **Restart** = `Ctrl+C`, then run it again: the state (candidates, reviews, owners, embeddings, reuse journal) lives in
+  `data/governance.db`, not in the process. Run it again after changing `data/kb/owners.yaml`
+  (`poetry run kb migrate-governance --force-owners` applies the file to an already initialised database).
+- The script prints the **service token** to configure in Archinex (`LLMOPS_AUTH_TOKEN`); it is generated once and kept in
+  `.llmops-local-service-token` (git-ignored), so a restart does not change it. Archinex also needs `LLMOPS_BASE_URL`
+  (`http://127.0.0.1:8000`) and `LLMOPS_ALLOWED_HOSTS` if the host is not local.
+- It reads `.env` into the environment first. Secrets such as `OWNER_DISCORD_WEBHOOK` (Discord for owners without an
+  Archinex account) belong in the environment or `.env`, **never** in `data/kb/owners.yaml`.
+- Experts are identified by e-mail (`X-Actor-Email`, sent by Archinex): each e-mail must appear on **one** owner of
+  `data/kb/owners.yaml`; roles (`kb:maintain`, `kb:admin`, `kb:evaluate`) are declared there.
+- Test without a deployed instance: `poetry run python scripts/contract_server.py --port 8099` (scratch copy of the KB,
+  fake experts) or the image `docker build -f docker/Dockerfile.contract -t llmops-contract:latest .` (see
+  [`docs/deployment.md`](docs/deployment.md) for Cloud Run / Cloud SQL).
+
 ---
 
 ## Key Differentiators
@@ -87,7 +111,9 @@ make demo-check
     `get_doctrine_context` / `GET /api/knowledge/context` returns the doctrine applicable to a subject (active principles, required regulatory controls, patterns, ADRs) with bounded excerpts; `check_option` / `POST /api/knowledge/check` judges an option against structured `checks` clauses of the doctrine (`supports` / `violates` / `unassessed`, with citations). Both are fully deterministic — no LLM on the server. Evaluation: `make eval-check`.
 11. **Knowledge Enrichment Cycle (contract 1.2)**  
     Every new piece of knowledge goes through a persisted candidate queue (`/api/knowledge/candidates`, `submit_kb_candidate`…), deterministic checks (schema, references, duplicates, anonymization, doctrine conflicts, unreviewed LLM content), routing to the domain owner (`data/kb/owners.yaml`) and a human review (second review for principles), before `kb promote` / `kb publish` write and seal it. Confidence is computed from evidence, never from the author.
-12. **Dual-Mode Architecture & Architecture Suite Contract v1**  
+12. **Governance from Archinex & reuse of validated knowledge (contracts 1.3 to 1.13)**  
+    Experts act through Archinex (identity by e-mail, review inbox, solicitation, doctrine workshop and evaluations, regulatory framework ingestion, server-side promotion and publication, health). Similarity over vectors computed by the client (FR/EN), reuse confirmations judged assumption by assumption (never automatic), evaluation of the similarity thresholds. The engagement part is deprecated since 1.13. See [`docs/contracts/knowledge-hub-api-v1.md`](docs/contracts/knowledge-hub-api-v1.md) §5 and [`docs/VERSIONING.md`](docs/VERSIONING.md).
+13. **Dual-Mode Architecture & Architecture Suite Contract v1**  
     Provides both synchronous REST endpoints (`/api/rfp/*`, `/api/compliance/*`, `/api/knowledge/*`, `/api/skills/*`) for interactive web interfaces and CLI tools, as well as sealed canonical snapshots (`latest.json`) for offline-first admission gates (per ADR-SUITE-05). All contracts follow strict provenance (`sourceSystem: "knowledge-hub"`), canonical SHA-256 sealing, and Fail Loud resilience.
 
 ---
