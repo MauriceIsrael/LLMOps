@@ -138,3 +138,73 @@ extraction and graph rebuild).
 **Client contract tests**: `make contract-server` starts the real server on a scratch copy with a SQLite governance
 database, the service token `contract-service-token` and four test experts (see `scripts/contract_server.py`), so a
 client such as Archinex can be tested against the real contract instead of a fake.
+
+
+## 6. Run the governance server on Linux (or macOS)
+
+Tested here on Linux with the one-command launcher; the `systemd` unit and the Docker commands below are templates that were not run (no systemd service or Docker daemon in the test environment): report any difference.
+
+**Prerequisites**: Python 3.11, Git, a C++ toolchain for the graph engine wheels (`sudo apt-get install -y build-essential g++ curl`),
+and Poetry (`curl -sSL https://install.python-poetry.org | python3 -`).
+
+```bash
+git clone https://github.com/MauriceIsrael/LLMOps.git /opt/llmops && cd /opt/llmops
+poetry config virtualenvs.in-project true && poetry install --no-root     # then: poetry install
+cp .env.example .env && chmod 600 .env       # secrets: OWNER_DISCORD_WEBHOOK, SMTP_*, LLMOPS_SERVICE_TOKEN...
+poetry run python scripts/serve_local.py --host 0.0.0.0 --port 8000       # foreground; Ctrl+C then rerun = restart
+```
+
+**As a service** (restart on failure and at boot). Keep the secrets in `/etc/llmops.env` (mode `600`, owned by root), not in git:
+
+```ini
+# /etc/systemd/system/llmops.service
+[Unit]
+Description=LLMOps knowledge hub (governance server)
+After=network.target
+
+[Service]
+User=llmops
+WorkingDirectory=/opt/llmops
+EnvironmentFile=/etc/llmops.env
+ExecStart=/opt/llmops/.venv/bin/python scripts/serve_local.py --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo useradd --system --home /opt/llmops llmops && sudo chown -R llmops: /opt/llmops   # the service token file and data/ must be writable
+sudo systemctl daemon-reload && sudo systemctl enable --now llmops
+sudo systemctl restart llmops          # restart
+journalctl -u llmops -f                # logs (the owner notification lines are [KB_CANDIDATE_*])
+curl -s http://127.0.0.1:8000/health
+```
+
+The launcher prints (and `/opt/llmops/.llmops-local-service-token` keeps) the service token to give to the client
+(`LLMOPS_AUTH_TOKEN` in Archinex); to choose it, set `LLMOPS_SERVICE_TOKEN` in `/etc/llmops.env`. For a reverse proxy (TLS), forward
+to `127.0.0.1:8000` and keep the `Authorization` and `X-Actor-Email` headers.
+
+**Docker** instead of a service (state in a named volume; set the service token yourself):
+
+```bash
+docker build -t llmops:latest .                # the root Dockerfile (same image as Cloud Run); docker/Dockerfile.mcp lacks tools/
+docker run -d --name llmops --restart unless-stopped -p 8000:8000 -v llmops-data:/app/data \
+  -e SERVER_TOKEN="$(openssl rand -hex 24)" -e ENGAGEMENT_TOKENS="$SERVICE_TOKEN:kb:review,kb:delegate,*" \
+  -e CANDIDATES_BACKEND=sql -e GOVERNANCE_DATABASE_URL=sqlite:////app/data/governance.db \
+  -e OWNER_DISCORD_WEBHOOK="$OWNER_DISCORD_WEBHOOK" llmops:latest
+docker restart llmops
+```
+
+Image for client tests (not for deployment): `docker build -f docker/Dockerfile.contract -t llmops-contract:latest .` then
+`docker run --rm -p 8099:8000 llmops-contract:latest`.
+
+| Task | Linux / macOS | Windows (PowerShell) |
+|---|---|---|
+| Start | `poetry run python scripts/serve_local.py` | same |
+| Set a secret for the session | `export OWNER_DISCORD_WEBHOOK=…` | `$env:OWNER_DISCORD_WEBHOOK="…"` |
+| Persist a secret | `/etc/llmops.env` or `.env` | `setx OWNER_DISCORD_WEBHOOK "…"` (new windows only) or `.env` |
+| Free the port | `fuser -k 8000/tcp` | `Get-NetTCPConnection -LocalPort 8000 \| % { Stop-Process -Id $_.OwningProcess }` |
+| Make targets | `make serve`, `make verify` | no `make`: use the `poetry run …` commands |
+
