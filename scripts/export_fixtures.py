@@ -26,6 +26,9 @@ def export_fixtures(
     directory, and to ``<output_dir>/snapshots`` otherwise, so that exporting to a
     temporary directory (e.g. from tests) never touches the repository.
     """
+    # Regenerating the committed fixtures records the revisions the base now holds in the version ledger (K3);
+    # exporting to a scratch directory never touches the repository's ledger.
+    record_revisions = output_dir is None
     if output_dir is None:
         output_dir = Path(__file__).parent.parent / "fixtures"
     elif snapshot_dir is None:
@@ -50,6 +53,7 @@ def export_fixtures(
     export_sealed_snapshot(
         output_fixtures_path=output_dir / "sealed_snapshot.json",
         output_snapshot_dir=snapshot_dir,
+        record_revisions=record_revisions,
     )
 
     gc.collect()

@@ -101,6 +101,7 @@ from mcp_server.knowledge.tools import (
     put_embeddings,
     query_graph,
     request_kb_review,
+    resolve_asset_reference,
     review_kb_candidate,
     run_eval,
     run_similarity_eval,
@@ -459,6 +460,16 @@ def create_starlette_app() -> Starlette:
         data = json.loads(snap_file.read_text(encoding="utf-8"))
         etag = data.get("payload_sha256", "")
         return JSONResponse(data, headers={"ETag": etag, "Cache-Control": "public, max-age=86400"})
+
+    async def handle_knowledge_asset(request):
+        """Citable resolution of one element from a sealed snapshot (K3): ``?version=`` and ``?snapshot=`` are optional."""
+        res = resolve_asset_reference(
+            request.path_params.get("asset_id", ""),
+            version=request.query_params.get("version"),
+            snapshot=request.query_params.get("snapshot"),
+        )
+        status_code = {"ok": 200, "not_found": 404, "invalid_argument": 400}.get(res.get("status"), 500)
+        return JSONResponse(res, status_code=status_code)
 
     async def handle_knowledge_search(request):
         """Recherche REST d'assets dans le graphe de connaissances (Document Studio & clients HTTP)."""
@@ -1254,6 +1265,7 @@ def create_starlette_app() -> Starlette:
             Route("/visualize", endpoint=handle_visualize, methods=["GET"]),
             Route("/snapshot/latest", endpoint=handle_snapshot_latest, methods=["GET"]),
             Route("/snapshot/{snapshot_id}", endpoint=handle_snapshot_by_id, methods=["GET"]),
+            Route("/api/knowledge/assets/{asset_id}", endpoint=handle_knowledge_asset, methods=["GET"]),
             Route("/api/knowledge/search", endpoint=handle_knowledge_search, methods=["GET"]),
             Route("/api/knowledge/engagements", endpoint=handle_knowledge_engagements, methods=["GET"]),
             Route("/api/knowledge/suggestions", endpoint=handle_knowledge_suggestions, methods=["POST"]),

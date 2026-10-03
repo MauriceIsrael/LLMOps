@@ -34,6 +34,7 @@ from pipelines.kb_candidates.model import (
 )
 from pipelines.kb_candidates.owners import OwnersRegistry, load_owners
 from pipelines.kb_candidates.repository import CandidateRepository, get_repository
+from pipelines.knowledge_ref import bump_revision
 
 REVIEW_SCOPE = "kb:review"
 REMINDER_BUSINESS_DAYS = 5
@@ -472,10 +473,12 @@ class CandidateService:
                 if target is None:
                     raise CandidateError("target_asset_id", f"target asset '{candidate['target_asset_id']}' not found.")
                 path = target.path
+                fm["revision"] = bump_revision(target.path.read_text(encoding="utf-8"))  # K3: an accepted amendment
             else:
                 path = asset_path(self.kb_dir, candidate["asset_type"], asset_id, fm.get("framework"))
                 if path.exists():
                     raise CandidateStateError("proposed_content", f"{path} already exists.")
+                fm["revision"] = 1  # K3: a new element starts at revision 1
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(join_frontmatter(fm, body), encoding="utf-8")
 

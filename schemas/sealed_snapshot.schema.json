@@ -85,6 +85,31 @@
           "owner": { "type": "string" },
           "vendor": { "type": "string" },
           "last_reviewed": { "type": "string" },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Citable revision of the element (contract 1.15, K3): raised by every accepted amendment."
+          },
+          "knowledge_ref": {
+            "type": "object",
+            "description": "KnowledgeRef of the suite: a partial reference does not exist.",
+            "properties": {
+              "sourceId": { "const": "knowledge-hub" },
+              "knowledgeKey": { "type": "string" },
+              "version": { "type": "string" }
+            },
+            "required": ["sourceId", "knowledgeKey", "version"],
+            "additionalProperties": false
+          },
+          "content_sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "description": "Hash of `content`; the version ledger records it for every published revision."
+          },
+          "content": {
+            "type": "string",
+            "description": "Exact text of the element (front matter included): a reference resolves from the snapshot, never from the live base."
+          },
           "provenance": {
             "type": "object",
             "properties": {
