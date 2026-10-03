@@ -41,7 +41,9 @@ Minor versions only add interfaces or optional fields:
   ``403`` instead of ``500`` (K9).
 * ``1.15`` — snapshot channel aligned on the suite (ADR-KH-01 D6-D8). K1: every seal follows the ``canonical-json v1``
   profile, so ``payload_sha256`` of the sealed snapshot and the ``checksum`` of the conformity snapshot are
-  **recomputed** (same shapes, new values; a value the profile refuses fails the export).
+  **recomputed** (same shapes, new values; a value the profile refuses fails the export). K2: additive channel
+  envelope on the sealed snapshot (``emitter``, ``checksum``, ``rebuiltByEmitterTest``, ``regenerate``,
+  ``is_provisional``, ``provisional_reasons``).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """

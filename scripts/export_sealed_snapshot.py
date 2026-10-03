@@ -20,6 +20,7 @@ from mcp_server.core.db import ReadOnlyKuzuClient
 from mcp_server.core.version import SNAPSHOT_SCHEMA_VERSION
 from pipelines import canonical
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
+from pipelines.snapshot_envelope import channel_envelope
 
 
 def get_git_revision() -> str:
@@ -134,7 +135,9 @@ def export_sealed_snapshot(
     compliance_index: dict[str, dict[str, Any]] = {}
     controls_list = []
 
-    for ctrl in raw_controls:
+    # Sorted by id: the framework entry takes the version of its first control, which must not depend on the order in
+    # which the graph returns rows (a framework such as GSMA mixes several versions).
+    for ctrl in sorted(raw_controls, key=lambda c: c["id"]):
         cid = ctrl["id"]
         fw = ctrl.get("framework") or "UNKNOWN"
         ver = ctrl.get("version") or "1.0.0"
@@ -251,6 +254,7 @@ def export_sealed_snapshot(
         "source_revision": git_rev,
         "payload_sha256": payload_sha256,
         "schema_version": SNAPSHOT_SCHEMA_VERSION,
+        **channel_envelope(payload_sha256),  # K2: emitter, checksum, rebuiltByEmitterTest, regenerate, is_provisional
         **payload_data,
     }
 

@@ -663,6 +663,13 @@ export interface SealedSnapshotEnvelope {{
   source_revision: string;
   payload_sha256: string;
   schema_version: "1.0";
+  /** Channel envelope (contract 1.15, K2). */
+  emitter?: "knowledge-hub";
+  checksum?: string;
+  rebuiltByEmitterTest?: boolean;
+  regenerate?: string;
+  is_provisional?: boolean;
+  provisional_reasons?: {{ unripe_subjects: number; open_conflicts: number }};
   applicability_index: Record<string, {{ rules?: string[]; layers?: string[]; domains?: string[] }}>;
   assets: Asset[];
   glossary: Array<{{ term: string; definition: string; context?: string }}>;
