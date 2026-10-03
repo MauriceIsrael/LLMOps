@@ -800,6 +800,10 @@ Les consommateurs qui gèrent les engagements (Archinex, lots A1 à A4) n'ont pl
 
 Le Hub contient deux bases, connaissance et engagement ([ADR-KH-01](../adr/ADR-KH-01-contrats-exposes.md) A10, projet). La dépréciation du §5.13 est **annulée** : les routes `POST /api/elicitation/trigger`, `GET /api/elicitation/questions`, `GET /api/arbitration/{board,conflicts,statements}` et les outils MCP d'engagement sont en service, **sans** en-tête `Deprecation`, **sans** champ d'enveloppe `deprecation`, sans ligne de journal de dépréciation. Entrées, formes et codes sont ceux de la 1.13. Le champ `deprecation` reste un champ optionnel réservé (aucune interface n'est dépréciée en 1.14). Le générateur de document (legacy, lot K4) n'est pas concerné.
 
+### 5.15 Contrat 1.15 — Instantané aligné sur la suite (K1 à K3)
+
+**K1 — sceaux au profil canonical-json v1.** `payload_sha256` de l'instantané scellé (`GET /snapshot/latest`, `fixtures/sealed_snapshot.json`, `data/snapshots/*.json`) et `checksum` de l'instantané de conformité sont calculés par `pipelines/canonical.py` (profil de la suite, 48 vecteurs partagés), plus par `json.dumps`. **Les formes ne changent pas ; la valeur de `payload_sha256` change pour un même contenu** : un consommateur qui recalculait l'ancienne empreinte (JSON indenté, clés triées) doit adopter le profil (nombres au format ECMAScript, clés triées par unité de code UTF-16, `NaN`/`Infinity`/entiers au-delà de 2^53−1 refusés). Un test de garde interdit de calculer un sceau à partir d'un `json.dumps` hors du module. K2 et K3 complètent cette section.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

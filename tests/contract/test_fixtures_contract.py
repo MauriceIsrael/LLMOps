@@ -66,8 +66,8 @@ def test_sealed_snapshot_structure():
     assert required_sealed_keys.issubset(data.keys()), "Sealed snapshot missing required envelope keys!"
     assert data["payload_sha256"].startswith("sha256:"), "Missing or invalid sha256 prefix in payload_sha256!"
 
-    # Recalcul cryptographique réel du sceau SHA-256 sur le payload canonique (P1-8)
-    import hashlib
+    # Recalcul cryptographique réel du sceau sur le payload, au profil canonical-json v1 de la suite (K1)
+    from pipelines import canonical
 
     payload_data = {
         "applicability_index": data["applicability_index"],
@@ -77,8 +77,7 @@ def test_sealed_snapshot_structure():
         "controls": data.get("controls", []),
         "compliance_index": data.get("compliance_index", {}),
     }
-    canonical_json = json.dumps(payload_data, sort_keys=True, indent=2, default=str)
-    expected_hash = f"sha256:{hashlib.sha256(canonical_json.encode('utf-8')).hexdigest()}"
+    expected_hash = canonical.sha256(payload_data)
     assert data["payload_sha256"] == expected_hash, (
         f"Sealed snapshot payload checksum mismatch! Expected {expected_hash}, got {data['payload_sha256']}"
     )

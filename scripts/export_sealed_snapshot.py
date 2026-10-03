@@ -18,6 +18,7 @@ if str(ROOT_DIR) not in sys.path:
 from mcp_server.core.config import server_config
 from mcp_server.core.db import ReadOnlyKuzuClient
 from mcp_server.core.version import SNAPSHOT_SCHEMA_VERSION
+from pipelines import canonical
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
 
 
@@ -240,15 +241,15 @@ def export_sealed_snapshot(
         "compliance_index": compliance_index,
     }
 
-    # Canonical serialization to compute checksum
-    canonical_payload_json = json.dumps(payload_data, sort_keys=True, indent=2, default=str)
-    payload_sha256 = compute_sha256(canonical_payload_json)
+    # The seal follows the suite's canonical-json v1 profile (K1): a value the profile refuses (NaN, an integer beyond
+    # 2**53 - 1, a non-JSON type) fails the export instead of being approximated.
+    payload_sha256 = canonical.sha256(payload_data)
 
     envelope = {
         "snapshot_id": snapshot_id,
         "created_at": now_utc,
         "source_revision": git_rev,
-        "payload_sha256": f"sha256:{payload_sha256}",
+        "payload_sha256": payload_sha256,
         "schema_version": SNAPSHOT_SCHEMA_VERSION,
         **payload_data,
     }
