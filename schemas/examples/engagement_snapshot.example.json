@@ -1,18 +1,18 @@
 {
-  "schemaVersion": "1.1",
-  "snapshotId": "eng-example-eng-80273ff564a5",
+  "schemaVersion": "1.2",
+  "snapshotId": "eng-example-eng-f30a6fbc84ed",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:80273ff564a52ef10c73eef57de8e9ad9f199693ee4c8e50c957d23600c9b84d",
+  "checksum": "sha256:f30a6fbc84edf8d6ee9bdeaf8ac23cf5a8a1435c2dcb92f79dcb913a8ea2f42d",
   "data": {
     "engagement": {
       "id": "example-eng",
       "confidentiality": "confidential"
     },
     "pins": {
-      "contract_version": "1.19",
+      "contract_version": "1.20",
       "kb_snapshot": {
         "snapshot_id": "snapshot-2026-10-03-0000000",
         "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
@@ -74,7 +74,8 @@
             "id": "ADR-0001",
             "resolved": null
           }
-        ]
+        ],
+        "imported": false
       },
       {
         "id": "S-0002",
@@ -89,7 +90,8 @@
         "author": "@carl",
         "validated_by": "@ada",
         "validated_at": "2026-10-02T09:31:00",
-        "based_on": []
+        "based_on": [],
+        "imported": false
       },
       {
         "id": "S-0003",
@@ -109,7 +111,8 @@
             "id": "UNKNOWN-REF-1",
             "resolved": null
           }
-        ]
+        ],
+        "imported": true
       }
     ],
     "decisions": [
@@ -141,7 +144,8 @@
         "author": "@carl",
         "validated_by": "@ada",
         "validated_at": "2026-10-02T10:00:00",
-        "supersedes": ""
+        "supersedes": "",
+        "imported": false
       },
       {
         "id": "D-0002",
@@ -164,7 +168,8 @@
         "author": "@dan",
         "validated_by": "",
         "validated_at": "",
-        "supersedes": ""
+        "supersedes": "",
+        "imported": false
       }
     ],
     "conflicts": [

@@ -55,6 +55,7 @@
   "rest.POST /api/engagements/{engagement}/decisions/{decision_id}/assert": 200,
   "rest.POST /api/engagements/{engagement}/decisions/{decision_id}/withdraw": 200,
   "rest.POST /api/engagements/{engagement}/exports": 201,
+  "rest.POST /api/engagements/{engagement}/import": 200,
   "rest.POST /api/engagements/{engagement}/questions": 201,
   "rest.POST /api/engagements/{engagement}/questions/{question_id}/answers": 201,
   "rest.POST /api/engagements/{engagement}/requirements": 200,

@@ -9,7 +9,7 @@ Roles and the actions they allow::
     reader       read
     contributor  read, contribute            (propose statements and answers; nothing becomes asserted)
     decider      read, contribute, decide    (assert and arbitrate: only a person with this role asserts)
-    admin        everything above + export, members
+    admin        everything above + export, import, members
 
 ``members`` (create the engagement, manage members) is also allowed to the operator token (``server_admin``), which cannot
 read the content: operating the server and reading a programme's data are different powers.
@@ -35,12 +35,12 @@ from pipelines.governance.store import (
 )
 
 ROLES = ("reader", "contributor", "decider", "admin")
-ACTIONS = ("read", "contribute", "decide", "export", "members")
+ACTIONS = ("read", "contribute", "decide", "export", "import", "members")
 ROLE_ACTIONS: dict[str, frozenset[str]] = {
     "reader": frozenset({"read"}),
     "contributor": frozenset({"read", "contribute"}),
     "decider": frozenset({"read", "contribute", "decide"}),
-    "admin": frozenset({"read", "contribute", "decide", "export", "members"}),
+    "admin": frozenset({"read", "contribute", "decide", "export", "import", "members"}),
 }
 CONFIDENTIALITY = ("public", "internal", "confidential")
 ENGAGEMENT_ID = re.compile(r"^[a-z0-9-]{1,64}$")
