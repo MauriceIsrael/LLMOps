@@ -50,9 +50,12 @@ Minor versions only add interfaces or optional fields:
   audit; ``POST /api/engagements``, ``GET|PUT /api/engagements/{id}/members``, ``GET /api/engagements/{id}/me``,
   ``GET /api/engagements/{id}/audit``. A managed engagement is closed to everyone but its members in every environment;
   a refusal by role answers ``403`` with ``action`` and ``reason``. Unmanaged engagements behave as before.
+* ``1.17`` — writing into a managed engagement (K15): ``POST /api/engagements/{id}/{subjects, subjects/{name}/maturity,
+  statements, statements/{id}/assert, statements/{id}/withdraw, questions, questions/{id}/answers, requirements,
+  conflicts/{id}/arbitrate}``. Contributions are proposed; only a decider who is not the author asserts.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.16"
+CONTRACT_VERSION = "1.17"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

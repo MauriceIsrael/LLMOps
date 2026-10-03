@@ -1,0 +1,116 @@
+{
+  "interface": "rest.POST /api/engagements/{engagement}/questions/{question_id}/answers",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "created": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "statement": {
+                "keys": {
+                  "author": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "confidence": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "id": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "origin": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "predicate": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "role": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "section": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "status": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "subject": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "validated_at": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "validated_by": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "value": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

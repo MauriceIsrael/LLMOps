@@ -212,6 +212,7 @@ class ElicitationRepository:
             raise ValueError(f"Prédicat non autorisé : '{predicate_val}'")
         predicate = predicate_val
         status = statement.get("status", "active")
+        origin = statement.get("origin", "human")
         created_at = statement.get("created_at", datetime.now().isoformat())
         sub_name = statement.get("subject", "general")
 
@@ -242,6 +243,7 @@ class ElicitationRepository:
             st.verbatim = $verbatim,
             st.status = $status,
             st.based_on = $based_on_str,
+            st.origin = $origin,
             st.created_at = $created_at;
         """
         self.db_client.execute_cypher(
@@ -259,6 +261,7 @@ class ElicitationRepository:
                 "verbatim": verbatim,
                 "status": status,
                 "based_on_str": based_on_str,
+                "origin": origin,
                 "created_at": created_at,
             },
         )
@@ -270,6 +273,35 @@ class ElicitationRepository:
         )
 
         return s_id
+
+    def get_statement_record(self, statement_id: str) -> dict[str, Any] | None:
+        """A statement with its attribution (K15): author, origin, who asserted it and when."""
+        res = self.db_client.execute_cypher(
+            "MATCH (s:Statement {id: $id}) RETURN s.id as id, s.engagement as engagement, s.subject as subject, "
+            "s.section as section, s.predicate as predicate, s.value as value, s.author as author, s.role as role, "
+            "s.confidence as confidence, s.status as status, s.origin as origin, s.validated_by as validated_by, "
+            "s.validated_at as validated_at;",
+            params={"id": statement_id},
+        )
+        return res[0] if res and "error" not in res[0] else None
+
+    def validate_statement(self, statement_id: str, validated_by: str) -> None:
+        """A person asserts a proposed statement: it becomes active and records who asserted it, and when."""
+        self.db_client.execute_cypher(
+            "MATCH (s:Statement {id: $id}) SET s.status = 'active', s.validated_by = $by, s.validated_at = $at;",
+            params={"id": statement_id, "by": validated_by, "at": datetime.now().isoformat()},
+        )
+
+    def set_statement_status(self, statement_id: str, status: str) -> None:
+        self.db_client.execute_cypher(
+            "MATCH (s:Statement {id: $id}) SET s.status = $status;", params={"id": statement_id, "status": status}
+        )
+
+    def link_answer(self, statement_id: str, question_id: str) -> None:
+        self.db_client.execute_cypher(
+            "MATCH (s:Statement {id: $s}), (q:Question {id: $q}) MERGE (s)-[:ANSWERS]->(q);",
+            params={"s": statement_id, "q": question_id},
+        )
 
     def save_conflict(self, conflict_data: dict[str, Any], statement_ids: list[str]) -> str:
         """Enregistre un conflit d'architecture lié à un ou plusieurs énoncés."""

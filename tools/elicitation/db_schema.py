@@ -63,6 +63,9 @@ class ElicitationSchemaInitializer:
                     created_at STRING,
                     status STRING,
                     based_on STRING,
+                    origin STRING DEFAULT 'human',
+                    validated_by STRING DEFAULT '',
+                    validated_at STRING DEFAULT '',
                     PRIMARY KEY(id)
                 );
                 """
@@ -76,6 +79,12 @@ class ElicitationSchemaInitializer:
                 self.graph_store.execute_cypher("ALTER TABLE Statement ADD based_on STRING DEFAULT '[]';")
             except Exception:
                 pass
+            # K15: who produced the statement (human | llm-derived) and who asserted it (a person, never its author)
+            for column, default in (("origin", "human"), ("validated_by", ""), ("validated_at", "")):
+                try:
+                    self.graph_store.execute_cypher(f"ALTER TABLE Statement ADD {column} STRING DEFAULT '{default}';")
+                except Exception:
+                    pass
 
         # 3. Table Question
         if "Question" not in table_names:

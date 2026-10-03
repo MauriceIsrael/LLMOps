@@ -846,6 +846,29 @@ Corrigé au passage : la `version` d'un référentiel (`frameworks[].version`) d
 
 Niveaux de confidentialité : `public`, `internal`, `confidential`. Les e-mails ne sortent jamais du registre dans une réponse d'engagement ni dans l'audit ; l'audit nomme les personnes par handle et les jetons par une empreinte. Refus par rôle : `403 {"error": "forbidden", "action", "reason"}` avec `reason` parmi `actor_required`, `not_a_member`, `role_insufficient` ; un jeton hors portée reste un `403` sans `reason` (K9). Les routes existantes d'engagement demandent `read` ; `trigger`/`shred` avec persistance `contribute` ; `PUT …/frameworks/applicable` `decide`.
 
+### 5.17 Contrat 1.17 — Écriture dans un engagement géré (K15)
+
+Archinex est l'outil de délibération ; le Hub enregistre. Toutes les routes sont sous `/api/engagements/{id}/`, exigent un engagement **géré** (`409 engagement_not_managed` sinon) et les rôles du §5.16. Réponse : `{"status": "ok", "data": …}`.
+
+| Route | Rôle | Effet |
+|---|---|---|
+| `POST subjects` `{name, definition?}` | `contributor` | crée (`201`) ou retrouve (`200`) un sujet |
+| `POST subjects/{name}/maturity` `{level}` | `decider` | avance la maturité ; `L3_decided` et `L4_specified` exigent un énoncé **affirmé** sur le sujet et **aucun conflit ouvert** (`409 no_asserted_statement`, `open_conflict`) |
+| `POST statements` `{subject, value, confidence, section?, predicate?, role?, verbatim?, based_on?, origin?}` | `contributor` | propose un énoncé, `status: proposed` |
+| `POST statements/{id}/assert` | `decider` | l'énoncé devient `active`, avec `validated_by` et `validated_at` ; ouvre les conflits détectés (`conflicts_opened`) |
+| `POST statements/{id}/withdraw` | `contributor` (auteur) ou `decider` | `withdrawn` ; un autre contributeur : `403 not_author` |
+| `POST questions` `{question, subject?, section?, …}` | `contributor` | question ouverte |
+| `POST questions/{id}/answers` `{value, confidence, …}` | `contributor` | énoncé **proposé** lié à la question, qui devient `answered` |
+| `POST requirements` `{requirements: [{id, text, section?, category?, criticality?}]}` | `contributor` | 1 à 500 exigences ; un `id` existant avec le même texte est ignoré (`unchanged`), avec un autre texte : `409 requirement_changed` |
+| `POST conflicts/{id}/arbitrate` `{keep_statement_id, reason}` | `decider` | arbitre ; refusé si l'arbitre a écrit un des énoncés en cause |
+
+Règles communes :
+- **L'auteur est le membre** (son handle), jamais un nom du corps de requête (`author`, `status`, `validated_by` envoyés sont ignorés).
+- **Rien ne naît affirmé.** Personne n'affirme ce qu'il a écrit (`409 self_validation`). Un contenu `origin: "llm-derived"` est proposé comme le reste.
+- `confidence` ∈ `verified, designed, vendor-stated, stated-by-client, assumed` ; `verified` exige des preuves (`based_on`). Une valeur inconnue : `400` avec le champ.
+- **Idempotence** : l'en-tête `Idempotency-Key` (ou `idempotency_key`) donne le même identifiant ; un élément existant est renvoyé tel quel (`200`, `created: false`), jamais réécrit (une affirmation n'est pas remise à zéro par un rejeu). Les exigences sont idempotentes par leur `id`.
+- Colonnes ajoutées à l'énoncé : `origin`, `validated_by`, `validated_at` (additif).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

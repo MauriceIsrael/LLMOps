@@ -1,0 +1,96 @@
+{
+  "interface": "rest.POST /api/engagements/{engagement}/conflicts/{conflict_id}/arbitrate",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "conflict": {
+                "keys": {
+                  "arbitrated_by": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "detail": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "id": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "origin": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "resolution": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "statement_ids": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "status": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

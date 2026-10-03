@@ -1,0 +1,96 @@
+{
+  "interface": "rest.POST /api/engagements/{engagement}/questions",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "created": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "question": {
+                "keys": {
+                  "engagement": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "expected_shape": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "id": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "question": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "routed_to": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "section": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "status": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "why_it_matters": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

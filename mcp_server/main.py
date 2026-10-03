@@ -50,6 +50,7 @@ from mcp_server.engagement.tools import (
     get_subject,
     get_subject_trajectory,
 )
+from mcp_server.engagement.write_routes import build_write_routes
 from mcp_server.knowledge.tools import (
     _suggest_knowledge_improvement,
     add_eval_case,
@@ -1368,6 +1369,7 @@ def create_starlette_app() -> Starlette:
             Route("/api/engagements/{engagement}/members", endpoint=handle_engagement_members, methods=["GET", "PUT"]),
             Route("/api/engagements/{engagement}/me", endpoint=handle_engagement_me, methods=["GET"]),
             Route("/api/engagements/{engagement}/audit", endpoint=handle_engagement_audit, methods=["GET"]),
+            *build_write_routes(),  # K15
             Route("/api/knowledge/suggestions", endpoint=handle_knowledge_suggestions, methods=["POST"]),
             Route("/api/compliance/conformity-snapshot", endpoint=handle_compliance_conformity_snapshot, methods=["GET"]),
             Route("/api/compliance/frameworks", endpoint=handle_compliance_frameworks, methods=["GET"]),
