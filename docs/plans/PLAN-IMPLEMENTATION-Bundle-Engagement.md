@@ -16,7 +16,7 @@ Lots LLMOps **K1 à K4** et **C1**, lots Archinex **A16 à A19**, porte **G9**. 
 > en détient sous les préalables d'A10-d) ; les lots Archinex **A16 à A19** sont à reformuler par l'équipe Archinex (l'export n'est plus construit chez eux) ; **A22 est caduque** ; D14 est tranchée (le Hub porte le contrat).
 > Nouveaux lots LLMOps : **K9** (#46, préalable bloquant), **K10** (#48), **K11** (#49), **K12** (#50), **K13** (#51). Voir [`../SUITE-MAP.md`](../SUITE-MAP.md).
 > Les exigences de l'appel d'offres restent **côté Hub** en attendant la clarification avec la suite (A10-h).
-> **Numérotation de contrat** : K10 prend la **1.14** ; K1 (checksum canonique) prendra la 1.15.
+> **État au 3 octobre (contrat 1.18)** : livrés dans `main` ou en PR : K1 à K3 et K5 (1.15), K9, K10 (1.14), **K14** (rôles et engagements gérés, 1.16, issue #58), **K15** (API d'écriture, 1.17, #59), **K11** (instantané d'engagement, 1.18). Restent : K12 (#50), K13 (#51), K4, K6 à K8, C1. Deux écarts à ce plan : le canal d'engagement n'émet **pas** le « bundle » tel que décrit plus bas (le plan d'engagement du Hub ne détient ni décisions avec alternatives, ni architecture, ni conformité, ni journal de réutilisation) mais un instantané plus restreint, schéma `engagement_snapshot` ; les rôles et l'identité des personnes (K14) sont venus s'intercaler avant K11. Le « bundle » ci-dessous reste le modèle cible de ces compléments.
 
 ---
 
@@ -79,10 +79,12 @@ décision affirmée ; `is_provisional` et ses raisons **dérivés, jamais décla
 | **K3** | LLMOps | `version` citable par élément, résolution **depuis l'instantané scellé**, `GET /api/knowledge/assets/{id}`, `KnowledgeRef` documenté | K2 |
 | **K4** | LLMOps | Hub sans prose de livrable : gel puis retrait planifié du générateur « zero-draft HLD » et des gabarits (guide de migration vers le Document Engine). **Hors périmètre : `POST /api/prose/suggest-batch`**, assistance consommée par le Document Engine, corrigée par la PR #39 (citations de la doctrine ou aucun brouillon) | — |
 | **C1** | LLMOps | OpenAPI généré depuis le catalogue gelé, `docs/CLIENTS.md` à jour (instantané d'abord pour les composants de la suite) | K3 |
-| **K9** | LLMOps | Autorisation par appelant complète (403 et non 500, énumération filtrée, accès fermé par défaut) — **#46, préalable bloquant à toute donnée réelle** | — |
+| **K9** | LLMOps | Autorisation par appelant : 403 et non 500, énumération filtrée, identifiants validés — **livré** (#46) ; la fermeture par défaut est réalisée par K14 | — |
+| **K14** | LLMOps | Engagements gérés : rôles, membres, journal d'accès, fermés dans tous les environnements — **livré** (#58) | K9 |
+| **K15** | LLMOps | API d'écriture de l'engagement pour Archinex — **livré** (#59) | K14 |
 | **K10** | LLMOps | Lever la dépréciation du plan d'engagement (contrat 1.14) — #48 | — |
-| **K11** | LLMOps | Émission de l'instantané d'engagement par le Hub (ce bundle) — #49 | K1, K2, K3, K5, K9, K10 |
-| **K12** | LLMOps | Reprise des engagements déjà stockés côté Archinex — #50 | K10 |
+| **K11** | LLMOps | Émission de l'instantané d'engagement par le Hub — **livré** (#49), schéma `engagement_snapshot` plus restreint que ce bundle | K1, K2, K3, K5, K14, K15 |
+| **K12** | LLMOps | Reprise des engagements déjà stockés côté Archinex — #50 | K15 |
 | **K13** | LLMOps | Étanchéité de la capitalisation : aucune ancre de programme dans la base de connaissance — #51 | — |
 | **A16** *(à reformuler, équipe Archinex)* | Archinex | Export du bundle comme instantané scellé de la suite (TypeScript, vecteurs partagés), construit **sans rien inventer** ; refus si la vérification échoue ou si `confidentiality` manque | B1, K1 |
 | **A17** | Archinex | Publication : fichier et référence `SnapshotRef` (`sourceSystem`, `snapshotId`, `checksum`, `producedAt`) pour les consommateurs ; bouton « Exporter le dossier », bandeau « provisoire » et liste des écarts bloquants | A16 |

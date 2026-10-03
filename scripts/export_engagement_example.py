@@ -49,7 +49,7 @@ def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
              "author": "@carl", "validated_by": "@ada", "validated_at": "2026-10-02T09:31:00", "based_on": "[]"},
             {"id": "S-0003", "subject": "core-network", "section": "general", "predicate": "has_property",
              "value": "A second core site is under study.", "confidence": "stated-by-client", "status": "proposed", "origin": "human",
-             "author": "@dan", "validated_by": "", "validated_at": "", "based_on": '[{"id": "ADR-9999", "resolved": null}]'},
+             "author": "@dan", "validated_by": "", "validated_at": "", "based_on": '[{"id": "UNKNOWN-REF-1", "resolved": null}]'},
         ],
         "conflicts": [{"id": "C-0001", "kind": "contradiction", "detail": "Contradiction between S-0001 and S-0002.",
                        "status": "arbitrated", "resolution": "Latency budget", "arbitrated_by": "@ada"}],

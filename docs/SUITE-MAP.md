@@ -1,12 +1,13 @@
 # Carte des composants : qui fait quoi, et par quelle interface
 
-Date : 3 octobre 2026 (révisée après la décision du mainteneur : **le Hub contient deux bases**, ADR-KH-01 A10, projet).
+Date : 3 octobre 2026 (révisée après la décision du mainteneur : **le Hub contient deux bases**, ADR-KH-01 A10, projet ; état du code après K9 à K15 et K11, contrat 1.18).
 Ce document décrit LLMOps (rôle « Knowledge Hub »), Archinex et les composants de la suite (Document Studio, Document Engine, etc.).
 Chaque affirmation porte un niveau de preuve :
 
 - **[lu]** : lu dans le code ou dans un texte du dépôt cité.
 - **[ADR]** : dit par un ADR de la suite, dont certains sont encore *proposés* ; non vérifié dans le code du composant.
 - **[décidé]** : décision du mainteneur du Hub (2026-10-03), en projet tant que l'ADR n'est pas adopté et que la suite n'a pas répondu.
+- **[livré]** : implémenté dans ce dépôt et testé (contrat cité).
 - **[déduit]** : mon inférence. À valider avec le propriétaire du composant.
 
 Sources : `docs/plans/ALIGNEMENT-Document-Studio-Knowledge-Hub.md`, `docs/adr/ADR-KH-01-contrats-exposes.md` (A10),
@@ -72,9 +73,9 @@ Précisions :
 
 | Interface | Nature | État |
 |---|---|---|
-| Archinex ↔ LLMOps | REST (et MCP) : lecture de la base, écriture de l'engagement, candidats, similarité, confirmations de réutilisation. Contrat versionné (1.0 à 1.13), formes gelées dans `tests/contract/frozen/` | [lu] en service ; les routes d'engagement sont **encore dépréciées en 1.13** : levée en 1.14 (K10, #48) |
-| LLMOps → suite (connaissance) | Instantané scellé (`scripts/export_sealed_snapshot.py`) | [lu] existe ; écarts d'enveloppe, de sceau et de version : K1 à K3 |
-| LLMOps → suite (engagement) | Instantané scellé de la base d'engagement | [décidé] **à construire** : K11 (#49), après K9 |
+| Archinex ↔ LLMOps | REST (et MCP) : lecture de la base, candidats, similarité, confirmations de réutilisation, **écriture de l'engagement** (sujets, énoncés, questions, exigences, arbitrage). Contrat versionné (1.0 à 1.18), formes gelées dans `tests/contract/frozen/` | [livré] 1.14 (dépréciation levée), 1.16 (rôles), 1.17 (écriture) |
+| LLMOps → suite (connaissance) | Instantané scellé (`scripts/export_sealed_snapshot.py`) | [livré] canonical-json v1, enveloppe de canal, versions citables et résolution (1.15, K1 à K3). Le contenu reste à plat (pas de wrapper `data`) : à valider avec la suite |
+| LLMOps → suite (engagement) | Instantané scellé de la base d'engagement, `POST /api/engagements/{id}/exports` | [livré] 1.18 (K11) : enveloppe de la suite, identifiant dérivé du contenu, handles seulement, refus si la vérification échoue ; consommateur de la suite non établi |
 | Document Engine → LLMOps | Assistance de prose : `POST /api/prose/suggest-batch`, groundée (PR #39) | [lu] ; « l'assistance n'est pas un canal » [ADR] |
 | Suite ↔ LLMOps (règle) | Canal à instantané scellé, **jamais de RPC** | [ADR] amendement du 2026-09-13, opposable |
 | Archinex → suite | **Aucune** | [décidé] la suite ne connaît pas Archinex |
@@ -88,11 +89,11 @@ Chaque canal d'instantané porte une enveloppe commune (émetteur, empreinte SHA
 | # | Étape | État |
 |---|---|---|
 | 1 | Base de connaissance vide, enrichie par Archinex (NIS2, etc.) | [lu] Archinex ingère par l'API LLMOps ; revue humaine avant canonisation |
-| 2 | Soumission d'un appel d'offres via Archinex : exigences, sujets et manques extraits (proposés) → **base d'engagement du Hub** | [décidé] cible ; aujourd'hui l'engagement est dans Archinex (K10, K12) |
-| 3 | Sollicitation des architectes : leurs réponses deviennent des énoncés attribués, la base éclaire les propositions, la réutilisation est confirmée hypothèse par hypothèse | [lu] sous 1.13 ; Archinex écrit à nouveau dans le Hub après K10 |
+| 2 | Soumission d'un appel d'offres via Archinex : exigences, sujets et manques extraits (proposés) → **base d'engagement du Hub** | [livré] côté Hub (K15 : `POST requirements`, `subjects`, `statements`) ; l'engagement existant d'Archinex reste à reprendre (K12) |
+| 3 | Sollicitation des architectes : leurs réponses deviennent des énoncés attribués, la base éclaire les propositions, la réutilisation est confirmée hypothèse par hypothèse | [livré] côté Hub (K15 : questions, réponses, énoncés proposés puis affirmés par un autre membre) ; reste côté Archinex d'écrire dans le Hub |
 | 4 | Capitalisation de décisions vers la base de connaissance : candidat revu par un humain, **sans ancre de programme** | [lu] chemin des candidats ; test d'étanchéité : K13 |
 | 5 | Décisions propres au projet : restent dans la base d'engagement | [décidé] |
-| 6 | Délibération, puis **le Hub émet l'instantané scellé d'engagement** vers la suite | [décidé] K11 ; exige K9 |
+| 6 | Délibération, puis **le Hub émet l'instantané scellé d'engagement** vers la suite | [livré] K11 (rôle `admin`, K14) |
 | 7 | Génération de documents | [lu] Document Engine, sur `ProjectedGraph` + snapshots ; via l'adaptateur LLMOps#40 |
 
 ## 5. Ce qui manque ou reste à établir
@@ -105,9 +106,9 @@ Chaque canal d'instantané porte une enveloppe commune (émetteur, empreinte SHA
 3. **Exigences** : Hub ou Requirements Intake / Tuleap, laquelle fait foi ? En clarification.
 4. **L'émetteur d'un canal doit-il être un composant de la suite ?** Le Hub n'en est pas un (ADR-SUITE-05) ; à confirmer.
 5. **Maturité** : Archinex a `L5_archived`, la suite s'arrête à `L4_specified` ; à projeter vers `L4_specified` (archinex#31).
-6. **Autorisation (K9, #46)** : bloquante. Le Hub ne reçoit aucune donnée réelle d'engagement tant que le refus en 403, le
-   filtrage de l'énumération et la fermeture par défaut ne sont pas livrés.
-7. **Transition** : deux sources de vérité (Prisma d'Archinex et base d'engagement) pendant K12 ; durée à borner.
+6. **Autorisation** : [livré] K9 (403, énumération filtrée, identifiants validés) et K14 (engagements gérés, fermés à tous sauf leurs membres, dans tous les environnements, rôles et journal d'accès). Reste : l'identité de la personne est attestée par le client de confiance, sans signature ni SSO (#7). Tout engagement réel doit être **géré**.
+7. **Transition** : deux sources de vérité (Prisma d'Archinex et base d'engagement) tant que K12 (#50) n'est pas fait ; durée à borner avec l'équipe Archinex. Un énoncé repris sans personne qui l'ait affirmé bloquerait l'export (règle de K11) : K12 doit conserver les validateurs.
+7bis. **Le contenu de l'instantané d'engagement** est celui que le Hub détient (exigences, sujets, énoncés, conflits, manques) ; décisions avec alternatives, éléments d'architecture, conformité et réutilisation, que le modèle `engagement_bundle` prévoyait, n'y sont pas. Ce qu'attend la suite (adaptateur vers `ProjectedGraph`, LLMOps#40) reste à établir.
 8. **Contrôle de la prose en sortie** : vérifier que chaque affirmation chiffrée ou normative se retrouve dans les énoncés
    cités. Amorcé dans `pipelines/prose_grounding.py` ; l'endroit idéal est le pipeline du Document Engine (à confirmer).
 9. **Statut des ADR** : ADR-KH-01 (PR #41, A10 incluse) et la proposition à ADR-SUITE-05 ne sont pas adoptés.

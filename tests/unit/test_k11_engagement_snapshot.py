@@ -78,7 +78,7 @@ def test_a_ripe_conflict_free_engagement_is_not_provisional_and_an_open_conflict
 def test_citations_resolve_against_the_pinned_knowledge_snapshot_and_unknown_ones_are_listed():
     data = json.loads(EXAMPLE_TEXT)["data"]
     assert data["kb_references"][0]["knowledge_ref"] == {"sourceId": "knowledge-hub", "knowledgeKey": "decision:ADR-0001", "version": "1"}
-    assert data["unresolved_references"] == [{"statement_id": "S-0003", "id": "ADR-9999"}]
+    assert data["unresolved_references"] == [{"statement_id": "S-0003", "id": "UNKNOWN-REF-1"}]
     assert data["pins"]["kb_snapshot"]["snapshot_id"] == "snapshot-2026-10-03-0000000"
 
 

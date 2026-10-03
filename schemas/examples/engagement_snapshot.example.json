@@ -1,18 +1,18 @@
 {
   "schemaVersion": "1.0",
-  "snapshotId": "eng-example-eng-6491cd842259",
+  "snapshotId": "eng-example-eng-86a35105b1e0",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:6491cd842259e1d9330635df65d1f357bf3ee8a35bb589d7060ebb97121c7e1b",
+  "checksum": "sha256:86a35105b1e00e95e772cba92a44de8a0b460f25c7a35aae5dc3f73506d4f69c",
   "data": {
     "engagement": {
       "id": "example-eng",
       "confidentiality": "confidential"
     },
     "pins": {
-      "contract_version": "1.17",
+      "contract_version": "1.18",
       "kb_snapshot": {
         "snapshot_id": "snapshot-2026-10-03-0000000",
         "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
@@ -106,7 +106,7 @@
         "validated_at": "",
         "based_on": [
           {
-            "id": "ADR-9999",
+            "id": "UNKNOWN-REF-1",
             "resolved": null
           }
         ]
@@ -156,7 +156,7 @@
     "unresolved_references": [
       {
         "statement_id": "S-0003",
-        "id": "ADR-9999"
+        "id": "UNKNOWN-REF-1"
       }
     ]
   }
