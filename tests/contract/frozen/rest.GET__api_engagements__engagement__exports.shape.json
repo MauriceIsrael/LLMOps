@@ -1,0 +1,91 @@
+{
+  "interface": "rest.GET /api/engagements/{engagement}/exports",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "engagement": {
+                "type": [
+                  "string"
+                ]
+              },
+              "exports": {
+                "items": {
+                  "keys": {
+                    "checksum": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "is_provisional": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "producedAt": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "produced_by": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "snapshotId": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "sourceSystem": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

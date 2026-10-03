@@ -28,6 +28,7 @@ from sqlalchemy.exc import IntegrityError
 from pipelines.governance.store import (
     database_url,
     engagement_audit,
+    engagement_exports,
     engagement_members,
     engagement_registry,
     get_engine,
@@ -165,6 +166,37 @@ class EngagementAccess:
             row = conn.execute(select(engagement_members).where(
                 engagement_members.c.engagement == engagement, engagement_members.c.email == email.strip().lower())).first()
         return {"email": row.email, "handle": row.handle, "role": row.role} if row else None
+
+    # --- sealed exports (K11) --------------------------------------------------------------------------------------
+
+    def get_export(self, snapshot_id: str) -> dict[str, Any] | None:
+        with self.engine.connect() as conn:
+            row = conn.execute(select(engagement_exports).where(engagement_exports.c.snapshot_id == snapshot_id)).first()
+        if row is None:
+            return None
+        return {"engagement": row.engagement, "envelope": json.loads(row.envelope), "produced_by": row.produced_by}
+
+    def put_export(self, envelope: dict[str, Any], engagement: str, produced_by: str, is_provisional: bool) -> bool:
+        """Store an issued snapshot; ``False`` when that identifier (same content) already exists. Never overwrites."""
+        from pipelines import canonical
+
+        try:
+            with self.engine.begin() as conn:
+                conn.execute(engagement_exports.insert().values(
+                    snapshot_id=envelope["snapshotId"], engagement=engagement, checksum=envelope["checksum"],
+                    produced_at=envelope["createdAt"], produced_by=produced_by, is_provisional=is_provisional,
+                    envelope=canonical.dumps(envelope)))
+            return True
+        except IntegrityError:
+            return False
+
+    def list_exports(self, engagement: str) -> list[dict[str, Any]]:
+        with self.engine.connect() as conn:
+            rows = conn.execute(select(engagement_exports).where(engagement_exports.c.engagement == engagement)
+                                .order_by(engagement_exports.c.produced_at.desc(), engagement_exports.c.snapshot_id)).all()
+        return [{"sourceSystem": "knowledge-hub", "snapshotId": r.snapshot_id, "checksum": r.checksum,
+                 "producedAt": r.produced_at, "produced_by": r.produced_by, "is_provisional": bool(r.is_provisional)}
+                for r in rows]
 
     # --- audit ----------------------------------------------------------------------------------------------------
 

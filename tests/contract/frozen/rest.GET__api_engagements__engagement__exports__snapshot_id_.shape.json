@@ -1,0 +1,364 @@
+{
+  "interface": "rest.GET /api/engagements/{engagement}/exports/{snapshot_id}",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "checksum": {
+            "type": [
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": [
+              "string"
+            ]
+          },
+          "data": {
+            "keys": {
+              "conflicts": {
+                "items": {
+                  "keys": {
+                    "arbitrated_by": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "detail": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "kind": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "resolution": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "statement_ids": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "status": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "engagement": {
+                "keys": {
+                  "confidentiality": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "id": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "gaps": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "is_provisional": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "kb_references": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "pins": {
+                "keys": {
+                  "contract_version": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kb_snapshot": {
+                    "keys": {
+                      "checksum": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "snapshot_id": {
+                        "type": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "provisional_reasons": {
+                "keys": {
+                  "open_conflicts": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "unripe_subjects": {
+                    "type": [
+                      "number"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "requirements": {
+                "items": {
+                  "keys": {
+                    "category": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "criticality": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "section": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "status": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "text": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "statements": {
+                "items": {
+                  "keys": {
+                    "assertion_level": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "author": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "based_on": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "confidence": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "origin": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "predicate": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "section": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "status": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "subject": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "validated_at": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "validated_by": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "value": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "subjects": {
+                "items": {
+                  "keys": {
+                    "definition": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "maturity": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "name": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "unresolved_references": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "emitter": {
+            "type": [
+              "string"
+            ]
+          },
+          "schemaVersion": {
+            "type": [
+              "string"
+            ]
+          },
+          "snapshotId": {
+            "type": [
+              "string"
+            ]
+          },
+          "sourceRevision": {
+            "type": [
+              "string"
+            ]
+          },
+          "sourceSystem": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "string"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

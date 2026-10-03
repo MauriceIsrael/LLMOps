@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "1.0",
+  "snapshotId": "eng-example-eng-86a35105b1e0",
+  "sourceSystem": "knowledge-hub",
+  "emitter": "knowledge-hub",
+  "createdAt": "2026-10-03T12:00:00Z",
+  "sourceRevision": "example",
+  "checksum": "sha256:86a35105b1e00e95e772cba92a44de8a0b460f25c7a35aae5dc3f73506d4f69c",
+  "data": {
+    "engagement": {
+      "id": "example-eng",
+      "confidentiality": "confidential"
+    },
+    "pins": {
+      "contract_version": "1.18",
+      "kb_snapshot": {
+        "snapshot_id": "snapshot-2026-10-03-0000000",
+        "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    "is_provisional": true,
+    "provisional_reasons": {
+      "unripe_subjects": 1,
+      "open_conflicts": 0
+    },
+    "requirements": [
+      {
+        "id": "REQ-001",
+        "text": "The gateway shall survive the loss of one site.",
+        "section": "3.2",
+        "category": "resilience",
+        "criticality": "mandatory",
+        "status": "gap"
+      },
+      {
+        "id": "REQ-002",
+        "text": "Data at rest shall be encrypted.",
+        "section": "4.1",
+        "category": "security",
+        "criticality": "mandatory",
+        "status": "gap"
+      }
+    ],
+    "subjects": [
+      {
+        "id": "example-eng:core-network",
+        "name": "core-network",
+        "definition": "",
+        "maturity": "L1_framed"
+      },
+      {
+        "id": "example-eng:mcx-services",
+        "name": "mcx-services",
+        "definition": "Mission-critical services",
+        "maturity": "L3_decided"
+      }
+    ],
+    "statements": [
+      {
+        "id": "S-0001",
+        "subject": "mcx-services",
+        "section": "resilience",
+        "predicate": "has_property",
+        "value": "The gateway is active-active across two sites.",
+        "confidence": "designed",
+        "status": "active",
+        "assertion_level": "asserted",
+        "origin": "human",
+        "author": "@carl",
+        "validated_by": "@ada",
+        "validated_at": "2026-10-02T09:30:00",
+        "based_on": [
+          {
+            "id": "ADR-0001",
+            "resolved": null
+          }
+        ]
+      },
+      {
+        "id": "S-0002",
+        "subject": "mcx-services",
+        "section": "resilience",
+        "predicate": "has_property",
+        "value": "The gateway is active-passive.",
+        "confidence": "assumed",
+        "status": "superseded",
+        "assertion_level": "superseded",
+        "origin": "llm-derived",
+        "author": "@carl",
+        "validated_by": "@ada",
+        "validated_at": "2026-10-02T09:31:00",
+        "based_on": []
+      },
+      {
+        "id": "S-0003",
+        "subject": "core-network",
+        "section": "general",
+        "predicate": "has_property",
+        "value": "A second core site is under study.",
+        "confidence": "stated-by-client",
+        "status": "proposed",
+        "assertion_level": "proposed",
+        "origin": "human",
+        "author": "@dan",
+        "validated_by": "",
+        "validated_at": "",
+        "based_on": [
+          {
+            "id": "UNKNOWN-REF-1",
+            "resolved": null
+          }
+        ]
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "C-0001",
+        "kind": "contradiction",
+        "status": "arbitrated",
+        "statement_ids": [
+          "S-0001",
+          "S-0002"
+        ],
+        "detail": "Contradiction between S-0001 and S-0002.",
+        "resolution": "Latency budget",
+        "arbitrated_by": "@ada"
+      }
+    ],
+    "gaps": [
+      {
+        "id": "G1-core-network",
+        "kind": "G1_empty_section",
+        "description": "No asserted statement about 'core-network'.",
+        "subject": "core-network",
+        "blocking": false
+      },
+      {
+        "id": "Q-0001",
+        "kind": "G2_unanswered_blocking",
+        "description": "Which redundancy model for the core?",
+        "subject": "core-network",
+        "blocking": true
+      }
+    ],
+    "kb_references": [
+      {
+        "statement_id": "S-0001",
+        "knowledge_ref": {
+          "sourceId": "knowledge-hub",
+          "knowledgeKey": "decision:ADR-0001",
+          "version": "1"
+        },
+        "confidence": "verified"
+      }
+    ],
+    "unresolved_references": [
+      {
+        "statement_id": "S-0003",
+        "id": "UNKNOWN-REF-1"
+      }
+    ]
+  }
+}

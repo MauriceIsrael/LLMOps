@@ -53,9 +53,12 @@ Minor versions only add interfaces or optional fields:
 * ``1.17`` — writing into a managed engagement (K15): ``POST /api/engagements/{id}/{subjects, subjects/{name}/maturity,
   statements, statements/{id}/assert, statements/{id}/withdraw, questions, questions/{id}/answers, requirements,
   conflicts/{id}/arbitrate}``. Contributions are proposed; only a decider who is not the author asserts.
+* ``1.18`` — the sealed snapshot of an engagement (K11): ``POST|GET /api/engagements/{id}/exports`` and
+  ``GET /api/engagements/{id}/exports/{snapshotId}``, schema ``schemas/engagement_snapshot.schema.json``. The Hub is the
+  emitter of the channel; the export is refused (nothing produced) when its verification fails.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.17"
+CONTRACT_VERSION = "1.18"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

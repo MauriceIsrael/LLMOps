@@ -214,6 +214,19 @@ engagement_audit = Table(
     Column("detail", Text, nullable=False, default="{}"),
 )
 
+# Sealed engagement snapshots (K11): content-addressed, immutable, resolvable later. ``snapshot_id`` derives from the checksum,
+# so the same state gives the same identifier and an issued identifier never designates other content.
+engagement_exports = Table(
+    "engagement_exports", metadata,
+    Column("snapshot_id", String(128), primary_key=True),
+    Column("engagement", String(64), nullable=False, index=True),
+    Column("checksum", String(80), nullable=False),
+    Column("produced_at", String(32), nullable=False),
+    Column("produced_by", String(256), nullable=False),
+    Column("is_provisional", Boolean, nullable=False),
+    Column("envelope", Text, nullable=False),  # canonical JSON of the whole envelope, as issued
+)
+
 counters = Table(
     "counters", metadata,
     Column("key", String(128), primary_key=True),

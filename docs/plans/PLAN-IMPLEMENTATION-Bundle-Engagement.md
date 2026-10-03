@@ -8,7 +8,15 @@ Lots LLMOps **K1 à K4** et **C1**, lots Archinex **A16 à A19**, porte **G9**. 
 
 > **Ce qui a changé par rapport à la première version** : le rôle de LLMOps est celui du **Knowledge Hub** de la suite. Il ne génère aucune prose de livrable
 > et ne détient aucune donnée de programme. Les anciens lots B2 (service de vérification) et B3 (rendus HLD, fiches, diagrammes dans LLMOps) sont **supprimés** : la composition d'un
-> document appartient au Document Engine, la rédaction au Document Studio. Le bundle est un produit d'**Archinex**, publié comme instantané scellé.
+> document appartient au Document Engine, la rédaction au Document Studio. Le bundle est un produit d'**Archinex**, publié comme instantané scellé. *(Remplacé le 3 octobre : émis par le Hub, voir la révision ci-dessus.)*
+
+> **Révision du 3 octobre 2026 (ADR-KH-01 A10, projet)** — le Hub contient **deux bases** : connaissance (agnostique de programme) et **engagement** (exigences, décisions, énoncés, conflits, manques). Le « bundle » ci-dessous
+> devient **l'instantané scellé de la base d'engagement, émis par le Hub** (lot **K11**), non plus un produit d'Archinex. Archinex est l'outil d'aide à la décision et de sollicitation des experts : un client qui écrit
+> dans le Hub. La suite n'a pas à le connaître. Conséquences : la phrase « ne détient aucune donnée de programme » ci-dessus est **remplacée** (la base de connaissance n'en détient aucune ; la base d'engagement
+> en détient sous les préalables d'A10-d) ; les lots Archinex **A16 à A19** sont à reformuler par l'équipe Archinex (l'export n'est plus construit chez eux) ; **A22 est caduque** ; D14 est tranchée (le Hub porte le contrat).
+> Nouveaux lots LLMOps : **K9** (#46, préalable bloquant), **K10** (#48), **K11** (#49), **K12** (#50), **K13** (#51). Voir [`../SUITE-MAP.md`](../SUITE-MAP.md).
+> Les exigences de l'appel d'offres restent **côté Hub** en attendant la clarification avec la suite (A10-h).
+> **État au 3 octobre (contrat 1.18)** : livrés dans `main` ou en PR : K1 à K3 et K5 (1.15), K9, K10 (1.14), **K14** (rôles et engagements gérés, 1.16, issue #58), **K15** (API d'écriture, 1.17, #59), **K11** (instantané d'engagement, 1.18). Restent : K12 (#50), K13 (#51), K4, K6 à K8, C1. Deux écarts à ce plan : le canal d'engagement n'émet **pas** le « bundle » tel que décrit plus bas (le plan d'engagement du Hub ne détient ni décisions avec alternatives, ni architecture, ni conformité, ni journal de réutilisation) mais un instantané plus restreint, schéma `engagement_snapshot` ; les rôles et l'identité des personnes (K14) sont venus s'intercaler avant K11. Le « bundle » ci-dessous reste le modèle cible de ces compléments.
 
 ---
 
@@ -57,23 +65,32 @@ décision affirmée ; `is_provisional` et ses raisons **dérivés, jamais décla
 | **D11** | Que contient le bundle ? | Le texte des exigences du client est légitime, jamais son nom ; `confidentiality` obligatoire. **Validé.** |
 | **D12** | OSCAL | **Validé en principe** : export de la matrice de conformité au format OSCAL, produit par Archinex ; lot A19 |
 | **D13** | DOCX / PDF | **Sans objet** : le Document Engine produit déjà les formats ; il n'y a rien à convertir ici |
-| **D14** | Qui possède le schéma du bundle ? | **À trancher** (Q3 de l'alignement) : le producteur (Archinex) par défaut ; copie de référence dans LLMOps tant qu'aucun propriétaire n'est désigné |
+| **D14** | Qui possède le schéma du bundle ? | **Tranchée le 3 octobre** : le Hub, émetteur du canal « engagement » (A10-b). Reste à faire valider par la suite (registre de canaux) |
+| **D16** | Où vivent les exigences de l'appel d'offres ? | **Dans la base d'engagement du Hub** pour l'instant (A10-h) ; à clarifier avec Requirements Intake / Tuleap |
+| **D17** | Ingestion de l'appel d'offres | Faite côté Archinex (extraction par modèle, marquée `llm-derived`, **proposée** seulement) ; le Hub reste déterministe |
 
 ## 4. Lots
 
 | Lot | Dépôt | Objet | Prérequis |
 |---|---|---|---|
 | **B1** | LLMOps | Schéma de référence, vérificateur, exemple scellé, **module `pipelines/canonical.py` conforme au profil de la suite**, vecteurs partagés (**livré**) | — |
-| **K1** | LLMOps | Tous les sceaux au profil canonical-json v1 (instantané scellé, instantané de conformité) ; régénération des fixtures ; contrat 1.14 | B1 |
+| **K1** | LLMOps | Tous les sceaux au profil canonical-json v1 (instantané scellé, instantané de conformité) ; régénération des fixtures ; contrat 1.15 | B1 |
 | **K2** | LLMOps | Enveloppe de canal : `emitter`, `rebuiltByEmitterTest`, `is_provisional` + raisons, `checksum` canonique (additif : champs actuels conservés) ; test de fraîcheur à l'octet | K1 |
 | **K3** | LLMOps | `version` citable par élément, résolution **depuis l'instantané scellé**, `GET /api/knowledge/assets/{id}`, `KnowledgeRef` documenté | K2 |
 | **K4** | LLMOps | Hub sans prose de livrable : gel puis retrait planifié du générateur « zero-draft HLD » et des gabarits (guide de migration vers le Document Engine). **Hors périmètre : `POST /api/prose/suggest-batch`**, assistance consommée par le Document Engine, corrigée par la PR #39 (citations de la doctrine ou aucun brouillon) | — |
 | **C1** | LLMOps | OpenAPI généré depuis le catalogue gelé, `docs/CLIENTS.md` à jour (instantané d'abord pour les composants de la suite) | K3 |
-| **A16** | Archinex | Export du bundle comme instantané scellé de la suite (TypeScript, vecteurs partagés), construit **sans rien inventer** ; refus si la vérification échoue ou si `confidentiality` manque | B1, K1 |
+| **K9** | LLMOps | Autorisation par appelant : 403 et non 500, énumération filtrée, identifiants validés — **livré** (#46) ; la fermeture par défaut est réalisée par K14 | — |
+| **K14** | LLMOps | Engagements gérés : rôles, membres, journal d'accès, fermés dans tous les environnements — **livré** (#58) | K9 |
+| **K15** | LLMOps | API d'écriture de l'engagement pour Archinex — **livré** (#59) | K14 |
+| **K10** | LLMOps | Lever la dépréciation du plan d'engagement (contrat 1.14) — #48 | — |
+| **K11** | LLMOps | Émission de l'instantané d'engagement par le Hub — **livré** (#49), schéma `engagement_snapshot` plus restreint que ce bundle | K1, K2, K3, K5, K14, K15 |
+| **K12** | LLMOps | Reprise des engagements déjà stockés côté Archinex — #50 | K15 |
+| **K13** | LLMOps | Étanchéité de la capitalisation : aucune ancre de programme dans la base de connaissance — #51 | — |
+| **A16** *(à reformuler, équipe Archinex)* | Archinex | Export du bundle comme instantané scellé de la suite (TypeScript, vecteurs partagés), construit **sans rien inventer** ; refus si la vérification échoue ou si `confidentiality` manque | B1, K1 |
 | **A17** | Archinex | Publication : fichier et référence `SnapshotRef` (`sourceSystem`, `snapshotId`, `checksum`, `producedAt`) pour les consommateurs ; bouton « Exporter le dossier », bandeau « provisoire » et liste des écarts bloquants | A16 |
 | **A18** | Archinex | E2E « acte 7 » (API et navigateur) sur le vrai LLMOps | A17, K3 |
 | **A19** | Archinex | Export OSCAL de la matrice de conformité (D12), ré-export et différence entre deux bundles, retour vers la capitalisation | A18 |
-| **A20** | à désigner | **Adaptateur vers le Document Engine** : `bundle.architecture` → `ProjectedGraph`, `bundle.compliance` → instantané de conformité, `bundle.requirements` → instantané d'exigences (ADR-DE-05) ; correspondance des types d'éléments (`actor/system/component/datastore/network…`) vers `layer` et `c4Type` ; propriétaire à décider avec les équipes du moteur (Q2, D15) | A18 |
+| **A20** (LLMOps#40) | à désigner | **Adaptateur vers le Document Engine** : `bundle.architecture` → `ProjectedGraph`, `bundle.compliance` → instantané de conformité, `bundle.requirements` → instantané d'exigences (ADR-DE-05) ; correspondance des types d'éléments (`actor/system/component/datastore/network…`) vers `layer` et `c4Type` ; propriétaire à décider avec les équipes du moteur (Q2, D15) | A18 |
 
 Aucun lot ne rend de document. Le **consommateur** (Document Engine) prend `compile(ProjectedGraph, Blueprint, GenerationContext)` et des snapshots externes demandés : le bundle ne s'y branche donc pas tel quel, d'où le lot **A20** (adaptateur, propriétaire à désigner, question **Q2** répondue dans le rapport d'alignement).
 
@@ -98,7 +115,7 @@ Constat : le générateur « zero-draft HLD » (`generate_zero_draft_hld`, `/api
 
 ## 5. Porte G9
 
-Sur le scénario de bout en bout, Archinex exporte un bundle **scellé au profil de la suite** ; il passe la vérification (TypeScript et référence Python, mêmes cas de conformité) ; ses références à la base sont citables (version) et
+Sur le scénario de bout en bout, **le Hub** (ex-Archinex, voir la révision) exporte un bundle **scellé au profil de la suite** ; il passe la vérification (TypeScript et référence Python, mêmes cas de conformité) ; ses références à la base sont citables (version) et
 résolvent depuis l'instantané épinglé ; `is_provisional` est juste ; un bundle altéré (sceau, niveau, réutilisation sans confirmation) est refusé ; aucune adresse e-mail ; deux exports du même état ont le même `checksum`.
 Le rendu d'un document relève du Document Engine / Studio et se démontre avec leurs propriétaires, via l'adaptateur A20.
 
@@ -107,4 +124,6 @@ Le rendu d'un document relève du Document Engine / Studio et se démontre avec 
 - **Contrat non validé par son consommateur** : le schéma est une proposition ; le Document Engine consomme un `ProjectedGraph` et des snapshots, pas ce dossier : sa valeur directe est la provenance et le contrôle (statuts, `is_provisional`), l'entrée du moteur passe par l'adaptateur A20.
 - **Textes de la suite non opposables** : `ADR-KH-01` est « proposé » ; K1 à K4 s'y réfèrent, mais seuls l'amendement KH-1 et le profil canonical-json sont opposables. L'adopter est une décision du propriétaire du Hub (Q4).
 - **Un bundle prouve la provenance, pas la vérité** ; la double revue n'est une garantie que si les validateurs sont des personnes distinctes.
-- **Q1** (le journal de réutilisation est-il une donnée de programme ?) peut déplacer une partie du stockage d'LLMOps vers Archinex.
+- **Q1** (le journal de réutilisation est-il une donnée de programme ?) : tranchée, c'est de la connaissance sur la base (ADR-KH-01 A3-b), anonymisée ; K13 en fait un test.
+- **Le Hub détient désormais des données de programme** : il hérite de leurs obligations (confidentialité, classification) ; K9 est bloquant (A10-i).
+- **Deux sources de vérité pendant la transition** (Prisma d'Archinex et base d'engagement du Hub) : la durée est à borner dans K12.
