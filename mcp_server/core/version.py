@@ -39,9 +39,12 @@ Minor versions only add interfaces or optional fields:
   so the elicitation/arbitration routes and the engagement MCP tools are in service again. They no longer carry the
   ``Deprecation`` header nor the ``deprecation`` field; behaviour and shapes are those of 1.13. Authorisation answers
   ``403`` instead of ``500`` (K9).
+* ``1.15`` — snapshot channel aligned on the suite (ADR-KH-01 D6-D8). K1: every seal follows the ``canonical-json v1``
+  profile, so ``payload_sha256`` of the sealed snapshot and the ``checksum`` of the conformity snapshot are
+  **recomputed** (same shapes, new values; a value the profile refuses fails the export).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.14"
+CONTRACT_VERSION = "1.15"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

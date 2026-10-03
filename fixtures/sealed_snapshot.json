@@ -2,7 +2,7 @@
   "snapshot_id": "snapshot-2026-10-02-2ccd18e",
   "created_at": "2026-10-02T16:37:13Z",
   "source_revision": "2ccd18e14fd5b850073d9bc6bcea3cfc313df1fe",
-  "payload_sha256": "sha256:15d5a2a4fbb31d8f6a2178e5f291d132e94bb35856c50b4fc403fa3be56eccb2",
+  "payload_sha256": "sha256:83763b38b8d8150cb8800981ab85bb9355bb677be44e28ba6d2c5677690f6256",
   "schema_version": "1.0",
   "applicability_index": {
     "TPL-getting-started": {
