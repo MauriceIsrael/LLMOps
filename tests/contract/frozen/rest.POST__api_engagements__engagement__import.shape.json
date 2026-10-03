@@ -1,0 +1,172 @@
+{
+  "interface": "rest.POST /api/engagements/{engagement}/import",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "accepted": {
+                "items": {
+                  "keys": {
+                    "id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "kind": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "ref": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "status": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "adjusted": {
+                "items": {
+                  "keys": {
+                    "code": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "kind": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "reason": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "ref": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "applied": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "batch_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "counts": {
+                "keys": {
+                  "accepted": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "adjusted": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "rejected": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "unchanged": {
+                    "type": [
+                      "number"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "dry_run": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "notes": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "rejected": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "unchanged": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

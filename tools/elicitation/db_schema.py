@@ -66,6 +66,7 @@ class ElicitationSchemaInitializer:
                     origin STRING DEFAULT 'human',
                     validated_by STRING DEFAULT '',
                     validated_at STRING DEFAULT '',
+                    imported_from STRING DEFAULT '',
                     PRIMARY KEY(id)
                 );
                 """
@@ -80,7 +81,7 @@ class ElicitationSchemaInitializer:
             except Exception:
                 pass
             # K15: who produced the statement (human | llm-derived) and who asserted it (a person, never its author)
-            for column, default in (("origin", "human"), ("validated_by", ""), ("validated_at", "")):
+            for column, default in (("origin", "human"), ("validated_by", ""), ("validated_at", ""), ("imported_from", "")):
                 try:
                     self.graph_store.execute_cypher(f"ALTER TABLE Statement ADD {column} STRING DEFAULT '{default}';")
                 except Exception:
@@ -190,10 +191,16 @@ class ElicitationSchemaInitializer:
                     validated_at STRING,
                     supersedes STRING,
                     created_at STRING,
+                    imported_from STRING DEFAULT '',
                     PRIMARY KEY(id)
                 );
                 """
             )
+        else:
+            try:
+                self.graph_store.execute_cypher("ALTER TABLE Decision ADD imported_from STRING DEFAULT '';")
+            except Exception:
+                pass
 
         # 7. Tables de Relations
         if "ABOUT" not in table_names:

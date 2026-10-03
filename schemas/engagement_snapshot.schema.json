@@ -5,7 +5,7 @@
   "type": "object",
   "properties": {
     "schemaVersion": {
-      "const": "1.1"
+      "const": "1.2"
     },
     "snapshotId": {
       "type": "string",
@@ -262,6 +262,10 @@
                   ],
                   "additionalProperties": false
                 }
+              },
+              "imported": {
+                "type": "boolean",
+                "description": "True when the item was carried over from another system by an import (K12): its author, date and validator are the source's."
               }
             },
             "required": [
@@ -277,7 +281,8 @@
               "author",
               "validated_by",
               "validated_at",
-              "based_on"
+              "based_on",
+              "imported"
             ],
             "additionalProperties": false
           }
@@ -609,6 +614,10 @@
               },
               "supersedes": {
                 "type": "string"
+              },
+              "imported": {
+                "type": "boolean",
+                "description": "True when the item was carried over from another system by an import (K12): its author, date and validator are the source's."
               }
             },
             "required": [
@@ -627,7 +636,8 @@
               "author",
               "validated_by",
               "validated_at",
-              "supersedes"
+              "supersedes",
+              "imported"
             ],
             "additionalProperties": false
           }

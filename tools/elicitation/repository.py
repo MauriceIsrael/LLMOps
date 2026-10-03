@@ -266,6 +266,14 @@ class ElicitationRepository:
             },
         )
 
+        # K12: attribution carried over by an import (only when given: a re-save never blanks an existing assertion)
+        extra = {k: statement[k] for k in ("validated_by", "validated_at", "imported_from") if k in statement}
+        if extra:
+            self.db_client.execute_cypher(
+                "MATCH (st:Statement {id: $s_id}) SET " + ", ".join(f"st.{k} = ${k}" for k in extra) + ";",
+                params={"s_id": s_id, **extra},
+            )
+
         # Lier à la section/sujet via ABOUT
         self.db_client.execute_cypher(
             "MERGE (st:Statement {id: $s_id}) MERGE (sub:Subject {id: $sub_id}) MERGE (st)-[:ABOUT]->(sub);",
@@ -280,7 +288,7 @@ class ElicitationRepository:
             "MATCH (s:Statement {id: $id}) RETURN s.id as id, s.engagement as engagement, s.subject as subject, "
             "s.section as section, s.predicate as predicate, s.value as value, s.author as author, s.role as role, "
             "s.confidence as confidence, s.status as status, s.origin as origin, s.validated_by as validated_by, "
-            "s.validated_at as validated_at;",
+            "s.validated_at as validated_at, s.imported_from as imported_from;",
             params={"id": statement_id},
         )
         return res[0] if res and "error" not in res[0] else None
@@ -307,7 +315,7 @@ class ElicitationRepository:
 
     _DECISION_COLUMNS = ("id", "engagement", "subject", "decision", "rationale", "rejected", "reversibility", "consequences",
                          "accepted_violations", "based_on", "author", "status", "origin", "validated_by", "validated_at",
-                         "supersedes", "created_at")
+                         "supersedes", "created_at", "imported_from")
 
     def save_decision(self, decision: dict[str, Any]) -> str:
         """Create a decision. Lists are stored as JSON text; the caller has validated everything."""

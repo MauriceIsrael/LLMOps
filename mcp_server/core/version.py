@@ -59,9 +59,12 @@ Minor versions only add interfaces or optional fields:
 * ``1.19`` — decisions in the engagement base (K16): ``POST /api/engagements/{id}/decisions`` and ``…/decisions/{id}/{assert,
   withdraw}``; a subject is decided (``L3_decided``, ``L4_specified``) only on an **asserted decision** (was: an asserted
   statement). The snapshot gains ``decisions`` (``schemaVersion`` ``1.1``).
+* ``1.20`` — importing an engagement from another system (K12): ``POST /api/engagements/{id}/import`` (role ``admin``,
+  new action ``import``), ``?dry_run=true`` writes nothing. Provenance kept, nothing asserted in the batch's name; imported
+  items are flagged ``imported`` in the snapshot (``schemaVersion`` ``1.2``).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.19"
+CONTRACT_VERSION = "1.20"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

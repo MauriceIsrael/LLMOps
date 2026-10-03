@@ -835,7 +835,7 @@ Corrigé au passage : la `version` d'un référentiel (`frameworks[].version`) d
 | `reader` | `read` |
 | `contributor` | + `contribute` (proposer énoncés et réponses ; rien ne devient affirmé) |
 | `decider` | + `decide` (affirmer, arbitrer) |
-| `admin` | + `export` (instantané vers la suite), `members` |
+| `admin` | + `export` (instantané vers la suite), `import` (reprise depuis un autre système), `members` |
 
 | Route | Action requise |
 |---|---|
@@ -904,6 +904,22 @@ Règles : le sujet doit exister (`400`) ; `reversibility` ∈ `reversible, costl
 **Instantané** (`schemaVersion` `1.1`, additif) : `data.decisions` avec `assertion_level` dérivé du statut ; `kb_references` et `unresolved_references` portent `statement_id` **ou** `decision_id`. Vérifications ajoutées : `DECIDED_WITHOUT_DECISION` (sujet `L3`/`L4` sans décision affirmée), `MULTIPLE_ACTIVE_DECISIONS`, `INCONSISTENT_ALTERNATIVES`, `SUPERSESSION`, et les contrôles de personne des énoncés (`ASSERTED_WITHOUT_PERSON`, `SELF_VALIDATION`, `AUTHOR_NOT_A_HANDLE`, `VALIDATOR_ON_PROPOSED`, `DANGLING`).
 
 **Pas dans ce lot** : la conformité exigence → contrôle et G3 dérivés (voir K17) ; une lecture `GET` des décisions (elles sont lues par l'instantané).
+
+### 5.20 Contrat 1.20 — Import d'un engagement depuis un autre système (K12)
+
+Archinex tenait l'engagement ; le Hub est désormais le système d'enregistrement. L'import est fait **par le client qui connaît ses données** ; le Hub le rend sûr et répétable. Action `import` (rôle `admin` seulement, §5.16).
+
+`POST /api/engagements/{id}/import` (`?dry_run=true` ou `"dry_run": true` : **rien n'est écrit**) avec `{batch_id, subjects?, requirements?, statements?, decisions?, questions?, allow_partial?}` ; au plus 2000 éléments. Chaque énoncé, décision et question porte une `key` (idempotence : l'identifiant en dérive, un élément déjà présent est laissé **inchangé**, jamais écrasé).
+
+**Provenance, pas réécriture.** L'auteur (**handle d'un membre**), `created_at`, le valideur et `validated_at` d'origine sont conservés ; chaque élément repris est marqué `imported_from` le lot et `imported: true` dans l'instantané (schéma `1.2`).
+
+**Rien n'est affirmé au nom du lot.** Un élément est `active` seulement si la source nomme un valideur **membre `decider` ou `admin`, distinct de l'auteur**, avec la date ; sinon il est importé `proposed` et signalé (`adjusted`, `no_validator`). Une auto-validation est **rejetée** (`self_validation`).
+
+**Rien n'est réparé en silence.** Rejets (avec `ref`, `kind`, `code`, `path`, `reason`) : `unknown_author`, `validator_not_a_decider`, `validated_at_required`, `status_conflict`, `self_validation`, `email` (adresse dans un texte), `unknown_subject`, `invalid_argument` (confiance hors vocabulaire, `verified` sans preuve, date, statut), `requirement_changed`, `decision_exists`, `decision_pending`, `supersession_inconsistent`. Une maturité `L3`/`L4` que les décisions du lot n'étayent pas est importée à `L2_decomposed` et listée (`maturity_capped`). La détection de conflits tourne à l'application sur les énoncés affirmés ; la simulation ne la rejoue pas.
+
+**Tout ou rien par défaut** : un seul rejet et rien n'est écrit (`422 import_refused`, rapport complet dans `data`) ; `allow_partial` applique les éléments acceptés. Réponse : `{batch_id, dry_run, applied, counts, accepted, unchanged, adjusted, rejected, conflicts_opened?}`.
+
+Les conflits d'Archinex ne sont pas repris (le Hub détecte les siens à l'affirmation) ; les réponses aux questions arrivent comme énoncés.
 
 ---
 
