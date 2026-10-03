@@ -174,11 +174,11 @@ Le Hub est la **mémoire d'ingénierie transverse** de la suite (`ADR-SUITE-05` 
 |---|---|---|---|
 | 1 | Élicitation déterministe, sans LLM | **Tenu et étendu** : aucun appel de modèle dans les chemins du Hub (vecteurs de similarité calculés par le **client**, juge d'option par règles, contenu issu d'un modèle du client marqué `llm-derived` et jamais décidant) | — |
 | 2 | Fraîcheur fermée à la source | Fixtures : test existant. Instantané scellé et spécification d'interface : **non couverts** | K2 |
-| 3 | Isolation physique des plans | Non réexaminée | à vérifier |
+| 3 | Isolation physique des plans | **Tenue** (vérifié le 2026-10-03) : bases séparées (`data/knowledge.lbug`, `data/engagements/<id>.lbug`) ; identifiants d'engagement validés (`[a-z0-9-]+`, aucun séparateur de chemin) | — |
 | 4 | Version citable, résolution scellée | **Non tenue** : pas de coordonnée de version par élément ; la lecture d'un actif relit la base vivante | K3 |
-| 5 | Paramétrage du plan Connaissance | Non réexaminé à cette date | à vérifier avant adoption |
-| 6 | Autorisation par appelant | **Partielle** : jetons à portées (`kb:review`, `kb:delegate`), identité de l'expert par e-mail contrôlée par le registre des propriétaires (403 sinon), jeton de démonstration sans portée de gouvernance. Le prérequis « aucune donnée de programme classifiée » est tenu **par construction** (A3-c) ; le cloisonnement des engagements n'a pas été réexaminé | à vérifier |
-| 7 | Hygiène de production | Non réexaminée ; d'après la lecture de `scripts/generate_schemas.py` (non rejoué), `schemas/types.ts` contient encore du TypeScript écrit à la main sous l'étiquette « généré » | C1 |
+| 5 | Paramétrage du plan Connaissance | **Tenu** pour le plan Connaissance : les valeurs sont liées par paramètres, seuls des fragments fixes sont interpolés (`mcp_server/knowledge/tools.py`). **Écart restant** : `tools/elicitation/flows/intake.py:173` interpole `engagement` dans le Cypher (plan d'engagement, déprécié) | K9 |
+| 6 | Autorisation par appelant | **Partielle** (vérifié le 2026-10-03) : jetons à portées, identité de l'expert par e-mail contrôlée par le registre (403 sinon) ; **cloisonnement des engagements tenu** (un jeton cantonné à `eng-a` ne lit pas `eng-b`). **Défauts** : (i) le refus lève une exception non convertie : les routes REST d'engagement répondent **500** au lieu de 403 ; (ii) `GET /api/knowledge/engagements` énumère **toutes** les bases d'engagement à tout porteur d'un jeton valide, même cantonné ailleurs ; (iii) hors production et sans `ENGAGEMENT_TOKENS`, l'accès est ouvert (fermé en production). Le prérequis « aucune donnée de programme classifiée » reste tenu par construction (A3-c) | K9 |
+| 7 | Hygiène de production | **Sentinelles de test** : aucune occurrence en code de production (recherche hors `tests/`). **Types** : `schemas/types.ts` est produit par `scripts/generate_schemas.py` en **partie** : les unions de vocabulaires viennent des constantes Python, les interfaces sont écrites dans le gabarit ; la dérive des interfaces n'est pas détectée | C1 |
 | 8 | Provenance sur tout élément, identifiants stables | Partielle : provenance des actifs dans l'instantané, valideur et date des amendements ; identifiants jamais recyclés **non testé** | K3 |
 
 ### A5 — D4 (vocabulaires) : état
@@ -204,10 +204,10 @@ Le Hub est la **mémoire d'ingénierie transverse** de la suite (`ADR-SUITE-05` 
 Le Hub comme socle sémantique ; Cypher libre comme contrat ; **prose de livrable générée** (précisée par A3-a et A3-e) ; absorption d'objets possédés par la suite ; dépendance dure ; **RPC synchrone comme mécanisme d'intégration applicative de la suite**.
 
 ### A9 — Conséquences et suivi
-- Lots **K1** (sceaux), **K2** (enveloppe), **K3** (version citable), **K4** (retrait planifié du générateur de document), **K5** (confiance à 5 valeurs, `#42`), **C1** (OpenAPI, types réels) : issues `LLMOps#33` à `#37`, suivi `#38`, adaptateur `#40`.
+- Lots **K1** (sceaux), **K2** (enveloppe), **K3** (version citable), **K4** (retrait planifié du générateur de document), **K5** (confiance à 5 valeurs, `#42`), **C1** (OpenAPI, types réels) : issues `LLMOps#33` à `#37`, suivi `#38`, adaptateur `#40` ; lots ajoutés le 2026-10-03 : K6 (snapshot de conformité honnête), K7 (chemin de contribution suite → Hub), K8 (importeur d'index), K9 (autorisation) — numéros d'issue dans `#38`.
 - PR `LLMOps#39` (assistance honnête).
 - Chaque engagement de la Partie II est **testable** : K1 par les vecteurs partagés, K2 par le test de fraîcheur à l'octet, K3 par la résolution depuis l'instantané. Un engagement sans test reste une intention.
-- À vérifier avant adoption : A4 lignes 3, 5, 6 (cloisonnement), 7.
+- Lignes d'A4 initialement « à vérifier » : **vérifiées le 2026-10-03** (voir A4) ; elles ont révélé deux défauts réels (500 au lieu de 403, énumération des engagements) et un écart (Cypher interpolé du plan d'engagement), suivis par le lot **K9**.
 
 ---
 
