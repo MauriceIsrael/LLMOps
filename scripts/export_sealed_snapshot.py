@@ -20,6 +20,17 @@ from mcp_server.core.db import ReadOnlyKuzuClient
 from mcp_server.core.version import SNAPSHOT_SCHEMA_VERSION
 from pipelines import canonical
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
+from pipelines.knowledge_ref import (
+    LEDGER_NAME,
+    check_revisions,
+    content_sha256,
+    format_typed_id,
+    knowledge_ref,
+    load_ledger,
+    revision_of,
+    write_ledger,
+)
+from pipelines.snapshot_envelope import channel_envelope
 
 
 def get_git_revision() -> str:
@@ -33,24 +44,6 @@ def get_git_revision() -> str:
         return "06f3455"
 
 
-def format_typed_id(asset_id: str, asset_type: str | None) -> str:
-    """Format an asset identifier with a normalized type prefix (type:slug)."""
-    t = (asset_type or "").lower()
-    if t in ("decision", "adr") or asset_id.startswith("ADR-"):
-        return f"decision:{asset_id}"
-    elif t in ("principle",) or asset_id.startswith("P-"):
-        return f"principle:{asset_id}"
-    elif t in ("pattern",) or asset_id.startswith("PAT-"):
-        return f"pattern:{asset_id}"
-    elif t in ("template",) or asset_id.startswith("TPL-"):
-        return f"template:{asset_id}"
-    elif t in ("risk",) or asset_id.startswith("RSK-") or asset_id.startswith("R-"):
-        return f"risk:{asset_id}"
-    elif t in ("questionnaire", "framework"):
-        return f"{t}:{asset_id}"
-    return f"asset:{asset_id}"
-
-
 def compute_sha256(data: str | bytes) -> str:
     """Compute standard hex SHA-256 digest."""
     if isinstance(data, str):
@@ -62,8 +55,16 @@ def export_sealed_snapshot(
     output_fixtures_path: Path | None = None,
     output_snapshot_dir: Path | None = None,
     db_path: Path | None = None,
+    ledger_path: Path | None = None,
+    record_revisions: bool = False,
 ) -> dict[str, Any]:
-    """Generates a canonical sealed snapshot of the knowledge base."""
+    """Generates a canonical sealed snapshot of the knowledge base.
+
+    K3: every asset carries its ``revision``, its ``content`` and ``content_sha256`` and its ``knowledge_ref``. The content
+    hash of each revision is checked against ``version-ledger.json`` (default: the one of the knowledge base directory): a
+    revision whose content changed is refused; a new revision is refused unless ``record_revisions`` (the regeneration
+    command) records it.
+    """
     if output_fixtures_path is None:
         output_fixtures_path = ROOT_DIR / "fixtures" / "sealed_snapshot.json"
     if output_snapshot_dir is None:
@@ -134,7 +135,9 @@ def export_sealed_snapshot(
     compliance_index: dict[str, dict[str, Any]] = {}
     controls_list = []
 
-    for ctrl in raw_controls:
+    # Sorted by id: the framework entry takes the version of its first control, which must not depend on the order in
+    # which the graph returns rows (a framework such as GSMA mixes several versions).
+    for ctrl in sorted(raw_controls, key=lambda c: c["id"]):
         cid = ctrl["id"]
         fw = ctrl.get("framework") or "UNKNOWN"
         ver = ctrl.get("version") or "1.0.0"
@@ -166,6 +169,7 @@ def export_sealed_snapshot(
 
     # 5. Build enriched asset list and applicability index
     enriched_assets = []
+    published: dict[str, tuple[int, str]] = {}
     applicability_index: dict[str, dict[str, list[str]]] = {}
 
     for item in raw_assets:
@@ -192,9 +196,18 @@ def export_sealed_snapshot(
 
         text_hash = compute_sha256(text_content) if text_content else compute_sha256(aid)
 
+        # K3: the exact text of the element (front matter included: it carries the revision). The database stores the body
+        # only, so the source file is the reference; an element whose file cannot be read cannot be sealed.
+        if not (src_path_str and Path(src_path_str).exists()):
+            raise ValueError(f"asset '{aid}': source file '{src_path_str}' not found, its content cannot be sealed")
+        full_content = Path(src_path_str).read_text(encoding="utf-8")
+        revision = revision_of(full_content)
+        typed_key = format_typed_id(aid, atype)
+        published[typed_key] = (revision, content_sha256(full_content))
+
         provenance = {
             "document": f"{aid}.md",
-            "version": "1.0",
+            "version": str(revision),
             "section": "architecture",
             "text_sha256": text_hash,
         }
@@ -205,7 +218,7 @@ def export_sealed_snapshot(
 
         asset_obj: dict[str, Any] = {
             "id": aid,
-            "typed_id": format_typed_id(aid, atype),
+            "typed_id": typed_key,
             "title": item.get("title") or aid,
             "type": atype,
             "status": status,
@@ -214,6 +227,10 @@ def export_sealed_snapshot(
             "phase": phase_str or None,
             "owner": item.get("owner") or None,
             "last_reviewed": item.get("last_reviewed") or None,
+            "revision": revision,
+            "knowledge_ref": knowledge_ref(typed_key, revision),
+            "content_sha256": published[typed_key][1],
+            "content": full_content,
             "provenance": provenance,
             "supersedes": supersedes_map.get(aid, []),
             "superseded_by": superseded_by_map.get(aid, []),
@@ -230,6 +247,11 @@ def export_sealed_snapshot(
         }
 
     enriched_assets.sort(key=lambda x: x["id"])
+
+    ledger_file = ledger_path or (server_config.kb_dir / LEDGER_NAME)
+    updated_ledger = check_revisions(load_ledger(ledger_file), published, record=record_revisions)
+    if record_revisions:
+        write_ledger(ledger_file, updated_ledger)
 
     # 6. Build sealed snapshot payload
     payload_data = {
@@ -251,6 +273,7 @@ def export_sealed_snapshot(
         "source_revision": git_rev,
         "payload_sha256": payload_sha256,
         "schema_version": SNAPSHOT_SCHEMA_VERSION,
+        **channel_envelope(payload_sha256),  # K2: emitter, checksum, rebuiltByEmitterTest, regenerate, is_provisional
         **payload_data,
     }
 

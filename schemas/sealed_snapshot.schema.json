@@ -25,6 +25,35 @@
       "type": "string",
       "enum": ["1.0"]
     },
+    "emitter": {
+      "type": "string",
+      "description": "Channel emitter (contract 1.15, K2). Always 'knowledge-hub'."
+    },
+    "checksum": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Same value as payload_sha256, under the suite's channel-envelope name: sha256 of the payload at the canonical-json v1 profile."
+    },
+    "rebuiltByEmitterTest": {
+      "type": "boolean",
+      "description": "True: the emitter's freshness test rebuilds this file instead of reading it."
+    },
+    "regenerate": {
+      "type": "string",
+      "description": "Command that regenerates this file."
+    },
+    "is_provisional": {
+      "type": "boolean",
+      "description": "True when a subject is below L3_decided or a conflict is open: the whole snapshot is then provisional. Derived from provisional_reasons."
+    },
+    "provisional_reasons": {
+      "type": "object",
+      "properties": {
+        "unripe_subjects": { "type": "integer", "minimum": 0 },
+        "open_conflicts": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["unripe_subjects", "open_conflicts"]
+    },
     "applicability_index": {
       "type": "object",
       "description": "Context index mapping assets to architectural domains, phases, and rules.",
@@ -56,6 +85,31 @@
           "owner": { "type": "string" },
           "vendor": { "type": "string" },
           "last_reviewed": { "type": "string" },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Citable revision of the element (contract 1.15, K3): raised by every accepted amendment."
+          },
+          "knowledge_ref": {
+            "type": "object",
+            "description": "KnowledgeRef of the suite: a partial reference does not exist.",
+            "properties": {
+              "sourceId": { "const": "knowledge-hub" },
+              "knowledgeKey": { "type": "string" },
+              "version": { "type": "string" }
+            },
+            "required": ["sourceId", "knowledgeKey", "version"],
+            "additionalProperties": false
+          },
+          "content_sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "description": "Hash of `content`; the version ledger records it for every published revision."
+          },
+          "content": {
+            "type": "string",
+            "description": "Exact text of the element (front matter included): a reference resolves from the snapshot, never from the live base."
+          },
           "provenance": {
             "type": "object",
             "properties": {

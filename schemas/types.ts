@@ -45,9 +45,20 @@ export interface Asset {
   path?: string;
   source_path?: string;
   content?: string;
+  /** Contract 1.15 (K3): citable revision, reference, and hash of `content` in the sealed snapshot. */
+  revision?: number;
+  knowledge_ref?: KnowledgeRef;
+  content_sha256?: string;
   provenance?: AssetProvenance;
   supersedes?: Array<{ id: string; title?: string }>;
   superseded_by?: Array<{ id: string; title?: string }>;
+}
+
+/** KnowledgeRef of the suite (K3): a partial reference does not exist. */
+export interface KnowledgeRef {
+  sourceId: "knowledge-hub";
+  knowledgeKey: string;
+  version: string;
 }
 
 export interface Statement {
@@ -112,6 +123,13 @@ export interface SealedSnapshotEnvelope {
   source_revision: string;
   payload_sha256: string;
   schema_version: "1.0";
+  /** Channel envelope (contract 1.15, K2). */
+  emitter?: "knowledge-hub";
+  checksum?: string;
+  rebuiltByEmitterTest?: boolean;
+  regenerate?: string;
+  is_provisional?: boolean;
+  provisional_reasons?: { unripe_subjects: number; open_conflicts: number };
   applicability_index: Record<string, { rules?: string[]; layers?: string[]; domains?: string[] }>;
   assets: Asset[];
   glossary: Array<{ term: string; definition: string; context?: string }>;

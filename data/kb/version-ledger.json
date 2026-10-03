@@ -1,0 +1,200 @@
+{
+  "description": "Append-only record of the content hash of every published revision of a knowledge element (ADR-KH-01 D8, lot K3): the same {knowledgeKey, version} always resolves to the same bytes. Never edit by hand; `poetry run python scripts/export_fixtures.py` records new revisions.",
+  "revisions": {
+    "asset:BLU-hla-it-platform": {
+      "1": "sha256:b107eac9f9ef52474ce29425fbd44d6ed4960c7ddaf17d8915bc267c691b3d45"
+    },
+    "asset:BLU-hla-mcx": {
+      "1": "sha256:67d2eeaf2ab6a4b3de508c819113df55d1bbed2e4f6bfc91f8c5c852e6a73cee"
+    },
+    "asset:EST-netdevops-telco": {
+      "1": "sha256:24a3933678a95313234b4a5b3659570d1e3265f3a8683cf2c1329c342b170acd"
+    },
+    "asset:SKL-AUTO-GITOPS": {
+      "1": "sha256:6b4a37bc04e0b3f71cb4004cfb56c20e9f9376edb896639ed7cb1d03a3b40a23"
+    },
+    "asset:SKL-CRYPTO-HSM": {
+      "1": "sha256:7b775f220f24a90a0580a4794cdf7420daa57d1ad49050e5486b2e5f64c444e1"
+    },
+    "asset:SKL-KUBE-TELCO": {
+      "1": "sha256:5467ace257b7401829c0134365d0f54c48bb376579091b845c2ded1adcd2a012"
+    },
+    "asset:SKL-MOB-FLEET": {
+      "1": "sha256:79ae1b69508470976605cf7c26ad841712b0312a93bafaf636811adaa281d224"
+    },
+    "asset:SKL-NET-UNDERLAY": {
+      "1": "sha256:086e779af772547c738fd29d29b12f2ffd996308bcc6abe451f27011115adb15"
+    },
+    "asset:SKL-OBS-SOC": {
+      "1": "sha256:4fa5735dd68ae00f64f0cbf86305fb2fad037c3f45f132dfb42e5ef97ef6479c"
+    },
+    "asset:SKL-RESIL-DR": {
+      "1": "sha256:38930a473d72cc5d074032f1b6d4460b58ab126d319e9d11088d66e8a2bf93da"
+    },
+    "asset:SKL-SEC-ZEROTRUST": {
+      "1": "sha256:7d66f174dde2ccf6ffff2242787b1c726012764069909fc65f3632a0333defe9"
+    },
+    "asset:SKL-TELCO-CORE": {
+      "1": "sha256:eb72f4e35d8dfdc4b7e5b6f8dc2ca17c5acc50ba025d72b20eda77fcd4a26c3c"
+    },
+    "decision:ADR-0001": {
+      "1": "sha256:85df94b90c06ce7026c6195e93c570e15ba0f5f9f5b4231c479c6352ec1d48d0"
+    },
+    "decision:ADR-0002": {
+      "1": "sha256:7d0cf7c806468795bf4107f898becd00cad4359384418ef87664dcb007ffe556"
+    },
+    "decision:ADR-0003": {
+      "1": "sha256:ab5716649c4f561cfae796ea58a045bf95b88873bf596fe9175b6c6c8eb59702"
+    },
+    "decision:ADR-0004": {
+      "1": "sha256:558ed135a86efa95e2212adef108f4c0f65ff6058d2fdb7a6843bcdd189b8dd9"
+    },
+    "decision:ADR-0005": {
+      "1": "sha256:fad29674d458bcfbae9f3af6f812c09b27a501d906f992830e5a3209c6f653c4"
+    },
+    "decision:ADR-0006": {
+      "1": "sha256:bedeffb2a82579474391d7080184c36e327c73785df8fa65d3b6a36c44b7e090"
+    },
+    "decision:ADR-0007": {
+      "1": "sha256:0b57ef48f469cd40c65200c154ec7990c1de8efb1820eef458a1e857cadfee16"
+    },
+    "decision:ADR-0008": {
+      "1": "sha256:bceedaea730268fb17b3305e032766954c63ed95ba57c26f0e20f6fd7f70a8ad"
+    },
+    "decision:ADR-0009": {
+      "1": "sha256:4f2bbe8ac8ec618e1f1d487a98ec0e707458c4b2a44a7973042f5f871dc898a7"
+    },
+    "decision:ADR-0010": {
+      "1": "sha256:5e1c16afb5b069a13ec20b89813fe805b677a4d3e429c836ce9f55a5db65ec63"
+    },
+    "decision:ADR-0011": {
+      "1": "sha256:f962193221cf69e271ca0c2a60329894c926104232b32de28b35319aec514dab"
+    },
+    "decision:ADR-0012": {
+      "1": "sha256:ed7b5ae29788086ede90ce36028ffe80c0b870533eb871e2def4b48a7a1514c2"
+    },
+    "decision:ADR-0013": {
+      "1": "sha256:3730b62801ab0f1969bf35100f59187655c3bcef52b44fee2ea8255771bf1d2e"
+    },
+    "decision:ADR-0014": {
+      "1": "sha256:6197c4e7a50fe0197ffedf79a026d4cc8b4ce1d6d9d223e869f82b8cbc09c9f0"
+    },
+    "decision:ADR-0015": {
+      "1": "sha256:f7d703f5a8a765174445a26c664a427a27d2a627e53de3661ec77a05583f5574"
+    },
+    "decision:ADR-0016": {
+      "1": "sha256:43b64d478f7b2a52df59e31f5010606367db09d485f3221081e773135bea3585"
+    },
+    "pattern:PAT-001": {
+      "1": "sha256:aa6c246f52455fe926d4902201fb492b2f153571633dc711f4fd6d2cba2e9f89"
+    },
+    "pattern:PAT-002": {
+      "1": "sha256:227a7d41c30fec59baf9746bfba3ab60d980ecf41059ab09232cb4d3c15d6b5f"
+    },
+    "pattern:PAT-003": {
+      "1": "sha256:2652ce16b30f791a49988b567bb7db82f8a3a4653cf94995263ebe2862a19155"
+    },
+    "pattern:PAT-004": {
+      "1": "sha256:d3e5749fa796bd48b4792e7425c629f363fb24400ef4283b08e338d5a8c9ec28"
+    },
+    "pattern:PAT-005": {
+      "1": "sha256:77a3297f10d30c2325b85dbdc6686e90bc5c22e7b6c0fa638de46a103c6ce277"
+    },
+    "pattern:PAT-006": {
+      "1": "sha256:e19514edeed77ae4ca7d07da6b6558908a866e3d5d605c4a7bbfde18d2972f30"
+    },
+    "pattern:PAT-007": {
+      "1": "sha256:d55bb664b033a3b91e1c9629d6711fb7e24e40d15e4c9ffd507c3a1d797254f4"
+    },
+    "pattern:PAT-008": {
+      "1": "sha256:9a6825b69594484437fb832dd23e4c54475d3b8740e3d2d8c02698866fe6e27f"
+    },
+    "pattern:PAT-009": {
+      "1": "sha256:240efda49935ce3084c6719c797a5958c3a6ada638e4fd9c1e4c19713b7327cf"
+    },
+    "pattern:PAT-010": {
+      "1": "sha256:46c904c7fd1b80c0222677422a3f69f9f5d9258483ce2cb1ef7864d7dcc42874"
+    },
+    "pattern:PAT-011": {
+      "1": "sha256:72a611cc26c683a1235ddb5d695bdc13d3d6dec7b074a0669385b70dd4113e10"
+    },
+    "principle:P-001": {
+      "1": "sha256:dcfe5bf222072e39cad22712ed33d7e74e5a909cb92332bfec25031b054c251e"
+    },
+    "principle:P-002": {
+      "1": "sha256:cbd0e42b86616e722749e343ba331971524a37cca1bb2ce9f086dda700b553c6"
+    },
+    "principle:P-003": {
+      "1": "sha256:35a13a26572bf14e189e4180d277428ab4feb1c85c96c883f02163f1284fb252"
+    },
+    "principle:P-004": {
+      "1": "sha256:a408041db8f3a158c55e8a338abba6b8a97c46c6eeb92b012a79780a0173f73c"
+    },
+    "principle:P-005": {
+      "1": "sha256:75f5c26ef8713b26359622d0e4fb161dde117817953d49212e842596b0b997af"
+    },
+    "principle:P-006": {
+      "1": "sha256:6490874ead06386081e4789ba46a11c3af66293302a8a5fd34ff59623ef25a1e"
+    },
+    "principle:P-007": {
+      "1": "sha256:b962cf0f84116f54c9ac068a4b41ad6a3042cad645dabf34ef54d71b07f56252"
+    },
+    "principle:P-008": {
+      "1": "sha256:8a3fe56523296c86ec22e09ea8df8040a86080bfc90d8526feb0407641841d59"
+    },
+    "principle:P-009": {
+      "1": "sha256:495182f0558044229f2437c24682a4b98b686a1c5c85a0c628e52870cb9a9261"
+    },
+    "principle:P-010": {
+      "1": "sha256:617d56e8c2ec66b598698e0ab449f379eb40d009857a4159e1d83fc425d9df1e"
+    },
+    "principle:P-011": {
+      "1": "sha256:564b3d5a247e49be065afa14585db8faec130869e102a6c5e0df03306fc7942d"
+    },
+    "principle:P-012": {
+      "1": "sha256:85b871550b1623bc3acf9bb2d969b7e1733344f096960316e00d67b01420592c"
+    },
+    "principle:P-013": {
+      "1": "sha256:c316820b7e0c58fa1fe9b70cad820713635ac5063393541ee615db163045aeaf"
+    },
+    "principle:P-014": {
+      "1": "sha256:a79eb7c5d9bebc2c9bd2923a5e75aa994e3fa0675b0e28842bda7c991154701e"
+    },
+    "principle:P-015": {
+      "1": "sha256:2a9c266f65807205c3162da261fd4e1ca5f28228795a9209179879f25449a9a2"
+    },
+    "questionnaire:QST-cloud-platform": {
+      "1": "sha256:0af5ddc9f89c2d5f9953246a80fca170f87a24e8989dee031cddc42704af2738"
+    },
+    "questionnaire:QST-core-ems": {
+      "1": "sha256:aa43e0ae8c7c53bbb3556193a88500bb799f20eda9ca1ebbb6865758298964af"
+    },
+    "questionnaire:QST-service-management": {
+      "1": "sha256:f4ce3cbcdc81eee2b00bffcfaf7d8c535f0d771602e214a244cd7baf3f42d963"
+    },
+    "risk:RSK-netdevops-telco": {
+      "1": "sha256:074f7e5f23ff629e87022b037ce0eaf2d69224a171dedefbe31059e69c9cab2a"
+    },
+    "template:TPL-claims-register": {
+      "1": "sha256:a63f25e5f333b3995b818caced39bac73d12b5b2565da7175b9cae57ea75628d"
+    },
+    "template:TPL-getting-started": {
+      "1": "sha256:c09cd7957cc414c9533de4d5867996043f83b63222c20c9cdeb1a58fa8b4482a"
+    },
+    "template:TPL-glossary": {
+      "1": "sha256:c29eda36cc2dfd7fd2baacc4e0ac983100ef688a2303efa99a31c07bc6d6e013"
+    },
+    "template:TPL-hla-section-map": {
+      "1": "sha256:8bf84e364d4c48ffd8ccc38383c3f05cb5a8b1bac51fb7984b792903044b7e3b"
+    },
+    "template:TPL-mcp-spec": {
+      "1": "sha256:25df113b6cbcbc15ddda9fc508de5a9c8f43cd3d2601685a201e51396593a1f9"
+    },
+    "template:TPL-zero-draft-hld": {
+      "1": "sha256:aae97947c605be4a60d50222006508b2aeb5bbd546644330551778fa0e6f2465"
+    },
+    "template:TPL-zero-draft-hld-en": {
+      "1": "sha256:be0fedd7c6481bf4cf5ef0de116970204d57e8c75e805e7fda7525a751c67db2"
+    }
+  }
+}

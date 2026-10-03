@@ -804,6 +804,26 @@ Le Hub contient deux bases, connaissance et engagement ([ADR-KH-01](../adr/ADR-K
 
 **K1 — sceaux au profil canonical-json v1.** `payload_sha256` de l'instantané scellé (`GET /snapshot/latest`, `fixtures/sealed_snapshot.json`, `data/snapshots/*.json`) et `checksum` de l'instantané de conformité sont calculés par `pipelines/canonical.py` (profil de la suite, 48 vecteurs partagés), plus par `json.dumps`. **Les formes ne changent pas ; la valeur de `payload_sha256` change pour un même contenu** : un consommateur qui recalculait l'ancienne empreinte (JSON indenté, clés triées) doit adopter le profil (nombres au format ECMAScript, clés triées par unité de code UTF-16, `NaN`/`Infinity`/entiers au-delà de 2^53−1 refusés). Un test de garde interdit de calculer un sceau à partir d'un `json.dumps` hors du module. K2 et K3 complètent cette section.
 
+**K2 — enveloppe de canal.** Champs **additifs** de l'instantané scellé (`GET /snapshot/latest`, fixtures, `data/snapshots/*.json`), ceux que le registre de canaux de la suite demande à un émetteur ([`schemas/sealed_snapshot.schema.json`](../../schemas/sealed_snapshot.schema.json)) :
+
+| Champ | Valeur |
+|---|---|
+| `emitter` | `knowledge-hub` |
+| `checksum` | même valeur que `payload_sha256` (`sha256:<hex>` du contenu au profil canonical-json v1) |
+| `rebuiltByEmitterTest` | `true` : le test de fraîcheur **reconstruit** le fichier depuis `data/kb` (`tests/contract/test_sealed_snapshot_freshness.py`) et échoue s'il diffère |
+| `regenerate` | `poetry run python scripts/export_fixtures.py` |
+| `is_provisional`, `provisional_reasons {unripe_subjects, open_conflicts}` | **dérivés** des compteurs : provisoire dès qu'un sujet est sous `L3_decided` ou qu'un conflit est ouvert. Le plan Connaissance ne contient ni sujet ni conflit : ils valent `false`, `0`, `0`. L'instantané d'engagement (lot K11) porte les vrais compteurs |
+
+Les champs en snake_case existants sont conservés. L'enveloppe de la suite place le contenu sous `data` (`snapshotId`, `schemaVersion`…) : cet instantané garde son contenu à plat, pour ne pas le dupliquer ; l'adaptation est un choix à valider avec la suite (voir `docs/SUITE-MAP.md`). **K3 — référence citable.** Une référence de la suite est `KnowledgeRef {sourceId: "knowledge-hub", knowledgeKey, version}` : « une référence partielle n'existe pas ». `knowledgeKey` est la clé typée (`decision:ADR-0001`, `principle:P-002`, `pattern:PAT-006`…) ; `version` est la **révision** de l'élément (champ d'en-tête `revision`, entier ≥ 1, **1 si absent**, relevé par chaque amendement accepté via `kb promote`). Le champ `version` historique n'est pas utilisé : pour un contrôle c'est la révision du texte réglementaire (`2022/2555`, `Rel-18`).
+
+- **Instantané scellé** : chaque actif porte `revision`, `knowledge_ref`, `content` (texte exact, en-tête compris) et `content_sha256`. `provenance.version` n'est plus la constante `"1.0"` mais la révision. `source_path` n'y figure pas.
+- **Registre des révisions** `data/kb/version-ledger.json` (ajout seul) : hash du contenu de chaque révision publiée. L'export **refuse** un contenu modifié sans nouvelle révision, et une révision non enregistrée tant que `scripts/export_fixtures.py` (ou `kb publish`) ne l'a pas enregistrée. Les clés retirées restent au registre : un identifiant n'est jamais recyclé. Garantie : le même `{knowledgeKey, version}` résout toujours les mêmes octets.
+- **Résolution** : `GET /api/knowledge/assets/{id}[?version=&snapshot=]` (`id` : clé typée ou identifiant nu) et l'outil MCP `get_asset(id, version?, snapshot?)` quand `version` ou `snapshot` est donné. Le contenu vient **de l'instantané désigné** (`latest` par défaut), dont l'empreinte est **vérifiée** avant lecture, ainsi que le hash du contenu. Refus explicites, jamais le contenu courant : `404 version_not_in_snapshot` (avec `available_version`), `404 unknown_key`, `404 snapshot_unavailable`, `400` pour un identifiant d'instantané invalide, `500 snapshot_corrupt` / `content_corrupt`.
+- **Hérité, non citable** : `get_asset(id)` sans `version` ni `snapshot` lit toujours la **base vivante** (forme gelée de la 1.x ; `resolved_from: "live-base"` le dit) ; son champ `source_path` reste dans cette forme gelée jusqu'à la 2.0. Les anciennes références `KH:<id>@v1.0.0` (`external_ref`, suggestions) ne sont pas des `KnowledgeRef` et ne sont pas citables.
+- **Pas encore couverts** : termes de glossaire et contrôles (leur révision n'est pas portée par cet ajout).
+
+Corrigé au passage : la `version` d'un référentiel (`frameworks[].version`) dépendait de l'ordre des lignes renvoyées par le graphe (GSMA mêle plusieurs versions) ; elle vient désormais du premier contrôle par identifiant.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés
