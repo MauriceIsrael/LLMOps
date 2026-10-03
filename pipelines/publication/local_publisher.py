@@ -60,6 +60,7 @@ def publish(service: CandidateService, kb_dir: Path, db_path: Path, snapshot_dir
     return service.publish(
         ingest=lambda: rebuild_and_swap(kb_dir, db_path),
         snapshot=lambda: export_sealed_snapshot(output_fixtures_path=fixture, output_snapshot_dir=snapshot_dir,
-                                                db_path=db_path),
+                                                db_path=db_path, ledger_path=kb_dir / "version-ledger.json",
+                                                record_revisions=True),  # publishing records the new revisions
         actor=actor,
     )

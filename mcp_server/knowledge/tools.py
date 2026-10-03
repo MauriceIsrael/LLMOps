@@ -66,14 +66,45 @@ def list_assets(
         return handle_exception_response(e, context_action="list_assets")
 
 
-def get_asset(id: str) -> dict[str, Any]:
+SNAPSHOTS_DIR = Path("data/snapshots")
+
+
+def resolve_asset_reference(id: str, version: str | None = None, snapshot: str | None = None) -> dict[str, Any]:
+    """Resolve a citable reference ``{knowledgeKey, version}`` from a sealed snapshot (K3), never from the live base.
+
+    ``id`` is a typed key (``decision:ADR-0001``) or a bare identifier; ``snapshot`` designates the snapshot (default: the
+    latest). A version the snapshot does not hold is refused with the version it holds, never answered with other content.
+    """
+    from pipelines.knowledge_ref import ResolutionError, load_snapshot, resolve
+
+    if not id:
+        return invalid_argument_response("id", "A knowledge key is required.")
+    try:
+        return ok_response(resolve(load_snapshot(SNAPSHOTS_DIR, snapshot), id, version), count=1)
+    except ResolutionError as err:
+        if err.reason == "invalid_snapshot_id":
+            return invalid_argument_response("snapshot", str(err))
+        if err.reason in ("snapshot_corrupt", "content_corrupt"):
+            return {"status": "error", "reason": err.reason, "error": str(err), **err.detail}
+        return {"status": "not_found", "id": id, "reason": err.reason, "error": str(err), **err.detail}
+
+
+def get_asset(id: str, version: str | None = None, snapshot: str | None = None) -> dict[str, Any]:
     """Retrieve full content and frontmatter metadata for an architecture asset.
 
+    Without ``version`` nor ``snapshot`` the **live** base is read (current state, not citable: ``resolved_from`` says so).
+    With either, the asset is resolved from a sealed snapshot (K3): the same ``{knowledgeKey, version}`` always yields the
+    same bytes, and a version the snapshot does not hold is refused (see ``resolve_asset_reference``).
+
     Args:
-        id: Unique asset identifier (e.g. 'ADR-0014', 'P-002').
+        id: Unique asset identifier (e.g. 'ADR-0014', 'P-002') or typed key ('decision:ADR-0014').
+        version: Revision to resolve, from the snapshot.
+        snapshot: Snapshot identifier to resolve from (default: the latest sealed snapshot).
     """
     if not id:
         return not_found_response(id)
+    if version is not None or snapshot is not None:
+        return resolve_asset_reference(id, version, snapshot)
 
     query = (
         "MATCH (a:Asset {id: $id}) "
@@ -101,6 +132,7 @@ def get_asset(id: str) -> dict[str, Any]:
             parsed["last_reviewed"] = row.get("last_reviewed") or parsed.get("last_reviewed", "")
             parsed["version"] = row.get("version") or parsed.get("version", "1.0.0")
             parsed["external_ref"] = row.get("external_ref") or f"KH:{id}@v{parsed['version']}"
+            parsed["resolved_from"] = "live-base"
             return ok_response(parsed, count=1)
 
     # Fallback disk search if database row missing

@@ -596,9 +596,20 @@ export interface Asset {{
   path?: string;
   source_path?: string;
   content?: string;
+  /** Contract 1.15 (K3): citable revision, reference, and hash of `content` in the sealed snapshot. */
+  revision?: number;
+  knowledge_ref?: KnowledgeRef;
+  content_sha256?: string;
   provenance?: AssetProvenance;
   supersedes?: Array<{{ id: string; title?: string }}>;
   superseded_by?: Array<{{ id: string; title?: string }}>;
+}}
+
+/** KnowledgeRef of the suite (K3): a partial reference does not exist. */
+export interface KnowledgeRef {{
+  sourceId: "knowledge-hub";
+  knowledgeKey: string;
+  version: string;
 }}
 
 export interface Statement {{

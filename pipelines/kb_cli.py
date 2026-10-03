@@ -133,7 +133,8 @@ def publish_cmd(
     result = _service(kb_dir, db_path).publish(
         ingest=lambda: rebuild_knowledge_db(kb_dir, db_path),
         snapshot=lambda: export_sealed_snapshot(output_fixtures_path=fixture, output_snapshot_dir=snapshot_dir,
-                                                db_path=db_path),
+                                                db_path=db_path, ledger_path=kb_dir / "version-ledger.json",
+                                                record_revisions=True),
     )
     if not result["published"]:
         console.print(f"[yellow]{result['message']}[/yellow]")

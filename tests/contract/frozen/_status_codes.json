@@ -8,6 +8,7 @@
   "rest.GET /api/elicitation/questions": 200,
   "rest.GET /api/frameworks/ingestions": 200,
   "rest.GET /api/frameworks/ingestions/{ingestion_id}": 200,
+  "rest.GET /api/knowledge/assets/{asset_id}": 200,
   "rest.GET /api/knowledge/candidates": 200,
   "rest.GET /api/knowledge/candidates/{candidate_id}": 200,
   "rest.GET /api/knowledge/candidates/{candidate_id}/comments": 200,

@@ -356,6 +356,7 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/visualize"),
         _rest("GET", "/snapshot/latest"),
         _rest("GET", "/snapshot/{snapshot_id}", "/snapshot/snapshot-does-not-exist"),
+        _rest("GET", "/api/knowledge/assets/{asset_id}", "/api/knowledge/assets/decision:ADR-0001?version=1"),
         _rest("GET", "/api/knowledge/search", "/api/knowledge/search?query=MCX"),
         _rest("GET", "/api/knowledge/engagements"),
         _rest("POST", "/api/knowledge/suggestions", json_body={

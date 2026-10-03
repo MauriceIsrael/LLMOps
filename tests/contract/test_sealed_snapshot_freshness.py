@@ -67,3 +67,38 @@ def test_rebuild_is_deterministic(rebuilt, tmp_path):
     first, db = rebuilt
     again = export_sealed_snapshot(output_fixtures_path=tmp_path / "f.json", output_snapshot_dir=tmp_path / "s", db_path=db)
     assert again["payload_sha256"] == first["payload_sha256"]
+
+
+def test_the_export_refuses_content_that_changed_without_a_new_revision(rebuilt, tmp_path):
+    """K3: the same {knowledgeKey, version} must always resolve to the same bytes."""
+    from pipelines.knowledge_ref import LEDGER_NAME, VersionLedgerError, load_ledger, write_ledger
+
+    _, db = rebuilt
+    ledger = load_ledger(ROOT / "data/kb" / LEDGER_NAME)
+    ledger["decision:ADR-0001"]["1"] = "sha256:" + "0" * 64  # the ledger remembers other bytes for this revision
+    forged = tmp_path / LEDGER_NAME
+    write_ledger(forged, ledger)
+    with pytest.raises(VersionLedgerError, match="decision:ADR-0001 revision 1"):
+        export_sealed_snapshot(
+            output_fixtures_path=tmp_path / "f.json", output_snapshot_dir=tmp_path / "s", db_path=db, ledger_path=forged
+        )
+
+
+def test_the_export_refuses_a_revision_the_ledger_does_not_know(rebuilt, tmp_path):
+    from pipelines.knowledge_ref import LEDGER_NAME, VersionLedgerError, load_ledger, write_ledger
+
+    _, db = rebuilt
+    ledger = load_ledger(ROOT / "data/kb" / LEDGER_NAME)
+    del ledger["decision:ADR-0001"]
+    short = tmp_path / LEDGER_NAME
+    write_ledger(short, ledger)
+    with pytest.raises(VersionLedgerError, match="not in the version ledger"):
+        export_sealed_snapshot(
+            output_fixtures_path=tmp_path / "f.json", output_snapshot_dir=tmp_path / "s", db_path=db, ledger_path=short
+        )
+    # regenerating (recording) is what adds it, and the ledger file then holds it
+    export_sealed_snapshot(
+        output_fixtures_path=tmp_path / "f.json", output_snapshot_dir=tmp_path / "s", db_path=db, ledger_path=short,
+        record_revisions=True,
+    )
+    assert "decision:ADR-0001" in load_ledger(short)

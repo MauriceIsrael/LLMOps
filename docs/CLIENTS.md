@@ -70,6 +70,7 @@ Types for TypeScript clients: [`schemas/types.ts`](../schemas/types.ts); JSON Sc
 | Doctrine workshop and evaluations | `/api/knowledge/checks/simulate`, `/evals/…`, `/verdict-feedback` | 1.6 |
 | RFP helpers (legacy) | `/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint` | supported, frozen |
 | Writing assistance | `POST /api/prose/suggest-batch` (used by the Document Engine): grounded excerpts of the doctrine, or no draft | 1.x |
+| Citable reference (K3) | `GET /api/knowledge/assets/{id}?version=` — resolves `{knowledgeKey, version}` from a verified sealed snapshot, refuses an absent version | 1.15 |
 | Health, publication | `GET /api/knowledge/health`, `POST /api/knowledge/publications` | 1.8 |
 | Engagement part | `/api/elicitation/*`, `/api/arbitration/*` | in service (the 1.13 deprecation was cancelled by 1.14; the Hub holds the engagement base, [ADR-KH-01 A10](adr/ADR-KH-01-contrats-exposes.md)) |
 

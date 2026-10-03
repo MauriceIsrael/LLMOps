@@ -1,0 +1,138 @@
+{
+  "interface": "rest.GET /api/knowledge/assets/{asset_id}",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "confidence": {
+                "type": [
+                  "string"
+                ]
+              },
+              "content": {
+                "type": [
+                  "string"
+                ]
+              },
+              "content_sha256": {
+                "type": [
+                  "string"
+                ]
+              },
+              "id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "knowledge_ref": {
+                "keys": {
+                  "knowledgeKey": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "sourceId": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "version": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "snapshot": {
+                "keys": {
+                  "checksum": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "created_at": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "snapshot_id": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "title": {
+                "type": [
+                  "string"
+                ]
+              },
+              "type": {
+                "type": [
+                  "string"
+                ]
+              },
+              "typed_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "version": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

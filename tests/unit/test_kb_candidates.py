@@ -449,6 +449,7 @@ def test_promote_and_publish(service, kb, recorder, tmp_path):
     fm = yaml.safe_load(path.read_text().split("---")[1])
     assert fm["status"] == "active" and fm["confidence"] == "verified"
     assert fm["validated_by"] == ["@auto"] and str(fm["last_reviewed"]) == "2026-10-01"
+    assert fm["revision"] == 1  # K3: a new element starts at revision 1
     with pytest.raises(CandidateStateError):
         service.promote(c["id"])
 
@@ -474,6 +475,21 @@ def test_promote_amendment_rewrites_the_target(service, kb):
     text = (kb / "principles" / "P-001.md").read_text()
     assert "runbooks are versioned" in text
     assert "checks_status: validated" in text
+    assert "revision: 2" in text  # K3: an accepted amendment raises the revision (the synthetic base had none: 1 -> 2)
+
+
+def test_two_accepted_amendments_raise_the_revision_twice(service, kb):
+    for n, wording in enumerate(("Configurations and runbooks are versioned.", "Configurations, runbooks and policies are versioned.")):
+        base = (kb / "principles" / "P-001.md").read_text()
+        amended = base.replace(
+            "Configurations are versioned." if n == 0 else "Configurations and runbooks are versioned.", wording
+        )
+        c = service.submit(submission(amended, kind="amendment", asset_type="principle", target_asset_id="P-001",
+                                      title="Everything as code"))
+        service.review(c["id"], "accept", "@auto")
+        service.review(c["id"], "accept", "@maintainers")
+        service.promote(c["id"])
+    assert "revision: 3" in (kb / "principles" / "P-001.md").read_text()
 
 
 def test_promote_glossary_entry(service, kb):

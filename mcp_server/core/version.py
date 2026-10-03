@@ -43,7 +43,9 @@ Minor versions only add interfaces or optional fields:
   profile, so ``payload_sha256`` of the sealed snapshot and the ``checksum`` of the conformity snapshot are
   **recomputed** (same shapes, new values; a value the profile refuses fails the export). K2: additive channel
   envelope on the sealed snapshot (``emitter``, ``checksum``, ``rebuiltByEmitterTest``, ``regenerate``,
-  ``is_provisional``, ``provisional_reasons``).
+  ``is_provisional``, ``provisional_reasons``). K3: per-element ``revision``, ``knowledge_ref``, ``content`` and
+  ``content_sha256`` in the sealed snapshot, a version ledger, ``GET /api/knowledge/assets/{id}`` and optional
+  ``version`` / ``snapshot`` on ``get_asset`` (resolution from a verified sealed snapshot).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
