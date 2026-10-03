@@ -824,6 +824,28 @@ Les champs en snake_case existants sont conservés. L'enveloppe de la suite plac
 
 Corrigé au passage : la `version` d'un référentiel (`frameworks[].version`) dépendait de l'ordre des lignes renvoyées par le graphe (GSMA mêle plusieurs versions) ; elle vient désormais du premier contrôle par identifiant.
 
+### 5.16 Contrat 1.16 — Engagements gérés : rôles, membres, audit (K14)
+
+[ADR-KH-01](../adr/ADR-KH-01-contrats-exposes.md) A11. Un engagement qui a une ligne dans le registre (`POST /api/engagements`) est **géré** : il est fermé à tous sauf à ses membres, **dans tous les environnements** (le mode ouvert hors production ne concerne que les engagements non gérés, hérités). Il faut une base de gouvernance (`GOVERNANCE_DATABASE_URL` ou `CANDIDATES_BACKEND=sql`) ; sans elle les routes de gestion répondent `503 governance_database_required` et aucun engagement n'est géré.
+
+**Qui agit.** Une personne agit par un client de confiance : un jeton portant `eng:delegate` qui envoie `X-Actor-Email` (l'en-tête n'a aucun effet pour un autre jeton). Jetons : `eng:service` (lecture sans personne, ex. l'adaptateur de la suite), `eng:create` (créer un engagement). Le jeton d'exploitation (`server_admin`) gère les membres mais **ne lit pas** le contenu.
+
+| Rôle | Actions |
+|---|---|
+| `reader` | `read` |
+| `contributor` | + `contribute` (proposer énoncés et réponses ; rien ne devient affirmé) |
+| `decider` | + `decide` (affirmer, arbitrer) |
+| `admin` | + `export` (instantané vers la suite), `members` |
+
+| Route | Action requise |
+|---|---|
+| `POST /api/engagements` `{engagement, confidentiality, admin_email, admin_handle}` | jeton `server_admin` ou `eng:create` ; `201`, `409` si l'engagement existe, `400` sinon |
+| `GET`, `PUT /api/engagements/{id}/members` (`{members:[{email, handle, role}]}`) | `members` ; au moins un `admin`, e-mails et handles uniques |
+| `GET /api/engagements/{id}/me` | `read` ; `{managed, handle, role, actions, confidentiality}` |
+| `GET /api/engagements/{id}/audit?limit=` | `members` ; refus et actions autres que la lecture |
+
+Niveaux de confidentialité : `public`, `internal`, `confidential`. Les e-mails ne sortent jamais du registre dans une réponse d'engagement ni dans l'audit ; l'audit nomme les personnes par handle et les jetons par une empreinte. Refus par rôle : `403 {"error": "forbidden", "action", "reason"}` avec `reason` parmi `actor_required`, `not_a_member`, `role_insufficient` ; un jeton hors portée reste un `403` sans `reason` (K9). Les routes existantes d'engagement demandent `read` ; `trigger`/`shred` avec persistance `contribute` ; `PUT …/frameworks/applicable` `decide`.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

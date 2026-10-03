@@ -186,7 +186,10 @@ def test_all_engagement_tools_call_authorise():
         if func.__module__ != eng_module.__name__ or name.startswith("_") or name == "authorise":
             continue
         source = inspect.getsource(func)
-        assert "authorise(" in source, f"Engagement tool '{name}' does not call authorise choke point!"
+        # K14: the choke point is authorise_action (token scopes first, then the roles of a managed engagement)
+        assert "authorise_action(" in source or "authorise(" in source, (
+            f"Engagement tool '{name}' does not call authorise choke point!"
+        )
 
 
 def test_every_advertised_tool_is_callable():

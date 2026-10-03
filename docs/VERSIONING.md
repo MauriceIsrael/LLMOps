@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.15"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.16"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.15"
+  "schema_version": "1.16"
 }
 ```
 
@@ -36,6 +36,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.13` | Deprecation of the engagement part (elicitation / arbitration routes and engagement MCP tools): `Deprecation` header, `deprecation` field, logs; no change of behaviour ([DEPRECATION.md](DEPRECATION.md), [migration guide](migration-archinex.md)). |
 | `1.14` | Cancels the 1.13 deprecation (K10, [ADR-KH-01](adr/ADR-KH-01-contrats-exposes.md) A10): the engagement part is in service again, without `Deprecation` header or `deprecation` field. Authorisation answers `403` instead of `500` (K9). |
 | `1.15` | Snapshot channel aligned on the suite ([ADR-KH-01](adr/ADR-KH-01-contrats-exposes.md) D6-D8). **K1: all seals follow `canonical-json v1`**; the `payload_sha256` of the sealed snapshot changes value for the same content (it was computed over an indented `json.dumps`), and so can the `checksum` of the conformity snapshot for non-string numbers; shapes unchanged. A value the profile refuses (`NaN`, integer beyond 2^53−1, non-JSON type) now fails the export. **K2: channel envelope** (additive): `emitter`, `checksum`, `rebuiltByEmitterTest`, `regenerate`, `is_provisional`, `provisional_reasons`; a freshness test rebuilds the snapshot from `data/kb`. `frameworks[].version` is now deterministic. **K3: citable versions** — per-element `revision`, `knowledge_ref`, `content`, `content_sha256` in the sealed snapshot; `version-ledger.json`; `GET /api/knowledge/assets/{id}` and `get_asset(id, version?, snapshot?)` resolve from a verified snapshot and refuse an absent version. |
+| `1.16` | Managed engagements (K14, [ADR-KH-01](adr/ADR-KH-01-contrats-exposes.md) A11): roles, membership and audit, `/api/engagements*`; a managed engagement is closed to everyone but its members in every environment ([contract §5.16](contracts/knowledge-hub-api-v1.md)). |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

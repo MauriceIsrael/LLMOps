@@ -1,0 +1,98 @@
+{
+  "interface": "rest.GET /api/engagements/{engagement}/audit",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "engagement": {
+                "type": [
+                  "string"
+                ]
+              },
+              "events": {
+                "items": {
+                  "keys": {
+                    "action": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "actor": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "at": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "detail": {
+                      "keys": {
+                        "as": {
+                          "type": [
+                            "string"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "outcome": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

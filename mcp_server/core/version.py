@@ -46,9 +46,13 @@ Minor versions only add interfaces or optional fields:
   ``is_provisional``, ``provisional_reasons``). K3: per-element ``revision``, ``knowledge_ref``, ``content`` and
   ``content_sha256`` in the sealed snapshot, a version ledger, ``GET /api/knowledge/assets/{id}`` and optional
   ``version`` / ``snapshot`` on ``get_asset`` (resolution from a verified sealed snapshot).
+* ``1.16`` — managed engagements (K14, ADR-KH-01 A11): roles (reader, contributor, decider, admin), membership and
+  audit; ``POST /api/engagements``, ``GET|PUT /api/engagements/{id}/members``, ``GET /api/engagements/{id}/me``,
+  ``GET /api/engagements/{id}/audit``. A managed engagement is closed to everyone but its members in every environment;
+  a refusal by role answers ``403`` with ``action`` and ``reason``. Unmanaged engagements behave as before.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.15"
+CONTRACT_VERSION = "1.16"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

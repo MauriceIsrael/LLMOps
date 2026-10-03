@@ -359,6 +359,16 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/knowledge/assets/{asset_id}", "/api/knowledge/assets/decision:ADR-0001?version=1"),
         _rest("GET", "/api/knowledge/search", "/api/knowledge/search?query=MCX"),
         _rest("GET", "/api/knowledge/engagements"),
+        _rest("POST", "/api/engagements", json_body={
+            "engagement": "contract-eng", "confidentiality": "internal",
+            "admin_email": "admin@example.org", "admin_handle": "@admin"}),
+        _rest("GET", "/api/engagements/{engagement}/members", "/api/engagements/contract-eng/members"),
+        _rest("GET", "/api/engagements/{engagement}/me", "/api/engagements/unmanaged-eng/me"),
+        # the audit runs right after the creation, before any other event: its entries (and their detail keys) are stable
+        _rest("GET", "/api/engagements/{engagement}/audit", "/api/engagements/contract-eng/audit?limit=1"),
+        _rest("PUT", "/api/engagements/{engagement}/members", "/api/engagements/contract-eng/members", json_body={
+            "members": [{"email": "admin@example.org", "handle": "@admin", "role": "admin"},
+                        {"email": "reader@example.org", "handle": "@reader", "role": "reader"}]}),
         _rest("POST", "/api/knowledge/suggestions", json_body={
             "title": "Contract freeze suggestion",
             "rationale": "Exercise the suggestion contract.",

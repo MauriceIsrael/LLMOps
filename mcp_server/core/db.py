@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from mcp_server.core.auth import authorise
+from mcp_server.core.auth import authorise_action
 from mcp_server.core.config import server_config
 from mcp_server.core.exceptions import (
     EngagementNotFound,
@@ -35,13 +35,13 @@ def validate_engagement_id(engagement_id: str) -> str:
     return engagement_id
 
 
-def guard_engagement(engagement: str, caller: str | None = None) -> str:
+def guard_engagement(engagement: str, caller: str | None = None, action: str = "read") -> str:
     """K9 choke point for every entry point that builds a path or a query from an engagement identifier.
 
     Authorisation first (``Unauthorised`` -> 403), then the identifier format (``InvalidEngagementIdError`` -> 400),
     so that no caller reaches ``data/engagements/<id>.*`` outside its scopes and no identifier escapes the directory.
     """
-    authorise(caller=caller, engagement=engagement)
+    authorise_action(engagement, action, caller)
     if not isinstance(engagement, str) or not re.match(r"^[a-z0-9-]+$", engagement):
         raise InvalidEngagementIdError(str(engagement))
     return engagement
@@ -192,7 +192,7 @@ def open_connection(scope: str | None = None, caller: str | None = None) -> Read
         return ReadOnlyKuzuClient(db_path=server_config.knowledge_db_path)
 
     # 1. Authorisation first
-    authorise(caller=caller, engagement=scope)
+    authorise_action(scope, "read", caller)
 
     # 2. Resolution second
     path = get_engagement_path(scope)

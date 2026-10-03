@@ -783,7 +783,7 @@ def shred_rfp(
     if not rfp_text.strip():
         return invalid_argument_response("rfp_text", "rfp_text cannot be empty.")
     if persist:
-        guard_engagement(engagement)  # K9: before anything is written under data/engagements/
+        guard_engagement(engagement, action="contribute")  # K9/K14: before anything is written under data/engagements/
 
     try:
         from pipelines.rfp_shredder import RFPShredder
@@ -894,7 +894,7 @@ def trigger_rfp_elicitation(
     Args:
         engagement: Target engagement identifier.
     """
-    guard_engagement(engagement)  # K9
+    guard_engagement(engagement, action="contribute")  # K9/K14
     try:
         from tools.elicitation.zero_draft import ZeroDraftAssembler
 

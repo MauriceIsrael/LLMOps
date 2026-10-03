@@ -6,7 +6,7 @@ Provides tools for inspecting and interacting with engagement-specific graph sta
 from pathlib import Path
 from typing import Any
 
-from mcp_server.core.auth import authorise
+from mcp_server.core.auth import authorise_action
 from mcp_server.core.config import resolve_engagement
 from mcp_server.core.db import (
     get_engagement_path,
@@ -56,7 +56,7 @@ def get_subject(subject: str, engagement: str | None = None, db_path: str | Path
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     if not subject:
         return invalid_argument_response("subject", "Parameter 'subject' is required.")
@@ -87,7 +87,7 @@ def get_subject_trajectory(subject: str, engagement: str | None = None, db_path:
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     if not subject:
         return invalid_argument_response("subject", "Parameter 'subject' is required.")
@@ -113,7 +113,7 @@ def get_board(engagement: str | None = None) -> dict[str, Any]:
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     try:
         repo = _get_repo(engagement=eng)
@@ -138,7 +138,7 @@ def get_statements(engagement: str | None = None, subject: str | None = None, se
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     try:
         repo = _get_repo(engagement=eng)
@@ -169,7 +169,7 @@ def get_conflicts(engagement: str | None = None, status: str = "open") -> dict[s
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     try:
         repo = _get_repo(engagement=eng)
@@ -192,7 +192,7 @@ def get_open_questions(engagement: str | None = None, role: str | None = None) -
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     try:
         repo = _get_repo(engagement=eng)
@@ -222,7 +222,7 @@ def get_diagram_graph(
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     try:
         repo = _get_repo(engagement=eng, db_path=db_path)
@@ -277,7 +277,7 @@ def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     try:
         repo = _get_repo(engagement=eng)
@@ -312,7 +312,7 @@ def get_render_payload(engagement: str | None = None, db_path: str | Path | None
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     try:
         repo = _get_repo(engagement=eng, db_path=db_path)
@@ -361,7 +361,7 @@ def get_engagement_export(engagement: str | None = None) -> dict[str, Any]:
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     board_res = get_board(engagement=eng)
     payload_res = get_render_payload(engagement=eng)
@@ -382,7 +382,7 @@ def query_graph(cypher_query: str, engagement: str | None = None) -> dict[str, A
     eng = resolve_engagement(engagement)
     if not eng:
         return _no_engagement()
-    authorise(engagement=eng)
+    authorise_action(eng, "read")
 
     try:
         db_client = open_connection(scope=eng)
@@ -399,6 +399,6 @@ def get_graph_summary() -> dict[str, Any]:
 
     This server is read-only by design. Project data is written only through the elicitation engine's human-confirmation flow; see TPL-elicitation-proto for how to produce an engagement graph (E5).
     """
-    authorise(engagement=resolve_engagement() or "default")
+    authorise_action(resolve_engagement() or "default", "read")
     from mcp_server.knowledge.tools import get_graph_summary as kb_summary
     return kb_summary()
