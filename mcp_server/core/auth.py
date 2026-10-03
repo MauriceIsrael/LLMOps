@@ -142,3 +142,20 @@ def delegated_actor_email(caller: str | None = None) -> str | None:
     if email and has_scope(DELEGATE_SCOPE, caller):
         return email
     return None
+
+
+def open_access_warning() -> str | None:
+    """Message to log at HTTP startup when engagement access is open, else ``None`` (K9, ADR-KH-01 A10-d-1).
+
+    Access is open when no ``ENGAGEMENT_TOKENS`` are configured outside production: any authenticated
+    caller then reads every engagement. Production fails closed (see ``authorise``).
+    """
+    if os.getenv("ENGAGEMENT_TOKENS", "").strip():
+        return None
+    if os.getenv("LLMOPS_ENV", "development").lower().strip() in ("production", "prod"):
+        return None
+    return (
+        "ENGAGEMENT ACCESS IS OPEN: ENGAGEMENT_TOKENS is not set and LLMOPS_ENV is not production, so every "
+        "authenticated caller can read every engagement. Set ENGAGEMENT_TOKENS (token:eng1,eng2;...) before "
+        "putting real engagement data in this server."
+    )

@@ -10,6 +10,7 @@ from mcp_server.core.config import server_config
 from mcp_server.core.db import (
     ReadOnlyKuzuClient,
     discover_engagements,
+    guard_engagement,
     open_connection,
 )
 from mcp_server.core.envelope import (
@@ -697,6 +698,7 @@ def get_skills_matrix(
     engagement = resolve_engagement(engagement)
     if not engagement:
         return invalid_argument_response("engagement", "No engagement given and LLMOPS_ENGAGEMENT is not set.")
+    guard_engagement(engagement)  # K9
     bp_path = resolve_blueprint_path(blueprint_path)
     if bp_path is None:
         return invalid_argument_response("blueprint_path", "No blueprint given and LLMOPS_BLUEPRINT is not set.")
@@ -748,6 +750,8 @@ def shred_rfp(
     """
     if not rfp_text.strip():
         return invalid_argument_response("rfp_text", "rfp_text cannot be empty.")
+    if persist:
+        guard_engagement(engagement)  # K9: before anything is written under data/engagements/
 
     try:
         from pipelines.rfp_shredder import RFPShredder
@@ -783,6 +787,7 @@ def generate_zero_draft_hld(
         client_name: Name of the client or recipient.
         language: Target document language ('fr' or 'en', defaults to 'fr').
     """
+    guard_engagement(engagement)  # K9
     try:
         from tools.elicitation.zero_draft import ZeroDraftAssembler
 
@@ -810,6 +815,7 @@ def get_rfp_compliance_matrix(
     Args:
         engagement: Target engagement identifier.
     """
+    guard_engagement(engagement)  # K9
     try:
         from tools.elicitation.repository import ElicitationRepository
 
@@ -856,6 +862,7 @@ def trigger_rfp_elicitation(
     Args:
         engagement: Target engagement identifier.
     """
+    guard_engagement(engagement)  # K9
     try:
         from tools.elicitation.zero_draft import ZeroDraftAssembler
 

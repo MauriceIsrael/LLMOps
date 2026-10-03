@@ -33,3 +33,13 @@ class DatabaseError(LLMOpsError):
 QueryRejected = QueryRejectedError
 EngagementNotFound = EngagementNotFoundError
 
+
+
+class InvalidEngagementIdError(LLMOpsError, ValueError):
+    """Raised when an engagement identifier is not ``[a-z0-9-]+`` (path separators and dot segments included)."""
+
+    def __init__(self, engagement: str) -> None:
+        self.engagement = engagement
+        super().__init__(
+            f"Invalid engagement identifier '{engagement}'. Must contain only lowercase alphanumeric characters and hyphens."
+        )

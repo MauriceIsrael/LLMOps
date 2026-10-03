@@ -170,9 +170,9 @@ def check_node(state: IntakeState) -> dict[str, Any]:
 
     detected_conflicts = []
 
-    query = f"""
-    MATCH (s1:Statement {{engagement: '{engagement}', status: 'active'}})-[:ABOUT]->(sub:Subject),
-          (s2:Statement {{engagement: '{engagement}', status: 'active'}})-[:ABOUT]->(sub:Subject)
+    query = """
+    MATCH (s1:Statement {engagement: $engagement, status: 'active'})-[:ABOUT]->(sub:Subject),
+          (s2:Statement {engagement: $engagement, status: 'active'})-[:ABOUT]->(sub:Subject)
     WHERE s1.id < s2.id AND (
         (s1.predicate = s2.predicate AND s1.value <> s2.value) OR
         (s1.author <> s2.author AND s1.predicate <> s2.predicate)
@@ -181,7 +181,7 @@ def check_node(state: IntakeState) -> dict[str, Any]:
            s2.id as id2, s2.author as author2, s2.value as val2, s2.predicate as pred2,
            sub.name as subject;
     """
-    rows = db_client.execute_cypher(query)
+    rows = db_client.execute_cypher(query, {"engagement": engagement})
 
     if rows and "error" not in rows[0]:
         for r in rows:
