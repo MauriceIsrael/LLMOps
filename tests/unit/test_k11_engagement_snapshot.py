@@ -227,6 +227,10 @@ def test_provisional_follows_the_deliberation(client):
     d1 = client.get(f"{BASE}/exports/{client.post(f'{BASE}/exports', headers=as_('admin')).json()['data']['snapshotRef']['snapshotId']}",
                     headers=as_("reader")).json()["data"]
     assert d1["is_provisional"] is True and d1["provisional_reasons"]["unripe_subjects"] == 1
+    did = client.post(f"{BASE}/decisions", headers=as_("contributor"), json={
+        "subject": "mcx-services", "decision": "Active-active gateway", "rationale": "Meets the requirement.",
+        "reversibility": "costly"}).json()["data"]["decision"]["id"]
+    client.post(f"{BASE}/decisions/{did}/assert", headers=as_("admin"))
     client.post(f"{BASE}/subjects/mcx-services/maturity", headers=as_("decider"), json={"level": "L3_decided"})
     ref = client.post(f"{BASE}/exports", headers=as_("admin")).json()["data"]
     assert ref["is_provisional"] is False

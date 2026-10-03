@@ -303,6 +303,58 @@ class ElicitationRepository:
             params={"s": statement_id, "q": question_id},
         )
 
+    # --- decisions (K16) ------------------------------------------------------------------------------------------
+
+    _DECISION_COLUMNS = ("id", "engagement", "subject", "decision", "rationale", "rejected", "reversibility", "consequences",
+                         "accepted_violations", "based_on", "author", "status", "origin", "validated_by", "validated_at",
+                         "supersedes", "created_at")
+
+    def save_decision(self, decision: dict[str, Any]) -> str:
+        """Create a decision. Lists are stored as JSON text; the caller has validated everything."""
+        import json
+
+        row = {c: decision.get(c, "") for c in self._DECISION_COLUMNS}
+        for column in ("rejected", "consequences", "accepted_violations", "based_on"):
+            row[column] = json.dumps(decision.get(column) or [], ensure_ascii=False)
+        row["created_at"] = decision.get("created_at") or datetime.now().isoformat()
+        self.db_client.execute_cypher(
+            "CREATE (d:Decision {" + ", ".join(f"{c}: ${c}" for c in self._DECISION_COLUMNS) + "});", params=row)
+        return str(row["id"])
+
+    def get_decision_record(self, decision_id: str) -> dict[str, Any] | None:
+        import json
+
+        cols = ", ".join(f"d.{c} as {c}" for c in self._DECISION_COLUMNS)
+        res = self.db_client.execute_cypher(f"MATCH (d:Decision {{id: $id}}) RETURN {cols};", params={"id": decision_id})
+        if not res or "error" in res[0]:
+            return None
+        row = dict(res[0])
+        for column in ("rejected", "consequences", "accepted_violations", "based_on"):
+            try:
+                row[column] = json.loads(row.get(column) or "[]")
+            except ValueError:
+                row[column] = []
+        return row
+
+    def list_decisions(self, engagement: str) -> list[dict[str, Any]]:
+        res = self.db_client.execute_cypher(
+            "MATCH (d:Decision {engagement: $e}) RETURN d.id as id;", params={"e": engagement})
+        return [r for r in (self.get_decision_record(x["id"]) for x in (res or []) if x and "id" in x) if r]
+
+    def set_decision_status(self, decision_id: str, status: str) -> None:
+        self.db_client.execute_cypher(
+            "MATCH (d:Decision {id: $id}) SET d.status = $status;", params={"id": decision_id, "status": status})
+
+    def validate_decision(self, decision_id: str, validated_by: str) -> None:
+        """A person asserts a proposed decision; the decision it supersedes, if any, is superseded in the same gesture."""
+        now = datetime.now().isoformat()
+        self.db_client.execute_cypher(
+            "MATCH (d:Decision {id: $id}) SET d.status = 'active', d.validated_by = $by, d.validated_at = $at;",
+            params={"id": decision_id, "by": validated_by, "at": now})
+        record = self.get_decision_record(decision_id)
+        if record and record.get("supersedes"):
+            self.set_decision_status(record["supersedes"], "superseded")
+
     def save_conflict(self, conflict_data: dict[str, Any], statement_ids: list[str]) -> str:
         """Enregistre un conflit d'architecture lié à un ou plusieurs énoncés."""
         query_count = "MATCH (c:Conflict) RETURN c.id as id;"

@@ -56,9 +56,12 @@ Minor versions only add interfaces or optional fields:
 * ``1.18`` — the sealed snapshot of an engagement (K11): ``POST|GET /api/engagements/{id}/exports`` and
   ``GET /api/engagements/{id}/exports/{snapshotId}``, schema ``schemas/engagement_snapshot.schema.json``. The Hub is the
   emitter of the channel; the export is refused (nothing produced) when its verification fails.
+* ``1.19`` — decisions in the engagement base (K16): ``POST /api/engagements/{id}/decisions`` and ``…/decisions/{id}/{assert,
+  withdraw}``; a subject is decided (``L3_decided``, ``L4_specified``) only on an **asserted decision** (was: an asserted
+  statement). The snapshot gains ``decisions`` (``schemaVersion`` ``1.1``).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.18"
+CONTRACT_VERSION = "1.19"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

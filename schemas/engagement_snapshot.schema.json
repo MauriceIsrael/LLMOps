@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "EngagementSnapshot",
-  "description": "Sealed snapshot of an engagement emitted by the Knowledge Hub (contract 1.18, lot K11). Suite ExternalSnapshotEnvelope; checksum = sha256 of data at the canonical-json v1 profile; snapshotId derives from the checksum.",
+  "description": "Sealed snapshot of an engagement emitted by the Knowledge Hub (contract 1.18 (K11), schema 1.1 with decisions at contract 1.19 (K16)). Suite ExternalSnapshotEnvelope; checksum = sha256 of data at the canonical-json v1 profile; snapshotId derives from the checksum.",
   "type": "object",
   "properties": {
     "schemaVersion": {
-      "const": "1.0"
+      "const": "1.1"
     },
     "snapshotId": {
       "type": "string",
@@ -367,58 +367,267 @@
         "kb_references": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "statement_id": {
-                "type": "string"
-              },
-              "knowledge_ref": {
+            "oneOf": [
+              {
                 "type": "object",
                 "properties": {
-                  "sourceId": {
-                    "const": "knowledge-hub"
-                  },
-                  "knowledgeKey": {
+                  "statement_id": {
                     "type": "string"
                   },
-                  "version": {
+                  "knowledge_ref": {
+                    "type": "object",
+                    "properties": {
+                      "sourceId": {
+                        "const": "knowledge-hub"
+                      },
+                      "knowledgeKey": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "sourceId",
+                      "knowledgeKey",
+                      "version"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "confidence": {
                     "type": "string"
                   }
                 },
                 "required": [
-                  "sourceId",
-                  "knowledgeKey",
-                  "version"
+                  "statement_id",
+                  "knowledge_ref",
+                  "confidence"
                 ],
                 "additionalProperties": false
               },
-              "confidence": {
-                "type": "string"
+              {
+                "type": "object",
+                "properties": {
+                  "decision_id": {
+                    "type": "string"
+                  },
+                  "knowledge_ref": {
+                    "type": "object",
+                    "properties": {
+                      "sourceId": {
+                        "const": "knowledge-hub"
+                      },
+                      "knowledgeKey": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "sourceId",
+                      "knowledgeKey",
+                      "version"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "confidence": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "decision_id",
+                  "knowledge_ref",
+                  "confidence"
+                ],
+                "additionalProperties": false
               }
-            },
-            "required": [
-              "statement_id",
-              "knowledge_ref",
-              "confidence"
-            ],
-            "additionalProperties": false
+            ]
           }
         },
         "unresolved_references": {
           "type": "array",
           "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "statement_id": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "statement_id",
+                  "id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "decision_id": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "decision_id",
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
             "type": "object",
             "properties": {
-              "statement_id": {
+              "id": {
                 "type": "string"
               },
-              "id": {
+              "subject": {
+                "type": "string"
+              },
+              "decision": {
+                "type": "string"
+              },
+              "rationale": {
+                "type": "string"
+              },
+              "rejected": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "option": {
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "option",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "reversibility": {
+                "enum": [
+                  "reversible",
+                  "costly",
+                  "irreversible"
+                ]
+              },
+              "consequences": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "accepted_violations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "typed_id": {
+                      "type": "string"
+                    },
+                    "justification": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "typed_id",
+                    "justification"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "based_on": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "resolved": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "resolved"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "status": {
+                "enum": [
+                  "proposed",
+                  "active",
+                  "superseded",
+                  "withdrawn"
+                ]
+              },
+              "assertion_level": {
+                "enum": [
+                  "asserted",
+                  "proposed",
+                  "superseded",
+                  "withdrawn"
+                ],
+                "description": "Derived from status: only an asserted decision is written as a decision taken."
+              },
+              "origin": {
+                "enum": [
+                  "human",
+                  "llm-derived"
+                ]
+              },
+              "author": {
+                "type": "string"
+              },
+              "validated_by": {
+                "type": "string",
+                "pattern": "^(@[a-z0-9][a-z0-9._-]{0,62})?$"
+              },
+              "validated_at": {
+                "type": "string"
+              },
+              "supersedes": {
                 "type": "string"
               }
             },
             "required": [
-              "statement_id",
-              "id"
+              "id",
+              "subject",
+              "decision",
+              "rationale",
+              "rejected",
+              "reversibility",
+              "consequences",
+              "accepted_violations",
+              "based_on",
+              "status",
+              "assertion_level",
+              "origin",
+              "author",
+              "validated_by",
+              "validated_at",
+              "supersedes"
             ],
             "additionalProperties": false
           }
@@ -435,7 +644,8 @@
         "conflicts",
         "gaps",
         "kb_references",
-        "unresolved_references"
+        "unresolved_references",
+        "decisions"
       ],
       "additionalProperties": false
     }

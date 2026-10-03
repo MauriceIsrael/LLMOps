@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.18")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.19")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 

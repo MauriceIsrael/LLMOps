@@ -1,0 +1,130 @@
+{
+  "interface": "rest.POST /api/engagements/{engagement}/decisions/{decision_id}/withdraw",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "decision": {
+                "keys": {
+                  "accepted_violations": {
+                    "items": null,
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "author": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "based_on": {
+                    "items": null,
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "consequences": {
+                    "items": null,
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "decision": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "id": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "origin": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "rationale": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "rejected": {
+                    "items": null,
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "reversibility": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "status": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "subject": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "supersedes": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "validated_at": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "validated_by": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

@@ -36,7 +36,7 @@ from pipelines.snapshot_envelope import provisional
 from tools.elicitation.config import SUBJECT_LEVELS
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "engagement_snapshot.schema.json"
-SCHEMA_VERSION = "1.0"
+SCHEMA_VERSION = "1.1"
 EMITTER = "knowledge-hub"
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+")
 HANDLE = re.compile(r"^@[a-z0-9][a-z0-9._-]{0,62}$")
@@ -83,6 +83,7 @@ def collect(repo: Any, engagement: str) -> dict[str, Any]:
             "s.based_on as based_on;", e=engagement),
         "conflicts": conflicts,
         "involves": involved,
+        "decisions": repo.list_decisions(engagement),
         "questions": rows(
             "MATCH (q:Question {engagement: $e}) OPTIONAL MATCH (q)-[:TARGETS]->(s:Subject) RETURN q.id as id, "
             "q.gap_type as gap_type, q.question as question, q.status as status, s.name as subject;", e=engagement),
@@ -105,8 +106,23 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
     """The ``data`` of the snapshot from raw rows: deterministic, sorted, nothing guessed."""
     from pipelines.knowledge_ref import ResolutionError, resolve  # noqa: PLC0415
 
+    kb_refs: list[dict[str, Any]] = []
+    unresolved: list[dict[str, Any]] = []
+
+    def cite(owner: dict[str, str], based_on: list[dict[str, Any]]) -> None:
+        for ref in based_on:
+            found = None
+            if kb_snapshot is not None:
+                try:
+                    found = resolve(kb_snapshot, ref["id"])
+                except ResolutionError:
+                    found = None
+            if found:
+                kb_refs.append({**owner, "knowledge_ref": found["knowledge_ref"], "confidence": found["confidence"]})
+            else:
+                unresolved.append({**owner, "id": ref["id"]})
+
     statements = []
-    kb_refs, unresolved = [], []
     for r in sorted(raw["statements"], key=lambda r: r["id"]):
         based_on = _based_on(r.get("based_on"))
         status = r.get("status") or "proposed"
@@ -118,17 +134,22 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
             "author": r.get("author") or "", "validated_by": r.get("validated_by") or "",
             "validated_at": r.get("validated_at") or "", "based_on": based_on,
         })
-        for ref in based_on:
-            found = None
-            if kb_snapshot is not None:
-                try:
-                    found = resolve(kb_snapshot, ref["id"])
-                except ResolutionError:
-                    found = None
-            if found:
-                kb_refs.append({"statement_id": r["id"], "knowledge_ref": found["knowledge_ref"], "confidence": found["confidence"]})
-            else:
-                unresolved.append({"statement_id": r["id"], "id": ref["id"]})
+        cite({"statement_id": r["id"]}, based_on)
+
+    decisions = []
+    for r in sorted(raw.get("decisions", []), key=lambda r: r["id"]):
+        based_on = _based_on(r.get("based_on"))
+        status = r.get("status") or "proposed"
+        decisions.append({
+            "id": r["id"], "subject": r.get("subject") or "", "decision": r.get("decision") or "",
+            "rationale": r.get("rationale") or "", "rejected": list(r.get("rejected") or []),
+            "reversibility": r.get("reversibility") or "reversible", "consequences": list(r.get("consequences") or []),
+            "accepted_violations": list(r.get("accepted_violations") or []), "based_on": based_on, "status": status,
+            "assertion_level": ASSERTION_OF.get(status, status), "origin": r.get("origin") or "human",
+            "author": r.get("author") or "", "validated_by": r.get("validated_by") or "",
+            "validated_at": r.get("validated_at") or "", "supersedes": r.get("supersedes") or "",
+        })
+        cite({"decision_id": r["id"]}, based_on)
 
     subjects = [{"id": f"{engagement}:{r['name']}", "name": r["name"], "definition": r.get("definition") or "",
                  "maturity": r.get("level") or SUBJECT_LEVELS[0]} for r in sorted(raw["subjects"], key=lambda r: r["name"])]
@@ -159,7 +180,7 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
         "requirements": [{"id": r["id"], "text": r.get("text") or "", "section": r.get("section") or "",
                           "category": r.get("category") or "general", "criticality": r.get("criticality") or "mandatory",
                           "status": r.get("status") or "gap"} for r in sorted(raw["requirements"], key=lambda r: r["id"])],
-        "subjects": subjects, "statements": statements, "conflicts": conflicts,
+        "subjects": subjects, "statements": statements, "decisions": decisions, "conflicts": conflicts,
         "gaps": sorted(gaps, key=lambda g: g["id"]),
         "kb_references": kb_refs, "unresolved_references": unresolved,
     }
@@ -214,7 +235,7 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
     if data["engagement"]["confidentiality"] not in CONFIDENTIALITY:
         problems.append(Problem("CONFIDENTIALITY", "$.data.engagement.confidentiality", "confidentiality is required"))
 
-    for collection in ("requirements", "subjects", "statements", "conflicts", "gaps"):
+    for collection in ("requirements", "subjects", "statements", "decisions", "conflicts", "gaps"):
         ids = [i["id"] for i in data[collection]]
         for dup in sorted({i for i in ids if ids.count(i) > 1}):
             problems.append(Problem("DUPLICATE_ID", f"$.data.{collection}", f"identifier '{dup}' appears twice"))
@@ -233,6 +254,38 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
             problems.append(Problem("AUTHOR_NOT_A_HANDLE", where, f"{s['id']}: the author must be a member handle"))
         if s["origin"] == "llm-derived" and s["status"] == "active" and not s["validated_by"]:
             problems.append(Problem("LLM_ASSERTED", where, f"{s['id']} derived by a model and asserted by nobody"))
+    decision_ids = {d["id"] for d in data["decisions"]}
+    by_subject: dict[str, list[dict[str, Any]]] = {}
+    for i, d in enumerate(data["decisions"]):
+        where = f"$.data.decisions[{i}]"
+        by_subject.setdefault(d["subject"], []).append(d)
+        if d["subject"] not in subject_names:
+            problems.append(Problem("DANGLING", where, f"decision {d['id']} cites unknown subject '{d['subject']}'"))
+        if d["status"] == "active":
+            if not HANDLE.match(d["validated_by"]) or not d["validated_at"]:
+                problems.append(Problem("ASSERTED_WITHOUT_PERSON", where, f"decision {d['id']} is active without a person who asserted it"))
+            elif d["validated_by"] == d["author"]:
+                problems.append(Problem("SELF_VALIDATION", where, f"decision {d['id']} was asserted by its own author"))
+        elif d["status"] == "proposed" and d["validated_by"]:
+            problems.append(Problem("VALIDATOR_ON_PROPOSED", where, f"decision {d['id']} is proposed but names a validator"))
+        if not HANDLE.match(d["author"]):
+            problems.append(Problem("AUTHOR_NOT_A_HANDLE", where, f"decision {d['id']}: the author must be a member handle"))
+        kept = d["decision"].strip().lower()
+        if any(r["option"].strip().lower() == kept for r in d["rejected"]):
+            problems.append(Problem("INCONSISTENT_ALTERNATIVES", where, f"decision {d['id']} is also listed among its rejected options"))
+        if d["supersedes"]:
+            target = next((x for x in data["decisions"] if x["id"] == d["supersedes"]), None)
+            if target is None:
+                problems.append(Problem("DANGLING", where, f"decision {d['id']} supersedes unknown decision {d['supersedes']}"))
+            elif d["status"] == "active" and target["status"] != "superseded":
+                problems.append(Problem("SUPERSESSION", where, f"decision {d['supersedes']} must be superseded by {d['id']}"))
+    for subject, items in sorted(by_subject.items()):
+        if sum(1 for d in items if d["status"] == "active") > 1:
+            problems.append(Problem("MULTIPLE_ACTIVE_DECISIONS", "$.data.decisions", f"subject '{subject}' has more than one asserted decision"))
+    decided = {d["subject"] for d in data["decisions"] if d["status"] == "active"}
+    for i, sub in enumerate(data["subjects"]):
+        if sub["maturity"] in ("L3_decided", "L4_specified") and sub["name"] not in decided:
+            problems.append(Problem("DECIDED_WITHOUT_DECISION", f"$.data.subjects[{i}]", f"'{sub['name']}' is {sub['maturity']} without an asserted decision"))
     for i, c in enumerate(data["conflicts"]):
         for sid in c["statement_ids"]:
             if sid not in statement_ids:
@@ -243,8 +296,8 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
         if g["subject"] and g["subject"] not in subject_names:
             problems.append(Problem("DANGLING", f"$.data.gaps[{i}]", f"gap {g['id']} cites unknown subject '{g['subject']}'"))
     for i, ref in enumerate(data["kb_references"]):
-        if ref["statement_id"] not in statement_ids:
-            problems.append(Problem("DANGLING", f"$.data.kb_references[{i}]", f"reference cites unknown statement {ref['statement_id']}"))
+        if ref.get("statement_id", ref.get("decision_id")) not in (statement_ids | decision_ids):
+            problems.append(Problem("DANGLING", f"$.data.kb_references[{i}]", "reference cites an unknown statement or decision"))
     unripe = sum(1 for s in data["subjects"] if s["maturity"] in UNRIPE)
     open_conflicts = sum(1 for c in data["conflicts"] if c["status"] == "open")
     expected = provisional(unripe, open_conflicts)

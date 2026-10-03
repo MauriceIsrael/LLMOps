@@ -887,6 +887,24 @@ Le Hub est l'**émetteur** du canal « engagement » vers la suite ([ADR-KH-01](
 
 **Ce que l'instantané ne contient pas** : le plan d'engagement du Hub ne détient ni décisions avec alternatives et hypothèses, ni éléments d'architecture, ni liens de conformité, ni journal de réutilisation. [`schemas/engagement_bundle.schema.json`](../../schemas/engagement_bundle.schema.json) reste le modèle cible de ces compléments ; l'instantané n'invente rien.
 
+### 5.19 Contrat 1.19 — Décisions dans la base d'engagement (K16)
+
+Une **décision** enregistre ce que la délibération a engagé : option retenue, **options écartées avec leur raison**, rationale, réversibilité, conséquences, violations acceptées (avec justification), références à la base. Sous les rôles du §5.16, comme les énoncés.
+
+| Route (`/api/engagements/{id}/…`) | Rôle | Effet |
+|---|---|---|
+| `POST decisions` `{subject, decision, rationale, reversibility, rejected?, consequences?, accepted_violations?, based_on?, supersedes?, origin?}` | `contributor` | **propose** une décision (`201`) ; `Idempotency-Key` comme pour les énoncés |
+| `POST decisions/{id}/assert` | `decider` | l'affirme (`active`, `validated_by`, `validated_at`) ; la décision qu'elle remplace devient `superseded` dans le même geste |
+| `POST decisions/{id}/withdraw` | auteur ou `decider` | `withdrawn` ; refusé (`409 subject_decided`) si le sujet est décidé sur elle |
+
+Règles : le sujet doit exister (`400`) ; `reversibility` ∈ `reversible, costly, irreversible` ; chaque option écartée a une raison, chaque violation acceptée une justification ; l'option retenue ne figure pas parmi les écartées ; **une seule décision affirmée par sujet** (`409 decision_exists` : nommer l'ancienne dans `supersedes` pour la remplacer ; `409 decision_pending` s'il y en a déjà une proposée) ; **personne n'affirme sa propre décision** (`409 self_validation`) ; un contenu `llm-derived` reste proposé.
+
+**Changement de règle de maturité** : `L3_decided` et `L4_specified` exigent désormais une **décision affirmée** sur le sujet (avant : un énoncé affirmé), toujours sans conflit ouvert (`409 no_asserted_decision`, `open_conflict`).
+
+**Instantané** (`schemaVersion` `1.1`, additif) : `data.decisions` avec `assertion_level` dérivé du statut ; `kb_references` et `unresolved_references` portent `statement_id` **ou** `decision_id`. Vérifications ajoutées : `DECIDED_WITHOUT_DECISION` (sujet `L3`/`L4` sans décision affirmée), `MULTIPLE_ACTIVE_DECISIONS`, `INCONSISTENT_ALTERNATIVES`, `SUPERSESSION`, et les contrôles de personne des énoncés (`ASSERTED_WITHOUT_PERSON`, `SELF_VALIDATION`, `AUTHOR_NOT_A_HANDLE`, `VALIDATOR_ON_PROPOSED`, `DANGLING`).
+
+**Pas dans ce lot** : la conformité exigence → contrôle et G3 dérivés (voir K17) ; une lecture `GET` des décisions (elles sont lues par l'instantané).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

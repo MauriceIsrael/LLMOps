@@ -23,6 +23,7 @@ MAX_TEXT = 4000
 ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$")
 KEY = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
 ASSERTED_LEVELS = ("L3_decided", "L4_specified")
+REVERSIBILITY = ("reversible", "costly", "irreversible")
 
 
 class WriteError(Exception):
@@ -117,10 +118,11 @@ class EngagementWriter:
         if level not in SUBJECT_LEVELS:
             raise WriteError(400, "invalid_argument", f"'level' must be one of {SUBJECT_LEVELS}", "level")
         if level in ASSERTED_LEVELS:
+            # K16: a decided subject has an asserted decision (the statements alone do not decide)
+            if not [d for d in self.repo.list_decisions(self.engagement) if d["subject"] == name and d["status"] == "active"]:
+                raise WriteError(409, "no_asserted_decision", f"{level} needs an asserted decision about '{name}'")
             asserted = [s for s in self.repo.get_active_statements(self.engagement)
                         if s.get("subject") == name and s.get("status") == "active"]
-            if not asserted:
-                raise WriteError(409, "no_asserted_statement", f"{level} needs at least one asserted statement about '{name}'")
             open_ids = {sid for c in self.repo.get_conflicts(self.engagement, "open")
                         for sid in (self.repo.get_conflict(c["id"]) or {}).get("statement_ids", [])}
             if open_ids & {s["id"] for s in asserted}:
@@ -179,6 +181,99 @@ class EngagementWriter:
             raise WriteError(403, "not_author", "only the author or a decider withdraws a statement")
         self.repo.set_statement_status(statement_id, "withdrawn")
         return {"statement": self._public(self.repo.get_statement_record(statement_id))}
+
+    # --- decisions (K16) ------------------------------------------------------------------------------------------
+
+    def add_decision(self, body: dict[str, Any], key: str | None = None) -> dict[str, Any]:
+        key = _key(key or body.get("idempotency_key"))
+        subject = _text(body, "subject", limit=120)
+        if subject not in self.repo.subject_levels(self.engagement):
+            raise WriteError(400, "invalid_argument", f"unknown subject '{subject}': create it first", "subject")
+        decision = _text(body, "decision")
+        rationale = _text(body, "rationale")
+        reversibility = _text(body, "reversibility", limit=16)
+        if reversibility not in REVERSIBILITY:
+            raise WriteError(400, "invalid_argument", f"'reversibility' must be one of {list(REVERSIBILITY)}", "reversibility")
+        rejected = self._list_of(body, "rejected", {"option": True, "reason": True})
+        violations = self._list_of(body, "accepted_violations", {"typed_id": True, "justification": True})
+        consequences = body.get("consequences") or []
+        if not isinstance(consequences, list) or not all(isinstance(c, str) and c.strip() for c in consequences):
+            raise WriteError(400, "invalid_argument", "'consequences' is a list of non-empty strings", "consequences")
+        kept = decision.strip().lower()
+        if any(r["option"].strip().lower() == kept for r in rejected):
+            raise WriteError(400, "invalid_argument", "the retained decision is also listed among the rejected options", "rejected")
+        record: dict[str, Any] = {
+            "engagement": self.engagement, "subject": subject, "decision": decision, "rationale": rationale,
+            "rejected": rejected, "reversibility": reversibility, "consequences": [c.strip() for c in consequences],
+            "accepted_violations": violations, "based_on": _based_on(body), "origin": _origin(body),
+            "author": self.actor, "status": "proposed", "validated_by": "", "validated_at": "", "supersedes": "",
+        }
+        if key:
+            record["id"] = _derived_id("D", self.engagement, "decision", key)
+            if self.repo.get_decision_record(record["id"]):
+                return {"created": False, "decision": self._public_decision(self.repo.get_decision_record(record["id"]))}
+        existing = [d for d in self.repo.list_decisions(self.engagement) if d["subject"] == subject]
+        superseded = body.get("supersedes") or ""
+        if any(d["status"] == "proposed" for d in existing):
+            raise WriteError(409, "decision_pending", f"'{subject}' already has a proposed decision: assert or withdraw it first")
+        active = next((d for d in existing if d["status"] == "active"), None)
+        if superseded and not (active and superseded == active["id"]):
+            raise WriteError(400, "invalid_argument", f"'supersedes' must name the asserted decision of '{subject}'", "supersedes")
+        if active and not superseded:
+            raise WriteError(409, "decision_exists", f"'{subject}' has an asserted decision ({active['id']}): name it in 'supersedes' to replace it")
+        record["supersedes"] = superseded
+        if not key:
+            record["id"] = "D-" + _derived_id("D", self.engagement, "decision", f"{subject}|{len(self.repo.list_decisions(self.engagement)) + 1}")[2:]
+        self.repo.save_decision(record)
+        return {"created": True, "decision": self._public_decision(self.repo.get_decision_record(record["id"]))}
+
+    def assert_decision(self, decision_id: str) -> dict[str, Any]:
+        d = self._decision(decision_id)
+        if d["status"] != "proposed":
+            raise WriteError(409, "not_proposed", f"{decision_id} is '{d['status']}': only a proposed decision can be asserted")
+        require_distinct(self.actor, [d.get("author") or ""], decision_id)
+        others = [x for x in self.repo.list_decisions(self.engagement)
+                  if x["subject"] == d["subject"] and x["status"] == "active" and x["id"] != d.get("supersedes")]
+        if others:
+            raise WriteError(409, "decision_exists", f"'{d['subject']}' already has an asserted decision ({others[0]['id']})")
+        self.repo.validate_decision(decision_id, self.actor)
+        return {"decision": self._public_decision(self.repo.get_decision_record(decision_id)),
+                "superseded": [d["supersedes"]] if d.get("supersedes") else []}
+
+    def withdraw_decision(self, decision_id: str, is_decider: bool) -> dict[str, Any]:
+        d = self._decision(decision_id)
+        if d["status"] not in ("proposed", "active"):
+            raise WriteError(409, "not_withdrawable", f"{decision_id} is '{d['status']}'")
+        if d.get("author") != self.actor and not is_decider:
+            raise WriteError(403, "not_author", "only the author or a decider withdraws a decision")
+        if d["status"] == "active" and self.repo.subject_levels(self.engagement).get(d["subject"]) in ASSERTED_LEVELS:
+            raise WriteError(409, "subject_decided", f"'{d['subject']}' is decided on this decision: supersede it instead of withdrawing it")
+        self.repo.set_decision_status(decision_id, "withdrawn")
+        return {"decision": self._public_decision(self.repo.get_decision_record(decision_id))}
+
+    @staticmethod
+    def _list_of(body: dict[str, Any], field: str, keys: dict[str, bool]) -> list[dict[str, str]]:
+        raw = body.get(field) or []
+        if not isinstance(raw, list):
+            raise WriteError(400, "invalid_argument", f"'{field}' is a list of {{{', '.join(keys)}}}", field)
+        out = []
+        for i, item in enumerate(raw):
+            if not isinstance(item, dict) or any(not isinstance(item.get(k), str) or not item[k].strip() for k in keys):
+                raise WriteError(400, "invalid_argument", f"{field}[{i}] needs a non-empty {' and '.join(keys)}", field)
+            out.append({k: item[k].strip() for k in keys})
+        return out
+
+    def _decision(self, decision_id: str) -> dict[str, Any]:
+        d = self.repo.get_decision_record(decision_id)
+        if not d or d.get("engagement") != self.engagement:
+            raise WriteError(404, "unknown_decision", f"decision '{decision_id}' not found")
+        return d
+
+    @staticmethod
+    def _public_decision(d: dict[str, Any] | None) -> dict[str, Any]:
+        keys = ("id", "subject", "decision", "rationale", "rejected", "reversibility", "consequences", "accepted_violations",
+                "based_on", "status", "origin", "author", "validated_by", "validated_at", "supersedes")
+        return {k: (d or {}).get(k) for k in keys}
 
     # --- questions and answers ------------------------------------------------------------------------------------
 

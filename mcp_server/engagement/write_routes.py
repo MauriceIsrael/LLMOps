@@ -73,6 +73,19 @@ def build_write_routes() -> list[Route]:
         return await _handle(request, "contribute",
                              lambda w, b, m: (200, w.withdraw_statement(sid, m["role"] in DECIDING_ROLES)))
 
+    async def decisions(request):
+        key = request.headers.get("Idempotency-Key")
+        return await _handle(request, "contribute", lambda w, b, m: _created(w.add_decision(b, key)))
+
+    async def assert_decision(request):
+        did = request.path_params["decision_id"]
+        return await _handle(request, "decide", lambda w, b, m: (200, w.assert_decision(did)))
+
+    async def withdraw_decision(request):
+        did = request.path_params["decision_id"]
+        return await _handle(request, "contribute",
+                             lambda w, b, m: (200, w.withdraw_decision(did, m["role"] in DECIDING_ROLES)))
+
     async def questions(request):
         key = request.headers.get("Idempotency-Key")
         return await _handle(request, "contribute", lambda w, b, m: _created(w.add_question(b, key)))
@@ -95,6 +108,9 @@ def build_write_routes() -> list[Route]:
         Route(f"{base}/statements", endpoint=statements, methods=["POST"]),
         Route(f"{base}/statements/{{statement_id}}/assert", endpoint=assert_statement, methods=["POST"]),
         Route(f"{base}/statements/{{statement_id}}/withdraw", endpoint=withdraw_statement, methods=["POST"]),
+        Route(f"{base}/decisions", endpoint=decisions, methods=["POST"]),
+        Route(f"{base}/decisions/{{decision_id}}/assert", endpoint=assert_decision, methods=["POST"]),
+        Route(f"{base}/decisions/{{decision_id}}/withdraw", endpoint=withdraw_decision, methods=["POST"]),
         Route(f"{base}/questions", endpoint=questions, methods=["POST"]),
         Route(f"{base}/questions/{{question_id}}/answers", endpoint=answers, methods=["POST"]),
         Route(f"{base}/requirements", endpoint=requirements, methods=["POST"]),

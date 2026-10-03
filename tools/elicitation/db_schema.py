@@ -168,6 +168,33 @@ class ElicitationSchemaInitializer:
                 """
             )
 
+        # 6bis. Table Decision (K16): what the deliberation engaged, with its rationale and the alternatives set aside
+        if "Decision" not in table_names:
+            self.graph_store.execute_cypher(
+                """
+                CREATE NODE TABLE Decision (
+                    id STRING,
+                    engagement STRING,
+                    subject STRING,
+                    decision STRING,
+                    rationale STRING,
+                    rejected STRING,
+                    reversibility STRING,
+                    consequences STRING,
+                    accepted_violations STRING,
+                    based_on STRING,
+                    author STRING,
+                    status STRING,
+                    origin STRING,
+                    validated_by STRING,
+                    validated_at STRING,
+                    supersedes STRING,
+                    created_at STRING,
+                    PRIMARY KEY(id)
+                );
+                """
+            )
+
         # 7. Tables de Relations
         if "ABOUT" not in table_names:
             self.graph_store.execute_cypher("CREATE REL TABLE ABOUT (FROM Statement TO Subject);")

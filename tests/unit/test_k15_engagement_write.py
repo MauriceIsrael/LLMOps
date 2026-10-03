@@ -184,14 +184,26 @@ def test_the_decider_who_wrote_a_conflicting_statement_cannot_arbitrate_it(clien
     assert res.status_code == 409 and res.json()["error"] == "self_validation"
 
 
-def test_maturity_l3_needs_an_asserted_statement_and_no_open_conflict(client):
+DECISION = {"subject": "mcx-services", "decision": "Active-active gateway", "rationale": "Meets REQ-001.",
+            "reversibility": "costly", "rejected": [{"option": "Active-passive gateway", "reason": "Failover too slow."}]}
+
+
+def decide(client):
+    """A proposed decision on 'mcx-services' by a contributor, asserted by the admin."""
+    did = client.post(f"{BASE}/decisions", headers=as_("contributor"), json=DECISION).json()["data"]["decision"]["id"]
+    assert client.post(f"{BASE}/decisions/{did}/assert", headers=as_("admin")).status_code == 200
+    return did
+
+
+def test_maturity_l3_needs_an_asserted_decision_and_no_open_conflict(client):
     assert client.post(f"{BASE}/subjects", headers=as_("contributor"), json={"name": "mcx-services", "definition": "d"}).status_code == 201
     assert client.post(f"{BASE}/subjects", headers=as_("contributor"), json={"name": "mcx-services"}).status_code == 200  # replay
     adv = f"{BASE}/subjects/mcx-services/maturity"
     assert client.post(adv, headers=as_("decider"), json={"level": "L1_framed"}).status_code == 200
     assert client.post(adv, headers=as_("decider"), json={"level": "nonsense"}).status_code == 400
     no_fact = client.post(adv, headers=as_("decider"), json={"level": "L3_decided"})
-    assert no_fact.status_code == 409 and no_fact.json()["error"] == "no_asserted_statement"
+    assert no_fact.status_code == 409 and no_fact.json()["error"] == "no_asserted_decision"
+    decide(client)  # K16: the statements alone do not decide
     a, b, opened = two_conflicting_asserted(client)
     blocked = client.post(adv, headers=as_("decider"), json={"level": "L3_decided"})
     assert blocked.status_code == 409 and blocked.json()["error"] == "open_conflict"
