@@ -17,7 +17,7 @@ Le Hub contient deux bases isolées : la **base de connaissance** (générique, 
 
 ## Questions à trancher avec les propriétaires
 - Les « décisions de programme » qu'Architecture Studio porte (si c'est bien le cas) sont-elles les mêmes objets que les décisions délibérées dans Archinex ? Sinon, deux natures de décision coexistent et le vocabulaire doit les distinguer.
-- Une exigence d'appel d'offres du Hub et une exigence prise en charge par Requirements Intake / Tuleap : laquelle fait foi ? Lequel des deux alimente l'autre ?
+- Une exigence d'appel d'offres du Hub et une exigence prise en charge par Requirements Intake / Tuleap : laquelle fait foi ? Lequel des deux alimente l'autre ? (Position actuelle du Hub, ADR-KH-01 A10-h : il garde les exigences de l'appel d'offres, qui servent à solliciter les architectes, jusqu'à clarification.)
 - L'émetteur d'un canal doit-il être un composant de la suite pour figurer au registre ? (si oui, le Hub y entre comme émetteur sans y entrer comme composant : à confirmer.)
 - Qui consomme l'instantané d'engagement : un adaptateur vers `ProjectedGraph` (LLMOps#40) ou directement un composant ?
 

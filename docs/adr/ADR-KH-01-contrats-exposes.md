@@ -232,9 +232,11 @@ Le Hub comme socle sémantique ; Cypher libre comme contrat ; **prose de livrabl
 
 **f. Ce que cela défait.** La dépréciation du plan d'engagement (1.13) est **levée** (contrat 1.14 : les routes d'engagement ne sont plus dépréciées ; le retrait en version majeure d'A3-d est annulé). Archinex repasse du stockage local de l'engagement à l'écriture dans le Hub : les issues archinex `#27`, `#28` (A16, A17) sont à reformuler et `#32` (A22, retrait des appels d'engagement) est **caduque**. La PR archinex `#33` (sceau canonique des sections figées) reste valable pour le figement local.
 
-**g. Lots proposés** (à créer après adoption) : **K10** levée de la dépréciation et contrat 1.14 ; **K11** émission de l'instantané d'engagement par le Hub (K1, K2, K9 en prérequis) ; **K12** reprise de l'existant d'Archinex (engagements déjà en base Prisma) ; **K13** étanchéité de la capitalisation (d-3, avec test). Un engagement sans test reste une intention.
+**g. Lots** (issues créées le 2026-10-03) : **K10** `#48` levée de la dépréciation et contrat 1.14 ; **K11** `#49` émission de l'instantané d'engagement par le Hub (K1, K2, K9 en prérequis) ; **K12** `#50` reprise de l'existant d'Archinex (engagements déjà en base Prisma) ; **K13** `#51` étanchéité de la capitalisation (d-3, avec test). Un engagement sans test reste une intention.
 
-**h. Risque assumé.** Le Hub passe d'une mémoire transverse à un détenteur de données de programme, éventuellement classifiées : il hérite de leurs obligations. Le prérequis d-1 est donc bloquant, pas souhaitable.
+**h. Exigences (décision du mainteneur, 2026-10-03).** Les exigences d'un appel d'offres sont **gardées côté Hub**, dans la base d'engagement, en attendant la clarification avec la suite (Requirements Intake / Tuleap). Elles servent à solliciter les architectes : une exigence ouvre des questions, les réponses d'experts deviennent des énoncés attribués, la connaissance de la base éclaire les propositions. La base d'engagement se forme ainsi : appel d'offres ingéré via Archinex → exigences, sujets et manques → réponses des architectes et réutilisation confirmée de la base. Ce qu'Archinex en tire par un modèle est marqué `llm-derived` et reste **proposé** : seule une personne affirme.
+
+**i. Risque assumé.** Le Hub passe d'une mémoire transverse à un détenteur de données de programme, éventuellement classifiées : il hérite de leurs obligations. Le prérequis d-1 est donc bloquant, pas souhaitable.
 
 ---
 
