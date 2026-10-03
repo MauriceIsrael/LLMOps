@@ -46,7 +46,9 @@
     "confidence": {
       "enum": [
         "verified",
+        "designed",
         "vendor-stated",
+        "stated-by-client",
         "assumed"
       ]
     },
