@@ -25,6 +25,35 @@
       "type": "string",
       "enum": ["1.0"]
     },
+    "emitter": {
+      "type": "string",
+      "description": "Channel emitter (contract 1.15, K2). Always 'knowledge-hub'."
+    },
+    "checksum": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Same value as payload_sha256, under the suite's channel-envelope name: sha256 of the payload at the canonical-json v1 profile."
+    },
+    "rebuiltByEmitterTest": {
+      "type": "boolean",
+      "description": "True: the emitter's freshness test rebuilds this file instead of reading it."
+    },
+    "regenerate": {
+      "type": "string",
+      "description": "Command that regenerates this file."
+    },
+    "is_provisional": {
+      "type": "boolean",
+      "description": "True when a subject is below L3_decided or a conflict is open: the whole snapshot is then provisional. Derived from provisional_reasons."
+    },
+    "provisional_reasons": {
+      "type": "object",
+      "properties": {
+        "unripe_subjects": { "type": "integer", "minimum": 0 },
+        "open_conflicts": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["unripe_subjects", "open_conflicts"]
+    },
     "applicability_index": {
       "type": "object",
       "description": "Context index mapping assets to architectural domains, phases, and rules.",

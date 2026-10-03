@@ -804,6 +804,18 @@ Le Hub contient deux bases, connaissance et engagement ([ADR-KH-01](../adr/ADR-K
 
 **K1 — sceaux au profil canonical-json v1.** `payload_sha256` de l'instantané scellé (`GET /snapshot/latest`, `fixtures/sealed_snapshot.json`, `data/snapshots/*.json`) et `checksum` de l'instantané de conformité sont calculés par `pipelines/canonical.py` (profil de la suite, 48 vecteurs partagés), plus par `json.dumps`. **Les formes ne changent pas ; la valeur de `payload_sha256` change pour un même contenu** : un consommateur qui recalculait l'ancienne empreinte (JSON indenté, clés triées) doit adopter le profil (nombres au format ECMAScript, clés triées par unité de code UTF-16, `NaN`/`Infinity`/entiers au-delà de 2^53−1 refusés). Un test de garde interdit de calculer un sceau à partir d'un `json.dumps` hors du module. K2 et K3 complètent cette section.
 
+**K2 — enveloppe de canal.** Champs **additifs** de l'instantané scellé (`GET /snapshot/latest`, fixtures, `data/snapshots/*.json`), ceux que le registre de canaux de la suite demande à un émetteur ([`schemas/sealed_snapshot.schema.json`](../../schemas/sealed_snapshot.schema.json)) :
+
+| Champ | Valeur |
+|---|---|
+| `emitter` | `knowledge-hub` |
+| `checksum` | même valeur que `payload_sha256` (`sha256:<hex>` du contenu au profil canonical-json v1) |
+| `rebuiltByEmitterTest` | `true` : le test de fraîcheur **reconstruit** le fichier depuis `data/kb` (`tests/contract/test_sealed_snapshot_freshness.py`) et échoue s'il diffère |
+| `regenerate` | `poetry run python scripts/export_fixtures.py` |
+| `is_provisional`, `provisional_reasons {unripe_subjects, open_conflicts}` | **dérivés** des compteurs : provisoire dès qu'un sujet est sous `L3_decided` ou qu'un conflit est ouvert. Le plan Connaissance ne contient ni sujet ni conflit : ils valent `false`, `0`, `0`. L'instantané d'engagement (lot K11) porte les vrais compteurs |
+
+Les champs en snake_case existants sont conservés. L'enveloppe de la suite place le contenu sous `data` (`snapshotId`, `schemaVersion`…) : cet instantané garde son contenu à plat, pour ne pas le dupliquer ; l'adaptation est un choix à valider avec la suite (voir `docs/SUITE-MAP.md`). Corrigé au passage : la `version` d'un référentiel (`frameworks[].version`) dépendait de l'ordre des lignes renvoyées par le graphe (GSMA mêle plusieurs versions) ; elle vient désormais du premier contrôle par identifiant.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés
