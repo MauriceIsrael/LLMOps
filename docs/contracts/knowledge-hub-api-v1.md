@@ -869,6 +869,24 @@ Règles communes :
 - **Idempotence** : l'en-tête `Idempotency-Key` (ou `idempotency_key`) donne le même identifiant ; un élément existant est renvoyé tel quel (`200`, `created: false`), jamais réécrit (une affirmation n'est pas remise à zéro par un rejeu). Les exigences sont idempotentes par leur `id`.
 - Colonnes ajoutées à l'énoncé : `origin`, `validated_by`, `validated_at` (additif).
 
+### 5.18 Contrat 1.18 — Instantané scellé d'un engagement (K11)
+
+Le Hub est l'**émetteur** du canal « engagement » vers la suite ([ADR-KH-01](../adr/ADR-KH-01-contrats-exposes.md) A10) ; Archinex, outil de délibération, n'y apparaît pas. Schéma : [`schemas/engagement_snapshot.schema.json`](../../schemas/engagement_snapshot.schema.json), exemple reconstruit par le test de l'émetteur : [`schemas/examples/engagement_snapshot.example.json`](../../schemas/examples/engagement_snapshot.example.json).
+
+| Route | Rôle | Effet |
+|---|---|---|
+| `POST /api/engagements/{id}/exports` | `admin` | émet l'instantané : `201` `{snapshotRef, created: true, is_provisional}` ; le même état donne le même instantané : `200`, `created: false` |
+| `GET /api/engagements/{id}/exports` | `read` | historique des références |
+| `GET /api/engagements/{id}/exports/{snapshotId}` | `read` (jeton `eng:service` compris) | l'enveloppe, vérifiée avant d'être servie (`500 snapshot_corrupt` sinon) ; l'instantané d'un autre engagement : `404` |
+
+**Enveloppe** (suite `ExternalSnapshotEnvelope`) : `schemaVersion`, `snapshotId`, `sourceSystem` et `emitter` (`knowledge-hub`), `createdAt`, `sourceRevision`, `checksum`, `data`. `checksum` = sha256 de `data` **seul** au profil canonical-json v1 ; `snapshotId` = `eng-<engagement>-<12 premiers hex du checksum>` : l'identifiant dérive du contenu, un identifiant émis ne désigne jamais un autre contenu. `snapshotRef` = `{sourceSystem, snapshotId, checksum, producedAt}` voyage à part de ce qu'il désigne.
+
+**`data`** : `engagement {id, confidentiality}` (obligatoire), `pins` (version du contrat, instantané de la base de connaissance cité), `is_provisional` et `provisional_reasons {unripe_subjects, open_conflicts}` (**dérivés** : sujet sous `L3_decided` ou conflit ouvert), `requirements`, `subjects` (maturité), `statements` (confiance, `status`, `assertion_level` dérivé, `origin`, `author`, `validated_by`, `validated_at`, `based_on`), `conflicts`, `gaps` (G1 et G2 ; G3 n'est pas calculé), `kb_references` (`KnowledgeRef` résolus depuis l'instantané épinglé) et `unresolved_references`. Personnes : **handles seulement**.
+
+**Refus** (rien n'est produit ni stocké) : `422 verification_failed` avec `problems [{code, path, message}]` (jamais la valeur fautive) pour `EMAIL`, `ASSERTED_WITHOUT_PERSON`, `SELF_VALIDATION`, `AUTHOR_NOT_A_HANDLE`, `VALIDATOR_ON_PROPOSED`, `ARBITRATED_WITHOUT_PERSON`, `DANGLING`, `DUPLICATE_ID`, `PROVISIONAL`, `SEAL`, `SNAPSHOT_ID`, `SCHEMA` ; `422 kb_snapshot_unavailable` si des énoncés citent la base alors que son instantané est inutilisable ; `409 engagement_not_managed`.
+
+**Ce que l'instantané ne contient pas** : le plan d'engagement du Hub ne détient ni décisions avec alternatives et hypothèses, ni éléments d'architecture, ni liens de conformité, ni journal de réutilisation. [`schemas/engagement_bundle.schema.json`](../../schemas/engagement_bundle.schema.json) reste le modèle cible de ces compléments ; l'instantané n'invente rien.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

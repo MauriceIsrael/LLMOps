@@ -1,0 +1,454 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EngagementSnapshot",
+  "description": "Sealed snapshot of an engagement emitted by the Knowledge Hub (contract 1.18, lot K11). Suite ExternalSnapshotEnvelope; checksum = sha256 of data at the canonical-json v1 profile; snapshotId derives from the checksum.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "snapshotId": {
+      "type": "string",
+      "pattern": "^eng-[a-z0-9-]{1,64}-[0-9a-f]{12}$"
+    },
+    "sourceSystem": {
+      "const": "knowledge-hub"
+    },
+    "emitter": {
+      "const": "knowledge-hub"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sourceRevision": {
+      "type": "string"
+    },
+    "checksum": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "engagement": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{1,64}$"
+            },
+            "confidentiality": {
+              "enum": [
+                "public",
+                "internal",
+                "confidential"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "confidentiality"
+          ],
+          "additionalProperties": false
+        },
+        "pins": {
+          "type": "object",
+          "properties": {
+            "contract_version": {
+              "type": "string"
+            },
+            "kb_snapshot": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "snapshot_id": {
+                      "type": "string"
+                    },
+                    "checksum": {
+                      "type": "string",
+                      "pattern": "^sha256:[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": [
+                    "snapshot_id",
+                    "checksum"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": [
+            "contract_version",
+            "kb_snapshot"
+          ],
+          "additionalProperties": false
+        },
+        "is_provisional": {
+          "type": "boolean",
+          "description": "True when a subject is below L3_decided or a conflict is open: the whole snapshot is then provisional, whatever the status of its items. Derived, never declared."
+        },
+        "provisional_reasons": {
+          "type": "object",
+          "properties": {
+            "unripe_subjects": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "open_conflicts": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "unripe_subjects",
+            "open_conflicts"
+          ],
+          "additionalProperties": false
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "section": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "criticality": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "text",
+              "section",
+              "category",
+              "criticality",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "definition": {
+                "type": "string"
+              },
+              "maturity": {
+                "enum": [
+                  "L0_named",
+                  "L1_framed",
+                  "L2_decomposed",
+                  "L3_decided",
+                  "L4_specified"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "definition",
+              "maturity"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "statements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "section": {
+                "type": "string"
+              },
+              "predicate": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              },
+              "confidence": {
+                "enum": [
+                  "verified",
+                  "designed",
+                  "vendor-stated",
+                  "stated-by-client",
+                  "assumed"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "proposed",
+                  "active",
+                  "superseded",
+                  "withdrawn"
+                ]
+              },
+              "assertion_level": {
+                "enum": [
+                  "asserted",
+                  "proposed",
+                  "superseded",
+                  "withdrawn"
+                ],
+                "description": "Derived from status: only an asserted statement is written as a fact."
+              },
+              "origin": {
+                "enum": [
+                  "human",
+                  "llm-derived"
+                ]
+              },
+              "author": {
+                "type": "string"
+              },
+              "validated_by": {
+                "type": "string",
+                "pattern": "^(@[a-z0-9][a-z0-9._-]{0,62})?$"
+              },
+              "validated_at": {
+                "type": "string"
+              },
+              "based_on": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "resolved": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "resolved"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "subject",
+              "section",
+              "predicate",
+              "value",
+              "confidence",
+              "status",
+              "assertion_level",
+              "origin",
+              "author",
+              "validated_by",
+              "validated_at",
+              "based_on"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "contradiction",
+                  "principle_violation",
+                  "stale_basis"
+                ]
+              },
+              "status": {
+                "type": "string"
+              },
+              "statement_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "detail": {
+                "type": "string"
+              },
+              "resolution": {
+                "type": "string"
+              },
+              "arbitrated_by": {
+                "type": "string",
+                "pattern": "^(@[a-z0-9][a-z0-9._-]{0,62})?$"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "status",
+              "statement_ids",
+              "detail",
+              "resolution",
+              "arbitrated_by"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "G1_empty_section",
+                  "G2_unanswered_blocking",
+                  "G3_principle_unaddressed"
+                ]
+              },
+              "description": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "blocking": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "description",
+              "subject",
+              "blocking"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "kb_references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "statement_id": {
+                "type": "string"
+              },
+              "knowledge_ref": {
+                "type": "object",
+                "properties": {
+                  "sourceId": {
+                    "const": "knowledge-hub"
+                  },
+                  "knowledgeKey": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sourceId",
+                  "knowledgeKey",
+                  "version"
+                ],
+                "additionalProperties": false
+              },
+              "confidence": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "statement_id",
+              "knowledge_ref",
+              "confidence"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "unresolved_references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "statement_id": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "statement_id",
+              "id"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "engagement",
+        "pins",
+        "is_provisional",
+        "provisional_reasons",
+        "requirements",
+        "subjects",
+        "statements",
+        "conflicts",
+        "gaps",
+        "kb_references",
+        "unresolved_references"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "snapshotId",
+    "sourceSystem",
+    "emitter",
+    "createdAt",
+    "sourceRevision",
+    "checksum",
+    "data"
+  ],
+  "additionalProperties": false
+}

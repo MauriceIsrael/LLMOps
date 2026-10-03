@@ -434,6 +434,12 @@ def build_catalogue() -> list[Interface]:
               "/api/engagements/contract-eng/statements/{stmt3}/withdraw", member="contrib@example.org"),
         _rest("POST", "/api/engagements/{engagement}/requirements", "/api/engagements/contract-eng/requirements",
               json_body={"requirements": [{"id": "REQ-1", "text": "Encrypt data at rest"}]}, member="contrib@example.org"),
+        # --- REST: the sealed snapshot of an engagement (K11) ----------------------------------------------------
+        _rest("POST", "/api/engagements/{engagement}/exports", "/api/engagements/contract-eng/exports",
+              member="admin@example.org", remember="export1", remember_path=("snapshotRef", "snapshotId")),
+        _rest("GET", "/api/engagements/{engagement}/exports", "/api/engagements/contract-eng/exports", member="reader@example.org"),
+        _rest("GET", "/api/engagements/{engagement}/exports/{snapshot_id}", "/api/engagements/contract-eng/exports/{export1}",
+              member="reader@example.org"),
         _rest("POST", "/api/knowledge/suggestions", json_body={
             "title": "Contract freeze suggestion",
             "rationale": "Exercise the suggestion contract.",

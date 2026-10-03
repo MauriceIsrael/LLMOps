@@ -38,6 +38,7 @@ from mcp_server.core.db import guard_engagement
 from mcp_server.core.envelope import invalid_argument_response
 from mcp_server.core.exceptions import InvalidEngagementIdError
 from mcp_server.core.version import CONTRACT_VERSION
+from mcp_server.engagement.export_routes import build_export_routes
 from mcp_server.engagement.tools import (
     get_board,
     get_conflicts,
@@ -1370,6 +1371,7 @@ def create_starlette_app() -> Starlette:
             Route("/api/engagements/{engagement}/me", endpoint=handle_engagement_me, methods=["GET"]),
             Route("/api/engagements/{engagement}/audit", endpoint=handle_engagement_audit, methods=["GET"]),
             *build_write_routes(),  # K15
+            *build_export_routes(),  # K11
             Route("/api/knowledge/suggestions", endpoint=handle_knowledge_suggestions, methods=["POST"]),
             Route("/api/compliance/conformity-snapshot", endpoint=handle_compliance_conformity_snapshot, methods=["GET"]),
             Route("/api/compliance/frameworks", endpoint=handle_compliance_frameworks, methods=["GET"]),

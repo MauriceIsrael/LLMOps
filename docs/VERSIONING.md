@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.17"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.18"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.17"
+  "schema_version": "1.18"
 }
 ```
 
@@ -38,6 +38,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.15` | Snapshot channel aligned on the suite ([ADR-KH-01](adr/ADR-KH-01-contrats-exposes.md) D6-D8). **K1: all seals follow `canonical-json v1`**; the `payload_sha256` of the sealed snapshot changes value for the same content (it was computed over an indented `json.dumps`), and so can the `checksum` of the conformity snapshot for non-string numbers; shapes unchanged. A value the profile refuses (`NaN`, integer beyond 2^53−1, non-JSON type) now fails the export. **K2: channel envelope** (additive): `emitter`, `checksum`, `rebuiltByEmitterTest`, `regenerate`, `is_provisional`, `provisional_reasons`; a freshness test rebuilds the snapshot from `data/kb`. `frameworks[].version` is now deterministic. **K3: citable versions** — per-element `revision`, `knowledge_ref`, `content`, `content_sha256` in the sealed snapshot; `version-ledger.json`; `GET /api/knowledge/assets/{id}` and `get_asset(id, version?, snapshot?)` resolve from a verified snapshot and refuse an absent version. |
 | `1.16` | Managed engagements (K14, [ADR-KH-01](adr/ADR-KH-01-contrats-exposes.md) A11): roles, membership and audit, `/api/engagements*`; a managed engagement is closed to everyone but its members in every environment ([contract §5.16](contracts/knowledge-hub-api-v1.md)). |
 | `1.17` | Writing into a managed engagement (K15, [contract §5.17](contracts/knowledge-hub-api-v1.md)): subjects, statements (proposed, then asserted by a decider who is not the author), questions and answers, requirements, conflict arbitration, maturity; idempotent; every write attributed to the member. |
+| `1.18` | Sealed snapshot of an engagement (K11, [contract §5.18](contracts/knowledge-hub-api-v1.md)): the Hub emits the engagement channel (suite envelope, canonical-json v1, content-addressed identifier, handles only, `is_provisional` derived); refused when its verification fails. |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 
