@@ -71,7 +71,7 @@ Types for TypeScript clients: [`schemas/types.ts`](../schemas/types.ts); JSON Sc
 | RFP helpers (legacy) | `/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint` | supported, frozen |
 | Writing assistance | `POST /api/prose/suggest-batch` (used by the Document Engine): grounded excerpts of the doctrine, or no draft | 1.x |
 | Health, publication | `GET /api/knowledge/health`, `POST /api/knowledge/publications` | 1.8 |
-| Engagement part | `/api/elicitation/*`, `/api/arbitration/*` | **deprecated since 1.13**: [migration](migration-archinex.md) |
+| Engagement part | `/api/elicitation/*`, `/api/arbitration/*` | in service (the 1.13 deprecation was cancelled by 1.14; the Hub holds the engagement base, [ADR-KH-01 A10](adr/ADR-KH-01-contrats-exposes.md)) |
 
 Full specification, bodies and status codes: [`contracts/knowledge-hub-api-v1.md`](contracts/knowledge-hub-api-v1.md); MCP tools and response shapes: [`INTERFACE.md`](INTERFACE.md).
 

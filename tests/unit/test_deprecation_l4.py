@@ -1,4 +1,4 @@
-"""L4: deprecation signals on the engagement interfaces, behaviour unchanged; conflict detection mode flag."""
+"""K10 (contract 1.14): the 1.13 deprecation of the engagement part is cancelled; legacy stays legacy; conflict detection mode flag."""
 
 import gc
 import logging
@@ -17,7 +17,6 @@ DEPRECATED_ROUTES = [
     ("GET", "/api/arbitration/conflicts"),
     ("GET", "/api/arbitration/statements"),
 ]
-LEGACY_ROUTES = ["/api/rfp/shred-to-candidates", "/api/documents/zero-draft-blueprint"]
 
 
 @pytest.fixture
@@ -31,34 +30,33 @@ def client(monkeypatch, tmp_path):
 
 
 @pytest.mark.parametrize(("method", "path"), DEPRECATED_ROUTES)
-def test_deprecated_routes_carry_header_and_field(client, caplog, method, path):
+def test_engagement_routes_are_in_service_without_deprecation_signal(client, caplog, method, path):
     with caplog.at_level(logging.WARNING, logger="mcp_server.deprecation"):
         res = client.request(method, path, headers={"Authorization": "Bearer demo-token"}, params={"engagement": "dep-eng"})
-    assert res.headers["Deprecation"] == "true"
-    assert 'rel="deprecation"' in res.headers["Link"] and "migration-archinex.md" in res.headers["Link"]
-    body = res.json()
-    assert body["deprecation"]["since"] and body["deprecation"]["replaced_by"].startswith("archinex:")
-    assert body["deprecation"]["doc"] == "docs/migration-archinex.md"
-    assert sum("deprecated interface called" in r.message for r in caplog.records) == 1  # one line per call
+    assert "Deprecation" not in res.headers and "Link" not in res.headers
+    assert "deprecation" not in res.json()
+    assert not [r for r in caplog.records if "deprecated interface called" in r.message]
+
+
+def test_nothing_is_deprecated_in_1_14():
+    assert deprecation.DEPRECATED == {}
 
 
 def test_legacy_routes_carry_no_deprecation_signal(client):
     res = client.get("/api/knowledge/health", headers={"Authorization": "Bearer demo-token"})
     assert "Deprecation" not in res.headers and "deprecation" not in res.json()
-    for path in LEGACY_ROUTES:
-        assert all(path not in name for name in deprecation.DEPRECATED)
-    assert set(deprecation.LEGACY) >= {"shred_rfp", "generate_zero_draft_hld", "trigger_rfp_elicitation"}
+    assert set(deprecation.LEGACY) >= {"shred_rfp", "generate_zero_draft_hld", "trigger_rfp_elicitation"}  # K4 still applies
 
 
-def test_every_engagement_tool_is_marked_and_keeps_its_result(monkeypatch, tmp_path):
+def test_engagement_tools_return_their_result_without_deprecation_field(monkeypatch, tmp_path):
     monkeypatch.setenv("ENGAGEMENTS_DIR", str(tmp_path))
     from mcp_server.engagement import tools
 
     marked = [n for n in ("get_board", "get_statements", "get_conflicts", "get_open_questions") if hasattr(tools, n)]
     for name in marked:
         res = getattr(tools, name)(engagement="dep-eng")
-        assert res["status"] == "ok" and res["deprecation"]["replaced_by"] == deprecation.DEPRECATED[name]
-        assert getattr(tools, name).__wrapped__  # same function, same signature (FastMCP schema unchanged)
+        assert res["status"] == "ok" and "deprecation" not in res
+        assert not hasattr(getattr(tools, name), "__wrapped__")  # the decorator is gone, the function is the tool
 
 
 @pytest.fixture

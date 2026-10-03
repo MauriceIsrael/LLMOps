@@ -35,9 +35,13 @@ Minor versions only add interfaces or optional fields:
 * ``1.13`` — deprecation of the engagement part (L4): ``Deprecation`` header, ``deprecation`` envelope field and a
   log line on the elicitation/arbitration routes and the engagement MCP tools; ``CONFLICT_DETECTION_MODE`` flag.
   No change of behaviour or shape.
+* ``1.14`` — **cancels the 1.13 deprecation** (K10, ADR-KH-01 A10): the Hub holds two bases, knowledge and engagement,
+  so the elicitation/arbitration routes and the engagement MCP tools are in service again. They no longer carry the
+  ``Deprecation`` header nor the ``deprecation`` field; behaviour and shapes are those of 1.13. Authorisation answers
+  ``403`` instead of ``500`` (K9).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.13"
+CONTRACT_VERSION = "1.14"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

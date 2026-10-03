@@ -21,7 +21,6 @@ from starlette.routing import Route
 from starlette.types import Receive, Scope, Send
 
 from mcp_server.config import settings
-from mcp_server.core import deprecation
 from mcp_server.core.auth import (
     Unauthorised,
     authorise,
@@ -781,7 +780,7 @@ def create_starlette_app() -> Starlette:
 
         res = trigger_rfp_elicitation(engagement=engagement)
         status_code = 200 if res.get("status") == "ok" else 400
-        return JSONResponse(deprecation.mark(res, "POST /api/elicitation/trigger"), status_code=status_code, headers=deprecation.headers("POST /api/elicitation/trigger"))
+        return JSONResponse(res, status_code=status_code)
 
     async def handle_elicitation_questions(request):
         """Liste les questions ouvertes d'élicitation pour un engagement et un rôle donné."""
@@ -793,7 +792,7 @@ def create_starlette_app() -> Starlette:
         role = request.query_params.get("role")
         res = get_open_questions(engagement=engagement, role=role)
         status_code = 200 if res.get("status") == "ok" else 400
-        return JSONResponse(deprecation.mark(res, "GET /api/elicitation/questions"), status_code=status_code, headers=deprecation.headers("GET /api/elicitation/questions"))
+        return JSONResponse(res, status_code=status_code)
 
     async def handle_arbitration_board(request):
         """Tableau de maturité d'architecture des sujets (L0 à L4)."""
@@ -804,7 +803,7 @@ def create_starlette_app() -> Starlette:
         ).strip()
         res = get_board(engagement=engagement)
         status_code = 200 if res.get("status") == "ok" else 400
-        return JSONResponse(deprecation.mark(res, "GET /api/arbitration/board"), status_code=status_code, headers=deprecation.headers("GET /api/arbitration/board"))
+        return JSONResponse(res, status_code=status_code)
 
     async def handle_arbitration_conflicts(request):
         """Liste les conflits et controverses d'architecture ouverts ou arbitrés."""
@@ -816,7 +815,7 @@ def create_starlette_app() -> Starlette:
         status = request.query_params.get("status", "open")
         res = get_conflicts(engagement=engagement, status=status)
         status_code = 200 if res.get("status") == "ok" else 400
-        return JSONResponse(deprecation.mark(res, "GET /api/arbitration/conflicts"), status_code=status_code, headers=deprecation.headers("GET /api/arbitration/conflicts"))
+        return JSONResponse(res, status_code=status_code)
 
     async def handle_arbitration_statements(request):
         """Liste les énoncés d'architecture actifs."""
@@ -830,7 +829,7 @@ def create_starlette_app() -> Starlette:
         status = request.query_params.get("status")
         res = get_statements(engagement=engagement, subject=subject, section=section, status=status)
         status_code = 200 if res.get("status") == "ok" else 400
-        return JSONResponse(deprecation.mark(res, "GET /api/arbitration/statements"), status_code=status_code, headers=deprecation.headers("GET /api/arbitration/statements"))
+        return JSONResponse(res, status_code=status_code)
 
     def _query_list(request, name: str) -> list[str]:
         """List query parameter: repeated (?x=a&x=b) and/or comma-separated (?x=a,b)."""

@@ -16,24 +16,10 @@ MIGRATION_GUIDE_URL = "https://github.com/MauriceIsrael/LLMOps/blob/main/docs/mi
 DOC = "docs/migration-archinex.md"
 SINCE = CONTRACT_VERSION
 
-# interface -> replacement on the Archinex side (plan de gouvernance, lot L4)
-DEPRECATED: dict[str, str] = {
-    "POST /api/elicitation/trigger": "archinex: élicitation par sujet (A2)",
-    "GET /api/elicitation/questions": "archinex: questions d'un sujet (A2)",
-    "GET /api/arbitration/board": "archinex: tableau de maturité des sujets (A3)",
-    "GET /api/arbitration/conflicts": "archinex: conflits et arbitrage (A3)",
-    "GET /api/arbitration/statements": "archinex: énoncés d'un sujet (A3)",
-    "get_subject": "archinex: fiche sujet (A3)",
-    "get_subject_trajectory": "archinex: trajectoire d'un sujet (A3)",
-    "get_board": "archinex: tableau de maturité des sujets (A3)",
-    "get_statements": "archinex: énoncés d'un sujet (A3)",
-    "get_conflicts": "archinex: conflits et arbitrage (A3)",
-    "get_open_questions": "archinex: questions d'un sujet (A2)",
-    "get_diagram_graph": "archinex: diagrammes d'engagement (A4)",
-    "get_render_payload": "archinex: rendu du document d'engagement (A4)",
-    "get_dangling_references": "archinex: contrôle des références (A4)",
-    "get_engagement_export": "archinex: export de l'engagement (A4)",
-}
+# interface -> replacement. Empty since contract 1.14 (K10): the engagement plane is back in service, the Hub holds the
+# engagement base (ADR-KH-01 A10). The mechanism stays for the next deprecation; ``docs/migration-archinex.md`` is
+# kept as history (it was cancelled by 1.14).
+DEPRECATED: dict[str, str] = {}
 
 LEGACY: tuple[str, ...] = (
     "POST /api/rfp/shred-to-candidates",
