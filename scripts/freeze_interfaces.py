@@ -236,11 +236,30 @@ def _as_reviewer(call: Callable[[], Any], set_caller: bool = True, delegate: boo
             os.environ["ENGAGEMENT_TOKENS"] = previous_tokens
 
 
+MEMBER_TOKEN = "contract-member-token"
+
+
+def _as_member(call: Callable[[], Any], email: str) -> Any:
+    """Run ``call`` with a client token that may act for a person (``eng:delegate``); restores the environment."""
+    previous = os.environ.get("ENGAGEMENT_TOKENS")
+    os.environ["ENGAGEMENT_TOKENS"] = f"{MEMBER_TOKEN}:*,eng:delegate"
+    try:
+        return call()
+    finally:
+        if previous is None:
+            os.environ.pop("ENGAGEMENT_TOKENS", None)
+        else:
+            os.environ["ENGAGEMENT_TOKENS"] = previous
+
+
 def _rest(method: str, path: str, url: str | None = None, *, json_body: Any = None,
           headers: dict[str, str] | None = None, stream: bool = False, remember: str | None = None,
           reviewer: bool = False, delegate: bool = False, form: dict[str, str] | None = None,
-          files: dict[str, Any] | None = None) -> Interface:
+          files: dict[str, Any] | None = None, member: str | None = None,
+          remember_path: tuple[str | int, ...] | None = None) -> Interface:
     def call(client: Any) -> Any:
+        if member:  # K15: a person acting through a trusted client (eng:delegate + X-Actor-Email)
+            return _as_member(lambda: _call(client), member)
         if reviewer or delegate:
             return _as_reviewer(lambda: _call(client), set_caller=False, delegate=delegate)
         return _call(client)
@@ -248,10 +267,13 @@ def _rest(method: str, path: str, url: str | None = None, *, json_body: Any = No
     def _call(client: Any) -> Any:
         if stream:
             return {"route_registered": True}
-        hdrs = {"Authorization": f"Bearer {CONTRACT_TOKEN}", **(headers or {})}
+        hdrs = {"Authorization": f"Bearer {MEMBER_TOKEN if member else CONTRACT_TOKEN}", **(headers or {})}
+        if member:
+            hdrs["X-Actor-Email"] = member
         kwargs: dict[str, Any] = {"headers": hdrs}
         if json_body is not None:
-            kwargs["json"] = json_body
+            kwargs["json"] = {k: (_STATE[v[1:-1]] if isinstance(v, str) and v[:1] == "{" and v[-1:] == "}" and v[1:-1] in _STATE else v)
+                              for k, v in json_body.items()} if isinstance(json_body, dict) else json_body
         if form is not None:
             kwargs["data"] = form
         if files is not None:
@@ -264,7 +286,17 @@ def _rest(method: str, path: str, url: str | None = None, *, json_body: Any = No
         else:
             body = {"text": res.text[:0]}
         if remember and isinstance(body, dict) and isinstance(body.get("data"), dict):
-            _STATE[remember] = body["data"].get("id", "")
+            if remember_path:
+                node: Any = body["data"]
+                for step in remember_path:
+                    try:
+                        node = node[step]
+                    except (KeyError, IndexError, TypeError):
+                        node = ""
+                        break
+                _STATE[remember] = node
+            else:
+                _STATE[remember] = body["data"].get("id", "")
         return {
             "status_code": res.status_code,
             "content_type": content_type,
@@ -368,7 +400,40 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/engagements/{engagement}/audit", "/api/engagements/contract-eng/audit?limit=1"),
         _rest("PUT", "/api/engagements/{engagement}/members", "/api/engagements/contract-eng/members", json_body={
             "members": [{"email": "admin@example.org", "handle": "@admin", "role": "admin"},
-                        {"email": "reader@example.org", "handle": "@reader", "role": "reader"}]}),
+                        {"email": "reader@example.org", "handle": "@reader", "role": "reader"},
+                        {"email": "decider@example.org", "handle": "@decider", "role": "decider"},
+                        {"email": "contrib@example.org", "handle": "@contrib", "role": "contributor"}]}),
+        # --- REST: writing into a managed engagement (K15), always through a member -------------------------------
+        _rest("POST", "/api/engagements/{engagement}/subjects", "/api/engagements/contract-eng/subjects",
+              json_body={"name": "mcx-services", "definition": "Mission-critical services"}, member="contrib@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/statements", "/api/engagements/contract-eng/statements", json_body={
+            "subject": "mcx-services", "value": "Gateway is active-active", "confidence": "designed"},
+              member="contrib@example.org", remember="stmt1", remember_path=("statement", "id")),
+        _rest("POST", "/api/engagements/{engagement}/statements/{statement_id}/assert",
+              "/api/engagements/contract-eng/statements/{stmt1}/assert", member="decider@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/statements", "/api/engagements/contract-eng/statements", json_body={
+            "subject": "mcx-services", "value": "Gateway is active-passive", "confidence": "designed"},
+              member="contrib@example.org", remember="stmt2", remember_path=("statement", "id")),
+        _rest("POST", "/api/engagements/{engagement}/statements/{statement_id}/assert",
+              "/api/engagements/contract-eng/statements/{stmt2}/assert", member="decider@example.org",
+              remember="conflict1", remember_path=("conflicts_opened", 0)),
+        _rest("POST", "/api/engagements/{engagement}/conflicts/{conflict_id}/arbitrate",
+              "/api/engagements/contract-eng/conflicts/{conflict1}/arbitrate",
+              json_body={"keep_statement_id": "{stmt1}", "reason": "Latency budget"}, member="admin@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/subjects/{name}/maturity",
+              "/api/engagements/contract-eng/subjects/mcx-services/maturity", json_body={"level": "L3_decided"},
+              member="decider@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/questions", "/api/engagements/contract-eng/questions", json_body={
+            "question": "Which redundancy model?", "subject": "mcx-services"},
+              member="decider@example.org", remember="question1", remember_path=("question", "id")),
+        _rest("POST", "/api/engagements/{engagement}/questions/{question_id}/answers",
+              "/api/engagements/contract-eng/questions/{question1}/answers",
+              json_body={"value": "Two sites, active-active", "confidence": "stated-by-client"},
+              member="contrib@example.org", remember="stmt3", remember_path=("statement", "id")),
+        _rest("POST", "/api/engagements/{engagement}/statements/{statement_id}/withdraw",
+              "/api/engagements/contract-eng/statements/{stmt3}/withdraw", member="contrib@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/requirements", "/api/engagements/contract-eng/requirements",
+              json_body={"requirements": [{"id": "REQ-1", "text": "Encrypt data at rest"}]}, member="contrib@example.org"),
         _rest("POST", "/api/knowledge/suggestions", json_body={
             "title": "Contract freeze suggestion",
             "rationale": "Exercise the suggestion contract.",
