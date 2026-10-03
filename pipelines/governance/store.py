@@ -183,6 +183,37 @@ reuse_confirmations = Table(
     Column("comment", Text),
 )
 
+# Engagement access (K14, ADR-KH-01 A11). An engagement with a row here is *managed*: it is closed to everyone but its
+# members, in every environment. Handles only identify people outside this table; e-mails never leave it.
+engagement_registry = Table(
+    "engagement_registry", metadata,
+    Column("engagement", String(64), primary_key=True),
+    Column("confidentiality", String(16), nullable=False),
+    Column("created_at", String(32), nullable=False),
+    Column("created_by", String(256), nullable=False),
+)
+
+engagement_members = Table(
+    "engagement_members", metadata,
+    Column("engagement", String(64), primary_key=True),
+    Column("email", String(256), primary_key=True),
+    Column("handle", String(64), nullable=False),
+    Column("role", String(16), nullable=False),
+    Column("added_by", String(256), nullable=False),
+    Column("added_at", String(32), nullable=False),
+)
+
+engagement_audit = Table(
+    "engagement_audit", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("at", String(32), nullable=False),
+    Column("engagement", String(64), nullable=False, index=True),
+    Column("actor", String(256), nullable=False),
+    Column("action", String(16), nullable=False),
+    Column("outcome", String(16), nullable=False),  # allowed | denied
+    Column("detail", Text, nullable=False, default="{}"),
+)
+
 counters = Table(
     "counters", metadata,
     Column("key", String(128), primary_key=True),

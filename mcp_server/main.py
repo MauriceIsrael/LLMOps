@@ -22,8 +22,12 @@ from starlette.types import Receive, Scope, Send
 
 from mcp_server.config import settings
 from mcp_server.core.auth import (
+    ENGAGEMENT_CREATE_SCOPE,
     Unauthorised,
-    authorise,
+    acting_member,
+    authorise_action,
+    caller_label,
+    has_scope,
     open_access_warning,
     parse_engagement_tokens,
     set_current_actor_email,
@@ -496,7 +500,7 @@ def create_starlette_app() -> Starlette:
                 if eid == "default":
                     continue
                 try:  # K9: a token only sees the engagements its scopes cover
-                    authorise(caller=caller, engagement=eid)
+                    authorise_action(eid, "read", caller)
                 except Unauthorised:
                     continue
                 friendly_name = eid.replace("-", " ").replace("_", " ").title()
@@ -589,7 +593,7 @@ def create_starlette_app() -> Starlette:
         ).strip()
         fws = body.get("frameworks", []) if isinstance(body, dict) else []
         from pipelines.compliance_mapper import set_applicable_frameworks
-        guard_engagement(engagement)  # K9
+        guard_engagement(engagement, action="decide")  # K9/K14: the applicable frameworks frame the engagement
         res = set_applicable_frameworks(engagement=engagement, frameworks=fws)
         return JSONResponse(res, status_code=200)
 
@@ -1241,17 +1245,109 @@ def create_starlette_app() -> Starlette:
             status_code=400,
         )
 
+
+    # --- Engagement access (K14, ADR-KH-01 A11) -----------------------------------------------------------------
+
+    def _access_or_503():
+        from pipelines.engagement.access import get_access
+
+        access = get_access()
+        if access is None:
+            return None, JSONResponse(
+                {"status": "error", "error": "governance_database_required",
+                 "message": "Managed engagements need a governance database (GOVERNANCE_DATABASE_URL or CANDIDATES_BACKEND=sql)."},
+                status_code=503)
+        return access, None
+
+    def _access_error(err):
+        return JSONResponse({"status": "invalid_argument", "argument": err.argument, "reason": err.reason}, status_code=400)
+
+    async def handle_engagement_create(request):
+        """Create a managed engagement with its first admin. Operator token (``server_admin``) or scope ``eng:create``."""
+        from pipelines.engagement.access import AccessError
+
+        caller = getattr(request.state, "caller", "")
+        if caller != "server_admin" and not has_scope(ENGAGEMENT_CREATE_SCOPE, caller):
+            return JSONResponse({"status": "error", "error": "forbidden", "reason": "eng_create_scope_required"}, status_code=403)
+        access, failure = _access_or_503()
+        if failure:
+            return failure
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        if not isinstance(body, dict):
+            body = {}
+        try:
+            created = access.create(
+                str(body.get("engagement", "")), str(body.get("confidentiality", "")),
+                body.get("admin_email", ""), str(body.get("admin_handle", "")), caller_label(caller))
+        except AccessError as err:
+            return JSONResponse({"status": "invalid_argument", "argument": err.argument, "reason": err.reason},
+                                status_code=409 if "already exists" in err.reason else 400)
+        for m in created["members"]:
+            m.pop("email", None)  # e-mails never leave the registry through a response either
+        return JSONResponse({"status": "ok", "data": created}, status_code=201)
+
+    async def handle_engagement_members(request):
+        """GET: the members (handles and roles; e-mails only to an admin member). PUT: replace the list (role admin)."""
+        from pipelines.engagement.access import AccessError
+
+        engagement = request.path_params["engagement"]
+        guard_engagement(engagement, action="members")
+        access, failure = _access_or_503()
+        if failure:
+            return failure
+        if not access.is_managed(engagement):
+            return JSONResponse({"status": "not_found", "id": engagement, "reason": "not_managed"}, status_code=404)
+        if request.method == "PUT":
+            try:
+                body = await request.json()
+                members = access.replace_members(engagement, body.get("members") if isinstance(body, dict) else None,
+                                                 (acting_member(engagement) or {}).get("handle") or caller_label(request.state.caller))
+            except AccessError as err:
+                return _access_error(err)
+            return JSONResponse({"status": "ok", "data": {"engagement": engagement, "members": members}})
+        return JSONResponse({"status": "ok", "data": {"engagement": engagement, "members": access.members(engagement)}})
+
+    async def handle_engagement_me(request):
+        """The caller's own role on an engagement: managed or not, role, allowed actions."""
+        from pipelines.engagement.access import ROLE_ACTIONS, get_access
+
+        engagement = request.path_params["engagement"]
+        guard_engagement(engagement, action="read")
+        access = get_access()
+        if access is None or not access.is_managed(engagement):
+            return JSONResponse({"status": "ok", "data": {"engagement": engagement, "managed": False, "handle": None,
+                                                           "role": None, "actions": [], "confidentiality": None}})
+        member = acting_member(engagement)
+        role = member["role"] if member else None
+        return JSONResponse({"status": "ok", "data": {
+            "engagement": engagement, "managed": True, "handle": member["handle"] if member else None, "role": role,
+            "actions": sorted(ROLE_ACTIONS[role]) if role else ["read"],  # a read-only service token has no role
+            "confidentiality": access.confidentiality(engagement)}})
+
+    async def handle_engagement_audit(request):
+        """The access journal of an engagement (role admin): refusals and every non-read action."""
+        engagement = request.path_params["engagement"]
+        guard_engagement(engagement, action="members")
+        access, failure = _access_or_503()
+        if failure:
+            return failure
+        limit = int(request.query_params.get("limit", "100") or 100)
+        return JSONResponse({"status": "ok", "data": {"engagement": engagement, "events": access.audit_events(engagement, limit)}})
+
     async def handle_unauthorised(request, exc):
         """K9: a caller outside the scopes of an engagement gets a 403 in the usual error envelope, never a 500."""
-        return JSONResponse(
-            {
-                "status": "error",
-                "error": "forbidden",
-                "message": "The token is not authorised for this engagement",
-                "engagement": exc.engagement,
-            },
-            status_code=403,
-        )
+        body = {
+            "status": "error",
+            "error": "forbidden",
+            "message": "The token is not authorised for this engagement",
+            "engagement": exc.engagement,
+        }
+        if getattr(exc, "reason", None):  # K14: the role a managed engagement requires
+            body.update(action=exc.action, reason=exc.reason, message="The caller lacks the role this action requires")
+        return JSONResponse(body, status_code=403)
 
     return Starlette(
         debug=settings.DEBUG,
@@ -1268,6 +1364,10 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/assets/{asset_id}", endpoint=handle_knowledge_asset, methods=["GET"]),
             Route("/api/knowledge/search", endpoint=handle_knowledge_search, methods=["GET"]),
             Route("/api/knowledge/engagements", endpoint=handle_knowledge_engagements, methods=["GET"]),
+            Route("/api/engagements", endpoint=handle_engagement_create, methods=["POST"]),
+            Route("/api/engagements/{engagement}/members", endpoint=handle_engagement_members, methods=["GET", "PUT"]),
+            Route("/api/engagements/{engagement}/me", endpoint=handle_engagement_me, methods=["GET"]),
+            Route("/api/engagements/{engagement}/audit", endpoint=handle_engagement_audit, methods=["GET"]),
             Route("/api/knowledge/suggestions", endpoint=handle_knowledge_suggestions, methods=["POST"]),
             Route("/api/compliance/conformity-snapshot", endpoint=handle_compliance_conformity_snapshot, methods=["GET"]),
             Route("/api/compliance/frameworks", endpoint=handle_compliance_frameworks, methods=["GET"]),

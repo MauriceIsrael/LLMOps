@@ -1,0 +1,76 @@
+{
+  "interface": "rest.GET /api/engagements/{engagement}/members",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "engagement": {
+                "type": [
+                  "string"
+                ]
+              },
+              "members": {
+                "items": {
+                  "keys": {
+                    "email": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "handle": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "role": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

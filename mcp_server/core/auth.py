@@ -8,6 +8,9 @@ _current_caller: ContextVar[str] = ContextVar("current_caller", default="default
 _current_actor_email: ContextVar[str | None] = ContextVar("current_actor_email", default=None)
 
 DELEGATE_SCOPE = "kb:delegate"
+ENGAGEMENT_DELEGATE_SCOPE = "eng:delegate"  # a trusted client (Archinex) may act for the person named by X-Actor-Email
+ENGAGEMENT_SERVICE_SCOPE = "eng:service"  # a service (the suite's adapter, automation) may read without a person
+ENGAGEMENT_CREATE_SCOPE = "eng:create"  # may create a managed engagement
 
 
 class Role(str, Enum):
@@ -33,6 +36,16 @@ class Unauthorised(PermissionError):  # noqa: N818
     def __init__(self, engagement: str):
         super().__init__(f"Unauthorized to access engagement '{engagement}'")
         self.engagement = engagement
+
+
+class Forbidden(Unauthorised):
+    """An authenticated caller lacks the role an action on a managed engagement requires (still a 403)."""
+
+    def __init__(self, engagement: str, action: str, reason: str):
+        super().__init__(engagement)
+        self.action = action
+        self.reason = reason
+        self.args = (f"Forbidden: '{action}' on engagement '{engagement}' ({reason})",)
 
 
 def parse_engagement_tokens(env_tokens: str) -> dict[str, list[str]]:
@@ -159,3 +172,74 @@ def open_access_warning() -> str | None:
         "authenticated caller can read every engagement. Set ENGAGEMENT_TOKENS (token:eng1,eng2;...) before "
         "putting real engagement data in this server."
     )
+
+
+def caller_label(caller: str) -> str:
+    """A loggable name for a caller: roles by name, tokens by a short fingerprint (the caller *is* the secret token)."""
+    import hashlib
+
+    if caller in (Role.SERVER_ADMIN.value, Role.SYSTEM.value, Role.LOCAL_DEV.value, "default_user"):
+        return caller
+    return "token:" + hashlib.sha256(caller.encode("utf-8")).hexdigest()[:8]
+
+
+def authorise_action(engagement: str, action: str, caller: str | None = None) -> None:
+    """Authorise ``action`` (read, contribute, decide, export, members) on ``engagement`` (K14, ADR-KH-01 A11).
+
+    1. ``authorise``: the token must cover the engagement (scopes, production fail-closed).
+    2. An engagement that is **not managed** (no registry row, or no governance database) keeps the legacy behaviour.
+    3. A **managed** engagement is closed in every environment: the person behind the call (``X-Actor-Email`` through a token
+       carrying ``eng:delegate``) must be a member whose role allows the action. Without a person only a token with
+       ``eng:service`` may read; the operator token (``server_admin``) may manage members but never read the content.
+
+    Refusals are audited; so is every allowed action other than a read.
+    """
+    from pipelines.engagement.access import ROLE_ACTIONS, get_access
+
+    if caller is None:
+        caller = get_current_caller()
+    authorise(caller=caller, engagement=engagement)
+    access = get_access()
+    if access is None or not access.is_managed(engagement):
+        return
+
+    def refuse(reason: str, actor: str) -> None:
+        access.audit(engagement, actor, action, "denied", {"reason": reason, "caller": caller_label(caller)})
+        raise Forbidden(engagement, action, reason)
+
+    email = _current_actor_email.get() if has_scope(ENGAGEMENT_DELEGATE_SCOPE, caller) else None
+    if not email:
+        if action == "members" and caller == Role.SERVER_ADMIN.value:
+            access.audit(engagement, caller, action, "allowed", {"as": "operator"})
+            return
+        if action == "read" and has_scope(ENGAGEMENT_SERVICE_SCOPE, caller):
+            return
+        refuse("actor_required", caller_label(caller))
+        return
+    member = access.member(engagement, email)
+    if member is None:
+        refuse("not_a_member", caller_label(caller))
+        return
+    if action not in ROLE_ACTIONS[member["role"]]:
+        refuse("role_insufficient", member["handle"])
+        return
+    if action != "read":
+        access.audit(engagement, member["handle"], action, "allowed", {"role": member["role"]})
+
+
+def acting_member(engagement: str, caller: str | None = None) -> dict[str, str] | None:
+    """The member (``{email, handle, role}``) behind the current call on a managed engagement, else ``None``."""
+    from pipelines.engagement.access import get_access
+
+    caller = caller or get_current_caller()
+    access = get_access()
+    email = _current_actor_email.get() if has_scope(ENGAGEMENT_DELEGATE_SCOPE, caller) else None
+    if access is None or not email or not access.is_managed(engagement):
+        return None
+    return access.member(engagement, email)
+
+
+def require_distinct_validator(validator_handle: str, author_handle: str | None) -> None:
+    """Separation of duties: nobody validates what they wrote (raises ``PermissionError``)."""
+    if author_handle and validator_handle == author_handle:
+        raise PermissionError("self_validation: the author of an item cannot be its only validator")

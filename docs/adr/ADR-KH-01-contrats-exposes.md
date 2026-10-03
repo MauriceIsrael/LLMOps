@@ -238,6 +238,24 @@ Le Hub comme socle sémantique ; Cypher libre comme contrat ; **prose de livrabl
 
 **i. Risque assumé.** Le Hub passe d'une mémoire transverse à un détenteur de données de programme, éventuellement classifiées : il hérite de leurs obligations. Le prérequis d-1 est donc bloquant, pas souhaitable.
 
+### A11 — Authentification et rôles de la base d'engagement (proposition du mainteneur, 2026-10-03, projet)
+
+Réalise le préalable A10-d-1 par un modèle d'accès, pas par un réglage d'environnement.
+
+**a. Engagement géré.** Un engagement inscrit au registre (`POST /api/engagements`, avec son niveau de confidentialité et son premier administrateur) est **fermé à tous sauf à ses membres, dans tous les environnements**. Le mode ouvert hors production ne concerne plus que les engagements hérités non inscrits ; toute donnée réelle va dans un engagement géré. Le registre exige une base de gouvernance SQL.
+
+**b. Qui est une personne.** Le jeton identifie un **client**, jamais une personne. Une personne agit par un client de confiance (jeton `eng:delegate`, e-mail dans `X-Actor-Email`, résolu en handle par le registre des membres). Sans personne, seul un jeton `eng:service` lit (adaptateur de la suite, automatisation). Le jeton d'exploitation gère les membres et **ne lit pas** le contenu : exploiter le serveur et lire les données d'un programme sont deux pouvoirs.
+
+**c. Rôles par engagement.** `reader` (lit), `contributor` (propose énoncés et réponses ; rien ne devient affirmé), `decider` (affirme, arbitre), `admin` (exporte vers la suite, gère les membres). Un engagement garde toujours au moins un `admin`.
+
+**d. Séparation des tâches.** Personne ne valide ce qu'il a écrit (`require_distinct_validator`) : l'affirmation exige une personne `decider` distincte de l'auteur. Appliquée par l'API d'écriture (K15).
+
+**e. Journal d'accès.** Refus et actions autres que la lecture sont journalisés ; personnes par handle, jetons par empreinte, jamais d'e-mail ni de secret. Visible de l'`admin`.
+
+**f. Ce que ce modèle ne fait pas.** Pas d'authentification forte des personnes : l'identité reste celle que le client de confiance atteste (issue #7 : assertion signée, SSO). Un client de confiance compromis peut usurper un membre ; c'est pourquoi `eng:delegate` n'est donné qu'au client déclaré et que chaque action est journalisée. Pas de chiffrement par engagement ni de classification des fichiers.
+
+**g. Lots.** **K14** (ce modèle) ; **K15** API d'écriture de l'engagement pour Archinex, protégée par K14 ; **K11** émission de l'instantané (action `export`).
+
 ---
 
 ## Décision d'adoption (à renseigner par le propriétaire du Knowledge Hub)
