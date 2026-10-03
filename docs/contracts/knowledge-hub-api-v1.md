@@ -67,7 +67,9 @@ Conformément aux conventions de robustesse, le Hub rejette le repli silencieux 
 }
 ```
 * `400 Bad Request` : Paramètre manquant, JSON malformé ou non conforme au schéma.
-* `401 Unauthorized` : Jeton absent, invalide ou insuffisant.
+* `401 Unauthorized` : Jeton absent ou invalide.
+* `403 Forbidden` : Jeton valide mais hors des portées de l'engagement demandé (`{"status": "error", "error": "forbidden", "engagement": "<id>"}`). Avant K9, ces cas répondaient `500` sur les routes d'engagement ; seul le code d'état change, les formes de succès sont inchangées.
+* `400 Bad Request` (identifiant) : un identifiant d'engagement qui n'est pas `[a-z0-9-]+` est refusé (`{"status": "invalid_argument", "argument": "engagement", ...}`).
 * `404 Not Found` : Engagement, ressource ou actif non trouvé.
 * `500 Internal Server Error` : Défaillance interne du moteur ou de la base de graphe.
 

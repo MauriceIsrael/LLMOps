@@ -12,7 +12,12 @@ from typing import Any
 
 from mcp_server.core.auth import authorise
 from mcp_server.core.config import server_config
-from mcp_server.core.exceptions import EngagementNotFound, QueryRejected, SchemaError
+from mcp_server.core.exceptions import (
+    EngagementNotFound,
+    InvalidEngagementIdError,
+    QueryRejected,
+    SchemaError,
+)
 from tools.adapters.kuzu_store import make_graph_store
 
 
@@ -28,6 +33,18 @@ def validate_engagement_id(engagement_id: str) -> str:
             f"Invalid engagement identifier '{engagement_id}'. Must contain only lowercase alphanumeric characters and hyphens."
         )
     return engagement_id
+
+
+def guard_engagement(engagement: str, caller: str | None = None) -> str:
+    """K9 choke point for every entry point that builds a path or a query from an engagement identifier.
+
+    Authorisation first (``Unauthorised`` -> 403), then the identifier format (``InvalidEngagementIdError`` -> 400),
+    so that no caller reaches ``data/engagements/<id>.*`` outside its scopes and no identifier escapes the directory.
+    """
+    authorise(caller=caller, engagement=engagement)
+    if not isinstance(engagement, str) or not re.match(r"^[a-z0-9-]+$", engagement):
+        raise InvalidEngagementIdError(str(engagement))
+    return engagement
 
 
 def get_engagement_path(engagement_id: str, base_dir: Path | str | None = None) -> Path:

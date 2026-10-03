@@ -1,6 +1,7 @@
 """Point d'entrée du serveur FastMCP pour la Base de Connaissances d'Architecture."""
 
 import asyncio
+import logging
 import os
 from contextlib import asynccontextmanager
 from typing import Any
@@ -22,12 +23,17 @@ from starlette.types import Receive, Scope, Send
 from mcp_server.config import settings
 from mcp_server.core import deprecation
 from mcp_server.core.auth import (
+    Unauthorised,
+    authorise,
+    open_access_warning,
     parse_engagement_tokens,
     set_current_actor_email,
     set_current_caller,
 )
 from mcp_server.core.config import server_config
+from mcp_server.core.db import guard_engagement
 from mcp_server.core.envelope import invalid_argument_response
+from mcp_server.core.exceptions import InvalidEngagementIdError
 from mcp_server.core.version import CONTRACT_VERSION
 from mcp_server.engagement.tools import (
     get_board,
@@ -474,9 +480,14 @@ def create_starlette_app() -> Starlette:
         ]
         eng_dir = server_config.engagements_dir
         if eng_dir.exists():
+            caller = getattr(request.state, "caller", None)
             for f in sorted(eng_dir.glob("*.lbug")):
                 eid = f.stem
                 if eid == "default":
+                    continue
+                try:  # K9: a token only sees the engagements its scopes cover
+                    authorise(caller=caller, engagement=eid)
+                except Unauthorised:
                     continue
                 friendly_name = eid.replace("-", " ").replace("_", " ").title()
                 engagements.append({
@@ -505,6 +516,7 @@ def create_starlette_app() -> Starlette:
             or request.headers.get("X-Source-System")
             or "knowledge-hub"
         ).strip()
+        guard_engagement(engagement)  # K9
 
         try:
             from pipelines.compliance_mapper import to_conformity_snapshot
@@ -538,6 +550,7 @@ def create_starlette_app() -> Starlette:
             compute_framework_coverage,
             get_applicable_frameworks,
         )
+        guard_engagement(engagement)  # K9
         fws = get_applicable_frameworks(engagement=engagement)
         payload: dict[str, Any] = {
             "status": "ok",
@@ -566,6 +579,7 @@ def create_starlette_app() -> Starlette:
         ).strip()
         fws = body.get("frameworks", []) if isinstance(body, dict) else []
         from pipelines.compliance_mapper import set_applicable_frameworks
+        guard_engagement(engagement)  # K9
         res = set_applicable_frameworks(engagement=engagement, frameworks=fws)
         return JSONResponse(res, status_code=200)
 
@@ -674,6 +688,7 @@ def create_starlette_app() -> Starlette:
         engagement = str(body.get("engagement", "default")).strip() if isinstance(body, dict) else "default"
         project_title = str(body.get("project_title", "Système d'Architecture Télécom & Plateforme Sécurisée")).strip() if isinstance(body, dict) else "Système d'Architecture Télécom & Plateforme Sécurisée"
         client_name = str(body.get("client_name", "Client RFP")).strip() if isinstance(body, dict) else "Client RFP"
+        guard_engagement(engagement)  # K9
 
         try:
             from tools.elicitation.zero_draft import ZeroDraftAssembler
@@ -1209,6 +1224,25 @@ def create_starlette_app() -> Starlette:
         status_code = 200 if res.get("status") == "ok" else 400
         return JSONResponse(res, status_code=status_code)
 
+    async def handle_invalid_engagement(request, exc):
+        """K9: a malformed engagement identifier is a 400 in the usual envelope."""
+        return JSONResponse(
+            {"status": "invalid_argument", "argument": "engagement", "reason": str(exc)},
+            status_code=400,
+        )
+
+    async def handle_unauthorised(request, exc):
+        """K9: a caller outside the scopes of an engagement gets a 403 in the usual error envelope, never a 500."""
+        return JSONResponse(
+            {
+                "status": "error",
+                "error": "forbidden",
+                "message": "The token is not authorised for this engagement",
+                "engagement": exc.engagement,
+            },
+            status_code=403,
+        )
+
     return Starlette(
         debug=settings.DEBUG,
         routes=[
@@ -1295,6 +1329,7 @@ def create_starlette_app() -> Starlette:
             Route("/api/skills/matrix", endpoint=handle_skills_matrix, methods=["GET"]),
         ],
         middleware=[Middleware(AuthMiddleware)],
+        exception_handlers={Unauthorised: handle_unauthorised, InvalidEngagementIdError: handle_invalid_engagement},
     )
 
 
@@ -1326,6 +1361,9 @@ def main() -> None:
             raise RuntimeError(
                 "CRITICAL SECURITY FAILURE: SERVER_TOKEN or LLMOPS_AUTH_TOKEN environment variable must be set to start the HTTP/SSE server. Refusing to run in unauthenticated mode."
             )
+        warning = open_access_warning()
+        if warning:
+            logging.getLogger("mcp_server.auth").warning(warning)
         asyncio.run(run_sse_authenticated(host=host, port=port))
     else:
         mcp.run(transport="stdio")
