@@ -12,7 +12,6 @@ from mcp_server.core.db import (
     get_engagement_path,
     open_connection,
 )
-from mcp_server.core.deprecation import deprecated
 from mcp_server.core.envelope import (
     handle_exception_response,
     invalid_argument_response,
@@ -46,7 +45,6 @@ def _get_repo(engagement: str | None = None, db_path: str | Path | None = None) 
     return ElicitationRepository(db_path=p)
 
 
-@deprecated("get_subject")
 def get_subject(subject: str, engagement: str | None = None, db_path: str | Path | None = None) -> dict[str, Any]:
     """Retrieve details, maturity level, and framing definition for an architecture subject.
 
@@ -78,7 +76,6 @@ def get_subject(subject: str, engagement: str | None = None, db_path: str | Path
         return handle_exception_response(e, context_action="get_subject")
 
 
-@deprecated("get_subject_trajectory")
 def get_subject_trajectory(subject: str, engagement: str | None = None, db_path: str | Path | None = None) -> dict[str, Any]:
     """Retrieve maturity level progression trajectory (timeline of questions and answer excerpts) for a subject.
 
@@ -107,7 +104,6 @@ def get_subject_trajectory(subject: str, engagement: str | None = None, db_path:
         return handle_exception_response(e, context_action="get_subject_trajectory")
 
 
-@deprecated("get_board")
 def get_board(engagement: str | None = None) -> dict[str, Any]:
     """Retrieve the maturity board showing all subjects, maturity levels, origin, and blocking questions.
 
@@ -130,7 +126,6 @@ def get_board(engagement: str | None = None) -> dict[str, Any]:
         return handle_exception_response(e, context_action="get_board")
 
 
-@deprecated("get_statements")
 def get_statements(engagement: str | None = None, subject: str | None = None, section: str | None = None, status: str | None = None) -> dict[str, Any]:
     """Retrieve active architecture statements for an engagement, with optional subject, section, or status filters.
 
@@ -164,7 +159,6 @@ def get_statements(engagement: str | None = None, subject: str | None = None, se
         return handle_exception_response(e, context_action="get_statements")
 
 
-@deprecated("get_conflicts")
 def get_conflicts(engagement: str | None = None, status: str = "open") -> dict[str, Any]:
     """Retrieve architecture conflicts for an engagement (declared by architects or detected automatically).
 
@@ -188,7 +182,6 @@ def get_conflicts(engagement: str | None = None, status: str = "open") -> dict[s
         return handle_exception_response(e, context_action="get_conflicts")
 
 
-@deprecated("get_open_questions")
 def get_open_questions(engagement: str | None = None, role: str | None = None) -> dict[str, Any]:
     """Retrieve open elicitation questions for an engagement, optionally filtered by targeted architect role.
 
@@ -216,7 +209,6 @@ def get_open_questions(engagement: str | None = None, role: str | None = None) -
         return handle_exception_response(e, context_action="get_open_questions")
 
 
-@deprecated("get_diagram_graph")
 def get_diagram_graph(
     engagement: str | None = None, format: str = "json", db_path: str | Path | None = None
 ) -> dict[str, Any]:
@@ -276,7 +268,6 @@ def get_diagram_graph(
         return handle_exception_response(e, context_action="get_diagram_graph")
 
 
-@deprecated("get_dangling_references")
 def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
     """Report unresolved dangling references (cited knowledge assets not present in the knowledge base).
 
@@ -311,7 +302,6 @@ def get_dangling_references(engagement: str | None = None) -> dict[str, Any]:
         return handle_exception_response(e, context_action="get_dangling_references")
 
 
-@deprecated("get_render_payload")
 def get_render_payload(engagement: str | None = None, db_path: str | Path | None = None) -> dict[str, Any]:
     """Retrieve complete structured architecture document payload and synthesis data for external renderers.
 
@@ -362,7 +352,6 @@ def get_render_payload(engagement: str | None = None, db_path: str | Path | None
         return handle_exception_response(e, context_action="get_render_payload")
 
 
-@deprecated("get_engagement_export")
 def get_engagement_export(engagement: str | None = None) -> dict[str, Any]:
     """Retrieve complete bulk export (board, render payload, diagram graph) for an engagement in a single call (E4).
 

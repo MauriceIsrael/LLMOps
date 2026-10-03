@@ -8,7 +8,7 @@
       "level": "L2_decomposed",
       "origin": "discovered",
       "days_at_level": 0,
-      "updated_at": "2026-10-02T10:21:51.707435",
+      "updated_at": "2026-10-03T15:51:33.977405",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -22,7 +22,7 @@
       "level": "L0_named",
       "origin": "discovered",
       "days_at_level": 0,
-      "updated_at": "2026-10-02T10:21:51.707435",
+      "updated_at": "2026-10-03T15:51:33.977405",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -36,7 +36,7 @@
       "level": "L0_named",
       "origin": "discovered",
       "days_at_level": 0,
-      "updated_at": "2026-10-02T10:21:51.707435",
+      "updated_at": "2026-10-03T15:51:33.977405",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -50,7 +50,7 @@
       "level": "L2_decomposed",
       "origin": "blueprint",
       "days_at_level": 0,
-      "updated_at": "2026-10-02T10:21:51.707435",
+      "updated_at": "2026-10-03T15:51:33.977405",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -64,7 +64,7 @@
       "level": "L0_named",
       "origin": "discovered",
       "days_at_level": 0,
-      "updated_at": "2026-10-02T10:21:51.707435",
+      "updated_at": "2026-10-03T15:51:33.977405",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -78,7 +78,7 @@
       "level": "L1_framed",
       "origin": "blueprint",
       "days_at_level": 0,
-      "updated_at": "2026-10-02T10:21:51.707435",
+      "updated_at": "2026-10-03T15:51:33.977405",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -92,7 +92,7 @@
       "level": "L0_named",
       "origin": "blueprint",
       "days_at_level": 0,
-      "updated_at": "2026-10-02T10:21:51.707435",
+      "updated_at": "2026-10-03T15:51:33.977405",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -106,7 +106,7 @@
       "level": "L0_named",
       "origin": "blueprint",
       "days_at_level": 0,
-      "updated_at": "2026-10-02T10:21:51.707435",
+      "updated_at": "2026-10-03T15:51:33.977405",
       "is_stalled": false,
       "open_question_ref": null,
       "assigned_role": null,
@@ -114,10 +114,5 @@
         "5.2"
       ]
     }
-  ],
-  "deprecation": {
-    "since": "1.13",
-    "replaced_by": "archinex: tableau de maturit\u00e9 des sujets (A3)",
-    "doc": "docs/migration-archinex.md"
-  }
+  ]
 }

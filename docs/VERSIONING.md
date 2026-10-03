@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.13"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.14"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.13"
+  "schema_version": "1.14"
 }
 ```
 
@@ -34,6 +34,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.11` | Similarity evaluation: FR/EN annotated dataset, runs with client vectors, threshold sweep ([contract §5.11](contracts/knowledge-hub-api-v1.md)). |
 | `1.12` | Bilingual search metadata at ingestion: optional `terms` / `title_fr` in proposals and row decisions ([contract §5.12](contracts/knowledge-hub-api-v1.md)). |
 | `1.13` | Deprecation of the engagement part (elicitation / arbitration routes and engagement MCP tools): `Deprecation` header, `deprecation` field, logs; no change of behaviour ([DEPRECATION.md](DEPRECATION.md), [migration guide](migration-archinex.md)). |
+| `1.14` | Cancels the 1.13 deprecation (K10, [ADR-KH-01](adr/ADR-KH-01-contrats-exposes.md) A10): the engagement part is in service again, without `Deprecation` header or `deprecation` field. Authorisation answers `403` instead of `500` (K9). |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

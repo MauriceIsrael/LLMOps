@@ -1,5 +1,7 @@
 # Migration guide — engagement interfaces to Archinex
 
+> **Cancelled by contract 1.14 (K10).** The Hub holds two bases, knowledge and engagement ([ADR-KH-01 A10](adr/ADR-KH-01-contrats-exposes.md), draft); the interfaces below are in service and carry no deprecation signal. This guide is kept as history.
+
 Since contract **1.13**, LLMOps is the **knowledge hub and doctrine authority**; engagements (subjects,
 statements, elicitation, arbitration) live in **Archinex**. The interfaces below still answer exactly as before
 (same inputs, shapes and status codes) and now announce their deprecation
