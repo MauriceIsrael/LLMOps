@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.18"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.19"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.18"
+  "schema_version": "1.19"
 }
 ```
 
@@ -39,6 +39,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.16` | Managed engagements (K14, [ADR-KH-01](adr/ADR-KH-01-contrats-exposes.md) A11): roles, membership and audit, `/api/engagements*`; a managed engagement is closed to everyone but its members in every environment ([contract §5.16](contracts/knowledge-hub-api-v1.md)). |
 | `1.17` | Writing into a managed engagement (K15, [contract §5.17](contracts/knowledge-hub-api-v1.md)): subjects, statements (proposed, then asserted by a decider who is not the author), questions and answers, requirements, conflict arbitration, maturity; idempotent; every write attributed to the member. |
 | `1.18` | Sealed snapshot of an engagement (K11, [contract §5.18](contracts/knowledge-hub-api-v1.md)): the Hub emits the engagement channel (suite envelope, canonical-json v1, content-addressed identifier, handles only, `is_provisional` derived); refused when its verification fails. |
+| `1.19` | Decisions in the engagement base (K16, [contract §5.19](contracts/knowledge-hub-api-v1.md)): proposed, asserted by a decider who is not the author, superseded; a subject is decided only on an asserted decision (**rule change**: was an asserted statement); the engagement snapshot gains `decisions` (schema `1.1`). |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

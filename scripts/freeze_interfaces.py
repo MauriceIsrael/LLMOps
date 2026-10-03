@@ -420,9 +420,23 @@ def build_catalogue() -> list[Interface]:
         _rest("POST", "/api/engagements/{engagement}/conflicts/{conflict_id}/arbitrate",
               "/api/engagements/contract-eng/conflicts/{conflict1}/arbitrate",
               json_body={"keep_statement_id": "{stmt1}", "reason": "Latency budget"}, member="admin@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/decisions", "/api/engagements/contract-eng/decisions", json_body={
+            "subject": "mcx-services", "decision": "Active-active gateway", "rationale": "Meets the resilience requirement.",
+            "reversibility": "costly", "consequences": ["Two sites to operate"],
+            "rejected": [{"option": "Active-passive gateway", "reason": "Failover time above the budget."}]},
+              member="contrib@example.org", remember="decision1", remember_path=("decision", "id")),
+        _rest("POST", "/api/engagements/{engagement}/decisions/{decision_id}/assert",
+              "/api/engagements/contract-eng/decisions/{decision1}/assert", member="decider@example.org"),
         _rest("POST", "/api/engagements/{engagement}/subjects/{name}/maturity",
               "/api/engagements/contract-eng/subjects/mcx-services/maturity", json_body={"level": "L3_decided"},
               member="decider@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/subjects", "/api/engagements/contract-eng/subjects",
+              json_body={"name": "core-network"}, member="contrib@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/decisions", "/api/engagements/contract-eng/decisions", json_body={
+            "subject": "core-network", "decision": "Single core site", "rationale": "Pilot budget.", "reversibility": "reversible"},
+              member="contrib@example.org", remember="decision2", remember_path=("decision", "id")),
+        _rest("POST", "/api/engagements/{engagement}/decisions/{decision_id}/withdraw",
+              "/api/engagements/contract-eng/decisions/{decision2}/withdraw", member="contrib@example.org"),
         _rest("POST", "/api/engagements/{engagement}/questions", "/api/engagements/contract-eng/questions", json_body={
             "question": "Which redundancy model?", "subject": "mcx-services"},
               member="decider@example.org", remember="question1", remember_path=("question", "id")),
