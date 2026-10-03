@@ -165,8 +165,8 @@ Le Hub est la **mémoire d'ingénierie transverse** de la suite (`ADR-SUITE-05` 
 ### A3 — D2 (ce que le Hub ne fait pas) précisée
 **a. Assistance à la rédaction.** Le Hub peut être **fournisseur d'assistance** du Document Engine (`ADR-DE-02`, second amendement d'`ADR-SUITE-05` du 2026-09-13 : l'assistance n'est pas un canal). Ce n'est pas de la « prose destinée à un livrable d'homologation » à trois conditions, qui sont des **engagements du Hub** : (1) la réponse est une **citation de la doctrine** de la base (identifiant, type, confiance telle que publiée, extrait), jamais un récit ; (2) elle **n'énonce rien sur le projet** (ni conformité, ni validation) ; (3) quand rien ne s'applique, **elle ne produit rien** et renvoie un avertissement. Le brouillon reste un `suggestion` que seul un geste humain bloc par bloc fait entrer dans le document (`ADR-DE-02`). *Constat à la date de l'amendement* : la route fabriquait du texte (« Conception validée… ») ; corrigée par la PR `LLMOps#39`.
 **b. Mémoire d'usage (décision du mainteneur, 2026-10-02).** Le **journal de réutilisation** (quel actif a été retenu ou rejeté pour un sujet de ce type, pour quelle raison, sous quelles hypothèses jugées) est de la **connaissance sur la base**. Il ne conserve **aucune ancre de programme** : empreinte du sujet normalisé et libellé anonymisé seulement (adresses IP et e-mails refusés par le serveur), jamais le texte ni l'identifiant d'un engagement. La décision d'un engagement vit chez son producteur (`ADR-SUITE-05` D4).
-**c. Schéma du dossier d'engagement (décision du mainteneur, 2026-10-02).** Le Hub **tient le contrat de provenance et d'épistémique** d'un dossier d'engagement scellé (`schemas/engagement_bundle.schema.json`, proposé). Tenir un schéma n'est pas détenir des données : le Hub **ne reçoit jamais** le contenu d'un engagement (aucun service de vérification ni de rendu), et ne détient « ni décision de programme, ni exigence de programme, ni claim, ni preuve ».
-**d. Plan d'engagement.** Déprécié depuis la 1.13 (en-tête `Deprecation`, guide `docs/migration-archinex.md`) : conforme à D2 ; retrait en version majeure avec l'accord écrit des consommateurs.
+**c. Schéma du dossier d'engagement (décision du mainteneur, 2026-10-02) — _remplacé par A10 (projet)_.** Le Hub **tient le contrat de provenance et d'épistémique** d'un dossier d'engagement scellé (`schemas/engagement_bundle.schema.json`, proposé). Tenir un schéma n'est pas détenir des données : le Hub **ne reçoit jamais** le contenu d'un engagement (aucun service de vérification ni de rendu), et ne détient « ni décision de programme, ni exigence de programme, ni claim, ni preuve ».
+**d. Plan d'engagement — _remplacé par A10 (projet)_.** Déprécié depuis la 1.13 (en-tête `Deprecation`, guide `docs/migration-archinex.md`) : conforme à D2 ; retrait en version majeure avec l'accord écrit des consommateurs.
 **e. Générateur de document.** `generate_zero_draft_hld`, `POST /api/documents/zero-draft-blueprint` et les gabarits `templates/` produisent de la prose de livrable : **legacy**, à retirer au profit du Document Engine (lot K4), après accord des consommateurs.
 
 ### A4 — D3 (garanties) : état constaté au 2026-10-02
@@ -198,7 +198,7 @@ Le Hub est la **mémoire d'ingénierie transverse** de la suite (`ADR-SUITE-05` 
 - **D7 — Enveloppe de canal.** Les instantanés publiés portent `emitter`, `rebuiltByEmitterTest`, `checksum` canonique et `is_provisional` avec ses raisons (additif : les champs actuels sont conservés). Lot **K2**.
 - **D8 — Référence citable.** `KnowledgeRef {sourceId: 'knowledge-hub', knowledgeKey, version}` ; la `version` est une coordonnée **publiée dans l'instantané** et résolue depuis lui, jamais depuis la base vivante ; une référence sans version n'est pas citable dans un document figé. Lot **K3**.
 - **D9 — Aucune réutilisation automatique.** Toute proposition de réutilisation d'une connaissance est « à confirmer » par une personne, hypothèse par hypothèse ; les zones de score ne décident jamais. Cohérent avec « rien de ce qui sort du KH n'entre dans la suite comme fait vérifié ».
-- **D10 — Pas de service sur du contenu d'engagement.** Le Hub ne vérifie, ne rend et ne stocke aucun dossier d'engagement (A3-c).
+- **D10 — Pas de service sur du contenu d'engagement — _remplacée par A10 (projet)_.** Le Hub ne vérifie, ne rend et ne stocke aucun dossier d'engagement (A3-c).
 
 ### A8 — Rejets (inchangés, confirmés)
 Le Hub comme socle sémantique ; Cypher libre comme contrat ; **prose de livrable générée** (précisée par A3-a et A3-e) ; absorption d'objets possédés par la suite ; dépendance dure ; **RPC synchrone comme mécanisme d'intégration applicative de la suite**.
@@ -208,6 +208,33 @@ Le Hub comme socle sémantique ; Cypher libre comme contrat ; **prose de livrabl
 - PR `LLMOps#39` (assistance honnête).
 - Chaque engagement de la Partie II est **testable** : K1 par les vecteurs partagés, K2 par le test de fraîcheur à l'octet, K3 par la résolution depuis l'instantané. Un engagement sans test reste une intention.
 - Lignes d'A4 initialement « à vérifier » : **vérifiées le 2026-10-03** (voir A4) ; elles ont révélé deux défauts réels (500 au lieu de 403, énumération des engagements) et un écart (Cypher interpolé du plan d'engagement), suivis par le lot **K9**.
+
+### A10 — Deux bases dans le Hub : connaissance et engagement (proposition du mainteneur, 2026-10-03, projet)
+
+*Cet amendement **inverse** A3-c, A3-d et D10 (A7). Il n'est pas un détail : il change ce que le Hub détient. Il suppose l'accord des propriétaires de la suite (voir [`PROPOSITION-amendement-ADR-SUITE-05.md`](PROPOSITION-amendement-ADR-SUITE-05.md)) et ne vaut qu'une fois la décision d'adoption inscrite.*
+
+**a. Position.** Le Hub contient **deux bases**, physiquement isolées (garantie 3, tenue) :
+1. la **base de connaissance** : connaissance générique, **agnostique de tout programme**, qui porte l'expérience des experts sur un vertical métier (ici TELCO/MCX) ;
+2. la **base d'engagement** : la donnée **d'un programme** : exigences (un appel d'offres est une liste d'exigences de projet), décisions, énoncés, conflits, manques, hypothèses, avec leur provenance.
+
+**b. Rôles.** Archinex est l'**outil d'aide à la décision et de sollicitation des experts** : il fait vivre le débat, il est un client interactif du Hub (REST). Le Hub est le **réceptacle** (système d'enregistrement des deux bases) et le **point d'entrée unique vers la suite**, par deux familles de canaux à instantané scellé : la base de connaissance (existant) et la base d'engagement (nouveau). La suite n'a pas à connaître Archinex : l'émetteur déclaré de l'instantané d'engagement est le Hub, qui sait le reconstruire (`rebuiltByEmitterTest`).
+
+**c. D2 révisée.** « Il ne détient ni décision de programme, ni exigence de programme, ni claim, ni résultat de vérification, ni preuve » devient : **la base de connaissance n'en détient aucune ; la base d'engagement en détient, sous les préalables de d.** Restent intacts : pas de prose de livrable ; pas de calcul à la place d'une application spécialisée ; le Hub **enregistre** les décisions, il n'en prend aucune (une décision est posée par une personne via un client, jamais par le Hub ni par un modèle).
+
+**d. Préalables à la mise en service de la base d'engagement** (chacun testable ; tant qu'un seul manque, la base d'engagement reste hors service comme canal vers la suite) :
+1. **Garantie 6 complète** : lot K9 (`#46`) : refus en 403 et non en 500, énumération des engagements filtrée par jeton, **accès fermé par défaut y compris hors production**.
+2. **Confidentialité obligatoire par engagement** : un instantané n'est émis que si son niveau est renseigné ; le niveau voyage dans l'enveloppe.
+3. **Étanchéité vers la base de connaissance** : le journal de réutilisation reste anonymisé (A3-b inchangé) ; une décision capitalisée vers la base passe par un **candidat revu par un humain** qui ne porte **aucune ancre de programme** (identifiant d'engagement, nom du client, adresses).
+4. **Aucun contenu d'engagement vers un modèle externe** : l'assistance de prose du Hub (A3-a) ne lit pas la base d'engagement et « n'énonce rien sur le projet » (condition 2 d'A3-a, maintenue). Le garde de classification en sortie (ADR-DE-43) reste celui de la suite.
+5. **Aucun e-mail dans un instantané** : handles de propriétaires seulement.
+
+**e. L'instantané d'engagement.** Enveloppe de la suite (K2), sceau canonical-json v1 (K1), confiance à cinq valeurs (K5), `is_provisional` **dérivé** (sujet sous `L3_decided` ou conflit ouvert), références `knowledge-hub:<slug>` avec version (K3), épinglage de l'instantané de la base de connaissance utilisé. `schemas/engagement_bundle.schema.json` devient le contrat **proposé** de ce canal et `pipelines/bundle/verify.py` le vérificateur de l'émetteur. **Non tranché** : un instantané unique dont les sections se consomment séparément, ou un canal par nature d'objet (décisions, exigences, conflits, manques). Cela relève du registre de canaux de la suite (voir [`../SUITE-MAP.md`](../SUITE-MAP.md) §5).
+
+**f. Ce que cela défait.** La dépréciation du plan d'engagement (1.13) est **levée** (contrat 1.14 : les routes d'engagement ne sont plus dépréciées ; le retrait en version majeure d'A3-d est annulé). Archinex repasse du stockage local de l'engagement à l'écriture dans le Hub : les issues archinex `#27`, `#28` (A16, A17) sont à reformuler et `#32` (A22, retrait des appels d'engagement) est **caduque**. La PR archinex `#33` (sceau canonique des sections figées) reste valable pour le figement local.
+
+**g. Lots proposés** (à créer après adoption) : **K10** levée de la dépréciation et contrat 1.14 ; **K11** émission de l'instantané d'engagement par le Hub (K1, K2, K9 en prérequis) ; **K12** reprise de l'existant d'Archinex (engagements déjà en base Prisma) ; **K13** étanchéité de la capitalisation (d-3, avec test). Un engagement sans test reste une intention.
+
+**h. Risque assumé.** Le Hub passe d'une mémoire transverse à un détenteur de données de programme, éventuellement classifiées : il hérite de leurs obligations. Le prérequis d-1 est donc bloquant, pas souhaitable.
 
 ---
 
