@@ -25,8 +25,12 @@ CREATED_AT = "2026-10-03T12:00:00Z"
 def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
     """Raw rows of an illustrative engagement and the knowledge snapshot it is pinned to (a stub: one asset)."""
     adr = "---\nid: ADR-0001\ntitle: Git as the source of truth\n---\n\n# ADR-0001\n"
+    vocabulary = {"version": 1, "knowledge_ref": knowledge_ref("vocabulary:facts", 1), "content_sha256": "sha256:" + "0" * 64, "keys": [
+        {"key": "topology.dc_count", "type": "int", "min": 1, "unit": "datacentres", "label": {"fr": "Nombre de centres de données", "en": "Number of data centres"}},
+        {"key": "topology.mode", "type": "enum", "values": ["single-site", "active-passive", "active-active"],
+         "label": {"fr": "Mode multi-site", "en": "Multi-site mode"}}]}
     kb = {
-        "snapshot_id": "snapshot-2026-10-03-0000000", "payload_sha256": "sha256:" + "0" * 64,
+        "fact_vocabulary": vocabulary, "snapshot_id": "snapshot-2026-10-03-0000000", "payload_sha256": "sha256:" + "0" * 64,
         "assets": [{"id": "ADR-0001", "typed_id": "decision:ADR-0001", "revision": 1, "confidence": "verified",
                     "knowledge_ref": knowledge_ref("decision:ADR-0001", 1), "content": adr, "content_sha256": content_sha256(adr),
                     "title": "Git as the source of truth", "type": "decision", "status": "active"}],
@@ -58,12 +62,15 @@ def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
                  {"option": "Active-passive gateway", "reason": "Failover time above the budget."}],
              "reversibility": "costly", "consequences": ["Two sites to operate."], "accepted_violations": [],
              "based_on": [{"id": "ADR-0001", "resolved": None}], "status": "active", "origin": "human",
-             "author": "@carl", "validated_by": "@ada", "validated_at": "2026-10-02T10:00:00", "supersedes": ""},
+             "author": "@carl", "validated_by": "@ada", "validated_at": "2026-10-02T10:00:00", "supersedes": "",
+             "facts": [{"key": "topology.dc_count", "value": 2, "source_excerpt": "across two sites"},
+                       {"key": "topology.mode", "value": "active-active", "source_excerpt": "Active-active gateway"}]},
             {"id": "D-0002", "subject": "core-network", "decision": "Keep a single core site for the pilot",
              "rationale": "Budget.", "rejected": [], "reversibility": "reversible", "consequences": [],
              "accepted_violations": [{"typed_id": "principle:P-009", "justification": "Pilot only."}],
              "based_on": [], "status": "proposed", "origin": "llm-derived", "author": "@dan", "validated_by": "",
-             "validated_at": "", "supersedes": ""},
+             "validated_at": "", "supersedes": "",
+             "facts": [{"key": "topology.dc_count", "value": 1, "source_excerpt": "a single core site"}]},
         ],
         "conflicts": [{"id": "C-0001", "kind": "contradiction", "detail": "Contradiction between S-0001 and S-0002.",
                        "status": "arbitrated", "resolution": "Latency budget", "arbitrated_by": "@ada"}],

@@ -9,6 +9,7 @@
   "rest.GET /api/engagements/{engagement}/audit": 200,
   "rest.GET /api/engagements/{engagement}/exports": 200,
   "rest.GET /api/engagements/{engagement}/exports/{snapshot_id}": 200,
+  "rest.GET /api/engagements/{engagement}/facts": 200,
   "rest.GET /api/engagements/{engagement}/me": 200,
   "rest.GET /api/engagements/{engagement}/members": 200,
   "rest.GET /api/frameworks/ingestions": 200,

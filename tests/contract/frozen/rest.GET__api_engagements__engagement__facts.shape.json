@@ -1,0 +1,126 @@
+{
+  "interface": "rest.GET /api/engagements/{engagement}/facts",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "contradictions": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "items": {
+                "items": {
+                  "keys": {
+                    "decision": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "key": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "source_excerpt": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "subject": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "unit": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "value": {
+                      "type": [
+                        "number"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "vocabulary": {
+                "keys": {
+                  "knowledge_ref": {
+                    "keys": {
+                      "knowledgeKey": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "sourceId": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "version": {
+                        "type": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "version": {
+                    "type": [
+                      "number"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

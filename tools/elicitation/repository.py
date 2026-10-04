@@ -315,14 +315,14 @@ class ElicitationRepository:
 
     _DECISION_COLUMNS = ("id", "engagement", "subject", "decision", "rationale", "rejected", "reversibility", "consequences",
                          "accepted_violations", "based_on", "author", "status", "origin", "validated_by", "validated_at",
-                         "supersedes", "created_at", "imported_from")
+                         "supersedes", "created_at", "imported_from", "facts")
 
     def save_decision(self, decision: dict[str, Any]) -> str:
         """Create a decision. Lists are stored as JSON text; the caller has validated everything."""
         import json
 
         row = {c: decision.get(c, "") for c in self._DECISION_COLUMNS}
-        for column in ("rejected", "consequences", "accepted_violations", "based_on"):
+        for column in ("rejected", "consequences", "accepted_violations", "based_on", "facts"):
             row[column] = json.dumps(decision.get(column) or [], ensure_ascii=False)
         row["created_at"] = decision.get("created_at") or datetime.now().isoformat()
         self.db_client.execute_cypher(
@@ -337,7 +337,7 @@ class ElicitationRepository:
         if not res or "error" in res[0]:
             return None
         row = dict(res[0])
-        for column in ("rejected", "consequences", "accepted_violations", "based_on"):
+        for column in ("rejected", "consequences", "accepted_violations", "based_on", "facts"):
             try:
                 row[column] = json.loads(row.get(column) or "[]")
             except ValueError:

@@ -39,7 +39,8 @@ class WriteError(Exception):
 
     def body(self) -> dict[str, Any]:
         if self.status == 400:
-            return {"status": "invalid_argument", "argument": self.argument, "reason": self.reason, **self.detail}
+            specific = {} if self.code == "invalid_argument" else {"code": self.code}  # e.g. UNKNOWN_FACT_KEY (K18)
+            return {"status": "invalid_argument", "argument": self.argument, "reason": self.reason, **specific, **self.detail}
         if self.status == 404:
             return {"status": "not_found", "error": self.code, "reason": self.reason, **self.detail}
         return {"status": "error", "error": self.code, "reason": self.reason, **self.detail}
@@ -119,6 +120,8 @@ def _list_of(body: dict[str, Any], field: str, keys: dict[str, bool]) -> list[di
 
 def prepare_decision(body: dict[str, Any]) -> dict[str, Any]:
     """The validated fields of a decision (no author, status, identifier or supersession)."""
+    from pipelines.engagement import facts as fact_module
+
     subject = _text(body, "subject", limit=120)
     decision = _text(body, "decision")
     rationale = _text(body, "rationale")
@@ -133,10 +136,14 @@ def prepare_decision(body: dict[str, Any]) -> dict[str, Any]:
     kept = decision.strip().lower()
     if any(r["option"].strip().lower() == kept for r in rejected):
         raise WriteError(400, "invalid_argument", "the retained decision is also listed among the rejected options", "rejected")
+    try:  # K18: the facts the decision asserts, in the vocabulary of the knowledge base
+        facts = fact_module.validate(body.get("facts"))
+    except fact_module.FactError as err:
+        raise WriteError(400, err.code, err.reason, err.path) from err
     return {
         "subject": subject, "decision": decision, "rationale": rationale, "rejected": rejected,
         "reversibility": reversibility, "consequences": [c.strip() for c in consequences],
-        "accepted_violations": violations, "based_on": _based_on(body), "origin": _origin(body),
+        "accepted_violations": violations, "based_on": _based_on(body), "origin": _origin(body), "facts": facts,
     }
 
 
@@ -285,7 +292,7 @@ class EngagementWriter:
     @staticmethod
     def _public_decision(d: dict[str, Any] | None) -> dict[str, Any]:
         keys = ("id", "subject", "decision", "rationale", "rejected", "reversibility", "consequences", "accepted_violations",
-                "based_on", "status", "origin", "author", "validated_by", "validated_at", "supersedes")
+                "based_on", "status", "origin", "author", "validated_by", "validated_at", "supersedes", "facts")
         return {k: (d or {}).get(k) for k in keys}
 
     # --- questions and answers ------------------------------------------------------------------------------------

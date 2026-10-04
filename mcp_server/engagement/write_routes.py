@@ -109,6 +109,19 @@ async def _import(request):
     return JSONResponse({"status": "ok", "data": report})
 
 
+async def _facts(request):
+    """The facts in force of an engagement (K18): only those of asserted decisions, each with its decision."""
+    from pipelines.engagement.facts import in_force
+
+    engagement = request.path_params["engagement"]
+    guard_engagement(engagement, action="read")
+    repo = ElicitationRepository(db_path=get_engagement_path(engagement))
+    try:
+        return JSONResponse({"status": "ok", "data": in_force(repo.list_decisions(engagement))})
+    finally:
+        repo.close()
+
+
 def build_write_routes() -> list[Route]:
     base = "/api/engagements/{engagement}"
 
@@ -168,6 +181,7 @@ def build_write_routes() -> list[Route]:
         Route(f"{base}/statements/{{statement_id}}/assert", endpoint=assert_statement, methods=["POST"]),
         Route(f"{base}/statements/{{statement_id}}/withdraw", endpoint=withdraw_statement, methods=["POST"]),
         Route(f"{base}/import", endpoint=_import, methods=["POST"]),
+        Route(f"{base}/facts", endpoint=_facts, methods=["GET"]),
         Route(f"{base}/decisions", endpoint=decisions, methods=["POST"]),
         Route(f"{base}/decisions/{{decision_id}}/assert", endpoint=assert_decision, methods=["POST"]),
         Route(f"{base}/decisions/{{decision_id}}/withdraw", endpoint=withdraw_decision, methods=["POST"]),

@@ -36,7 +36,7 @@ from pipelines.snapshot_envelope import provisional
 from tools.elicitation.config import SUBJECT_LEVELS
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "engagement_snapshot.schema.json"
-SCHEMA_VERSION = "1.2"
+SCHEMA_VERSION = "1.3"
 EMITTER = "knowledge-hub"
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+")
 HANDLE = re.compile(r"^@[a-z0-9][a-z0-9._-]{0,62}$")
@@ -148,10 +148,13 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
             "assertion_level": ASSERTION_OF.get(status, status), "origin": r.get("origin") or "human",
             "author": r.get("author") or "", "validated_by": r.get("validated_by") or "",
             "validated_at": r.get("validated_at") or "", "supersedes": r.get("supersedes") or "",
-            "imported": bool(r.get("imported_from")),
+            "imported": bool(r.get("imported_from")), "facts": list(r.get("facts") or []),
         })
         cite({"decision_id": r["id"]}, based_on)
 
+    from pipelines.engagement import facts as fact_module  # noqa: PLC0415
+
+    facts_section = fact_module.pinned(decisions, kb_snapshot)  # K18: only asserted decisions bring facts
     subjects = [{"id": f"{engagement}:{r['name']}", "name": r["name"], "definition": r.get("definition") or "",
                  "maturity": r.get("level") or SUBJECT_LEVELS[0]} for r in sorted(raw["subjects"], key=lambda r: r["name"])]
     members: dict[str, list[str]] = {}
@@ -181,7 +184,7 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
         "requirements": [{"id": r["id"], "text": r.get("text") or "", "section": r.get("section") or "",
                           "category": r.get("category") or "general", "criticality": r.get("criticality") or "mandatory",
                           "status": r.get("status") or "gap"} for r in sorted(raw["requirements"], key=lambda r: r["id"])],
-        "subjects": subjects, "statements": statements, "decisions": decisions, "conflicts": conflicts,
+        "subjects": subjects, "statements": statements, "decisions": decisions, "facts": facts_section, "conflicts": conflicts,
         "gaps": sorted(gaps, key=lambda g: g["id"]),
         "kb_references": kb_refs, "unresolved_references": unresolved,
     }
@@ -299,6 +302,19 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
     for i, ref in enumerate(data["kb_references"]):
         if ref.get("statement_id", ref.get("decision_id")) not in (statement_ids | decision_ids):
             problems.append(Problem("DANGLING", f"$.data.kb_references[{i}]", "reference cites an unknown statement or decision"))
+    by_id = {d["id"]: d for d in data["decisions"]}
+    facts_in_data = data["facts"]["items"]
+    for i, f in enumerate(facts_in_data):
+        d = by_id.get(f["decision"])
+        if d is None:
+            problems.append(Problem("DANGLING", f"$.data.facts.items[{i}]", f"fact {f['key']} cites unknown decision {f['decision']}"))
+        elif d["status"] != "active":
+            problems.append(Problem("FACT_NOT_ASSERTED", f"$.data.facts.items[{i}]", f"fact {f['key']} comes from decision {d['id']}, which is not asserted"))
+        elif not any(x["key"] == f["key"] and x["value"] == f["value"] for x in d["facts"]):
+            problems.append(Problem("FACT_NOT_IN_DECISION", f"$.data.facts.items[{i}]", f"decision {d['id']} does not carry fact {f['key']}"))
+    expected_facts = sum(len(d["facts"]) for d in data["decisions"] if d["status"] == "active")
+    if len(facts_in_data) != expected_facts:
+        problems.append(Problem("FACTS_INCOMPLETE", "$.data.facts.items", "the facts must be exactly those of the asserted decisions"))
     unripe = sum(1 for s in data["subjects"] if s["maturity"] in UNRIPE)
     open_conflicts = sum(1 for c in data["conflicts"] if c["status"] == "open")
     expected = provisional(unripe, open_conflicts)
@@ -336,14 +352,19 @@ def export_engagement(access: Any, repo: Any, engagement: str, produced_by: str,
     if confidentiality is None:
         raise ExportRefused("engagement_not_managed", "only a managed engagement can be exported")
     raw = collect(repo, engagement)
-    needs_kb = any(_based_on(s.get("based_on")) for s in raw["statements"])
+    needs_kb = any(_based_on(s.get("based_on")) for s in raw["statements"]) or any(d.get("facts") for d in raw["decisions"])
     try:
         kb_snapshot = load_snapshot(snapshots_dir)
     except ResolutionError as err:
         if needs_kb:
             raise ExportRefused("kb_snapshot_unavailable", f"statements cite the knowledge base but its snapshot is unusable ({err.reason})") from err
         kb_snapshot = None
-    data = build_data(raw, engagement, confidentiality, kb_snapshot)
+    from pipelines.engagement.facts import FactError  # noqa: PLC0415
+
+    try:
+        data = build_data(raw, engagement, confidentiality, kb_snapshot)
+    except FactError as err:
+        raise ExportRefused(err.code.lower(), f"{err.reason} ({err.path})") from err
     try:
         checksum = canonical.sha256(data)
     except canonical.CanonicalError as err:
