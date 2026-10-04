@@ -1,0 +1,14 @@
+trigger_id: TRG-sovereign-hosting-jurisdiction
+version: 1
+asset: SNC-REQ-01
+when:
+  - {key: hosting.sovereignty, op: in, value: [national, eu, sovereign-cloud]}
+question:
+  fr: Quelles garanties d'immunité aux lois extraterritoriales et de localisation des données l'hébergement apporte-t-il ?
+  en: What guarantees of immunity to extraterritorial laws and of data localisation does the hosting provide?
+rationale:
+  fr: Une exigence de souveraineté d'hébergement impose de démontrer la localisation des données et l'immunité du fournisseur (SNC-REQ-01).
+  en: A hosting sovereignty requirement means showing where the data is located and that the provider is immune to extraterritorial laws (SNC-REQ-01).
+initial_level: L1_framed
+suggested_role: security-architect
+mandatory: true

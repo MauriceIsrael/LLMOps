@@ -1,0 +1,14 @@
+trigger_id: TRG-nis2-business-continuity
+version: 1
+asset: NIS2-ART21-2C
+when:
+  - {key: continuity.nis2_in_scope, op: eq, value: true}
+question:
+  fr: Quel plan de continuité et de reprise d'activité répond à l'article 21(2)(c) de NIS2 ?
+  en: Which business continuity and disaster recovery plan answers NIS2 Article 21(2)(c)?
+rationale:
+  fr: Une entité soumise à NIS2 doit couvrir la gestion de la continuité, des sauvegardes et de la crise ; le plan doit être tranché et justifié.
+  en: An entity in NIS2 scope must cover business continuity, backup management and crisis management; the plan has to be decided and justified.
+initial_level: L1_framed
+suggested_role: security-architect
+mandatory: true

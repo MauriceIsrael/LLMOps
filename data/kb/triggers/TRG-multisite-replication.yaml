@@ -1,0 +1,14 @@
+trigger_id: TRG-multisite-replication
+version: 1
+asset: P-010
+when:
+  - {key: topology.dc_count, op: gte, value: 2}
+question:
+  fr: Quelle stratégie de réplication des données entre centres de données, et pour quel RPO ?
+  en: Which data replication strategy between data centres, and for which RPO?
+rationale:
+  fr: Dès que deux centres de données hébergent le service, chaque domaine de données doit garder un seul maître (P-010) ; la réplication et l'objectif de point de reprise en découlent.
+  en: As soon as two data centres host the service, each data domain must keep a single master (P-010); the replication strategy and the recovery point objective follow.
+initial_level: L1_framed
+suggested_role: architect
+mandatory: false

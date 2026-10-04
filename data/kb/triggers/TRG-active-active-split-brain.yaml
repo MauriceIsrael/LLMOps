@@ -1,0 +1,15 @@
+trigger_id: TRG-active-active-split-brain
+version: 1
+asset: P-009
+when:
+  - {key: topology.dc_count, op: eq, value: 2}
+  - {key: topology.mode, op: eq, value: active-active}
+question:
+  fr: Comment éviter le split-brain entre deux sites actifs (site témoin, quorum) ?
+  en: How is split-brain avoided between two active sites (witness site, quorum)?
+rationale:
+  fr: Deux sites actifs sans arbitre peuvent diverger lors d'une coupure du lien inter-sites ; un site témoin ou un quorum doit être tranché. Avec trois sites, la question disparaît.
+  en: Two active sites without an arbiter can diverge when the inter-site link is cut; a witness site or a quorum has to be decided. With three sites the question goes away.
+initial_level: L1_framed
+suggested_role: architect
+mandatory: false

@@ -1,0 +1,14 @@
+trigger_id: TRG-multisite-distribution
+version: 1
+asset: P-009
+when:
+  - {key: topology.dc_count, op: gte, value: 3}
+question:
+  fr: Comment répartir les charges et les données entre trois sites ou plus ?
+  en: How are workloads and data distributed across three or more sites?
+rationale:
+  fr: À partir de trois sites, la répartition multi-site (nombre de répliques, quorum, affinité) remplace la question du site témoin.
+  en: From three sites on, multi-site distribution (replica count, quorum, affinity) replaces the witness-site question.
+initial_level: L1_framed
+suggested_role: architect
+mandatory: false

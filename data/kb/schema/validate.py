@@ -74,6 +74,18 @@ for d in SCAN:
         if fm["status"] == "draft" and age > 180:
             warnings.append(f"{rel}: draft for {age} days — promote or drop at the next harvest")
 
+# K19: question triggers (declarative rules attached to the elements above), checked against the facts vocabulary
+sys.path.insert(0, os.path.dirname(os.path.dirname(ROOT)))
+from pathlib import Path  # noqa: E402
+
+from pipelines import triggers as _triggers  # noqa: E402
+
+try:
+    _triggers.load_all(Path(ROOT))
+except _triggers.TriggerError as exc:
+    for p in exc.problems:
+        errors.append(f"triggers/{p['trigger']}: {p['path']} [{p['code']}] {p['reason']}")
+
 for wmsg in warnings:
     print(f"WARN  {wmsg}")
 for e in errors:
