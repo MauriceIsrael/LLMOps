@@ -50,6 +50,65 @@ def _created(result: dict[str, Any]) -> tuple[int, dict[str, Any]]:
     return (201 if result.get("created") else 200), result
 
 
+async def _import(request):
+    """Import a batch from another system (K12), role ``admin``. ``?dry_run=true`` writes nothing."""
+    from pipelines.engagement.importer import Importer
+    from pipelines.engagement.write import KEY
+
+    engagement = request.path_params["engagement"]
+    guard_engagement(engagement, action="import")
+    access = get_access()
+    if access is None or not access.is_managed(engagement):
+        return JSONResponse({"status": "error", "error": "engagement_not_managed",
+                             "reason": "An import needs a managed engagement (POST /api/engagements)."}, status_code=409)
+    member = acting_member(engagement)
+    if member is None:
+        return JSONResponse({"status": "error", "error": "forbidden", "reason": "actor_required"}, status_code=403)
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+    batch_id = body.get("batch_id")
+    if not isinstance(batch_id, str) or not KEY.match(batch_id):
+        return JSONResponse({"status": "invalid_argument", "argument": "batch_id",
+                             "reason": "'batch_id' is required (letters, digits . _ : -)"}, status_code=400)
+    dry_run = request.query_params.get("dry_run", "").lower() in ("1", "true", "yes") or body.get("dry_run") is True
+    partial = body.get("allow_partial") is True
+    members = {m["handle"]: m["role"] for m in access.members(engagement)}
+    repo = ElicitationRepository(db_path=get_engagement_path(engagement))
+    try:
+        importer = Importer(repo, engagement, members, batch_id)
+        try:
+            plan = importer.plan(body)
+        except WriteError as err:
+            return JSONResponse(err.body(), status_code=err.status)
+        applied = False
+        extra: dict = {}
+        if not dry_run and (not plan.rejected or partial):
+            extra = importer.apply(plan)
+            applied = True
+            access.audit(engagement, member["handle"], "import", "allowed", {
+                "batch_id": batch_id, "accepted": len(plan.accepted), "unchanged": len(plan.unchanged),
+                "adjusted": len(plan.adjusted), "rejected": len(plan.rejected)})
+    finally:
+        repo.close()
+    report = {
+        "batch_id": batch_id, "dry_run": dry_run, "applied": applied,
+        "counts": {"accepted": len(plan.accepted), "unchanged": len(plan.unchanged), "adjusted": len(plan.adjusted),
+                   "rejected": len(plan.rejected)},
+        "accepted": plan.accepted, "unchanged": plan.unchanged, "adjusted": plan.adjusted, "rejected": plan.rejected,
+        **extra,
+    }
+    if dry_run:
+        report["notes"] = ["A dry run does not simulate the conflict detection run on asserted statements."]
+    if plan.rejected and not dry_run and not partial:
+        return JSONResponse({"status": "error", "error": "import_refused",
+                             "reason": f"{len(plan.rejected)} item(s) rejected: nothing was written", "data": report}, status_code=422)
+    return JSONResponse({"status": "ok", "data": report})
+
+
 def build_write_routes() -> list[Route]:
     base = "/api/engagements/{engagement}"
 
@@ -108,6 +167,7 @@ def build_write_routes() -> list[Route]:
         Route(f"{base}/statements", endpoint=statements, methods=["POST"]),
         Route(f"{base}/statements/{{statement_id}}/assert", endpoint=assert_statement, methods=["POST"]),
         Route(f"{base}/statements/{{statement_id}}/withdraw", endpoint=withdraw_statement, methods=["POST"]),
+        Route(f"{base}/import", endpoint=_import, methods=["POST"]),
         Route(f"{base}/decisions", endpoint=decisions, methods=["POST"]),
         Route(f"{base}/decisions/{{decision_id}}/assert", endpoint=assert_decision, methods=["POST"]),
         Route(f"{base}/decisions/{{decision_id}}/withdraw", endpoint=withdraw_decision, methods=["POST"]),

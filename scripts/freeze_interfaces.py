@@ -448,6 +448,10 @@ def build_catalogue() -> list[Interface]:
               "/api/engagements/contract-eng/statements/{stmt3}/withdraw", member="contrib@example.org"),
         _rest("POST", "/api/engagements/{engagement}/requirements", "/api/engagements/contract-eng/requirements",
               json_body={"requirements": [{"id": "REQ-1", "text": "Encrypt data at rest"}]}, member="contrib@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/import", "/api/engagements/contract-eng/import?dry_run=true", json_body={
+            "batch_id": "contract-batch", "subjects": [{"name": "imported-subject", "maturity": "L1_framed"}],
+            "statements": [{"key": "imp-1", "subject": "imported-subject", "value": "Imported fact", "confidence": "designed",
+                            "author": "@contrib", "status": "active"}]}, member="admin@example.org"),
         # --- REST: the sealed snapshot of an engagement (K11) ----------------------------------------------------
         _rest("POST", "/api/engagements/{engagement}/exports", "/api/engagements/contract-eng/exports",
               member="admin@example.org", remember="export1", remember_path=("snapshotRef", "snapshotId")),

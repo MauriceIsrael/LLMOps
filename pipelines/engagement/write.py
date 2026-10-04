@@ -85,6 +85,61 @@ def _based_on(body: dict[str, Any]) -> list[dict[str, Any]]:
     return [{"id": i["id"], "resolved": i.get("resolved")} for i in raw]
 
 
+def prepare_statement(body: dict[str, Any]) -> dict[str, Any]:
+    """The validated fields of a statement (no author, status or identifier: the caller decides those)."""
+    subject = _text(body, "subject", limit=120)
+    value = _text(body, "value")
+    confidence = _text(body, "confidence", limit=32)
+    if confidence not in CONFIDENCE_LEVELS:
+        raise WriteError(400, "invalid_argument", f"'confidence' must be one of {sorted(CONFIDENCE_LEVELS)}", "confidence")
+    based_on = _based_on(body)
+    if confidence == "verified" and not based_on:
+        raise WriteError(400, "invalid_argument", "'verified' needs evidence: list it in 'based_on'", "confidence")
+    return {
+        "subject": subject, "value": value, "confidence": confidence,
+        "section": _text(body, "section", required=False, default="general", limit=120),
+        "predicate": _text(body, "predicate", required=False, default="has_property", limit=64),
+        "role": _text(body, "role", required=False, default="architect", limit=64),
+        "verbatim": _text(body, "verbatim", required=False) or value,
+        "based_on": based_on, "origin": _origin(body),
+    }
+
+
+def _list_of(body: dict[str, Any], field: str, keys: dict[str, bool]) -> list[dict[str, str]]:
+    raw = body.get(field) or []
+    if not isinstance(raw, list):
+        raise WriteError(400, "invalid_argument", f"'{field}' is a list of {{{', '.join(keys)}}}", field)
+    out = []
+    for i, item in enumerate(raw):
+        if not isinstance(item, dict) or any(not isinstance(item.get(k), str) or not item[k].strip() for k in keys):
+            raise WriteError(400, "invalid_argument", f"{field}[{i}] needs a non-empty {' and '.join(keys)}", field)
+        out.append({k: item[k].strip() for k in keys})
+    return out
+
+
+def prepare_decision(body: dict[str, Any]) -> dict[str, Any]:
+    """The validated fields of a decision (no author, status, identifier or supersession)."""
+    subject = _text(body, "subject", limit=120)
+    decision = _text(body, "decision")
+    rationale = _text(body, "rationale")
+    reversibility = _text(body, "reversibility", limit=16)
+    if reversibility not in REVERSIBILITY:
+        raise WriteError(400, "invalid_argument", f"'reversibility' must be one of {list(REVERSIBILITY)}", "reversibility")
+    rejected = _list_of(body, "rejected", {"option": True, "reason": True})
+    violations = _list_of(body, "accepted_violations", {"typed_id": True, "justification": True})
+    consequences = body.get("consequences") or []
+    if not isinstance(consequences, list) or not all(isinstance(c, str) and c.strip() for c in consequences):
+        raise WriteError(400, "invalid_argument", "'consequences' is a list of non-empty strings", "consequences")
+    kept = decision.strip().lower()
+    if any(r["option"].strip().lower() == kept for r in rejected):
+        raise WriteError(400, "invalid_argument", "the retained decision is also listed among the rejected options", "rejected")
+    return {
+        "subject": subject, "decision": decision, "rationale": rationale, "rejected": rejected,
+        "reversibility": reversibility, "consequences": [c.strip() for c in consequences],
+        "accepted_violations": violations, "based_on": _based_on(body), "origin": _origin(body),
+    }
+
+
 def require_distinct(actor: str, authors: list[str], what: str) -> None:
     """Nobody validates what they wrote (ADR-KH-01 A11-d)."""
     from mcp_server.core.auth import require_distinct_validator
@@ -134,25 +189,9 @@ class EngagementWriter:
 
     def add_statement(self, body: dict[str, Any], key: str | None = None) -> dict[str, Any]:
         key = _key(key or body.get("idempotency_key"))
-        subject = _text(body, "subject", limit=120)
-        value = _text(body, "value")
-        confidence = _text(body, "confidence", limit=32)
-        if confidence not in CONFIDENCE_LEVELS:
-            raise WriteError(400, "invalid_argument", f"'confidence' must be one of {sorted(CONFIDENCE_LEVELS)}", "confidence")
-        based_on = _based_on(body)
-        if confidence == "verified" and not based_on:
-            raise WriteError(400, "invalid_argument", "'verified' needs evidence: list it in 'based_on'", "confidence")
-        origin = _origin(body)
-        statement: dict[str, Any] = {
-            "engagement": self.engagement, "subject": subject, "value": value, "confidence": confidence,
-            "section": _text(body, "section", required=False, default="general", limit=120),
-            "predicate": _text(body, "predicate", required=False, default="has_property", limit=64),
-            "role": _text(body, "role", required=False, default="architect", limit=64),
-            "verbatim": _text(body, "verbatim", required=False) or value,
-            "based_on": based_on, "origin": origin,
-            "author": self.actor,  # the member behind the call, whatever the body says
-            "status": "proposed",
-        }
+        statement = {**prepare_statement(body), "engagement": self.engagement,
+                     "author": self.actor,  # the member behind the call, whatever the body says
+                     "status": "proposed"}
         if key:
             statement["id"] = _derived_id("S", self.engagement, "statement", key)
             if self.repo.get_statement_record(statement["id"]):
@@ -186,27 +225,13 @@ class EngagementWriter:
 
     def add_decision(self, body: dict[str, Any], key: str | None = None) -> dict[str, Any]:
         key = _key(key or body.get("idempotency_key"))
-        subject = _text(body, "subject", limit=120)
+        fields = prepare_decision(body)
+        subject = fields["subject"]
         if subject not in self.repo.subject_levels(self.engagement):
             raise WriteError(400, "invalid_argument", f"unknown subject '{subject}': create it first", "subject")
-        decision = _text(body, "decision")
-        rationale = _text(body, "rationale")
-        reversibility = _text(body, "reversibility", limit=16)
-        if reversibility not in REVERSIBILITY:
-            raise WriteError(400, "invalid_argument", f"'reversibility' must be one of {list(REVERSIBILITY)}", "reversibility")
-        rejected = self._list_of(body, "rejected", {"option": True, "reason": True})
-        violations = self._list_of(body, "accepted_violations", {"typed_id": True, "justification": True})
-        consequences = body.get("consequences") or []
-        if not isinstance(consequences, list) or not all(isinstance(c, str) and c.strip() for c in consequences):
-            raise WriteError(400, "invalid_argument", "'consequences' is a list of non-empty strings", "consequences")
-        kept = decision.strip().lower()
-        if any(r["option"].strip().lower() == kept for r in rejected):
-            raise WriteError(400, "invalid_argument", "the retained decision is also listed among the rejected options", "rejected")
         record: dict[str, Any] = {
-            "engagement": self.engagement, "subject": subject, "decision": decision, "rationale": rationale,
-            "rejected": rejected, "reversibility": reversibility, "consequences": [c.strip() for c in consequences],
-            "accepted_violations": violations, "based_on": _based_on(body), "origin": _origin(body),
-            "author": self.actor, "status": "proposed", "validated_by": "", "validated_at": "", "supersedes": "",
+            **fields, "engagement": self.engagement, "author": self.actor, "status": "proposed",
+            "validated_by": "", "validated_at": "", "supersedes": "",
         }
         if key:
             record["id"] = _derived_id("D", self.engagement, "decision", key)
@@ -250,18 +275,6 @@ class EngagementWriter:
             raise WriteError(409, "subject_decided", f"'{d['subject']}' is decided on this decision: supersede it instead of withdrawing it")
         self.repo.set_decision_status(decision_id, "withdrawn")
         return {"decision": self._public_decision(self.repo.get_decision_record(decision_id))}
-
-    @staticmethod
-    def _list_of(body: dict[str, Any], field: str, keys: dict[str, bool]) -> list[dict[str, str]]:
-        raw = body.get(field) or []
-        if not isinstance(raw, list):
-            raise WriteError(400, "invalid_argument", f"'{field}' is a list of {{{', '.join(keys)}}}", field)
-        out = []
-        for i, item in enumerate(raw):
-            if not isinstance(item, dict) or any(not isinstance(item.get(k), str) or not item[k].strip() for k in keys):
-                raise WriteError(400, "invalid_argument", f"{field}[{i}] needs a non-empty {' and '.join(keys)}", field)
-            out.append({k: item[k].strip() for k in keys})
-        return out
 
     def _decision(self, decision_id: str) -> dict[str, Any]:
         d = self.repo.get_decision_record(decision_id)

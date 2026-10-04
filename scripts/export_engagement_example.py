@@ -49,7 +49,8 @@ def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
              "author": "@carl", "validated_by": "@ada", "validated_at": "2026-10-02T09:31:00", "based_on": "[]"},
             {"id": "S-0003", "subject": "core-network", "section": "general", "predicate": "has_property",
              "value": "A second core site is under study.", "confidence": "stated-by-client", "status": "proposed", "origin": "human",
-             "author": "@dan", "validated_by": "", "validated_at": "", "based_on": '[{"id": "UNKNOWN-REF-1", "resolved": null}]'},
+             "author": "@dan", "validated_by": "", "validated_at": "", "based_on": '[{"id": "UNKNOWN-REF-1", "resolved": null}]',
+             "imported_from": "archinex-batch-1"},
         ],
         "decisions": [
             {"id": "D-0001", "subject": "mcx-services", "decision": "Active-active gateway across two sites",

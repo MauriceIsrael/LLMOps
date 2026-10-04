@@ -191,7 +191,7 @@ def export(client):
 def test_the_snapshot_carries_decisions_with_their_assertion_level(client):
     d = propose(client)
     env = export(client)
-    assert env["schemaVersion"] == "1.1" and verify(env) == []
+    assert env["schemaVersion"] == "1.2" and verify(env) == []  # 1.1 added decisions, 1.2 the imported flag
     only = env["data"]["decisions"][0]
     assert only["assertion_level"] == "proposed" and only["author"] == "@carl" and only["validated_by"] == ""
     assert_(client, d["id"])

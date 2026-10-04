@@ -36,7 +36,7 @@ from pipelines.snapshot_envelope import provisional
 from tools.elicitation.config import SUBJECT_LEVELS
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "engagement_snapshot.schema.json"
-SCHEMA_VERSION = "1.1"
+SCHEMA_VERSION = "1.2"
 EMITTER = "knowledge-hub"
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+")
 HANDLE = re.compile(r"^@[a-z0-9][a-z0-9._-]{0,62}$")
@@ -80,7 +80,7 @@ def collect(repo: Any, engagement: str) -> dict[str, Any]:
             "MATCH (s:Statement {engagement: $e}) RETURN s.id as id, s.subject as subject, s.section as section, "
             "s.predicate as predicate, s.value as value, s.confidence as confidence, s.status as status, "
             "s.origin as origin, s.author as author, s.validated_by as validated_by, s.validated_at as validated_at, "
-            "s.based_on as based_on;", e=engagement),
+            "s.based_on as based_on, s.imported_from as imported_from;", e=engagement),
         "conflicts": conflicts,
         "involves": involved,
         "decisions": repo.list_decisions(engagement),
@@ -132,7 +132,7 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
             "confidence": r.get("confidence") or "assumed", "status": status,
             "assertion_level": ASSERTION_OF.get(status, status), "origin": r.get("origin") or "human",
             "author": r.get("author") or "", "validated_by": r.get("validated_by") or "",
-            "validated_at": r.get("validated_at") or "", "based_on": based_on,
+            "validated_at": r.get("validated_at") or "", "based_on": based_on, "imported": bool(r.get("imported_from")),
         })
         cite({"statement_id": r["id"]}, based_on)
 
@@ -148,6 +148,7 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
             "assertion_level": ASSERTION_OF.get(status, status), "origin": r.get("origin") or "human",
             "author": r.get("author") or "", "validated_by": r.get("validated_by") or "",
             "validated_at": r.get("validated_at") or "", "supersedes": r.get("supersedes") or "",
+            "imported": bool(r.get("imported_from")),
         })
         cite({"decision_id": r["id"]}, based_on)
 
