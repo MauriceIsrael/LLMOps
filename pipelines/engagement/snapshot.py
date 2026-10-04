@@ -36,7 +36,7 @@ from pipelines.snapshot_envelope import provisional
 from tools.elicitation.config import SUBJECT_LEVELS
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "engagement_snapshot.schema.json"
-SCHEMA_VERSION = "1.3"
+SCHEMA_VERSION = "1.4"
 EMITTER = "knowledge-hub"
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+")
 HANDLE = re.compile(r"^@[a-z0-9][a-z0-9._-]{0,62}$")
@@ -84,6 +84,9 @@ def collect(repo: Any, engagement: str) -> dict[str, Any]:
         "conflicts": conflicts,
         "involves": involved,
         "decisions": repo.list_decisions(engagement),
+        "derived": repo.list_derived_subjects(engagement),
+        "origins": {r["name"]: r.get("origin") for r in rows(
+            "MATCH (s:Subject) WHERE s.engagement = $e RETURN s.name as name, s.origin as origin;", e=engagement)},
         "questions": rows(
             "MATCH (q:Question {engagement: $e}) OPTIONAL MATCH (q)-[:TARGETS]->(s:Subject) RETURN q.id as id, "
             "q.gap_type as gap_type, q.question as question, q.status as status, s.name as subject;", e=engagement),
@@ -155,8 +158,15 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
     from pipelines.engagement import facts as fact_module  # noqa: PLC0415
 
     facts_section = fact_module.pinned(decisions, kb_snapshot)  # K18: only asserted decisions bring facts
+    from pipelines.engagement import cascade as cascade_module  # noqa: PLC0415
+
+    origins = raw.get("origins") or {}
     subjects = [{"id": f"{engagement}:{r['name']}", "name": r["name"], "definition": r.get("definition") or "",
-                 "maturity": r.get("level") or SUBJECT_LEVELS[0]} for r in sorted(raw["subjects"], key=lambda r: r["name"])]
+                 "maturity": r.get("level") or SUBJECT_LEVELS[0], "origin": origins.get(r["name"]) or "declared"}
+                for r in sorted(raw["subjects"], key=lambda r: r["name"])]
+    derived_items = cascade_module.lineage_items(raw.get("derived") or [], kb_snapshot)
+    lineage = {"kb_snapshot": {"snapshot_id": kb_snapshot["snapshot_id"], "checksum": kb_snapshot["payload_sha256"]} if kb_snapshot else None,
+               "items": [{k: v for k, v in i.items() if k not in ("question", "rationale")} for i in derived_items]}
     members: dict[str, list[str]] = {}
     for link in raw["involves"]:
         members.setdefault(link["conflict"], []).append(link["statement"])
@@ -184,7 +194,7 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
         "requirements": [{"id": r["id"], "text": r.get("text") or "", "section": r.get("section") or "",
                           "category": r.get("category") or "general", "criticality": r.get("criticality") or "mandatory",
                           "status": r.get("status") or "gap"} for r in sorted(raw["requirements"], key=lambda r: r["id"])],
-        "subjects": subjects, "statements": statements, "decisions": decisions, "facts": facts_section, "conflicts": conflicts,
+        "subjects": subjects, "statements": statements, "decisions": decisions, "facts": facts_section, "lineage": lineage, "conflicts": conflicts,
         "gaps": sorted(gaps, key=lambda g: g["id"]),
         "kb_references": kb_refs, "unresolved_references": unresolved,
     }
@@ -312,6 +322,24 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
             problems.append(Problem("FACT_NOT_ASSERTED", f"$.data.facts.items[{i}]", f"fact {f['key']} comes from decision {d['id']}, which is not asserted"))
         elif not any(x["key"] == f["key"] and x["value"] == f["value"] for x in d["facts"]):
             problems.append(Problem("FACT_NOT_IN_DECISION", f"$.data.facts.items[{i}]", f"decision {d['id']} does not carry fact {f['key']}"))
+    subject_by_name = {s["name"]: s for s in data["subjects"]}
+    lineage_subjects = set()
+    for i, item in enumerate(data["lineage"]["items"]):
+        where = f"$.data.lineage.items[{i}]"
+        lineage_subjects.add(item["subject"])
+        sub = subject_by_name.get(item["subject"])
+        if sub is None or sub["origin"] != "derived":
+            problems.append(Problem("LINEAGE_SUBJECT", where, f"{item['subject']} must be a subject derived by the engine"))
+        if not item["resolved"]:
+            problems.append(Problem("DERIVED_RULE_UNRESOLVED", where, f"{item['subject']}: rule {item['trigger_id']} version {item['trigger_version']} does not resolve in the pinned knowledge snapshot"))
+        if item["foundation"] == "foundation_contested" and not item["cause"]:
+            problems.append(Problem("CONTESTED_WITHOUT_CAUSE", where, f"{item['subject']} is contested without its cause"))
+        for parent in item["parents"]:
+            if parent["decision"] not in by_id:
+                problems.append(Problem("DANGLING", where, f"{item['subject']} derives from unknown decision {parent['decision']}"))
+    for sub in data["subjects"]:
+        if sub["origin"] == "derived" and sub["name"] not in lineage_subjects:
+            problems.append(Problem("DERIVED_WITHOUT_LINEAGE", "$.data.subjects", f"{sub['name']} is derived but has no lineage"))
     expected_facts = sum(len(d["facts"]) for d in data["decisions"] if d["status"] == "active")
     if len(facts_in_data) != expected_facts:
         problems.append(Problem("FACTS_INCOMPLETE", "$.data.facts.items", "the facts must be exactly those of the asserted decisions"))
@@ -353,12 +381,19 @@ def export_engagement(access: Any, repo: Any, engagement: str, produced_by: str,
         raise ExportRefused("engagement_not_managed", "only a managed engagement can be exported")
     raw = collect(repo, engagement)
     needs_kb = any(_based_on(s.get("based_on")) for s in raw["statements"]) or any(d.get("facts") for d in raw["decisions"])
-    try:
-        kb_snapshot = load_snapshot(snapshots_dir)
-    except ResolutionError as err:
-        if needs_kb:
-            raise ExportRefused("kb_snapshot_unavailable", f"statements cite the knowledge base but its snapshot is unusable ({err.reason})") from err
-        kb_snapshot = None
+    if access.get_pin(engagement):  # K20: an engagement that has derived subjects is read against its pinned snapshot
+        from pipelines.engagement.cascade import pinned_snapshot  # noqa: PLC0415
+
+        kb_snapshot, reason = pinned_snapshot(access, engagement, snapshots_dir, "", create=False)
+        if kb_snapshot is None:
+            raise ExportRefused("pinned_snapshot_unavailable", f"the knowledge snapshot the engagement is pinned to is unusable ({reason})")
+    else:
+        try:
+            kb_snapshot = load_snapshot(snapshots_dir)
+        except ResolutionError as err:
+            if needs_kb:
+                raise ExportRefused("kb_snapshot_unavailable", f"statements cite the knowledge base but its snapshot is unusable ({err.reason})") from err
+            kb_snapshot = None
     from pipelines.engagement.facts import FactError  # noqa: PLC0415
 
     try:

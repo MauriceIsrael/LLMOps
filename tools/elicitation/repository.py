@@ -90,6 +90,69 @@ class ElicitationRepository:
                 },
             )
 
+    # --- derived subjects (K20): questions opened by the cascade engine, never by a person ----------------------------
+
+    def save_derived_subject(self, engagement: str, name: str, definition: str, level: str, trigger_id: str,
+                             derivation: dict[str, Any]) -> None:
+        """Create a subject the engine derived. ``origin`` is ``derived`` here and nowhere else: no route takes it from a caller."""
+        import json
+
+        self.db_client.execute_cypher(
+            "MERGE (s:Subject {id: $id}) SET s.name = $name, s.engagement = $engagement, s.definition = $definition, "
+            "s.level = $level, s.origin = 'derived', s.updated_at = $now, s.trigger_id = $trigger, s.foundation = 'sound', "
+            "s.derivation = $derivation;",
+            params={"id": f"{engagement}:{name}", "name": name, "engagement": engagement, "definition": definition,
+                    "level": level, "now": datetime.now().isoformat(), "trigger": trigger_id,
+                    "derivation": json.dumps(derivation, ensure_ascii=False, sort_keys=True)})
+
+    def list_derived_subjects(self, engagement: str) -> list[dict[str, Any]]:
+        import json
+
+        rows = self.db_client.execute_cypher(
+            "MATCH (s:Subject {engagement: $e, origin: 'derived'}) RETURN s.name as name, s.level as level, "
+            "s.trigger_id as trigger_id, s.foundation as foundation, s.derivation as derivation;", params={"e": engagement})
+        out = []
+        for r in rows or []:
+            if not r or "error" in r:
+                continue
+            try:
+                derivation = json.loads(r.get("derivation") or "{}")
+            except ValueError:
+                derivation = {}
+            out.append({"name": r["name"], "level": r.get("level") or "L0_named", "trigger_id": r.get("trigger_id") or "",
+                        "foundation": r.get("foundation") or "sound", "derivation": derivation})
+        return sorted(out, key=lambda d: d["trigger_id"])
+
+    def set_foundation(self, engagement: str, name: str, foundation: str, derivation: dict[str, Any]) -> None:
+        """Mark a derived subject ``sound`` or ``contested`` (with its cause). A derived subject is never deleted."""
+        import json
+
+        self.db_client.execute_cypher(
+            "MATCH (s:Subject {id: $id}) SET s.foundation = $foundation, s.derivation = $derivation, s.updated_at = $now;",
+            params={"id": f"{engagement}:{name}", "foundation": foundation, "now": datetime.now().isoformat(),
+                    "derivation": json.dumps(derivation, ensure_ascii=False, sort_keys=True)})
+
+    def save_derived_question(self, question: dict[str, Any], trigger_id: str, mandatory: bool) -> str:
+        """The question of a derived subject (only for a mandatory rule: closing it needs a justification)."""
+        q_id = self.save_question(question)
+        self.db_client.execute_cypher(
+            "MATCH (q:Question {id: $id}) SET q.trigger_id = $trigger, q.mandatory = $mandatory;",
+            params={"id": q_id, "trigger": trigger_id, "mandatory": "1" if mandatory else ""})
+        return q_id
+
+    def get_question_closure(self, question_id: str) -> dict[str, Any]:
+        rows = self.db_client.execute_cypher(
+            "MATCH (q:Question {id: $id}) RETURN q.mandatory as mandatory, q.trigger_id as trigger_id, "
+            "q.justification as justification, q.closed_by as closed_by;", params={"id": question_id})
+        r = rows[0] if rows and "error" not in rows[0] else {}
+        return {"mandatory": r.get("mandatory") == "1", "trigger_id": r.get("trigger_id") or "",
+                "justification": r.get("justification") or "", "closed_by": r.get("closed_by") or ""}
+
+    def close_question(self, question_id: str, justification: str, closed_by: str) -> None:
+        self.db_client.execute_cypher(
+            "MATCH (q:Question {id: $id}) SET q.justification = $j, q.closed_by = $by;",
+            params={"id": question_id, "j": justification, "by": closed_by})
+
     def bind_blueprint_to_engagement(self, blueprint: Any, engagement: str) -> None:
         """Lie un blueprint d'architecture à un engagement et matérialise tous les sujets déclarés à L0_named avec origin='blueprint'."""
         if hasattr(blueprint, "roots") and blueprint.roots:

@@ -961,6 +961,26 @@ Une règle relie des faits affirmés (§5.21) à une question qui devient pertin
 
 Jeu initial (six règles) : réplication et RPO (`topology.dc_count ≥ 2`), split-brain à deux sites actifs, bascule du trafic en actif/actif, répartition à trois sites ou plus, souveraineté d'hébergement (SNC-REQ-01, `mandatory`), continuité NIS2 (NIS2-ART21-2C, `mandatory`). Amorçage et revue : K22.
 
+### 5.23 Contrat 1.23 — Moteur de cascade : une décision affirmée ouvre des sujets plus précis (K20)
+
+Le moteur s'exécute **dans le Hub**, sur la base d'engagement, de façon **déterministe et sans modèle de langage** (comme `compliance_mapper`). Chaînage avant interactif : les faits en vigueur de **tout l'engagement** (§5.21, décisions affirmées uniquement) sont lus contre les règles (§5.22) de l'instantané de base **épinglé**. **Le moteur ne déduit jamais de décision** : il ouvre des questions que seuls des humains tranchent.
+
+**Déclenchement.** Après l'affirmation, le remplacement ou le retrait d'une décision (`POST …/decisions/{id}/assert|withdraw`, réponse : clé `cascade` = `{pinned, created, contested, restored}` ou `{skipped}`), après un import (K12), et au changement d'épinglage. `run` est une fonction de l'état, pas des événements : le rejouer ne change rien. Si la base épinglée est inutilisable, l'affirmation réussit et la réponse dit pourquoi (`skipped`).
+
+**Sujet dérivé.** Une règle qui tient ouvre un sujet : nom = identifiant de règle sans `TRG-` (suffixé `-derived` si une personne porte déjà ce nom), définition = la question (`en`), niveau = `initial_level`. `origin: derived`, **valeur que seul le moteur écrit** : aucune route ne la prend d'un appelant. Provenance conservée : `{trigger_id, trigger_version, knowledge_ref, kb_snapshot, facts: [{key, value, decision}], parents: [{subject, decision}], question, rationale, suggested_role, mandatory}`. Un sujet dérivé est une **question, pas une affirmation** : il ne passe pas par la validation distincte.
+
+**Idempotence.** Une règle n'ouvre qu'**un** sujet par engagement (clé `trigger_id` + engagement). Rejouer l'affirmation ou l'import ne duplique rien.
+
+**Maintien de la vérité.** Quand la condition d'une règle ne tient plus (supersession, retrait, règle absente de la base épinglée après un changement d'épinglage), le sujet passe à `foundation_contested` avec la cause : `{unsatisfied: [{key, op, value, current}]}` (`current` nul : plus aucun fait ; `contradiction: true` si la clé est affirmée avec deux valeurs) ou `{rule_missing: true}`. Il n'est **jamais supprimé**. Si la condition redevient vraie, la marque est levée. Une clé affirmée avec deux valeurs par deux décisions en vigueur est **inutilisable** : la condition est fausse, personne n'est départagé.
+
+**Question obligatoire.** Une règle `mandatory` ouvre aussi une question bloquante (`G2_unanswered_blocking`, `section: cascade`). La clore (`POST …/questions/{id}/answers`) exige le rôle `decider` ou `admin` (`403 mandatory_question`) et une `justification` (`400`) ; elle est conservée avec son auteur. Écart assumé : seules les règles `mandatory` créent une question ; les autres sujets dérivés apparaissent comme sujets vides (manque `G1`), la question étant leur définition.
+
+**Base épinglée.** L'identifiant et l'empreinte de l'instantané de base sont fixés à la première dérivation, par engagement. `PUT /api/engagements/{id}/kb-pin` `{snapshot_id}` (action `pin`, rôle `admin`, journalisé) les change ; le moteur réévalue aussitôt. L'export (K11) lit la base épinglée dès qu'elle existe.
+
+**Lecture.** `GET /api/engagements/{id}/lineage` (rôle `reader`) : `{kb_snapshot, pin_unavailable, derived: [...], tree: [{subject, decisions: [{decision, derived: [{subject, rule, version, foundation, facts, children}]}]}]}`. Chaque entrée de `derived` dit si sa règle se résout dans la base épinglée (`resolved`), son état (`sound` ou `foundation_contested`), et le statut de sa question.
+
+**Instantané d'engagement** (schéma `1.4`) : chaque sujet porte `origin` ; section `data.lineage` `{kb_snapshot, items}` (sans date : fonction de l'état). La vérification refuse : un sujet dérivé dont la règle ne se résout pas dans la base épinglée (`DERIVED_RULE_UNRESOLVED`), un sujet dérivé sans lignée ou une lignée sans sujet dérivé, un sujet contesté sans cause, une décision parente inconnue. L'outil MCP sans état `evaluate_cascade` (optionnel dans l'issue) n'est pas livré.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

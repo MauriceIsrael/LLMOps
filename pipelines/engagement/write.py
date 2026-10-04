@@ -161,10 +161,14 @@ def require_distinct(actor: str, authors: list[str], what: str) -> None:
 class EngagementWriter:
     """Writes into one engagement on behalf of one member (``actor`` is their handle)."""
 
-    def __init__(self, repo: Any, engagement: str, actor: str) -> None:
+    def __init__(self, repo: Any, engagement: str, actor: str, cascade: Any = None) -> None:
         self.repo = repo
         self.engagement = engagement
         self.actor = actor
+        self.cascade = cascade  # K20: a callable returning the report of the cascade engine, run after a decision changes
+
+    def _cascade(self) -> dict[str, Any] | None:
+        return self.cascade() if self.cascade else None
 
     # --- subjects -------------------------------------------------------------------------------------------------
 
@@ -269,8 +273,12 @@ class EngagementWriter:
         if others:
             raise WriteError(409, "decision_exists", f"'{d['subject']}' already has an asserted decision ({others[0]['id']})")
         self.repo.validate_decision(decision_id, self.actor)
-        return {"decision": self._public_decision(self.repo.get_decision_record(decision_id)),
-                "superseded": [d["supersedes"]] if d.get("supersedes") else []}
+        out = {"decision": self._public_decision(self.repo.get_decision_record(decision_id)),
+               "superseded": [d["supersedes"]] if d.get("supersedes") else []}
+        report = self._cascade()  # K20: the facts in force changed; subjects opened or contested follow
+        if report is not None:
+            out["cascade"] = report
+        return out
 
     def withdraw_decision(self, decision_id: str, is_decider: bool) -> dict[str, Any]:
         d = self._decision(decision_id)
@@ -281,7 +289,11 @@ class EngagementWriter:
         if d["status"] == "active" and self.repo.subject_levels(self.engagement).get(d["subject"]) in ASSERTED_LEVELS:
             raise WriteError(409, "subject_decided", f"'{d['subject']}' is decided on this decision: supersede it instead of withdrawing it")
         self.repo.set_decision_status(decision_id, "withdrawn")
-        return {"decision": self._public_decision(self.repo.get_decision_record(decision_id))}
+        out = {"decision": self._public_decision(self.repo.get_decision_record(decision_id))}
+        report = self._cascade()
+        if report is not None:
+            out["cascade"] = report
+        return out
 
     def _decision(self, decision_id: str) -> dict[str, Any]:
         d = self.repo.get_decision_record(decision_id)
@@ -318,12 +330,18 @@ class EngagementWriter:
         question_id = self.repo.save_question(question)
         return {"created": True, "question": self.repo.get_question(question_id)}
 
-    def answer_question(self, question_id: str, body: dict[str, Any], key: str | None = None) -> dict[str, Any]:
+    def answer_question(self, question_id: str, body: dict[str, Any], key: str | None = None, role: str | None = None) -> dict[str, Any]:
         question = self.repo.get_question(question_id)
         if not question:
             raise WriteError(404, "unknown_question", f"question '{question_id}' not found")
         if question.get("status") in ("declined", "rerouted"):
             raise WriteError(409, "question_closed", f"the question is '{question['status']}'")
+        closure = self.repo.get_question_closure(question_id)
+        justification = ""
+        if closure["mandatory"]:  # K20: a regulatory question is closed by a decider, who says why
+            if role not in ("decider", "admin"):
+                raise WriteError(403, "mandatory_question", "a mandatory question is closed by a member with the decider role", "justification")
+            justification = _text(body, "justification", limit=1000)
         body = {**body, "section": body.get("section") or question.get("section") or "general"}
         body.setdefault("subject", self.subject_of_question(question_id) or "general")
         result = self.add_statement(body, key)
@@ -331,6 +349,8 @@ class EngagementWriter:
             self.repo.link_answer(result["statement"]["id"], question_id)
             if "answered" in QUESTION_STATUSES:
                 self.repo.update_question_status(question_id, "answered")
+            if justification:
+                self.repo.close_question(question_id, justification, self.actor)
         return result
 
     def subject_of_question(self, question_id: str) -> str | None:
