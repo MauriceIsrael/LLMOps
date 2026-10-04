@@ -921,6 +921,20 @@ Archinex tenait l'engagement ; le Hub est désormais le système d'enregistremen
 
 Les conflits d'Archinex ne sont pas repris (le Hub détecte les siens à l'affirmation) ; les réponses aux questions arrivent comme énoncés.
 
+### 5.21 Contrat 1.21 — Faits d'architecture portés par les décisions (K18)
+
+Pour qu'un moteur symbolique (K20) puisse raisonner sur le contenu d'une décision, celle-ci affirme des **faits lisibles par machine**, dans un **vocabulaire partagé** par tous les engagements.
+
+**Vocabulaire** : `data/kb/vocabulary/facts.yaml`, élément de la base de connaissance comme les autres : `version` entière, citable (`knowledgeKey` `vocabulary:facts`), gardé par le registre de versions (K3 : même version, mêmes octets). Chaque clé : `key` (`domaine.nom`), `type` (`int`, `bool`, `enum`, `duration` = nombre entier de secondes), `values` (enum), `min`/`max`, `unit`, `label` FR/EN, `asset` (actif de référence, seulement s'il en existe un). Le vocabulaire figure dans l'instantané scellé de la base, section `fact_vocabulary` `{version, knowledge_ref, content_sha256, keys}`. **Écart assumé** : cette section est scellée par son propre `content_sha256`, **hors** de `payload_sha256`, pour qu'un consommateur qui recalcule le sceau sur les six sections historiques continue de vérifier (ajout rétrocompatible).
+
+**Écriture** : `facts: [{key, value, source_excerpt}]` sur `POST /api/engagements/{id}/decisions` et sur les décisions de l'import (K12). `source_excerpt` (obligatoire) cite le passage de la décision dont le fait est tiré. Refus `400` avec `code` et `argument` (chemin) : `UNKNOWN_FACT_KEY` (clé hors vocabulaire), `FACT_TYPE` (mauvais type, hors énumération, hors bornes ; un booléen n'est pas un entier), `FACT_DUPLICATE`, `FACT_SHAPE`. Rien n'est réparé, rien n'est écrit.
+
+**Un fait ne compte que si sa décision est affirmée** (`active`) : l'affirmation par un `decider` distinct de l'auteur couvre la décision **et** ses faits ; une décision proposée, retirée ou remplacée n'en apporte aucun.
+
+`GET /api/engagements/{id}/facts` (rôle `reader`) : `{vocabulary, items: [{key, value, unit?, source_excerpt, decision, subject}], contradictions: [{key, decisions}]}`. Deux décisions en vigueur qui donnent des valeurs différentes à une même clé sont **signalées** (`contradictions`), jamais départagées.
+
+**Instantané d'engagement** (schéma `1.3`) : chaque décision porte `facts`, et `data.facts` liste les faits en vigueur lus contre le vocabulaire de l'instantané de base épinglé (`pins.kb_snapshot`). L'export est refusé si cet instantané n'a pas de vocabulaire ou ne connaît pas une clé (`fact_vocabulary_missing`, `kb_snapshot_unavailable`) ; la vérification refuse un fait dont la décision n'est pas affirmée, qui n'est pas dans la décision, ou une liste incomplète.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

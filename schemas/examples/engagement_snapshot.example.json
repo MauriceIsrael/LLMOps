@@ -1,18 +1,18 @@
 {
-  "schemaVersion": "1.2",
-  "snapshotId": "eng-example-eng-f30a6fbc84ed",
+  "schemaVersion": "1.3",
+  "snapshotId": "eng-example-eng-2d1ceb74efdf",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:f30a6fbc84edf8d6ee9bdeaf8ac23cf5a8a1435c2dcb92f79dcb913a8ea2f42d",
+  "checksum": "sha256:2d1ceb74efdf8509dd2dc04e286b5d2404544f5d486edda480b2e11e75e3c77c",
   "data": {
     "engagement": {
       "id": "example-eng",
       "confidentiality": "confidential"
     },
     "pins": {
-      "contract_version": "1.20",
+      "contract_version": "1.21",
       "kb_snapshot": {
         "snapshot_id": "snapshot-2026-10-03-0000000",
         "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
@@ -145,7 +145,19 @@
         "validated_by": "@ada",
         "validated_at": "2026-10-02T10:00:00",
         "supersedes": "",
-        "imported": false
+        "imported": false,
+        "facts": [
+          {
+            "key": "topology.dc_count",
+            "value": 2,
+            "source_excerpt": "across two sites"
+          },
+          {
+            "key": "topology.mode",
+            "value": "active-active",
+            "source_excerpt": "Active-active gateway"
+          }
+        ]
       },
       {
         "id": "D-0002",
@@ -169,9 +181,44 @@
         "validated_by": "",
         "validated_at": "",
         "supersedes": "",
-        "imported": false
+        "imported": false,
+        "facts": [
+          {
+            "key": "topology.dc_count",
+            "value": 1,
+            "source_excerpt": "a single core site"
+          }
+        ]
       }
     ],
+    "facts": {
+      "vocabulary": {
+        "version": 1,
+        "knowledge_ref": {
+          "sourceId": "knowledge-hub",
+          "knowledgeKey": "vocabulary:facts",
+          "version": "1"
+        }
+      },
+      "items": [
+        {
+          "key": "topology.dc_count",
+          "value": 2,
+          "source_excerpt": "across two sites",
+          "decision": "D-0001",
+          "subject": "mcx-services",
+          "unit": "datacentres"
+        },
+        {
+          "key": "topology.mode",
+          "value": "active-active",
+          "source_excerpt": "Active-active gateway",
+          "decision": "D-0001",
+          "subject": "mcx-services"
+        }
+      ],
+      "contradictions": []
+    },
     "conflicts": [
       {
         "id": "C-0001",

@@ -62,9 +62,13 @@ Minor versions only add interfaces or optional fields:
 * ``1.20`` — importing an engagement from another system (K12): ``POST /api/engagements/{id}/import`` (role ``admin``,
   new action ``import``), ``?dry_run=true`` writes nothing. Provenance kept, nothing asserted in the batch's name; imported
   items are flagged ``imported`` in the snapshot (``schemaVersion`` ``1.2``).
+* ``1.21`` — facts carried by decisions (K18): ``facts: [{key, value, source_excerpt}]`` on ``POST /api/engagements/{id}/decisions``
+  (and on imported decisions), keys defined by the vocabulary ``data/kb/vocabulary/facts.yaml`` (sealed knowledge snapshot section
+  ``fact_vocabulary``), refusals ``UNKNOWN_FACT_KEY`` / ``FACT_TYPE``; ``GET /api/engagements/{id}/facts`` (asserted decisions
+  only); the engagement snapshot gains ``facts`` and each decision its ``facts`` (``schemaVersion`` ``1.3``).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.20"
+CONTRACT_VERSION = "1.21"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

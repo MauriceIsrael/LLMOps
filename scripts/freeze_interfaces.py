@@ -423,10 +423,15 @@ def build_catalogue() -> list[Interface]:
         _rest("POST", "/api/engagements/{engagement}/decisions", "/api/engagements/contract-eng/decisions", json_body={
             "subject": "mcx-services", "decision": "Active-active gateway", "rationale": "Meets the resilience requirement.",
             "reversibility": "costly", "consequences": ["Two sites to operate"],
-            "rejected": [{"option": "Active-passive gateway", "reason": "Failover time above the budget."}]},
+            "rejected": [{"option": "Active-passive gateway", "reason": "Failover time above the budget."}],
+            "facts": [{"key": "topology.dc_count", "value": 2, "source_excerpt": "Active-active gateway"}]},
               member="contrib@example.org", remember="decision1", remember_path=("decision", "id")),
         _rest("POST", "/api/engagements/{engagement}/decisions/{decision_id}/assert",
               "/api/engagements/contract-eng/decisions/{decision1}/assert", member="decider@example.org"),
+        _rest("GET", "/api/engagements/{engagement}/facts", "/api/engagements/contract-eng/facts", member="reader@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/decisions", "/api/engagements/contract-eng/decisions", json_body={
+            "subject": "mcx-services", "decision": "x", "rationale": "x", "reversibility": "reversible",
+            "facts": [{"key": "topology.unknown", "value": 1, "source_excerpt": "x"}]}, member="contrib@example.org"),
         _rest("POST", "/api/engagements/{engagement}/subjects/{name}/maturity",
               "/api/engagements/contract-eng/subjects/mcx-services/maturity", json_body={"level": "L3_decided"},
               member="decider@example.org"),

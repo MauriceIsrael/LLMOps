@@ -1,7 +1,7 @@
 {
-  "snapshot_id": "snapshot-2026-10-03-68748fa",
-  "created_at": "2026-10-03T16:29:58Z",
-  "source_revision": "68748fac91a5e05b31c47d9e2964775367aeaaf9",
+  "snapshot_id": "snapshot-2026-10-04-76fcd20",
+  "created_at": "2026-10-04T08:15:24Z",
+  "source_revision": "76fcd209a149242a312b9a29d6226ab1f39d70e7",
   "payload_sha256": "sha256:625d5aeebbbe4a957c59e8be6265a1f916ae55b91db16d919537d705434218f1",
   "schema_version": "1.0",
   "emitter": "knowledge-hub",
@@ -12,6 +12,82 @@
   "provisional_reasons": {
     "unripe_subjects": 0,
     "open_conflicts": 0
+  },
+  "fact_vocabulary": {
+    "version": 1,
+    "knowledge_ref": {
+      "sourceId": "knowledge-hub",
+      "knowledgeKey": "vocabulary:facts",
+      "version": "1"
+    },
+    "content_sha256": "sha256:b5eb7e9d235dfdb0988df9d04562b3236f06f6804739a95abf094c490223a813",
+    "keys": [
+      {
+        "key": "continuity.nis2_in_scope",
+        "type": "bool",
+        "label": {
+          "fr": "Entit\u00e9 soumise \u00e0 NIS2",
+          "en": "Entity in NIS2 scope"
+        }
+      },
+      {
+        "key": "data.rpo_target_s",
+        "type": "duration",
+        "label": {
+          "fr": "Objectif de point de reprise (RPO)",
+          "en": "Recovery point objective (RPO)"
+        },
+        "unit": "s"
+      },
+      {
+        "key": "data.rto_target_s",
+        "type": "duration",
+        "label": {
+          "fr": "Objectif de temps de reprise (RTO)",
+          "en": "Recovery time objective (RTO)"
+        },
+        "unit": "s"
+      },
+      {
+        "key": "hosting.sovereignty",
+        "type": "enum",
+        "label": {
+          "fr": "Souverainet\u00e9 d'h\u00e9bergement",
+          "en": "Hosting sovereignty"
+        },
+        "values": [
+          "none",
+          "national",
+          "eu",
+          "sovereign-cloud"
+        ]
+      },
+      {
+        "key": "topology.dc_count",
+        "type": "int",
+        "label": {
+          "fr": "Nombre de centres de donn\u00e9es",
+          "en": "Number of data centres"
+        },
+        "unit": "datacentres",
+        "min": 1,
+        "asset": "P-009"
+      },
+      {
+        "key": "topology.mode",
+        "type": "enum",
+        "label": {
+          "fr": "Mode de fonctionnement multi-site",
+          "en": "Multi-site operating mode"
+        },
+        "values": [
+          "single-site",
+          "active-passive",
+          "active-active"
+        ],
+        "asset": "P-009"
+      }
+    ]
   },
   "applicability_index": {
     "TPL-getting-started": {

@@ -1,0 +1,40 @@
+# Vocabulary of architecture facts (K18, ADR-KH-01 A10).
+#
+# A decision asserts machine-readable facts; each fact is a {key, value} whose key is defined here, once, for every
+# engagement. The cascade engine (K20) reasons only on these keys. A key outside this file, or a value of the wrong type, is
+# refused: nothing is repaired in silence.
+#
+# Versioned and citable like any element (``vocabulary:facts`` at ``version``): changing this file without raising
+# ``version`` is refused by the version ledger when the sealed snapshot is exported (K3).
+#
+# type: int | bool | enum | duration   (a duration is a whole number of seconds)
+# min / max: optional bounds for int and duration. values: the permitted values of an enum.
+# asset: the element of the knowledge base that justifies the key, when there is one (never invented).
+version: 1
+keys:
+  - key: topology.dc_count
+    type: int
+    min: 1
+    unit: datacentres
+    label: {fr: Nombre de centres de données, en: Number of data centres}
+    asset: P-009
+  - key: topology.mode
+    type: enum
+    values: [single-site, active-passive, active-active]
+    label: {fr: Mode de fonctionnement multi-site, en: Multi-site operating mode}
+    asset: P-009
+  - key: data.rpo_target_s
+    type: duration
+    unit: s
+    label: {fr: Objectif de point de reprise (RPO), en: Recovery point objective (RPO)}
+  - key: data.rto_target_s
+    type: duration
+    unit: s
+    label: {fr: Objectif de temps de reprise (RTO), en: Recovery time objective (RTO)}
+  - key: hosting.sovereignty
+    type: enum
+    values: [none, national, eu, sovereign-cloud]
+    label: {fr: Souveraineté d'hébergement, en: Hosting sovereignty}
+  - key: continuity.nis2_in_scope
+    type: bool
+    label: {fr: Entité soumise à NIS2, en: Entity in NIS2 scope}

@@ -195,6 +195,9 @@
     },
     "template:TPL-zero-draft-hld-en": {
       "1": "sha256:be0fedd7c6481bf4cf5ef0de116970204d57e8c75e805e7fda7525a751c67db2"
+    },
+    "vocabulary:facts": {
+      "1": "sha256:b5eb7e9d235dfdb0988df9d04562b3236f06f6804739a95abf094c490223a813"
     }
   }
 }

@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.20"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.21"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.20"
+  "schema_version": "1.21"
 }
 ```
 
@@ -41,6 +41,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.18` | Sealed snapshot of an engagement (K11, [contract §5.18](contracts/knowledge-hub-api-v1.md)): the Hub emits the engagement channel (suite envelope, canonical-json v1, content-addressed identifier, handles only, `is_provisional` derived); refused when its verification fails. |
 | `1.19` | Decisions in the engagement base (K16, [contract §5.19](contracts/knowledge-hub-api-v1.md)): proposed, asserted by a decider who is not the author, superseded; a subject is decided only on an asserted decision (**rule change**: was an asserted statement); the engagement snapshot gains `decisions` (schema `1.1`). |
 | `1.20` | Import of an engagement from another system (K12, [contract §5.20](contracts/knowledge-hub-api-v1.md)): dry run, provenance kept, nothing asserted in the batch's name, imported items flagged in the snapshot (schema `1.2`); new `import` action for the `admin` role. |
+| `1.21` | Facts carried by decisions (K18, [contract §5.21](contracts/knowledge-hub-api-v1.md)): vocabulary `data/kb/vocabulary/facts.yaml` (section `fact_vocabulary` of the sealed knowledge snapshot, outside `payload_sha256`), `facts` on decisions, `GET /api/engagements/{id}/facts`, engagement snapshot schema `1.3`. |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

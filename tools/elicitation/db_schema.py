@@ -192,15 +192,17 @@ class ElicitationSchemaInitializer:
                     supersedes STRING,
                     created_at STRING,
                     imported_from STRING DEFAULT '',
+                    facts STRING DEFAULT '[]',
                     PRIMARY KEY(id)
                 );
                 """
             )
         else:
-            try:
-                self.graph_store.execute_cypher("ALTER TABLE Decision ADD imported_from STRING DEFAULT '';")
-            except Exception:
-                pass
+            for column, default in (("imported_from", "''"), ("facts", "'[]'")):
+                try:
+                    self.graph_store.execute_cypher(f"ALTER TABLE Decision ADD {column} STRING DEFAULT {default};")
+                except Exception:
+                    pass
 
         # 7. Tables de Relations
         if "ABOUT" not in table_names:

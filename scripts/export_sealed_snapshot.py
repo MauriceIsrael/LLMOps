@@ -19,6 +19,7 @@ from mcp_server.core.config import server_config
 from mcp_server.core.db import ReadOnlyKuzuClient
 from mcp_server.core.version import SNAPSHOT_SCHEMA_VERSION
 from pipelines import canonical
+from pipelines.engagement import facts
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
 from pipelines.knowledge_ref import (
     LEDGER_NAME,
@@ -248,6 +249,15 @@ def export_sealed_snapshot(
 
     enriched_assets.sort(key=lambda x: x["id"])
 
+    # K18: the vocabulary of architecture facts is an element of the knowledge base like the others: citable, versioned,
+    # and guarded by the ledger (same {knowledgeKey, version}, same bytes).
+    vocabulary = facts.load(server_config.kb_dir / "vocabulary" / "facts.yaml")
+    for item in facts.public_keys(vocabulary):
+        ref = item.get("asset")
+        if ref and not any(a["id"] == ref for a in enriched_assets):
+            raise ValueError(f"fact vocabulary: key '{item['key']}' cites asset '{ref}', which is not in the knowledge base")
+    published[facts.VOCABULARY_KEY] = (vocabulary["version"], vocabulary["content_sha256"])
+
     ledger_file = ledger_path or (server_config.kb_dir / LEDGER_NAME)
     updated_ledger = check_revisions(load_ledger(ledger_file), published, record=record_revisions)
     if record_revisions:
@@ -274,6 +284,14 @@ def export_sealed_snapshot(
         "payload_sha256": payload_sha256,
         "schema_version": SNAPSHOT_SCHEMA_VERSION,
         **channel_envelope(payload_sha256),  # K2: emitter, checksum, rebuiltByEmitterTest, regenerate, is_provisional
+        # K18: sealed by its own content_sha256 and guarded by the version ledger, but **outside** payload_sha256: a consumer
+        # that recomputes the checksum over the six payload sections keeps verifying (additive, backward compatible).
+        "fact_vocabulary": {
+            "version": vocabulary["version"],
+            "knowledge_ref": vocabulary["knowledge_ref"],
+            "content_sha256": vocabulary["content_sha256"],
+            "keys": facts.public_keys(vocabulary),
+        },
         **payload_data,
     }
 
