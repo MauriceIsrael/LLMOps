@@ -203,6 +203,17 @@ engagement_members = Table(
     Column("added_at", String(32), nullable=False),
 )
 
+# The sealed knowledge snapshot an engagement is read against (K20): fixed at the first derivation, changed only by an explicit
+# action of an admin, so that the same state and the same pinned base always give the same derived subjects.
+engagement_pins = Table(
+    "engagement_pins", metadata,
+    Column("engagement", String(64), primary_key=True),
+    Column("kb_snapshot_id", String(128), nullable=False),
+    Column("kb_checksum", String(80), nullable=False),
+    Column("pinned_at", String(32), nullable=False),
+    Column("pinned_by", String(256), nullable=False),
+)
+
 engagement_audit = Table(
     "engagement_audit", metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),

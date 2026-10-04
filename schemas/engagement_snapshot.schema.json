@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "EngagementSnapshot",
-  "description": "Sealed snapshot of an engagement emitted by the Knowledge Hub (contract 1.18 (K11), schema 1.1 with decisions at contract 1.19 (K16), 1.2 with imported flags (K12), 1.3 with facts at contract 1.21 (K18)). Suite ExternalSnapshotEnvelope; checksum = sha256 of data at the canonical-json v1 profile; snapshotId derives from the checksum.",
+  "description": "Sealed snapshot of an engagement emitted by the Knowledge Hub (contract 1.18 (K11), schema 1.1 with decisions at contract 1.19 (K16), 1.2 with imported flags (K12), 1.3 with facts at contract 1.21 (K18), 1.4 with the lineage of derived subjects and subject origin at contract 1.23 (K20)). Suite ExternalSnapshotEnvelope; checksum = sha256 of data at the canonical-json v1 profile; snapshotId derives from the checksum.",
   "type": "object",
   "properties": {
     "schemaVersion": {
-      "const": "1.3"
+      "const": "1.4"
     },
     "snapshotId": {
       "type": "string",
@@ -168,13 +168,17 @@
                   "L3_decided",
                   "L4_specified"
                 ]
+              },
+              "origin": {
+                "type": "string"
               }
             },
             "required": [
               "id",
               "name",
               "definition",
-              "maturity"
+              "maturity",
+              "origin"
             ],
             "additionalProperties": false
           }
@@ -779,6 +783,178 @@
             "contradictions"
           ],
           "additionalProperties": false
+        },
+        "lineage": {
+          "type": "object",
+          "properties": {
+            "kb_snapshot": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "snapshot_id": {
+                      "type": "string"
+                    },
+                    "checksum": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "snapshot_id",
+                    "checksum"
+                  ]
+                }
+              ]
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "subject": {
+                    "type": "string"
+                  },
+                  "trigger_id": {
+                    "type": "string"
+                  },
+                  "trigger_version": {
+                    "type": "integer"
+                  },
+                  "knowledge_ref": {
+                    "type": "object",
+                    "properties": {
+                      "sourceId": {
+                        "const": "knowledge-hub"
+                      },
+                      "knowledgeKey": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "sourceId",
+                      "knowledgeKey",
+                      "version"
+                    ]
+                  },
+                  "resolved": {
+                    "type": "boolean"
+                  },
+                  "kb_snapshot": {
+                    "type": "object",
+                    "properties": {
+                      "snapshot_id": {
+                        "type": "string"
+                      },
+                      "checksum": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "snapshot_id",
+                      "checksum"
+                    ]
+                  },
+                  "facts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": [
+                            "integer",
+                            "boolean",
+                            "string"
+                          ]
+                        },
+                        "decision": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "value",
+                        "decision"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "parents": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "subject": {
+                          "type": "string"
+                        },
+                        "decision": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "subject",
+                        "decision"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "foundation": {
+                    "enum": [
+                      "sound",
+                      "foundation_contested"
+                    ]
+                  },
+                  "cause": {
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
+                  "mandatory": {
+                    "type": "boolean"
+                  },
+                  "suggested_role": {
+                    "type": "string"
+                  },
+                  "question_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "subject",
+                  "trigger_id",
+                  "trigger_version",
+                  "knowledge_ref",
+                  "resolved",
+                  "kb_snapshot",
+                  "facts",
+                  "parents",
+                  "foundation",
+                  "cause",
+                  "mandatory",
+                  "suggested_role",
+                  "question_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "kb_snapshot",
+            "items"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -794,7 +970,8 @@
         "kb_references",
         "unresolved_references",
         "decisions",
-        "facts"
+        "facts",
+        "lineage"
       ],
       "additionalProperties": false
     }

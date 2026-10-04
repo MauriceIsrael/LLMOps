@@ -429,6 +429,9 @@ def build_catalogue() -> list[Interface]:
         _rest("POST", "/api/engagements/{engagement}/decisions/{decision_id}/assert",
               "/api/engagements/contract-eng/decisions/{decision1}/assert", member="decider@example.org"),
         _rest("GET", "/api/engagements/{engagement}/facts", "/api/engagements/contract-eng/facts", member="reader@example.org"),
+        _rest("GET", "/api/engagements/{engagement}/lineage", "/api/engagements/contract-eng/lineage", member="reader@example.org"),
+        _rest("PUT", "/api/engagements/{engagement}/kb-pin", "/api/engagements/contract-eng/kb-pin", member="admin@example.org",
+              json_body={"snapshot_id": json.loads(Path("data/snapshots/latest.json").read_text(encoding="utf-8"))["snapshot_id"]}),
         _rest("POST", "/api/engagements/{engagement}/decisions", "/api/engagements/contract-eng/decisions", json_body={
             "subject": "mcx-services", "decision": "x", "rationale": "x", "reversibility": "reversible",
             "facts": [{"key": "topology.unknown", "value": 1, "source_excerpt": "x"}]}, member="contrib@example.org"),

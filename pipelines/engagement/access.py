@@ -30,17 +30,18 @@ from pipelines.governance.store import (
     engagement_audit,
     engagement_exports,
     engagement_members,
+    engagement_pins,
     engagement_registry,
     get_engine,
 )
 
 ROLES = ("reader", "contributor", "decider", "admin")
-ACTIONS = ("read", "contribute", "decide", "export", "import", "members")
+ACTIONS = ("read", "contribute", "decide", "export", "import", "pin", "members")
 ROLE_ACTIONS: dict[str, frozenset[str]] = {
     "reader": frozenset({"read"}),
     "contributor": frozenset({"read", "contribute"}),
     "decider": frozenset({"read", "contribute", "decide"}),
-    "admin": frozenset({"read", "contribute", "decide", "export", "import", "members"}),
+    "admin": frozenset({"read", "contribute", "decide", "export", "import", "pin", "members"}),
 }
 CONFIDENTIALITY = ("public", "internal", "confidential")
 ENGAGEMENT_ID = re.compile(r"^[a-z0-9-]{1,64}$")
@@ -166,6 +167,26 @@ class EngagementAccess:
             row = conn.execute(select(engagement_members).where(
                 engagement_members.c.engagement == engagement, engagement_members.c.email == email.strip().lower())).first()
         return {"email": row.email, "handle": row.handle, "role": row.role} if row else None
+
+    # --- the pinned knowledge snapshot (K20) ------------------------------------------------------------------------
+
+    def get_pin(self, engagement: str) -> dict[str, str] | None:
+        with self.engine.connect() as conn:
+            row = conn.execute(select(engagement_pins).where(engagement_pins.c.engagement == engagement)).first()
+        return None if row is None else {"snapshot_id": row.kb_snapshot_id, "checksum": row.kb_checksum}
+
+    def set_pin(self, engagement: str, snapshot_id: str, checksum: str, by: str, replace: bool) -> bool:
+        """Pin a snapshot. Without ``replace`` an existing pin is kept (``False``); with it, an admin moves it."""
+        with self.engine.begin() as conn:
+            existing = conn.execute(select(engagement_pins).where(engagement_pins.c.engagement == engagement)).first()
+            values = {"kb_snapshot_id": snapshot_id, "kb_checksum": checksum, "pinned_at": _now(), "pinned_by": by}
+            if existing is None:
+                conn.execute(engagement_pins.insert().values(engagement=engagement, **values))
+                return True
+            if not replace:
+                return False
+            conn.execute(engagement_pins.update().where(engagement_pins.c.engagement == engagement).values(**values))
+            return True
 
     # --- sealed exports (K11) --------------------------------------------------------------------------------------
 

@@ -18,6 +18,14 @@ from tools.elicitation.repository import ElicitationRepository
 DECIDING_ROLES = ("decider", "admin")
 
 
+def cascade_of(repo, access, engagement: str, actor: str):
+    """The cascade engine of K20 as the callable a writer runs after a decision changes."""
+    from mcp_server.knowledge import tools as knowledge_tools
+    from pipelines.engagement.cascade import Cascade
+
+    return lambda: Cascade(repo, access, engagement, knowledge_tools.SNAPSHOTS_DIR, actor).run()
+
+
 async def _handle(request, action: str, work: Callable[[EngagementWriter, dict[str, Any], dict[str, str]], tuple[int, dict[str, Any]]]):
     engagement = request.path_params["engagement"]
     guard_engagement(engagement, action=action)  # token scopes, then the member's role; 403 / 400 are raised
@@ -38,7 +46,8 @@ async def _handle(request, action: str, work: Callable[[EngagementWriter, dict[s
         body = {}
     repo = ElicitationRepository(db_path=get_engagement_path(engagement))
     try:
-        status, data = work(EngagementWriter(repo, engagement, member["handle"]), body, member)
+        status, data = work(EngagementWriter(repo, engagement, member["handle"], cascade_of(repo, access, engagement, member["handle"])),
+                            body, member)
     except WriteError as err:
         return JSONResponse(err.body(), status_code=err.status)
     finally:
@@ -88,6 +97,7 @@ async def _import(request):
         extra: dict = {}
         if not dry_run and (not plan.rejected or partial):
             extra = importer.apply(plan)
+            extra["cascade"] = cascade_of(repo, access, engagement, member["handle"])()  # K20: replaying creates nothing more
             applied = True
             access.audit(engagement, member["handle"], "import", "allowed", {
                 "batch_id": batch_id, "accepted": len(plan.accepted), "unchanged": len(plan.unchanged),
@@ -120,6 +130,71 @@ async def _facts(request):
         return JSONResponse({"status": "ok", "data": in_force(repo.list_decisions(engagement))})
     finally:
         repo.close()
+
+
+async def _lineage(request):
+    """The derivation tree of an engagement (K20): subjects the cascade opened, from which decision, by which rule and facts."""
+    from mcp_server.knowledge import tools as knowledge_tools
+    from pipelines.engagement.cascade import lineage_items, lineage_tree, pinned_snapshot
+
+    engagement = request.path_params["engagement"]
+    guard_engagement(engagement, action="read")
+    access = get_access()
+    repo = ElicitationRepository(db_path=get_engagement_path(engagement))
+    try:
+        snapshot, reason = (None, "not_managed") if access is None else pinned_snapshot(
+            access, engagement, knowledge_tools.SNAPSHOTS_DIR, "", create=False)
+        items = lineage_items(repo.list_derived_subjects(engagement), snapshot)
+        for item in items:
+            question = repo.get_question(item["question_id"]) if item["question_id"] else None
+            item["question_status"] = question["status"] if question else None
+        pin = access.get_pin(engagement) if access else None
+        return JSONResponse({"status": "ok", "data": {
+            "kb_snapshot": pin, "pin_unavailable": reason if pin and snapshot is None else None,
+            "derived": items, "tree": lineage_tree(items)}})
+    finally:
+        repo.close()
+
+
+async def _kb_pin(request):
+    """Move the knowledge snapshot an engagement is read against (K20), role ``admin``; the cascade then re-evaluates."""
+    from mcp_server.knowledge import tools as knowledge_tools
+    from pipelines.engagement.cascade import Cascade
+    from pipelines.knowledge_ref import SNAPSHOT_ID, ResolutionError, load_snapshot
+
+    engagement = request.path_params["engagement"]
+    guard_engagement(engagement, action="pin")
+    access = get_access()
+    if access is None or not access.is_managed(engagement):
+        return JSONResponse({"status": "error", "error": "engagement_not_managed", "reason": "Pinning needs a managed engagement."}, status_code=409)
+    member = acting_member(engagement)
+    if member is None:
+        return JSONResponse({"status": "error", "error": "forbidden", "reason": "actor_required"}, status_code=403)
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    snapshot_id = body.get("snapshot_id") if isinstance(body, dict) else None
+    if not isinstance(snapshot_id, str) or not SNAPSHOT_ID.match(snapshot_id):
+        return JSONResponse({"status": "invalid_argument", "argument": "snapshot_id", "reason": "'snapshot_id' is required"}, status_code=400)
+    try:
+        snapshot = load_snapshot(knowledge_tools.SNAPSHOTS_DIR, snapshot_id)
+    except ResolutionError as err:
+        try:  # the latest snapshot may be the one designated
+            snapshot = load_snapshot(knowledge_tools.SNAPSHOTS_DIR)
+            if snapshot["snapshot_id"] != snapshot_id:
+                raise err from None
+        except ResolutionError:
+            return JSONResponse({"status": "invalid_argument", "argument": "snapshot_id", "reason": f"snapshot not usable ({err.reason})"}, status_code=400)
+    previous = access.get_pin(engagement)
+    access.set_pin(engagement, snapshot["snapshot_id"], snapshot["payload_sha256"], member["handle"], replace=True)
+    access.audit(engagement, member["handle"], "pin", "allowed", {"from": (previous or {}).get("snapshot_id"), "to": snapshot["snapshot_id"]})
+    repo = ElicitationRepository(db_path=get_engagement_path(engagement))
+    try:
+        report = Cascade(repo, access, engagement, knowledge_tools.SNAPSHOTS_DIR, member["handle"]).run()
+    finally:
+        repo.close()
+    return JSONResponse({"status": "ok", "data": {"kb_snapshot": access.get_pin(engagement), "previous": previous, "cascade": report}})
 
 
 def build_write_routes() -> list[Route]:
@@ -165,7 +240,7 @@ def build_write_routes() -> list[Route]:
     async def answers(request):
         qid = request.path_params["question_id"]
         key = request.headers.get("Idempotency-Key")
-        return await _handle(request, "contribute", lambda w, b, m: _created(w.answer_question(qid, b, key)))
+        return await _handle(request, "contribute", lambda w, b, m: _created(w.answer_question(qid, b, key, m["role"])))
 
     async def requirements(request):
         return await _handle(request, "contribute", lambda w, b, m: (200, w.add_requirements(b)))
@@ -182,6 +257,8 @@ def build_write_routes() -> list[Route]:
         Route(f"{base}/statements/{{statement_id}}/withdraw", endpoint=withdraw_statement, methods=["POST"]),
         Route(f"{base}/import", endpoint=_import, methods=["POST"]),
         Route(f"{base}/facts", endpoint=_facts, methods=["GET"]),
+        Route(f"{base}/lineage", endpoint=_lineage, methods=["GET"]),
+        Route(f"{base}/kb-pin", endpoint=_kb_pin, methods=["PUT"]),
         Route(f"{base}/decisions", endpoint=decisions, methods=["POST"]),
         Route(f"{base}/decisions/{{decision_id}}/assert", endpoint=assert_decision, methods=["POST"]),
         Route(f"{base}/decisions/{{decision_id}}/withdraw", endpoint=withdraw_decision, methods=["POST"]),

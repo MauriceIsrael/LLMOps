@@ -33,15 +33,19 @@ class ElicitationSchemaInitializer:
                     level STRING,
                     origin STRING,
                     updated_at STRING,
+                    trigger_id STRING DEFAULT '',
+                    foundation STRING DEFAULT '',
+                    derivation STRING DEFAULT '',
                     PRIMARY KEY(id)
                 );
                 """
             )
         else:
-            try:
-                self.graph_store.execute_cypher("ALTER TABLE Subject ADD origin STRING DEFAULT 'declared';")
-            except Exception:
-                pass
+            for column, default in (("origin", "'declared'"), ("trigger_id", "''"), ("foundation", "''"), ("derivation", "''")):
+                try:
+                    self.graph_store.execute_cypher(f"ALTER TABLE Subject ADD {column} STRING DEFAULT {default};")
+                except Exception:
+                    pass
 
 
         # 2. Table Statement
@@ -103,15 +107,20 @@ class ElicitationSchemaInitializer:
                     status STRING,
                     level STRING DEFAULT '',
                     created_at STRING,
+                    mandatory STRING DEFAULT '',
+                    trigger_id STRING DEFAULT '',
+                    justification STRING DEFAULT '',
+                    closed_by STRING DEFAULT '',
                     PRIMARY KEY(id)
                 );
                 """
             )
         else:
-            try:
-                self.graph_store.execute_cypher("ALTER TABLE Question ADD level STRING DEFAULT '';")
-            except Exception:
-                pass
+            for column in ("level", "mandatory", "trigger_id", "justification", "closed_by"):
+                try:
+                    self.graph_store.execute_cypher(f"ALTER TABLE Question ADD {column} STRING DEFAULT '';")
+                except Exception:
+                    pass
 
         # 4. Table Conflict
         if "Conflict" not in table_names:

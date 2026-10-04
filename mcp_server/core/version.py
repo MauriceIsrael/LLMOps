@@ -71,9 +71,14 @@ Minor versions only add interfaces or optional fields:
   ``initial_level``, ``suggested_role``, ``mandatory``), validated at ingestion and at publication, versioned and citable
   (``trigger:<id>``). The sealed knowledge snapshot gains the section ``question_triggers`` (own ``content_sha256``, outside
   ``payload_sha256``). No route: the rules are read in the snapshot.
+* ``1.23`` — the cascade engine (K20): an asserted decision opens more precise subjects (``origin: derived``) from the question
+  triggers of the engagement's **pinned** knowledge snapshot; truth maintenance (``foundation_contested``, never deleted);
+  ``GET /api/engagements/{id}/lineage``, ``PUT /api/engagements/{id}/kb-pin`` (admin, new action ``pin``); asserting or
+  withdrawing a decision, and an import, answer with a ``cascade`` report; a mandatory question is closed by a decider with a
+  justification. The engagement snapshot gains ``lineage`` and the ``origin`` of each subject (``schemaVersion`` ``1.4``).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.22"
+CONTRACT_VERSION = "1.23"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
