@@ -62,7 +62,24 @@ def pinned_snapshot(access: Any, engagement: str, snapshots_dir: Path, by: str, 
 
 
 def rules_of(snapshot: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    """The reference rules of a knowledge snapshot (K19), by id."""
     return {r["trigger_id"]: r for r in ((snapshot or {}).get("question_triggers") or {}).get("items", [])}
+
+
+def local_rule(adjustment: dict[str, Any]) -> dict[str, Any]:
+    """An engagement's own rule (K21) in the shape of a reference rule: no ``knowledge_ref``, ``scope`` ``local``."""
+    doc = adjustment["payload"]
+    return {**doc, "trigger_id": adjustment["trigger_id"], "knowledge_ref": None, "scope": "local"}
+
+
+def effective_rules(snapshot: dict[str, Any] | None, adjustments: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], set[str]]:
+    """``(rules, disabled)``: the rules of the pinned base, minus the deactivated ones, plus the asserted local rules (K21)."""
+    disabled = {a["trigger_id"] for a in adjustments if a["kind"] == "disable" and a["status"] == "active"}
+    rules = {tid: {**r, "scope": "reference"} for tid, r in rules_of(snapshot).items() if tid not in disabled}
+    for a in adjustments:
+        if a["kind"] == "local" and a["status"] == "active":
+            rules[a["trigger_id"]] = local_rule(a)
+    return rules, disabled
 
 
 def _fact_map(items: list[dict[str, Any]], contradictions: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
@@ -100,7 +117,7 @@ class Cascade:
         except fact_module.FactError as err:
             return {"skipped": err.code.lower(), "created": [], "contested": [], "restored": []}
         values, origin = _fact_map(in_force["items"], in_force["contradictions"])
-        rules = rules_of(snapshot)
+        rules, disabled = effective_rules(snapshot, self.repo.list_adjustments(self.engagement))
         existing = {d["trigger_id"]: d for d in self.repo.list_derived_subjects(self.engagement)}
         names = set(self.repo.subject_levels(self.engagement))
         report: dict[str, Any] = {"pinned": snapshot["snapshot_id"], "created": [], "contested": [], "restored": []}
@@ -108,9 +125,9 @@ class Cascade:
         for trigger_id in sorted(set(rules) | set(existing)):
             rule = rules.get(trigger_id)
             held = existing.get(trigger_id)
-            if rule is None:  # the pinned base no longer has the rule (after a re-pin): its subject stays, contested
+            if rule is None:  # deactivated, withdrawn, or no longer in the pinned base: its subject stays, contested
                 if held and held["foundation"] == SOUND:
-                    self._contest(held, {"rule_missing": True}, report)
+                    self._contest(held, {"rule_disabled": True} if trigger_id in disabled else {"rule_missing": True}, report)
                 continue
             holds = triggers.matches(rule, values)
             if held is None:
@@ -140,6 +157,7 @@ class Cascade:
         question_id = None
         derivation = {
             "trigger_id": rule["trigger_id"], "trigger_version": rule["version"], "knowledge_ref": rule["knowledge_ref"],
+            "scope": rule.get("scope", "reference"),
             "kb_snapshot": {"snapshot_id": snapshot["snapshot_id"], "checksum": snapshot["payload_sha256"]},
             "facts": used, "parents": [{"subject": s, "decision": d} for s, d in parents],
             "question": rule["question"], "rationale": rule["rationale"], "suggested_role": rule["suggested_role"],
@@ -177,15 +195,22 @@ class Cascade:
 # --- reading ----------------------------------------------------------------------------------------------------------
 
 
-def lineage_items(derived: list[dict[str, Any]], snapshot: dict[str, Any] | None) -> list[dict[str, Any]]:
-    """The derived subjects as the snapshot and the lineage route carry them: no date, a function of the state."""
+def lineage_items(derived: list[dict[str, Any]], snapshot: dict[str, Any] | None,
+                  adjustments: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+    """The derived subjects as the snapshot and the lineage route carry them: no date, a function of the state.
+
+    ``resolved``: a reference rule resolves when the pinned base holds it at that version (a deactivated rule still does); a
+    local rule resolves while the engagement records it (K21), whatever its status.
+    """
     rules = rules_of(snapshot)
+    local = {a["trigger_id"]: a for a in adjustments or [] if a["kind"] == "local"}
     items = []
     for d in sorted(derived, key=lambda d: d["trigger_id"]):
         v = d["derivation"]
-        rule = rules.get(d["trigger_id"])
+        scope = v.get("scope", "reference")
+        rule = local[d["trigger_id"]]["payload"] if scope == "local" and d["trigger_id"] in local else rules.get(d["trigger_id"])
         items.append({
-            "subject": d["name"], "trigger_id": d["trigger_id"], "trigger_version": v.get("trigger_version"),
+            "subject": d["name"], "trigger_id": d["trigger_id"], "trigger_version": v.get("trigger_version"), "scope": scope,
             "knowledge_ref": v.get("knowledge_ref"), "resolved": bool(rule and rule["version"] == v.get("trigger_version")),
             "kb_snapshot": v.get("kb_snapshot"), "facts": v.get("facts", []), "parents": v.get("parents", []),
             "foundation": FOUNDATION_STATUS.get(d["foundation"], d["foundation"]), "cause": v.get("cause"),

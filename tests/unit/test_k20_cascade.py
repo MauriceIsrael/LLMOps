@@ -316,7 +316,7 @@ def test_the_snapshot_carries_the_lineage_and_each_derived_subject_resolves_its_
     first, _ = decide(client, facts(2))
     decide(client, facts(3), supersedes=first["id"])
     env = export(client)
-    assert env["schemaVersion"] == "1.4" and verify(env) == []
+    assert env["schemaVersion"] == "1.5" and verify(env) == []
     items = {i["trigger_id"]: i for i in env["data"]["lineage"]["items"]}
     assert items["TRG-active-active-split-brain"]["foundation"] == "foundation_contested" and all(i["resolved"] for i in items.values())
     assert env["data"]["lineage"]["kb_snapshot"] == env["data"]["pins"]["kb_snapshot"]

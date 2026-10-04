@@ -38,6 +38,7 @@ OPS = ("eq", "neq", "gte", "lte", "in")
 ORDERED_TYPES = ("int", "duration")
 LEVELS = ("L0_named", "L1_framed")
 ID = re.compile(r"^TRG-[a-z0-9][a-z0-9-]{0,62}$")
+LOCAL_ID = re.compile(r"^TRG-local-[a-z0-9][a-z0-9-]{0,50}$")  # an engagement's own rule (K21), never a knowledge-base element
 FIELDS = {"trigger_id", "version", "asset", "when", "question", "rationale", "initial_level", "suggested_role", "mandatory"}
 MAX_TEXT = 1000
 MAX_CONDITIONS = 10
@@ -108,8 +109,13 @@ def check_condition(condition: Any, path: str, vocabulary: dict[str, Any]) -> tu
     return None
 
 
-def validate_rule(doc: Any, name: str, vocabulary: dict[str, Any], carrier_index: dict[str, dict[str, Any]]) -> list[dict[str, str]]:
-    """Every problem of one rule document, with the path of each. Nothing is repaired."""
+def validate_rule(doc: Any, name: str, vocabulary: dict[str, Any], carrier_index: dict[str, dict[str, Any]],
+                  local: bool = False) -> list[dict[str, str]]:
+    """Every problem of one rule document, with the path of each. Nothing is repaired.
+
+    ``local``: a rule of one engagement (K21), same schema and same checks; its id is ``TRG-local-…`` and its carrier is optional
+    (a rule specific to a programme may have no element of the knowledge base behind it), checked when given.
+    """
     problems: list[dict[str, str]] = []
 
     def add(path: str, code: str, reason: str) -> None:
@@ -120,15 +126,18 @@ def validate_rule(doc: Any, name: str, vocabulary: dict[str, Any], carrier_index
         return problems
     for unknown in sorted(set(doc) - FIELDS):
         add(unknown, "UNKNOWN_FIELD", f"'{unknown}' is not a field of a rule")
-    if not isinstance(doc.get("trigger_id"), str) or not ID.match(doc["trigger_id"]):
-        add("trigger_id", "ID", "'trigger_id' must look like TRG-some-name")
+    id_format = LOCAL_ID if local else ID
+    if not isinstance(doc.get("trigger_id"), str) or not id_format.match(doc["trigger_id"]):
+        add("trigger_id", "ID", "'trigger_id' must look like " + ("TRG-local-some-name" if local else "TRG-some-name"))
     elif doc["trigger_id"] != name:
         add("trigger_id", "ID", f"'trigger_id' must be the file name ({name})")
+    elif not local and doc["trigger_id"].startswith("TRG-local-"):
+        add("trigger_id", "ID", "'TRG-local-' is reserved for the rules of one engagement (K21)")
     version = doc.get("version")
     if isinstance(version, bool) or not isinstance(version, int) or version < 1:
         add("version", "VERSION", "'version' must be a positive integer")
     carrier = carrier_index.get(doc.get("asset")) if isinstance(doc.get("asset"), str) else None
-    if carrier is None:
+    if carrier is None and not (local and doc.get("asset") is None):
         add("asset", "UNKNOWN_ASSET", f"the carrier '{doc.get('asset')}' is not an element of the knowledge base")
     when = doc.get("when")
     if not isinstance(when, list) or not when or len(when) > MAX_CONDITIONS:

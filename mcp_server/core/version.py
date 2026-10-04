@@ -76,9 +76,14 @@ Minor versions only add interfaces or optional fields:
   ``GET /api/engagements/{id}/lineage``, ``PUT /api/engagements/{id}/kb-pin`` (admin, new action ``pin``); asserting or
   withdrawing a decision, and an import, answer with a ``cascade`` report; a mandatory question is closed by a decider with a
   justification. The engagement snapshot gains ``lineage`` and the ``origin`` of each subject (``schemaVersion`` ``1.4``).
+* ``1.24`` — rule adjustments per engagement (K21): ``POST /api/engagements/{id}/rules/{trigger_id}/{disable,enable}`` (a decider
+  deactivates a reference rule with a mandatory justification, audited), ``POST /api/engagements/{id}/rules`` (a contributor
+  proposes a local rule, same schema and checks as K19), ``…/rules/{id}/{assert,withdraw}`` (a decider other than the author
+  asserts), ``GET /api/engagements/{id}/rules``. The engine reads the pinned base minus deactivations plus asserted local rules;
+  the engagement snapshot gains ``rule_adjustments`` and the ``scope`` of each lineage item (``schemaVersion`` ``1.5``).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.23"
+CONTRACT_VERSION = "1.24"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

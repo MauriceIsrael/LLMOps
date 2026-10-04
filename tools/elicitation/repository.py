@@ -153,6 +153,47 @@ class ElicitationRepository:
             "MATCH (q:Question {id: $id}) SET q.justification = $j, q.closed_by = $by;",
             params={"id": question_id, "j": justification, "by": closed_by})
 
+    # --- rule adjustments (K21) -------------------------------------------------------------------------------------
+
+    _ADJUSTMENT_COLUMNS = ("id", "engagement", "kind", "trigger_id", "status", "payload", "justification", "author",
+                           "validated_by", "validated_at", "created_at")
+
+    def save_adjustment(self, adjustment: dict[str, Any]) -> str:
+        """Create or replace an adjustment (a deactivation is one record per rule, re-armed by a new gesture)."""
+        import json
+
+        row = {c: adjustment.get(c, "") for c in self._ADJUSTMENT_COLUMNS}
+        row["payload"] = json.dumps(adjustment.get("payload") or {}, ensure_ascii=False, sort_keys=True)
+        row["created_at"] = adjustment.get("created_at") or datetime.now().isoformat()
+        assignments = ", ".join(f"a.{c} = ${c}" for c in self._ADJUSTMENT_COLUMNS if c != "id")
+        self.db_client.execute_cypher(f"MERGE (a:RuleAdjustment {{id: $id}}) SET {assignments};", params=row)
+        return str(row["id"])
+
+    def get_adjustment(self, adjustment_id: str) -> dict[str, Any] | None:
+        import json
+
+        cols = ", ".join(f"a.{c} as {c}" for c in self._ADJUSTMENT_COLUMNS)
+        res = self.db_client.execute_cypher(f"MATCH (a:RuleAdjustment {{id: $id}}) RETURN {cols};", params={"id": adjustment_id})
+        if not res or "error" in res[0]:
+            return None
+        row = dict(res[0])
+        try:
+            row["payload"] = json.loads(row.get("payload") or "{}")
+        except ValueError:
+            row["payload"] = {}
+        return row
+
+    def list_adjustments(self, engagement: str) -> list[dict[str, Any]]:
+        res = self.db_client.execute_cypher(
+            "MATCH (a:RuleAdjustment {engagement: $e}) RETURN a.id as id;", params={"e": engagement})
+        rows = [self.get_adjustment(r["id"]) for r in (res or []) if r and "id" in r]
+        return sorted([r for r in rows if r], key=lambda r: (r["kind"], r["trigger_id"]))
+
+    def set_adjustment_status(self, adjustment_id: str, status: str, validated_by: str = "", validated_at: str = "") -> None:
+        self.db_client.execute_cypher(
+            "MATCH (a:RuleAdjustment {id: $id}) SET a.status = $status, a.validated_by = $by, a.validated_at = $at;",
+            params={"id": adjustment_id, "status": status, "by": validated_by, "at": validated_at})
+
     def bind_blueprint_to_engagement(self, blueprint: Any, engagement: str) -> None:
         """Lie un blueprint d'architecture à un engagement et matérialise tous les sujets déclarés à L0_named avec origin='blueprint'."""
         if hasattr(blueprint, "roots") and blueprint.roots:

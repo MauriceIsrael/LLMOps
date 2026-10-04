@@ -36,7 +36,7 @@ from pipelines.snapshot_envelope import provisional
 from tools.elicitation.config import SUBJECT_LEVELS
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "engagement_snapshot.schema.json"
-SCHEMA_VERSION = "1.4"
+SCHEMA_VERSION = "1.5"
 EMITTER = "knowledge-hub"
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+")
 HANDLE = re.compile(r"^@[a-z0-9][a-z0-9._-]{0,62}$")
@@ -85,6 +85,7 @@ def collect(repo: Any, engagement: str) -> dict[str, Any]:
         "involves": involved,
         "decisions": repo.list_decisions(engagement),
         "derived": repo.list_derived_subjects(engagement),
+        "adjustments": repo.list_adjustments(engagement),
         "origins": {r["name"]: r.get("origin") for r in rows(
             "MATCH (s:Subject) WHERE s.engagement = $e RETURN s.name as name, s.origin as origin;", e=engagement)},
         "questions": rows(
@@ -161,10 +162,24 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
     from pipelines.engagement import cascade as cascade_module  # noqa: PLC0415
 
     origins = raw.get("origins") or {}
+    adjustments = raw.get("adjustments") or []
+    reference = cascade_module.rules_of(kb_snapshot)
+    rule_adjustments = {
+        "disabled": [{"trigger_id": a["trigger_id"], "mandatory": bool((a.get("payload") or {}).get("mandatory")),
+                      "justification": a.get("justification") or "", "disabled_by": a.get("author") or "",
+                      "resolved": a["trigger_id"] in reference}
+                     for a in adjustments if a["kind"] == "disable" and a["status"] == "active"],
+        "local_rules": [{
+            **{k: (a.get("payload") or {}).get(k) for k in ("trigger_id", "version", "asset", "when", "question", "rationale",
+                                                          "initial_level", "suggested_role", "mandatory")},
+            "status": a["status"], "assertion_level": ASSERTION_OF.get(a["status"], a["status"]), "author": a.get("author") or "",
+            "validated_by": a.get("validated_by") or "", "validated_at": a.get("validated_at") or ""}
+            for a in adjustments if a["kind"] == "local"],
+    }
     subjects = [{"id": f"{engagement}:{r['name']}", "name": r["name"], "definition": r.get("definition") or "",
                  "maturity": r.get("level") or SUBJECT_LEVELS[0], "origin": origins.get(r["name"]) or "declared"}
                 for r in sorted(raw["subjects"], key=lambda r: r["name"])]
-    derived_items = cascade_module.lineage_items(raw.get("derived") or [], kb_snapshot)
+    derived_items = cascade_module.lineage_items(raw.get("derived") or [], kb_snapshot, raw.get("adjustments") or [])
     lineage = {"kb_snapshot": {"snapshot_id": kb_snapshot["snapshot_id"], "checksum": kb_snapshot["payload_sha256"]} if kb_snapshot else None,
                "items": [{k: v for k, v in i.items() if k not in ("question", "rationale")} for i in derived_items]}
     members: dict[str, list[str]] = {}
@@ -194,7 +209,7 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
         "requirements": [{"id": r["id"], "text": r.get("text") or "", "section": r.get("section") or "",
                           "category": r.get("category") or "general", "criticality": r.get("criticality") or "mandatory",
                           "status": r.get("status") or "gap"} for r in sorted(raw["requirements"], key=lambda r: r["id"])],
-        "subjects": subjects, "statements": statements, "decisions": decisions, "facts": facts_section, "lineage": lineage, "conflicts": conflicts,
+        "subjects": subjects, "statements": statements, "decisions": decisions, "facts": facts_section, "lineage": lineage, "rule_adjustments": rule_adjustments, "conflicts": conflicts,
         "gaps": sorted(gaps, key=lambda g: g["id"]),
         "kb_references": kb_refs, "unresolved_references": unresolved,
     }
@@ -322,6 +337,28 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
             problems.append(Problem("FACT_NOT_ASSERTED", f"$.data.facts.items[{i}]", f"fact {f['key']} comes from decision {d['id']}, which is not asserted"))
         elif not any(x["key"] == f["key"] and x["value"] == f["value"] for x in d["facts"]):
             problems.append(Problem("FACT_NOT_IN_DECISION", f"$.data.facts.items[{i}]", f"decision {d['id']} does not carry fact {f['key']}"))
+    adj = data["rule_adjustments"]
+    for i, d in enumerate(adj["disabled"]):
+        where = f"$.data.rule_adjustments.disabled[{i}]"
+        if not d["justification"].strip():
+            problems.append(Problem("DISABLED_WITHOUT_JUSTIFICATION", where, f"{d['trigger_id']} is deactivated without a justification"))
+        if not HANDLE.match(d["disabled_by"]):
+            problems.append(Problem("AUTHOR_NOT_A_HANDLE", where, f"{d['trigger_id']}: the deactivation must name a member handle"))
+        if not d["resolved"]:
+            problems.append(Problem("DISABLED_UNKNOWN_RULE", where, f"{d['trigger_id']} is not a reference rule of the pinned knowledge snapshot"))
+    for i, r in enumerate(adj["local_rules"]):
+        where = f"$.data.rule_adjustments.local_rules[{i}]"
+        if not r["trigger_id"].startswith("TRG-local-"):
+            problems.append(Problem("LOCAL_RULE_ID", where, f"{r['trigger_id']}: a local rule is named TRG-local-…"))
+        if not HANDLE.match(r["author"]):
+            problems.append(Problem("AUTHOR_NOT_A_HANDLE", where, f"local rule {r['trigger_id']}: the author must be a member handle"))
+        if r["status"] == "active":
+            if not HANDLE.match(r["validated_by"]) or not r["validated_at"]:
+                problems.append(Problem("ASSERTED_WITHOUT_PERSON", where, f"local rule {r['trigger_id']} is active without a person who asserted it"))
+            elif r["validated_by"] == r["author"]:
+                problems.append(Problem("SELF_VALIDATION", where, f"local rule {r['trigger_id']} was asserted by its own author"))
+        elif r["status"] == "proposed" and r["validated_by"]:
+            problems.append(Problem("VALIDATOR_ON_PROPOSED", where, f"local rule {r['trigger_id']} is proposed but names a validator"))
     subject_by_name = {s["name"]: s for s in data["subjects"]}
     lineage_subjects = set()
     for i, item in enumerate(data["lineage"]["items"]):

@@ -1,0 +1,116 @@
+{
+  "interface": "rest.POST /api/engagements/{engagement}/rules/{trigger_id}/disable",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "adjustment": {
+                "keys": {
+                  "author": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "justification": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "status": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "trigger_id": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "validated_at": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "validated_by": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "cascade": {
+                "keys": {
+                  "contested": {
+                    "items": null,
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "created": {
+                    "items": null,
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "pinned": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "restored": {
+                    "items": null,
+                    "type": [
+                      "array"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

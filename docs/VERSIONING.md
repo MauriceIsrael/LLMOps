@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.23"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.24"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.23"
+  "schema_version": "1.24"
 }
 ```
 
@@ -44,6 +44,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.21` | Facts carried by decisions (K18, [contract §5.21](contracts/knowledge-hub-api-v1.md)): vocabulary `data/kb/vocabulary/facts.yaml` (section `fact_vocabulary` of the sealed knowledge snapshot, outside `payload_sha256`), `facts` on decisions, `GET /api/engagements/{id}/facts`, engagement snapshot schema `1.3`. |
 | `1.22` | Question triggers attached to knowledge-base elements (K19, [contract §5.22](contracts/knowledge-hub-api-v1.md)): declarative rules `data/kb/triggers/TRG-*.yaml` over the facts vocabulary, validated at ingestion and publication, citable `trigger:<id>`; section `question_triggers` of the sealed knowledge snapshot (own seal, outside `payload_sha256`). |
 | `1.23` | Cascade engine (K20, [contract §5.23](contracts/knowledge-hub-api-v1.md)): decisions open derived subjects from the pinned knowledge snapshot (`origin: derived`, truth maintenance `foundation_contested`), `GET …/lineage`, `PUT …/kb-pin` (admin, new `pin` action), `cascade` report on assert/withdraw/import, mandatory questions closed by a decider with a justification; engagement snapshot schema `1.4` (`lineage`, subject `origin`). |
+| `1.24` | Rule adjustments per engagement (K21, [contract §5.24](contracts/knowledge-hub-api-v1.md)): justified deactivation of a reference rule, local rules proposed then asserted by another decider, `GET …/rules`; engagement snapshot schema `1.5` (`rule_adjustments`, lineage `scope`). |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

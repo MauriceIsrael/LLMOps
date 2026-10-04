@@ -229,7 +229,7 @@ def export(client):
 def test_the_snapshot_carries_the_facts_of_asserted_decisions_only(client):
     d = propose(client)
     env = export(client)
-    assert env["schemaVersion"] == "1.4" and verify(env) == []
+    assert env["schemaVersion"] == "1.5" and verify(env) == []
     assert env["data"]["facts"]["items"] == [] and env["data"]["decisions"][0]["facts"], "the decision carries them, none is in force"
     before = env["checksum"]
     assert_(client, d["id"])
