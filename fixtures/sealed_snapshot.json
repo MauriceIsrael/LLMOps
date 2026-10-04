@@ -1,7 +1,7 @@
 {
-  "snapshot_id": "snapshot-2026-10-04-76fcd20",
-  "created_at": "2026-10-04T08:15:24Z",
-  "source_revision": "76fcd209a149242a312b9a29d6226ab1f39d70e7",
+  "snapshot_id": "snapshot-2026-10-04-b3fa465",
+  "created_at": "2026-10-04T08:51:08Z",
+  "source_revision": "b3fa46531fb59d7e9fc8c0b6c288c59bb7ddd602",
   "payload_sha256": "sha256:625d5aeebbbe4a957c59e8be6265a1f916ae55b91db16d919537d705434218f1",
   "schema_version": "1.0",
   "emitter": "knowledge-hub",
@@ -88,6 +88,232 @@
         "asset": "P-009"
       }
     ]
+  },
+  "question_triggers": {
+    "items": [
+      {
+        "trigger_id": "TRG-active-active-split-brain",
+        "version": 1,
+        "knowledge_ref": {
+          "sourceId": "knowledge-hub",
+          "knowledgeKey": "trigger:TRG-active-active-split-brain",
+          "version": "1"
+        },
+        "carrier": {
+          "kind": "asset",
+          "id": "P-009",
+          "typed_id": "principle:P-009",
+          "knowledge_ref": {
+            "sourceId": "knowledge-hub",
+            "knowledgeKey": "principle:P-009",
+            "version": "1"
+          }
+        },
+        "when": [
+          {
+            "key": "topology.dc_count",
+            "op": "eq",
+            "value": 2
+          },
+          {
+            "key": "topology.mode",
+            "op": "eq",
+            "value": "active-active"
+          }
+        ],
+        "question": {
+          "fr": "Comment \u00e9viter le split-brain entre deux sites actifs (site t\u00e9moin, quorum) ?",
+          "en": "How is split-brain avoided between two active sites (witness site, quorum)?"
+        },
+        "rationale": {
+          "fr": "Deux sites actifs sans arbitre peuvent diverger lors d'une coupure du lien inter-sites ; un site t\u00e9moin ou un quorum doit \u00eatre tranch\u00e9. Avec trois sites, la question dispara\u00eet.",
+          "en": "Two active sites without an arbiter can diverge when the inter-site link is cut; a witness site or a quorum has to be decided. With three sites the question goes away."
+        },
+        "initial_level": "L1_framed",
+        "suggested_role": "architect",
+        "mandatory": false
+      },
+      {
+        "trigger_id": "TRG-active-active-traffic-failover",
+        "version": 1,
+        "knowledge_ref": {
+          "sourceId": "knowledge-hub",
+          "knowledgeKey": "trigger:TRG-active-active-traffic-failover",
+          "version": "1"
+        },
+        "carrier": {
+          "kind": "asset",
+          "id": "P-009",
+          "typed_id": "principle:P-009",
+          "knowledge_ref": {
+            "sourceId": "knowledge-hub",
+            "knowledgeKey": "principle:P-009",
+            "version": "1"
+          }
+        },
+        "when": [
+          {
+            "key": "topology.mode",
+            "op": "eq",
+            "value": "active-active"
+          }
+        ],
+        "question": {
+          "fr": "Comment le trafic bascule-t-il d'un site \u00e0 l'autre en cas de perte d'un site ?",
+          "en": "How does traffic switch from one site to the other when a site is lost?"
+        },
+        "rationale": {
+          "fr": "En actif/actif, la perte d'un site reporte sa charge sur l'autre ; le m\u00e9canisme de bascule du trafic et la capacit\u00e9 r\u00e9siduelle doivent \u00eatre d\u00e9cid\u00e9s.",
+          "en": "In active/active, losing a site moves its load to the other; the traffic switching mechanism and the remaining capacity have to be decided."
+        },
+        "initial_level": "L0_named",
+        "suggested_role": "architect",
+        "mandatory": false
+      },
+      {
+        "trigger_id": "TRG-multisite-distribution",
+        "version": 1,
+        "knowledge_ref": {
+          "sourceId": "knowledge-hub",
+          "knowledgeKey": "trigger:TRG-multisite-distribution",
+          "version": "1"
+        },
+        "carrier": {
+          "kind": "asset",
+          "id": "P-009",
+          "typed_id": "principle:P-009",
+          "knowledge_ref": {
+            "sourceId": "knowledge-hub",
+            "knowledgeKey": "principle:P-009",
+            "version": "1"
+          }
+        },
+        "when": [
+          {
+            "key": "topology.dc_count",
+            "op": "gte",
+            "value": 3
+          }
+        ],
+        "question": {
+          "fr": "Comment r\u00e9partir les charges et les donn\u00e9es entre trois sites ou plus ?",
+          "en": "How are workloads and data distributed across three or more sites?"
+        },
+        "rationale": {
+          "fr": "\u00c0 partir de trois sites, la r\u00e9partition multi-site (nombre de r\u00e9pliques, quorum, affinit\u00e9) remplace la question du site t\u00e9moin.",
+          "en": "From three sites on, multi-site distribution (replica count, quorum, affinity) replaces the witness-site question."
+        },
+        "initial_level": "L1_framed",
+        "suggested_role": "architect",
+        "mandatory": false
+      },
+      {
+        "trigger_id": "TRG-multisite-replication",
+        "version": 1,
+        "knowledge_ref": {
+          "sourceId": "knowledge-hub",
+          "knowledgeKey": "trigger:TRG-multisite-replication",
+          "version": "1"
+        },
+        "carrier": {
+          "kind": "asset",
+          "id": "P-010",
+          "typed_id": "principle:P-010",
+          "knowledge_ref": {
+            "sourceId": "knowledge-hub",
+            "knowledgeKey": "principle:P-010",
+            "version": "1"
+          }
+        },
+        "when": [
+          {
+            "key": "topology.dc_count",
+            "op": "gte",
+            "value": 2
+          }
+        ],
+        "question": {
+          "fr": "Quelle strat\u00e9gie de r\u00e9plication des donn\u00e9es entre centres de donn\u00e9es, et pour quel RPO ?",
+          "en": "Which data replication strategy between data centres, and for which RPO?"
+        },
+        "rationale": {
+          "fr": "D\u00e8s que deux centres de donn\u00e9es h\u00e9bergent le service, chaque domaine de donn\u00e9es doit garder un seul ma\u00eetre (P-010) ; la r\u00e9plication et l'objectif de point de reprise en d\u00e9coulent.",
+          "en": "As soon as two data centres host the service, each data domain must keep a single master (P-010); the replication strategy and the recovery point objective follow."
+        },
+        "initial_level": "L1_framed",
+        "suggested_role": "architect",
+        "mandatory": false
+      },
+      {
+        "trigger_id": "TRG-nis2-business-continuity",
+        "version": 1,
+        "knowledge_ref": {
+          "sourceId": "knowledge-hub",
+          "knowledgeKey": "trigger:TRG-nis2-business-continuity",
+          "version": "1"
+        },
+        "carrier": {
+          "kind": "control",
+          "id": "NIS2-ART21-2C",
+          "framework": "NIS2"
+        },
+        "when": [
+          {
+            "key": "continuity.nis2_in_scope",
+            "op": "eq",
+            "value": true
+          }
+        ],
+        "question": {
+          "fr": "Quel plan de continuit\u00e9 et de reprise d'activit\u00e9 r\u00e9pond \u00e0 l'article 21(2)(c) de NIS2 ?",
+          "en": "Which business continuity and disaster recovery plan answers NIS2 Article 21(2)(c)?"
+        },
+        "rationale": {
+          "fr": "Une entit\u00e9 soumise \u00e0 NIS2 doit couvrir la gestion de la continuit\u00e9, des sauvegardes et de la crise ; le plan doit \u00eatre tranch\u00e9 et justifi\u00e9.",
+          "en": "An entity in NIS2 scope must cover business continuity, backup management and crisis management; the plan has to be decided and justified."
+        },
+        "initial_level": "L1_framed",
+        "suggested_role": "security-architect",
+        "mandatory": true
+      },
+      {
+        "trigger_id": "TRG-sovereign-hosting-jurisdiction",
+        "version": 1,
+        "knowledge_ref": {
+          "sourceId": "knowledge-hub",
+          "knowledgeKey": "trigger:TRG-sovereign-hosting-jurisdiction",
+          "version": "1"
+        },
+        "carrier": {
+          "kind": "control",
+          "id": "SNC-REQ-01",
+          "framework": "SecNumCloud"
+        },
+        "when": [
+          {
+            "key": "hosting.sovereignty",
+            "op": "in",
+            "value": [
+              "national",
+              "eu",
+              "sovereign-cloud"
+            ]
+          }
+        ],
+        "question": {
+          "fr": "Quelles garanties d'immunit\u00e9 aux lois extraterritoriales et de localisation des donn\u00e9es l'h\u00e9bergement apporte-t-il ?",
+          "en": "What guarantees of immunity to extraterritorial laws and of data localisation does the hosting provide?"
+        },
+        "rationale": {
+          "fr": "Une exigence de souverainet\u00e9 d'h\u00e9bergement impose de d\u00e9montrer la localisation des donn\u00e9es et l'immunit\u00e9 du fournisseur (SNC-REQ-01).",
+          "en": "A hosting sovereignty requirement means showing where the data is located and that the provider is immune to extraterritorial laws (SNC-REQ-01)."
+        },
+        "initial_level": "L1_framed",
+        "suggested_role": "security-architect",
+        "mandatory": true
+      }
+    ],
+    "content_sha256": "sha256:b6b901976cbb15861ede58e3cbba4061fe2e19a14b0e062160423f5936dd2dd7"
   },
   "applicability_index": {
     "TPL-getting-started": {

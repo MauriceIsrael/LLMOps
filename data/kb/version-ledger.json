@@ -196,6 +196,24 @@
     "template:TPL-zero-draft-hld-en": {
       "1": "sha256:be0fedd7c6481bf4cf5ef0de116970204d57e8c75e805e7fda7525a751c67db2"
     },
+    "trigger:TRG-active-active-split-brain": {
+      "1": "sha256:f22e5100aff83d58ae995dcfd5bb1ba81f6bb37dab351b91e9dbe0f09e087b6e"
+    },
+    "trigger:TRG-active-active-traffic-failover": {
+      "1": "sha256:5dbac619e9220b4828514f4e7d3fbd56ca9245534f5db943016f27050196e2f2"
+    },
+    "trigger:TRG-multisite-distribution": {
+      "1": "sha256:d0783918ba90e5c68a4c417e1702ec8c78f14a1c9840b6bc440b3eeb2750bf2d"
+    },
+    "trigger:TRG-multisite-replication": {
+      "1": "sha256:3124e2cca2dede42577baf62d932a773ad2abc37e5138d172e408c3c77c5a098"
+    },
+    "trigger:TRG-nis2-business-continuity": {
+      "1": "sha256:19633078fe80c4670eab0484605ad907a9c5f61ebdb96da6a1cea26710b9d43d"
+    },
+    "trigger:TRG-sovereign-hosting-jurisdiction": {
+      "1": "sha256:1f98ac34cbfff9ee6499fb25b0faab17d7df991d4773a1f3a60c2435b5232677"
+    },
     "vocabulary:facts": {
       "1": "sha256:b5eb7e9d235dfdb0988df9d04562b3236f06f6804739a95abf094c490223a813"
     }

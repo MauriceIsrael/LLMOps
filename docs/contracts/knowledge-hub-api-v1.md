@@ -935,6 +935,32 @@ Pour qu'un moteur symbolique (K20) puisse raisonner sur le contenu d'une décisi
 
 **Instantané d'engagement** (schéma `1.3`) : chaque décision porte `facts`, et `data.facts` liste les faits en vigueur lus contre le vocabulaire de l'instantané de base épinglé (`pins.kb_snapshot`). L'export est refusé si cet instantané n'a pas de vocabulaire ou ne connaît pas une clé (`fact_vocabulary_missing`, `kb_snapshot_unavailable`) ; la vérification refuse un fait dont la décision n'est pas affirmée, qui n'est pas dans la décision, ou une liste incomplète.
 
+### 5.22 Contrat 1.22 — Règles de déclenchement de questions attachées aux actifs (K19)
+
+Une règle relie des faits affirmés (§5.21) à une question qui devient pertinente. C'est un savoir d'architecte réutilisable : il vit **avec l'élément qui le justifie** (principe, pattern, contrôle), dans la base de connaissance, versionné et citable. Chaque question générée par le moteur (K20) est ainsi traçable jusqu'à une référence de la base.
+
+**Fichier** : `data/kb/triggers/TRG-<nom>.yaml`, une règle par fichier (le nom du fichier est l'identifiant). Choix assumé : la règle est un élément **rattaché par référence** à son porteur (`asset`), et non incorporée à sa page, pour que modifier une règle ne fasse pas monter la révision de l'actif.
+
+| Champ | Contenu |
+|---|---|
+| `trigger_id`, `version` | identifiant `TRG-…` ; entier ≥ 1, citable `trigger:<id>` (registre de versions, K3) |
+| `asset` | le porteur : un élément de la base de connaissance (actif ou contrôle), jamais inventé |
+| `when` | **conjonction** de conditions `{key, op, value}` ; `key` du vocabulaire (§5.21) ; `op` ∈ `eq`, `neq`, `gte`, `lte`, `in` |
+| `question`, `rationale` | textes `{fr, en}` |
+| `initial_level` | `L0_named` ou `L1_framed` |
+| `suggested_role` | rôle suggéré |
+| `mandatory` | vrai pour un contrôle réglementaire : clore la question exigera une justification. Obligatoire sur une règle portée par un contrôle de sévérité `mandatory` |
+
+**Sémantique figée** (déclaratif, aucun code ; `pipelines.triggers.matches` en est l'évaluation de référence) : une condition n'est vraie que si un **fait en vigueur** existe pour cette clé et que la comparaison tient ; **sans fait, la condition est fausse, `neq` compris** ; `in` tient si la valeur est l'une de la liste ; `gte` et `lte` ne s'appliquent qu'aux clés `int` et `duration` ; un booléen n'est pas un entier.
+
+**Validation** à l'ingestion (`pipelines.cli ingest`, qui s'arrête) et à la publication (export de l'instantané, qui refuse) : clé du vocabulaire, valeur du bon type et dans les bornes, opérateur compatible, porteur existant. Une règle invalide n'est pas publiée ; le rapport donne le fichier, le **chemin** (`when[1].key`) et le code (`UNKNOWN_FACT_KEY`, `VALUE_TYPE`, `OP_TYPE`, `UNKNOWN_OP`, `CONDITION_SHAPE`, `UNKNOWN_ASSET`, `MANDATORY_REQUIRED`, …).
+
+**Instantané de la base** : section `question_triggers` `{items, content_sha256}`, chaque règle avec son `knowledge_ref` (`trigger:<id>`) et son porteur résolu (`carrier`: actif avec `typed_id` et `knowledge_ref`, ou contrôle avec `framework`). **Écart assumé**, comme pour `fact_vocabulary` : la section est scellée par son propre `content_sha256`, **hors** de `payload_sha256` (consommateurs existants intacts). Changer une règle change sa `version` et le sceau de la section, pas le `payload_sha256`.
+
+**Relations du graphe.** Une règle n'a pas de relation propre : elle est portée par un élément, et les relations existantes de cet élément disent ce qu'elle rend pertinent. Exemple : une règle portée par un pattern qui `implements_controls` des contrôles ouvre une question dont les contrôles mis en œuvre sont déjà résolubles depuis `compliance_index` ; retenir le pattern rend ces contrôles pertinents sans les répéter dans la règle. Le moteur (K20) lit la règle ; il ne suit pas les relations.
+
+Jeu initial (six règles) : réplication et RPO (`topology.dc_count ≥ 2`), split-brain à deux sites actifs, bascule du trafic en actif/actif, répartition à trois sites ou plus, souveraineté d'hébergement (SNC-REQ-01, `mandatory`), continuité NIS2 (NIS2-ART21-2C, `mandatory`). Amorçage et revue : K22.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

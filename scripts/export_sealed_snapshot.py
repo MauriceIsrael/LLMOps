@@ -18,7 +18,7 @@ if str(ROOT_DIR) not in sys.path:
 from mcp_server.core.config import server_config
 from mcp_server.core.db import ReadOnlyKuzuClient
 from mcp_server.core.version import SNAPSHOT_SCHEMA_VERSION
-from pipelines import canonical
+from pipelines import canonical, triggers
 from pipelines.engagement import facts
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
 from pipelines.knowledge_ref import (
@@ -258,6 +258,23 @@ def export_sealed_snapshot(
             raise ValueError(f"fact vocabulary: key '{item['key']}' cites asset '{ref}', which is not in the knowledge base")
     published[facts.VOCABULARY_KEY] = (vocabulary["version"], vocabulary["content_sha256"])
 
+    # K19: the question triggers attached to the elements of the knowledge base: validated against the facts vocabulary (a rule
+    # that is not valid is not published), resolved to their carrier, and guarded by the ledger like any element (K3).
+    rules = triggers.load_all(server_config.kb_dir, vocabulary)
+    by_asset = {a["id"]: a for a in enriched_assets}
+    by_control = {c["id"]: c for c in controls_list}
+    published_rules: list[dict[str, Any]] = []
+    for rule in rules:
+        if rule["asset"] in by_asset:
+            a = by_asset[rule["asset"]]
+            carrier = {"kind": "asset", "id": a["id"], "typed_id": a["typed_id"], "knowledge_ref": a["knowledge_ref"]}
+        elif rule["asset"] in by_control:
+            carrier = {"kind": "control", "id": rule["asset"], "framework": by_control[rule["asset"]]["framework"]}
+        else:
+            raise ValueError(f"trigger '{rule['trigger_id']}': carrier '{rule['asset']}' is not in the knowledge base graph (run the ingestion)")
+        published[triggers.trigger_key(rule["trigger_id"])] = (rule["version"], rule["content_sha256"])
+        published_rules.append(triggers.public(rule, carrier))
+
     ledger_file = ledger_path or (server_config.kb_dir / LEDGER_NAME)
     updated_ledger = check_revisions(load_ledger(ledger_file), published, record=record_revisions)
     if record_revisions:
@@ -292,6 +309,8 @@ def export_sealed_snapshot(
             "content_sha256": vocabulary["content_sha256"],
             "keys": facts.public_keys(vocabulary),
         },
+        # K19: same treatment (own seal, outside payload_sha256); the rules are recomputed from data/kb/triggers by the emitter.
+        "question_triggers": {"items": published_rules, "content_sha256": canonical.sha256(published_rules)},
         **payload_data,
     }
 

@@ -44,6 +44,19 @@ def ingest(
         console.print(f"[bold red]❌ Le répertoire {kb_dir} n'existe pas.[/bold red]")
         raise typer.Exit(code=1)
 
+    # K19: question triggers are checked at ingestion as at publication: an invalid rule stops the ingestion, with its path
+    from pipelines import triggers
+
+    try:
+        valid_rules = triggers.load_all(kb_dir)
+    except triggers.TriggerError as err:
+        console.print("[bold red]❌ Règles de déclenchement invalides :[/bold red]")
+        for problem in err.problems:
+            console.print(f"  {problem['trigger']} {problem['path']} [{problem['code']}] {problem['reason']}")
+        raise typer.Exit(code=1) from err
+    if valid_rules:
+        console.print(f"[bold green]🧭 {len(valid_rules)} règles de déclenchement valides.[/bold green]")
+
     all_files = sorted(
         [
             p

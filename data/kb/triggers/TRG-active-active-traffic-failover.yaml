@@ -1,0 +1,14 @@
+trigger_id: TRG-active-active-traffic-failover
+version: 1
+asset: P-009
+when:
+  - {key: topology.mode, op: eq, value: active-active}
+question:
+  fr: Comment le trafic bascule-t-il d'un site à l'autre en cas de perte d'un site ?
+  en: How does traffic switch from one site to the other when a site is lost?
+rationale:
+  fr: En actif/actif, la perte d'un site reporte sa charge sur l'autre ; le mécanisme de bascule du trafic et la capacité résiduelle doivent être décidés.
+  en: In active/active, losing a site moves its load to the other; the traffic switching mechanism and the remaining capacity have to be decided.
+initial_level: L0_named
+suggested_role: architect
+mandatory: false
