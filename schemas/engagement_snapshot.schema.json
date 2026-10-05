@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "EngagementSnapshot",
-  "description": "Sealed snapshot of an engagement emitted by the Knowledge Hub (contract 1.18 (K11), schema 1.1 with decisions at contract 1.19 (K16), 1.2 with imported flags (K12), 1.3 with facts at contract 1.21 (K18), 1.4 with the lineage of derived subjects and subject origin at contract 1.23 (K20)). Suite ExternalSnapshotEnvelope; checksum = sha256 of data at the canonical-json v1 profile; snapshotId derives from the checksum.",
+  "description": "Sealed snapshot of an engagement emitted by the Knowledge Hub (contract 1.18 (K11), schema 1.1 with decisions at contract 1.19 (K16), 1.2 with imported flags (K12), 1.3 with facts at contract 1.21 (K18), 1.4 with the lineage of derived subjects and subject origin at contract 1.23 (K20), 1.5 with the rule adjustments of the engagement at contract 1.24 (K21)). Suite ExternalSnapshotEnvelope; checksum = sha256 of data at the canonical-json v1 profile; snapshotId derives from the checksum.",
   "type": "object",
   "properties": {
     "schemaVersion": {
-      "const": "1.4"
+      "const": "1.5"
     },
     "snapshotId": {
       "type": "string",
@@ -824,22 +824,29 @@
                     "type": "integer"
                   },
                   "knowledge_ref": {
-                    "type": "object",
-                    "properties": {
-                      "sourceId": {
-                        "const": "knowledge-hub"
+                    "oneOf": [
+                      {
+                        "type": "null"
                       },
-                      "knowledgeKey": {
-                        "type": "string"
-                      },
-                      "version": {
-                        "type": "string"
+                      {
+                        "type": "object",
+                        "properties": {
+                          "sourceId": {
+                            "const": "knowledge-hub"
+                          },
+                          "knowledgeKey": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "sourceId",
+                          "knowledgeKey",
+                          "version"
+                        ]
                       }
-                    },
-                    "required": [
-                      "sourceId",
-                      "knowledgeKey",
-                      "version"
                     ]
                   },
                   "resolved": {
@@ -929,6 +936,12 @@
                       "string",
                       "null"
                     ]
+                  },
+                  "scope": {
+                    "enum": [
+                      "reference",
+                      "local"
+                    ]
                   }
                 },
                 "required": [
@@ -944,7 +957,8 @@
                   "cause",
                   "mandatory",
                   "suggested_role",
-                  "question_id"
+                  "question_id",
+                  "scope"
                 ],
                 "additionalProperties": false
               }
@@ -953,6 +967,174 @@
           "required": [
             "kb_snapshot",
             "items"
+          ],
+          "additionalProperties": false
+        },
+        "rule_adjustments": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "trigger_id": {
+                    "type": "string"
+                  },
+                  "mandatory": {
+                    "type": "boolean"
+                  },
+                  "justification": {
+                    "type": "string"
+                  },
+                  "disabled_by": {
+                    "type": "string"
+                  },
+                  "resolved": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "trigger_id",
+                  "mandatory",
+                  "justification",
+                  "disabled_by",
+                  "resolved"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "local_rules": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "trigger_id": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "integer"
+                  },
+                  "asset": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "when": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string"
+                        },
+                        "op": {
+                          "enum": [
+                            "eq",
+                            "neq",
+                            "gte",
+                            "lte",
+                            "in"
+                          ]
+                        },
+                        "value": {}
+                      },
+                      "required": [
+                        "key",
+                        "op",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "question": {
+                    "type": "object",
+                    "properties": {
+                      "fr": {
+                        "type": "string"
+                      },
+                      "en": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "fr",
+                      "en"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "rationale": {
+                    "type": "object",
+                    "properties": {
+                      "fr": {
+                        "type": "string"
+                      },
+                      "en": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "fr",
+                      "en"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "initial_level": {
+                    "enum": [
+                      "L0_named",
+                      "L1_framed"
+                    ]
+                  },
+                  "suggested_role": {
+                    "type": "string"
+                  },
+                  "mandatory": {
+                    "type": "boolean"
+                  },
+                  "status": {
+                    "enum": [
+                      "proposed",
+                      "active",
+                      "withdrawn"
+                    ]
+                  },
+                  "assertion_level": {
+                    "type": "string"
+                  },
+                  "author": {
+                    "type": "string"
+                  },
+                  "validated_by": {
+                    "type": "string"
+                  },
+                  "validated_at": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "trigger_id",
+                  "version",
+                  "asset",
+                  "when",
+                  "question",
+                  "rationale",
+                  "initial_level",
+                  "suggested_role",
+                  "mandatory",
+                  "status",
+                  "assertion_level",
+                  "author",
+                  "validated_by",
+                  "validated_at"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "disabled",
+            "local_rules"
           ],
           "additionalProperties": false
         }
@@ -971,7 +1153,8 @@
         "unresolved_references",
         "decisions",
         "facts",
-        "lineage"
+        "lineage",
+        "rule_adjustments"
       ],
       "additionalProperties": false
     }

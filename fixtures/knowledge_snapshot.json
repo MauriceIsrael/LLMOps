@@ -2,7 +2,7 @@
   "status": "ok",
   "count": 1,
   "data": {
-    "schema_version": "1.23",
+    "schema_version": "1.24",
     "knowledge": {
       "dataset": "data/knowledge.lbug",
       "node_counts": {

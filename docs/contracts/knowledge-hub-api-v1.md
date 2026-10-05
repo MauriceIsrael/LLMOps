@@ -981,6 +981,22 @@ Le moteur s'exécute **dans le Hub**, sur la base d'engagement, de façon **dét
 
 **Instantané d'engagement** (schéma `1.4`) : chaque sujet porte `origin` ; section `data.lineage` `{kb_snapshot, items}` (sans date : fonction de l'état). La vérification refuse : un sujet dérivé dont la règle ne se résout pas dans la base épinglée (`DERIVED_RULE_UNRESOLVED`), un sujet dérivé sans lignée ou une lignée sans sujet dérivé, un sujet contesté sans cause, une décision parente inconnue. L'outil MCP sans état `evaluate_cascade` (optionnel dans l'issue) n'est pas livré.
 
+### 5.24 Contrat 1.24 — Ajustements des règles par engagement (K21)
+
+Les règles de référence (§5.22) vivent dans la base de connaissance et ne savent rien d'un programme. Chaque engagement a pourtant ses spécificités : une règle peut y être non pertinente, une règle propre au programme peut manquer. Ces ajustements sont des **éléments engagés** : ils vivent dans la base d'engagement, **jamais** dans la base de connaissance (aucune règle locale n'apparaît dans l'instantané de la base).
+
+**Désactiver une règle de référence** : `POST /api/engagements/{id}/rules/{trigger_id}/disable` `{justification}` (action `decide`, donc `decider` ou `admin`). La **justification est obligatoire** (`400`), règles `mandatory` comprises, et tracée dans le journal d'accès (`rule_disable` : règle, `mandatory`, justification, acteur). La règle doit exister dans la base épinglée (`404 unknown_rule`). Les sujets qu'elle avait ouverts restent, marqués `foundation_contested` avec la cause `{rule_disabled: true}` (K20). `POST …/enable` la réactive (`409 not_disabled` sinon) ; si sa condition tient, le moteur la rouvre.
+
+**Règle locale** : `POST /api/engagements/{id}/rules` (`contributor`) avec le schéma de K19 (`trigger_id`, `version`, `when`, `question`, `rationale`, `initial_level`, `suggested_role`, `mandatory`, `asset` facultatif) et **les mêmes contrôles**, lus contre le vocabulaire et les porteurs de la base épinglée. Écart assumé : l'identifiant est `TRG-local-…` (espace réservé à l'engagement, refusé dans `data/kb/triggers`) et le porteur `asset` est **facultatif** (une règle propre à un programme n'a pas forcément d'élément de la base derrière elle) ; il est vérifié s'il est donné. Elle est **proposée** : elle ne s'applique qu'une fois **affirmée** (`POST …/rules/{id}/assert`, `decider` **distinct de l'auteur**, `409 self_validation` sinon). `POST …/rules/{id}/withdraw` (auteur ou `decider`) la retire ; elle peut être proposée de nouveau. Refus `400` avec `code`, `argument` (chemin, p. ex. `when[0].key`) et `problems`.
+
+**Lecture** : `GET /api/engagements/{id}/rules` : `{kb_snapshot, reference: [{trigger_id, version, mandatory, carrier, disabled, justification}], local: [...]}`.
+
+**Évaluation** : le moteur lit `règles de la base épinglée − désactivations + règles locales affirmées` ; chaque réponse d'écriture porte le rapport `cascade` (K20). Un sujet dérivé d'une règle locale porte `scope: local` et `knowledge_ref` nul.
+
+**Instantané d'engagement** (schéma `1.5`) : section `rule_adjustments` `{disabled: [{trigger_id, mandatory, justification, disabled_by, resolved}], local_rules: [{…règle…, status, assertion_level, author, validated_by, validated_at}]}` et `scope` sur chaque entrée de `lineage`. La vérification refuse : une désactivation sans justification, sans handle, ou d'une règle absente de la base épinglée ; une règle locale affirmée sans personne ou par son auteur, ou proposée avec un valideur, ou dont l'identifiant n'est pas `TRG-local-…`. Une règle locale retirée reste dans la section (comme un énoncé retiré) et ne bloque pas l'export.
+
+**Non livré dans ce lot** : la capitalisation d'une règle locale vers le référentiel par le canal de propositions (K7, K13), après retrait de toute ancre de programme. Elle suivra K7 et K13.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

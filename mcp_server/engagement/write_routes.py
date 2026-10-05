@@ -26,6 +26,13 @@ def cascade_of(repo, access, engagement: str, actor: str):
     return lambda: Cascade(repo, access, engagement, knowledge_tools.SNAPSHOTS_DIR, actor).run()
 
 
+def _adjuster(repo, access, engagement: str, actor: str, cascade=None):
+    from mcp_server.knowledge import tools as knowledge_tools
+    from pipelines.engagement.rules import RuleAdjuster
+
+    return RuleAdjuster(repo, access, engagement, actor, knowledge_tools.SNAPSHOTS_DIR, cascade)
+
+
 async def _handle(request, action: str, work: Callable[[EngagementWriter, dict[str, Any], dict[str, str]], tuple[int, dict[str, Any]]]):
     engagement = request.path_params["engagement"]
     guard_engagement(engagement, action=action)  # token scopes, then the member's role; 403 / 400 are raised
@@ -46,8 +53,10 @@ async def _handle(request, action: str, work: Callable[[EngagementWriter, dict[s
         body = {}
     repo = ElicitationRepository(db_path=get_engagement_path(engagement))
     try:
-        status, data = work(EngagementWriter(repo, engagement, member["handle"], cascade_of(repo, access, engagement, member["handle"])),
-                            body, member)
+        cascade = cascade_of(repo, access, engagement, member["handle"])
+        writer = EngagementWriter(repo, engagement, member["handle"], cascade)
+        writer.rules = _adjuster(repo, access, engagement, member["handle"], cascade)  # K21
+        status, data = work(writer, body, member)
     except WriteError as err:
         return JSONResponse(err.body(), status_code=err.status)
     finally:
@@ -132,6 +141,22 @@ async def _facts(request):
         repo.close()
 
 
+async def _rules(request):
+    """The rules an engagement reads (K21): the reference rules of its pinned base, which are deactivated, and its local rules."""
+    engagement = request.path_params["engagement"]
+    guard_engagement(engagement, action="read")
+    access = get_access()
+    if access is None or not access.is_managed(engagement):
+        return JSONResponse({"status": "error", "error": "engagement_not_managed", "reason": "Rules need a managed engagement."}, status_code=409)
+    repo = ElicitationRepository(db_path=get_engagement_path(engagement))
+    try:
+        return JSONResponse({"status": "ok", "data": _adjuster(repo, access, engagement, "", None).overview()})
+    except WriteError as err:
+        return JSONResponse(err.body(), status_code=err.status)
+    finally:
+        repo.close()
+
+
 async def _lineage(request):
     """The derivation tree of an engagement (K20): subjects the cascade opened, from which decision, by which rule and facts."""
     from mcp_server.knowledge import tools as knowledge_tools
@@ -144,7 +169,7 @@ async def _lineage(request):
     try:
         snapshot, reason = (None, "not_managed") if access is None else pinned_snapshot(
             access, engagement, knowledge_tools.SNAPSHOTS_DIR, "", create=False)
-        items = lineage_items(repo.list_derived_subjects(engagement), snapshot)
+        items = lineage_items(repo.list_derived_subjects(engagement), snapshot, repo.list_adjustments(engagement))
         for item in items:
             question = repo.get_question(item["question_id"]) if item["question_id"] else None
             item["question_status"] = question["status"] if question else None
@@ -245,6 +270,25 @@ def build_write_routes() -> list[Route]:
     async def requirements(request):
         return await _handle(request, "contribute", lambda w, b, m: (200, w.add_requirements(b)))
 
+    async def propose_rule(request):
+        return await _handle(request, "contribute", lambda w, b, m: (201, w.rules.propose_local(b)))
+
+    async def assert_rule(request):
+        tid = request.path_params["trigger_id"]
+        return await _handle(request, "decide", lambda w, b, m: (200, w.rules.assert_local(tid)))
+
+    async def withdraw_rule(request):
+        tid = request.path_params["trigger_id"]
+        return await _handle(request, "contribute", lambda w, b, m: (200, w.rules.withdraw_local(tid, m["role"] in DECIDING_ROLES)))
+
+    async def disable_rule(request):
+        tid = request.path_params["trigger_id"]
+        return await _handle(request, "decide", lambda w, b, m: (200, w.rules.disable(tid, b)))
+
+    async def enable_rule(request):
+        tid = request.path_params["trigger_id"]
+        return await _handle(request, "decide", lambda w, b, m: (200, w.rules.enable(tid)))
+
     async def arbitrate(request):
         cid = request.path_params["conflict_id"]
         return await _handle(request, "decide", lambda w, b, m: (200, w.arbitrate(cid, b)))
@@ -258,6 +302,12 @@ def build_write_routes() -> list[Route]:
         Route(f"{base}/import", endpoint=_import, methods=["POST"]),
         Route(f"{base}/facts", endpoint=_facts, methods=["GET"]),
         Route(f"{base}/lineage", endpoint=_lineage, methods=["GET"]),
+        Route(f"{base}/rules", endpoint=_rules, methods=["GET"]),
+        Route(f"{base}/rules", endpoint=propose_rule, methods=["POST"]),
+        Route(f"{base}/rules/{{trigger_id}}/disable", endpoint=disable_rule, methods=["POST"]),
+        Route(f"{base}/rules/{{trigger_id}}/enable", endpoint=enable_rule, methods=["POST"]),
+        Route(f"{base}/rules/{{trigger_id}}/assert", endpoint=assert_rule, methods=["POST"]),
+        Route(f"{base}/rules/{{trigger_id}}/withdraw", endpoint=withdraw_rule, methods=["POST"]),
         Route(f"{base}/kb-pin", endpoint=_kb_pin, methods=["PUT"]),
         Route(f"{base}/decisions", endpoint=decisions, methods=["POST"]),
         Route(f"{base}/decisions/{{decision_id}}/assert", endpoint=assert_decision, methods=["POST"]),

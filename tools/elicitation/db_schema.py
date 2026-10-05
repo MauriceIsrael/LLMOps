@@ -213,6 +213,28 @@ class ElicitationSchemaInitializer:
                 except Exception:
                     pass
 
+        # 6ter. Table RuleAdjustment (K21): what one engagement changes in the reference trigger rules: a justified deactivation
+        # or a rule of its own. Engaged elements: they live here, never in the knowledge base.
+        if "RuleAdjustment" not in table_names:
+            self.graph_store.execute_cypher(
+                """
+                CREATE NODE TABLE RuleAdjustment (
+                    id STRING,
+                    engagement STRING,
+                    kind STRING,
+                    trigger_id STRING,
+                    status STRING,
+                    payload STRING,
+                    justification STRING,
+                    author STRING,
+                    validated_by STRING,
+                    validated_at STRING,
+                    created_at STRING,
+                    PRIMARY KEY(id)
+                );
+                """
+            )
+
         # 7. Tables de Relations
         if "ABOUT" not in table_names:
             self.graph_store.execute_cypher("CREATE REL TABLE ABOUT (FROM Statement TO Subject);")
