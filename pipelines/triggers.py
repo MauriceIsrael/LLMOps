@@ -229,3 +229,29 @@ def matches(rule: dict[str, Any], facts: dict[str, Any]) -> bool:
         if not ok:
             return False
     return True
+
+
+def unsatisfied(rule: dict[str, Any], facts: dict[str, Any], contradicted: set[str] | None = None) -> list[dict[str, Any]]:
+    """The conditions of ``rule`` that do not hold on ``facts``, each with the value it met (``None``: no fact in force)."""
+    out = []
+    for c in rule["when"]:
+        if not matches({"when": [c]}, facts):
+            item = {"key": c["key"], "op": c["op"], "value": c["value"], "current": facts.get(c["key"])}
+            if contradicted and c["key"] in contradicted:
+                item["contradiction"] = True
+            out.append(item)
+    return out
+
+
+def evaluate(rules: list[dict[str, Any]], facts: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """``(opened, closed)`` for ``facts``: the one evaluation both the cascade engine (K20) and the admin preview (K22) use.
+
+    ``opened`` are the rules that hold, sorted by id; ``closed`` are the others with the conditions that do not hold.
+    """
+    opened, closed = [], []
+    for rule in sorted(rules, key=lambda r: r["trigger_id"]):
+        if matches(rule, facts):
+            opened.append(rule)
+        else:
+            closed.append({"trigger_id": rule["trigger_id"], "unsatisfied": unsatisfied(rule, facts)})
+    return opened, closed

@@ -997,6 +997,27 @@ Les règles de référence (§5.22) vivent dans la base de connaissance et ne sa
 
 **Non livré dans ce lot** : la capitalisation d'une règle locale vers le référentiel par le canal de propositions (K7, K13), après retrait de toute ancre de programme. Elle suivra K7 et K13.
 
+### 5.25 Contrat 1.25 — Amorçage et revue des règles de déclenchement (K22)
+
+Les règles (§5.22) et les clés du vocabulaire (§5.21) entrent dans la base de connaissance par le **même cycle que toute connaissance** (§5.2) : candidat, contrôles déterministes, revue humaine, promotion, publication (§5.8). Rien n'est publié automatiquement, quelle que soit l'origine.
+
+**Deux types de candidat** (`asset_type`) : `trigger` (le contenu est le YAML d'une règle ; amendement : `target_asset_id` est la règle et `version` vaut la précédente + 1, exigé par le registre de versions, K3) et `fact_key` (le contenu est le YAML d'une clé ; l'accepter ajoute la clé et fait monter la `version` du vocabulaire ; le type d'une clé existante ne change pas). `source.system` accepte `kb-extraction`. Le contrôle `schema` est **le validateur de K19** sur le vocabulaire courant : une clé inconnue fait échouer le candidat (`checks_failed`) avec le chemin de la clé ; `anonymization`, `llm_unreviewed` et `previously_rejected` s'appliquent comme aux autres candidats ; `references`, `duplicate` et `doctrine_conflict` (faits pour du Markdown) ne s'appliquent pas.
+
+**Extraction** : commande hors ligne `kb extract-triggers [--asset ID] [--dry-run]` (comme `kb suggest-links` : seul endroit où un modèle est utilisé, jamais sur une route servie ; ignorée sans `LLM_ENDPOINT`). Elle lit les sections « Consequences », « Trade-offs », « Implications », « When not to use this », « Revisit when » (et leurs équivalents français) des principes, patterns et décisions actifs. Sortie **contrainte** : une règle est validée par le validateur de K19 ; la phrase citée (`source_quote`) doit figurer **mot pour mot** dans la section lue, sinon la proposition est écartée et signalée ; une clé inconnue doit être **définie** par le modèle (`new_keys`) et devient un candidat `fact_key` à revoir, la règle restant `checks_failed` tant qu'une personne n'a pas accepté la clé, ou fusionné, ou amendé. Tout est `llm-derived`, passage cité dans `rationale`. Rejouer ne crée rien de ce qui existe (règle, clé, candidat en cours).
+
+**API de revue** (application d'administration) :
+
+| Route | Rôle |
+|---|---|
+| `GET /api/knowledge/triggers` | `{vocabulary, assets: [{id, title, rules}], candidates}` ; la file `candidates` (règles et clés en cours de revue, avec leur contrôle `schema`) est réservée au scope `kb:review` |
+| `POST /api/knowledge/triggers/validate` `{content, asset_type?, target_asset_id?}` | validation en direct : `{valid, problems: [{path, code, reason}]}`, **même validateur** que le contrôle `schema` et la publication ; rien n'est stocké |
+| `POST /api/knowledge/triggers/preview` `{facts: {clé: valeur}, rules?: [YAML ou objet]}` | « avec ces faits, voici les questions qui s'ouvriraient » : `{opens, closed: [{trigger_id, unsatisfied}], invalid_drafts}`. Les faits sont validés sur le vocabulaire (`400`, `code`, `path`) ; `rules` ajoute des brouillons (un candidat en revue) aux règles de référence |
+| `POST /api/knowledge/candidates/{id}/merge-key` `{into, reviewer, reason?}` | scope `kb:review` : rejette le candidat `fact_key` (le motif consigne la fusion) et renvoie les règles candidates qui citent la clé, chacune avec son contenu réécrit sur la clé existante ; le relecteur les amende ensuite (une règle n'est jamais modifiée ni acceptée par effet de bord) |
+
+L'aperçu et le moteur de cascade (§5.23) utilisent **la même évaluation** (`pipelines.triggers.evaluate`) : mêmes faits, mêmes règles, mêmes questions (test de recette). La revue elle-même (accepter, amender, rejeter) passe par `PATCH /api/knowledge/candidates/{id}` (§5.2), la promotion et la publication par §5.8.
+
+**Application d'administration** (`apps/kb-client-app`, `/governance/triggers`) : liste des règles par actif, file des candidats, éditeur avec validation en direct, aperçu, actions accepter, amender, rejeter et fusion de clé, appuyés sur ces routes (proxy `api/kb/triggers`, jeton `LLMOPS_REVIEW_TOKEN`). **Vérifiée par `svelte-check` et par le build, non validée visuellement.**
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

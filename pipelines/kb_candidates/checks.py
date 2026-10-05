@@ -192,6 +192,10 @@ def _schema_problems(fm: dict[str, Any], asset_type: str, ctx: CheckContext) -> 
 def check_schema(candidate: dict[str, Any], ctx: CheckContext) -> dict[str, str]:
     asset_type = candidate.get("asset_type")
     content = candidate.get("proposed_content", "")
+    if asset_type in ("trigger", "fact_key"):  # K22: a rule or a vocabulary key: YAML, no front matter
+        from pipelines.kb_candidates import rules as rule_candidates
+
+        return rule_candidates.check_schema(candidate, ctx.kb_dir)
     if asset_type == "glossary":
         if GLOSSARY_ENTRY.search(content):
             return _result("schema", "pass", "glossary entry format '**Term** — definition'")
@@ -370,8 +374,14 @@ CHECKS = (
 )
 
 
+# A rule or a vocabulary key has no front matter, no cited asset and no prose to compare to the doctrine: the schema check
+# (K19 validator, same vocabulary) replaces them; anonymization, the model's mark and earlier rejections still apply.
+DATA_CHECKS = (check_schema, check_anonymization, check_llm_unreviewed, check_previously_rejected)
+
+
 def run_checks(candidate: dict[str, Any], ctx: CheckContext) -> list[dict[str, str]]:
-    return [check(candidate, ctx) for check in CHECKS]
+    checks = DATA_CHECKS if candidate.get("asset_type") in ("trigger", "fact_key") else CHECKS
+    return [check(candidate, ctx) for check in checks]
 
 
 def has_failure(checks: list[dict[str, str]]) -> bool:

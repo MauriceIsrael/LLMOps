@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.20")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.25")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -247,7 +247,7 @@ export interface CheckResult {
 /* ---- Contract 1.2: KB candidate cycle ------------------------------------ */
 
 export type KbCandidateKind = "new_asset" | "amendment" | "rex" | "framework_ingestion";
-export type KbAssetType = "principle" | "pattern" | "decision" | "control" | "glossary";
+export type KbAssetType = "principle" | "pattern" | "decision" | "control" | "glossary" | "trigger" | "fact_key";
 export type KbCandidateStatus = "proposed" | "checks_failed" | "in_review" | "accepted" | "rejected" | "published";
 export type KbProductionMode = "human-authored" | "llm-proposed-human-approved" | "llm-derived";
 export type KbReviewAction = "accept" | "amend" | "reject";
@@ -268,7 +268,7 @@ export interface KbCandidateSubmission {
   rationale?: string;
   proposed_content: string;
   source: {
-    system: "archinex" | "document-studio" | "mcp" | "cli-ingestion";
+    system: "archinex" | "document-studio" | "mcp" | "cli-ingestion" | "kb-extraction";
     engagement?: string | null;
     decision_id?: string | null;
     author?: string | null;

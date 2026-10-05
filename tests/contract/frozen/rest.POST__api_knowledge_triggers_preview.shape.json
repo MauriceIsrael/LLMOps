@@ -1,0 +1,193 @@
+{
+  "interface": "rest.POST /api/knowledge/triggers/preview",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "closed": {
+                "items": {
+                  "keys": {
+                    "trigger_id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "unsatisfied": {
+                      "items": {
+                        "keys": {
+                          "current": {
+                            "type": [
+                              "null",
+                              "number"
+                            ]
+                          },
+                          "key": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "op": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "value": {
+                            "items": {
+                              "type": [
+                                "string"
+                              ]
+                            },
+                            "type": [
+                              "array",
+                              "boolean",
+                              "number"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "invalid_drafts": {
+                "items": null,
+                "type": [
+                  "array"
+                ]
+              },
+              "opens": {
+                "items": {
+                  "keys": {
+                    "asset": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "initial_level": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "mandatory": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "question": {
+                      "keys": {
+                        "en": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "fr": {
+                          "type": [
+                            "string"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "rationale": {
+                      "keys": {
+                        "en": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "fr": {
+                          "type": [
+                            "string"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "scope": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "suggested_role": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "trigger_id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "version": {
+                      "type": [
+                        "number"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

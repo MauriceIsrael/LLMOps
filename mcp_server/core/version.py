@@ -81,9 +81,13 @@ Minor versions only add interfaces or optional fields:
   proposes a local rule, same schema and checks as K19), ``…/rules/{id}/{assert,withdraw}`` (a decider other than the author
   asserts), ``GET /api/engagements/{id}/rules``. The engine reads the pinned base minus deactivations plus asserted local rules;
   the engagement snapshot gains ``rule_adjustments`` and the ``scope`` of each lineage item (``schemaVersion`` ``1.5``).
+* ``1.25`` — trigger rules and facts-vocabulary keys in the candidate cycle, and their review (K22): candidate ``asset_type``
+  ``trigger`` and ``fact_key`` (``source.system`` ``kb-extraction``); ``GET /api/knowledge/triggers``,
+  ``POST /api/knowledge/triggers/{validate,preview}``, ``POST /api/knowledge/candidates/{id}/merge-key``; offline command
+  ``kb extract-triggers``.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.24"
+CONTRACT_VERSION = "1.25"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
