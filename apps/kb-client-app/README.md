@@ -17,7 +17,10 @@ Interface web full-stack développée avec **Svelte 5** et **SvelteKit**, servan
 - Workflow d'arbitrage par le Lead Architect : approbation (promotion automatique en pattern), demande de réétude, ou rejet.
 - Dispatch d'alertes événementielles (Discord Webhook, push mobile ntfy.sh).
 
-### 3. Gestion des Identités & Contrôle d'Accès (ABAC)
+### 3. Revue des règles de déclenchement (`/governance/triggers`)
+- Règles par actif, file des candidats proposés par l'extraction hors ligne (`kb extract-triggers`, `llm-derived`), éditeur avec validation en direct sur le vocabulaire des faits, aperçu « avec ces faits, quelles questions s'ouvrent », accepter / amender / rejeter, fusion d'une clé proposée avec une clé existante. Contrat Hub 1.25 ; variables `LLMOPS_ENDPOINT` et `LLMOPS_REVIEW_TOKEN` (scope `kb:review`).
+
+### 4. Gestion des Identités & Contrôle d'Accès (ABAC)
 - Authentification par session JWT (Access & Refresh tokens) avec hachage sécurisé bcrypt.
 - Moteur d'autorisation fine basé sur les attributs (**Casbin ABAC**).
 - Persistance locale des politiques et utilisateurs via **Prisma ORM** et SQLite (`dev.db`).

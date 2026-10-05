@@ -2277,3 +2277,142 @@ def get_framework_coverage(frameworks: list[str]) -> dict[str, Any]:
         return ok_response(coverage, count=len(coverage))
     except Exception as e:
         return handle_exception_response(e, context_action="get_framework_coverage")
+
+
+# --- K22: trigger rules and facts vocabulary, for the review in the administration application -------------------------
+
+
+def _live_vocabulary() -> dict[str, Any]:
+    from pipelines.engagement import facts as fact_module
+
+    return fact_module.load(server_config.kb_dir / "vocabulary" / "facts.yaml")
+
+
+def list_trigger_rules() -> dict[str, Any]:
+    """The reference rules by carrying element, the facts vocabulary, and the rule and key candidates in flight (contract 1.25)."""
+    from mcp_server.core.auth import has_scope
+    from pipelines import triggers
+    from pipelines.engagement import facts as fact_module
+    from pipelines.kb_candidates.kb import load_assets
+    from pipelines.kb_candidates.rules import TRIGGER_TYPES
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    try:
+        vocabulary = _live_vocabulary()
+        rules = triggers.load_all(server_config.kb_dir, vocabulary)
+    except (OSError, fact_module.VocabularyError) as e:
+        return handle_exception_response(e, context_action="list_trigger_rules")
+    except triggers.TriggerError as e:
+        return {"status": "error", "error": "invalid_rules", "reason": str(e), "problems": e.problems}
+    titles = {a.id: a.title for a in load_assets(server_config.kb_dir)}
+    by_asset: dict[str, list[dict[str, Any]]] = {}
+    for r in rules:
+        by_asset.setdefault(r["asset"], []).append({k: v for k, v in r.items() if k != "content_sha256"})
+    data: dict[str, Any] = {
+        "vocabulary": {"version": vocabulary["version"], "keys": fact_module.public_keys(vocabulary)},
+        "assets": [{"id": aid, "title": titles.get(aid, aid), "rules": by_asset[aid]} for aid in sorted(by_asset)],
+        "candidates": [],
+    }
+    if has_scope(REVIEW_SCOPE):  # the queue is for reviewers, like the candidates themselves
+        data["candidates"] = [
+            {"id": c["id"], "asset_type": c["asset_type"], "status": c["status"], "title": c["title"], "kind": c["kind"],
+             "target_asset_id": c.get("target_asset_id"), "assigned_owner": c.get("assigned_owner"),
+             "production_mode": (c.get("source") or {}).get("production_mode"),
+             "checks": [x for x in c.get("checks") or [] if x["name"] == "schema"]}
+            for c in _candidate_service().find()
+            if c.get("asset_type") in TRIGGER_TYPES and c["status"] not in ("published", "rejected")]
+    return ok_response(data, count=len(rules))
+
+
+def validate_trigger_rule(body: dict[str, Any]) -> dict[str, Any]:
+    """Live validation of a rule or a vocabulary key against the facts vocabulary (nothing is stored).
+
+    Body: ``{content: <YAML>, asset_type?: 'trigger'|'fact_key', target_asset_id?}``. Answers ``{valid, problems: [{path, code,
+    reason}]}``: the same validator as the ``schema`` check of the candidate cycle and the publication.
+    """
+    from pipelines.kb_candidates.rules import problems_of
+
+    content = body.get("content")
+    if not isinstance(content, str) or not content.strip():
+        return invalid_argument_response("content", "'content' is the YAML of the rule or of the key.")
+    asset_type = body.get("asset_type", "trigger")
+    if asset_type not in ("trigger", "fact_key"):
+        return invalid_argument_response("asset_type", "'asset_type' must be 'trigger' or 'fact_key'.")
+    target = body.get("target_asset_id")
+    problems, _ = problems_of({"asset_type": asset_type, "proposed_content": content, "kind": "amendment" if target else "new_asset",
+                               "target_asset_id": target}, server_config.kb_dir)
+    return ok_response({"valid": not problems, "problems": problems}, count=len(problems))
+
+
+def preview_triggers(body: dict[str, Any]) -> dict[str, Any]:
+    """"With these facts, these are the questions that would open": the evaluation of the cascade engine (K20), without an engagement.
+
+    Body: ``{facts: {key: value}, rules?: [<rule YAML or mapping>]}``. The reference rules of the knowledge base are evaluated;
+    ``rules`` adds drafts (a candidate under review). The facts are checked against the vocabulary (a key or a type it does not
+    know is refused with its path). The evaluator is ``pipelines.triggers.evaluate``, the one the engine uses.
+    """
+    import yaml
+
+    from pipelines import triggers
+    from pipelines.engagement import facts as fact_module
+
+    facts = body.get("facts")
+    if not isinstance(facts, dict):
+        return invalid_argument_response("facts", "'facts' is an object {key: value}.")
+    try:
+        vocabulary = _live_vocabulary()
+        reference = triggers.load_all(server_config.kb_dir, vocabulary)
+    except triggers.TriggerError as e:
+        return {"status": "error", "error": "invalid_rules", "reason": str(e), "problems": e.problems}
+    try:
+        fact_module.validate([{"key": k, "value": v, "source_excerpt": "preview"} for k, v in sorted(facts.items())], vocabulary)
+    except fact_module.FactError as err:
+        return {"status": "invalid_argument", "argument": "facts", "code": err.code, "reason": err.reason, "path": err.path}
+    drafts, invalid = [], []
+    carrier_index = triggers.carriers(server_config.kb_dir)
+    for i, raw in enumerate(body.get("rules") or []):
+        doc = yaml.safe_load(raw) if isinstance(raw, str) else raw
+        name = str((doc or {}).get("trigger_id")) if isinstance(doc, dict) else f"rules[{i}]"
+        problems = triggers.validate_rule(doc, name, vocabulary, carrier_index, local=name.startswith("TRG-local-"))
+        if problems:
+            invalid.append({"trigger_id": name, "problems": problems})
+        else:
+            drafts.append({**doc, "scope": "draft"})
+    drafted = {d["trigger_id"] for d in drafts}
+    rules = [{**r, "scope": "reference"} for r in reference if r["trigger_id"] not in drafted] + drafts
+    opened, closed = triggers.evaluate(rules, facts)
+    shown = ("trigger_id", "version", "question", "rationale", "initial_level", "suggested_role", "mandatory", "asset", "scope")
+    return ok_response({"opens": [{k: r.get(k) for k in shown} for r in opened], "closed": closed, "invalid_drafts": invalid},
+                       count=len(opened))
+
+
+def merge_fact_key_candidate(candidate_id: str, into: str, reviewer: str, reason: str | None = None) -> dict[str, Any]:
+    """Merge a proposed vocabulary key into an existing one (requires the 'kb:review' scope).
+
+    Rejects the key candidate (the reason records the merge) and answers the rule candidates that cite the merged key, each with
+    the content rewritten on the existing key: the reviewer then amends them (a rule is never changed or accepted as a side
+    effect).
+    """
+    from pipelines.kb_candidates import rules as rule_candidates
+
+    service = _candidate_service()
+    try:
+        candidate = service.get(candidate_id)
+    except Exception:
+        return not_found_response(candidate_id)
+    if candidate.get("asset_type") != "fact_key":
+        return invalid_argument_response("candidate_id", "only a fact_key candidate can be merged.")
+    vocabulary = _live_vocabulary()
+    if into not in vocabulary["keys"]:
+        return invalid_argument_response("into", f"'{into}' is not a key of the facts vocabulary.")
+    key = (rule_candidates.parse_content(candidate["proposed_content"]) or {}).get("key")
+    if into == key:
+        return invalid_argument_response("into", "a key cannot be merged into itself.")
+    res = review_kb_candidate(candidate_id, "reject", reviewer, reason=f"merged into {into}" + (f": {reason}" if reason else ""))
+    if res.get("status") != "ok":
+        return res
+    affected = [{"id": c["id"], "status": c["status"], "title": c["title"],
+                 "suggested_content": rule_candidates.rewrite_key(c["proposed_content"], key, into)}
+                for c in service.find() if c.get("asset_type") == "trigger" and c["status"] in ("checks_failed", "in_review")
+                and key in rule_candidates.keys_of(c["proposed_content"])]
+    return ok_response({"candidate": res["data"], "merged_into": into, "affected_rules": affected}, count=len(affected))

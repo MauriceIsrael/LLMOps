@@ -49,6 +49,8 @@
         "decision",
         "control",
         "glossary",
+        "trigger",
+        "fact_key",
         null
       ]
     },
@@ -80,7 +82,8 @@
             "archinex",
             "document-studio",
             "mcp",
-            "cli-ingestion"
+            "cli-ingestion",
+            "kb-extraction"
           ]
         },
         "engagement": {

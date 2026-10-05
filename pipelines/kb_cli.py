@@ -217,6 +217,28 @@ def suggest_links_cmd(
                       "(links_production_mode: llm-derived — to be reviewed).")
 
 
+@app.command("extract-triggers")
+def extract_triggers_cmd(
+    asset: str | None = typer.Option(None, "--asset", help="Only this element (default: every active principle, pattern and decision)."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Read and propose, submit nothing."),
+    kb_dir: Path = KB_DIR_OPTION,
+    db_path: Path = DB_PATH_OPTION,
+) -> None:
+    """Offline LLM proposals of trigger rules (K22) from the consequence sections; candidates only, never published."""
+    from pipelines.trigger_extraction import extract_triggers
+
+    load_dotenv()
+    res = extract_triggers(kb_dir, _service(kb_dir, db_path), asset_id=asset, dry_run=dry_run)
+    if res["skipped"]:
+        console.print(f"[yellow]{res['reason']}[/yellow]")
+        return
+    console.print(f"[bold green]✓ {len(res['submitted'])} rule candidate(s)[/bold green] by {res['model']} (llm-derived), "
+                  f"{len(res['key_candidates'])} vocabulary key candidate(s), {len(res['unchanged'])} already known, "
+                  f"{len(res['dropped'])} dropped.")
+    for d in res["dropped"]:
+        console.print(f"[yellow]  dropped {d.get('asset')} § {d.get('section')}: {d['reason']}[/yellow]")
+
+
 @app.command("review-sheet")
 def review_sheet_cmd(
     framework: str = typer.Option(..., "--framework"),

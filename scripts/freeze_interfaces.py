@@ -570,6 +570,12 @@ def build_catalogue() -> list[Interface]:
         # Contract 1.6 — doctrine workshop and evaluations
         _rest("GET", "/api/knowledge/templates/{asset_type}", "/api/knowledge/templates/pattern"),
         _rest("POST", "/api/knowledge/candidates/validate", json_body=SAMPLE_CANDIDATE),
+        # K22: rules and vocabulary keys, for their review
+        _rest("GET", "/api/knowledge/triggers"),
+        _rest("POST", "/api/knowledge/triggers/validate", json_body={"content": "trigger_id: TRG-x\nversion: 1\nwhen: []\n"}),
+        _rest("POST", "/api/knowledge/triggers/preview", json_body={"facts": {"topology.dc_count": 2, "topology.mode": "active-active"}}),
+        _rest("POST", "/api/knowledge/candidates/{candidate_id}/merge-key", "/api/knowledge/candidates/CAND-does-not-exist/merge-key",
+              json_body={"into": "topology.dc_count", "reviewer": "@maintainers"}),
         _rest("POST", "/api/knowledge/checks/simulate", json_body={"asset_id": "P-002", "checks": [], "options": [
             {"title": "Fully autonomous remediation", "description": "no human approval"}]}),
         _rest("GET", "/api/knowledge/evals/{dataset}", "/api/knowledge/evals/check_option_v1",
