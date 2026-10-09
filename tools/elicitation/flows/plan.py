@@ -8,6 +8,7 @@ from langgraph.graph import END, StateGraph
 
 from tools.elicitation.models.blueprint_schema import load_blueprint
 from tools.elicitation.repository import ElicitationRepository
+from tools.elicitation.resolve import database_path
 
 
 class PlanState(TypedDict, total=False):
@@ -26,7 +27,7 @@ def plan_node(state: PlanState) -> dict[str, Any]:
 
     engagement = require_engagement(state.get("engagement"))
     bp_path = state.get("blueprint_path") or require_blueprint_path()
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     roster_path = state.get("roster_path")
 
     blueprint = load_blueprint(bp_path)

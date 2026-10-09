@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from mcp_server.core.config import require_engagement
 from tools.adapters.kuzu_store import make_graph_store
 from tools.elicitation.db_schema import ElicitationSchemaInitializer
 from tools.ports.graph_store import GraphStore
@@ -22,11 +23,11 @@ class ElicitationRepository:
 
     def __init__(
         self,
-        db_path: str | Path | None = "data/kuzu_db",
+        db_path: str | Path,
         graph_store: GraphStore | None = None,
         read_only: bool = False,
     ) -> None:
-        self.db_path = str(db_path or "data/kuzu_db")
+        self.db_path = str(db_path)
         self.graph_store = graph_store or make_graph_store(db_path=self.db_path, read_only=read_only)
         self.db_client = self.graph_store  # Property alias for compatibility
         # Initialise le schéma au besoin
@@ -232,7 +233,7 @@ class ElicitationRepository:
     def save_question(self, question: dict[str, Any]) -> str:
         """Enregistre une question élicitée dans Kùzu DB."""
         q_id = question.get("id") or f"Q-{int(datetime.now().timestamp() * 1000)}"
-        engagement = question.get("engagement", "demo-2026")
+        engagement = require_engagement(question.get("engagement"))
         gap_type = question.get("gap_type", "G1_empty_section")
         section = question.get("section", "general")
         question_text = question.get("question", "")

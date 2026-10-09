@@ -12,6 +12,7 @@ from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkp
 from tools.elicitation.flows.scan import build_scan_graph
 from tools.elicitation.mailbox.roster import RosterManager
 from tools.elicitation.repository import ElicitationRepository
+from tools.elicitation.resolve import database_path
 
 app = typer.Typer(help="CLI d'élicitation d'architecture pilotée par les manques (Gap-Driven Elicitation).")
 console = Console()
@@ -88,7 +89,7 @@ def scan(
 
 
 def resolve_impersonation(
-    as_user: str | None, default_author: str, default_role: str, engagement: str = "demo-2026"
+    as_user: str | None, default_author: str, default_role: str, engagement: str
 ) -> tuple[str, str]:
     """Résout l'auteur et le rôle à partir du drapeau d'usurpation --as (ex: --as alice)."""
     if not as_user:
@@ -111,7 +112,7 @@ def answer(
     author: str = typer.Option("alice", "--author", "-a", help="Nom de l'expert"),
     role: str = typer.Option("cloud-architect", "--role", "-r", help="Rôle de l'expert"),
     as_user: str | None = typer.Option(None, "--as", help="Usurper un utilisateur du roster (ex: --as alice, --as rui)"),
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Soumettre une réponse d'expert (directe ou depuis un fichier carte .md) et démarrer le flux d'intake."""
     from pathlib import Path
@@ -172,7 +173,7 @@ def confirm(
     question_id: str = typer.Argument(..., help="Identifiant de la question en pause"),
     accept: bool = typer.Option(True, "--accept/--reject", help="Accepter ou rejeter les énoncés"),
     as_user: str | None = typer.Option(None, "--as", help="Usurper un utilisateur du roster (ex: --as alice)"),
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Reprendre un flux en pause (interrupt) et persister les énoncés dans un nouveau processus."""
     console.print(f"[bold blue]▶️ Reprise du flux pour {question_id} (Accept: {accept})...[/bold blue]")
@@ -200,10 +201,10 @@ def confirm(
 
 @app.command()
 def conflicts(
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Lister tous les conflits ouverts d'un engagement."""
-    repo = ElicitationRepository()
+    repo = ElicitationRepository(db_path=database_path(None, engagement))
     c_list = repo.get_conflicts(engagement, status="open")
 
     if not c_list:
@@ -230,11 +231,11 @@ def arbitrate(
     to: str | None = typer.Option(None, "--to", help="Nouvelle valeur révisée pour l'énoncé amendé"),
     by: str = typer.Option("chief-architect", "--by", help="Auteur de l'arbitrage (ex: chief-architect)"),
     as_user: str | None = typer.Option(None, "--as", help="Usurper un utilisateur du roster (ex: --as charlie)"),
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Arbitrer un conflit (réservé à l'architecte en chef). Passe l'énoncé perdant à superseded ou l'amende."""
     by_user, _ = resolve_impersonation(as_user, by, "chief-architect", engagement)
-    repo = ElicitationRepository()
+    repo = ElicitationRepository(db_path=database_path(None, engagement))
     repo.arbitrate_conflict(
         conflict_id,
         keep_statement_id=keep,
@@ -265,7 +266,7 @@ def demote(
 ) -> None:
     """Rétrograde la maturité d'un sujet (demotion non-monotone) et réouvre les questions fermées."""
     author, _ = resolve_impersonation(as_user, "sofia", "chief-architect", engagement)
-    repo = ElicitationRepository()
+    repo = ElicitationRepository(db_path=database_path(None, engagement))
     repo.demote_subject(subject_name=subject_name, to_level=to, author=author, reason=reason, engagement=engagement)
     console.print(f"[bold yellow]⚠️ Sujet '{subject_name}' rétrogradé à {to} par {author}. Raison : {reason}[/bold yellow]")
     console.print("Énoncés de niveau supérieur marqués en 'under_review'. Questions réouvertes.")
@@ -384,7 +385,7 @@ def accept(
 
 @app.command()
 def assemble(
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Assembler le document d'architecture final et émettre le rapport de statut."""
     console.print(f"[bold blue]📑 Assemblage du document pour l'engagement {engagement}...[/bold blue]")
@@ -408,11 +409,11 @@ def assemble(
 
 @app.command()
 def subjects(
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
     stall_days: int = typer.Option(7, "--stall-days", "-s", help="Seuil de jours pour la détection de stagnation"),
 ) -> None:
     """Afficher le tableau de maturité des sujets (Maturity Board) et le publier dans la mailbox."""
-    repo = ElicitationRepository()
+    repo = ElicitationRepository(db_path=database_path(None, engagement))
     board = repo.get_subjects_maturity_board(engagement=engagement, stall_days=stall_days)
 
     if not board:
@@ -450,11 +451,11 @@ def contest(
     statement_id: str = typer.Argument(..., help="Identifiant de l'énoncé contesté (ex: S-0001)"),
     text: str = typer.Option(..., "--text", "-t", help="Argumentation de contestation"),
     as_user: str | None = typer.Option(None, "--as", help="Usurper un utilisateur du roster (ex: --as rui)"),
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Contester un énoncé existant et créer un conflit d'architecture."""
     author, role = resolve_impersonation(as_user, "rui", "mobile-core-architect", engagement)
-    repo = ElicitationRepository()
+    repo = ElicitationRepository(db_path=database_path(None, engagement))
     s_id, c_id = repo.contest_statement(
         target_statement_id=statement_id, author=author, role=role, text=text, engagement=engagement
     )
@@ -465,7 +466,7 @@ def contest(
 
 @app.command()
 def harvest(
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifiant de l'engagement"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
     as_user: str | None = typer.Option(None, "--as", help="Usurper un utilisateur du roster (ex: --as sofia)"),
     notify: bool = typer.Option(True, "--notify/--no-notify", help="Notifier le propriétaire du Knowledge Hub (Maurice)"),
 ) -> None:
@@ -551,7 +552,7 @@ def publish(
 @app.command(name="import")
 def import_data(
     file_path: str = typer.Argument(..., help="Path to JSON import file"),
-    engagement: str = typer.Option("demo-2026", "--engagement", "-e", help="Identifier of engagement target"),
+    engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifier of engagement target"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Validate and report without writing to database"),
 ) -> None:
     """Import third-party elicitation payload (Subjects, Statements, Conflicts, Uncertainties) via Repository pipeline."""
@@ -586,7 +587,7 @@ def import_data(
         console.print("[bold yellow]🔍 Dry-run complete. No changes written to database.[/bold yellow]")
         return
 
-    repo = ElicitationRepository()
+    repo = ElicitationRepository(db_path=database_path(None, target_engagement))
     for s in subjects:
         repo.save_subject(s["name"], engagement=target_engagement, definition=s.get("definition", ""))
         if "level" in s:
