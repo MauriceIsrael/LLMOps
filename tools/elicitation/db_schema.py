@@ -9,7 +9,7 @@ class ElicitationSchemaInitializer:
 
     def __init__(
         self,
-        db_path: str | Path = "data/kuzu_db",
+        db_path: str | Path,
         graph_store: GraphStore | None = None,
     ) -> None:
         self.db_path = str(db_path)

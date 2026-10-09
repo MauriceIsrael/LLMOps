@@ -6,15 +6,16 @@ from typing import Any
 from rich.console import Console
 
 from tools.elicitation.repository import ElicitationRepository
+from tools.elicitation.resolve import database_path
 
 console = Console()
 
 
 def get_subject_trajectory(
-    subject_name: str, engagement: str | None = None, db_path: str | Path = "data/kuzu_db"
+    subject_name: str, engagement: str | None = None, db_path: str | Path | None = None
 ) -> dict[str, Any]:
     """Extrait la chaîne chronologique des questions et énoncés ayant fait évoluer la maturité d'un sujet."""
-    repo = ElicitationRepository(db_path=db_path)
+    repo = ElicitationRepository(db_path=database_path(db_path, engagement))
     sub_mat = repo.get_subject_maturity(subject_name)
 
     # Questions posées cibles

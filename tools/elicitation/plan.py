@@ -8,6 +8,7 @@ from rich.table import Table
 
 from tools.elicitation.models.blueprint_schema import load_blueprint
 from tools.elicitation.repository import ElicitationRepository
+from tools.elicitation.resolve import database_path
 
 console = Console()
 
@@ -15,7 +16,7 @@ console = Console()
 def generate_instruction_plan(
     engagement: str,
     blueprint_path: str | Path | None = None,
-    db_path: str | Path = "data/kuzu_db",
+    db_path: str | Path | None = None,
     roster: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Génère le plan d'instructions complet à 4 blocs selon SPEC-PLANNING-AND-DEMO.
@@ -31,7 +32,7 @@ def generate_instruction_plan(
     roster = roster or dict(profile.roster)
 
     blueprint = load_blueprint(blueprint_path)
-    repo = ElicitationRepository(db_path=db_path)
+    repo = ElicitationRepository(db_path=database_path(db_path, engagement))
 
     # 1. Blueprint Coverage
     coverage_rows = []

@@ -10,7 +10,7 @@ from tools.elicitation.mailbox.renderers import render_question_card
 class FileMailboxAdapter:
     """Adaptateur de boîte aux lettres sur système de fichiers local sous projects/<engagement>/mailbox/."""
 
-    def __init__(self, engagement: str = "demo-2026", base_dir: str | Path = "projects") -> None:
+    def __init__(self, engagement: str, base_dir: str | Path = "projects") -> None:
         self.engagement = engagement
         self.mailbox_dir = Path(base_dir) / engagement / "mailbox"
         self.questions_dir = self.mailbox_dir / "questions"

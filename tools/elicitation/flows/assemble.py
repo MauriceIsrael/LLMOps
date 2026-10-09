@@ -7,6 +7,7 @@ from langgraph.graph import END, StateGraph
 from typing_extensions import TypedDict
 
 from tools.elicitation.repository import ElicitationRepository
+from tools.elicitation.resolve import database_path, engagement_of
 
 
 class AssembleState(TypedDict, total=False):
@@ -29,9 +30,9 @@ class AssembleState(TypedDict, total=False):
 
 def gather_node(state: AssembleState) -> dict[str, Any]:
     """Rassemble tous les énoncés actifs de l'engagement regroupés par section."""
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = ElicitationRepository(db_path=db_path)
-    engagement = state.get("engagement", "demo-2026")
+    engagement = engagement_of(state.get("engagement"))
     statements = repo.get_active_statements(engagement)
 
     by_section: dict[str, list[dict[str, Any]]] = {}
@@ -69,9 +70,9 @@ def render_node(state: AssembleState) -> dict[str, Any]:
 
 def global_check_node(state: AssembleState) -> dict[str, Any]:
     """Vérifie la cohérence globale : conflits ouverts et maturité des sujets (Section Readiness : L3+)."""
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = ElicitationRepository(db_path=db_path)
-    engagement = state.get("engagement", "demo-2026")
+    engagement = engagement_of(state.get("engagement"))
     open_conflicts_list = repo.get_conflicts(engagement, status="open")
 
     board = repo.get_subjects_maturity_board(engagement)
@@ -102,7 +103,7 @@ def global_check_node(state: AssembleState) -> dict[str, Any]:
 
 def report_node(state: AssembleState) -> dict[str, Any]:
     """Écrit le document final sous projects/<engagement>/document.md et affiche le rapport."""
-    engagement = state.get("engagement", "demo-2026")
+    engagement = engagement_of(state.get("engagement"))
     out_dir = Path("projects") / engagement
     out_dir.mkdir(parents=True, exist_ok=True)
     doc_path = out_dir / "document.md"
