@@ -166,6 +166,7 @@ class EngagementWriter:
         self.engagement = engagement
         self.actor = actor
         self.cascade = cascade  # K20: a callable returning the report of the cascade engine, run after a decision changes
+        self.rules: Any = None  # K21: the RuleAdjuster of the request, set by the route that needs it
 
     def _cascade(self) -> dict[str, Any] | None:
         return self.cascade() if self.cascade else None
