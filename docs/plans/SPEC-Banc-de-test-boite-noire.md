@@ -182,7 +182,9 @@ Le Hub est utilisable en boîte noire par son API (contrat v1.24) ; un jeton de 
 3. Le système expose son état par `GET …/facts`, `GET …/lineage` et `POST …/exports` puis `GET …/exports/{id}` : l'**instantané scellé** contient les conflits, les manques, les décisions, les références à la base (`kb_references`, `unresolved_references`), la lignée et l'indicateur `is_provisional`.
 4. L'instantané de base de connaissance est **épinglé** (`PUT …/kb-pin`) pour que S2 et S3 lisent la même connaissance que S1.
 
-La normalisation de l'instantané en `RunArtifact` est déterministe (aucun modèle). Un `HLD` en prose n'est pas rendu par le Hub (pas de modèle sur ses routes) : si le jalon J5 retient une comparaison de texte, elle passe par le générateur déterministe de premier jet de LLMOps (`generate_zero_draft_hld`, à vérifier) ou par l'adaptateur vers la suite documentaire (issue #40, **sans responsable à ce jour**).
+La normalisation de l'instantané en `RunArtifact` est déterministe (aucun modèle).
+
+**Décision (9 octobre 2026) : le banc compare les propriétés de l'instantané, pas un HLD en prose.** L'instantané est plus facile à comparer et contient tout ce qui permettra de générer ensuite une prose fiable (décisions, faits, conflits, manques, références, lignée, indicateur provisoire). Le Hub ne rend d'ailleurs pas de prose (pas de modèle sur ses routes). Évaluer une prose générée à partir de l'instantané est une étape **ultérieure et distincte** : elle mesurerait le générateur, pas le système. Pour S0 et S1, qui ne produisent que du texte, la comparaison passe par l'extracteur commun (§4.2).
 
 ### 4.5 Adaptateur d'Archinex — [à définir]
 Archinex doit fournir un point d'entrée **par lot** (cas en entrée, artefact en sortie, sans interface graphique) et un mode d'exécution où les sollicitations d'expert sont servies par le banc (§4.3). Sans cela, S2 et S3 ne sont pas automatisables.
@@ -248,7 +250,7 @@ Autorisé comme indicateur, sous conditions : modèle figé d'une famille diffé
 ## 6. Plan d'expérience et statistiques
 
 - **Plan apparié** : chaque cas est exécuté par chaque système, *k* ≥ 5 itérations. L'unité statistique est le **cas** (la moyenne de ses itérations), non l'itération.
-- **Hypothèses et critères fixés avant mesure** (fichier `hypotheses.yaml`, daté et haché) : pour chacune, la métrique, le sens, la comparaison (S2 contre S1, S3 contre S2), le seuil de succès et le niveau de confiance. Exemple de forme : « H1 : le rappel de M1 de S2 dépasse celui de S1 d'au moins 0,25, borne basse de l'intervalle à 95 % > 0 ». Les seuils sont proposés par les annotateurs et le propriétaire du produit, pas par l'équipe qui construit le banc.
+- **Hypothèses et critères fixés avant mesure** (fichier `hypotheses.yaml`, daté et haché) : pour chacune, la métrique, le sens, la comparaison (S2 contre S1, S3 contre S2), le seuil de succès et le niveau de confiance. Exemple de forme : « H1 : le rappel de M1 de S2 dépasse celui de S1 d'au moins 0,25, borne basse de l'intervalle à 95 % > 0 ». Les seuils sont proposés par les annotateurs et signés par le mainteneur du Hub et le responsable produit d'Archinex (§14, question 3), pas décidés par l'équipe qui construit le banc.
 - **Inférence** : intervalle de confiance par *bootstrap* sur les cas (10 000 rééchantillonnages) ; test de permutation apparié ou de Wilcoxon sur les différences par cas ; taille d'effet rapportée avec chaque valeur de *p* ; correction de Holm sur l'ensemble des hypothèses.
 - **Puissance** : le banc calcule, pour l'effet visé, le nombre de cas nécessaire et **refuse de conclure** en dessous (rapport « non concluant »).
 - **Hors échantillon** : les conclusions ne s'appuient que sur `held-out` ; `dev` sert à la mise au point.
@@ -354,7 +356,7 @@ Commandes :
 | **J2 — Squelette** | modèles, adaptateurs S0 et S1, stockage, manifestes, cassettes, `abe run` et `replay` | un cas rejouable de bout en bout sans modèle | — |
 | **J3 — Adaptateurs S2/S3** | adaptateur du Hub (§4.4), adaptateur d'Archinex (§4.5), mode assisté | un cas complet en S2 et en S3, instantané normalisé | **Archinex : point d'entrée par lot**, avec sollicitations d'expert servies par le banc |
 | **J4 — Métriques et instrument** | extracteur, M1 à M7, tests d'instrument | tous les contrôles du §7 verts ; extracteur à F1 ≥ 0,85 | — |
-| **J5 — Statistiques et rapport** | bootstrap, permutation, Holm, puissance ; gabarits Markdown et HTML ; M8 | rapport sur le pilote, avec « non concluant » correctement émis | décision sur le HLD en prose (§4.4) |
+| **J5 — Statistiques et rapport** | bootstrap, permutation, Holm, puissance ; gabarits Markdown et HTML ; M8 | rapport sur le pilote, avec « non concluant » correctement émis | — |
 | **J6 — Extension et CI** | 30 cas ou plus, répartition par catégorie, trois niveaux de CI | première exécution sur `held-out` avec verdict par hypothèse | — |
 
 **J1 avant tout code** : si l'effet n'est pas visible à la main, il ne le sera pas dans un rapport automatisé.
@@ -381,9 +383,9 @@ Commandes :
 
 ## 14. Questions ouvertes
 
-1. **Archinex** : existe-t-il un mode par lot et un mode où les sollicitations d'expert sont servies par un script ? (J3 en dépend.)
-2. **Texte ou propriétés** : compare-t-on un HLD en prose (adaptateur vers la suite documentaire, issue #40, sans responsable) ou les propriétés de l'instantané ? Je recommande de commencer par les propriétés.
-3. **Propriétaire des seuils** (J0) : qui décide de ce qui compte comme « mieux » ?
+1. **Archinex** *(question posée à son équipe par la PR de cette spécification)* : existe-t-il un **mode par lot** (un cas en entrée, un artefact en sortie, sans interface graphique) et un **mode où les sollicitations d'expert sont servies par un script** plutôt que par une personne ? Sans les deux, S2 et S3 ne sont pas automatisables (J3 en dépend). Si l'un manque, quelle est la plus petite modification qui le fournirait ?
+2. ~~**Texte ou propriétés**~~ **Tranché le 9 octobre 2026 : les propriétés de l'instantané** (§4.4).
+3. **Qui valide les seuils (J0)** : avant la première mesure, une personne désignée écrit noir sur blanc à partir de quel écart on dira que « ça marche » (exemple : « Archinex + LLMOps détecte au moins 25 points de contradictions de plus que le LLM muni du même catalogue »). Sans seuil fixé d'avance, on est tenté de l'ajuster aux résultats. Proposition : les annotateurs proposent, le mainteneur du Hub et le responsable produit d'Archinex signent ensemble `hypotheses.yaml`, daté et haché, avant le premier lot de mesures.
 4. **Annotateurs** : qui, combien d'heures, quelle indépendance par rapport à l'équipe qui construit les systèmes ?
 5. **Étalonnage du temps d'expert** (M7) : mesure sur un échantillon réel ou valeur de référence ?
 6. **Matrice de conformité** : sans K17 (exigence → contrôle dans l'instantané), la partie « obligations réglementaires » de M3 repose sur l'extracteur pour S2/S3 ; avec K17, elle devient structurelle.
