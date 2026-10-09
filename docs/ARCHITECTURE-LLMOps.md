@@ -11,6 +11,7 @@ Ce document décrit **l'architecture actuelle**. Il complète, sans les remplace
 | [`contracts/knowledge-hub-api-v1.md`](contracts/knowledge-hub-api-v1.md) | le contrat d'interface, §5.1 à §5.25 |
 | [`adr/ADR-KH-01-contrats-exposes.md`](adr/ADR-KH-01-contrats-exposes.md) | les décisions d'architecture du Hub (A1 à A11) |
 | [`plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md`](plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md) | les lots K1 à K22 et leur état |
+| [`ZOOM-LangGraph-elicitation.md`](ZOOM-LangGraph-elicitation.md) | zoom sur l'usage de LangGraph : flux, pause durable, écarts avec l'API d'écriture |
 | [`architecture.md`](architecture.md) | **historique** : la vue d'origine (moteur d'élicitation LangGraph, ontologie du graphe), toujours exacte pour ces deux sujets |
 | [`deployment.md`](deployment.md), [`VERSIONING.md`](VERSIONING.md) | exploitation, politique de versions |
 
@@ -104,7 +105,7 @@ Trois modes d'accès au même cœur :
 |---|---|
 | `mcp_server/` | serveur : `main.py` (application Starlette, routes, exceptions), `main_knowledge.py` / `main_engagement.py` (serveurs MCP par plan), `core/` (authentification, enveloppes de réponse, configuration, version du contrat, dépréciation, notifications), `knowledge/tools.py` (outils et fonctions du plan connaissance), `engagement/` (outils, routes d'écriture et d'export), `db/` (clients graphe) |
 | `pipelines/` | logique métier, sans dépendance au serveur : `kb_candidates/` (cycle d'enrichissement), `doctrine/` (juge, index, évaluations), `similarity/`, `frameworks/` (ingestion des référentiels), `governance/` (schéma SQL, journaux, évaluations, registre), `engagement/` (accès, écriture, import, faits, cascade, règles, instantané), `ingestion/` (Markdown vers graphe), `publication/`, `canonical.py`, `knowledge_ref.py`, `triggers.py` |
-| `tools/elicitation/` | moteur d'élicitation (LangGraph : scan, intake, assemblage, harvest), schéma et dépôt du graphe d'engagement, CLI `elicit` |
+| `tools/elicitation/` | moteur d'élicitation (LangGraph : scan, intake, assemblage, harvest ; voir [`ZOOM-LangGraph-elicitation.md`](ZOOM-LangGraph-elicitation.md)), schéma et dépôt du graphe d'engagement, CLI `elicit` |
 | `tools/ports`, `tools/adapters` | port `GraphStore` et ses adaptateurs (LadybugDB, Kuzu) |
 | `data/kb/` | **la base de connaissance** (voir §4) ; `data/snapshots/` instantanés scellés ; `data/engagements/` bases d'engagement ; `data/knowledge.lbug` graphe construit |
 | `schemas/` | schémas JSON des échanges (instantané, engagement, candidats…) et types TypeScript générés |
