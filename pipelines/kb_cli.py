@@ -201,13 +201,21 @@ def ingest_framework_cmd(
 @app.command("suggest-links")
 def suggest_links_cmd(
     framework: str = typer.Option(..., "--framework"),
+    proposals: Path = typer.Option(None, "--proposals",
+                                   help="JSON file of proposals already made (body of POST …/link-proposals)."),
     kb_dir: Path = KB_DIR_OPTION,
     staging_dir: Path = STAGING_OPTION,
 ) -> None:
     """Offline LLM proposals of links and acceptance criteria (llm-derived); skipped without LLM_ENDPOINT."""
     from pipelines.frameworks.ingest import latest_staging
-    from pipelines.frameworks.links import suggest_links
+    from pipelines.frameworks.links import apply_proposals_file, suggest_links
 
+    if proposals is not None:
+        res = apply_proposals_file(latest_staging(staging_dir, framework), proposals, kb_dir)
+        console.print(f"[bold green]✓ {res['updated']} draft(s) annotated[/bold green] from {proposals} ({res['model']}; "
+                      f"links_production_mode: llm-derived — to be reviewed); unknown links dropped: "
+                      f"{res['dropped_unknown_links']}, unknown requirements: {res['unknown_requirements'] or 'none'}.")
+        return
     load_dotenv()
     res = suggest_links(latest_staging(staging_dir, framework), kb_dir)
     if res["skipped"]:

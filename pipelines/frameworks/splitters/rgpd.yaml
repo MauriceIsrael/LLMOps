@@ -1,0 +1,70 @@
+# Splitter of Regulation (EU) 2016/679 (GDPR) — one requirement per article paragraph, or per
+# point when the paragraph lists distinct obligations; an article without numbered paragraphs
+# (Article 44) is one requirement.
+# Official source: EUR-Lex HTML of CELEX 32016R0679 (see data/sources/frameworks/README.md).
+framework: RGPD
+title: "Regulation (EU) 2016/679 (GDPR)"
+jurisdiction: EU
+mode: structured
+levels:
+  - name: article
+    pattern: '^Article\s+(?P<num>\d+)\s*$'
+    title_next_line: true
+    sequential: true
+  - name: paragraph
+    pattern: '^(?P<num>\d+)\.\s+(?P<text>.+)$'
+    sequential: true
+  - name: point
+    pattern: '^\((?P<num>[a-z])\)(?:\s+(?P<text>.+))?$'
+    sequential: true  # "(i)" after "(d)" is a roman sub-point, not point (i)
+stop: ['^CHAPTER [IVX]+$', '^Section \d+$']
+id_template: "RGPD-ART{article}-{paragraph}{point_upper}"
+ref_template: "Regulation (EU) 2016/679 (GDPR), Article {article}{paragraph_paren}{point_paren}"
+# Architecture-relevant obligations: principles (5), data protection by design and by default
+# (25), processors (28), records of processing (30), security of processing (32), breach
+# notification (33, 34), impact assessment (35), transfers to third countries (44, 45, 46).
+include:
+  article: ["5", "25", "28", "30", "32", "33", "34", "35", "44", "45", "46"]
+# Paragraphs whose points are the content of one obligation (a list of elements, conditions or
+# safeguards, the terms of the processor contract) are read as a whole. The points of
+# Articles 5(1) (the principles) and 32(1) (the security measures) stay separate requirements.
+inline:
+  - {article: "28", paragraph: "3"}
+  - {article: "30", paragraph: "1"}
+  - {article: "30", paragraph: "2"}
+  - {article: "33", paragraph: "3"}
+  - {article: "34", paragraph: "3"}
+  - {article: "35", paragraph: "3"}
+  - {article: "35", paragraph: "7"}
+  - {article: "46", paragraph: "2"}
+  - {article: "46", paragraph: "3"}
+# Excluded: obligations of the Commission, the Board and the supervisory authorities; means of
+# demonstrating compliance (codes of conduct, certification); liability and exemptions.
+exclude:
+  - {article: "25", paragraph: "3"}
+  - {article: "28", paragraph: "5"}
+  - {article: "28", paragraph: "6"}
+  - {article: "28", paragraph: "10"}
+  - {article: "30", paragraph: "5"}
+  - {article: "32", paragraph: "3"}
+  - {article: "34", paragraph: "4"}
+  - {article: "35", paragraph: "8"}
+  - {article: "35", paragraph: "10"}
+  - {article: "45", paragraph: "2"}
+  - {article: "28", paragraph: "7"}
+  - {article: "28", paragraph: "8"}
+  - {article: "35", paragraph: "4"}
+  - {article: "35", paragraph: "5"}
+  - {article: "35", paragraph: "6"}
+  - {article: "45", paragraph: "3"}
+  - {article: "45", paragraph: "4"}
+  - {article: "45", paragraph: "5"}
+  - {article: "45", paragraph: "6"}
+  - {article: "45", paragraph: "7"}
+  - {article: "45", paragraph: "8"}
+  - {article: "45", paragraph: "9"}
+  - {article: "46", paragraph: "4"}
+  - {article: "46", paragraph: "5"}
+defaults:
+  domain: [data-protection]
+  severity: mandatory

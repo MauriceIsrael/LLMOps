@@ -1,0 +1,101 @@
+{
+  "model": "claude-opus-5-5 (coding agent)",
+  "note": "Proposals for the 9 NIS2 requirements that have no control in data/kb/controls/NIS2 (Articles 20(1), 20(2), 21(1), 21(3), 21(4), 23(1)-(4)). Drafted by the coding agent from the official text (CELEX 32022L2555, sha256 c3d39841d58a4f964613a0fa8e7ec332f120516df01f41201e6a5a1d3d78df6b). llm-derived: NOT validated, they decide nothing until the domain expert accepts, amends or rejects each row.",
+  "proposals": [
+    {
+      "requirement_id": "NIS2-ART20-1",
+      "title_fr": "Gouvernance : approbation et supervision des mesures par l'organe de direction",
+      "satisfied_by": [],
+      "acceptance_criteria": [
+        "The cybersecurity risk-management measures embodied in the architecture (security baseline, residual risks, accepted exceptions) are listed in a register that the management body formally approves.",
+        "Each architecture decision that accepts a cybersecurity risk or deviates from a measure of Article 21(2) names its approver at management-body level and keeps the approval traceable.",
+        "The architecture provides the indicators the management body needs to oversee the implementation of the measures (coverage of the baseline, open findings, incident trends)."
+      ],
+      "terms": ["management body", "governance", "risk acceptance", "organe de direction", "gouvernance cybersécurité", "acceptation du risque"]
+    },
+    {
+      "requirement_id": "NIS2-ART20-2",
+      "title_fr": "Formation des membres de l'organe de direction et du personnel",
+      "satisfied_by": [],
+      "acceptance_criteria": [
+        "The run organisation proposed with the architecture includes a recurring cybersecurity training plan for management-body members and for the operating staff of the solution.",
+        "Operating documentation of the solution (runbooks, security procedures) is part of the training material and kept up to date with the architecture."
+      ],
+      "terms": ["cybersecurity training", "awareness", "formation cybersécurité", "sensibilisation"]
+    },
+    {
+      "requirement_id": "NIS2-ART21-1",
+      "title_fr": "Mesures techniques, opérationnelles et organisationnelles appropriées et proportionnées",
+      "satisfied_by": [],
+      "acceptance_criteria": [
+        "The architecture is backed by a documented risk analysis of the network and information systems in scope, and each security measure is traceable to the risks it treats.",
+        "The level of the measures is justified against the state of the art and the relevant European or international standards (e.g. ISO/IEC 27001), with the entity's exposure, size and incident likelihood and severity taken into account.",
+        "The architecture states how the impact of an incident on the recipients of the services and on other services is prevented or minimised (isolation, degraded modes, containment)."
+      ],
+      "terms": ["risk analysis", "proportionate measures", "state of the art", "analyse de risques", "mesures proportionnées", "état de l'art"]
+    },
+    {
+      "requirement_id": "NIS2-ART21-3",
+      "title_fr": "Chaîne d'approvisionnement : vulnérabilités propres à chaque fournisseur",
+      "satisfied_by": [],
+      "acceptance_criteria": [
+        "Each direct supplier and service provider of the architecture (hardware, software, cloud, managed services) is listed with an assessment of its specific vulnerabilities, product quality and secure development practices.",
+        "Supplier selection takes into account the results of the EU coordinated security risk assessments of critical supply chains (Article 22(1)) when they apply to the components chosen.",
+        "Contracts with suppliers require vulnerability notification, security updates over the support period and, for software, a software bill of materials."
+      ],
+      "terms": ["supplier assessment", "third-party risk", "sbom", "évaluation des fournisseurs", "risque fournisseur", "chaîne d'approvisionnement"]
+    },
+    {
+      "requirement_id": "NIS2-ART21-4",
+      "title_fr": "Mesures correctives en cas de non-conformité",
+      "satisfied_by": [],
+      "acceptance_criteria": [
+        "Non-compliance with a measure of Article 21(2) found in the architecture or in operation is recorded with an owner, a corrective action and a deadline.",
+        "The architecture allows corrective measures to be deployed without undue delay (configuration managed as code, tested rollout and rollback paths)."
+      ],
+      "terms": ["corrective action", "remediation", "non-compliance", "action corrective", "remédiation", "non-conformité"]
+    },
+    {
+      "requirement_id": "NIS2-ART23-1",
+      "title_fr": "Notification des incidents importants au CSIRT ou à l'autorité compétente",
+      "satisfied_by": ["P-008"],
+      "acceptance_criteria": [
+        "The architecture detects incidents and qualifies their significance (impact on the provision of the services, cross-border impact) through centralised security monitoring.",
+        "A notification path to the national CSIRT or competent authority (in Luxembourg, the authority designated under the national NIS2 law) and to affected recipients of the services is defined, with roles and contact points.",
+        "Logs and evidence needed to report the incident and its cross-border impact are retained and protected against tampering."
+      ],
+      "terms": ["significant incident", "incident notification", "csirt", "incident important", "notification d'incident", "soc", "siem"]
+    },
+    {
+      "requirement_id": "NIS2-ART23-2",
+      "title_fr": "Information des destinataires des services en cas de cybermenace importante",
+      "satisfied_by": [],
+      "acceptance_criteria": [
+        "The architecture includes a channel to inform the recipients of the services potentially affected by a significant cyber threat of the measures or remedies they can take.",
+        "The service catalogue identifies, for each service, the recipients to inform and the communication means that remain available during a crisis."
+      ],
+      "terms": ["cyber threat", "customer communication", "cybermenace", "communication aux clients"]
+    },
+    {
+      "requirement_id": "NIS2-ART23-3",
+      "title_fr": "Critères d'un incident important",
+      "satisfied_by": [],
+      "acceptance_criteria": [
+        "Severity thresholds that make an incident significant (severe operational disruption, financial loss, considerable damage to other persons) are defined per service and implemented in the incident qualification of the monitoring chain.",
+        "The architecture provides the measurements (service availability, number of affected users, duration) needed to apply those thresholds."
+      ],
+      "terms": ["incident severity", "significant incident criteria", "gravité de l'incident", "seuil d'incident important"]
+    },
+    {
+      "requirement_id": "NIS2-ART23-4",
+      "title_fr": "Délais de notification : alerte précoce 24 h, notification 72 h, rapport final à un mois",
+      "satisfied_by": ["P-008"],
+      "acceptance_criteria": [
+        "Incident detection, qualification and escalation allow an early warning within 24 hours and an incident notification within 72 hours of becoming aware of a significant incident.",
+        "Indicators of compromise, severity and impact are collected and kept so that the 72-hour notification and the final report within one month can be produced.",
+        "Incident records keep the root cause, mitigation measures and cross-border impact needed for intermediate, progress and final reports."
+      ],
+      "terms": ["early warning", "24 hours", "72 hours", "final report", "alerte précoce", "24 heures", "72 heures", "rapport final"]
+    }
+  ]
+}

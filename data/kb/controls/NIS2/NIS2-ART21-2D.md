@@ -15,6 +15,17 @@ last_reviewed: 2026-09-04
 owner: security-compliance-team
 source_ref: "Directive (EU) 2022/2555 (NIS 2), Article 21(2)(d)"
 terms: [supply-chain-security-baseline, northbound-interface, sbom]
+# Draft check clauses proposed by the coding agent (regulatory frameworks) — NOT validated.
+# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).
+checks_status: draft
+checks:
+  - id: NIS2-ART21-2D-C1
+    kind: requires
+    when:
+      terms_any: [managed service provider, managed services provider, third-party provider, third party provider, outsourced to, outsourcing, saas provider, cloud provider, hosting provider, external provider, infogerance, infogere, prestataire externe, prestataire de services, sous-traitance, sous-traitant, fournisseur tiers, fournisseur cloud, hebergeur]
+    expect:
+      terms_any: [supplier assessment, supplier security assessment, security assessment of the provider, vendor risk assessment, third-party risk, security requirements in the contract, security clauses, contractual security requirements, right to audit, audit right, iso 27001 certified, iso/iec 27001 certified, iso 27001 certification, soc 2, secnumcloud, csa star, evaluation du fournisseur, evaluation de securite du fournisseur, clauses de securite, exigences de securite contractuelles, droit d'audit, certifie iso 27001, certification iso 27001, qualifie secnumcloud]
+    message: "NIS2 Art. 21(2)(d) and 21(3): a supplier or service provider must be assessed for its security practices and bound by contractual security requirements."
 ---
 
 # NIS2-ART21-2D — Supply Chain Security and Direct Vendor Relations

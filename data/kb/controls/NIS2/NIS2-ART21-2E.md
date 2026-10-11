@@ -15,6 +15,22 @@ last_reviewed: 2026-09-04
 owner: security-compliance-team
 source_ref: "Directive (EU) 2022/2555 (NIS 2), Article 21(2)(e)"
 terms: [shadow-environment, security-baseline, devsecops]
+# Draft check clauses proposed by the coding agent (regulatory frameworks) — NOT validated.
+# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).
+checks_status: draft
+checks:
+  - id: NIS2-ART21-2E-C1
+    kind: forbids
+    when:
+      terms_any: [end-of-life software, end-of-life operating system, end-of-life os, unsupported operating system, unsupported software, unsupported version, out-of-support, no longer supported, logiciel hors support, systeme hors support, version hors support, fin de support editeur, plus supporte par l'editeur, no security updates, sans mises a jour de securite, sans correctifs de securite]
+    message: "NIS2 Art. 21(2)(e): systems must stay maintained, with vulnerability handling; unsupported or unpatched software is not acceptable."
+  - id: NIS2-ART21-2E-C2
+    kind: requires
+    when:
+      terms_any: [custom development, in-house development, developed in-house, bespoke application, specific development, ci/cd pipeline, build pipeline, developpement specifique, developpement sur mesure, application sur mesure, chaine ci/cd, pipeline ci/cd]
+    expect:
+      terms_any: [sast, dast, code review, security code review, dependency scanning, software composition analysis, vulnerability scanning, penetration test, pentest, secure development lifecycle, sdlc, devsecops, sbom, revue de code, analyse de code, scan de vulnerabilites, analyse des dependances, test d'intrusion, tests d'intrusion, cycle de developpement securise]
+    message: "NIS2 Art. 21(2)(e): developed software needs secure development practices and vulnerability handling (code analysis, dependency scanning, penetration tests)."
 ---
 
 # NIS2-ART21-2E — Security in Network and Information Systems Lifecycle

@@ -14,6 +14,15 @@ confidence: verified
 last_reviewed: 2026-09-08
 owner: data-protection-officer
 source_ref: "Regulation (EU) 2016/679 (GDPR), Article 25 (Data protection by design and by default)"
+# Draft check clauses proposed by the coding agent (regulatory frameworks) — NOT validated.
+# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).
+checks_status: draft
+checks:
+  - id: RGPD-REQ-PRIVACY-01-C1
+    kind: forbids
+    when:
+      terms_any: [production data in test, production data copied to test, production data in the test environment, real personal data in test, unlimited retention, indefinite retention, kept indefinitely, retained indefinitely, no retention period, donnees de production en recette, donnees de production en test, copie de la production en recette, donnees reelles en recette, conservation illimitee, conservation indefinie, conservees indefiniment, sans duree de conservation]
+    message: "GDPR Art. 5(1)(c) and (e), Art. 25: personal data are minimised and kept no longer than necessary; real production data in test and unlimited retention are not acceptable."
 ---
 
 # RGPD-REQ-PRIVACY-01 — Privacy by Design & Default for Real-Time Location, CDRs and MCX Media

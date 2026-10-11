@@ -92,3 +92,39 @@ def suggest_links(
         draft.write_text(join_frontmatter(fm, body), encoding="utf-8")
         updated += 1
     return {"skipped": False, "updated": updated, "model": model}
+
+
+def apply_proposals_file(staging: str | Path, proposals_file: str | Path, kb_dir: str | Path = "data/kb") -> dict[str, Any]:
+    """Proposals prepared outside this CLI (the body of ``POST …/link-proposals``) -> staging drafts.
+
+    Same rules as the API route: a link is kept only if it names an active principle, pattern
+    or decision; everything is ``llm-derived`` and decides nothing until the expert reviews
+    the row (``kb review-sheet`` / ``kb apply-review``).
+    """
+    data = json.loads(Path(proposals_file).read_text(encoding="utf-8"))
+    model = str(data.get("model") or "unknown")
+    known = {a.id for a in load_assets(kb_dir) if a.type in LINKABLE_TYPES and a.frontmatter.get("status") == "active"}
+    updated, dropped, unknown = 0, 0, []
+    for item in data.get("proposals") or []:
+        req_id = str(item.get("requirement_id") or "")
+        draft = Path(staging) / f"{req_id}.md"
+        fm, body = split_frontmatter(draft.read_text(encoding="utf-8")) if req_id and draft.is_file() else (None, "")
+        if fm is None:
+            unknown.append(req_id)
+            continue
+        links = [str(x) for x in item.get("satisfied_by") or []]
+        fm["proposed_links"] = [x for x in links if x in known]
+        dropped += len(links) - len(fm["proposed_links"])
+        fm["proposed_acceptance_criteria"] = [str(x).strip() for x in item.get("acceptance_criteria") or [] if str(x).strip()]
+        terms = list(dict.fromkeys(" ".join(str(x).lower().split()) for x in item.get("terms") or [] if str(x).strip()))
+        if terms:
+            fm["proposed_terms"] = terms
+            # Applied to the control only if the expert accepts the row, as with the API route.
+            fm["terms_production_mode"] = "llm-proposed-human-approved"
+        if str(item.get("title_fr") or "").strip():
+            fm["proposed_title_fr"] = str(item["title_fr"]).strip()
+        fm["links_production_mode"] = "llm-derived"
+        fm["links_model"] = model
+        draft.write_text(join_frontmatter(fm, body), encoding="utf-8")
+        updated += 1
+    return {"updated": updated, "dropped_unknown_links": dropped, "unknown_requirements": unknown, "model": model}
