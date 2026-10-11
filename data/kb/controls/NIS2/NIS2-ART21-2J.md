@@ -15,6 +15,22 @@ last_reviewed: 2026-09-04
 owner: security-compliance-team
 source_ref: "Directive (EU) 2022/2555 (NIS 2), Article 21(2)(j)"
 terms: [fido2, emergency-comms, mtls]
+# Draft check clauses proposed by the coding agent (regulatory frameworks) — NOT validated.
+# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).
+checks_status: draft
+checks:
+  - id: NIS2-ART21-2J-C1
+    kind: forbids
+    when:
+      terms_any: [password-only, password only, single-factor authentication, single factor authentication, login and password only, shared admin account, shared administrator account, shared administration account, mot de passe seul, authentification par mot de passe seul, authentification simple facteur, compte administrateur partage, compte d'administration partage, compte generique partage]
+    message: "NIS2 Art. 21(2)(j): access must use multi-factor or continuous authentication with personal accounts; password-only or shared accounts are not acceptable."
+  - id: NIS2-ART21-2J-C2
+    kind: requires
+    when:
+      terms_any: [remote access, administrative access, privileged access, admin console, administration console, remote administration, bastion, remote access vpn, client vpn, acces distant, acces a distance, acces d'administration, acces a privileges, acces privilegie, console d'administration, administration a distance, vpn nomade]
+    expect:
+      terms_any: [multi-factor authentication, two-factor, 2fa, fido2, webauthn, otp, one-time password, smart card, hardware token, security key, certificate-based authentication, continuous authentication, carte a puce, authentification continue, double authentification, authentification a deux facteurs, cle de securite]
+    message: "NIS2 Art. 21(2)(j): remote, administrative and privileged access requires multi-factor (or continuous) authentication."
 ---
 
 # NIS2-ART21-2J — Multi-Factor Authentication and Secured Communications

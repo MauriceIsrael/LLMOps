@@ -15,6 +15,22 @@ last_reviewed: 2026-09-04
 owner: security-compliance-team
 source_ref: "Directive (EU) 2022/2555 (NIS 2), Article 21(2)(h)"
 terms: [cryptographic-baseline, ai-assistant, envelope-encryption]
+# Draft check clauses proposed by the coding agent (regulatory frameworks) — NOT validated.
+# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).
+checks_status: draft
+checks:
+  - id: NIS2-ART21-2H-C1
+    kind: forbids
+    when:
+      terms_any: [unencrypted connection, unencrypted protocol, unencrypted flow, unencrypted traffic, unencrypted link, unencrypted backup, unencrypted storage, unencrypted disk, stored unencrypted, sent unencrypted, transmitted unencrypted, in clear text, in cleartext, in plaintext, plaintext password, without encryption, http instead of https, non chiffre, non chiffree, non chiffres, non chiffrees, sans chiffrement, transmis en clair, transmises en clair, stocke en clair, stockee en clair, stockes en clair, stockees en clair, flux en clair, mots de passe en clair]
+    message: "NIS2 Art. 21(2)(h): data in transit and at rest must be protected with current cryptography; clear-text protocols and deprecated algorithms are not acceptable."
+  - id: NIS2-ART21-2H-C2
+    kind: requires
+    when:
+      terms_any: [personal data, sensitive data, health data, confidential data, donnees personnelles, donnees a caractere personnel, donnees sensibles, donnees de sante, donnees confidentielles]
+    expect:
+      terms_any: [encryption, encrypted, chiffre, chiffree, chiffres, chiffrees, tls, mtls, aes-256, aes, kms, hsm, key management, gestion des cles]
+    message: "NIS2 Art. 21(2)(h): sensitive and personal data must be encrypted, with managed keys."
 ---
 
 # NIS2-ART21-2H — Cryptography and Information System Security for AI Systems

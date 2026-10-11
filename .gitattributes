@@ -1,0 +1,2 @@
+# Sources officielles des référentiels : octets exacts (leur SHA-256 est enregistré dans les manifestes)
+data/sources/** -text

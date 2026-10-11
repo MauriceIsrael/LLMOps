@@ -29,9 +29,9 @@ class MarkdownDocParser:
         content = path.read_text(encoding="utf-8")
 
         if path.suffix in (".yaml", ".yml"):
-            return self.parse_yaml_content(content, source_path=str(path))
+            return self.parse_yaml_content(content, source_path=path.as_posix())
 
-        return self.parse_content(content, source_path=str(path))
+        return self.parse_content(content, source_path=path.as_posix())
 
     def parse_yaml_content(self, content: str, source_path: str = "") -> dict[str, Any] | None:
         """Parse un document purement YAML (.yaml / .yml)."""

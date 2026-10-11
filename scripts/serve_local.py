@@ -69,6 +69,12 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=None)
     args = parser.parse_args()
 
+    # Windows : la console (cp1252) ne sait pas écrire les émojis de la journalisation ; sans cela, une
+    # publication de la base échoue en 500 (UnicodeEncodeError). Équivaut à lancer Python avec -X utf8.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
     try:
         from dotenv import load_dotenv
 
