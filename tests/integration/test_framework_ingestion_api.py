@@ -9,6 +9,8 @@ from starlette.testclient import TestClient
 
 from mcp_server.core.config import server_config
 
+from tests.integration.nis2_baseline import rewind_nis2
+
 ROOT = Path(__file__).parent.parent.parent
 EXCERPT = ROOT / "tests" / "fixtures" / "frameworks" / "nis2_excerpt.txt"
 CLIENT = {"Authorization": "Bearer archinex-token"}
@@ -24,6 +26,7 @@ def _as(email: str) -> dict:
 def env(tmp_path, monkeypatch):
     kb = tmp_path / "kb"
     shutil.copytree(ROOT / "data" / "kb", kb)
+    rewind_nis2(kb)
     owners = yaml.safe_load((kb / "owners.yaml").read_text())
     owners["owners"]["@security-compliance-team"]["email"] = SEC
     owners["owners"]["@ciso-office"]["email"] = OTHER

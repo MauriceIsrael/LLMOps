@@ -1,11 +1,11 @@
 {
-  "snapshot_id": "snapshot-2026-10-04-b3fa465",
-  "created_at": "2026-10-04T08:51:08Z",
-  "source_revision": "b3fa46531fb59d7e9fc8c0b6c288c59bb7ddd602",
-  "payload_sha256": "sha256:625d5aeebbbe4a957c59e8be6265a1f916ae55b91db16d919537d705434218f1",
+  "snapshot_id": "snapshot-2026-10-12-7393586",
+  "created_at": "2026-10-12T20:03:56Z",
+  "source_revision": "7393586b88f7fe4fb74dec6e5d6a24f179030f39",
+  "payload_sha256": "sha256:c3ab979159585845af7829720f28b585915956c11eea16f9f2656de0d9753778",
   "schema_version": "1.0",
   "emitter": "knowledge-hub",
-  "checksum": "sha256:625d5aeebbbe4a957c59e8be6265a1f916ae55b91db16d919537d705434218f1",
+  "checksum": "sha256:c3ab979159585845af7829720f28b585915956c11eea16f9f2656de0d9753778",
   "rebuiltByEmitterTest": true,
   "regenerate": "poetry run python scripts/export_fixtures.py",
   "is_provisional": false,
@@ -326,7 +326,7 @@
   },
   "embedding_index": {
     "model": "intfloat/multilingual-e5-small",
-    "count": 93,
+    "count": 102,
     "items": [
       {
         "ref": "3GPP-TS28104-MDA",
@@ -464,6 +464,21 @@
         "text_sha256": "5e8c1a84432f8983e62f6e68a10c93b7d47f3244eb50c603846dac18cff7d0b1"
       },
       {
+        "ref": "NIS2-ART20-1",
+        "type": "control",
+        "text_sha256": "001e2aabba987d4b629c15af40b60a091521db0914e868d87901b4360342f57a"
+      },
+      {
+        "ref": "NIS2-ART20-2",
+        "type": "control",
+        "text_sha256": "09fee7f7094c9e0b81a56cec2910742bc80bca19278636c7d9c635f54015783a"
+      },
+      {
+        "ref": "NIS2-ART21-1",
+        "type": "control",
+        "text_sha256": "8ff270951ab606bad364485c0160596fd90984105d4d61b5988435625e9a6685"
+      },
+      {
         "ref": "NIS2-ART21-2A",
         "type": "control",
         "text_sha256": "ea9c17c29e2741a3b0e10aa89929aa9422e09afab3c2857ac1d6788d6862b467"
@@ -512,6 +527,36 @@
         "ref": "NIS2-ART21-2J",
         "type": "control",
         "text_sha256": "5a874bd556ae1adb937c7aff71710fdd91ce15ba3d7ae4f31e1ee0434a83a8bf"
+      },
+      {
+        "ref": "NIS2-ART21-3",
+        "type": "control",
+        "text_sha256": "572ff3ad5214ff3e744a398c9a38cc442f0da07d76660e0489420d6e5f239112"
+      },
+      {
+        "ref": "NIS2-ART21-4",
+        "type": "control",
+        "text_sha256": "deab47a686cb20eb3e85e8e8079e2f05380c75f34ec12b6edd65e466a7547d24"
+      },
+      {
+        "ref": "NIS2-ART23-1",
+        "type": "control",
+        "text_sha256": "5b11075829e4c9595f7fc8a2773bd9f255c3574bd911de70dd1731a040cc7181"
+      },
+      {
+        "ref": "NIS2-ART23-2",
+        "type": "control",
+        "text_sha256": "e44afd6b8f7b085f0e118dcb0aa150d167b98cc6c608bac17b189671d396f655"
+      },
+      {
+        "ref": "NIS2-ART23-3",
+        "type": "control",
+        "text_sha256": "28ec94ce1d688bdab118ecedc3822c0768ab71c6c5e39c87de4d061c7028467d"
+      },
+      {
+        "ref": "NIS2-ART23-4",
+        "type": "control",
+        "text_sha256": "207ada1cc18eeec83c85f091f489c0e23da35f8244c408cd31c8a82c7a0607d3"
       },
       {
         "ref": "PPDR-DEVICE-ATEX",
@@ -794,22 +839,9 @@
         "text_sha256": "2b3e928f85d561b93b446c47b3e34b1437a1b6ac996e004d43605dba29ec4b1c"
       }
     ],
-    "content_sha256": "sha256:fdbdbba4807702391c3c694081f9a8dc47b01ab4eaf2cfc0ef32f75c5a82774b"
+    "content_sha256": "sha256:61e9bdee378ba0325380e4782452db663fb9262c4f91db5db11e7acf1abfafdd"
   },
   "applicability_index": {
-    "TPL-getting-started": {
-      "domains": [
-        "delivery"
-      ],
-      "phases": [
-        "BID",
-        "BUILD",
-        "RUN"
-      ],
-      "rules": [
-        "rule:tpl-getting-started"
-      ]
-    },
     "BLU-hla-it-platform": {
       "domains": [
         "it-infrastructure",
@@ -1033,6 +1065,19 @@
       ],
       "rules": [
         "rule:est-netdevops-telco"
+      ]
+    },
+    "TPL-getting-started": {
+      "domains": [
+        "delivery"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:tpl-getting-started"
       ]
     },
     "TPL-glossary": {
@@ -1543,6 +1588,28 @@
         "rule:skl-telco-core"
       ]
     },
+    "TPL-claims-register": {
+      "domains": [
+        "delivery"
+      ],
+      "phases": [
+        "BID"
+      ],
+      "rules": [
+        "rule:tpl-claims-register"
+      ]
+    },
+    "TPL-hla-section-map": {
+      "domains": [
+        "delivery"
+      ],
+      "phases": [
+        "BID"
+      ],
+      "rules": [
+        "rule:tpl-hla-section-map"
+      ]
+    },
     "TPL-zero-draft-hld-en": {
       "domains": [
         "delivery",
@@ -1569,28 +1636,6 @@
       ],
       "rules": [
         "rule:tpl-zero-draft-hld"
-      ]
-    },
-    "TPL-claims-register": {
-      "domains": [
-        "delivery"
-      ],
-      "phases": [
-        "BID"
-      ],
-      "rules": [
-        "rule:tpl-claims-register"
-      ]
-    },
-    "TPL-hla-section-map": {
-      "domains": [
-        "delivery"
-      ],
-      "phases": [
-        "BID"
-      ],
-      "rules": [
-        "rule:tpl-hla-section-map"
       ]
     }
   },
@@ -3478,7 +3523,7 @@
     {
       "framework": "NIS2",
       "version": "2022/2555",
-      "controls_count": 10
+      "controls_count": 19
     },
     {
       "framework": "PPDR-DEVICE",
@@ -3847,6 +3892,33 @@
       ]
     },
     {
+      "id": "NIS2-ART20-1",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Governance \u2014 Member States shall ensure that the management bodies of essential and important\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART20-2",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Governance \u2014 Member States shall ensure that the members of the management bodies of essential and\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART21-1",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that essential and important entities take appropriate and\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
       "id": "NIS2-ART21-2A",
       "framework": "NIS2",
       "version": "2022/2555",
@@ -3970,6 +4042,60 @@
       "implemented_by": [
         "PAT-004"
       ]
+    },
+    {
+      "id": "NIS2-ART21-3",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that, when considering which measures referred to in\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART21-4",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that an entity that finds that it does not comply with the\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART23-1",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Reporting obligations \u2014 Each Member State shall ensure that essential and important entities notify, without\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART23-2",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Reporting obligations \u2014 Where applicable, Member States shall ensure that essential and important entities\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART23-3",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Reporting obligations \u2014 An incident shall be considered to be significant if",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART23-4",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Reporting obligations \u2014 Member States shall ensure that, for the purpose of notification under paragraph 1, the\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
     },
     {
       "id": "PPDR-DEVICE-ATEX",
@@ -4450,6 +4576,24 @@
       }
     },
     "NIS2": {
+      "NIS2-ART20-1": {
+        "title": "Governance \u2014 Member States shall ensure that the management bodies of essential and important\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART20-2": {
+        "title": "Governance \u2014 Member States shall ensure that the members of the management bodies of essential and\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART21-1": {
+        "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that essential and important entities take appropriate and\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
       "NIS2-ART21-2A": {
         "title": "Risk Analysis and Information System Security Policies",
         "version": "2022/2555",
@@ -4544,6 +4688,42 @@
         "implemented_by": [
           "PAT-004"
         ]
+      },
+      "NIS2-ART21-3": {
+        "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that, when considering which measures referred to in\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART21-4": {
+        "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that an entity that finds that it does not comply with the\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART23-1": {
+        "title": "Reporting obligations \u2014 Each Member State shall ensure that essential and important entities notify, without\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART23-2": {
+        "title": "Reporting obligations \u2014 Where applicable, Member States shall ensure that essential and important entities\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART23-3": {
+        "title": "Reporting obligations \u2014 An incident shall be considered to be significant if",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART23-4": {
+        "title": "Reporting obligations \u2014 Member States shall ensure that, for the purpose of notification under paragraph 1, the\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
       }
     },
     "PPDR-DEVICE": {
