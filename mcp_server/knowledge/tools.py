@@ -1801,7 +1801,10 @@ def _ingestion_error(exc: Exception) -> dict[str, Any] | None:
     from pipelines.frameworks.api import IngestionError, IngestionNotFoundError
 
     if isinstance(exc, IngestionError):
-        return invalid_argument_response(exc.argument, exc.reason)
+        res = invalid_argument_response(exc.argument, exc.reason)
+        if getattr(exc, "conflict", False):
+            res["conflict"] = True
+        return res
     if isinstance(exc, IngestionNotFoundError):
         return not_found_response(str(exc))
     return None
@@ -1833,7 +1836,7 @@ def create_framework_ingestion(framework: str, version: str, tag: str, filename:
         return _ingestion_error(e) or handle_exception_response(e, context_action="create_framework_ingestion")
 
 
-def list_framework_ingestions() -> dict[str, Any]:
+def list_framework_ingestions(status: str | None = None) -> dict[str, Any]:
     """Ingestions in progress or done, and the frameworks that have a splitter (requires 'kb:review')."""
     from mcp_server.core.auth import has_scope
     from pipelines.frameworks.api import supported_frameworks
@@ -1845,10 +1848,10 @@ def list_framework_ingestions() -> dict[str, Any]:
     if ingestion is None:
         return _NO_DB
     try:
-        items = ingestion.list()
+        items = ingestion.list(status=status)
         return ok_response({"ingestions": items, "splitters": supported_frameworks()}, count=len(items))
     except Exception as e:
-        return handle_exception_response(e, context_action="list_framework_ingestions")
+        return _ingestion_error(e) or handle_exception_response(e, context_action="list_framework_ingestions")
 
 
 def get_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
@@ -1918,6 +1921,35 @@ def apply_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
         return ok_response(ingestion.apply(ingestion_id, who[1].handle), count=1)
     except Exception as e:
         return _ingestion_error(e) or handle_exception_response(e, context_action="apply_framework_ingestion")
+
+
+def abandon_framework_ingestion(ingestion_id: int, reason: str) -> dict[str, Any]:
+    """Mark an unapplied ingestion as ``abandoned`` ('kb:maintain', mandatory reason)."""
+    from pipelines.governance.log import get_log
+
+    who = _actor_with_role("kb:maintain")
+    if isinstance(who, dict):
+        return who
+    ingestion = _ingestion_service(who[0])
+    if ingestion is None:
+        return _NO_DB
+    try:
+        abandoned = ingestion.abandon(ingestion_id, who[1].handle, reason)
+        log = get_log()
+        if log is not None:
+            log.emit(
+                "ingestion.abandoned",
+                None,
+                who[1].handle,
+                [],
+                ingestion_id=ingestion_id,
+                framework=abandoned["framework"],
+                version=abandoned["version"],
+                reason=abandoned["abandon_reason"],
+            )
+        return ok_response(abandoned, count=abandoned["total"])
+    except Exception as e:
+        return _ingestion_error(e) or handle_exception_response(e, context_action="abandon_framework_ingestion")
 
 
 def declare_framework_coverage(framework: str) -> dict[str, Any]:

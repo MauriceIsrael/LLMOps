@@ -52,7 +52,8 @@
           "enum": [
             "reviewing",
             "partially_applied",
-            "applied"
+            "applied",
+            "abandoned"
           ]
         },
         "created_by": {
@@ -63,6 +64,24 @@
         },
         "declaration_reset": {
           "type": "boolean"
+        },
+        "abandoned_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "abandoned_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "abandon_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "requirements": {
           "type": "array",

@@ -376,7 +376,7 @@ export interface KbComment { id: number; candidate_id: string; author: string; b
 export type GovernanceEventType =
   | "candidate.submitted" | "candidate.assigned" | "review.requested" | "candidate.reviewed"
   | "candidate.commented" | "candidate.promoted" | "candidate.published" | "reminder.due"
-  | "owners.updated" | "eval.updated" | "coverage.changed";
+  | "owners.updated" | "eval.updated" | "coverage.changed" | "ingestion.abandoned";
 
 export interface GovernanceEvent {
   id: number;
@@ -504,10 +504,13 @@ export interface FrameworkIngestion {
   tag: string | null;
   source_name: string;
   source_sha256: string;
-  status: "reviewing" | "partially_applied" | "applied";
+  status: "reviewing" | "partially_applied" | "applied" | "abandoned";
   created_by: string;
   created_at: string;
   declaration_reset: boolean;
+  abandoned_by?: string | null;
+  abandoned_at?: string | null;
+  abandon_reason?: string | null;
   requirements: IngestionRow[];
   decided: number;
   total: number;

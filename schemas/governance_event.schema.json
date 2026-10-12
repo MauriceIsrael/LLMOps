@@ -112,7 +112,8 @@
             "reminder.due",
             "owners.updated",
             "eval.updated",
-            "coverage.changed"
+            "coverage.changed",
+            "ingestion.abandoned"
           ]
         },
         "candidate_id": {

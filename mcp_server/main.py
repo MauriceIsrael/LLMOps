@@ -54,6 +54,7 @@ from mcp_server.engagement.tools import (
 from mcp_server.engagement.write_routes import build_write_routes
 from mcp_server.knowledge.tools import (
     _suggest_knowledge_improvement,
+    abandon_framework_ingestion,
     add_eval_case,
     add_ingestion_link_proposals,
     annotate_eval_case,
@@ -1119,7 +1120,7 @@ def create_starlette_app() -> Starlette:
         return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
 
     async def handle_ingestion_list(request):
-        res = list_framework_ingestions()
+        res = list_framework_ingestions(status=request.query_params.get("status") or None)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     def _ingestion_id(request):
@@ -1154,6 +1155,13 @@ def create_starlette_app() -> Starlette:
         if ingestion_id is None:
             return _bad_body()
         res = apply_framework_ingestion(ingestion_id)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_ingestion_abandon(request):
+        ingestion_id, body = _ingestion_id(request), await _json_body(request)
+        if ingestion_id is None or body is None:
+            return _bad_body()
+        res = abandon_framework_ingestion(ingestion_id, str(body.get("reason") or ""))
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     async def handle_coverage_declaration(request):
@@ -1423,6 +1431,7 @@ def create_starlette_app() -> Starlette:
             Route("/api/frameworks/ingestions/{ingestion_id}/link-proposals", endpoint=handle_ingestion_proposals,
                   methods=["POST"]),
             Route("/api/frameworks/ingestions/{ingestion_id}/apply", endpoint=handle_ingestion_apply, methods=["POST"]),
+            Route("/api/frameworks/ingestions/{ingestion_id}/abandon", endpoint=handle_ingestion_abandon, methods=["POST"]),
             Route("/api/frameworks/{framework}/coverage-declaration", endpoint=handle_coverage_declaration,
                   methods=["POST"]),
             Route("/api/knowledge/templates/{asset_type}", endpoint=handle_template, methods=["GET"]),
