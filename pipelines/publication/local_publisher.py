@@ -54,13 +54,17 @@ def rebuild_and_swap(kb_dir: Path, db_path: Path) -> None:
 
 
 def publish(service: CandidateService, kb_dir: Path, db_path: Path, snapshot_dir: Path, actor: str) -> dict[str, Any]:
+    from pipelines.similarity.index import index_after_publication
     from scripts.export_sealed_snapshot import export_sealed_snapshot
 
     fixture = snapshot_dir / "sealed_snapshot.json"
-    return service.publish(
+    result = service.publish(
         ingest=lambda: rebuild_and_swap(kb_dir, db_path),
         snapshot=lambda: export_sealed_snapshot(output_fixtures_path=fixture, output_snapshot_dir=snapshot_dir,
                                                 db_path=db_path, ledger_path=kb_dir / "version-ledger.json",
                                                 record_revisions=True),  # publishing records the new revisions
         actor=actor,
     )
+    if result.get("published"):  # issue #94: the reference model's vectors follow the published assets
+        result["embedding_index"] = index_after_publication(kb_dir)
+    return result
