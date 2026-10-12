@@ -424,16 +424,30 @@ def list_frameworks() -> dict[str, Any]:
     """List regulatory and security frameworks embedded in the knowledge base along with their versions and control counts."""
     kb_client = _get_db()
     try:
+        from pipelines.frameworks.coverage import _controls, framework_coverage
+
         query = """
         MATCH (c:Control)
         RETURN c.framework as framework, c.version as version, count(c) as control_count;
         """
         rows = kb_client.execute_cypher(query)
         meta = _framework_metadata()
+        controls_by_fw = _controls(Path(server_config.kb_dir))
         res = []
         for r in rows:
             fw = r.get("framework", "")
             info = meta.get(fw, {"title": fw, "jurisdiction": "Unknown", "description": ""})
+            cov = framework_coverage(fw, server_config.kb_dir)
+            fw_ctrls = controls_by_fw.get(fw.lower(), [])
+            validated_controls = [
+                {
+                    "id": str(c["id"]),
+                    "validated_by": [str(v) for v in (c.get("validated_by") or [])],
+                    "validated_at": str(c["validated_at"]) if c.get("validated_at") else None,
+                }
+                for c in fw_ctrls
+                if c.get("id") and c.get("validated_by")
+            ]
             res.append({
                 "framework": fw,
                 "version": r.get("version", "1.0.0"),
@@ -441,6 +455,14 @@ def list_frameworks() -> dict[str, Any]:
                 "jurisdiction": info["jurisdiction"],
                 "description": info["description"],
                 "control_count": r.get("control_count", 0),
+                "status": cov["status"],
+                "expected": cov["expected"],
+                "present": cov["present"],
+                "validated": cov["validated"],
+                "declared_by": cov["declared_by"],
+                "declared_at": cov["declared_at"],
+                "provisional": cov["provisional"],
+                "validated_controls": validated_controls,
             })
         return ok_response(res, count=len(res))
     except Exception as e:

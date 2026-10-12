@@ -276,6 +276,7 @@ def generate_framework_coverage_schema() -> dict[str, Any]:
             "validated": {"type": "integer", "minimum": 0},
             "missing_ids": {"type": "array", "items": {"type": "string"}},
             "declared_by": {"type": ["string", "null"]},
+            "declared_at": {"type": ["string", "null"]},
             "provisional": {"type": ["boolean", "null"]},
             "manifest": {"type": "boolean"},
         },
