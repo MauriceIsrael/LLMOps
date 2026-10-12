@@ -151,7 +151,8 @@ def test_suggest_links_from_a_proposals_file(env):
     proposals = ROOT / "data" / "proposals" / "frameworks" / "NIS2-2022-2555.link-proposals.json"
     out = _run(env, "suggest-links", "--framework", "NIS2", "--proposals", str(proposals), "--kb-dir", str(env["kb"]),
                "--staging-dir", str(env["staging"])).output
-    assert "9 draft(s) annotated" in out and "unknown requirements: none" in out
+    flat = " ".join(out.split())  # la console coupe les lignes selon la largeur et la longueur des chemins
+    assert "9 draft(s) annotated" in flat and "unknown requirements: none" in flat
     fm = _fm(run_dir / "NIS2-ART23-4.md")
     assert fm["links_production_mode"] == "llm-derived" and fm["status"] == "draft" and fm["validated_by"] == []
     assert fm["proposed_links"] == ["P-008"] and len(fm["proposed_acceptance_criteria"]) == 3

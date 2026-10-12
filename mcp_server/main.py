@@ -16,7 +16,7 @@ from sse_starlette.sse import EventSourceResponse
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import HTMLResponse, JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.routing import Route
 from starlette.types import Receive, Scope, Send
 
@@ -410,6 +410,9 @@ def create_starlette_app() -> Starlette:
                 streams[1],
                 mcp._mcp_server.create_initialization_options(),
             )
+        # La session SSE a déjà répondu par le flux : renvoyer une réponse vide évite que Starlette appelle None
+        # à la déconnexion du client (« TypeError: 'NoneType' object is not callable »).
+        return Response()
 
     async def handle_messages(request):
         session_id_str = request.query_params.get("session_id")
