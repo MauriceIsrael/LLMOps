@@ -89,9 +89,17 @@ Minor versions only add interfaces or optional fields:
   ``KB_EMBEDDINGS=off``); ``POST /api/knowledge/similar`` encodes ``query_text`` itself when no ``vector`` is sent
   (``encoded_by``, ``409 model-mismatch``); a publication indexes the active assets (``embedding_index`` in its response)
   and the sealed snapshot declares ``embedding_model`` and ``embedding_index`` (outside ``payload_sha256``).
+* ``1.26`` — decision on each check clause (issues #101, #105): a clause carries its own ``status``
+  (``draft|validated|rejected``) and ``review {by, at, decision, comment}``; only ``validated`` blocks, ``rejected`` is
+  never evaluated; ``checks_status`` becomes their aggregate (``draft|partial|validated``). Promoting a candidate never
+  validates a clause (an unchanged clause keeps its decision, any other is a draft). ``GET /api/knowledge/checks``
+  lists the clauses (``may_decide``, ``mandatory_without_clause``, ``pending_publication``);
+  ``PATCH /api/knowledge/assets/{asset_id}/checks/{check_id}`` decides (``validate|amend|reject``, owner of the domain
+  or ``kb:maintain``); decisions are appended to ``data/kb/clause-decisions.jsonl`` and taken into account by the next
+  publication (CHANGELOG, ``clause_decisions`` in its response).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.25"
+CONTRACT_VERSION = "1.26"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

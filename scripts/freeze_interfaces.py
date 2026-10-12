@@ -565,6 +565,9 @@ def build_catalogue() -> list[Interface]:
               headers=DELEGATED, delegate=True),
         _rest("POST", "/api/frameworks/ingestions/{ingestion_id}/apply", "/api/frameworks/ingestions/{ingestion}/apply",
               headers=DELEGATED, delegate=True),
+        # An applied ingestion can no longer be abandoned: freezes the refusal shape
+        _rest("POST", "/api/frameworks/ingestions/{ingestion_id}/abandon", "/api/frameworks/ingestions/{ingestion}/abandon",
+              json_body={"reason": "Contract freeze"}, headers=DELEGATED, delegate=True),
         _rest("POST", "/api/frameworks/{framework}/coverage-declaration", "/api/frameworks/RGPD/coverage-declaration",
               headers=DELEGATED, delegate=True),
         # Contract 1.6 — doctrine workshop and evaluations
@@ -572,6 +575,11 @@ def build_catalogue() -> list[Interface]:
         _rest("POST", "/api/knowledge/candidates/validate", json_body=SAMPLE_CANDIDATE),
         _rest("POST", "/api/knowledge/checks/simulate", json_body={"asset_id": "P-002", "checks": [], "options": [
             {"title": "Fully autonomous remediation", "description": "no human approval"}]}),
+        # Contract 1.26 — decision on each check clause
+        _rest("GET", "/api/knowledge/checks", "/api/knowledge/checks?type=principle", headers=DELEGATED, delegate=True),
+        _rest("PATCH", "/api/knowledge/assets/{asset_id}/checks/{check_id}",
+              "/api/knowledge/assets/P-002/checks/P-002-C1", json_body={"decision": "validate"},
+              headers=DELEGATED, delegate=True),
         _rest("GET", "/api/knowledge/evals/{dataset}", "/api/knowledge/evals/check_option_v1",
               headers=DELEGATED, delegate=True),
         _rest("POST", "/api/knowledge/evals/{dataset}/cases", "/api/knowledge/evals/check_option_v1/cases",

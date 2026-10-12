@@ -1,0 +1,195 @@
+{
+  "interface": "rest.PATCH /api/knowledge/assets/{asset_id}/checks/{check_id}",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "asset_excerpt": {
+                "type": [
+                  "string"
+                ]
+              },
+              "asset_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "asset_status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "asset_title": {
+                "type": [
+                  "string"
+                ]
+              },
+              "asset_title_fr": {
+                "type": [
+                  "null"
+                ]
+              },
+              "asset_type": {
+                "type": [
+                  "string"
+                ]
+              },
+              "check_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "domain": {
+                "items": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "expect": {
+                "keys": {
+                  "terms_any": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "framework": {
+                "type": [
+                  "null"
+                ]
+              },
+              "kind": {
+                "type": [
+                  "string"
+                ]
+              },
+              "message": {
+                "type": [
+                  "string"
+                ]
+              },
+              "owner": {
+                "type": [
+                  "string"
+                ]
+              },
+              "review": {
+                "keys": {
+                  "at": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "by": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "decision": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "revision": {
+                "type": [
+                  "number"
+                ]
+              },
+              "severity": {
+                "type": [
+                  "null"
+                ]
+              },
+              "source_ref": {
+                "type": [
+                  "null"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "typed_id": {
+                "type": [
+                  "string"
+                ]
+              },
+              "when": {
+                "keys": {
+                  "terms_any": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

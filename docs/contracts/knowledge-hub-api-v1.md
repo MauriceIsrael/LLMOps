@@ -1009,6 +1009,20 @@ Le Hub retrouve la doctrine pertinente pour un sujet quelle que soit sa langue :
 
 **Publication** (`kb publish`, `POST /api/knowledge/publications`) : encode les actifs actifs dont le texte a changé (même `text_sha256` : non réencodé), supprime les vecteurs des actifs retirés ou remplacés, et rend `embedding_index {status: indexed|skipped|failed, encoded, unchanged, removed, content_sha256…}` ; un modèle absent n'empêche jamais une publication. `kb embeddings index` fait la même chose sans publier.
 
+### 5.26 Contrat 1.26 — Décision par clause vérifiable (issues #101, #105)
+
+Une clause `checks:` ne devient opposable (elle bloque un arbitrage) que par une **décision explicite sur cette clause** d'un relecteur du domaine de l'actif (ou `kb:maintain`). Accepter un actif entier ne valide jamais ses clauses.
+
+**Format** : chaque clause porte `status` (`draft` | `validated` | `rejected`) et `review {by, at, decision, comment}`. Une clause sans `status` hérite de `checks_status` de l'actif (actifs antérieurs à 1.26). `checks_status` devient l'agrégat : `validated` si toutes les clauses non rejetées le sont, `partial` si certaines, `draft` sinon. Le juge (`check_option`) n'évalue jamais une clause `rejected` ; il rapporte `check_status` de chaque verdict, et seul `validated` bloque côté client.
+
+**Promotion d'un candidat** : une clause identique (`kind`, `when`, `expect`, `message`) à celle de l'actif remplacé garde son statut et sa revue ; toute clause nouvelle ou modifiée est `draft`, quoi qu'en dise le contenu proposé.
+
+**`GET /api/knowledge/checks`** (`kb:review`) — filtres `status`, `framework`, `type`, `asset_id`. Réponse : `clauses[]` (actif : `asset_id`, `typed_id`, `asset_type`, `asset_title`, `asset_title_fr`, `framework`, `severity`, `domain`, `owner`, `source_ref`, `asset_excerpt`, `revision` ; règle : `check_id`, `kind`, `when`, `expect`, `message`, `status`, `review` ; `may_decide` pour l'expert agissant), `counts` par statut, `mandatory_without_clause[]` (contrôles obligatoires actifs sans aucune clause) et `pending_publication` (décisions pas encore publiées).
+
+**`PATCH /api/knowledge/assets/{asset_id}/checks/{check_id}`** (`kb:review`, expert agissant via `X-Actor-Email`, propriétaire du domaine ou `kb:maintain`) — corps `{decision: "validate"|"amend"|"reject", comment?, clause?}`. `amend` valide une clause corrigée (`clause` : `kind`, `when`, `expect`, `message`, champs absents conservés) ; `amend` et `reject` exigent un commentaire. Codes : `200` (la clause après décision), `400` (décision ou clause invalide, commentaire manquant), `403`, `404`. L'actif reçoit une nouvelle `revision` et la décision est ajoutée à `data/kb/clause-decisions.jsonl` (versionné avec la base).
+
+**Effet** : au prochain `POST /api/knowledge/publications` (ou `kb publish`), qui publie aussi quand seules des décisions de clauses sont en attente. La réponse liste `clause_decisions` ; le CHANGELOG les nomme avec leur relecteur.
+
 **Instantané scellé** (D7, D8) : sections `embedding_model {id, version, sha256, dim, local: true, query_prefix, passage_prefix}` et `embedding_index {model, count, items: [{ref, type, text_sha256}], content_sha256}`, hors `payload_sha256`. Elles ne dépendent que de la base et du modèle épinglé (pas de la machine) : le test de fraîcheur (`rebuiltByEmitterTest`) les reconstruit à l'octet.
 
 **Évaluation** : `tests/fixtures/similarity/fr-en-doctrine.yaml` (48 sujets français anonymisés, 8 requêtes anglaises), `make eval-semantic`. Rappel à 5 : 0,90 en hybride contre 0,72 en lexical (français 0,88 contre 0,67 ; anglais 1,00 contre 0,92).

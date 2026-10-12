@@ -31,6 +31,8 @@ from pipelines.doctrine.text import Vocabulary, match_terms
 
 CHECK_KINDS = ("requires", "forbids")
 MATCHER_KEYS = ("terms_any", "terms_all")
+# Per-clause status (contract 1.26): only a ``validated`` clause blocks; a ``rejected`` one is never evaluated.
+CLAUSE_STATUSES = ("draft", "validated", "rejected")
 
 
 @dataclass(frozen=True)
@@ -62,7 +64,7 @@ class CheckClause:
     when: Matcher
     expect: Matcher | None
     message: str
-    status: str = "draft"  # draft | validated (from ``checks_status``)
+    status: str = "draft"  # draft | validated (the clause's own ``status``, else the asset's ``checks_status``)
     extra: dict[str, Any] = field(default_factory=dict, compare=False)
 
 
@@ -100,7 +102,25 @@ def validate_clause(raw: Any) -> list[str]:
         problems.append("'expect' is only meaningful for kind 'requires'")
     if raw.get("message") is not None and not isinstance(raw.get("message"), str):
         problems.append("'message' must be a string")
+    if raw.get("status") is not None and raw.get("status") not in CLAUSE_STATUSES:
+        problems.append(f"'status' must be one of {list(CLAUSE_STATUSES)}")
     return problems
+
+
+def clause_status(raw: dict[str, Any], checks_status: str | None = None) -> str:
+    """Effective status of a raw clause: its own ``status``, else inherited from the asset's ``checks_status``."""
+    own = raw.get("status")
+    if own in CLAUSE_STATUSES:
+        return str(own)
+    return "validated" if str(checks_status or "").lower() in ("validated", "active") else "draft"
+
+
+def aggregate_checks_status(raw_checks: list[dict[str, Any]]) -> str:
+    """Asset-level ``checks_status`` derived from its clauses: ``validated`` when every kept clause is validated."""
+    kept = [c for c in raw_checks if c.get("status") != "rejected"]
+    if kept and all(c.get("status") == "validated" for c in kept):
+        return "validated"
+    return "partial" if any(c.get("status") == "validated" for c in kept) else "draft"
 
 
 def _matcher(block: dict[str, Any] | None) -> Matcher | None:
@@ -120,10 +140,12 @@ def parse_checks(raw_checks: Any, checks_status: str | None = None) -> list[Chec
     """
     if not isinstance(raw_checks, list):
         return []
-    status = "validated" if str(checks_status or "").lower() in ("validated", "active") else "draft"
     clauses = []
     for raw in raw_checks:
         if validate_clause(raw):
+            continue
+        status = clause_status(raw, checks_status)
+        if status == "rejected":
             continue
         when = _matcher(raw.get("when"))
         if when is None:
