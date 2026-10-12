@@ -19,8 +19,11 @@ def test_get_framework_coverage_tool():
     jsonschema.validate(res, SCHEMA)
     data = res["data"]
     assert data["NOT-A-FRAMEWORK"]["status"] == "missing"
-    assert data["NIS2"]["status"] == "partial"  # provisional manifest: never covered
-    assert data["NIS2"]["expected"] == len(data["NIS2"]["missing_ids"]) + data["NIS2"]["present"]
+    # NIS2: all requirements published and coverage declared by the maintainers
+    assert data["NIS2"]["status"] == "covered" and data["NIS2"]["declared_by"] == "@maintainers"
+    assert data["NIS2"]["expected"] == data["NIS2"]["present"] == 19 and data["NIS2"]["missing_ids"] == []
+    assert data["ISO27001"]["status"] == "partial"  # provisional manifest: never covered
+    assert data["ISO27001"]["expected"] == len(data["ISO27001"]["missing_ids"]) + data["ISO27001"]["present"]
     assert data["ISO27001"]["expected"] == 93
     assert get_framework_coverage([])["status"] == "invalid_argument"
     assert get_framework_coverage("NIS2,RGPD")["count"] == 2

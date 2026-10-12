@@ -17,6 +17,8 @@ from pipelines.compliance_mapper import compute_framework_coverage
 from pipelines.frameworks.links import suggest_links
 from pipelines.kb_cli import app
 
+from tests.integration.nis2_baseline import rewind_nis2
+
 ROOT = Path(__file__).parent.parent.parent
 EXCERPT = ROOT / "tests" / "fixtures" / "frameworks" / "nis2_excerpt.txt"
 EXPERT = "@security-compliance-team"
@@ -26,6 +28,7 @@ EXPERT = "@security-compliance-team"
 def env(tmp_path, monkeypatch):
     kb = tmp_path / "kb"
     shutil.copytree(ROOT / "data" / "kb", kb)
+    rewind_nis2(kb)
     monkeypatch.setenv("CANDIDATES_DIR", str(tmp_path / "candidates"))
     monkeypatch.delenv("LLM_ENDPOINT", raising=False)
     import mcp_server.core.notifier as notifier

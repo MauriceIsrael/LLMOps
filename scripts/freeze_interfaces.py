@@ -565,7 +565,7 @@ def build_catalogue() -> list[Interface]:
               headers=DELEGATED, delegate=True),
         _rest("POST", "/api/frameworks/ingestions/{ingestion_id}/apply", "/api/frameworks/ingestions/{ingestion}/apply",
               headers=DELEGATED, delegate=True),
-        _rest("POST", "/api/frameworks/{framework}/coverage-declaration", "/api/frameworks/NIS2/coverage-declaration",
+        _rest("POST", "/api/frameworks/{framework}/coverage-declaration", "/api/frameworks/RGPD/coverage-declaration",
               headers=DELEGATED, delegate=True),
         # Contract 1.6 — doctrine workshop and evaluations
         _rest("GET", "/api/knowledge/templates/{asset_type}", "/api/knowledge/templates/pattern"),

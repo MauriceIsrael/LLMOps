@@ -31,7 +31,7 @@ def test_list_controls_filtering():
 
     res_nis2 = list_controls(framework="NIS2")
     assert res_nis2["status"] == "ok"
-    assert res_nis2["count"] == 10
+    assert res_nis2["count"] == 19
     for c in res_nis2["data"]:
         assert c["framework"] == "NIS2"
         assert "implemented_by" in c
@@ -70,6 +70,6 @@ def test_get_compliance_matrix():
     data = res["data"]
     assert data["engagement"] == "nordwave-mcx-2027"
     assert data["framework"] == "NIS2"
-    assert data["total_controls"] == 10
+    assert data["total_controls"] == 19
     assert "matrix" in data
-    assert len(data["matrix"]) == 10
+    assert len(data["matrix"]) == 19
