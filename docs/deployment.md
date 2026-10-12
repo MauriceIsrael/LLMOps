@@ -208,3 +208,48 @@ Image for client tests (not for deployment): `docker build -f docker/Dockerfile.
 | Free the port | `fuser -k 8000/tcp` | `Get-NetTCPConnection -LocalPort 8000 \| % { Stop-Process -Id $_.OwningProcess }` |
 | Make targets | `make serve`, `make verify` | no `make`: use the `poetry run …` commands |
 
+
+
+## 7. Local semantic search (contract 1.25, issue #94)
+
+The Hub finds the doctrine relevant to a subject whatever its language: a French subject brings up an English control.
+It encodes with a **local** model on the processor (`intfloat/multilingual-e5-small`, int8 ONNX, 384 dimensions,
+~118 MB, MIT licence) through `fastembed`; no GPU, no extra service, and **no network call at query time**
+(`GET /health` → `embedding.local: true`).
+
+| Step | Command |
+|---|---|
+| Install (dependency `fastembed`) | `poetry install` |
+| Fetch the model once (pinned revision, every file checked against its SHA-256) | `poetry run kb models fetch` → `data/models/` (git-ignored) |
+| Check | `poetry run kb models status` (`ready`, `absent` or `off`), or `GET /health` → `embedding` |
+| Index the base (also done by every publication) | `poetry run kb embeddings index` (needs the governance database) |
+| Evaluate (FR→EN set, on demand / nightly) | `make eval-semantic` |
+
+The Docker image fetches and verifies the model at build time, in a cached layer. Without the model (or with
+`KB_EMBEDDINGS=off`) the doctrine context is exactly the lexical one (`relevance_method: "lexical"`).
+
+Settings: `KB_EMBEDDINGS=on|off` (default: on when the model is present), `KB_EMBEDDING_MODEL` (default
+`intfloat/multilingual-e5-small`), `KB_EMBEDDING_PROVIDER=local` (the only provider of v1), `KB_MODELS_DIR`
+(default `data/models`), `KB_EMBEDDING_THREADS` (ONNX threads, default 1: same model, snapshot and query give the same
+order), `KB_HYBRID_WEIGHT` (unset: the combined score is `max(lexical, semantic)`; a value w in [0, 1] gives
+`w * semantic + (1 - w) * lexical`).
+
+**Calibration** (run of `scripts/eval/eval_semantic_search.py` on `tests/fixtures/similarity/fr-en-doctrine.yaml`,
+56 cases: 48 French subjects, 8 English ones). Cosine similarities of the model are mapped onto [0, 1] with the band
+[0.70, 0.95]; an asset is `relevant` from a calibrated score of 0.50 (cosine 0.825), and the closest control of each
+declared framework from 0.40 (cosine 0.80).
+
+| Measure | Hybrid | Lexical |
+|---|---|---|
+| Recall at 5 (all / French / English) | 0.90 / 0.88 / 1.00 | 0.72 / 0.67 / 0.92 |
+| Expected assets flagged `relevant` | 0.93 | 0.59 |
+| Other assets flagged `relevant`, per case | 3.6 | 2.2 |
+
+Measured on a Windows laptop (one ONNX thread, passages encoded one by one so that a vector never depends on the other
+texts of its batch): model load with the SHA-256 check ≈ 1.1 s, encoding a query ≈ 2.5 ms (semantic scores of the whole
+base ≈ 18 ms), encoding the
+93 active assets ≈ 2.5 s (once; the vectors are then read from the `embeddings` table), resident memory ≈ 490 MB
+(peak ≈ 540 MB).
+
+The relevance **orders** the package; it never decides whether an option complies (ADR-KH-01 D9): that stays with the
+deterministic judge (`checks:` clauses).
