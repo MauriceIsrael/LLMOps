@@ -2101,11 +2101,35 @@ def _lexical_factory():
     return factory
 
 
-def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
-    """Validated knowledge close to a subject: ``{model, vector, query_text?, types?, domains?, top_k?}`` ('kb:review').
+def _server_side_query(query_text: str, model: str) -> dict[str, Any]:
+    """Vector of ``query_text`` by the reference model, with the in-memory vectors of the base, or an error envelope
+    (``409 model-mismatch`` for another model, ``503`` when the model is absent or off)."""
+    from pipelines.similarity.encoder import reference_encoder
+    from pipelines.similarity.semantic import MemoryVectors, calibrate, scorer_for
 
-    The client computes ``vector`` with the same model as the stored vectors. The result is **never a decision**:
-    every item has ``requires_confirmation: true`` and shows its provenance and its documented assumptions.
+    encoder, status = reference_encoder()
+    if model and model != status["model"]:
+        return {**invalid_argument_response(
+            "model", f"model-mismatch: the server encodes with its reference model '{status['model']}', not '{model}'. "
+            f"Send a 'vector' computed with '{model}', or omit 'model'."),
+            "conflict": True, "error": "model-mismatch", "reference_model": status["model"]}
+    if encoder is None:
+        return {"status": "unavailable", "reason": f"server-side encoding unavailable: the embedding model "
+                f"'{status['model']}' is {status['status']} ({status.get('reason')}). Send a 'vector' instead."}
+    scorer = scorer_for(encoder)
+    spec = encoder.spec
+    return {"model": spec.id, "vector": scorer.query(query_text), "store": MemoryVectors(scorer, server_config.kb_dir),
+            "score": lambda cos: calibrate(round(cos, 4), spec)}
+
+
+def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
+    """Validated knowledge close to a subject: ``{model?, vector?, query_text?, types?, domains?, top_k?}`` ('kb:review').
+
+    Either the client computes ``vector`` with the same model as the stored vectors (as before), or it sends only
+    ``query_text`` and the server encodes it with its local reference model (issue #94, lot E4): clients no longer need
+    to embed an encoder. Naming another ``model`` than the reference one without a vector is a ``409 model-mismatch``
+    (the server can only encode with its own model). The result is **never a decision**: every item has
+    ``requires_confirmation: true`` and shows its provenance and its documented assumptions.
     """
     from mcp_server.core.auth import has_scope
     from pipelines.kb_candidates.service import REVIEW_SCOPE
@@ -2114,32 +2138,41 @@ def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
 
     if not has_scope(REVIEW_SCOPE):
         return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
-    store = _embedding_store()
-    if store is None:
+    query_text = body.get("query_text")
+    has_text = isinstance(query_text, str) and bool(query_text.strip())
+    server_side = body.get("vector") is None and has_text
+    store: Any = _embedding_store()
+    if store is None and not server_side:
         return _NO_DB
     try:
-        query_text = body.get("query_text")
         types = _str_list(body.get("types"), "types")
         if isinstance(types, dict):
             return types
         domains = _str_list(body.get("domains"), "domains")
         if isinstance(domains, dict):
             return domains
+        model, vector, vector_score = str(body.get("model") or ""), body.get("vector"), None
+        if server_side:
+            served = _server_side_query(str(query_text).strip(), model)
+            if "status" in served:
+                return served
+            model, vector, store, vector_score = served["model"], served["vector"], served["store"], served["score"]
         lexical = None
-        if isinstance(query_text, str) and query_text.strip():
+        if has_text:
             lexical = _lexical_factory()(query_text)
         judgements = summary = None
         fingerprint = body.get("subject_fingerprint")
-        if isinstance(fingerprint, str) and fingerprint:
+        if isinstance(fingerprint, str) and fingerprint and _embedding_store() is not None:
             from pipelines.kb_candidates.kb import load_assets
             from pipelines.similarity.reuse import ReuseStore
 
             reuse = ReuseStore()
             judgements = reuse.judgements(fingerprint, {a.id: a for a in load_assets(server_config.kb_dir)})
             summary = reuse.summary()
-        res = similar(store, server_config.kb_dir, str(body.get("model") or ""), body.get("vector"),
+        res = similar(store, server_config.kb_dir, model, vector,
                       query_text if isinstance(query_text, str) else None, types or None, domains or None,
-                      body.get("top_k") or 10, lexical, judgements, summary)
+                      body.get("top_k") or 10, lexical, judgements, summary, vector_score)
+        res["encoded_by"] = "server" if server_side else "client"
         return ok_response(res, count=len(res["results"]))
     except EmbeddingError as exc:
         return invalid_argument_response(exc.argument, exc.reason)

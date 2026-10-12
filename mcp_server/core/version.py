@@ -81,9 +81,17 @@ Minor versions only add interfaces or optional fields:
   proposes a local rule, same schema and checks as K19), ``…/rules/{id}/{assert,withdraw}`` (a decider other than the author
   asserts), ``GET /api/engagements/{id}/rules``. The engine reads the pinned base minus deactivations plus asserted local rules;
   the engagement snapshot gains ``rule_adjustments`` and the ``scope`` of each lineage item (``schemaVersion`` ``1.5``).
+* ``1.25`` — local multilingual semantic search (issue #94): the Hub encodes with a local model on the processor
+  (``intfloat/multilingual-e5-small`` through ``fastembed``, files pinned by SHA-256 in ``data/models/``, never a network
+  call at query time). ``GET /health`` gains ``embedding {model, version, sha256, local: true, status}``; the doctrine
+  context gains, per item, ``relevant``, ``semantic_relevance``, ``combined_relevance`` and ``relevance_method``, and
+  ``relevance_method`` / ``embedding`` for the package (lexical ranking unchanged when the model is absent or
+  ``KB_EMBEDDINGS=off``); ``POST /api/knowledge/similar`` encodes ``query_text`` itself when no ``vector`` is sent
+  (``encoded_by``, ``409 model-mismatch``); a publication indexes the active assets (``embedding_index`` in its response)
+  and the sealed snapshot declares ``embedding_model`` and ``embedding_index`` (outside ``payload_sha256``).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.24"
+CONTRACT_VERSION = "1.25"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "SimilarKnowledgeResponse",
-  "description": "Validated knowledge close to a subject (POST /api/knowledge/similar, contract 1.9). Never a decision.",
+  "description": "Validated knowledge close to a subject (POST /api/knowledge/similar, contract 1.9; server-side encoding of query_text, contract 1.25). Never a decision.",
   "type": "object",
   "required": [
     "status",
@@ -133,6 +133,13 @@
               }
             }
           }
+        },
+        "encoded_by": {
+          "enum": [
+            "client",
+            "server"
+          ],
+          "description": "server: the query_text was encoded by the Hub's local reference model (contract 1.25)."
         }
       }
     }

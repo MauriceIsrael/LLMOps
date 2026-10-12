@@ -997,6 +997,22 @@ Les règles de référence (§5.22) vivent dans la base de connaissance et ne sa
 
 **Non livré dans ce lot** : la capitalisation d'une règle locale vers le référentiel par le canal de propositions (K7, K13), après retrait de toute ancre de programme. Elle suivra K7 et K13.
 
+### 5.25 Contrat 1.25 — Recherche sémantique multilingue locale (issue #94)
+
+Le Hub retrouve la doctrine pertinente pour un sujet quelle que soit sa langue : un sujet en français fait remonter un contrôle rédigé en anglais. Il encode lui-même, **localement et sur processeur**, avec `intfloat/multilingual-e5-small` (ONNX int8, 384 dimensions) servi par `fastembed`. Les fichiers du modèle sont téléchargés une fois (`kb models fetch`, ou à la construction de l'image) dans `data/models/`, chacun vérifié contre son SHA-256 épinglé ; **aucun appel réseau à l'exécution**. Sans le modèle, ou avec `KB_EMBEDDINGS=off`, tout se comporte comme en 1.24 (classement lexical).
+
+**Santé** : `GET /health` gagne `embedding {model, version, sha256, dim, local: true, provider: "local", status: "ready"|"absent"|"off", reason}`.
+
+**Contexte de doctrine** (`get_doctrine_context`, `GET /api/knowledge/context`), champs additifs par élément : `relevance` (lexicale, inchangée), `semantic_relevance` (similarité cosinus sujet `query:` / actif `passage:`, ramenée sur [0, 1] par la bande calibrée du modèle ; `null` sans modèle), `combined_relevance` (par défaut `max(lexicale, sémantique)` ; `KB_HYBRID_WEIGHT` = w donne `w × sémantique + (1 − w) × lexicale`), `relevance_method` (`lexical` sans modèle, `semantic` si seul le sens a parlé, `hybrid` sinon) et `relevant`. Un élément est **pertinent** si sa pertinence lexicale atteint 0,2 ou sa pertinence sémantique 0,50 ; parmi les contrôles imposés d'un référentiel déclaré, le plus proche du sujet l'est dès 0,40. Seuls les éléments pertinents entrent dans le paquet, sauf les contrôles imposés, **tous inclus** et triés : priorité de type, pertinents d'abord, score combiné, identifiant. Pour le paquet : `relevance_method` (`lexical` | `hybrid`) et `embedding {model, version, sha256, local}` (ou `null`). Scores arrondis à 4 décimales, un fil ONNX, un texte par passage : même modèle, même base, même sujet ⇒ même ordre. **D9 inchangée** : la pertinence trie, elle ne décide jamais.
+
+**Similarité encodée par le serveur** (`POST /api/knowledge/similar`) : sans `vector`, avec `query_text`, le serveur encode lui-même avec son modèle de référence (les vecteurs des actifs viennent de la table `embeddings`, ou sont encodés en mémoire) ; `scores.vector` est alors la similarité calibrée et `scores.cosine` le cosinus brut ; la réponse porte `encoded_by: "server"|"client"`. Nommer un autre `model` sans `vector` renvoie `409` (`error: "model-mismatch"`, `reference_model`) ; modèle absent : `503`. Le chemin historique (vecteur calculé par le client, comparé aux vecteurs déposés pour **son** modèle) est inchangé.
+
+**Publication** (`kb publish`, `POST /api/knowledge/publications`) : encode les actifs actifs dont le texte a changé (même `text_sha256` : non réencodé), supprime les vecteurs des actifs retirés ou remplacés, et rend `embedding_index {status: indexed|skipped|failed, encoded, unchanged, removed, content_sha256…}` ; un modèle absent n'empêche jamais une publication. `kb embeddings index` fait la même chose sans publier.
+
+**Instantané scellé** (D7, D8) : sections `embedding_model {id, version, sha256, dim, local: true, query_prefix, passage_prefix}` et `embedding_index {model, count, items: [{ref, type, text_sha256}], content_sha256}`, hors `payload_sha256`. Elles ne dépendent que de la base et du modèle épinglé (pas de la machine) : le test de fraîcheur (`rebuiltByEmitterTest`) les reconstruit à l'octet.
+
+**Évaluation** : `tests/fixtures/similarity/fr-en-doctrine.yaml` (48 sujets français anonymisés, 8 requêtes anglaises), `make eval-semantic`. Rappel à 5 : 0,90 en hybride contre 0,72 en lexical (français 0,88 contre 0,67 ; anglais 1,00 contre 0,92).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés
