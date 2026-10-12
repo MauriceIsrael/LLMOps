@@ -3,6 +3,8 @@
 Provides tools for searching and retrieving reusable architecture knowledge assets (Asset, GlossaryTerm, Principle, ADR).
 """
 
+import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +23,8 @@ from mcp_server.core.envelope import (
 )
 from mcp_server.core.version import CONTRACT_VERSION
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
+
+logger = logging.getLogger(__name__)
 
 
 def _get_db():
@@ -948,6 +952,36 @@ def _str_list(value: Any, name: str) -> list[str] | dict[str, Any]:
     return invalid_argument_response(name, f"'{name}' must be a list of strings.")
 
 
+def _hybrid_weight() -> float | None:
+    """``KB_HYBRID_WEIGHT`` in [0, 1]: weighted mean of semantic and lexical relevance; unset: their maximum."""
+    from pipelines.doctrine.context import DEFAULT_HYBRID_WEIGHT
+
+    raw = os.getenv("KB_HYBRID_WEIGHT", "").strip()
+    try:
+        value = float(raw) if raw else None
+    except ValueError:
+        value = None
+    return value if value is not None and 0.0 <= value <= 1.0 else DEFAULT_HYBRID_WEIGHT
+
+
+def _semantic_relevance(subject: str) -> tuple[dict[str, float] | None, dict[str, Any] | None]:
+    """Calibrated semantic relevance of every active asset for ``subject`` with the server's local model, or
+    ``(None, None)`` when the model is off or absent (the doctrine context then stays lexical). Never raises."""
+    try:
+        from pipelines.similarity.encoder import reference_encoder
+        from pipelines.similarity.semantic import scorer_for
+
+        encoder, status = reference_encoder()
+        if encoder is None:
+            return None, None
+        scores = scorer_for(encoder).scores(server_config.kb_dir, subject)
+        return ({ref: s["semantic"] for ref, s in scores.items()},
+                {"model": status["model"], "version": status["version"], "sha256": status["sha256"], "local": True})
+    except Exception as exc:  # the lexical ranking is always available
+        logger.warning("semantic relevance unavailable, lexical ranking: %s", exc)
+        return None, None
+
+
 def get_doctrine_context(
     subject: str,
     domains: list[str] | None = None,
@@ -982,6 +1016,7 @@ def get_doctrine_context(
     try:
         from pipelines.doctrine import build_doctrine_context
 
+        semantic, embedding = _semantic_relevance(subject.strip())
         payload = build_doctrine_context(
             _doctrine_index(),
             subject=subject.strip(),
@@ -991,6 +1026,9 @@ def get_doctrine_context(
             max_items=max_items,
             max_chars=max_chars,
             snapshot_id=_latest_snapshot_id(),
+            semantic=semantic,
+            weight=_hybrid_weight(),
+            embedding=embedding,
         )
         return ok_response(payload, count=len(payload["items"]))
     except Exception as e:
