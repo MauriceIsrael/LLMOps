@@ -77,8 +77,12 @@ def similar(
     lexical: Any = None,
     judgements: dict[str, list[dict[str, Any]]] | None = None,
     summary: dict[str, dict[str, int]] | None = None,
+    vector_score: Any = None,
 ) -> dict[str, Any]:
-    """``lexical(asset_id) -> float | None`` is the deterministic relevance of the doctrine engine for the query."""
+    """``lexical(asset_id) -> float | None`` is the deterministic relevance of the doctrine engine for the query.
+
+    ``vector_score(cosine) -> float`` maps the cosine onto the calibrated scale of the server's reference model (issue
+    #94: server-side encoding); the raw cosine is then reported as ``scores.cosine``."""
     space = store.model_space(model)
     if space is None:
         known = [m["model_id"] for m in store.models()]
@@ -94,7 +98,10 @@ def similar(
         if asset is None or (types and asset.type not in types):
             continue
         prov = _provenance(asset)
-        parts = {"vector": max(0.0, cosine(query, item["vector"]))}
+        cos = max(0.0, cosine(query, item["vector"]))
+        parts = {"vector": vector_score(cos) if vector_score else cos}
+        if vector_score:
+            parts["cosine"] = cos
         if query_text and lexical is not None:
             rel = lexical(asset.id)
             if rel is not None:

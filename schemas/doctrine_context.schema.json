@@ -95,6 +95,33 @@
               "required": {
                 "type": "boolean",
                 "description": "Control of a framework listed in 'frameworks'."
+              },
+              "relevant": {
+                "type": "boolean",
+                "description": "Relevant for the subject (contract 1.25): lexical or semantic relevance above its threshold. Separates the doctrine that is relevant from the controls only required by the frameworks. Orders, never decides (D9)."
+              },
+              "semantic_relevance": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Calibrated similarity in the local model's space (contract 1.25); null without the model."
+              },
+              "combined_relevance": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Score that orders the package (contract 1.25)."
+              },
+              "relevance_method": {
+                "enum": [
+                  "lexical",
+                  "semantic",
+                  "hybrid"
+                ],
+                "description": "lexical: no model; semantic: found by meaning only; hybrid: both kinds of evidence (contract 1.25)."
               }
             }
           }
@@ -107,6 +134,20 @@
             "string",
             "null"
           ]
+        },
+        "relevance_method": {
+          "enum": [
+            "lexical",
+            "hybrid"
+          ],
+          "description": "Contract 1.25."
+        },
+        "embedding": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Local model of the semantic relevance {model, version, sha256, local: true}; null in lexical mode (contract 1.25)."
         }
       }
     }

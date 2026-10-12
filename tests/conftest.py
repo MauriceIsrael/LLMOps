@@ -31,6 +31,11 @@ ROOT_DIR = Path(__file__).parent.parent
 os.environ.setdefault("LLMOPS_ENGAGEMENT", "nordwave-mcx-2027")
 os.environ.setdefault("LLMOPS_BLUEPRINT", "BLU-hla-mcx")
 
+# Issue #94: the suite never depends on a real embedding model being present in data/models/ (the ranking would then
+# vary with the machine). Tests of the semantic ranking switch it on with the toy encoder (KB_EMBEDDING_MODEL=toy-bow);
+# the FR->EN evaluation with the real model is opt-in (tests/eval/test_semantic_fr_en.py, KB_SEMANTIC_EVAL=1).
+os.environ.setdefault("KB_EMBEDDINGS", "off")
+
 _GUARDED_PATHS = (
     "data/*.lbug",
     "data/engagements",

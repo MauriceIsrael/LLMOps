@@ -64,3 +64,6 @@ apps/kb-client-app/svelte-check-output.txt
 apps/kb-client-app/scratch/
 data/governance.db
 .llmops-local-service-token
+
+# Local embedding models (issue #94): fetched by `kb models fetch`, never committed
+data/models/

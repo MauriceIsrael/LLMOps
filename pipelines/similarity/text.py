@@ -59,5 +59,6 @@ def embeddable_assets(kb_dir: str | Path) -> list[dict[str, Any]]:
         if a.type not in EMBEDDABLE_TYPES or str(a.frontmatter.get("status")) != "active":
             continue
         text = asset_text(a)
-        items.append({"ref": a.id, "type": a.type, "title": a.title, "text": text, "text_sha256": text_sha256(text)})
+        items.append({"ref": a.id, "type": a.type, "title": a.title, "text": text, "text_sha256": text_sha256(text),
+                      "language": "en,fr" if a.frontmatter.get("title_fr") else "en"})
     return sorted(items, key=lambda i: (i["type"], i["ref"]))

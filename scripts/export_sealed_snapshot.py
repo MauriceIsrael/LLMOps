@@ -31,6 +31,7 @@ from pipelines.knowledge_ref import (
     revision_of,
     write_ledger,
 )
+from pipelines.similarity.index import snapshot_section
 from pipelines.snapshot_envelope import channel_envelope
 
 
@@ -311,6 +312,9 @@ def export_sealed_snapshot(
         },
         # K19: same treatment (own seal, outside payload_sha256); the rules are recomputed from data/kb/triggers by the emitter.
         "question_triggers": {"items": published_rules, "content_sha256": canonical.sha256(published_rules)},
+        # Issue #94 (E2): the reference embedding model {id, version, sha256} and the fingerprint of the index (which text
+        # each vector stands for). Derived from data/kb and the pinned model only, outside payload_sha256 (additive).
+        **snapshot_section(server_config.kb_dir),
         **payload_data,
     }
 

@@ -17,6 +17,12 @@ Framework ingestion (plan L3):
     kb declare-coverage --framework NIS2 --by @expert
     kb coverage NIS2 ISO27001 ...
 
+Local semantic search (issue #94):
+
+    kb models fetch                     download the pinned embedding model into data/models/ (once)
+    kb models status                    ready | absent | off, as the server sees it
+    kb embeddings index                 (re)encode the active assets (also done by every publication)
+
 The commit of the knowledge base is left to the maintainer.
 """
 
@@ -139,6 +145,12 @@ def publish_cmd(
     if not result["published"]:
         console.print(f"[yellow]{result['message']}[/yellow]")
         return
+    from pipelines.similarity.index import index_after_publication
+
+    index = index_after_publication(kb_dir)
+    console.print(f"embedding index: {index['status']} ({index.get('model')}"
+                  + (f", {index['encoded']} encoded, {index['unchanged']} unchanged, {index['removed']} removed"
+                     if index["status"] == "indexed" else f": {index.get('reason')}") + ")")
     console.print(f"[bold green]✓ published {', '.join(result['published'])}[/bold green] "
                   f"in {result['snapshot_id']} (notified: {', '.join(result['channels'])}). "
                   "Review and commit data/kb, data/knowledge.lbug and the snapshot.")
@@ -311,6 +323,72 @@ def coverage_report_cmd(
 
     output.write_text(render_coverage_report(kb_dir), encoding="utf-8")
     console.print(f"[bold green]✓ coverage report[/bold green] → {output}")
+
+
+models_app = typer.Typer(help="Local embedding models (data/models/, git-ignored): fetch once, then offline.",
+                         no_args_is_help=True)
+app.add_typer(models_app, name="models")
+
+MODELS_DIR_OPTION = typer.Option(None, "--models-dir", help="Models directory (default: KB_MODELS_DIR or data/models).")
+
+
+@models_app.command("fetch")
+def models_fetch_cmd(
+    model: str = typer.Option(None, "--model", help="Model id (default: KB_EMBEDDING_MODEL or the reference model)."),
+    models_dir: Path = MODELS_DIR_OPTION,
+    force: bool = typer.Option(False, "--force", help="Download again even when the local copy is intact."),
+) -> None:
+    """Download the pinned files of the embedding model and check their SHA-256 (the only network access)."""
+    from pipelines.similarity.encoder import reset_cache, settings
+    from pipelines.similarity.models import fetch, spec_for
+
+    s = settings()
+    try:
+        spec = spec_for(model or s.model)
+    except ValueError as exc:
+        _fail(str(exc))
+    if not spec.files:
+        console.print(f"[yellow]{spec.id} has no file to fetch.[/yellow]")
+        return
+    try:
+        path = fetch(spec, models_dir or s.models_dir, force=force)
+    except Exception as exc:  # network, disk or integrity: nothing half-installed is ever loaded
+        _fail(f"fetch failed: {exc}")
+    reset_cache()
+    console.print(f"[bold green]✓ {spec.id}[/bold green] @ {spec.version[:12]} in {path} "
+                  f"(model sha256 {spec.sha256}). Restart the server, then 'kb embeddings index' or publish.")
+
+
+@models_app.command("status")
+def models_status_cmd() -> None:
+    """Status of the reference embedding model as the server sees it (ready, absent or off)."""
+    from pipelines.similarity.encoder import embedding_status
+
+    console.print_json(json.dumps(embedding_status(), ensure_ascii=False))
+
+
+embeddings_app = typer.Typer(help="Vectors of the knowledge base computed by the server's reference model.",
+                             no_args_is_help=True)
+app.add_typer(embeddings_app, name="embeddings")
+
+
+@embeddings_app.command("index")
+def embeddings_index_cmd(kb_dir: Path = KB_DIR_OPTION) -> None:
+    """(Re)encode the active assets whose text changed and drop the vectors of retired ones (as a publication does)."""
+    from pipelines.governance.store import database_url
+    from pipelines.similarity.encoder import reference_encoder
+    from pipelines.similarity.index import build_index
+    from pipelines.similarity.store import EmbeddingStore
+
+    load_dotenv()
+    if not database_url():
+        _fail("No governance database: set GOVERNANCE_DATABASE_URL (or CANDIDATES_BACKEND=sql).")
+    encoder, status = reference_encoder()
+    if encoder is None:
+        _fail(f"embedding model {status['model']} is {status['status']}: {status.get('reason')}")
+        return
+    res = build_index(EmbeddingStore(), kb_dir, encoder)
+    console.print_json(json.dumps(res, ensure_ascii=False))
 
 
 def main() -> None:

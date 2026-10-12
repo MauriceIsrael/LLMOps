@@ -104,6 +104,14 @@ class EmbeddingStore:
         return [{"ref": r.ref, "kind": r.kind, "text_sha256": r.text_sha256, "language": r.language,
                  "vector": json.loads(r.vector)} for r in rows]
 
+    def delete_refs(self, model_id: str, refs: list[str]) -> int:
+        """Remove the vectors of ``refs`` for ``model_id`` (assets retired or replaced)."""
+        if not refs:
+            return 0
+        with self.engine.begin() as conn:
+            return int(conn.execute(embeddings.delete().where(
+                (embeddings.c.model_id == model_id) & (embeddings.c.ref.in_(refs)))).rowcount)
+
     def delete_model(self, model_id: str) -> int:
         with self.engine.begin() as conn:
             return int(conn.execute(embeddings.delete().where(embeddings.c.model_id == model_id)).rowcount)

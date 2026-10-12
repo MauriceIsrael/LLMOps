@@ -342,6 +342,14 @@ def create_starlette_app() -> Starlette:
             except Exception:
                 engine_commit = "d7d3291"
 
+        # Issue #94: the reference embedding model, always local (the server never calls the network at query time).
+        from starlette.concurrency import run_in_threadpool
+
+        from pipelines.similarity.encoder import embedding_status
+
+        emb = await run_in_threadpool(embedding_status)
+        embedding = {k: emb.get(k) for k in ("model", "version", "sha256", "dim", "local", "provider", "status", "reason")}
+
         return JSONResponse(
             {
                 "status": "ok",
@@ -351,6 +359,7 @@ def create_starlette_app() -> Starlette:
                 "engine_version": "0.1.0",
                 "engine_commit": engine_commit,
                 "kb": kb_meta,
+                "embedding": embedding,
             },
             status_code=200,
         )

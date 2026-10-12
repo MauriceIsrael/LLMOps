@@ -1,4 +1,4 @@
-.PHONY: serve demo demo-check install test test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
+.PHONY: serve demo demo-check install models-fetch eval-semantic test test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
 
 install:
 	poetry install
@@ -45,6 +45,15 @@ contract-server:
 # Option judge evaluation: recall of expected violations on the annotated dataset.
 eval-check:
 	poetry run python scripts/eval/eval_check_option.py
+
+# Local semantic search (issue #94): fetch the pinned embedding model once (data/models/, git-ignored), then the
+# FR->EN evaluation with the real model (recall at 5, hybrid vs lexical). Run it on demand and nightly.
+models-fetch:
+	poetry run kb models fetch
+
+eval-semantic:
+	poetry run python scripts/eval/eval_semantic_search.py --verbose
+	KB_SEMANTIC_EVAL=1 poetry run pytest tests/eval/test_semantic_fr_en.py -m semantic_eval -v
 
 # Install the git pre-push hook that runs `make verify`.
 hooks:

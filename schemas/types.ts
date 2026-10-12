@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.20")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.25")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -188,12 +188,21 @@ export interface DoctrineContextItem {
   has_checks: boolean;
   framework?: string | null;
   required?: boolean;
+  /** Contract 1.25 (local semantic search): what ordered the item. Orders, never decides (D9). */
+  relevant?: boolean;
+  semantic_relevance?: number | null;
+  combined_relevance?: number;
+  relevance_method?: "lexical" | "semantic" | "hybrid";
 }
+
+export interface EmbeddingModelInfo { model: string; version: string; sha256: string | null; local: true }
 
 export interface DoctrineContext {
   items: DoctrineContextItem[];
   truncated: boolean;
   snapshot_id: string | null;
+  relevance_method?: "lexical" | "hybrid";   // contract 1.25
+  embedding?: EmbeddingModelInfo | null;      // contract 1.25
 }
 
 export interface DoctrineContextRequest {
@@ -551,8 +560,10 @@ export interface EmbeddingDeposit {
   items: Array<{ ref: string; text_sha256: string; vector: number[]; language?: "fr" | "en" }>;
 }
 
+/** Contract 1.25: send only ``query_text`` (no ``vector``, no ``model`` or the reference one) and the Hub encodes it
+ *  with its local reference model; another ``model`` without a vector answers 409 ``model-mismatch``. */
 export interface SimilarKnowledgeRequest {
-  model: string; vector: number[]; query_text?: string; types?: string[]; domains?: string[]; top_k?: number;
+  model?: string; vector?: number[]; query_text?: string; types?: string[]; domains?: string[]; top_k?: number;
   subject_fingerprint?: string;
 }
 
