@@ -474,6 +474,17 @@ def build_catalogue() -> list[Interface]:
               "/api/engagements/contract-eng/statements/{stmt3}/withdraw", member="contrib@example.org"),
         _rest("POST", "/api/engagements/{engagement}/requirements", "/api/engagements/contract-eng/requirements",
               json_body={"requirements": [{"id": "REQ-1", "text": "Encrypt data at rest"}]}, member="contrib@example.org"),
+        # Contract 1.27 — decision on a requirement, and the requirements a subject carries
+        _rest("POST", "/api/engagements/{engagement}/requirements/{requirement_id}/disposition",
+              "/api/engagements/contract-eng/requirements/REQ-1/disposition",
+              json_body={"disposition": "evacuated", "reason": "Out of the architecture scope"}, member="contrib@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/requirements/{requirement_id}/disposition/assert",
+              "/api/engagements/contract-eng/requirements/REQ-1/disposition/assert", member="decider@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/requirements/{requirement_id}/disposition/withdraw",
+              "/api/engagements/contract-eng/requirements/REQ-1/disposition/withdraw", member="admin@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/subjects/{name}/requirements",
+              "/api/engagements/contract-eng/subjects/mcx-services/requirements", json_body={"add": ["REQ-1"]},
+              member="contrib@example.org"),
         _rest("POST", "/api/engagements/{engagement}/import", "/api/engagements/contract-eng/import?dry_run=true", json_body={
             "batch_id": "contract-batch", "subjects": [{"name": "imported-subject", "maturity": "L1_framed"}],
             "statements": [{"key": "imp-1", "subject": "imported-subject", "value": "Imported fact", "confidence": "designed",

@@ -38,10 +38,16 @@ def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
     raw = {
         "requirements": [
             {"id": "REQ-001", "text": "The gateway shall survive the loss of one site.", "section": "3.2", "category": "resilience",
-             "criticality": "mandatory", "status": "gap"},
+             "criticality": "mandatory", "status": "gap", "disposition": "deliberated", "disposition_reason": "",
+             "disposition_status": "active", "disposition_author": "@carl", "disposition_by": "@ada",
+             "disposition_validated_at": "2026-10-02T09:40:00"},
             {"id": "REQ-002", "text": "Data at rest shall be encrypted.", "section": "4.1", "category": "security",
-             "criticality": "mandatory", "status": "gap"},
+             "criticality": "mandatory", "status": "gap", "disposition": "clarification_needed",
+             "disposition_reason": "Which key custody model does the client expect for data at rest?",
+             "disposition_status": "proposed", "disposition_author": "@dan", "disposition_by": "",
+             "disposition_validated_at": ""},
         ],
+        "subject_requirements": {"gateway-services": ["REQ-001"]},
         "subjects": [{"name": "core-network", "definition": "", "level": "L1_framed"},
                      {"name": "gateway-services", "definition": "Mission-critical services", "level": "L3_decided"}],
         "statements": [

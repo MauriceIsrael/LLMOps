@@ -270,6 +270,23 @@ def build_write_routes() -> list[Route]:
     async def requirements(request):
         return await _handle(request, "contribute", lambda w, b, m: (200, w.add_requirements(b)))
 
+    async def propose_disposition(request):
+        rid = request.path_params["requirement_id"]
+        return await _handle(request, "contribute", lambda w, b, m: _created(w.propose_disposition(rid, b)))
+
+    async def assert_disposition(request):
+        rid = request.path_params["requirement_id"]
+        return await _handle(request, "decide", lambda w, b, m: (200, w.assert_disposition(rid)))
+
+    async def withdraw_disposition(request):
+        rid = request.path_params["requirement_id"]
+        return await _handle(request, "contribute",
+                             lambda w, b, m: (200, w.withdraw_disposition(rid, m["role"] in DECIDING_ROLES)))
+
+    async def carry_requirements(request):
+        name = request.path_params["name"]
+        return await _handle(request, "contribute", lambda w, b, m: (200, w.carry_requirements(name, b)))
+
     async def propose_rule(request):
         return await _handle(request, "contribute", lambda w, b, m: (201, w.rules.propose_local(b)))
 
@@ -315,5 +332,9 @@ def build_write_routes() -> list[Route]:
         Route(f"{base}/questions", endpoint=questions, methods=["POST"]),
         Route(f"{base}/questions/{{question_id}}/answers", endpoint=answers, methods=["POST"]),
         Route(f"{base}/requirements", endpoint=requirements, methods=["POST"]),
+        Route(f"{base}/requirements/{{requirement_id}}/disposition", endpoint=propose_disposition, methods=["POST"]),
+        Route(f"{base}/requirements/{{requirement_id}}/disposition/assert", endpoint=assert_disposition, methods=["POST"]),
+        Route(f"{base}/requirements/{{requirement_id}}/disposition/withdraw", endpoint=withdraw_disposition, methods=["POST"]),
+        Route(f"{base}/subjects/{{name}}/requirements", endpoint=carry_requirements, methods=["POST"]),
         Route(f"{base}/conflicts/{{conflict_id}}/arbitrate", endpoint=arbitrate, methods=["POST"]),
     ]
