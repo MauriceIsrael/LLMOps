@@ -6,6 +6,17 @@ is loaded. A file that does not match is never loaded: the Hub falls back to its
 
 Standard library only, so the Docker build can run this module on its own (``python pipelines/similarity/models.py
 fetch``) in a cached layer, before the application code is copied.
+
+Behind a proxy that inspects HTTPS (corporate network, antivirus, WSL without the host's certificates), the TLS
+verification is never disabled (issue #111). Instead:
+
+* ``KB_MODELS_CA_BUNDLE`` (or ``SSL_CERT_FILE``, ``REQUESTS_CA_BUNDLE``) names a PEM file of extra trusted
+  certificates, e.g. the proxy's root certificate, added to the default ones;
+* ``KB_MODELS_BASE_URL`` (or ``HF_ENDPOINT``) points to a mirror of huggingface.co (same URL layout);
+* ``fetch(..., source_dir=...)`` installs files downloaded elsewhere (``kb models fetch --from-dir``), checked against
+  the same SHA-256 (``kb models urls`` lists what to download).
+
+Proxies are taken from ``HTTPS_PROXY`` / ``NO_PROXY`` as usual.
 """
 
 from __future__ import annotations
@@ -13,7 +24,10 @@ from __future__ import annotations
 import hashlib
 import os
 import shutil
+import ssl
 import sys
+import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -124,20 +138,91 @@ def verify(spec: ModelSpec, models_dir: str | Path | None = None) -> list[str]:
     return problems
 
 
-def fetch(spec: ModelSpec, models_dir: str | Path | None = None, force: bool = False, quiet: bool = False) -> Path:
-    """Download the pinned files of ``spec`` (only those missing or corrupt) and check them. Network: here only."""
+CA_BUNDLE_VARS = ("KB_MODELS_CA_BUNDLE", "SSL_CERT_FILE", "REQUESTS_CA_BUNDLE")
+
+
+class CertificateError(RuntimeError):
+    """The download was refused because the server's certificate is not trusted (proxy inspecting HTTPS?)."""
+
+
+def base_url() -> str:
+    return (os.getenv("KB_MODELS_BASE_URL") or os.getenv("HF_ENDPOINT") or HF_BASE).rstrip("/")
+
+
+def file_urls(spec: ModelSpec) -> dict[str, str]:
+    """Local file name -> download URL of every pinned file (pinned revision: the bytes never change)."""
+    return {spec.local_name(r): f"{base_url()}/{spec.repo}/resolve/{spec.version}/{r}" for r in sorted(spec.files)}
+
+
+def ssl_context() -> ssl.SSLContext:
+    """Default trust store, plus the PEM bundle named by ``KB_MODELS_CA_BUNDLE`` (or SSL_CERT_FILE, REQUESTS_CA_BUNDLE).
+
+    Verification stays on: an extra bundle only adds trusted roots, such as the one of a proxy inspecting HTTPS.
+    """
+    ctx = ssl.create_default_context()
+    for var in CA_BUNDLE_VARS:
+        bundle = os.getenv(var)
+        if bundle:
+            if not Path(bundle).is_file():
+                raise CertificateError(f"{var}={bundle}: no such certificate file.")
+            ctx.load_verify_locations(cafile=bundle)
+            break
+    return ctx
+
+
+CERTIFICATE_HELP = (
+    "the certificate presented for {host} is not trusted ({reason}). A proxy or an antivirus probably inspects HTTPS "
+    "on this network. Verification is never disabled; instead either:\n"
+    "  1. export KB_MODELS_CA_BUNDLE=/path/to/proxy-root.pem (the proxy's root certificate, PEM) and run again;\n"
+    "  2. export KB_MODELS_BASE_URL=https://<mirror of huggingface.co> if your organisation has one;\n"
+    "  3. download the files listed by 'kb models urls' with a browser, then 'kb models fetch --from-dir <folder>'\n"
+    "     (each file is checked against its pinned SHA-256)."
+)
+
+
+def _download(url: str, partial: Path, context: ssl.SSLContext) -> None:
+    try:
+        with urllib.request.urlopen(url, timeout=60, context=context) as resp, partial.open("wb") as out:  # noqa: S310
+            shutil.copyfileobj(resp, out, length=1 << 20)
+    except (ssl.SSLCertVerificationError, urllib.error.URLError) as exc:
+        reason = getattr(exc, "reason", exc)
+        if isinstance(exc, ssl.SSLCertVerificationError) or isinstance(reason, ssl.SSLCertVerificationError):
+            partial.unlink(missing_ok=True)
+            host = urllib.parse.urlsplit(url).hostname or url
+            raise CertificateError(CERTIFICATE_HELP.format(host=host, reason=getattr(reason, "verify_message", None)
+                                                           or reason)) from exc
+        raise
+
+
+def fetch(spec: ModelSpec, models_dir: str | Path | None = None, force: bool = False, quiet: bool = False,
+          source_dir: str | Path | None = None) -> Path:
+    """Install the pinned files of ``spec`` (only those missing or corrupt) and check them.
+
+    From the network (here only), or from ``source_dir`` when the files were downloaded elsewhere; either way a file
+    whose SHA-256 differs from the pinned one is never installed.
+    """
     base = model_dir(spec, models_dir)
     base.mkdir(parents=True, exist_ok=True)
+    context = ssl_context() if source_dir is None else None
+    urls = file_urls(spec)
     for remote, expected in sorted(spec.files.items()):
-        target = base / spec.local_name(remote)
+        name = spec.local_name(remote)
+        target = base / name
         if not force and target.is_file() and file_sha256(target) == expected:
             continue
-        url = f"{HF_BASE}/{spec.repo}/resolve/{spec.version}/{remote}"
         partial = target.with_name(target.name + ".part")
-        if not quiet:
-            print(f"downloading {url}", flush=True)
-        with urllib.request.urlopen(url, timeout=60) as resp, partial.open("wb") as out:  # noqa: S310 (pinned https URL)
-            shutil.copyfileobj(resp, out, length=1 << 20)
+        if source_dir is not None:
+            source = Path(source_dir) / name
+            if not source.is_file():
+                raise RuntimeError(f"{source}: missing (download it from {urls[name]}).")
+            if not quiet:
+                print(f"copying {source}", flush=True)
+            shutil.copyfile(source, partial)
+        else:
+            if not quiet:
+                print(f"downloading {urls[name]}", flush=True)
+            assert context is not None
+            _download(urls[name], partial, context)
         actual = file_sha256(partial)
         if actual != expected:
             partial.unlink(missing_ok=True)

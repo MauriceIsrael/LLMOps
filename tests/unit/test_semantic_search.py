@@ -94,7 +94,7 @@ def test_fetch_checks_the_pinned_hash_and_skips_intact_files(tmp_path, monkeypat
     spec = _fake_spec(content)
     calls = []
 
-    def fake_urlopen(url, timeout=0):
+    def fake_urlopen(url, timeout=0, context=None):
         calls.append(url)
         return io.BytesIO(content)
 
@@ -109,7 +109,7 @@ def test_fetch_checks_the_pinned_hash_and_skips_intact_files(tmp_path, monkeypat
 
 def test_fetch_refuses_a_file_that_does_not_match(tmp_path, monkeypatch):
     spec = _fake_spec(b"expected")
-    monkeypatch.setattr(models_mod.urllib.request, "urlopen", lambda url, timeout=0: io.BytesIO(b"tampered"))
+    monkeypatch.setattr(models_mod.urllib.request, "urlopen", lambda url, timeout=0, context=None: io.BytesIO(b"tampered"))
     with pytest.raises(RuntimeError, match="does not match"):
         fetch(spec, tmp_path, quiet=True)
     assert not any((tmp_path / spec.dirname).iterdir())  # nothing half-installed
