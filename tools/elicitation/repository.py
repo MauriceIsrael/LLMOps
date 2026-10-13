@@ -617,8 +617,6 @@ class ElicitationRepository:
         """Récupère un conflit par son identifiant avec les statement_ids impliqués."""
         query = "MATCH (c:Conflict {id: $conflict_id}) RETURN c.id as id, c.kind as kind, c.detail as detail, c.status as status, c.origin as origin, c.resolution as resolution, c.arbitrated_by as arbitrated_by;"
         res = self.db_client.execute_cypher(query, params={"conflict_id": conflict_id})
-        if not res or "error" in res[0]:
-            print(f"DEBUG GET_CONFLICT ERROR FOR {conflict_id}: {res}")
         if res and "error" not in res[0]:
             c = res[0]
             inv_query = "MATCH (c:Conflict {id: $conflict_id})-[:INVOLVES]->(st:Statement) RETURN st.id as id;"

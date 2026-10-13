@@ -15,12 +15,12 @@ ELICITATION = ROOT / "tools" / "elicitation"
 
 
 def test_no_print_in_the_flows():
-    """A `print` in a flow writes the content of an expert's answer to the standard output (and to the container logs)."""
+    """A `print` in the engine writes the content of an expert's answer to the standard output (and to the container logs)."""
     offenders = []
-    for path in sorted((ELICITATION / "flows").glob("*.py")):
+    for path in sorted(ELICITATION.rglob("*.py")):
         for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "print":
-                offenders.append(f"{path.name}:{node.lineno}")
+                offenders.append(f"{path.relative_to(ELICITATION)}:{node.lineno}")
     assert offenders == []
 
 
