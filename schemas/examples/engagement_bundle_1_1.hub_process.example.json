@@ -1,0 +1,203 @@
+{
+  "schemaVersion": "1.1",
+  "snapshotId": "bundle-eng-netops-nis2-2026-10-02T140000000Z",
+  "sourceSystem": "archinex",
+  "createdAt": "2026-10-02T14:00:00.000Z",
+  "sourceRevision": "example",
+  "data": {
+    "engagement": {
+      "id": "eng-netops-nis2",
+      "title": "Network operations platform under NIS2 (illustrative example)",
+      "language": "en",
+      "confidentiality": "internal",
+      "client_label": "Network operations platform under NIS2 (illustrative example)"
+    },
+    "is_provisional": true,
+    "provisional_reasons": {
+      "unripe_subjects": [
+        "SUBJ-training"
+      ],
+      "open_conflicts": []
+    },
+    "pins": {
+      "hub_snapshot": {
+        "engagement_id": "eng-netops-nis2",
+        "snapshot_id": "eng-eng-netops-nis2-0123456789ab",
+        "checksum": "sha256:abababababababababababababababababababababababababababababababab"
+      }
+    },
+    "source_documents": [
+      {
+        "id": "SRC-7c80b75b",
+        "kind": "rfp",
+        "title": "Network operations RFP",
+        "language": "en",
+        "sha256": "7c80b75b4ad2fc9371d66e3dd13b62db07ad41de05079bd0d333922507386cdf"
+      }
+    ],
+    "requirements": [
+      {
+        "id": "SRC-7c80b75b:4.1",
+        "source_document_id": "SRC-7c80b75b",
+        "clause_ref": "4.1",
+        "text": "Significant incidents must be notified to the competent authority within 24 hours.",
+        "language": "en",
+        "title": "Incident notification",
+        "criticality": "bloquant",
+        "category": "NFR",
+        "disposition": "deliberated",
+        "assertion_level": "asserted",
+        "provenance": {
+          "basis": "human_validation",
+          "by": [
+            "@lead-architect"
+          ],
+          "at": "2026-10-02T10:00:00.000Z"
+        }
+      },
+      {
+        "id": "SRC-7c80b75b:4.2",
+        "source_document_id": "SRC-7c80b75b",
+        "clause_ref": "4.2",
+        "text": "The supplier trains the operator staff before go-live.",
+        "language": "en",
+        "title": "Operator training",
+        "criticality": "majeur",
+        "category": "FR",
+        "disposition": "deliberated",
+        "disposition_reason": "Training load against the go-live date",
+        "assertion_level": "proposed",
+        "provenance": {
+          "basis": "ai_proposal",
+          "by": [
+            "@model-example-model"
+          ],
+          "at": "2026-10-02T09:00:00.000Z"
+        }
+      },
+      {
+        "id": "SRC-7c80b75b:4.3",
+        "source_document_id": "SRC-7c80b75b",
+        "clause_ref": "4.3",
+        "text": "Six workstations are provided in the control room.",
+        "language": "en",
+        "title": "Office furniture",
+        "criticality": "info",
+        "category": "FAC",
+        "disposition": "evacuated",
+        "disposition_reason": "Facilities, with no architecture impact",
+        "assertion_level": "proposed",
+        "provenance": {
+          "basis": "ai_proposal",
+          "by": [
+            "@model-example-model"
+          ],
+          "at": "2026-10-02T09:00:00.000Z"
+        }
+      },
+      {
+        "id": "SRC-7c80b75b:4.4",
+        "source_document_id": "SRC-7c80b75b",
+        "clause_ref": "4.4",
+        "text": "The platform recovers quickly after a site loss.",
+        "language": "en",
+        "title": "Recovery delay",
+        "criticality": "majeur",
+        "category": "NFR",
+        "disposition": "clarification_needed",
+        "clarification_question": "Which recovery time objective is tolerated after the loss of a site?",
+        "assertion_level": "proposed",
+        "provenance": {
+          "basis": "ai_proposal",
+          "by": [
+            "@model-example-model"
+          ],
+          "at": "2026-10-02T09:00:00.000Z"
+        }
+      },
+      {
+        "id": "SRC-7c80b75b:4.5",
+        "source_document_id": "SRC-7c80b75b",
+        "clause_ref": "4.5",
+        "text": "All management flows are encrypted.",
+        "language": "en",
+        "title": "Encrypted flows",
+        "criticality": "bloquant",
+        "category": "NFR",
+        "disposition": "to_qualify",
+        "disposition_reason": "A blocking clause the model proposed to evacuate: a person must settle it",
+        "assertion_level": "open",
+        "provenance": {
+          "basis": "ai_proposal",
+          "by": [
+            "@model-example-model"
+          ],
+          "at": "2026-10-02T09:00:00.000Z"
+        }
+      }
+    ],
+    "subjects": [
+      {
+        "id": "SUBJ-incident-notification",
+        "title": "Incident notification chain",
+        "domains": [
+          "operations"
+        ],
+        "maturity": "L3_decided",
+        "status": "open",
+        "requirement_ids": [
+          "SRC-7c80b75b:4.1"
+        ],
+        "decision_ids": []
+      },
+      {
+        "id": "SUBJ-training",
+        "title": "Operator training plan",
+        "domains": [
+          "operations"
+        ],
+        "maturity": "L1_framed",
+        "status": "open",
+        "requirement_ids": [
+          "SRC-7c80b75b:4.2"
+        ],
+        "decision_ids": []
+      }
+    ],
+    "decisions": [],
+    "statements": [],
+    "conflicts": [],
+    "compliance": [],
+    "gaps": [
+      {
+        "id": "GAP-Q-001",
+        "kind": "G2_unanswered_blocking",
+        "subject_id": "SUBJ-incident-notification",
+        "description": "Which authority portal applies?",
+        "blocking": false
+      },
+      {
+        "id": "GAP-SRC-7c80b75b:4.4",
+        "kind": "requirement_clarification",
+        "requirement_id": "SRC-7c80b75b:4.4",
+        "description": "À clarifier auprès du donneur d'ordre : Which recovery time objective is tolerated after the loss of a site?",
+        "blocking": false
+      },
+      {
+        "id": "GAP-SRC-7c80b75b:4.5",
+        "kind": "requirement_unqualified",
+        "requirement_id": "SRC-7c80b75b:4.5",
+        "description": "La clause 4.5 n'est pas qualifiée : A blocking clause the model proposed to evacuate: a person must settle it",
+        "blocking": true
+      }
+    ],
+    "architecture": {
+      "elements": [],
+      "relations": []
+    },
+    "kb_references": [],
+    "reuse_log": [],
+    "glossary": []
+  },
+  "checksum": "sha256:6387ba65cb3d3c905076845d9d8cbfc0c3e29687f21295385fb46c239c3992c3"
+}

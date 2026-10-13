@@ -4,6 +4,11 @@ JSON Schema checks the shape; this module checks what a schema cannot express an
 needs: the seal (suite canonical-json profile, ``pipelines/canonical.py``), unique and resolving identifiers, assertion
 levels DERIVED from epistemic statuses, claims backed by a person, reuse backed by a confirmation, cited KB assets listed,
 the two-stage provisional rule, no e-mail address.
+
+Schema 1.1 adds the audit of the RFP requirements. Its rules (REQ_*) apply to every requirement that carries a
+``disposition``; a 1.0 document has none, so it is unaffected. A requirement is a claim without an epistemic status: its
+assertion level is not derived, but only a person can make it 'asserted'. A schema cannot say that a clause to deliberate
+must be carried by a subject, or that an unresolved clause must appear in ``gaps`` so that no generator misses it.
 """
 
 from __future__ import annotations
@@ -76,6 +81,35 @@ def _walk_strings(node: Any, path: str = ""):
     elif isinstance(node, list):
         for i, v in enumerate(node):
             yield from _walk_strings(v, f"{path}/{i}")
+
+
+def requirement_audit_problems(requirements: list[dict[str, Any]], subjects: list[dict[str, Any]], gaps: list[dict[str, Any]]) -> list[Problem]:
+    """Rules of the requirement audit (schema 1.1). The disposition values themselves are checked by the schema."""
+    out: list[Problem] = []
+    carried_by: dict[str, list[str]] = {}
+    for s in subjects:
+        for rid in s.get("requirement_ids", []):
+            carried_by.setdefault(rid, []).append(s.get("id", ""))
+    with_gap = {g.get("requirement_id") for g in gaps if g.get("requirement_id")}
+    for i, r in enumerate(requirements):
+        disposition = r.get("disposition")
+        if disposition is None:
+            continue
+        where = f"/data/requirements/{i}"
+        if disposition == "evacuated" and not (r.get("disposition_reason") or "").strip():
+            out.append(Problem("REQ_UNJUSTIFIED", where, "an evacuated requirement needs a disposition_reason"))
+        if disposition == "clarification_needed" and not (r.get("clarification_question") or "").strip():
+            out.append(Problem("REQ_UNJUSTIFIED", where, "a requirement to clarify needs a clarification_question"))
+        if disposition == "evacuated" and r.get("criticality") == "bloquant" and r.get("assertion_level") != "asserted":
+            out.append(Problem("REQ_BLOCKING_EVACUATED", where, "a blocking requirement cannot be evacuated unless a person decided it (assertion_level asserted)"))
+        carriers = carried_by.get(r.get("id", ""), [])
+        if disposition == "deliberated" and not carriers:
+            out.append(Problem("REQ_UNCOVERED", where, "a requirement to deliberate must belong to at least one subject"))
+        if disposition != "deliberated" and carriers:
+            out.append(Problem("REQ_NOT_DELIBERATED", where, f"listed by subject(s) {', '.join(carriers)} but its disposition is '{disposition}'"))
+        if disposition in ("to_qualify", "clarification_needed") and r.get("id") not in with_gap:
+            out.append(Problem("REQ_NO_GAP", where, "an unresolved requirement must be listed in data.gaps so no generator can miss it"))
+    return out
 
 
 def invariant_problems(bundle: dict[str, Any]) -> list[Problem]:
@@ -170,6 +204,15 @@ def invariant_problems(bundle: dict[str, Any]) -> list[Problem]:
         prov = it.get("provenance") or {}
         if level == "asserted" and (prov.get("basis") not in HUMAN_BASES or not prov.get("by")):
             out.append(Problem("UNBACKED_CLAIM", where, "an asserted item needs provenance.basis human_validation or reuse_confirmation and at least one validator"))
+
+    # audited requirements (1.1): 'asserted' needs a person; the other levels are the producer's proposal
+    for i, r in enumerate(collections["requirements"]):
+        if "disposition" not in r:
+            continue
+        prov = r.get("provenance") or {}
+        if r.get("assertion_level") == "asserted" and (prov.get("basis") not in HUMAN_BASES or not prov.get("by")):
+            out.append(Problem("UNBACKED_CLAIM", f"/data/requirements/{i}", "an asserted requirement needs provenance.basis human_validation or reuse_confirmation and at least one validator"))
+    out += requirement_audit_problems(collections["requirements"], collections["subjects"], collections["gaps"])
 
     # reuse is backed by a confirmation judged assumption by assumption
     log = {r["id"]: r for r in collections["reuse_log"]}

@@ -2,14 +2,16 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/MauriceIsrael/LLMOps/schemas/engagement_bundle.schema.json",
   "title": "EngagementBundle",
-  "description": "PROPOSED contract, owner to be confirmed (the producer, not the knowledge hub: the hub holds no programme data). Sealed, versioned outcome of an engagement (requirements, subjects, validated decisions with their assumptions, compliance matrix, architecture model) from which documents, diagrams and decision cards are DERIVED. Every claim carries its epistemic status; a generator may only write as fact what has assertion_level 'asserted'. Sealed as a suite ExternalSnapshotEnvelope: checksum = sha256 of `data` under the suite canonical-json profile v1. Rules JSON Schema cannot express (identifiers resolve, levels derive from statuses, reuse is backed by a confirmation, no e-mail addresses...) are checked by pipelines/bundle/verify.py. Plan: docs/plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md.",
+  "description": "PROPOSED contract, owner to be confirmed (the producer, not the knowledge hub: the hub holds no programme data). Sealed, versioned outcome of an engagement (requirements, subjects, validated decisions with their assumptions, compliance matrix, architecture model) from which documents, diagrams and decision cards are DERIVED. Every claim carries its epistemic status; a generator may only write as fact what has assertion_level 'asserted'. Sealed as a suite ExternalSnapshotEnvelope: checksum = sha256 of `data` under the suite canonical-json profile v1. Rules JSON Schema cannot express (identifiers resolve, levels derive from statuses, reuse is backed by a confirmation, no e-mail addresses...) are checked by pipelines/bundle/verify.py. Versions: 1.0, and 1.1 which adds the audit of the RFP requirements (disposition, reason, assertion level and provenance on each requirement), four gap kinds, an optional pins.kb and pins.llmops_contract_version, and pins.hub_snapshot (the Hub snapshot that holds the committed facts of a cut-over engagement). What 1.1 adds is rejected in a 1.0 document. Plan: docs/plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
       "enum": [
-        "1.0"
-      ]
+        "1.0",
+        "1.1"
+      ],
+      "description": "1.1 adds the requirement audit, four gap kinds, optional kb pins and pins.hub_snapshot; a 1.0 document may use none of them."
     },
     "snapshotId": {
       "$ref": "#/definitions/id"
@@ -213,12 +215,32 @@
                 "version"
               ],
               "description": "Model that proposed similarity, if any (recorded for reproducibility)."
+            },
+            "hub_snapshot": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "engagement_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "snapshot_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "checksum": {
+                  "type": "string",
+                  "pattern": "^sha256:[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "engagement_id",
+                "snapshot_id",
+                "checksum"
+              ],
+              "description": "Hub snapshot that holds the committed facts (decisions, statements) of an engagement cut over to the Hub. When present, this bundle carries the process only: no decision, no statement, and no subject is declared decided here (1.1)."
             }
-          },
-          "required": [
-            "llmops_contract_version",
-            "kb"
-          ]
+          }
         },
         "source_documents": {
           "type": "array",
@@ -284,13 +306,61 @@
                   "fr",
                   "en"
                 ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Short title of the clause (1.1)."
+              },
+              "criticality": {
+                "enum": [
+                  "bloquant",
+                  "majeur",
+                  "info"
+                ],
+                "description": "Criticality stated by the source; a blocking clause is never evacuated without a person (1.1)."
+              },
+              "category": {
+                "type": "string",
+                "description": "Requirement category, e.g. FR, NFR, INT (1.1)."
+              },
+              "disposition": {
+                "enum": [
+                  "deliberated",
+                  "evacuated",
+                  "clarification_needed",
+                  "to_qualify"
+                ],
+                "description": "State retained for the clause: the decision of a person if there is one, otherwise the producer's proposal. deliberated = carried by at least one subject; evacuated = out of the debate, with a reason; clarification_needed = a question for the client; to_qualify = nobody could settle (1.1)."
+              },
+              "disposition_reason": {
+                "type": "string",
+                "description": "Reason of the evacuation, tension to deliberate, or why it could not be settled (1.1)."
+              },
+              "clarification_question": {
+                "type": "string",
+                "description": "Question to put to the client when disposition is clarification_needed (1.1)."
+              },
+              "assertion_level": {
+                "$ref": "#/definitions/assertion_level",
+                "description": "'asserted' only when a person decided the disposition; 'proposed' when it is a model or tool proposal; 'open' when it is to_qualify (1.1)."
+              },
+              "provenance": {
+                "$ref": "#/definitions/provenance",
+                "description": "Who proposed or decided the disposition, and when (1.1)."
               }
             },
             "required": [
               "id",
               "source_document_id",
               "text"
-            ]
+            ],
+            "dependencies": {
+              "disposition": [
+                "assertion_level",
+                "provenance"
+              ]
+            }
           }
         },
         "subjects": {
@@ -609,6 +679,10 @@
                   "uncovered_requirement",
                   "missing_assumption",
                   "unreviewed_proposal",
+                  "requirement_unqualified",
+                  "requirement_clarification",
+                  "decided_without_decision",
+                  "statement_without_subject",
                   "other"
                 ]
               },
@@ -1037,5 +1111,71 @@
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:\\-]*$",
       "description": "Identifier of a KB asset (principle, pattern, decision, control...) that MUST be listed in data.kb_references."
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": "1.0"
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "properties": {
+              "pins": {
+                "required": [
+                  "llmops_contract_version",
+                  "kb"
+                ],
+                "propertyNames": {
+                  "enum": [
+                    "llmops_contract_version",
+                    "kb",
+                    "frameworks",
+                    "embedding"
+                  ]
+                }
+              },
+              "requirements": {
+                "items": {
+                  "propertyNames": {
+                    "enum": [
+                      "id",
+                      "source_document_id",
+                      "clause_ref",
+                      "text",
+                      "language"
+                    ]
+                  }
+                }
+              },
+              "gaps": {
+                "items": {
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "G1_empty_section",
+                        "G2_unanswered_blocking",
+                        "G3_principle_unaddressed",
+                        "uncovered_requirement",
+                        "missing_assumption",
+                        "unreviewed_proposal",
+                        "other"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
