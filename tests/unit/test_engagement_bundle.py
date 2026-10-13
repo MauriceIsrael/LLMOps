@@ -146,12 +146,10 @@ def test_no_e_mail_address_in_a_bundle():
 
 
 # ── Schema 1.1: audit of the RFP requirements, optional kb pins, Hub snapshot pin ──────────────────────────────────────
-# The 1.1 examples were assembled and sealed by Archinex (TypeScript). Verifying them here also proves that its seal and
+# The 1.1 example was assembled and sealed by Archinex (TypeScript). Verifying it here also proves that its seal and
 # the suite canonical-json profile agree byte for byte.
 
 EXAMPLE_11 = json.loads((ROOT / "schemas" / "examples" / "engagement_bundle_1_1.example.json").read_text(encoding="utf-8"))
-EXAMPLE_11_HUB = json.loads((ROOT / "schemas" / "examples" / "engagement_bundle_1_1.hub_process.example.json").read_text(encoding="utf-8"))
-HUB_PIN = {"engagement_id": "eng-x", "snapshot_id": "eng-eng-x-0123456789ab", "checksum": "sha256:" + "ab" * 32}
 
 
 def mutated11(change, base=None) -> dict:
@@ -164,10 +162,9 @@ def req(d, clause):
     return next(r for r in d["requirements"] if r["clause_ref"] == clause)
 
 
-def test_the_1_1_examples_verify_and_carry_the_audit():
-    for example in (EXAMPLE_11, EXAMPLE_11_HUB):
-        assert example["schemaVersion"] == "1.1"
-        assert [str(p) for p in verify_bundle(example)] == []
+def test_the_1_1_example_verifies_and_carries_the_audit():
+    assert EXAMPLE_11["schemaVersion"] == "1.1"
+    assert [str(p) for p in verify_bundle(EXAMPLE_11)] == []
     assert {r["disposition"] for r in EXAMPLE_11["data"]["requirements"]} == {"deliberated", "evacuated", "clarification_needed", "to_qualify"}
 
 
@@ -182,7 +179,6 @@ def test_the_1_0_example_is_still_valid_as_1_0():
         lambda d: d["requirements"][0].update(title="Added by 1.1"),
         lambda d: d["requirements"][0].update(criticality="majeur"),
         lambda d: d["gaps"].append({"id": "GAP-9", "kind": "requirement_unqualified", "description": "x", "blocking": False}),
-        lambda d: d["pins"].update(hub_snapshot=HUB_PIN),
         lambda d: d["pins"].pop("kb"),
         lambda d: d["pins"].pop("llmops_contract_version"),
     ],
@@ -197,21 +193,6 @@ def test_a_1_1_document_may_omit_the_kb_pins():
     # An engagement can use no knowledge base: pins.kb and pins.llmops_contract_version are optional from 1.1.
     assert EXAMPLE_11["data"]["pins"] == {}
     assert codes(EXAMPLE_11) == set()
-
-
-def test_the_hub_snapshot_pin_is_well_formed_and_changes_the_seal():
-    pinned = mutated11(lambda d: d["pins"].update(hub_snapshot=HUB_PIN))
-    assert codes(pinned) == set()
-    assert pinned["checksum"] != EXAMPLE_11["checksum"]
-    assert "SCHEMA" in codes(mutated11(lambda d: d["pins"].update(hub_snapshot={**HUB_PIN, "checksum": "sha256:short"})))
-    assert "SCHEMA" in codes(mutated11(lambda d: d["pins"].update(hub_snapshot={"engagement_id": "eng-x"})))
-
-
-def test_the_hub_process_bundle_declares_no_fact_and_no_decided_subject():
-    d = EXAMPLE_11_HUB["data"]
-    assert d["pins"]["hub_snapshot"]["checksum"].startswith("sha256:")
-    assert d["decisions"] == [] and d["statements"] == []
-    assert all(s["status"] != "decided" for s in d["subjects"])
 
 
 @pytest.mark.parametrize(

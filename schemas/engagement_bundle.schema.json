@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/MauriceIsrael/LLMOps/schemas/engagement_bundle.schema.json",
   "title": "EngagementBundle",
-  "description": "PROPOSED contract, owner to be confirmed (the producer, not the knowledge hub: the hub holds no programme data). Sealed, versioned outcome of an engagement (requirements, subjects, validated decisions with their assumptions, compliance matrix, architecture model) from which documents, diagrams and decision cards are DERIVED. Every claim carries its epistemic status; a generator may only write as fact what has assertion_level 'asserted'. Sealed as a suite ExternalSnapshotEnvelope: checksum = sha256 of `data` under the suite canonical-json profile v1. Rules JSON Schema cannot express (identifiers resolve, levels derive from statuses, reuse is backed by a confirmation, no e-mail addresses...) are checked by pipelines/bundle/verify.py. Versions: 1.0, and 1.1 which adds the audit of the RFP requirements (disposition, reason, assertion level and provenance on each requirement), four gap kinds, an optional pins.kb and pins.llmops_contract_version, and pins.hub_snapshot (the Hub snapshot that holds the committed facts of a cut-over engagement). What 1.1 adds is rejected in a 1.0 document. Plan: docs/plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md.",
+  "description": "PROPOSED contract, owner to be confirmed (the producer, not the knowledge hub: the hub holds no programme data). Sealed, versioned outcome of an engagement (requirements, subjects, validated decisions with their assumptions, compliance matrix, architecture model) from which documents, diagrams and decision cards are DERIVED. Every claim carries its epistemic status; a generator may only write as fact what has assertion_level 'asserted'. Sealed as a suite ExternalSnapshotEnvelope: checksum = sha256 of `data` under the suite canonical-json profile v1. Rules JSON Schema cannot express (identifiers resolve, levels derive from statuses, reuse is backed by a confirmation, no e-mail addresses...) are checked by pipelines/bundle/verify.py. Versions: 1.0, and 1.1 which adds the audit of the RFP requirements (disposition, reason, assertion level and provenance on each requirement), four gap kinds, an optional pins.kb and pins.llmops_contract_version. What 1.1 adds is rejected in a 1.0 document. Plan: docs/plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -11,7 +11,7 @@
         "1.0",
         "1.1"
       ],
-      "description": "1.1 adds the requirement audit, four gap kinds, optional kb pins and pins.hub_snapshot; a 1.0 document may use none of them."
+      "description": "1.1 adds the requirement audit, four gap kinds, optional kb pins; a 1.0 document may use none of them."
     },
     "snapshotId": {
       "$ref": "#/definitions/id"
@@ -215,30 +215,6 @@
                 "version"
               ],
               "description": "Model that proposed similarity, if any (recorded for reproducibility)."
-            },
-            "hub_snapshot": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "engagement_id": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "snapshot_id": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "checksum": {
-                  "type": "string",
-                  "pattern": "^sha256:[0-9a-f]{64}$"
-                }
-              },
-              "required": [
-                "engagement_id",
-                "snapshot_id",
-                "checksum"
-              ],
-              "description": "Hub snapshot that holds the committed facts (decisions, statements) of an engagement cut over to the Hub. When present, this bundle carries the process only: no decision, no statement, and no subject is declared decided here (1.1)."
             }
           }
         },
