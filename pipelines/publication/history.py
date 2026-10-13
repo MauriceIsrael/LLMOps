@@ -20,8 +20,8 @@ from typing import Any
 import yaml
 
 from pipelines.kb_candidates.clauses import decisions as list_clause_decisions
-from pipelines.kb_candidates.kb import load_assets, split_frontmatter
-from pipelines.knowledge_ref import format_typed_id, load_ledger, revision_of
+from pipelines.kb_candidates.kb import load_assets
+from pipelines.knowledge_ref import format_typed_id
 
 # Reconstituted changelog sections for history prior to 12/10
 HISTORICAL_CHANGELOG_ENTRIES = """

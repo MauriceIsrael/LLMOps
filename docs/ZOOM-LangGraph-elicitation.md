@@ -19,7 +19,7 @@ En pratique, LangGraph apporte trois choses : un **état typé** par flux (`Type
 | Flux | Fichier | Nœuds (dans l'ordre) | Checkpointer | Lancé par |
 |---|---|---|---|---|
 | **A — Scan** | `flows/scan.py` | `load_frame` → `detect_gaps` → `enrich` → `crystallize` → `persist_questions` → `dispatch` | non | `elicit scan` |
-| **B — Intake** | `flows/intake.py` | `load_question` → `interpret` → **`confirm` (interrupt)** → `persist` → `check` → `raise_conflicts` | **oui, SQLite** | `elicit answer`, `elicit confirm` |
+| **B — Intake** | `flows/intake.py` | `load_question` → `interpret` → **`confirm` (interrupt)** → `persist` → `check` | **oui, SQLite** | `elicit answer`, `elicit confirm` |
 | **C — Assemble** | `flows/assemble.py` | `gather` → `render` → `global_check` → `report` | non | `elicit assemble` |
 | **D — Harvest** | `flows/harvest.py` | `harvest` | non | `elicit harvest` |
 | **Plan** | `flows/plan.py` | `plan` | non | `elicit plan` |
@@ -61,9 +61,8 @@ sequenceDiagram
   E->>P2: elicit confirm Q --accept
   P2->>CK: reprise du thread Q
   P2->>P2: confirm reçoit Command(resume={action: accept})
-  P2->>G: persist : énoncés, incertitudes, maturité, sous-sujets
-  P2->>G: check : contradictions déterministes
-  P2->>G: raise_conflicts : nœuds Conflict (aucun énoncé écrasé)
+  P2->>G: persist : énoncés (proposés sur un engagement géré), incertitudes, maturité, sous-sujets
+  P2->>G: check : run_checks, la définition unique, enregistre les nœuds Conflict (aucun énoncé écrasé)
 ```
 
 - **Un thread par question** : `thread_id = question_id`. Le checkpoint vit dans `projects/<engagement>/.checkpoints.sqlite` ; on peut interrompre la session et la reprendre **des jours plus tard, depuis un autre processus**.
@@ -100,20 +99,20 @@ flowchart TB
 
 Les deux familles écrivent dans **le même graphe d'engagement** par le même `ElicitationRepository`, mais avec des **garanties différentes**. C'est la principale chose à savoir avant de faire évoluer ce moteur.
 
-## 4. Écarts connus entre le moteur et le reste de l'architecture
+## 4. Écarts constatés, et leur résolution
 
-Ces points sont constatés dans le code ; ce sont des sujets de décision, pas des défauts corrigés.
+Constatés en écrivant ce document ; tous refermés (issues #78, #79, #80, #81, #82).
 
-1. **Le flux B écrit des énoncés `active` d'un seul geste.** `persist_node` fixe `status = "active"` après la confirmation de l'expert qui a répondu. L'API d'écriture K15, elle, ne produit que des énoncés `proposed` et exige un `decider` **distinct de l'auteur** pour affirmer ; le journal d'accès, les rôles (K14) et la vérification d'instantané (K11 : `SELF_VALIDATION`, `ASSERTED_WITHOUT_PERSON`) n'interviennent pas sur ce chemin. Un engagement géré peut donc recevoir, par la CLI, des énoncés affirmés que l'API aurait refusés — et l'instantané d'engagement les refusera à l'export (énoncé actif sans valideur). *À trancher : aligner le flux B sur K15 (énoncés proposés, affirmation séparée), ou borner la CLI aux engagements non gérés.*
-2. **Le flux B détecte les conflits à sa façon.** `check_node` a sa propre requête ; le dépôt a aussi `run_checks`, utilisé par l'API d'écriture à l'affirmation. Deux détecteurs, deux définitions de « contradiction ».
-3. **La cascade (K20) ne passe pas par le flux A.** Les sujets dérivés d'une décision et les questions du blueprint (`unlocks`) sont deux mécanismes : l'un statique (blueprint), l'autre conditionnel (règles K19). Ils ne se coordonnent pas ; le scan ne connaît pas les sujets `origin: derived`.
-4. **Les valeurs par défaut des nœuds sont codées en dur** (`"demo-2026"`, `data/kuzu_db`) alors que le serveur résout l'engagement et les chemins par sa configuration (`LLMOPS_ENGAGEMENT`, `LLMOPS_ENGAGEMENTS_DIR`). Le moteur suppose qu'on lui passe l'engagement et le chemin.
-5. **Des `print("DEBUG …")` subsistent** dans `intake.py` (dont le contenu intégral du fichier de réponse). À retirer avant tout usage sur des données réelles.
+1. **Le flux B écrivait des énoncés `active` d'un seul geste** (#78). Sur un engagement **géré** (inscrit au registre K14), `persist_node` écrit désormais des énoncés **`proposed`** (auteur = la personne qui répond), n'avance pas la maturité et ne détecte rien (rien n'est affirmé) ; `elicit confirm` le dit et renvoie vers l'API, où un `decider` distinct de l'auteur affirme. `elicit arbitrate`, `demote`, `contest` et `import` (hors simulation) refusent un engagement géré (code de sortie 2). Un engagement non géré garde le comportement d'avant (démo, scénarios).
+2. **Deux détecteurs de conflits** (#79). `check_node` appelle `ElicitationRepository.run_checks`, la définition de l'API d'écriture, et enregistre les conflits elle-même (le nœud `raise_conflicts` a disparu). La clause propre à l'intake (« auteurs différents sur des prédicats différents ») est **retirée** : deux avis sur deux propriétés distinctes ne sont pas une contradiction.
+3. **Le scan ignorait les sujets dérivés** (#80). Un sujet `origin: derived` resté à `L0_named` devient un manque `G1_empty_section` (section `derived:<sujet>`), routé vers le `suggested_role` de sa règle, avec la question de la règle. Pas de question tant que sa fondation est `contested` (elle repart quand la marque est levée), pas de doublon avec un sujet que le blueprint nomme, et rien pour une règle `mandatory` : la cascade a déjà posé sa question.
+4. **Valeurs par défaut codées en dur** : retirées (#82), l'engagement et la base sont résolus, jamais devinés.
+5. **`print("DEBUG …")`** : retirés (#81), garde-fou en test.
 
 ## 5. Quand LangGraph serait justifié davantage
 
 - **Plusieurs experts, plusieurs pauses** sur un même flux (aujourd'hui un `interrupt` par question) : les arêtes conditionnelles et la reprise par thread deviendraient utiles.
-- **Un flux B réaligné sur K15** : `confirm` produirait des énoncés *proposés*, et une seconde pause attendrait l'affirmation d'un `decider` distinct ; c'est exactement l'usage prévu de `interrupt`.
-- **Un flux unique « décision → cascade → scan »** qui relierait les trois mécanismes du point 3 : seulement si la cascade doit déclencher des questions dans la boîte aux lettres.
+- **Un flux B réaligné sur K15 jusqu'au bout** : `confirm` produit déjà des énoncés *proposés* sur un engagement géré ; une seconde pause attendrait l'affirmation d'un `decider` distinct ; c'est exactement l'usage prévu de `interrupt`.
+- **Un flux unique « décision → cascade → scan »** qui relierait la cascade et le scan (le scan lit déjà les sujets dérivés, mais ne les déclenche pas) : seulement si la cascade doit déclencher des questions dans la boîte aux lettres.
 
 Tant que ces besoins n'existent pas, remplacer LangGraph par des fonctions enchaînées ne changerait aucun comportement, à l'exception de la pause durable du flux B, qui est la seule fonction que la bibliothèque rend à moindre coût.

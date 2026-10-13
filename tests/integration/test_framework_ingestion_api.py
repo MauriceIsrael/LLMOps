@@ -8,7 +8,6 @@ import yaml
 from starlette.testclient import TestClient
 
 from mcp_server.core.config import server_config
-
 from tests.integration.nis2_baseline import rewind_nis2
 
 ROOT = Path(__file__).parent.parent.parent

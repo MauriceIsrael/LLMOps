@@ -16,7 +16,6 @@ from typer.testing import CliRunner
 from pipelines.compliance_mapper import compute_framework_coverage
 from pipelines.frameworks.links import suggest_links
 from pipelines.kb_cli import app
-
 from tests.integration.nis2_baseline import rewind_nis2
 
 ROOT = Path(__file__).parent.parent.parent

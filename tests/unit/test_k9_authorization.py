@@ -75,8 +75,9 @@ def test_wildcard_token_enumerates_everything(client, monkeypatch):
     assert body["count"] == 4
 
 
-def test_intake_conflict_query_binds_the_engagement(monkeypatch):
+def test_intake_conflict_detection_binds_the_engagement(monkeypatch):
     from tools.elicitation.flows import intake
+    from tools.elicitation.repository import ElicitationRepository
 
     seen = {}
 
@@ -88,9 +89,11 @@ def test_intake_conflict_query_binds_the_engagement(monkeypatch):
             seen["query"], seen["params"] = query, params
             return []
 
-    monkeypatch.setattr(intake, "make_graph_store", lambda **_: FakeStore())
+    # the only detection query is the repository's (issue #79); the engagement is bound as a parameter, never spliced in
+    monkeypatch.setattr("tools.elicitation.repository.make_graph_store", lambda **_: FakeStore(), raising=False)
+    monkeypatch.setattr(ElicitationRepository, "__init__", lambda self, **_: setattr(self, "db_client", FakeStore()))
     intake.check_node({"engagement": "eng-a", "db_path": "unused"})
-    assert "eng-a" not in seen["query"] and "$engagement" in seen["query"]  # bound as a parameter, never spliced into the query
+    assert "eng-a" not in seen["query"] and "$engagement" in seen["query"]
     assert seen["params"] == {"engagement": "eng-a"}
     # and a hostile identifier no longer gets that far: the engagement is validated before any query (issue #81)
     with pytest.raises(ValueError, match="Invalid engagement identifier"):
