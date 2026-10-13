@@ -220,7 +220,7 @@ def test_the_snapshot_carries_the_deactivations_and_the_local_rules(client):
     client.post(f"{BASE}/rules/{SPLIT}/disable", headers=as_("decider"), json={"justification": "Witness contracted"})
     client.post(f"{BASE}/rules", headers=as_("contributor"), json=LOCAL)
     before = export(client)
-    assert before["schemaVersion"] == "1.6" and verify(before) == []
+    assert before["schemaVersion"] == "1.7" and verify(before) == []
     adj = before["data"]["rule_adjustments"]
     assert [(d["trigger_id"], d["justification"], d["disabled_by"], d["resolved"]) for d in adj["disabled"]] == [(SPLIT, "Witness contracted", "@dan", True)]
     assert adj["local_rules"][0]["assertion_level"] == "proposed" and adj["local_rules"][0]["author"] == "@carl"

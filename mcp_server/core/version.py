@@ -117,10 +117,15 @@ Minor versions only add interfaces or optional fields:
   ``trigger`` and ``fact_key`` (``source.system`` ``kb-extraction``); ``GET /api/knowledge/triggers``,
   ``POST /api/knowledge/triggers/{validate,preview}``, ``POST /api/knowledge/candidates/{id}/merge-key``; offline command
   ``kb extract-triggers``.
+* ``1.30`` — the declared coverage requirement → control in the sealed engagement snapshot (K17): an optional ``compliance``
+  section (``schemaVersion`` ``1.7``), derived from the chain requirement ← subject ← decision → cited asset → control of the
+  **pinned** knowledge snapshot. ``allocated`` while an asserted decision stands behind the link, ``proposed`` when only proposed
+  ones do; never ``verified``, no origin declared by a caller. An engagement with no such link is sealed as before. No route
+  is added or changed.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.29"
+CONTRACT_VERSION = "1.30"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 

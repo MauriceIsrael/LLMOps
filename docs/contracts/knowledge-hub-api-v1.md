@@ -907,7 +907,7 @@ Règles : le sujet doit exister (`400`) ; `reversibility` ∈ `reversible, costl
 
 **Instantané** (`schemaVersion` `1.1`, additif) : `data.decisions` avec `assertion_level` dérivé du statut ; `kb_references` et `unresolved_references` portent `statement_id` **ou** `decision_id`. Vérifications ajoutées : `DECIDED_WITHOUT_DECISION` (sujet `L3`/`L4` sans décision affirmée), `MULTIPLE_ACTIVE_DECISIONS`, `INCONSISTENT_ALTERNATIVES`, `SUPERSESSION`, et les contrôles de personne des énoncés (`ASSERTED_WITHOUT_PERSON`, `SELF_VALIDATION`, `AUTHOR_NOT_A_HANDLE`, `VALIDATOR_ON_PROPOSED`, `DANGLING`).
 
-**Pas dans ce lot** : la conformité exigence → contrôle et G3 dérivés (voir K17) ; une lecture `GET` des décisions (elles sont lues par l'instantané).
+**Pas dans ce lot** : la conformité exigence → contrôle (livrée en 1.30, §5.30) et G3 dérivés ; une lecture `GET` des décisions (elles sont lues par l'instantané).
 
 ### 5.20 Contrat 1.20 — Import d'un engagement depuis un autre système (K12)
 
@@ -1041,7 +1041,9 @@ Une clause `checks:` ne devient opposable (elle bloque un arbitrage) que par une
 
 **Instantané** (`schemaVersion` `1.6`, champs facultatifs) : `requirements[].disposition {value, reason, status, assertion_level, author, validated_by, validated_at}` tant que la décision est proposée ou affirmée (retirée : elle disparaît) et `subjects[].requirement_ids` quand le sujet en porte. Un engagement qui n'utilise ni l'une ni l'autre est scellé **à l'identique**. Rien n'est émis (`verification_failed`) si une décision affirmée n'a pas de personne distincte de son auteur (`ASSERTED_WITHOUT_PERSON`, `SELF_VALIDATION`), si une évacuation n'a pas de motif ni une clarification de question (`DISPOSITION_UNJUSTIFIED`), si une exigence à délibérer n'a aucun sujet (`REQ_UNCOVERED`), si une exigence évacuée ou à clarifier est portée par un sujet (`REQ_NOT_DELIBERATED`) ou si un sujet porte une exigence inconnue (`DANGLING`).
 
-**Hors périmètre.** La conformité (K17), les éléments d'architecture et le journal de réutilisation que le modèle `engagement_bundle` prévoit ne sont toujours pas dans l'instantané : tant qu'ils n'y sont pas, Archinex garde son dossier pour les documents qui en ont besoin (OSCAL, vues d'architecture).
+**Hors périmètre.** Les éléments d'architecture et le journal de réutilisation que le modèle `engagement_bundle` prévoit ne sont toujours pas dans l'instantané (la conformité l'est depuis 1.28, §5.30) : tant qu'ils n'y sont pas, Archinex garde son dossier pour les documents qui en ont besoin (vues d'architecture).
+
+---
 
 ### 5.28 Contrat 1.28 — Explorateur de doctrine complet et historique d'actif (issues Archinex #95, LLMOps #108)
 
@@ -1087,6 +1089,28 @@ L'aperçu et le moteur de cascade (§5.23) utilisent **la même évaluation** (`
 **Application d'administration** (`apps/kb-client-app`, `/governance/triggers`) : liste des règles par actif, file des candidats, éditeur avec validation en direct, aperçu, actions accepter, amender, rejeter et fusion de clé, appuyés sur ces routes (proxy `api/kb/triggers`, jeton `LLMOPS_REVIEW_TOKEN`). **Vérifiée par `svelte-check` et par le build, non validée visuellement.**
 
 ---
+
+### 5.30 Contrat 1.30 — Couverture déclarée exigence → contrôle (K17, LLMOps#65)
+
+**Pourquoi.** Le modèle `engagement_bundle` prévoit une matrice exigence → contrôle ; l'instantané d'engagement du Hub n'en avait pas. Cette section la donne, sans que le Hub ne prétende vérifier quoi que ce soit (ADR-KH-01 D2).
+
+**Ce que dit la section, et rien de plus.** Le Hub n'apparie aucun texte. Il énonce une **chaîne de déclarations**, que le lecteur suit dans le même instantané :
+
+> exigence ← portée par ← sujet ← décidé par ← décision → cite → actif de la base → met en œuvre → contrôle
+
+L'exigence est portée par le sujet (1.27) ; la décision est celle du sujet et cite l'actif dans `based_on` (K16) ; l'actif met en œuvre le contrôle dans l'instantané de connaissances **épinglé** (`compliance_index`), jamais dans la base vivante. Chaque ligne de `compliance` :
+
+`{id: "CMP:<exigence>:<contrôle>", requirement_id, control_ref, framework, control_version, status, assertion_level, basis: "declared_by_decision", decision_ids, via_assets}`.
+
+* `status: allocated` / `assertion_level: asserted` : une décision **affirmée** soutient le lien. `status: proposed` : seules des décisions proposées le soutiennent. Une décision retirée ou remplacée n'en apporte aucun. Abaisser une décision d'« affirmée » à « proposée » change donc la section, donc le checksum.
+* **Jamais `verified`**, aucune origine déclarée par un appelant : le schéma n'admet ni l'un ni l'autre (`SCHEMA`), `basis` est la seule valeur `declared_by_decision`.
+* Une exigence **décidée** `evacuated` ou `clarification_needed` est hors chaîne.
+* La section n'est présente que si au moins un lien est déclaré : un engagement qui n'en a aucun est scellé **à l'identique**. Sans instantané de connaissances épinglé, rien n'est dérivé ; si des décisions citent la base alors que des exigences sont portées et que l'instantané est inutilisable, l'export est refusé (`kb_snapshot_unavailable`) plutôt que de taire la section.
+
+**Ce que la section n'est pas.** Elle ne dit pas que le contrôle est satisfait ni que le texte de l'actif répond à l'exigence. Un contrôle que l'exigence *devrait* viser et qu'aucune décision ne déclare **n'est pas listé** : l'établir demanderait un appariement de texte hors de l'instantané épinglé (voir K6, LLMOps#43, sur `compliance_mapper`). Il reste visible comme exigence portée par un sujet sans lien. Les manques G3 dérivés (principes sans énoncé ni décision affirmés) ne sont pas inclus.
+
+**Instantané** (`schemaVersion` `1.7`, section facultative). Rien n'est émis (`verification_failed`) si une ligne cite une exigence ou une décision inconnue (`DANGLING`), si son identifiant ne nomme pas son couple (`COMPLIANCE_ID`), si son statut ne suit pas celui des décisions (`COMPLIANCE_STATUS`, `COMPLIANCE_NOT_ASSERTED`), si une décision n'est pas sur un sujet qui porte l'exigence (`COMPLIANCE_NOT_CARRIED`), si l'actif n'est cité par aucune des décisions (`COMPLIANCE_ASSET_NOT_CITED`), si la ligne n'a aucune décision (`COMPLIANCE_WITHOUT_DECISION`), ou si l'instantané de connaissances n'est pas épinglé (`COMPLIANCE_UNPINNED`).
+
 
 ## 4. Oracles & Vecteurs de Test Partagés
 

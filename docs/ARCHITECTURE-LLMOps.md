@@ -293,7 +293,7 @@ flowchart LR
 ## 12. Limites connues et questions ouvertes
 
 - **Identité non signée** (§7) : confiance dans le client délégué.
-- **Parité avec le bundle d'Archinex** : la matrice de conformité exigence → contrôle et les manques G3 dérivés ne sont pas encore dans l'instantané d'engagement (K17, qui dépend de la correction de `compliance_mapper`, K6) ; c'est la porte du retrait de l'émission locale d'Archinex.
+- **Parité avec le bundle d'Archinex** : la couverture déclarée exigence → contrôle est dans l'instantané d'engagement depuis le contrat 1.30 (K17) ; elle ne repose pas sur `compliance_mapper` (K6 reste à faire pour sa route legacy). Les manques G3 dérivés n'y sont pas encore.
 - **Capitalisation** : la remontée d'une règle locale ou d'une décision d'engagement vers la base de connaissance, sans ancre de programme, n'est pas livrée (K13, K7).
 - **Lecture directe de la base** par `get_asset(id)` sans paramètre : conservée pour la compatibilité ; sa dépréciation reste à planifier.
 - **Consommateur de l'instantané d'engagement** : adaptateur non attribué (issue #40).

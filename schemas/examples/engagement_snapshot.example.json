@@ -1,18 +1,18 @@
 {
-  "schemaVersion": "1.6",
-  "snapshotId": "eng-example-eng-24a1aca4c12c",
+  "schemaVersion": "1.7",
+  "snapshotId": "eng-example-eng-e0c6ac454bdf",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:24a1aca4c12c38634bf1bb096a50900164fa3c160612ba2a2f1912a2c769a450",
+  "checksum": "sha256:e0c6ac454bdfb31ab60d743e6beccbefeb038cc3ec61717e58ace2ecd6223be7",
   "data": {
     "engagement": {
       "id": "example-eng",
       "confidentiality": "confidential"
     },
     "pins": {
-      "contract_version": "1.29",
+      "contract_version": "1.30",
       "kb_snapshot": {
         "snapshot_id": "snapshot-2026-10-03-0000000",
         "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
@@ -57,6 +57,24 @@
           "validated_by": "",
           "validated_at": ""
         }
+      }
+    ],
+    "compliance": [
+      {
+        "id": "CMP:REQ-001:SNC-REQ-01",
+        "requirement_id": "REQ-001",
+        "control_ref": "SNC-REQ-01",
+        "framework": "SecNumCloud",
+        "control_version": "3.2",
+        "status": "allocated",
+        "assertion_level": "asserted",
+        "basis": "declared_by_decision",
+        "decision_ids": [
+          "D-0001"
+        ],
+        "via_assets": [
+          "decision:ADR-0001"
+        ]
       }
     ],
     "subjects": [

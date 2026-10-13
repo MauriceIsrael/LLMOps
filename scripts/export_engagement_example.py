@@ -23,7 +23,7 @@ CREATED_AT = "2026-10-03T12:00:00Z"
 
 
 def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
-    """Raw rows of an illustrative engagement and the knowledge snapshot it is pinned to (a stub: one asset)."""
+    """Raw rows of an illustrative engagement and the knowledge snapshot it is pinned to (a stub: one asset, which implements one control)."""
     adr = "---\nid: ADR-0001\ntitle: Git as the source of truth\n---\n\n# ADR-0001\n"
     vocabulary = {"version": 1, "knowledge_ref": knowledge_ref("vocabulary:facts", 1), "content_sha256": "sha256:" + "0" * 64, "keys": [
         {"key": "topology.dc_count", "type": "int", "min": 1, "unit": "datacentres", "label": {"fr": "Nombre de centres de données", "en": "Number of data centres"}},
@@ -34,6 +34,8 @@ def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
         "assets": [{"id": "ADR-0001", "typed_id": "decision:ADR-0001", "revision": 1, "confidence": "verified",
                     "knowledge_ref": knowledge_ref("decision:ADR-0001", 1), "content": adr, "content_sha256": content_sha256(adr),
                     "title": "Git as the source of truth", "type": "decision", "status": "active"}],
+        "compliance_index": {"SecNumCloud": {"SNC-REQ-01": {"title": "Localisation et immunité", "version": "3.2", "severity": "mandatory",
+                                                             "implemented_by": ["ADR-0001"]}}},
     }
     raw = {
         "requirements": [

@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.29"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.30"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.29"
+  "schema_version": "1.30"
 }
 ```
 
@@ -49,6 +49,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.26` | Decision on each check clause (issues #101, #105, [contract §5.26](contracts/knowledge-hub-api-v1.md)): per-clause `status` (`draft`/`validated`/`rejected`) and `review`; `checks_status` becomes an aggregate (`partial` added); promotion never validates a clause; `GET /api/knowledge/checks`, `PATCH /api/knowledge/assets/{asset_id}/checks/{check_id}`; trail `data/kb/clause-decisions.jsonl`; publications list `clause_decisions`. |
 | `1.27` | Decision on each requirement and requirements carried by a subject ([contract §5.27](contracts/knowledge-hub-api-v1.md)): `POST /api/engagements/{id}/requirements/{requirement_id}/disposition` (+ `/assert`, `/withdraw`), `POST …/subjects/{name}/requirements`, optional `requirement_ids` on `POST …/subjects`; engagement snapshot schema `1.6` (`requirements[].disposition`, `subjects[].requirement_ids`, both optional: an engagement that uses neither is sealed as before). |
 | `1.29` | Trigger rules and facts-vocabulary keys in the candidate cycle, and their review (K22, [contract §5.29](contracts/knowledge-hub-api-v1.md)): candidate types `trigger` and `fact_key`, `kb extract-triggers`, `GET /api/knowledge/triggers`, `POST …/triggers/{validate,preview}`, `POST …/candidates/{id}/merge-key`. |
+| `1.30` | Declared coverage requirement → control ([contract §5.30](contracts/knowledge-hub-api-v1.md)): optional `compliance` section of the engagement snapshot (schema `1.7`), derived from decisions that cite assets implementing controls in the pinned knowledge snapshot; `allocated` / `proposed`, never `verified`. No route added or changed. |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

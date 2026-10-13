@@ -36,7 +36,7 @@ from pipelines.snapshot_envelope import provisional
 from tools.elicitation.config import SUBJECT_LEVELS
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "engagement_snapshot.schema.json"
-SCHEMA_VERSION = "1.6"
+SCHEMA_VERSION = "1.7"
 EMITTER = "knowledge-hub"
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+")
 HANDLE = re.compile(r"^@[a-z0-9][a-z0-9._-]{0,62}$")
@@ -221,12 +221,18 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
 
     unripe = sum(1 for s in subjects if s["maturity"] in UNRIPE)
     open_conflicts = sum(1 for c in conflicts if c["status"] == "open")
+    from pipelines.engagement import compliance as compliance_module  # noqa: PLC0415
+
+    requirements = [_requirement(r) for r in sorted(raw["requirements"], key=lambda r: r["id"])]
+    declared = compliance_module.derive(requirements, subjects, decisions, kb_snapshot)  # contract 1.30
     return {
         "engagement": {"id": engagement, "confidentiality": confidentiality},
         "pins": {"contract_version": CONTRACT_VERSION,
                  "kb_snapshot": {"snapshot_id": kb_snapshot["snapshot_id"], "checksum": kb_snapshot["payload_sha256"]} if kb_snapshot else None},
         **provisional(unripe, open_conflicts),
-        "requirements": [_requirement(r) for r in sorted(raw["requirements"], key=lambda r: r["id"])],
+        "requirements": requirements,
+        # contract 1.30: present only when a decision declares a link, so an engagement without any is sealed as before
+        **({"compliance": declared} if declared else {}),
         "subjects": subjects, "statements": statements, "decisions": decisions, "facts": facts_section, "lineage": lineage, "rule_adjustments": rule_adjustments, "conflicts": conflicts,
         "gaps": sorted(gaps, key=lambda g: g["id"]),
         "kb_references": kb_refs, "unresolved_references": unresolved,
@@ -361,6 +367,42 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
                 problems.append(Problem("REQ_UNCOVERED", where, f"{req['id']} is to deliberate but no subject carries it"))
             if d["value"] != "deliberated" and carriers.get(req["id"]):
                 problems.append(Problem("REQ_NOT_DELIBERATED", where, f"{req['id']} is decided '{d['value']}' but subject(s) {carriers[req['id']]} carry it"))
+    compliance = data.get("compliance", [])
+    if compliance and not (data["pins"].get("kb_snapshot")):
+        problems.append(Problem("COMPLIANCE_UNPINNED", "$.data.compliance", "a declared coverage needs the knowledge snapshot it was read in"))
+    requirement_by_id = {r["id"]: r for r in data["requirements"]}
+    decision_by_id = {d["id"]: d for d in data["decisions"]}
+    seen_links: set[tuple[str, str]] = set()
+    for i, row in enumerate(compliance):
+        where = f"$.data.compliance[{i}]"
+        if row["id"] != f"CMP:{row['requirement_id']}:{row['control_ref']}":
+            problems.append(Problem("COMPLIANCE_ID", where, f"{row['id']} does not name its requirement and control"))
+        if (row["requirement_id"], row["control_ref"]) in seen_links:
+            problems.append(Problem("DUPLICATE_ID", where, f"{row['id']} appears twice"))
+        seen_links.add((row["requirement_id"], row["control_ref"]))
+        if row["requirement_id"] not in requirement_by_id:
+            problems.append(Problem("DANGLING", where, f"{row['id']} cites unknown requirement {row['requirement_id']}"))
+        if row["assertion_level"] != ("asserted" if row["status"] == "allocated" else "proposed"):
+            problems.append(Problem("COMPLIANCE_STATUS", where, f"{row['id']}: the assertion level does not follow the status"))
+        wanted = "active" if row["status"] == "allocated" else "proposed"
+        cited = []
+        for did in row["decision_ids"]:
+            d = decision_by_id.get(did)
+            if d is None:
+                problems.append(Problem("DANGLING", where, f"{row['id']} cites unknown decision {did}"))
+                continue
+            cited.append(d)
+            if d["status"] != wanted:
+                problems.append(Problem("COMPLIANCE_NOT_ASSERTED" if wanted == "active" else "COMPLIANCE_STATUS", where,
+                                        f"{row['id']} is {row['status']} but decision {did} is {d['status']}"))
+            carried_by = next((s for s in data["subjects"] if s["name"] == d["subject"]), None)
+            if carried_by is None or row["requirement_id"] not in carried_by.get("requirement_ids", []):
+                problems.append(Problem("COMPLIANCE_NOT_CARRIED", where, f"decision {did} is not on a subject that carries {row['requirement_id']}"))
+        if not cited:
+            problems.append(Problem("COMPLIANCE_WITHOUT_DECISION", where, f"{row['id']} has no decision behind it"))
+        for asset in row["via_assets"]:
+            if not any(b["id"] in (asset, asset.split(":", 1)[-1]) for d in cited for b in d["based_on"]):
+                problems.append(Problem("COMPLIANCE_ASSET_NOT_CITED", where, f"{row['id']}: no cited decision lists {asset}"))
     for i, c in enumerate(data["conflicts"]):
         for sid in c["statement_ids"]:
             if sid not in statement_ids:
@@ -463,7 +505,9 @@ def export_engagement(access: Any, repo: Any, engagement: str, produced_by: str,
     if confidentiality is None:
         raise ExportRefused("engagement_not_managed", "only a managed engagement can be exported")
     raw = collect(repo, engagement)
-    needs_kb = any(_based_on(s.get("based_on")) for s in raw["statements"]) or any(d.get("facts") for d in raw["decisions"])
+    carries_requirements = any(raw.get("subject_requirements", {}).values())
+    needs_kb = (any(_based_on(s.get("based_on")) for s in raw["statements"]) or any(d.get("facts") for d in raw["decisions"])
+                or (carries_requirements and any(_based_on(d.get("based_on")) for d in raw["decisions"])))
     if access.get_pin(engagement):  # K20: an engagement that has derived subjects is read against its pinned snapshot
         from pipelines.engagement.cascade import pinned_snapshot  # noqa: PLC0415
 
