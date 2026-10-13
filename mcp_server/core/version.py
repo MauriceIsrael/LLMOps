@@ -97,9 +97,18 @@ Minor versions only add interfaces or optional fields:
   ``PATCH /api/knowledge/assets/{asset_id}/checks/{check_id}`` decides (``validate|amend|reject``, owner of the domain
   or ``kb:maintain``); decisions are appended to ``data/kb/clause-decisions.jsonl`` and taken into account by the next
   publication (CHANGELOG, ``clause_decisions`` in its response).
+* ``1.27`` — the decision on each requirement of an engagement, and the requirements a subject carries (the sealed engagement
+  snapshot is the content model for traceability): ``POST /api/engagements/{id}/requirements/{requirement_id}/disposition``
+  (a contributor proposes ``deliberated``, ``evacuated`` with its motive or ``clarification_needed`` with the question for the
+  client), ``…/disposition/assert`` (a decider other than the author) and ``…/disposition/withdraw``;
+  ``POST /api/engagements/{id}/subjects/{name}/requirements`` (``add`` / ``remove``) and an optional ``requirement_ids`` on
+  ``POST …/subjects``. A requirement decided ``evacuated`` or ``clarification_needed`` cannot be carried by a subject (``409``).
+  The engagement snapshot gains, optionally, ``requirements[].disposition`` and ``subjects[].requirement_ids``
+  (``schemaVersion`` ``1.6``); an engagement that uses neither is sealed as before. Nothing is exported when a decision to
+  deliberate has no subject, or an evacuation no motive.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.26"
+CONTRACT_VERSION = "1.27"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

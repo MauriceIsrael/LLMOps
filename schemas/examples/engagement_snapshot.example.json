@@ -1,18 +1,18 @@
 {
-  "schemaVersion": "1.5",
-  "snapshotId": "eng-example-eng-a58c97c5667a",
+  "schemaVersion": "1.6",
+  "snapshotId": "eng-example-eng-4dce6d7da229",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:a58c97c5667ab7fea02e10ba665ae271d1566dba43c6e1a1202e637c17cb66f4",
+  "checksum": "sha256:4dce6d7da229b3f145f4ef8db33d651871e8f6f7b46986f196b72c3b72dd6984",
   "data": {
     "engagement": {
       "id": "example-eng",
       "confidentiality": "confidential"
     },
     "pins": {
-      "contract_version": "1.26",
+      "contract_version": "1.27",
       "kb_snapshot": {
         "snapshot_id": "snapshot-2026-10-03-0000000",
         "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
@@ -30,7 +30,16 @@
         "section": "3.2",
         "category": "resilience",
         "criticality": "mandatory",
-        "status": "gap"
+        "status": "gap",
+        "disposition": {
+          "value": "deliberated",
+          "reason": "",
+          "status": "active",
+          "assertion_level": "asserted",
+          "author": "@carl",
+          "validated_by": "@ada",
+          "validated_at": "2026-10-02T09:40:00"
+        }
       },
       {
         "id": "REQ-002",
@@ -38,7 +47,16 @@
         "section": "4.1",
         "category": "security",
         "criticality": "mandatory",
-        "status": "gap"
+        "status": "gap",
+        "disposition": {
+          "value": "clarification_needed",
+          "reason": "Which key custody model does the client expect for data at rest?",
+          "status": "proposed",
+          "assertion_level": "proposed",
+          "author": "@dan",
+          "validated_by": "",
+          "validated_at": ""
+        }
       }
     ],
     "subjects": [
@@ -54,7 +72,10 @@
         "name": "gateway-services",
         "definition": "Mission-critical services",
         "maturity": "L3_decided",
-        "origin": "declared"
+        "origin": "declared",
+        "requirement_ids": [
+          "REQ-001"
+        ]
       }
     ],
     "statements": [

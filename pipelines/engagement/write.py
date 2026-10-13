@@ -24,6 +24,9 @@ ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$")
 KEY = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
 ASSERTED_LEVELS = ("L3_decided", "L4_specified")
 REVERSIBILITY = ("reversible", "costly", "irreversible")
+# Contract 1.27: what the deliberation does with a requirement. ``to_qualify`` is not here: it is the absence of a decision.
+DISPOSITIONS = ("deliberated", "evacuated", "clarification_needed")
+MIN_DISPOSITION_REASON = 12  # an evacuation (its motive) and a clarification (its question) must say something
 
 
 class WriteError(Exception):
@@ -176,9 +179,52 @@ class EngagementWriter:
     def add_subject(self, body: dict[str, Any]) -> dict[str, Any]:
         name = _text(body, "name", limit=120)
         definition = _text(body, "definition", required=False)
+        wanted = self._requirement_ids(body.get("requirement_ids"), "requirement_ids") if body.get("requirement_ids") is not None else None
+        if wanted:
+            self._check_carriable(name, wanted)
         created = name not in self.repo.subject_levels(self.engagement)
         self.repo.save_subject(name, engagement=self.engagement, definition=definition, origin="declared")
-        return {"created": created, "subject": name}
+        out: dict[str, Any] = {"created": created, "subject": name}
+        if wanted is not None:  # contract 1.27: the requirements the subject carries (added, never silently dropped)
+            self.repo.set_subject_requirements(name, self.engagement, [*self.repo.get_subject_requirements(name, self.engagement), *wanted])
+            out["requirement_ids"] = self.repo.get_subject_requirements(name, self.engagement)
+        return out
+
+    def carry_requirements(self, name: str, body: dict[str, Any]) -> dict[str, Any]:
+        """Add or remove the requirements a subject carries (contract 1.27). Idempotent: an id already there is left alone."""
+        if name not in self.repo.subject_levels(self.engagement):
+            raise WriteError(404, "unknown_subject", f"subject '{name}' not found")
+        add = self._requirement_ids(body.get("add"), "add") if body.get("add") is not None else []
+        remove = self._requirement_ids(body.get("remove"), "remove", known=False) if body.get("remove") is not None else []
+        if not add and not remove:
+            raise WriteError(400, "invalid_argument", "give 'add' and/or 'remove': lists of requirement ids", "add")
+        if set(add) & set(remove):
+            raise WriteError(400, "invalid_argument", "an id cannot be both added and removed", "remove")
+        self._check_carriable(name, add)
+        current = set(self.repo.get_subject_requirements(name, self.engagement))
+        self.repo.set_subject_requirements(name, self.engagement, sorted((current | set(add)) - set(remove)))
+        return {"subject": name, "requirement_ids": self.repo.get_subject_requirements(name, self.engagement)}
+
+    def _requirement_ids(self, raw: Any, field: str, known: bool = True) -> list[str]:
+        if not isinstance(raw, list) or len(raw) > 500 or not all(isinstance(i, str) and ID.match(i) for i in raw):
+            raise WriteError(400, "invalid_argument", f"'{field}' is a list of up to 500 requirement identifiers", field)
+        ids = sorted(set(raw))
+        if known:
+            existing = {r["id"] for r in self.repo.get_requirements(self.engagement)}
+            missing = [i for i in ids if i not in existing]
+            if missing:
+                raise WriteError(400, "unknown_requirement", f"unknown requirement(s) {missing[:5]}: add them first (POST requirements)", field)
+        return ids
+
+    def _check_carriable(self, subject: str, requirement_ids: list[str]) -> None:
+        """A requirement that a person decided to evacuate or to clarify is not carried by a subject: nothing is carried silently."""
+        by_id = {r["id"]: r for r in self.repo.get_requirements(self.engagement)}
+        blocked = [i for i in requirement_ids if by_id.get(i, {}).get("disposition_status") == "active"
+                   and by_id[i].get("disposition") != "deliberated"]
+        if blocked:
+            raise WriteError(409, "requirement_not_deliberated",
+                             f"{blocked[:5]} was decided '{by_id[blocked[0]]['disposition']}': withdraw that decision before a subject carries it",
+                             subject=subject)
 
     def advance_subject(self, name: str, body: dict[str, Any]) -> dict[str, Any]:
         level = _text(body, "level", limit=32)
@@ -393,6 +439,69 @@ class EngagementWriter:
         for req in created:
             self.repo.save_requirement(req)
         return {"created": [r["id"] for r in created], "unchanged": unchanged, "origin": origin}
+
+    # --- decision on a requirement (contract 1.27) ----------------------------------------------------------------
+
+    def propose_disposition(self, requirement_id: str, body: dict[str, Any]) -> dict[str, Any]:
+        """A member proposes what the deliberation does with a requirement: ``deliberated``, ``evacuated`` (with its motive) or
+        ``clarification_needed`` (with the question for the client). A decider other than the author asserts it."""
+        req = self._requirement(requirement_id)
+        disposition = _text(body, "disposition", limit=32)
+        if disposition not in DISPOSITIONS:
+            raise WriteError(400, "invalid_argument", f"'disposition' must be one of {list(DISPOSITIONS)}", "disposition")
+        reason = _text(body, "reason", required=False, limit=1000)
+        if disposition != "deliberated" and len(reason) < MIN_DISPOSITION_REASON:
+            what = "the motive of the evacuation" if disposition == "evacuated" else "the question for the client"
+            raise WriteError(400, "invalid_argument", f"'reason' is required ({what}, at least {MIN_DISPOSITION_REASON} characters)", "reason")
+        status = req.get("disposition_status") or ""
+        same = req.get("disposition") == disposition and (req.get("disposition_reason") or "") == reason
+        if status in ("proposed", "active") and same:
+            return {"created": False, "requirement": self._public_requirement(req)}  # replaying a write changes nothing
+        if status == "proposed":
+            raise WriteError(409, "disposition_pending", f"{requirement_id} already has a proposed decision: assert or withdraw it first")
+        if status == "active":
+            raise WriteError(409, "disposition_exists", f"{requirement_id} has an asserted decision ({req.get('disposition')}): withdraw it to decide otherwise")
+        self.repo.propose_requirement_disposition(requirement_id, disposition, reason, self.actor)
+        return {"created": True, "requirement": self._public_requirement(self._requirement(requirement_id))}
+
+    def assert_disposition(self, requirement_id: str) -> dict[str, Any]:
+        req = self._requirement(requirement_id)
+        if req.get("disposition_status") != "proposed":
+            raise WriteError(409, "not_proposed", f"{requirement_id}: only a proposed decision can be asserted")
+        require_distinct(self.actor, [req.get("disposition_author") or ""], f"the decision on {requirement_id}")
+        if req.get("disposition") != "deliberated":
+            carriers = sorted(n for n, ids in self.repo.list_subject_requirements(self.engagement).items() if requirement_id in ids)
+            if carriers:
+                raise WriteError(409, "carried_by_subject",
+                                 f"{requirement_id} is carried by {carriers}: remove it from them (POST subjects/{{name}}/requirements) "
+                                 f"before asserting '{req.get('disposition')}'", subjects=carriers)
+        self.repo.validate_requirement_disposition(requirement_id, self.actor)
+        return {"requirement": self._public_requirement(self._requirement(requirement_id))}
+
+    def withdraw_disposition(self, requirement_id: str, is_decider: bool) -> dict[str, Any]:
+        req = self._requirement(requirement_id)
+        if req.get("disposition_status") not in ("proposed", "active"):
+            raise WriteError(409, "not_withdrawable", f"{requirement_id} has no decision to withdraw")
+        if req.get("disposition_author") != self.actor and not is_decider:
+            raise WriteError(403, "not_author", "only the author or a decider withdraws a decision on a requirement")
+        self.repo.set_requirement_disposition_status(requirement_id, "withdrawn")
+        return {"requirement": self._public_requirement(self._requirement(requirement_id))}
+
+    def _requirement(self, requirement_id: str) -> dict[str, Any]:
+        req = self.repo.get_requirement(requirement_id)
+        if not req or req.get("engagement") != self.engagement:
+            raise WriteError(404, "unknown_requirement", f"requirement '{requirement_id}' not found")
+        return req
+
+    @staticmethod
+    def _public_requirement(r: dict[str, Any]) -> dict[str, Any]:
+        out = {k: r.get(k) for k in ("id", "section", "category", "criticality", "status")}
+        if r.get("disposition_status") in ("proposed", "active"):
+            out["disposition"] = {
+                "value": r.get("disposition"), "reason": r.get("disposition_reason") or "", "status": r["disposition_status"],
+                "author": r.get("disposition_author") or "", "validated_by": r.get("disposition_by") or "",
+                "validated_at": r.get("disposition_validated_at") or ""}
+        return out
 
     # --- conflicts ------------------------------------------------------------------------------------------------
 

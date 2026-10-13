@@ -1043,12 +1043,87 @@ class ElicitationRepository:
             "RETURN r.id as id, r.engagement as engagement, r.section as section, "
             "r.category as category, r.text as text, r.criticality as criticality, "
             "r.status as status, r.matched_assets as matched_assets, "
-            "r.matched_controls as matched_controls, r.rationale as rationale;"
+            "r.matched_controls as matched_controls, r.rationale as rationale, "
+            + ", ".join(f"r.{c} as {c}" for c in self._DISPOSITION_COLUMNS) + ";"
         )
         try:
             return self.db_client.execute_cypher(query, params={"engagement": engagement})
         except Exception:
             return []
+
+    # --- decision on a requirement (contract 1.27) --------------------------------------------------------------
+
+    _DISPOSITION_COLUMNS = ("disposition", "disposition_reason", "disposition_status", "disposition_author", "disposition_at",
+                            "disposition_by", "disposition_validated_at")
+
+    def get_requirement(self, requirement_id: str) -> dict[str, Any] | None:
+        """One requirement with its decision (``disposition_*``), or None."""
+        cols = ", ".join(f"r.{c} as {c}" for c in ("id", "engagement", "section", "category", "text", "criticality", "status") + self._DISPOSITION_COLUMNS)
+        res = self.db_client.execute_cypher(f"MATCH (r:Requirement {{id: $id}}) RETURN {cols};", params={"id": requirement_id})
+        if not res or "error" in res[0]:
+            return None
+        return dict(res[0])
+
+    def propose_requirement_disposition(self, requirement_id: str, disposition: str, reason: str, author: str) -> None:
+        """A member proposes what the deliberation does with a requirement; any earlier validator is cleared."""
+        self.db_client.execute_cypher(
+            "MATCH (r:Requirement {id: $id}) SET r.disposition = $disposition, r.disposition_reason = $reason, "
+            "r.disposition_status = 'proposed', r.disposition_author = $author, r.disposition_at = $at, "
+            "r.disposition_by = '', r.disposition_validated_at = '';",
+            params={"id": requirement_id, "disposition": disposition, "reason": reason, "author": author,
+                    "at": datetime.now().isoformat()})
+
+    def validate_requirement_disposition(self, requirement_id: str, validated_by: str) -> None:
+        """A person other than the author asserts the proposed decision on a requirement."""
+        self.db_client.execute_cypher(
+            "MATCH (r:Requirement {id: $id}) SET r.disposition_status = 'active', r.disposition_by = $by, "
+            "r.disposition_validated_at = $at;",
+            params={"id": requirement_id, "by": validated_by, "at": datetime.now().isoformat()})
+
+    def set_requirement_disposition_status(self, requirement_id: str, status: str) -> None:
+        self.db_client.execute_cypher(
+            "MATCH (r:Requirement {id: $id}) SET r.disposition_status = $status;", params={"id": requirement_id, "status": status})
+
+    # --- requirements carried by a subject (contract 1.27) ------------------------------------------------------
+
+    def get_subject_requirements(self, name: str, engagement: str) -> list[str]:
+        import json
+
+        res = self.db_client.execute_cypher(
+            "MATCH (s:Subject) WHERE s.name = $name AND s.engagement = $engagement RETURN s.requirements as requirements;",
+            params={"name": name, "engagement": engagement})
+        if not res or "error" in res[0]:
+            return []
+        try:
+            ids = json.loads(res[0].get("requirements") or "[]")
+        except ValueError:
+            return []
+        return sorted({i for i in ids if isinstance(i, str)})
+
+    def list_subject_requirements(self, engagement: str) -> dict[str, list[str]]:
+        """Subject name -> requirement ids it carries, for the whole engagement."""
+        import json
+
+        res = self.db_client.execute_cypher(
+            "MATCH (s:Subject {engagement: $engagement}) RETURN s.name as name, s.requirements as requirements;",
+            params={"engagement": engagement})
+        out: dict[str, list[str]] = {}
+        for row in res or []:
+            if not row or "error" in row:
+                continue
+            try:
+                ids = json.loads(row.get("requirements") or "[]")
+            except ValueError:
+                ids = []
+            out[row["name"]] = sorted({i for i in ids if isinstance(i, str)})
+        return out
+
+    def set_subject_requirements(self, name: str, engagement: str, requirement_ids: list[str]) -> None:
+        import json
+
+        self.db_client.execute_cypher(
+            "MATCH (s:Subject) WHERE s.name = $name AND s.engagement = $engagement SET s.requirements = $ids;",
+            params={"name": name, "engagement": engagement, "ids": json.dumps(sorted(set(requirement_ids)))})
 
     def get_open_questions(self, engagement: str) -> list[dict[str, Any]]:
         """Récupère les questions ouvertes pour un engagement."""

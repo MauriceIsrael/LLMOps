@@ -36,7 +36,7 @@ from pipelines.snapshot_envelope import provisional
 from tools.elicitation.config import SUBJECT_LEVELS
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "engagement_snapshot.schema.json"
-SCHEMA_VERSION = "1.5"
+SCHEMA_VERSION = "1.6"
 EMITTER = "knowledge-hub"
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+")
 HANDLE = re.compile(r"^@[a-z0-9][a-z0-9._-]{0,62}$")
@@ -76,6 +76,7 @@ def collect(repo: Any, engagement: str) -> dict[str, Any]:
     return {
         "requirements": repo.get_requirements(engagement),
         "subjects": rows("MATCH (s:Subject {engagement: $e}) RETURN s.name as name, s.definition as definition, s.level as level;", e=engagement),
+        "subject_requirements": repo.list_subject_requirements(engagement),  # contract 1.27
         "statements": rows(
             "MATCH (s:Statement {engagement: $e}) RETURN s.id as id, s.subject as subject, s.section as section, "
             "s.predicate as predicate, s.value as value, s.confidence as confidence, s.status as status, "
@@ -104,6 +105,22 @@ def _based_on(raw: Any) -> list[dict[str, Any]]:
         except ValueError:
             return []
     return [{"id": str(i["id"]), "resolved": i.get("resolved")} for i in raw or [] if isinstance(i, dict) and i.get("id")]
+
+
+def _requirement(r: dict[str, Any]) -> dict[str, Any]:
+    """A requirement as the snapshot states it. The decision on it (contract 1.27) appears only while it is proposed or asserted:
+    a requirement nobody decided about, or whose decision was withdrawn, is written as before."""
+    out: dict[str, Any] = {"id": r["id"], "text": r.get("text") or "", "section": r.get("section") or "",
+                           "category": r.get("category") or "general", "criticality": r.get("criticality") or "mandatory",
+                           "status": r.get("status") or "gap"}
+    status = r.get("disposition_status") or ""
+    if status in ("proposed", "active"):
+        out["disposition"] = {
+            "value": r.get("disposition") or "", "reason": r.get("disposition_reason") or "", "status": status,
+            "assertion_level": ASSERTION_OF.get(status, status), "author": r.get("disposition_author") or "",
+            "validated_by": r.get("disposition_by") or "", "validated_at": r.get("disposition_validated_at") or "",
+        }
+    return out
 
 
 def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_snapshot: dict[str, Any] | None) -> dict[str, Any]:
@@ -176,8 +193,11 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
             "validated_by": a.get("validated_by") or "", "validated_at": a.get("validated_at") or ""}
             for a in adjustments if a["kind"] == "local"],
     }
+    carried = raw.get("subject_requirements") or {}
     subjects = [{"id": f"{engagement}:{r['name']}", "name": r["name"], "definition": r.get("definition") or "",
-                 "maturity": r.get("level") or SUBJECT_LEVELS[0], "origin": origins.get(r["name"]) or "declared"}
+                 "maturity": r.get("level") or SUBJECT_LEVELS[0], "origin": origins.get(r["name"]) or "declared",
+                 # contract 1.27: present only when the subject carries requirements, so an engagement without them is unchanged
+                 **({"requirement_ids": sorted(carried[r["name"]])} if carried.get(r["name"]) else {})}
                 for r in sorted(raw["subjects"], key=lambda r: r["name"])]
     derived_items = cascade_module.lineage_items(raw.get("derived") or [], kb_snapshot, raw.get("adjustments") or [])
     lineage = {"kb_snapshot": {"snapshot_id": kb_snapshot["snapshot_id"], "checksum": kb_snapshot["payload_sha256"]} if kb_snapshot else None,
@@ -206,9 +226,7 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
         "pins": {"contract_version": CONTRACT_VERSION,
                  "kb_snapshot": {"snapshot_id": kb_snapshot["snapshot_id"], "checksum": kb_snapshot["payload_sha256"]} if kb_snapshot else None},
         **provisional(unripe, open_conflicts),
-        "requirements": [{"id": r["id"], "text": r.get("text") or "", "section": r.get("section") or "",
-                          "category": r.get("category") or "general", "criticality": r.get("criticality") or "mandatory",
-                          "status": r.get("status") or "gap"} for r in sorted(raw["requirements"], key=lambda r: r["id"])],
+        "requirements": [_requirement(r) for r in sorted(raw["requirements"], key=lambda r: r["id"])],
         "subjects": subjects, "statements": statements, "decisions": decisions, "facts": facts_section, "lineage": lineage, "rule_adjustments": rule_adjustments, "conflicts": conflicts,
         "gaps": sorted(gaps, key=lambda g: g["id"]),
         "kb_references": kb_refs, "unresolved_references": unresolved,
@@ -315,6 +333,34 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
     for i, sub in enumerate(data["subjects"]):
         if sub["maturity"] in ("L3_decided", "L4_specified") and sub["name"] not in decided:
             problems.append(Problem("DECIDED_WITHOUT_DECISION", f"$.data.subjects[{i}]", f"'{sub['name']}' is {sub['maturity']} without an asserted decision"))
+    requirement_ids = {r["id"] for r in data["requirements"]}
+    carriers: dict[str, list[str]] = {}
+    for i, sub in enumerate(data["subjects"]):
+        for rid in sub.get("requirement_ids", []):
+            carriers.setdefault(rid, []).append(sub["name"])
+            if rid not in requirement_ids:
+                problems.append(Problem("DANGLING", f"$.data.subjects[{i}]", f"subject '{sub['name']}' carries unknown requirement {rid}"))
+    for i, req in enumerate(data["requirements"]):
+        d = req.get("disposition")
+        if d is None:
+            continue
+        where = f"$.data.requirements[{i}]"
+        if not HANDLE.match(d["author"]):
+            problems.append(Problem("AUTHOR_NOT_A_HANDLE", where, f"{req['id']}: the author of the decision must be a member handle"))
+        if d["status"] == "active":
+            if not HANDLE.match(d["validated_by"]) or not d["validated_at"]:
+                problems.append(Problem("ASSERTED_WITHOUT_PERSON", where, f"the decision on {req['id']} is active without a person who asserted it"))
+            elif d["validated_by"] == d["author"]:
+                problems.append(Problem("SELF_VALIDATION", where, f"the decision on {req['id']} was asserted by its own author"))
+        elif d["validated_by"]:
+            problems.append(Problem("VALIDATOR_ON_PROPOSED", where, f"the decision on {req['id']} is proposed but names a validator"))
+        if d["value"] != "deliberated" and len(d["reason"].strip()) < 12:
+            problems.append(Problem("DISPOSITION_UNJUSTIFIED", where, f"{req['id']}: an evacuation needs its motive, a clarification its question"))
+        if d["status"] == "active":
+            if d["value"] == "deliberated" and not carriers.get(req["id"]):
+                problems.append(Problem("REQ_UNCOVERED", where, f"{req['id']} is to deliberate but no subject carries it"))
+            if d["value"] != "deliberated" and carriers.get(req["id"]):
+                problems.append(Problem("REQ_NOT_DELIBERATED", where, f"{req['id']} is decided '{d['value']}' but subject(s) {carriers[req['id']]} carry it"))
     for i, c in enumerate(data["conflicts"]):
         for sid in c["statement_ids"]:
             if sid not in statement_ids:
