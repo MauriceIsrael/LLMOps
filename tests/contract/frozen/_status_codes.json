@@ -75,7 +75,7 @@
   "rest.POST /api/engagements/{engagement}/subjects": 201,
   "rest.POST /api/engagements/{engagement}/subjects/{name}/maturity": 200,
   "rest.POST /api/frameworks/ingestions": 201,
-  "rest.POST /api/frameworks/ingestions/{ingestion_id}/abandon": 409,
+  "rest.POST /api/frameworks/ingestions/{ingestion_id}/abandon": 200,
   "rest.POST /api/frameworks/ingestions/{ingestion_id}/apply": 200,
   "rest.POST /api/frameworks/ingestions/{ingestion_id}/link-proposals": 200,
   "rest.POST /api/frameworks/{framework}/coverage-declaration": 409,

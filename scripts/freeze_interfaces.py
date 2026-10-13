@@ -568,9 +568,6 @@ def build_catalogue() -> list[Interface]:
               headers=DELEGATED, delegate=True),
         _rest("POST", "/api/frameworks/ingestions/{ingestion_id}/apply", "/api/frameworks/ingestions/{ingestion}/apply",
               headers=DELEGATED, delegate=True),
-        # An applied ingestion can no longer be abandoned: freezes the refusal shape
-        _rest("POST", "/api/frameworks/ingestions/{ingestion_id}/abandon", "/api/frameworks/ingestions/{ingestion}/abandon",
-              json_body={"reason": "Contract freeze"}, headers=DELEGATED, delegate=True),
         _rest("POST", "/api/frameworks/{framework}/coverage-declaration", "/api/frameworks/RGPD/coverage-declaration",
               headers=DELEGATED, delegate=True),
         # Contract 1.6 — doctrine workshop and evaluations
