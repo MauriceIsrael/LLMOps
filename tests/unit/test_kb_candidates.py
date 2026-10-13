@@ -474,7 +474,7 @@ def test_promote_amendment_rewrites_the_target(service, kb):
     service.promote(c["id"])
     text = (kb / "principles" / "P-001.md").read_text()
     assert "runbooks are versioned" in text
-    assert "checks_status: validated" in text
+    assert "checks_status: draft" in text  # #101: accepting the asset does not validate its clauses
     assert "revision: 2" in text  # K3: an accepted amendment raises the revision (the synthetic base had none: 1 -> 2)
 
 

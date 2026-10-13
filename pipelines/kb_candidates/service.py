@@ -16,6 +16,11 @@ from typing import Any
 
 from pipelines.governance.log import REQUEST_KINDS, GovernanceLog, default_due_at, get_log
 from pipelines.kb_candidates.checks import build_context, has_failure, run_checks
+from pipelines.kb_candidates.clauses import (
+    carry_clause_decisions,
+    mark_published,
+    pending_decisions,
+)
 from pipelines.kb_candidates.confidence import compute_confidence
 from pipelines.kb_candidates.kb import (
     asset_path,
@@ -466,12 +471,15 @@ class CandidateService:
             fm["owner"] = fm.get("owner") or str(candidate.get("assigned_owner") or "maintainers").lstrip("@")
             fm["validated_by"] = reviewers
             fm["validated_at"] = now_iso()
-            if fm.get("checks"):
-                fm["checks_status"] = "validated"
+            target = None
             if candidate.get("target_asset_id"):
                 target = next((a for a in load_assets(self.kb_dir) if a.id == candidate["target_asset_id"]), None)
                 if target is None:
                     raise CandidateError("target_asset_id", f"target asset '{candidate['target_asset_id']}' not found.")
+            if fm.get("checks"):
+                # #101: accepting the asset never validates its clauses; each one is decided on its own (contract 1.26)
+                carry_clause_decisions(fm, target.frontmatter if target else None)
+            if target is not None:
                 path = target.path
                 fm["revision"] = bump_revision(target.path.read_text(encoding="utf-8"))  # K3: an accepted amendment
             else:
@@ -513,17 +521,21 @@ class CandidateService:
     ) -> dict[str, Any]:
         """Re-ingest the KB, export a sealed snapshot, log the changelog, notify consumers."""
         promoted = [c for c in self.repo.find(status="accepted") if c.get("promoted")]
-        if not promoted:
-            return {"published": [], "snapshot_id": None, "message": "nothing to publish (no promoted candidate)"}
+        clause_decisions = pending_decisions(self.kb_dir)
+        if not promoted and not clause_decisions:
+            return {"published": [], "snapshot_id": None,
+                    "message": "nothing to publish (no promoted candidate, no clause decision)"}
         ingest()
         envelope = snapshot()
         snapshot_id = envelope.get("snapshot_id")
-        self._write_changelog(changelog or self.kb_dir / "CHANGELOG.md", snapshot_id, promoted)
+        self._write_changelog(changelog or self.kb_dir / "CHANGELOG.md", snapshot_id, promoted, clause_decisions)
+        mark_published(self.kb_dir, snapshot_id)
         payload = {
             "snapshot_id": snapshot_id,
             "payload_sha256": envelope.get("payload_sha256"),
             "candidates": [c["id"] for c in promoted],
-            "assets": [c["promoted"]["asset_id"] for c in promoted],
+            "assets": sorted({c["promoted"]["asset_id"] for c in promoted} | {d["asset_id"] for d in clause_decisions}),
+            "clause_decisions": [f"{d['asset_id']}/{d['check_id']}" for d in clause_decisions],
         }
         channels = self.notify_consumers("kb_published", payload)
         for c in promoted:
@@ -533,10 +545,12 @@ class CandidateService:
             self.repo.save(c)
             self._emit("candidate.published", c, actor, [r["reviewer"] for r in (c.get("review"), c.get("second_review")) if r],
                        snapshot_id=snapshot_id)
-        return {"published": [c["id"] for c in promoted], "snapshot_id": snapshot_id, "channels": channels}
+        return {"published": [c["id"] for c in promoted] + payload["clause_decisions"], "snapshot_id": snapshot_id,
+                "channels": channels, "clause_decisions": payload["clause_decisions"]}
 
     @staticmethod
-    def _write_changelog(path: Path, snapshot_id: str | None, candidates: list[dict[str, Any]]) -> None:
+    def _write_changelog(path: Path, snapshot_id: str | None, candidates: list[dict[str, Any]],
+                         clause_decisions: list[dict[str, Any]] | None = None) -> None:
         header = "# Knowledge base changelog\n\nPublished changes, newest first (written by `kb publish`).\n"
         existing = path.read_text(encoding="utf-8") if path.exists() else header
         if not existing.startswith("# "):
@@ -549,6 +563,10 @@ class CandidateService:
                 f"- `{c['promoted']['asset_id']}` ({c['kind']}, confidence `{c['promoted']['confidence']}`): "
                 f"{c['title']} — {c['id']}, reviewed by {reviewers or 'n/a'}"
             )
+        verbs = {"validate": "validated", "amend": "amended and validated", "reject": "rejected"}
+        for d in clause_decisions or []:
+            lines.append(f"- clause `{d['check_id']}` of `{d['asset_id']}` {verbs.get(d['decision'], d['decision'])} "
+                         f"by {d['by']}" + (f": {d['comment']}" if d.get("comment") else ""))
         entry = "\n".join(lines) + "\n"
         body = head.rstrip() + "\n\n" + entry + ("\n## " + rest if rest else "")
         path.write_text(body, encoding="utf-8")

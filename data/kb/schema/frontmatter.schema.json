@@ -132,9 +132,10 @@
     "checks_status": {
       "enum": [
         "draft",
+        "partial",
         "validated"
       ],
-      "description": "Review status of the 'checks' clauses; only a human reviewer sets 'validated'."
+      "description": "Aggregate of the clauses' own statuses (contract 1.26): 'validated' when every kept clause is validated, 'partial' when some are. Only a human decision on a clause validates it."
     },
     "checks": {
       "type": "array",
@@ -204,6 +205,42 @@
           },
           "message": {
             "type": "string"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "validated",
+              "rejected"
+            ],
+            "description": "Status of this clause (contract 1.26): only 'validated' blocks an arbitration; 'rejected' is never evaluated. Set by a decision on the clause, never by a promotion."
+          },
+          "review": {
+            "type": "object",
+            "description": "Last decision on this clause.",
+            "required": [
+              "by",
+              "at",
+              "decision"
+            ],
+            "properties": {
+              "by": {
+                "type": "string"
+              },
+              "at": {
+                "type": "string"
+              },
+              "decision": {
+                "enum": [
+                  "validate",
+                  "amend",
+                  "reject"
+                ]
+              },
+              "comment": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "additionalProperties": false,

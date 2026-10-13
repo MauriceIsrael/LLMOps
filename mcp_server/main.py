@@ -66,6 +66,7 @@ from mcp_server.knowledge.tools import (
     confirm_reuse,
     convert_verdict_feedback,
     create_framework_ingestion,
+    decide_check_clause,
     decide_ingestion_row,
     declare_framework_coverage,
     generate_zero_draft_hld,
@@ -94,6 +95,7 @@ from mcp_server.knowledge.tools import (
     get_similarity_eval_run,
     get_skills_matrix,
     list_assets,
+    list_check_clauses,
     list_controls,
     list_domain_owners,
     list_framework_ingestions,
@@ -1053,6 +1055,23 @@ def create_starlette_app() -> Starlette:
         res = simulate_checks(body)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_check_clauses(request):
+        """Clauses vérifiables de la doctrine et leur statut propre (contrat 1.26)."""
+        p = request.query_params
+        res = list_check_clauses(status=p.get("status") or None, framework=p.get("framework") or None,
+                                 asset_type=p.get("type") or None, asset_id=p.get("asset_id") or None)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_check_clause_decide(request):
+        """Décision sur une clause : validate, amend ou reject (contrat 1.26)."""
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = decide_check_clause(request.path_params["asset_id"], request.path_params["check_id"],
+                                  decision=str(body.get("decision") or ""), comment=body.get("comment"),
+                                  clause=body.get("clause"))
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_eval_dataset(request):
         res = get_eval_dataset(request.path_params["dataset"])
         return JSONResponse(res, status_code=_candidate_status_code(res))
@@ -1437,6 +1456,9 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/templates/{asset_type}", endpoint=handle_template, methods=["GET"]),
             Route("/api/knowledge/candidates/validate", endpoint=handle_candidate_validate, methods=["POST"]),
             Route("/api/knowledge/checks/simulate", endpoint=handle_checks_simulate, methods=["POST"]),
+            Route("/api/knowledge/checks", endpoint=handle_check_clauses, methods=["GET"]),
+            Route("/api/knowledge/assets/{asset_id}/checks/{check_id}", endpoint=handle_check_clause_decide,
+                  methods=["PATCH"]),
             Route("/api/knowledge/evals/{dataset}", endpoint=handle_eval_dataset, methods=["GET"]),
             Route("/api/knowledge/evals/{dataset}/cases", endpoint=handle_eval_case_add, methods=["POST"]),
             Route("/api/knowledge/evals/{dataset}/cases/{case_id}", endpoint=handle_eval_case_annotate, methods=["PATCH"]),

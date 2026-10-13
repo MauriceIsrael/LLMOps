@@ -2044,6 +2044,76 @@ def publish_kb_candidates() -> dict[str, Any]:
         return handle_exception_response(e, context_action="publish_kb_candidates")
 
 
+def list_check_clauses(status: str | None = None, framework: str | None = None, asset_type: str | None = None,
+                       asset_id: str | None = None) -> dict[str, Any]:
+    """Check clauses of the active doctrine with their own status (contract 1.26, requires 'kb:review').
+
+    Each row carries its asset (title, legal text excerpt, framework, severity, domain), the rule (kind, when, expect,
+    message), its status (draft | validated | rejected) and the last decision. ``may_decide`` tells whether the acting
+    expert can decide on it. ``mandatory_without_clause`` lists the mandatory controls nothing can enforce yet, and
+    ``pending_publication`` the decisions waiting for the next publication.
+    """
+    from mcp_server.core.auth import delegated_actor_email, has_scope
+    from pipelines.doctrine.checks import CLAUSE_STATUSES
+    from pipelines.kb_candidates.clauses import (
+        list_clauses,
+        mandatory_without_clause,
+        pending_decisions,
+    )
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    if status is not None and status not in CLAUSE_STATUSES:
+        return invalid_argument_response("status", f"'status' must be one of {list(CLAUSE_STATUSES)}.")
+    try:
+        kb = Path(server_config.kb_dir)
+        rows = list_clauses(kb, status=status, framework=framework, asset_type=asset_type, asset_id=asset_id)
+        email = delegated_actor_email()
+        registry = _candidate_service().owners()
+        owner = registry.by_email(email) if email else None
+        for row in rows:
+            row["may_decide"] = bool(owner and registry.can_review(owner.handle, row["domain"]))
+        counts = {s: sum(1 for r in rows if r["status"] == s) for s in CLAUSE_STATUSES}
+        data = {"clauses": rows, "counts": counts,
+                "mandatory_without_clause": [] if asset_id else mandatory_without_clause(kb, framework),
+                "pending_publication": len(pending_decisions(kb))}
+        return ok_response(data, count=len(rows))
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_check_clauses")
+
+
+def decide_check_clause(asset_id: str, check_id: str, decision: str, comment: str | None = None,
+                        clause: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Decide on one check clause (contract 1.26): 'validate', 'amend' (validate a corrected clause) or 'reject'.
+
+    Requires 'kb:review' and an acting expert owning the asset's domain (or ``kb:maintain``). A comment is required to
+    amend or reject. The asset gets a new revision and the decision enters the trail; it takes effect for the judge
+    at the next publication (``POST /api/knowledge/publications``).
+    """
+    from pipelines.kb_candidates.clauses import decide, find_asset
+    from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
+
+    who = _acting_expert()
+    if isinstance(who, dict):
+        return who
+    service, owner = who
+    try:
+        kb = Path(server_config.kb_dir)
+        asset = find_asset(kb, asset_id)
+        domain = asset.frontmatter.get("domain") or []
+        if not service.owners().can_review(owner.handle, [str(d) for d in (domain if isinstance(domain, list) else [domain])]):
+            return {"status": "unauthorized", "reason": f"{owner.handle} does not own the domain of {asset_id}."}
+        row = decide(kb, asset_id, check_id, decision, owner.handle, comment=comment, amended=clause)
+        return ok_response(row, count=1)
+    except CandidateNotFoundError as exc:
+        return not_found_response(str(exc))
+    except CandidateError as exc:
+        return _candidate_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="decide_check_clause")
+
+
 def get_kb_health() -> dict[str, Any]:
     """Health indicators of the knowledge base (requires 'kb:review'): assets by type and domain,
     unvalidated assets, draft clauses, coverage per framework, review queue age per owner, overdue
