@@ -337,8 +337,13 @@ def models_fetch_cmd(
     model: str = typer.Option(None, "--model", help="Model id (default: KB_EMBEDDING_MODEL or the reference model)."),
     models_dir: Path = MODELS_DIR_OPTION,
     force: bool = typer.Option(False, "--force", help="Download again even when the local copy is intact."),
+    from_dir: Path = typer.Option(None, "--from-dir", help="Install files downloaded elsewhere (see 'kb models urls') "
+                                  "instead of downloading them; each one is checked against its pinned SHA-256."),
 ) -> None:
-    """Download the pinned files of the embedding model and check their SHA-256 (the only network access)."""
+    """Download the pinned files of the embedding model and check their SHA-256 (the only network access).
+
+    Behind a proxy inspecting HTTPS: KB_MODELS_CA_BUNDLE=<proxy root certificate, PEM>, KB_MODELS_BASE_URL=<mirror>,
+    or --from-dir. TLS verification is never disabled."""
     from pipelines.similarity.encoder import reset_cache, settings
     from pipelines.similarity.models import fetch, spec_for
 
@@ -351,12 +356,29 @@ def models_fetch_cmd(
         console.print(f"[yellow]{spec.id} has no file to fetch.[/yellow]")
         return
     try:
-        path = fetch(spec, models_dir or s.models_dir, force=force)
+        path = fetch(spec, models_dir or s.models_dir, force=force, source_dir=from_dir)
     except Exception as exc:  # network, disk or integrity: nothing half-installed is ever loaded
         _fail(f"fetch failed: {exc}")
     reset_cache()
     console.print(f"[bold green]✓ {spec.id}[/bold green] @ {spec.version[:12]} in {path} "
                   f"(model sha256 {spec.sha256}). Restart the server, then 'kb embeddings index' or publish.")
+
+
+@models_app.command("urls")
+def models_urls_cmd(
+    model: str = typer.Option(None, "--model", help="Model id (default: KB_EMBEDDING_MODEL or the reference model)."),
+) -> None:
+    """Files to download by hand for 'kb models fetch --from-dir' (name, URL, pinned SHA-256)."""
+    from pipelines.similarity.encoder import settings
+    from pipelines.similarity.models import file_urls, spec_for
+
+    try:
+        spec = spec_for(model or settings().model)
+    except ValueError as exc:
+        _fail(str(exc))
+    hashes = {spec.local_name(r): h for r, h in spec.files.items()}
+    for name, url in file_urls(spec).items():
+        console.print(f"{name}\t{url}\tsha256 {hashes[name]}", soft_wrap=True, highlight=False)
 
 
 @models_app.command("status")

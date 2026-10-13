@@ -225,6 +225,22 @@ It encodes with a **local** model on the processor (`intfloat/multilingual-e5-sm
 | Index the base (also done by every publication) | `poetry run kb embeddings index` (needs the governance database) |
 | Evaluate (FR→EN set, on demand / nightly) | `make eval-semantic` |
 
+**Behind a proxy that inspects HTTPS** (corporate network, antivirus, WSL that does not see the certificates
+installed on Windows), `kb models fetch` fails with `certificate verify failed: self-signed certificate in certificate
+chain`. TLS verification is never disabled; use one of:
+
+1. **Trust the proxy's root certificate**: export it as PEM (on Windows: *certmgr.msc* → Trusted Root Certification
+   Authorities → the proxy's certificate → Export, Base-64), then
+   `export KB_MODELS_CA_BUNDLE=/mnt/c/Users/<me>/proxy-root.pem` and run `poetry run kb models fetch` again
+   (`SSL_CERT_FILE` and `REQUESTS_CA_BUNDLE` are honoured too). Under WSL you can also add it to the system store:
+   `sudo cp proxy-root.pem /usr/local/share/ca-certificates/proxy-root.crt && sudo update-ca-certificates`.
+2. **Use a mirror** of huggingface.co (same URL layout): `export KB_MODELS_BASE_URL=https://<mirror>` (or `HF_ENDPOINT`).
+3. **Install offline**: `poetry run kb models urls` lists the five files (name, URL, SHA-256); download them with a
+   browser into one folder, then `poetry run kb models fetch --from-dir <folder>`. Each file is checked against its
+   pinned SHA-256 before it is installed.
+
+`HTTPS_PROXY` / `NO_PROXY` are honoured as usual.
+
 The Docker image fetches and verifies the model at build time, in a cached layer. Without the model (or with
 `KB_EMBEDDINGS=off`) the doctrine context is exactly the lexical one (`relevance_method: "lexical"`).
 

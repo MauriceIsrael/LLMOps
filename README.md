@@ -69,6 +69,7 @@ persistent governance database (SQLite) and a delegating service token:
 ```bash
 poetry install
 poetry run kb models fetch                    # once: local multilingual embedding model into data/models/ (~120 MB)
+                                              # behind an HTTPS-inspecting proxy: see docs/deployment.md §7
 poetry run python scripts/serve_local.py      # or: make serve   (Linux/macOS; Windows has no make, use the first form)
 ```
 
