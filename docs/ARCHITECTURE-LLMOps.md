@@ -1,6 +1,6 @@
 # LLMOps — Document d'architecture
 
-État : 8 octobre 2026. Code de `main` au contrat **1.24** ; le contrat **1.25** (K22, revue des règles de déclenchement) est dans la PR #76, pas encore fusionnée.
+État : 8 octobre 2026. Code de `main` au contrat **1.24** ; le contrat **1.29** (K22, revue des règles de déclenchement) est dans la PR #76, pas encore fusionnée.
 Public : architectes et développeurs qui doivent comprendre, exploiter ou faire évoluer LLMOps, et les équipes des composants voisins (Archinex, suite documentaire).
 
 Ce document décrit **l'architecture actuelle**. Il complète, sans les remplacer :
@@ -129,7 +129,7 @@ Trois modes d'accès au même cœur :
 
 **Étanchéité.** Aucun nom de client ou de site, aucune adresse IP ou e-mail n'entre dans la base (liste noire `anonymization_denylist.txt`, contrôle `anonymization` du cycle de revue).
 
-### Cycle d'enrichissement (contrats 1.2, 1.5, 1.8, 1.25)
+### Cycle d'enrichissement (contrats 1.2, 1.5, 1.8, 1.29)
 
 ```mermaid
 stateDiagram-v2

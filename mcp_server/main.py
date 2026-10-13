@@ -106,7 +106,10 @@ from mcp_server.knowledge.tools import (
     list_knowledge_publications,
     list_reuse_confirmations,
     list_skills,
+    list_trigger_rules,
     list_verdict_feedback,
+    merge_fact_key_candidate,
+    preview_triggers,
     promote_kb_candidate,
     publish_kb_candidates,
     put_embeddings,
@@ -126,6 +129,7 @@ from mcp_server.knowledge.tools import (
     trigger_rfp_elicitation,
     update_domain_owners,
     validate_kb_candidate,
+    validate_trigger_rule,
 )
 
 active_plane = os.getenv("LLMOPS_PLANE", server_config.plane).lower()
@@ -1050,6 +1054,32 @@ def create_starlette_app() -> Starlette:
         res = validate_kb_candidate(body)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_trigger_rules(request):
+        res = list_trigger_rules()
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_trigger_validate(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = validate_trigger_rule(body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_trigger_preview(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = preview_triggers(body)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_merge_key(request):
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = merge_fact_key_candidate(request.path_params["candidate_id"], str(body.get("into") or ""),
+                                       str(body.get("reviewer") or ""), body.get("reason"))
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_checks_simulate(request):
         body = await _json_body(request)
         if body is None:
@@ -1471,6 +1501,10 @@ def create_starlette_app() -> Starlette:
                   methods=["POST"]),
             Route("/api/knowledge/templates/{asset_type}", endpoint=handle_template, methods=["GET"]),
             Route("/api/knowledge/candidates/validate", endpoint=handle_candidate_validate, methods=["POST"]),
+            Route("/api/knowledge/triggers", endpoint=handle_trigger_rules, methods=["GET"]),
+            Route("/api/knowledge/triggers/validate", endpoint=handle_trigger_validate, methods=["POST"]),
+            Route("/api/knowledge/triggers/preview", endpoint=handle_trigger_preview, methods=["POST"]),
+            Route("/api/knowledge/candidates/{candidate_id}/merge-key", endpoint=handle_merge_key, methods=["POST"]),
             Route("/api/knowledge/checks/simulate", endpoint=handle_checks_simulate, methods=["POST"]),
             Route("/api/knowledge/checks", endpoint=handle_check_clauses, methods=["GET"]),
             Route("/api/knowledge/assets/{asset_id}/checks/{check_id}", endpoint=handle_check_clause_decide,

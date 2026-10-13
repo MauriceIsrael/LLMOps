@@ -457,7 +457,11 @@ class CandidateService:
         today = today or datetime.now(UTC).date()
         reviewers = [r["reviewer"] for r in (candidate.get("review"), candidate.get("second_review")) if r]
 
-        if candidate.get("asset_type") == "glossary":
+        if candidate.get("asset_type") in ("trigger", "fact_key"):  # K22
+            from pipelines.kb_candidates import rules as rule_candidates
+
+            path, asset_id = rule_candidates.promote(candidate, self.kb_dir)
+        elif candidate.get("asset_type") == "glossary":
             path = self._promote_glossary(candidate)
             asset_id = f"glossary:{candidate['title']}"
         else:
@@ -545,8 +549,9 @@ class CandidateService:
             self.repo.save(c)
             self._emit("candidate.published", c, actor, [r["reviewer"] for r in (c.get("review"), c.get("second_review")) if r],
                        snapshot_id=snapshot_id)
-        return {"published": [c["id"] for c in promoted] + payload["clause_decisions"], "snapshot_id": snapshot_id,
-                "channels": channels, "clause_decisions": payload["clause_decisions"]}
+        decided = [f"{d['asset_id']}/{d['check_id']}" for d in clause_decisions]
+        return {"published": [c["id"] for c in promoted] + decided, "snapshot_id": snapshot_id,
+                "channels": channels, "clause_decisions": decided}
 
     @staticmethod
     def _write_changelog(path: Path, snapshot_id: str | None, candidates: list[dict[str, Any]],

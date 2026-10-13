@@ -1,5 +1,5 @@
 /**
- * LLMOps MCP Tool Response Contract (schema_version: "1.25")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.29")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -256,7 +256,7 @@ export interface CheckResult {
 /* ---- Contract 1.2: KB candidate cycle ------------------------------------ */
 
 export type KbCandidateKind = "new_asset" | "amendment" | "rex" | "framework_ingestion";
-export type KbAssetType = "principle" | "pattern" | "decision" | "control" | "glossary";
+export type KbAssetType = "principle" | "pattern" | "decision" | "control" | "glossary" | "trigger" | "fact_key";
 export type KbCandidateStatus = "proposed" | "checks_failed" | "in_review" | "accepted" | "rejected" | "published";
 export type KbProductionMode = "human-authored" | "llm-proposed-human-approved" | "llm-derived";
 export type KbReviewAction = "accept" | "amend" | "reject";
@@ -277,7 +277,7 @@ export interface KbCandidateSubmission {
   rationale?: string;
   proposed_content: string;
   source: {
-    system: "archinex" | "document-studio" | "mcp" | "cli-ingestion";
+    system: "archinex" | "document-studio" | "mcp" | "cli-ingestion" | "kb-extraction";
     engagement?: string | null;
     decision_id?: string | null;
     author?: string | null;
@@ -376,7 +376,7 @@ export interface KbComment { id: number; candidate_id: string; author: string; b
 export type GovernanceEventType =
   | "candidate.submitted" | "candidate.assigned" | "review.requested" | "candidate.reviewed"
   | "candidate.commented" | "candidate.promoted" | "candidate.published" | "reminder.due"
-  | "owners.updated" | "eval.updated" | "coverage.changed" | "ingestion.abandoned";
+  | "owners.updated" | "eval.updated" | "coverage.changed";
 
 export interface GovernanceEvent {
   id: number;
@@ -504,13 +504,10 @@ export interface FrameworkIngestion {
   tag: string | null;
   source_name: string;
   source_sha256: string;
-  status: "reviewing" | "partially_applied" | "applied" | "abandoned";
+  status: "reviewing" | "partially_applied" | "applied";
   created_by: string;
   created_at: string;
   declaration_reset: boolean;
-  abandoned_by?: string | null;
-  abandoned_at?: string | null;
-  abandon_reason?: string | null;
   requirements: IngestionRow[];
   decided: number;
   total: number;

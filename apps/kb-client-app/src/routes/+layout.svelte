@@ -17,6 +17,7 @@
   import Lightbulb from 'lucide-svelte/icons/lightbulb';
 
   import Sparkles from 'lucide-svelte/icons/sparkles';
+  import GitBranch from 'lucide-svelte/icons/git-branch';
   import Users from 'lucide-svelte/icons/users';
 
   import { Button } from '$lib/components/ui/button';
@@ -58,6 +59,7 @@
     { href: '/explorer',              labelKey: 'nav.explorer',   icon: Box,             color: 'text-cyan-400',   bg: 'bg-cyan-500/10' },
     { href: '/assets',                labelKey: 'nav.assets',     icon: FileText,        color: 'text-emerald-400',bg: 'bg-emerald-500/10' },
     { href: '/governance/suggestions', labelKey: 'nav.governance', icon: Sparkles,        color: 'text-amber-400',  bg: 'bg-amber-500/10' },
+    { href: '/governance/triggers',    labelKey: 'nav.triggers',   icon: GitBranch,       color: 'text-violet-400', bg: 'bg-violet-500/10' },
     { href: '/governance/staffing',   labelKey: 'nav.staffing',   icon: Users,           color: 'text-blue-400',   bg: 'bg-blue-500/10' },
     { href: '/ideas',                 labelKey: 'nav.ideas',      icon: Lightbulb,       color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
     { href: '/settings',              labelKey: 'nav.settings',   icon: Settings,        color: 'text-slate-400',  bg: 'bg-slate-500/10' },

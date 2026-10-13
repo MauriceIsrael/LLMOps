@@ -138,7 +138,7 @@ class Cascade:
                 self.repo.set_foundation(self.engagement, held["name"], SOUND, derivation)
                 report["restored"].append(held["name"])
             elif not holds and held["foundation"] == SOUND:
-                self._contest(held, {"unsatisfied": self._unsatisfied(rule, values, in_force["contradictions"])}, report)
+                self._contest(held, {"unsatisfied": triggers.unsatisfied(rule, values, {c["key"] for c in in_force["contradictions"]})}, report)
         if report["created"] or report["contested"] or report["restored"]:
             self.access.audit(self.engagement, self.actor, "cascade", "allowed", {
                 "kb_snapshot": snapshot["snapshot_id"], "created": len(report["created"]),
@@ -178,18 +178,6 @@ class Cascade:
     def _contest(self, held: dict[str, Any], cause: dict[str, Any], report: dict[str, Any]) -> None:
         self.repo.set_foundation(self.engagement, held["name"], CONTESTED, {**held["derivation"], "cause": cause})
         report["contested"].append(held["name"])
-
-    @staticmethod
-    def _unsatisfied(rule: dict[str, Any], values: dict[str, Any], contradictions: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        contradicted = {c["key"] for c in contradictions}
-        out = []
-        for c in rule["when"]:
-            if not triggers.matches({"when": [c]}, values):
-                item = {"key": c["key"], "op": c["op"], "value": c["value"], "current": values.get(c["key"])}
-                if c["key"] in contradicted:
-                    item["contradiction"] = True
-                out.append(item)
-        return out
 
 
 # --- reading ----------------------------------------------------------------------------------------------------------
