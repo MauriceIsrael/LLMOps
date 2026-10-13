@@ -5,6 +5,7 @@ from pathlib import Path
 
 from tools.elicitation.models.contribution_schema import Contribution
 from tools.elicitation.repository import ElicitationRepository
+from tools.elicitation.resolve import database_path
 from tools.elicitation.vocabulary_protector import map_material_vocabulary
 
 
@@ -89,13 +90,13 @@ class ContributionRepository:
         self.save(c)
         return c
 
-    def crystallise(self, ct_id: str, db_path: str = "data/kuzu_db") -> Contribution:
+    def crystallise(self, ct_id: str, db_path: str | None = None) -> Contribution:
         """Formule les énoncés candidats à partir du texte de matériel et cartographie le vocabulaire."""
         c = self.get(ct_id)
         if not c:
             raise FileNotFoundError(f"Contribution {ct_id} introuvable.")
 
-        repo = ElicitationRepository(db_path=db_path)
+        repo = ElicitationRepository(db_path=database_path(db_path, self.engagement))
         mapped, unmapped = map_material_vocabulary(c.material_text, repo=repo, engagement=self.engagement)
 
         c.mapped_subjects = mapped
@@ -134,7 +135,7 @@ class ContributionRepository:
         self.save(c)
         return c
 
-    def accept_by_lead(self, ct_id: str, lead_author: str, section_id: str = "4.5", db_path: str = "data/kuzu_db") -> tuple[Contribution, list[str]]:
+    def accept_by_lead(self, ct_id: str, lead_author: str, section_id: str = "4.5", db_path: str | None = None) -> tuple[Contribution, list[str]]:
         """Validation de l'ENTRÉE par l'architecte lead et persistance dans Kùzu DB."""
         c = self.get(ct_id)
         if not c:
@@ -143,7 +144,7 @@ class ContributionRepository:
         if c.status != "confirmed_by_author":
             raise ValueError(f"La contribution {ct_id} doit d'abord être confirmée par son auteur (statut actuel: {c.status}).")
 
-        repo = ElicitationRepository(db_path=db_path)
+        repo = ElicitationRepository(db_path=database_path(db_path, self.engagement))
         persisted_ids = []
 
         for st_data in c.proposed_statements:

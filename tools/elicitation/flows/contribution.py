@@ -6,6 +6,7 @@ from typing import Any, TypedDict
 from langgraph.graph import END, StateGraph
 
 from tools.elicitation.contribution_repository import ContributionRepository
+from tools.elicitation.resolve import database_path
 
 
 class ContributionState(TypedDict, total=False):
@@ -32,7 +33,7 @@ def contribution_node(state: ContributionState) -> dict[str, Any]:
     from mcp_server.core.config import require_engagement
 
     engagement = require_engagement(state.get("engagement"))
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     action = state.get("action", "submit")
     as_person = state.get("as_person", "external:contributor")
     ct_id = state.get("contribution_id")

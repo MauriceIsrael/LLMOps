@@ -44,9 +44,19 @@ def tokens(text: str) -> list[str]:
     return [stem(t) for t in folded.split() if t]
 
 
+SENTENCE_BREAK = "|"
+# A sentence ends at ";", a newline, or a "." followed by whitespace or the end (so "99.9" and "e.g.x" survive).
+_SENTENCE_END = re.compile(r"[;\n]+|\.(?=\s|$)")
+
+
 def normalize(text: str) -> str:
-    """Space-padded normalized text, suitable for phrase containment tests."""
-    return " " + " ".join(tokens(text)) + " "
+    """Space-padded normalized text, suitable for phrase containment tests.
+
+    Sentence boundaries (".", ";", newline) are kept as a ``|`` token: it never belongs to a phrase,
+    and it bounds the negation window (a cue does not negate the next sentence).
+    """
+    sentences = [" ".join(tokens(s)) for s in _SENTENCE_END.split(str(text or ""))]
+    return " " + f" {SENTENCE_BREAK} ".join(s for s in sentences if s) + " "
 
 
 def normalize_phrase(phrase: str) -> str:
@@ -124,6 +134,9 @@ def contains_affirmed(normalized_text: str, phrase: str) -> bool:
     start = normalized_text.find(needle)
     while start != -1:
         before = normalized_text[:start].split()[-NEGATION_WINDOW:]
+        # The window stops at the sentence boundary: a cue in a previous sentence does not apply here.
+        if SENTENCE_BREAK in before:
+            before = before[len(before) - before[::-1].index(SENTENCE_BREAK):]
         if not any(tok in NEGATION_CUES for tok in before):
             return True
         start = normalized_text.find(needle, start + 1)

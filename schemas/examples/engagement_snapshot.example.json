@@ -1,18 +1,18 @@
 {
   "schemaVersion": "1.5",
-  "snapshotId": "eng-example-eng-5a6ec021342d",
+  "snapshotId": "eng-example-eng-89b42366a7ae",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:5a6ec021342de773944a6b1d006bc6880e4eb92a20ea0f607cbe2b6a98744e89",
+  "checksum": "sha256:89b42366a7ae8dc99bc079a3a6bcc1177b8b59dbacb349e0be727aedd430bc68",
   "data": {
     "engagement": {
       "id": "example-eng",
       "confidentiality": "confidential"
     },
     "pins": {
-      "contract_version": "1.25",
+      "contract_version": "1.27",
       "kb_snapshot": {
         "snapshot_id": "snapshot-2026-10-03-0000000",
         "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
@@ -50,8 +50,8 @@
         "origin": "declared"
       },
       {
-        "id": "example-eng:mcx-services",
-        "name": "mcx-services",
+        "id": "example-eng:gateway-services",
+        "name": "gateway-services",
         "definition": "Mission-critical services",
         "maturity": "L3_decided",
         "origin": "declared"
@@ -60,7 +60,7 @@
     "statements": [
       {
         "id": "S-0001",
-        "subject": "mcx-services",
+        "subject": "gateway-services",
         "section": "resilience",
         "predicate": "has_property",
         "value": "The gateway is active-active across two sites.",
@@ -81,7 +81,7 @@
       },
       {
         "id": "S-0002",
-        "subject": "mcx-services",
+        "subject": "gateway-services",
         "section": "resilience",
         "predicate": "has_property",
         "value": "The gateway is active-passive.",
@@ -120,7 +120,7 @@
     "decisions": [
       {
         "id": "D-0001",
-        "subject": "mcx-services",
+        "subject": "gateway-services",
         "decision": "Active-active gateway across two sites",
         "rationale": "Meets REQ-001 within the latency budget.",
         "rejected": [
@@ -208,7 +208,7 @@
           "value": 2,
           "source_excerpt": "across two sites",
           "decision": "D-0001",
-          "subject": "mcx-services",
+          "subject": "gateway-services",
           "unit": "datacentres"
         },
         {
@@ -216,7 +216,7 @@
           "value": "active-active",
           "source_excerpt": "Active-active gateway",
           "decision": "D-0001",
-          "subject": "mcx-services"
+          "subject": "gateway-services"
         }
       ],
       "contradictions": []

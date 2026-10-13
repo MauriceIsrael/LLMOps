@@ -1,0 +1,55 @@
+# Splitter of Regulation (EU) 2024/2847 (Cyber Resilience Act): the reporting obligations of
+# manufacturers (Article 14) and the essential cybersecurity requirements (Annex I, Part I on
+# the properties of products with digital elements, Part II on vulnerability handling).
+# Official source: EUR-Lex HTML of CELEX 32024R2847 (see data/sources/frameworks/README.md).
+framework: CRA
+title: "Regulation (EU) 2024/2847 (Cyber Resilience Act)"
+jurisdiction: EU
+mode: structured
+defaults:
+  domain: [secure-development, vulnerability-management]
+  severity: mandatory
+structures:
+  - levels:
+      - name: article
+        pattern: '^Article\s+(?P<num>\d+)\s*$'
+        title_next_line: true
+        sequential: true
+      - name: paragraph
+        pattern: '^(?P<num>\d+)\.\s+(?P<text>.+)$'
+        sequential: true
+      - name: point
+        pattern: '^\((?P<num>[a-z])\)(?:\s+(?P<text>.+))?$'
+        sequential: true  # "(i)" after "(c)" is a roman sub-point
+    stop: ['^CHAPTER [IVX]+$', '^ANNEX [IVX]+$']
+    id_template: "CRA-ART{article}-{paragraph}{point_upper}"
+    ref_template: "Regulation (EU) 2024/2847 (Cyber Resilience Act), Article {article}{paragraph_paren}{point_paren}"
+    include:
+      article: ["14"]
+    # The notification stages and their content are read as a whole.
+    inline:
+      - {article: "14", paragraph: "2"}
+      - {article: "14", paragraph: "4"}
+      - {article: "14", paragraph: "5"}
+      - {article: "14", paragraph: "7"}
+    # Obligations of the CSIRTs and the Commission.
+    exclude:
+      - {article: "14", paragraph: "6"}
+      - {article: "14", paragraph: "9"}
+      - {article: "14", paragraph: "10"}
+  - levels:
+      - name: annex
+        pattern: '^ANNEX\s+(?P<num>[IVX]+)\s*$'
+        title_next_line: true
+      - name: part
+        pattern: '^Part\s+(?P<num>[IVX]+)\b'
+      - name: requirement
+        pattern: '^\((?P<num>\d+)\)(?:\s+(?P<text>.+))?$'
+        sequential: true
+      - name: point
+        pattern: '^\((?P<num>[a-z])\)(?:\s+(?P<text>.+))?$'
+        sequential: true
+    id_template: "CRA-ANX{annex}-P{part}-{requirement}{point_upper}"
+    ref_template: "Regulation (EU) 2024/2847 (Cyber Resilience Act), Annex {annex}, Part {part}, point ({requirement}){point_paren}"
+    include:
+      annex: ["I"]

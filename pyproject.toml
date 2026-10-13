@@ -29,6 +29,7 @@ sqlalchemy = "^2.0"
 psycopg = {version = "^3.2", extras = ["binary"], optional = true}
 python-multipart = "^0.0.32"
 jsonschema = "^4.0"
+fastembed = ">=0.9.0,<0.10"
 
 
 [tool.poetry.extras]
@@ -87,6 +88,7 @@ filterwarnings = [
 markers = [
     "deterministic: oracle de migration — aucun appel LLM, résultat reproductible",
     "stochastic: extraction LLM, DeepEval, Promptfoo — non utilisable comme oracle",
+    "semantic_eval: jeu FR→EN avec le vrai modèle d'embedding local (KB_SEMANTIC_EVAL=1, après kb models fetch)",
 ]
 
 [tool.mypy]

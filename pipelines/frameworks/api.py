@@ -32,12 +32,13 @@ MAX_SOURCE_BYTES = 20 * 1024 * 1024
 EXTRACTION_TIMEOUT_SECONDS = 120
 ALLOWED_SUFFIXES = (".pdf", ".html", ".htm", ".txt", ".md", ".docx")
 LINKABLE_TYPES = ("principle", "pattern", "decision")
+INGESTION_STATUSES = ("reviewing", "partially_applied", "applied", "abandoned")
 
 
 class IngestionError(ValueError):
-    def __init__(self, argument: str, reason: str) -> None:
+    def __init__(self, argument: str, reason: str, conflict: bool = False) -> None:
         super().__init__(reason)
-        self.argument, self.reason = argument, reason
+        self.argument, self.reason, self.conflict = argument, reason, conflict
 
 
 class IngestionNotFoundError(LookupError):
@@ -104,9 +105,15 @@ class IngestionService:
             raise IngestionNotFoundError(f"ingestions/{ingestion_id}")
         return dict(r._mapping)
 
-    def list(self) -> list[dict[str, Any]]:
+    def list(self, status: str | None = None) -> list[dict[str, Any]]:
+        query = select(framework_ingestions).order_by(framework_ingestions.c.id.desc())
+        if status is not None and str(status).strip():
+            clean_status = str(status).strip().lower()
+            if clean_status not in INGESTION_STATUSES:
+                raise IngestionError("status", f"'status' must be one of {list(INGESTION_STATUSES)}.")
+            query = query.where(framework_ingestions.c.status == clean_status)
         with self.engine.connect() as conn:
-            rows = conn.execute(select(framework_ingestions).order_by(framework_ingestions.c.id.desc())).all()
+            rows = conn.execute(query).all()
         return [dict(r._mapping) for r in rows]
 
     def get(self, ingestion_id: int) -> dict[str, Any]:
@@ -200,6 +207,8 @@ class IngestionService:
         header, row = self._header(ingestion_id), self._row(ingestion_id, requirement_id)
         if header["status"] == "applied":
             raise IngestionError("status", "the ingestion is fully applied.")
+        if header["status"] == "abandoned":
+            raise IngestionError("status", "the ingestion is abandoned; its rows are frozen.", conflict=True)
         if row["status"] == "applied":
             raise IngestionError("status", "this requirement was already applied.")
         decision = str(body.get("decision") or "").strip().lower()
@@ -221,7 +230,11 @@ class IngestionService:
 
     def add_link_proposals(self, ingestion_id: int, proposals: Any, model: str | None) -> dict[str, Any]:
         """Proposals made by the client's own LLM: stored as ``llm-derived``, validated against active assets."""
-        self._header(ingestion_id)
+        header = self._header(ingestion_id)
+        if header["status"] == "abandoned":
+            raise IngestionError("status", "the ingestion is abandoned; its rows are frozen.", conflict=True)
+        if header["status"] == "applied":
+            raise IngestionError("status", "the ingestion is fully applied.")
         if not isinstance(proposals, list) or not proposals:
             raise IngestionError("proposals", "'proposals' must be a non-empty list.")
         known = {a.id for a in load_assets(self.kb_dir) if a.type in LINKABLE_TYPES and a.frontmatter.get("status") == "active"}
@@ -242,13 +255,42 @@ class IngestionService:
             updated += 1
         return {"updated": updated, "dropped_unknown_links": dropped, "unknown_requirements": unknown_reqs}
 
-    # ------------------------------------------------------------------- apply
+    # ------------------------------------------------------------------- apply / abandon
+
+    def abandon(self, ingestion_id: int, actor: str, reason: str) -> dict[str, Any]:
+        """Mark an unapplied ingestion as ``abandoned`` (frozen rows, audit trail preserved)."""
+        clean_reason = reason.strip() if isinstance(reason, str) else ""
+        if not clean_reason:
+            raise IngestionError("reason", "'reason' is required to abandon an ingestion.")
+        header = self._header(ingestion_id)
+        if header["status"] in ("applied", "partially_applied"):
+            raise IngestionError(
+                "status",
+                f"cannot abandon an ingestion whose status is '{header['status']}': promoted controls remain the reference.",
+                conflict=True,
+            )
+        if header["status"] == "abandoned":
+            raise IngestionError("status", "the ingestion is already abandoned.", conflict=True)
+        with self.engine.begin() as conn:
+            conn.execute(
+                framework_ingestions.update()
+                .where(framework_ingestions.c.id == ingestion_id)
+                .values(
+                    status="abandoned",
+                    abandoned_by=actor,
+                    abandoned_at=now_iso(),
+                    abandon_reason=clean_reason,
+                )
+            )
+        return self.get(ingestion_id)
 
     def apply(self, ingestion_id: int, actor: str) -> dict[str, Any]:
         """Same as ``kb apply-review``: reviewed candidates, then promotion of the accepted ones."""
         if self.service is None:
             raise RuntimeError("apply needs a CandidateService")
         header, rows = self._header(ingestion_id), self._rows(ingestion_id)
+        if header["status"] == "abandoned":
+            raise IngestionError("status", "the ingestion is abandoned.", conflict=True)
         decided = [r for r in rows if r["decision"] and r["status"] != "applied"]
         if not decided:
             raise IngestionError("decisions", "no decided requirement to apply.")

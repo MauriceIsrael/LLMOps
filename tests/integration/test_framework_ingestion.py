@@ -17,6 +17,8 @@ from pipelines.compliance_mapper import compute_framework_coverage
 from pipelines.frameworks.links import suggest_links
 from pipelines.kb_cli import app
 
+from tests.integration.nis2_baseline import rewind_nis2
+
 ROOT = Path(__file__).parent.parent.parent
 EXCERPT = ROOT / "tests" / "fixtures" / "frameworks" / "nis2_excerpt.txt"
 EXPERT = "@security-compliance-team"
@@ -26,6 +28,7 @@ EXPERT = "@security-compliance-team"
 def env(tmp_path, monkeypatch):
     kb = tmp_path / "kb"
     shutil.copytree(ROOT / "data" / "kb", kb)
+    rewind_nis2(kb)
     monkeypatch.setenv("CANDIDATES_DIR", str(tmp_path / "candidates"))
     monkeypatch.delenv("LLM_ENDPOINT", raising=False)
     import mcp_server.core.notifier as notifier
@@ -141,3 +144,24 @@ def test_suggest_links_marks_proposals_as_llm_derived(env):
     fm = _fm(run_dir / "NIS2-ART21-2B.md")
     assert fm["proposed_links"] == ["P-002"]  # unknown ids are dropped
     assert fm["links_production_mode"] == "llm-derived"
+
+
+def test_suggest_links_from_a_proposals_file(env):
+    """Proposals prepared elsewhere (body of POST …/link-proposals) annotate the drafts, still llm-derived."""
+    _run(env, "ingest-framework", "--framework", "NIS2", "--version", "2022/2555", "--source", str(EXCERPT),
+         "--kb-dir", str(env["kb"]), "--staging-dir", str(env["staging"]))
+    run_dir = env["staging"] / "NIS2" / "2022-2555"
+    proposals = ROOT / "data" / "proposals" / "frameworks" / "NIS2-2022-2555.link-proposals.json"
+    out = _run(env, "suggest-links", "--framework", "NIS2", "--proposals", str(proposals), "--kb-dir", str(env["kb"]),
+               "--staging-dir", str(env["staging"])).output
+    flat = " ".join(out.split())  # la console coupe les lignes selon la largeur et la longueur des chemins
+    assert "9 draft(s) annotated" in flat and "unknown requirements: none" in flat
+    fm = _fm(run_dir / "NIS2-ART23-4.md")
+    assert fm["links_production_mode"] == "llm-derived" and fm["status"] == "draft" and fm["validated_by"] == []
+    assert fm["proposed_links"] == ["P-008"] and len(fm["proposed_acceptance_criteria"]) == 3
+    assert "alerte précoce" in fm["proposed_terms"] and fm["proposed_title_fr"].startswith("Délais de notification")
+    assert "proposed_links" not in _fm(run_dir / "NIS2-ART21-2C.md")  # existing controls are untouched
+    # The proposals cover exactly the requirements that have no control yet.
+    data = json.loads(proposals.read_text(encoding="utf-8"))
+    missing = {r for r in drafts_in_order(run_dir) if not (env["kb"] / "controls" / "NIS2" / f"{r}.md").exists()}
+    assert {p["requirement_id"] for p in data["proposals"]} == missing

@@ -9,6 +9,8 @@ from starlette.testclient import TestClient
 
 from mcp_server.core.config import server_config
 
+from tests.integration.nis2_baseline import rewind_nis2
+
 ROOT = Path(__file__).parent.parent.parent
 EXCERPT = ROOT / "tests" / "fixtures" / "frameworks" / "nis2_excerpt.txt"
 CLIENT = {"Authorization": "Bearer archinex-token"}
@@ -24,7 +26,8 @@ def _as(email: str) -> dict:
 def env(tmp_path, monkeypatch):
     kb = tmp_path / "kb"
     shutil.copytree(ROOT / "data" / "kb", kb)
-    owners = yaml.safe_load((kb / "owners.yaml").read_text())
+    rewind_nis2(kb)
+    owners = yaml.safe_load((kb / "owners.yaml").read_text(encoding="utf-8"))
     owners["owners"]["@security-compliance-team"]["email"] = SEC
     owners["owners"]["@ciso-office"]["email"] = OTHER
     owners["owners"]["@maintainers"] = {"email": MAINT, "roles": ["kb:maintain"]}
@@ -122,7 +125,7 @@ def test_upload_review_apply_declare(env):
     fm = yaml.safe_load(control.split("---")[1])
     assert fm["status"] == "active" and fm["validated_by"] == ["@security-compliance-team"]
     assert fm["satisfied_by"] == ["P-008"] and fm["links_production_mode"] == "human-authored"
-    llm = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2B.md").read_text().split("---")[1])
+    llm = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2B.md").read_text(encoding="utf-8").split("---")[1])
     assert llm["links_production_mode"] == "llm-proposed-human-approved" and "P-002" in llm["satisfied_by"]
     assert client.patch(f"{BASE}/{iid}/rows/NIS2-ART23-4", headers=_as(SEC), json={"decision": "accept"}).status_code == 400
 
@@ -162,7 +165,7 @@ def test_bilingual_terms_and_french_title_are_proposed_then_applied_by_the_exper
 
     client, kb = env["client"], env["kb"]
     iid = _upload(client).json()["data"]["id"]
-    curated = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2B.md").read_text().split("---")[1])
+    curated = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2B.md").read_text(encoding="utf-8").split("---")[1])
     props = client.post(f"{BASE}/{iid}/link-proposals", headers=_as(MAINT), json={"model": "local-llm", "proposals": [
         {"requirement_id": "NIS2-ART23-4", "title_fr": "Obligations de notification des incidents",
          "terms": ["early warning", "alerte précoce", "notification d'incident", "Early  Warning"]},
@@ -188,11 +191,11 @@ def test_bilingual_terms_and_french_title_are_proposed_then_applied_by_the_exper
     assert decide("NIS2-ART21-2A", {"decision": "amend", "terms": ["x" * 70]}).status_code == 400
     assert client.post(f"{BASE}/{iid}/apply", headers=_as(MAINT)).status_code == 200
 
-    new = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART23-4.md").read_text().split("---")[1])
+    new = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART23-4.md").read_text(encoding="utf-8").split("---")[1])
     assert new["title_fr"] == "Obligations de notification des incidents"
     assert new["terms"] == ["early warning", "alerte précoce", "notification d'incident"]
     assert new["terms_production_mode"] == "llm-proposed-human-approved"  # a model proposed it, a person approved it
-    amended = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2B.md").read_text().split("---")[1])
+    amended = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2B.md").read_text(encoding="utf-8").split("---")[1])
     assert set(curated.get("terms") or []) <= set(amended["terms"]) and "traitement des incidents" in amended["terms"]
     assert "gestion des incidents" not in amended["terms"]  # the expert's own terms replaced the model's proposal
     assert amended["terms_production_mode"] == "human-authored"
@@ -209,11 +212,59 @@ def test_bilingual_terms_and_french_title_are_proposed_then_applied_by_the_exper
 def test_a_model_proposed_french_title_never_replaces_a_curated_one(env):
     client, kb = env["client"], env["kb"]
     iid = _upload(client).json()["data"]["id"]
-    before = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2C.md").read_text().split("---")[1])
+    before = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2C.md").read_text(encoding="utf-8").split("---")[1])
     assert before.get("title_fr")
     client.post(f"{BASE}/{iid}/link-proposals", headers=_as(MAINT), json={"proposals": [
         {"requirement_id": "NIS2-ART21-2C", "title_fr": "Un autre titre", "terms": ["continuité d'activité"]}]})
     client.patch(f"{BASE}/{iid}/rows/NIS2-ART21-2C", headers=_as(SEC), json={"decision": "accept"})
     assert client.post(f"{BASE}/{iid}/apply", headers=_as(MAINT)).status_code == 200
-    after = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2C.md").read_text().split("---")[1])
+    after = yaml.safe_load((kb / "controls" / "NIS2" / "NIS2-ART21-2C.md").read_text(encoding="utf-8").split("---")[1])
     assert after["title_fr"] == before["title_fr"] and "continuité d'activité" in after["terms"]
+
+
+def test_abandon_ingestion_and_status_filter(env):
+    client = env["client"]
+    first = _upload(client, version="trial-1").json()["data"]["id"]
+    second = _upload(client, version="official-2").json()["data"]["id"]
+
+    # Non-maintainer cannot abandon; empty reason is refused (400).
+    assert client.post(f"{BASE}/{first}/abandon", headers=_as(SEC), json={"reason": "Essai"}).status_code == 403
+    assert client.post(f"{BASE}/{first}/abandon", headers=_as(MAINT), json={"reason": "   "}).status_code == 400
+    assert client.post(f"{BASE}/999/abandon", headers=_as(MAINT), json={"reason": "Essai"}).status_code == 404
+
+    # Abandon the trial ingestion: status becomes abandoned, rows are frozen, governance event recorded.
+    res = client.post(f"{BASE}/{first}/abandon", headers=_as(MAINT), json={"reason": "Extrait de test remplacé par le texte officiel"})
+    assert res.status_code == 200, res.text
+    data = res.json()["data"]
+    assert data["status"] == "abandoned"
+    assert data["abandoned_by"] == "@maintainers"
+    assert data["abandon_reason"] == "Extrait de test remplacé par le texte officiel"
+    assert data["abandoned_at"]
+
+    # Already abandoned -> 409; row decisions, proposals, and apply are frozen (409).
+    assert client.post(f"{BASE}/{first}/abandon", headers=_as(MAINT), json={"reason": "Again"}).status_code == 409
+    assert client.patch(f"{BASE}/{first}/rows/NIS2-ART23-4", headers=_as(SEC), json={"decision": "accept"}).status_code == 409
+    assert client.post(f"{BASE}/{first}/link-proposals", headers=_as(MAINT), json={"proposals": [
+        {"requirement_id": "NIS2-ART23-4", "satisfied_by": ["P-008"]}]}).status_code == 409
+    assert client.post(f"{BASE}/{first}/apply", headers=_as(MAINT)).status_code == 409
+
+    # Partially applied or applied ingestions cannot be abandoned (409).
+    assert client.patch(f"{BASE}/{second}/rows/NIS2-ART21-2A", headers=_as(SEC), json={"decision": "accept"}).status_code == 200
+    assert client.post(f"{BASE}/{second}/apply", headers=_as(MAINT)).json()["data"]["status"] == "partially_applied"
+    assert client.post(f"{BASE}/{second}/abandon", headers=_as(MAINT), json={"reason": "Nope"}).status_code == 409
+
+    # Filter by status on GET /api/frameworks/ingestions?status=...
+    abandoned_list = client.get(f"{BASE}?status=abandoned", headers=CLIENT).json()["data"]["ingestions"]
+    assert [i["id"] for i in abandoned_list] == [first]
+    partial_list = client.get(f"{BASE}?status=partially_applied", headers=CLIENT).json()["data"]["ingestions"]
+    assert [i["id"] for i in partial_list] == [second]
+    assert client.get(f"{BASE}?status=bogus", headers=CLIENT).status_code == 400
+
+    # Governance event recorded.
+    events = client.get("/api/knowledge/events", headers=CLIENT).json()["data"]["events"]
+    abandoned_events = [e for e in events if e["type"] == "ingestion.abandoned"]
+    assert len(abandoned_events) == 1
+    assert abandoned_events[0]["actor"] == "@maintainers"
+    assert abandoned_events[0]["payload"]["ingestion_id"] == first
+    assert abandoned_events[0]["payload"]["reason"] == "Extrait de test remplacé par le texte officiel"
+

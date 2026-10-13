@@ -1,5 +1,7 @@
 # Splitter of Directive (EU) 2022/2555 (NIS 2) — one requirement per article paragraph,
 # or per point when the paragraph lists points (Article 21(2)(a)...(j)).
+# Official source: EUR-Lex HTML of CELEX 32022L2555 (see data/sources/frameworks/README.md),
+# where a point label "(a)" stands on its own line before its text.
 framework: NIS2
 title: "Directive (EU) 2022/2555 (NIS 2)"
 jurisdiction: EU
@@ -8,16 +10,35 @@ levels:
   - name: article
     pattern: '^Article\s+(?P<num>\d+)\s*$'
     title_next_line: true
+    sequential: true  # ignores the correlation table at the end of the directive
   - name: paragraph
     pattern: '^(?P<num>\d+)\.\s+(?P<text>.+)$'
+    sequential: true
   - name: point
-    pattern: '^\((?P<num>[a-z])\)\s+(?P<text>.+)$'
+    pattern: '^\((?P<num>[a-z])\)(?:\s+(?P<text>.+))?$'
+    sequential: true  # "(i)" after "(d)" is a roman sub-point, not point (i)
+stop: ['^CHAPTER [IVX]+$']
 id_template: "NIS2-ART{article}-{paragraph}{point_upper}"
 ref_template: "Directive (EU) 2022/2555 (NIS 2), Article {article}{paragraph_paren}{point_paren}"
 # Obligations of essential and important entities (governance, risk-management measures,
 # reporting). Extend the list to ingest more articles.
 include:
   article: ["20", "21", "23"]
+# Article 23(3) (what makes an incident significant) and 23(4) (the notification stages and
+# deadlines) are read as a whole: their points stay in the paragraph text.
+inline:
+  - {article: "23", paragraph: "3"}
+  - {article: "23", paragraph: "4"}
+# Obligations of the Commission, the CSIRTs and the single points of contact, not of the entities.
+exclude:
+  - {article: "21", paragraph: "5"}
+  - {article: "23", paragraph: "5"}
+  - {article: "23", paragraph: "6"}
+  - {article: "23", paragraph: "7"}
+  - {article: "23", paragraph: "8"}
+  - {article: "23", paragraph: "9"}
+  - {article: "23", paragraph: "10"}
+  - {article: "23", paragraph: "11"}
 defaults:
   domain: [security-governance]
   severity: mandatory

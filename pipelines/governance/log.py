@@ -23,7 +23,7 @@ from pipelines.governance.store import (
 EVENT_TYPES = (
     "candidate.submitted", "candidate.assigned", "review.requested", "candidate.reviewed",
     "candidate.commented", "candidate.promoted", "candidate.published", "reminder.due",
-    "owners.updated", "eval.updated", "coverage.changed",
+    "owners.updated", "eval.updated", "coverage.changed", "ingestion.abandoned",
 )
 REQUEST_KINDS = ("second_review", "advice")
 DUE_BUSINESS_DAYS = 5

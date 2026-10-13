@@ -9,7 +9,7 @@ import yaml
 class RosterManager:
     """Gestionnaire des identités, autorisations et compétences techniques depuis roster.yaml."""
 
-    def __init__(self, engagement: str = "demo-2026", roster_path: str | Path | None = None) -> None:
+    def __init__(self, engagement: str, roster_path: str | Path | None = None) -> None:
         self.engagement = engagement
         if roster_path:
             self.roster_path = Path(roster_path)

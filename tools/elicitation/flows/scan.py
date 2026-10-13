@@ -16,6 +16,7 @@ from tools.elicitation.models.blueprint_schema import (
     load_blueprint,
 )
 from tools.elicitation.repository import ElicitationRepository
+from tools.elicitation.resolve import database_path, engagement_of
 
 
 class CountsSummary(dict):
@@ -131,7 +132,6 @@ def evaluate(section: BlueprintSection, req: BlueprintRequirement, current_level
 
 def load_frame_node(state: ScanState) -> dict[str, Any]:
     """Charge et valide le blueprint lié à l'engagement (D2, D10)."""
-    print(f"DEBUG LOAD_FRAME_NODE STATE: bp_path={state.get('blueprint_path')}, bp_id={state.get('blueprint_id')}")
     require(state, "engagement")
     engagement = state["engagement"]
 
@@ -173,7 +173,7 @@ def load_frame_node(state: ScanState) -> dict[str, Any]:
                 bp_path = Path("data/kb/blueprints") / bp_id
         bp = load_blueprint(bp_path)
 
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = state.get("repo") or ElicitationRepository(db_path=db_path)
     repo.bind_blueprint_to_engagement(bp, engagement=engagement)
 
@@ -185,7 +185,7 @@ def detect_gaps_node(state: ScanState) -> dict[str, Any]:
     require(state, "engagement", "blueprint")
     engagement = state["engagement"]
     bp: Blueprint = state["blueprint"]
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = state.get("repo") or ElicitationRepository(db_path=db_path, read_only=True)
 
     levels = repo.subject_levels(engagement=engagement)               # 1 seule requête (D9)
@@ -315,7 +315,7 @@ def enrich_node(state: ScanState) -> dict[str, Any]:
     """Enrichit les manques avec les patterns candidats, réponses antérieures et liens de contexte."""
     require(state, "engagement")
     engagement = state["engagement"]
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = state.get("repo") or ElicitationRepository(db_path=db_path, read_only=True)
     gaps = state.get("gaps", [])
     enriched_gaps = []
@@ -408,7 +408,7 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
     if max_questions is not None:
         max_open_per_role = min(max_open_per_role, max_questions)
 
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = state.get("repo") or ElicitationRepository(db_path=db_path)
 
     # Récupérer les questions ouvertes/envoyées dans Kùzu DB
@@ -551,7 +551,7 @@ def crystallize_node(state: ScanState) -> dict[str, Any]:
 
 def persist_questions_node(state: ScanState) -> dict[str, Any]:
     """Persiste les questions générées dans Kùzu DB."""
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = state.get("repo") or ElicitationRepository(db_path=db_path)
     persisted_ids = []
     for q in state.get("questions", []):
@@ -562,8 +562,8 @@ def persist_questions_node(state: ScanState) -> dict[str, Any]:
 
 def dispatch_node(state: ScanState) -> dict[str, Any]:
     """Poste les questions dans la boîte aux lettres."""
-    engagement = state.get("engagement", "demo-2026")
-    db_path = state.get("db_path", "data/kuzu_db")
+    engagement = engagement_of(state.get("engagement"))
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = state.get("repo") or ElicitationRepository(db_path=db_path)
     mailbox = FileMailbox(engagement=engagement)
     dispatched = []

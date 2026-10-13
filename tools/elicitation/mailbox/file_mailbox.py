@@ -57,7 +57,7 @@ class Mailbox(Protocol):
 class FileMailbox:
     """Implémentation FileMailbox écrivant et lisant des fichiers JSON sous projects/<engagement>/mailbox/."""
 
-    def __init__(self, engagement: str = "demo-2026", base_dir: str | Path = "projects") -> None:
+    def __init__(self, engagement: str, base_dir: str | Path = "projects") -> None:
         self.engagement = engagement
         self.mailbox_dir = Path(base_dir) / engagement / "mailbox"
         self.questions_dir = self.mailbox_dir / "questions"

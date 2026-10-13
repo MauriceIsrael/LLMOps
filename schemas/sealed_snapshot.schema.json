@@ -38,6 +38,42 @@
       "type": "boolean",
       "description": "True: the emitter's freshness test rebuilds this file instead of reading it."
     },
+    "embedding_model": {
+      "type": "object",
+      "description": "Reference embedding model of the Hub (contract 1.25, issue #94): local, pinned by the SHA-256 of its ONNX file. Outside payload_sha256.",
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string", "description": "Pinned revision of the model's source repository." },
+        "sha256": { "type": ["string", "null"] },
+        "dim": { "type": "integer", "minimum": 1 },
+        "local": { "const": true },
+        "query_prefix": { "type": "string" },
+        "passage_prefix": { "type": "string" }
+      },
+      "required": ["id", "version", "sha256", "dim", "local"]
+    },
+    "embedding_index": {
+      "type": "object",
+      "description": "Fingerprint of the index (contract 1.25): the text each vector of the reference model stands for. Derived from the knowledge base and the pinned model only. Outside payload_sha256.",
+      "properties": {
+        "model": { "type": "string" },
+        "count": { "type": "integer", "minimum": 0 },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ref": { "type": "string" },
+              "type": { "type": "string" },
+              "text_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+            },
+            "required": ["ref", "type", "text_sha256"]
+          }
+        },
+        "content_sha256": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      },
+      "required": ["model", "count", "items", "content_sha256"]
+    },
     "regenerate": {
       "type": "string",
       "description": "Command that regenerates this file."

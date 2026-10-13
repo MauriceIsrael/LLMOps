@@ -89,7 +89,7 @@ décision affirmée ; `is_provisional` et ses raisons **dérivés, jamais décla
 | **K19** | LLMOps | Règles de déclenchement de questions attachées aux actifs (contrat 1.22) — **livré** (#68) | K18 |
 | **K20** | LLMOps | Moteur de cascade déterministe (contrat 1.23) — **livré** (#69) | K18, K19, K16 |
 | **K21** | LLMOps | Ajustements des règles par engagement (contrat 1.24) — **livré** sauf la capitalisation (étape 4, dépend de K7 #44 et K13 #51) (#70) | K19, K20 |
-| **K22** | LLMOps | Amorçage des règles depuis les sections « Conséquences » et revue dans l'application d'administration (contrat 1.25) — **livré** (#71) ; l'écran n'est pas validé visuellement ; l'amorçage réel demande un modèle local (`LLM_ENDPOINT`) | K18, K19 |
+| **K22** | LLMOps | Amorçage des règles depuis les sections « Conséquences » et revue dans l'application d'administration (contrat 1.27) — **livré** (#71) ; l'écran n'est pas validé visuellement ; l'amorçage réel demande un modèle local (`LLM_ENDPOINT`) | K18, K19 |
 | **K13** | LLMOps | Étanchéité de la capitalisation : aucune ancre de programme dans la base de connaissance — #51 | — |
 | **A16** *(à reformuler, équipe Archinex)* | Archinex | Export du bundle comme instantané scellé de la suite (TypeScript, vecteurs partagés), construit **sans rien inventer** ; refus si la vérification échoue ou si `confidentiality` manque | B1, K1 |
 | **A17** | Archinex | Publication : fichier et référence `SnapshotRef` (`sourceSystem`, `snapshotId`, `checksum`, `producedAt`) pour les consommateurs ; bouton « Exporter le dossier », bandeau « provisoire » et liste des écarts bloquants | A16 |

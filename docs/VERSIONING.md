@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.25"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.27"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.25"
+  "schema_version": "1.27"
 }
 ```
 
@@ -45,7 +45,9 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.22` | Question triggers attached to knowledge-base elements (K19, [contract §5.22](contracts/knowledge-hub-api-v1.md)): declarative rules `data/kb/triggers/TRG-*.yaml` over the facts vocabulary, validated at ingestion and publication, citable `trigger:<id>`; section `question_triggers` of the sealed knowledge snapshot (own seal, outside `payload_sha256`). |
 | `1.23` | Cascade engine (K20, [contract §5.23](contracts/knowledge-hub-api-v1.md)): decisions open derived subjects from the pinned knowledge snapshot (`origin: derived`, truth maintenance `foundation_contested`), `GET …/lineage`, `PUT …/kb-pin` (admin, new `pin` action), `cascade` report on assert/withdraw/import, mandatory questions closed by a decider with a justification; engagement snapshot schema `1.4` (`lineage`, subject `origin`). |
 | `1.24` | Rule adjustments per engagement (K21, [contract §5.24](contracts/knowledge-hub-api-v1.md)): justified deactivation of a reference rule, local rules proposed then asserted by another decider, `GET …/rules`; engagement snapshot schema `1.5` (`rule_adjustments`, lineage `scope`). |
-| `1.25` | Trigger rules and facts-vocabulary keys in the candidate cycle, and their review (K22, [contract §5.25](contracts/knowledge-hub-api-v1.md)): candidate types `trigger` and `fact_key`, `kb extract-triggers`, `GET /api/knowledge/triggers`, `POST …/triggers/{validate,preview}`, `POST …/candidates/{id}/merge-key`. |
+| `1.25` | Local multilingual semantic search (issue #94, [contract §5.25](contracts/knowledge-hub-api-v1.md)): local model on the processor (`fastembed`, `intfloat/multilingual-e5-small`, pinned by SHA-256, no network at query time); `GET /health` → `embedding`; doctrine context items gain `relevant`, `semantic_relevance`, `combined_relevance`, `relevance_method` (package: `relevance_method`, `embedding`); `POST /api/knowledge/similar` encodes `query_text` on the server (`encoded_by`, `409 model-mismatch`); publications index the assets (`embedding_index`); sealed snapshot sections `embedding_model` and `embedding_index` (outside `payload_sha256`). Lexical ranking unchanged without the model. |
+| `1.26` | Decision on each check clause (issues #101, #105, [contract §5.26](contracts/knowledge-hub-api-v1.md)): per-clause `status` (`draft`/`validated`/`rejected`) and `review`; `checks_status` becomes an aggregate (`partial` added); promotion never validates a clause; `GET /api/knowledge/checks`, `PATCH /api/knowledge/assets/{asset_id}/checks/{check_id}`; trail `data/kb/clause-decisions.jsonl`; publications list `clause_decisions`. |
+| `1.27` | Trigger rules and facts-vocabulary keys in the candidate cycle, and their review (K22, [contract §5.27](contracts/knowledge-hub-api-v1.md)): candidate types `trigger` and `fact_key`, `kb extract-triggers`, `GET /api/knowledge/triggers`, `POST …/triggers/{validate,preview}`, `POST …/candidates/{id}/merge-key`. |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

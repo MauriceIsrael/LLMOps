@@ -149,15 +149,15 @@ def test_impersonation_flag_resolves_author_and_role():
     """Test le drapeau d'usurpation --as (ex: --as alice, --as bob, --as charlie)."""
     from tools.elicitation.cli import resolve_impersonation
 
-    author_a, role_a = resolve_impersonation("alice", "default", "default-role")
+    author_a, role_a = resolve_impersonation("alice", "default", "default-role", "demo-2026")
     assert author_a == "Alice"
     assert role_a == "cloud-architect"
 
-    author_b, role_b = resolve_impersonation("bob", "default", "default-role")
+    author_b, role_b = resolve_impersonation("bob", "default", "default-role", "demo-2026")
     assert author_b == "Bob"
     assert role_b == "storage-expert"
 
-    author_c, role_c = resolve_impersonation("charlie", "default", "default-role")
+    author_c, role_c = resolve_impersonation("charlie", "default", "default-role", "demo-2026")
     assert author_c == "Charlie"
     assert role_c == "chief-architect"
 

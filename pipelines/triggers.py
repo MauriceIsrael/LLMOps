@@ -136,7 +136,8 @@ def validate_rule(doc: Any, name: str, vocabulary: dict[str, Any], carrier_index
     version = doc.get("version")
     if isinstance(version, bool) or not isinstance(version, int) or version < 1:
         add("version", "VERSION", "'version' must be a positive integer")
-    carrier = carrier_index.get(doc.get("asset")) if isinstance(doc.get("asset"), str) else None
+    asset = doc.get("asset")
+    carrier = carrier_index.get(asset) if isinstance(asset, str) else None
     if carrier is None and not (local and doc.get("asset") is None):
         add("asset", "UNKNOWN_ASSET", f"the carrier '{doc.get('asset')}' is not an element of the knowledge base")
     when = doc.get("when")

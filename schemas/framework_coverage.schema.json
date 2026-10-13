@@ -70,6 +70,12 @@
               "null"
             ]
           },
+          "declared_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "provisional": {
             "type": [
               "boolean",
@@ -131,6 +137,12 @@
           }
         },
         "declared_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "declared_at": {
           "type": [
             "string",
             "null"

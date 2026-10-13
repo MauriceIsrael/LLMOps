@@ -256,7 +256,8 @@ def _rest(method: str, path: str, url: str | None = None, *, json_body: Any = No
           headers: dict[str, str] | None = None, stream: bool = False, remember: str | None = None,
           reviewer: bool = False, delegate: bool = False, form: dict[str, str] | None = None,
           files: dict[str, Any] | None = None, member: str | None = None,
-          remember_path: tuple[str | int, ...] | None = None) -> Interface:
+          remember_path: tuple[str | int, ...] | None = None,
+          setup: Callable[[], None] | None = None) -> Interface:
     def call(client: Any) -> Any:
         if member:  # K15: a person acting through a trusted client (eng:delegate + X-Actor-Email)
             return _as_member(lambda: _call(client), member)
@@ -267,6 +268,8 @@ def _rest(method: str, path: str, url: str | None = None, *, json_body: Any = No
     def _call(client: Any) -> Any:
         if stream:
             return {"route_registered": True}
+        if setup is not None:
+            setup()
         hdrs = {"Authorization": f"Bearer {MEMBER_TOKEN if member else CONTRACT_TOKEN}", **(headers or {})}
         if member:
             hdrs["X-Actor-Email"] = member
@@ -565,7 +568,7 @@ def build_catalogue() -> list[Interface]:
               headers=DELEGATED, delegate=True),
         _rest("POST", "/api/frameworks/ingestions/{ingestion_id}/apply", "/api/frameworks/ingestions/{ingestion}/apply",
               headers=DELEGATED, delegate=True),
-        _rest("POST", "/api/frameworks/{framework}/coverage-declaration", "/api/frameworks/NIS2/coverage-declaration",
+        _rest("POST", "/api/frameworks/{framework}/coverage-declaration", "/api/frameworks/RGPD/coverage-declaration",
               headers=DELEGATED, delegate=True),
         # Contract 1.6 — doctrine workshop and evaluations
         _rest("GET", "/api/knowledge/templates/{asset_type}", "/api/knowledge/templates/pattern"),
@@ -578,6 +581,11 @@ def build_catalogue() -> list[Interface]:
               json_body={"into": "topology.dc_count", "reviewer": "@maintainers"}),
         _rest("POST", "/api/knowledge/checks/simulate", json_body={"asset_id": "P-002", "checks": [], "options": [
             {"title": "Fully autonomous remediation", "description": "no human approval"}]}),
+        # Contract 1.26 — decision on each check clause
+        _rest("GET", "/api/knowledge/checks", "/api/knowledge/checks?type=principle", headers=DELEGATED, delegate=True),
+        _rest("PATCH", "/api/knowledge/assets/{asset_id}/checks/{check_id}",
+              "/api/knowledge/assets/P-002/checks/P-002-C1", json_body={"decision": "validate"},
+              headers=DELEGATED, delegate=True),
         _rest("GET", "/api/knowledge/evals/{dataset}", "/api/knowledge/evals/check_option_v1",
               headers=DELEGATED, delegate=True),
         _rest("POST", "/api/knowledge/evals/{dataset}/cases", "/api/knowledge/evals/check_option_v1/cases",
@@ -610,7 +618,24 @@ def build_catalogue() -> list[Interface]:
               json_body={"model": "contract-model", "vectors": _similarity_vectors()}, headers=DELEGATED, delegate=True),
         _rest("GET", "/api/knowledge/similarity-evals/{dataset}/runs/{run_id}",
               "/api/knowledge/similarity-evals/similarity_v1/runs/2", headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/frameworks/ingestions/{ingestion_id}/abandon",
+              "/api/frameworks/ingestions/{abandon_ingestion}/abandon",
+              json_body={"reason": "Contract freeze"}, headers=DELEGATED, delegate=True,
+              setup=_seed_abandon_ingestion),
     ]
+
+
+def _seed_abandon_ingestion() -> None:
+    """Create a fresh reviewing ingestion to exercise POST /api/frameworks/ingestions/{ingestion_id}/abandon."""
+    from mcp_server.core.config import server_config
+    from pipelines.frameworks.api import IngestionService
+
+    created = IngestionService(kb_dir=server_config.kb_dir).create(
+        "NIS2", "trial", "", "nis2_excerpt.txt",
+        Path("tests/fixtures/frameworks/nis2_excerpt.txt").read_bytes(),
+        "@maintainers",
+    )
+    _STATE["abandon_ingestion"] = created["id"]
 
 
 def _p002_sha() -> str:
@@ -649,7 +674,11 @@ def isolated_environment() -> Iterator[Any]:
 
     tmp = Path(tempfile.mkdtemp(prefix="llmops-freeze-"))
     eng_dir = tmp / "engagements"
-    shutil.copytree(server_config.engagements_dir, eng_dir, ignore=shutil.ignore_patterns(f"{SCRATCH_ENGAGEMENT}*"))
+    shutil.copytree(
+        server_config.engagements_dir,
+        eng_dir,
+        ignore=lambda _d, names: [n for n in names if not n.startswith(DEMO_ENGAGEMENT)],
+    )
     saved_eng_dir = server_config.engagements_dir
     saved_kb_dir = server_config.kb_dir
     kb_copy = tmp / "kb"

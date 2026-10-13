@@ -17,6 +17,12 @@ Framework ingestion (plan L3):
     kb declare-coverage --framework NIS2 --by @expert
     kb coverage NIS2 ISO27001 ...
 
+Local semantic search (issue #94):
+
+    kb models fetch                     download the pinned embedding model into data/models/ (once)
+    kb models status                    ready | absent | off, as the server sees it
+    kb embeddings index                 (re)encode the active assets (also done by every publication)
+
 The commit of the knowledge base is left to the maintainer.
 """
 
@@ -51,8 +57,40 @@ def _doctrine_loader(db_path: Path, kb_dir: Path):
     return load
 
 
+ROOT = Path(__file__).resolve().parents[1]
+GOVERNANCE_DB = ROOT / "data" / "governance.db"
+
+
+def apply_governance_defaults(environ: dict[str, str] | None = None) -> bool:
+    """Point the CLI at ``data/governance.db`` when it exists, as ``scripts/serve_local.py`` does.
+
+    An explicit ``GOVERNANCE_DATABASE_URL`` or ``CANDIDATES_BACKEND`` always wins. Returns whether a governance
+    database is configured after the defaults are applied.
+    """
+    import os
+
+    env = os.environ if environ is None else environ
+    if not env.get("GOVERNANCE_DATABASE_URL", "").strip() and not env.get("CANDIDATES_BACKEND", "").strip() and GOVERNANCE_DB.exists():
+        env["CANDIDATES_BACKEND"] = "sql"
+        env["GOVERNANCE_DATABASE_URL"] = f"sqlite:///{GOVERNANCE_DB.as_posix()}"
+    return bool(env.get("GOVERNANCE_DATABASE_URL", "").strip()) or env.get("CANDIDATES_BACKEND", "").strip().lower() == "sql"
+
+
+@app.callback()
+def _main() -> None:
+    load_dotenv()
+    apply_governance_defaults()
+
+
 def _service(kb_dir: Path, db_path: Path) -> CandidateService:
     load_dotenv()
+    if not apply_governance_defaults():
+        console.print(
+            f"[yellow]! No governance database found ({GOVERNANCE_DB.relative_to(ROOT).as_posix()} is absent and "
+            "GOVERNANCE_DATABASE_URL is not set): using the file queue (data/candidates), which the LLMOps server "
+            "does not read when it runs with CANDIDATES_BACKEND=sql. Start "
+            "scripts/serve_local.py once (or set GOVERNANCE_DATABASE_URL) to create it.[/yellow]"
+        )
     return CandidateService(kb_dir=kb_dir, doctrine_index_loader=_doctrine_loader(db_path, kb_dir))
 
 
@@ -139,6 +177,12 @@ def publish_cmd(
     if not result["published"]:
         console.print(f"[yellow]{result['message']}[/yellow]")
         return
+    from pipelines.similarity.index import index_after_publication
+
+    index = index_after_publication(kb_dir)
+    console.print(f"embedding index: {index['status']} ({index.get('model')}"
+                  + (f", {index['encoded']} encoded, {index['unchanged']} unchanged, {index['removed']} removed"
+                     if index["status"] == "indexed" else f": {index.get('reason')}") + ")")
     console.print(f"[bold green]✓ published {', '.join(result['published'])}[/bold green] "
                   f"in {result['snapshot_id']} (notified: {', '.join(result['channels'])}). "
                   "Review and commit data/kb, data/knowledge.lbug and the snapshot.")
@@ -201,13 +245,21 @@ def ingest_framework_cmd(
 @app.command("suggest-links")
 def suggest_links_cmd(
     framework: str = typer.Option(..., "--framework"),
+    proposals: Path = typer.Option(None, "--proposals",
+                                   help="JSON file of proposals already made (body of POST …/link-proposals)."),
     kb_dir: Path = KB_DIR_OPTION,
     staging_dir: Path = STAGING_OPTION,
 ) -> None:
     """Offline LLM proposals of links and acceptance criteria (llm-derived); skipped without LLM_ENDPOINT."""
     from pipelines.frameworks.ingest import latest_staging
-    from pipelines.frameworks.links import suggest_links
+    from pipelines.frameworks.links import apply_proposals_file, suggest_links
 
+    if proposals is not None:
+        res = apply_proposals_file(latest_staging(staging_dir, framework), proposals, kb_dir)
+        console.print(f"[bold green]✓ {res['updated']} draft(s) annotated[/bold green] from {proposals} ({res['model']}; "
+                      f"links_production_mode: llm-derived — to be reviewed); unknown links dropped: "
+                      f"{res['dropped_unknown_links']}, unknown requirements: {res['unknown_requirements'] or 'none'}.")
+        return
     load_dotenv()
     res = suggest_links(latest_staging(staging_dir, framework), kb_dir)
     if res["skipped"]:
@@ -325,6 +377,94 @@ def coverage_report_cmd(
 
     output.write_text(render_coverage_report(kb_dir), encoding="utf-8")
     console.print(f"[bold green]✓ coverage report[/bold green] → {output}")
+
+
+models_app = typer.Typer(help="Local embedding models (data/models/, git-ignored): fetch once, then offline.",
+                         no_args_is_help=True)
+app.add_typer(models_app, name="models")
+
+MODELS_DIR_OPTION = typer.Option(None, "--models-dir", help="Models directory (default: KB_MODELS_DIR or data/models).")
+
+
+@models_app.command("fetch")
+def models_fetch_cmd(
+    model: str = typer.Option(None, "--model", help="Model id (default: KB_EMBEDDING_MODEL or the reference model)."),
+    models_dir: Path = MODELS_DIR_OPTION,
+    force: bool = typer.Option(False, "--force", help="Download again even when the local copy is intact."),
+    from_dir: Path = typer.Option(None, "--from-dir", help="Install files downloaded elsewhere (see 'kb models urls') "
+                                  "instead of downloading them; each one is checked against its pinned SHA-256."),
+) -> None:
+    """Download the pinned files of the embedding model and check their SHA-256 (the only network access).
+
+    Behind a proxy inspecting HTTPS: KB_MODELS_CA_BUNDLE=<proxy root certificate, PEM>, KB_MODELS_BASE_URL=<mirror>,
+    or --from-dir. TLS verification is never disabled."""
+    from pipelines.similarity.encoder import reset_cache, settings
+    from pipelines.similarity.models import fetch, spec_for
+
+    s = settings()
+    try:
+        spec = spec_for(model or s.model)
+    except ValueError as exc:
+        _fail(str(exc))
+    if not spec.files:
+        console.print(f"[yellow]{spec.id} has no file to fetch.[/yellow]")
+        return
+    try:
+        path = fetch(spec, models_dir or s.models_dir, force=force, source_dir=from_dir)
+    except Exception as exc:  # network, disk or integrity: nothing half-installed is ever loaded
+        _fail(f"fetch failed: {exc}")
+    reset_cache()
+    console.print(f"[bold green]✓ {spec.id}[/bold green] @ {spec.version[:12]} in {path} "
+                  f"(model sha256 {spec.sha256}). Restart the server, then 'kb embeddings index' or publish.")
+
+
+@models_app.command("urls")
+def models_urls_cmd(
+    model: str = typer.Option(None, "--model", help="Model id (default: KB_EMBEDDING_MODEL or the reference model)."),
+) -> None:
+    """Files to download by hand for 'kb models fetch --from-dir' (name, URL, pinned SHA-256)."""
+    from pipelines.similarity.encoder import settings
+    from pipelines.similarity.models import file_urls, spec_for
+
+    try:
+        spec = spec_for(model or settings().model)
+    except ValueError as exc:
+        _fail(str(exc))
+    hashes = {spec.local_name(r): h for r, h in spec.files.items()}
+    for name, url in file_urls(spec).items():
+        console.print(f"{name}\t{url}\tsha256 {hashes[name]}", soft_wrap=True, highlight=False)
+
+
+@models_app.command("status")
+def models_status_cmd() -> None:
+    """Status of the reference embedding model as the server sees it (ready, absent or off)."""
+    from pipelines.similarity.encoder import embedding_status
+
+    console.print_json(json.dumps(embedding_status(), ensure_ascii=False))
+
+
+embeddings_app = typer.Typer(help="Vectors of the knowledge base computed by the server's reference model.",
+                             no_args_is_help=True)
+app.add_typer(embeddings_app, name="embeddings")
+
+
+@embeddings_app.command("index")
+def embeddings_index_cmd(kb_dir: Path = KB_DIR_OPTION) -> None:
+    """(Re)encode the active assets whose text changed and drop the vectors of retired ones (as a publication does)."""
+    from pipelines.governance.store import database_url
+    from pipelines.similarity.encoder import reference_encoder
+    from pipelines.similarity.index import build_index
+    from pipelines.similarity.store import EmbeddingStore
+
+    load_dotenv()
+    if not database_url():
+        _fail("No governance database: set GOVERNANCE_DATABASE_URL (or CANDIDATES_BACKEND=sql).")
+    encoder, status = reference_encoder()
+    if encoder is None:
+        _fail(f"embedding model {status['model']} is {status['status']}: {status.get('reason')}")
+        return
+    res = build_index(EmbeddingStore(), kb_dir, encoder)
+    console.print_json(json.dumps(res, ensure_ascii=False))
 
 
 def main() -> None:

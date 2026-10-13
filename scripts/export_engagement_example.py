@@ -43,12 +43,12 @@ def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
              "criticality": "mandatory", "status": "gap"},
         ],
         "subjects": [{"name": "core-network", "definition": "", "level": "L1_framed"},
-                     {"name": "mcx-services", "definition": "Mission-critical services", "level": "L3_decided"}],
+                     {"name": "gateway-services", "definition": "Mission-critical services", "level": "L3_decided"}],
         "statements": [
-            {"id": "S-0001", "subject": "mcx-services", "section": "resilience", "predicate": "has_property",
+            {"id": "S-0001", "subject": "gateway-services", "section": "resilience", "predicate": "has_property",
              "value": "The gateway is active-active across two sites.", "confidence": "designed", "status": "active", "origin": "human",
              "author": "@carl", "validated_by": "@ada", "validated_at": "2026-10-02T09:30:00", "based_on": '[{"id": "ADR-0001", "resolved": null}]'},
-            {"id": "S-0002", "subject": "mcx-services", "section": "resilience", "predicate": "has_property",
+            {"id": "S-0002", "subject": "gateway-services", "section": "resilience", "predicate": "has_property",
              "value": "The gateway is active-passive.", "confidence": "assumed", "status": "superseded", "origin": "llm-derived",
              "author": "@carl", "validated_by": "@ada", "validated_at": "2026-10-02T09:31:00", "based_on": "[]"},
             {"id": "S-0003", "subject": "core-network", "section": "general", "predicate": "has_property",
@@ -57,7 +57,7 @@ def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
              "imported_from": "archinex-batch-1"},
         ],
         "decisions": [
-            {"id": "D-0001", "subject": "mcx-services", "decision": "Active-active gateway across two sites",
+            {"id": "D-0001", "subject": "gateway-services", "decision": "Active-active gateway across two sites",
              "rationale": "Meets REQ-001 within the latency budget.", "rejected": [
                  {"option": "Active-passive gateway", "reason": "Failover time above the budget."}],
              "reversibility": "costly", "consequences": ["Two sites to operate."], "accepted_violations": [],

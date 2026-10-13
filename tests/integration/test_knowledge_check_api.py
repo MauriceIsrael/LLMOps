@@ -170,3 +170,45 @@ def test_rest_check_route_errors(client):
     assert res.status_code == 400
     assert res.json()["argument"] == "option.title"
     assert client.post("/api/knowledge/check", json={"option": OPTION}).status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Draft check clauses of the regulatory controls (NIS2 Art. 21(2), GDPR) through the route
+# ---------------------------------------------------------------------------
+
+def _check(client, title, description, frameworks):
+    payload = {"option": {"title": title, "description": description}, "frameworks": frameworks}
+    res = client.post("/api/knowledge/check", json=payload, headers=_auth())
+    assert res.status_code == 200
+    jsonschema.validate(res.json(), _schema("check_result.schema.json"))
+    return {v["check_id"]: v for v in res.json()["data"]["verdicts"] if v["check_id"]}
+
+
+def test_rest_check_flags_password_only_remote_access_against_nis2(client):
+    verdicts = _check(client, "Remote access for the vendor support team",
+                      "Support engineers reach the servers through remote access with password only.", ["NIS2"])
+    assert verdicts["NIS2-ART21-2J-C1"]["verdict"] == "violates"
+    assert verdicts["NIS2-ART21-2J-C2"]["verdict"] == "violates"
+    assert verdicts["NIS2-ART21-2J-C1"]["typed_id"] == "control:NIS2-ART21-2J"
+    assert verdicts["NIS2-ART21-2J-C1"]["check_status"] == "draft"
+
+
+def test_rest_check_supports_mfa_remote_access(client):
+    verdicts = _check(client, "Remote access for the vendor support team",
+                      "Remote access through a bastion with multi-factor authentication (FIDO2).", ["NIS2"])
+    assert verdicts["NIS2-ART21-2J-C2"]["verdict"] == "supports"
+    assert "NIS2-ART21-2J-C1" not in verdicts
+
+
+def test_rest_check_backups_and_breach_notification(client):
+    bad = _check(client, "Hosting of the citizen portal",
+                 "Data breach handling is left to the hosting provider. Single data centre, no backup.",
+                 ["NIS2", "RGPD"])
+    assert bad["NIS2-ART21-2C-C1"]["verdict"] == "violates"
+    assert bad["RGPD-REQ-BREACH-02-C2"]["verdict"] == "violates"
+    good = _check(client, "Hosting of the citizen portal",
+                  "Backup solution with immutable copies on a second site; data breach notified to the CNPD within "
+                  "72 hours by the DPO.", ["NIS2", "RGPD"])
+    assert good["NIS2-ART21-2C-C2"]["verdict"] == "supports"
+    assert good["RGPD-REQ-BREACH-02-C2"]["verdict"] == "supports"
+    assert not any(v["verdict"] == "violates" for v in good.values())

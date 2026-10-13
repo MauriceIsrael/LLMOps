@@ -16,7 +16,7 @@ from sse_starlette.sse import EventSourceResponse
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import HTMLResponse, JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.routing import Route
 from starlette.types import Receive, Scope, Send
 
@@ -54,6 +54,7 @@ from mcp_server.engagement.tools import (
 from mcp_server.engagement.write_routes import build_write_routes
 from mcp_server.knowledge.tools import (
     _suggest_knowledge_improvement,
+    abandon_framework_ingestion,
     add_eval_case,
     add_ingestion_link_proposals,
     annotate_eval_case,
@@ -65,6 +66,7 @@ from mcp_server.knowledge.tools import (
     confirm_reuse,
     convert_verdict_feedback,
     create_framework_ingestion,
+    decide_check_clause,
     decide_ingestion_row,
     declare_framework_coverage,
     generate_zero_draft_hld,
@@ -93,6 +95,7 @@ from mcp_server.knowledge.tools import (
     get_similarity_eval_run,
     get_skills_matrix,
     list_assets,
+    list_check_clauses,
     list_controls,
     list_domain_owners,
     list_framework_ingestions,
@@ -346,6 +349,14 @@ def create_starlette_app() -> Starlette:
             except Exception:
                 engine_commit = "d7d3291"
 
+        # Issue #94: the reference embedding model, always local (the server never calls the network at query time).
+        from starlette.concurrency import run_in_threadpool
+
+        from pipelines.similarity.encoder import embedding_status
+
+        emb = await run_in_threadpool(embedding_status)
+        embedding = {k: emb.get(k) for k in ("model", "version", "sha256", "dim", "local", "provider", "status", "reason")}
+
         return JSONResponse(
             {
                 "status": "ok",
@@ -355,6 +366,7 @@ def create_starlette_app() -> Starlette:
                 "engine_version": "0.1.0",
                 "engine_commit": engine_commit,
                 "kb": kb_meta,
+                "embedding": embedding,
             },
             status_code=200,
         )
@@ -414,6 +426,9 @@ def create_starlette_app() -> Starlette:
                 streams[1],
                 mcp._mcp_server.create_initialization_options(),
             )
+        # La session SSE a déjà répondu par le flux : renvoyer une réponse vide évite que Starlette appelle None
+        # à la déconnexion du client (« TypeError: 'NoneType' object is not callable »).
+        return Response()
 
     async def handle_messages(request):
         session_id_str = request.query_params.get("session_id")
@@ -1070,6 +1085,23 @@ def create_starlette_app() -> Starlette:
         res = simulate_checks(body)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_check_clauses(request):
+        """Clauses vérifiables de la doctrine et leur statut propre (contrat 1.26)."""
+        p = request.query_params
+        res = list_check_clauses(status=p.get("status") or None, framework=p.get("framework") or None,
+                                 asset_type=p.get("type") or None, asset_id=p.get("asset_id") or None)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_check_clause_decide(request):
+        """Décision sur une clause : validate, amend ou reject (contrat 1.26)."""
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        res = decide_check_clause(request.path_params["asset_id"], request.path_params["check_id"],
+                                  decision=str(body.get("decision") or ""), comment=body.get("comment"),
+                                  clause=body.get("clause"))
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_eval_dataset(request):
         res = get_eval_dataset(request.path_params["dataset"])
         return JSONResponse(res, status_code=_candidate_status_code(res))
@@ -1137,7 +1169,7 @@ def create_starlette_app() -> Starlette:
         return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
 
     async def handle_ingestion_list(request):
-        res = list_framework_ingestions()
+        res = list_framework_ingestions(status=request.query_params.get("status") or None)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     def _ingestion_id(request):
@@ -1172,6 +1204,13 @@ def create_starlette_app() -> Starlette:
         if ingestion_id is None:
             return _bad_body()
         res = apply_framework_ingestion(ingestion_id)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_ingestion_abandon(request):
+        ingestion_id, body = _ingestion_id(request), await _json_body(request)
+        if ingestion_id is None or body is None:
+            return _bad_body()
+        res = abandon_framework_ingestion(ingestion_id, str(body.get("reason") or ""))
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     async def handle_coverage_declaration(request):
@@ -1441,6 +1480,7 @@ def create_starlette_app() -> Starlette:
             Route("/api/frameworks/ingestions/{ingestion_id}/link-proposals", endpoint=handle_ingestion_proposals,
                   methods=["POST"]),
             Route("/api/frameworks/ingestions/{ingestion_id}/apply", endpoint=handle_ingestion_apply, methods=["POST"]),
+            Route("/api/frameworks/ingestions/{ingestion_id}/abandon", endpoint=handle_ingestion_abandon, methods=["POST"]),
             Route("/api/frameworks/{framework}/coverage-declaration", endpoint=handle_coverage_declaration,
                   methods=["POST"]),
             Route("/api/knowledge/templates/{asset_type}", endpoint=handle_template, methods=["GET"]),
@@ -1450,6 +1490,9 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/triggers/preview", endpoint=handle_trigger_preview, methods=["POST"]),
             Route("/api/knowledge/candidates/{candidate_id}/merge-key", endpoint=handle_merge_key, methods=["POST"]),
             Route("/api/knowledge/checks/simulate", endpoint=handle_checks_simulate, methods=["POST"]),
+            Route("/api/knowledge/checks", endpoint=handle_check_clauses, methods=["GET"]),
+            Route("/api/knowledge/assets/{asset_id}/checks/{check_id}", endpoint=handle_check_clause_decide,
+                  methods=["PATCH"]),
             Route("/api/knowledge/evals/{dataset}", endpoint=handle_eval_dataset, methods=["GET"]),
             Route("/api/knowledge/evals/{dataset}/cases", endpoint=handle_eval_case_add, methods=["POST"]),
             Route("/api/knowledge/evals/{dataset}/cases/{case_id}", endpoint=handle_eval_case_annotate, methods=["PATCH"]),

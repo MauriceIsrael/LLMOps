@@ -72,6 +72,7 @@ def framework_coverage(framework: str, kb_dir: str | Path = "data/kb") -> dict[s
         missing_ids = []
 
     declared_by = manifest.get("coverage_declared_by") or None
+    declared_at = manifest.get("coverage_declared_at") or None
     if not controls:
         status = "missing"
     elif (expected_list is not None and not manifest.get("provisional") and manifest.get("source_sha256")
@@ -88,6 +89,7 @@ def framework_coverage(framework: str, kb_dir: str | Path = "data/kb") -> dict[s
         "validated": n_validated,
         "missing_ids": missing_ids,
         "declared_by": declared_by,
+        "declared_at": declared_at,
         "provisional": bool(manifest.get("provisional")) if manifest else None,
         "manifest": bool(manifest),
     }

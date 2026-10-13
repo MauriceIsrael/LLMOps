@@ -139,10 +139,13 @@ framework_ingestions = Table(
     Column("tag", String(64)),
     Column("source_name", String(256), nullable=False),
     Column("source_sha256", String(64), nullable=False),
-    Column("status", String(24), nullable=False),  # reviewing | applied | partially_applied
+    Column("status", String(24), nullable=False),  # reviewing | applied | partially_applied | abandoned
     Column("created_by", String(128), nullable=False),
     Column("created_at", String(32), nullable=False),
     Column("declaration_reset", Boolean, nullable=False, default=False),
+    Column("abandoned_by", String(128)),
+    Column("abandoned_at", String(32)),
+    Column("abandon_reason", Text),
 )
 
 ingestion_rows = Table(
@@ -266,6 +269,23 @@ def database_url() -> str | None:
     return url or None
 
 
+def _upgrade(engine: Engine) -> None:
+    """Idempotent schema additions on existing databases."""
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine)
+    if "framework_ingestions" in insp.get_table_names():
+        existing = {c["name"] for c in insp.get_columns("framework_ingestions")}
+        with engine.begin() as conn:
+            for col, ddl in (
+                ("abandoned_by", "VARCHAR(128)"),
+                ("abandoned_at", "VARCHAR(32)"),
+                ("abandon_reason", "TEXT"),
+            ):
+                if col not in existing:
+                    conn.execute(text(f"ALTER TABLE framework_ingestions ADD COLUMN {col} {ddl}"))
+
+
 def get_engine(url: str | None = None) -> Engine:
     """Engine for ``url`` (default: the configured one); tables are created once per URL."""
     url = url or database_url()
@@ -280,6 +300,7 @@ def get_engine(url: str | None = None) -> Engine:
                     os.makedirs(os.path.dirname(path), exist_ok=True)
             engine = create_engine(url, future=True)
             metadata.create_all(engine)
+            _upgrade(engine)
             _engines[url] = engine
         return engine
 

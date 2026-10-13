@@ -12,6 +12,7 @@ from typing_extensions import TypedDict
 
 from tools.adapters.kuzu_store import make_graph_store
 from tools.elicitation.repository import ElicitationRepository
+from tools.elicitation.resolve import database_path, engagement_of
 
 
 class IntakeState(TypedDict, total=False):
@@ -39,14 +40,14 @@ class IntakeState(TypedDict, total=False):
 
 def load_question_node(state: IntakeState) -> dict[str, Any]:
     """Charge la question et ses données de cadrage depuis Kùzu DB."""
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = ElicitationRepository(db_path=db_path)
     q_id = state.get("question_id", "Q-0001")
     question = repo.get_question(q_id)
     if not question:
         question = {
             "id": q_id,
-            "engagement": state.get("engagement", "demo-2026"),
+            "engagement": engagement_of(state.get("engagement")),
             "section": state.get("section", "5.2"),
             "question": state.get("question_text", "Question d'architecture"),
             "status": "sent",
@@ -59,7 +60,6 @@ def load_question_node(state: IntakeState) -> dict[str, Any]:
         from_path = Path(state["from_file"])
         if from_path.exists():
             content = from_path.read_text(encoding="utf-8")
-            print(f"DEBUG LOAD_QUESTION_NODE CONTENT FOR {from_path}: {repr(content)}")
             if "## Your answer" in content:
                 ans_text = content.split("## Your answer", 1)[1]
                 if "## How to submit" in ans_text:
@@ -81,10 +81,8 @@ def interpret_node(state: IntakeState) -> dict[str, Any]:
     """
     from tools.elicitation.interpreters import get_interpreter
 
-    text = state.get("answer_text", "")
-    print(f"DEBUG INTERPRET_NODE TEXT: {repr(text)}")
     q = state.get("question", {})
-    eng = state.get("engagement") or q.get("engagement", "demo-2026")
+    eng = engagement_of(state.get("engagement") or q.get("engagement"))
     return get_interpreter(eng).interpret(dict(state))
 
 
@@ -122,7 +120,7 @@ def persist_node(state: IntakeState) -> dict[str, Any]:
     if state.get("rejected"):
         return {}
 
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = ElicitationRepository(db_path=db_path)
     persisted_ids = []
 
@@ -130,10 +128,8 @@ def persist_node(state: IntakeState) -> dict[str, Any]:
         st["status"] = "active"
         sid = repo.save_statement(st)
         persisted_ids.append(sid)
-        print(f"DEBUG PERSIST_NODE JUST SAVED {sid}: {repo.get_statement(sid)}")
 
     uncs = state.get("uncertainties", [])
-    print(f"\nDEBUG PERSIST_NODE UNCERTAINTIES: {uncs}\n")
     for unc in uncs:
         repo.save_uncertainty(unc)
 
@@ -164,9 +160,9 @@ def check_node(state: IntakeState) -> dict[str, Any]:
     if state.get("rejected"):
         return {}
 
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     db_client = make_graph_store(db_path=db_path, read_only=False)
-    engagement = state.get("engagement", "demo-2026")
+    engagement = engagement_of(state.get("engagement"))
 
     detected_conflicts = []
 
@@ -203,7 +199,7 @@ def raise_conflicts_node(state: IntakeState) -> dict[str, Any]:
     if state.get("rejected") or not state.get("detected_conflicts"):
         return {}
 
-    db_path = state.get("db_path", "data/kuzu_db")
+    db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = ElicitationRepository(db_path=db_path)
     conflict_ids = []
     for conf in state.get("detected_conflicts", []):
@@ -213,7 +209,7 @@ def raise_conflicts_node(state: IntakeState) -> dict[str, Any]:
     return {"created_conflict_ids": conflict_ids}
 
 
-def get_sqlite_checkpointer(engagement: str = "demo-2026", base_dir: str | Path = "projects") -> SqliteSaver:
+def get_sqlite_checkpointer(engagement: str, base_dir: str | Path = "projects") -> SqliteSaver:
     """Crée ou récupère le checkpointer SQLite persistant sur disque pour l'engagement."""
     checkpoint_dir = Path(base_dir) / engagement
     checkpoint_dir.mkdir(parents=True, exist_ok=True)

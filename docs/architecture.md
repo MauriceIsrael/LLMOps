@@ -1,5 +1,7 @@
 # 🏛 Architecture Logicielle — Plateforme LLMOps Neuro-Symbolique & Élicitation Collaborative
 
+> **Document historique.** Cette vue décrit l'origine de la plateforme (moteur d'élicitation LangGraph, ontologie du graphe). Elle reste exacte sur ces deux sujets. L'architecture actuelle (deux bases, instantanés scellés, engagements gérés, cascade de questions) est décrite dans [`ARCHITECTURE-LLMOps.md`](ARCHITECTURE-LLMOps.md).
+
 ## 1. Vue d'Ensemble & Objectifs
 
 Cette plateforme a pour but d'élaborer et de faire évoluer de manière déterministe et collaborative des documents d'architecture système (ADRs, principes, cadrage, compromis, dépendances, risques) en combinant un dossier documentaire Markdown structuré, un **Graphe de Connaissances LadybugDB**, et un **Moteur d'Élicitation Collaboratif (LangGraph)** exposé via **FastMCP** (Model Context Protocol).

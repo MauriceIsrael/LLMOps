@@ -3,6 +3,8 @@
 Provides tools for searching and retrieving reusable architecture knowledge assets (Asset, GlossaryTerm, Principle, ADR).
 """
 
+import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +23,8 @@ from mcp_server.core.envelope import (
 )
 from mcp_server.core.version import CONTRACT_VERSION
 from pipelines.ingestion.markdown_parser import MarkdownDocParser
+
+logger = logging.getLogger(__name__)
 
 
 def _get_db():
@@ -420,16 +424,30 @@ def list_frameworks() -> dict[str, Any]:
     """List regulatory and security frameworks embedded in the knowledge base along with their versions and control counts."""
     kb_client = _get_db()
     try:
+        from pipelines.frameworks.coverage import _controls, framework_coverage
+
         query = """
         MATCH (c:Control)
         RETURN c.framework as framework, c.version as version, count(c) as control_count;
         """
         rows = kb_client.execute_cypher(query)
         meta = _framework_metadata()
+        controls_by_fw = _controls(Path(server_config.kb_dir))
         res = []
         for r in rows:
             fw = r.get("framework", "")
             info = meta.get(fw, {"title": fw, "jurisdiction": "Unknown", "description": ""})
+            cov = framework_coverage(fw, server_config.kb_dir)
+            fw_ctrls = controls_by_fw.get(fw.lower(), [])
+            validated_controls = [
+                {
+                    "id": str(c["id"]),
+                    "validated_by": [str(v) for v in (c.get("validated_by") or [])],
+                    "validated_at": str(c["validated_at"]) if c.get("validated_at") else None,
+                }
+                for c in fw_ctrls
+                if c.get("id") and c.get("validated_by")
+            ]
             res.append({
                 "framework": fw,
                 "version": r.get("version", "1.0.0"),
@@ -437,6 +455,14 @@ def list_frameworks() -> dict[str, Any]:
                 "jurisdiction": info["jurisdiction"],
                 "description": info["description"],
                 "control_count": r.get("control_count", 0),
+                "status": cov["status"],
+                "expected": cov["expected"],
+                "present": cov["present"],
+                "validated": cov["validated"],
+                "declared_by": cov["declared_by"],
+                "declared_at": cov["declared_at"],
+                "provisional": cov["provisional"],
+                "validated_controls": validated_controls,
             })
         return ok_response(res, count=len(res))
     except Exception as e:
@@ -948,6 +974,36 @@ def _str_list(value: Any, name: str) -> list[str] | dict[str, Any]:
     return invalid_argument_response(name, f"'{name}' must be a list of strings.")
 
 
+def _hybrid_weight() -> float | None:
+    """``KB_HYBRID_WEIGHT`` in [0, 1]: weighted mean of semantic and lexical relevance; unset: their maximum."""
+    from pipelines.doctrine.context import DEFAULT_HYBRID_WEIGHT
+
+    raw = os.getenv("KB_HYBRID_WEIGHT", "").strip()
+    try:
+        value = float(raw) if raw else None
+    except ValueError:
+        value = None
+    return value if value is not None and 0.0 <= value <= 1.0 else DEFAULT_HYBRID_WEIGHT
+
+
+def _semantic_relevance(subject: str) -> tuple[dict[str, float] | None, dict[str, Any] | None]:
+    """Calibrated semantic relevance of every active asset for ``subject`` with the server's local model, or
+    ``(None, None)`` when the model is off or absent (the doctrine context then stays lexical). Never raises."""
+    try:
+        from pipelines.similarity.encoder import reference_encoder
+        from pipelines.similarity.semantic import scorer_for
+
+        encoder, status = reference_encoder()
+        if encoder is None:
+            return None, None
+        scores = scorer_for(encoder).scores(server_config.kb_dir, subject)
+        return ({ref: s["semantic"] for ref, s in scores.items()},
+                {"model": status["model"], "version": status["version"], "sha256": status["sha256"], "local": True})
+    except Exception as exc:  # the lexical ranking is always available
+        logger.warning("semantic relevance unavailable, lexical ranking: %s", exc)
+        return None, None
+
+
 def get_doctrine_context(
     subject: str,
     domains: list[str] | None = None,
@@ -982,6 +1038,7 @@ def get_doctrine_context(
     try:
         from pipelines.doctrine import build_doctrine_context
 
+        semantic, embedding = _semantic_relevance(subject.strip())
         payload = build_doctrine_context(
             _doctrine_index(),
             subject=subject.strip(),
@@ -991,6 +1048,9 @@ def get_doctrine_context(
             max_items=max_items,
             max_chars=max_chars,
             snapshot_id=_latest_snapshot_id(),
+            semantic=semantic,
+            weight=_hybrid_weight(),
+            embedding=embedding,
         )
         return ok_response(payload, count=len(payload["items"]))
     except Exception as e:
@@ -1763,7 +1823,10 @@ def _ingestion_error(exc: Exception) -> dict[str, Any] | None:
     from pipelines.frameworks.api import IngestionError, IngestionNotFoundError
 
     if isinstance(exc, IngestionError):
-        return invalid_argument_response(exc.argument, exc.reason)
+        res = invalid_argument_response(exc.argument, exc.reason)
+        if getattr(exc, "conflict", False):
+            res["conflict"] = True
+        return res
     if isinstance(exc, IngestionNotFoundError):
         return not_found_response(str(exc))
     return None
@@ -1795,7 +1858,7 @@ def create_framework_ingestion(framework: str, version: str, tag: str, filename:
         return _ingestion_error(e) or handle_exception_response(e, context_action="create_framework_ingestion")
 
 
-def list_framework_ingestions() -> dict[str, Any]:
+def list_framework_ingestions(status: str | None = None) -> dict[str, Any]:
     """Ingestions in progress or done, and the frameworks that have a splitter (requires 'kb:review')."""
     from mcp_server.core.auth import has_scope
     from pipelines.frameworks.api import supported_frameworks
@@ -1807,10 +1870,10 @@ def list_framework_ingestions() -> dict[str, Any]:
     if ingestion is None:
         return _NO_DB
     try:
-        items = ingestion.list()
+        items = ingestion.list(status=status)
         return ok_response({"ingestions": items, "splitters": supported_frameworks()}, count=len(items))
     except Exception as e:
-        return handle_exception_response(e, context_action="list_framework_ingestions")
+        return _ingestion_error(e) or handle_exception_response(e, context_action="list_framework_ingestions")
 
 
 def get_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
@@ -1882,6 +1945,35 @@ def apply_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
         return _ingestion_error(e) or handle_exception_response(e, context_action="apply_framework_ingestion")
 
 
+def abandon_framework_ingestion(ingestion_id: int, reason: str) -> dict[str, Any]:
+    """Mark an unapplied ingestion as ``abandoned`` ('kb:maintain', mandatory reason)."""
+    from pipelines.governance.log import get_log
+
+    who = _actor_with_role("kb:maintain")
+    if isinstance(who, dict):
+        return who
+    ingestion = _ingestion_service(who[0])
+    if ingestion is None:
+        return _NO_DB
+    try:
+        abandoned = ingestion.abandon(ingestion_id, who[1].handle, reason)
+        log = get_log()
+        if log is not None:
+            log.emit(
+                "ingestion.abandoned",
+                None,
+                who[1].handle,
+                [],
+                ingestion_id=ingestion_id,
+                framework=abandoned["framework"],
+                version=abandoned["version"],
+                reason=abandoned["abandon_reason"],
+            )
+        return ok_response(abandoned, count=abandoned["total"])
+    except Exception as e:
+        return _ingestion_error(e) or handle_exception_response(e, context_action="abandon_framework_ingestion")
+
+
 def declare_framework_coverage(framework: str) -> dict[str, Any]:
     """Declare a framework covered, as the acting expert; refused with the list of what is missing (409)."""
     from pipelines.frameworks.coverage import CoverageDeclarationError, declare_coverage
@@ -1950,6 +2042,76 @@ def publish_kb_candidates() -> dict[str, Any]:
         return {**ok_response(result, count=len(result.get("published") or [])), "warnings": storage_warnings()}
     except Exception as e:
         return handle_exception_response(e, context_action="publish_kb_candidates")
+
+
+def list_check_clauses(status: str | None = None, framework: str | None = None, asset_type: str | None = None,
+                       asset_id: str | None = None) -> dict[str, Any]:
+    """Check clauses of the active doctrine with their own status (contract 1.26, requires 'kb:review').
+
+    Each row carries its asset (title, legal text excerpt, framework, severity, domain), the rule (kind, when, expect,
+    message), its status (draft | validated | rejected) and the last decision. ``may_decide`` tells whether the acting
+    expert can decide on it. ``mandatory_without_clause`` lists the mandatory controls nothing can enforce yet, and
+    ``pending_publication`` the decisions waiting for the next publication.
+    """
+    from mcp_server.core.auth import delegated_actor_email, has_scope
+    from pipelines.doctrine.checks import CLAUSE_STATUSES
+    from pipelines.kb_candidates.clauses import (
+        list_clauses,
+        mandatory_without_clause,
+        pending_decisions,
+    )
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    if status is not None and status not in CLAUSE_STATUSES:
+        return invalid_argument_response("status", f"'status' must be one of {list(CLAUSE_STATUSES)}.")
+    try:
+        kb = Path(server_config.kb_dir)
+        rows = list_clauses(kb, status=status, framework=framework, asset_type=asset_type, asset_id=asset_id)
+        email = delegated_actor_email()
+        registry = _candidate_service().owners()
+        owner = registry.by_email(email) if email else None
+        for row in rows:
+            row["may_decide"] = bool(owner and registry.can_review(owner.handle, row["domain"]))
+        counts = {s: sum(1 for r in rows if r["status"] == s) for s in CLAUSE_STATUSES}
+        data = {"clauses": rows, "counts": counts,
+                "mandatory_without_clause": [] if asset_id else mandatory_without_clause(kb, framework),
+                "pending_publication": len(pending_decisions(kb))}
+        return ok_response(data, count=len(rows))
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_check_clauses")
+
+
+def decide_check_clause(asset_id: str, check_id: str, decision: str, comment: str | None = None,
+                        clause: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Decide on one check clause (contract 1.26): 'validate', 'amend' (validate a corrected clause) or 'reject'.
+
+    Requires 'kb:review' and an acting expert owning the asset's domain (or ``kb:maintain``). A comment is required to
+    amend or reject. The asset gets a new revision and the decision enters the trail; it takes effect for the judge
+    at the next publication (``POST /api/knowledge/publications``).
+    """
+    from pipelines.kb_candidates.clauses import decide, find_asset
+    from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
+
+    who = _acting_expert()
+    if isinstance(who, dict):
+        return who
+    service, owner = who
+    try:
+        kb = Path(server_config.kb_dir)
+        asset = find_asset(kb, asset_id)
+        domain = asset.frontmatter.get("domain") or []
+        if not service.owners().can_review(owner.handle, [str(d) for d in (domain if isinstance(domain, list) else [domain])]):
+            return {"status": "unauthorized", "reason": f"{owner.handle} does not own the domain of {asset_id}."}
+        row = decide(kb, asset_id, check_id, decision, owner.handle, comment=comment, amended=clause)
+        return ok_response(row, count=1)
+    except CandidateNotFoundError as exc:
+        return not_found_response(str(exc))
+    except CandidateError as exc:
+        return _candidate_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="decide_check_clause")
 
 
 def get_kb_health() -> dict[str, Any]:
@@ -2063,11 +2225,35 @@ def _lexical_factory():
     return factory
 
 
-def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
-    """Validated knowledge close to a subject: ``{model, vector, query_text?, types?, domains?, top_k?}`` ('kb:review').
+def _server_side_query(query_text: str, model: str) -> dict[str, Any]:
+    """Vector of ``query_text`` by the reference model, with the in-memory vectors of the base, or an error envelope
+    (``409 model-mismatch`` for another model, ``503`` when the model is absent or off)."""
+    from pipelines.similarity.encoder import reference_encoder
+    from pipelines.similarity.semantic import MemoryVectors, calibrate, scorer_for
 
-    The client computes ``vector`` with the same model as the stored vectors. The result is **never a decision**:
-    every item has ``requires_confirmation: true`` and shows its provenance and its documented assumptions.
+    encoder, status = reference_encoder()
+    if model and model != status["model"]:
+        return {**invalid_argument_response(
+            "model", f"model-mismatch: the server encodes with its reference model '{status['model']}', not '{model}'. "
+            f"Send a 'vector' computed with '{model}', or omit 'model'."),
+            "conflict": True, "error": "model-mismatch", "reference_model": status["model"]}
+    if encoder is None:
+        return {"status": "unavailable", "reason": f"server-side encoding unavailable: the embedding model "
+                f"'{status['model']}' is {status['status']} ({status.get('reason')}). Send a 'vector' instead."}
+    scorer = scorer_for(encoder)
+    spec = encoder.spec
+    return {"model": spec.id, "vector": scorer.query(query_text), "store": MemoryVectors(scorer, server_config.kb_dir),
+            "score": lambda cos: calibrate(round(cos, 4), spec)}
+
+
+def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
+    """Validated knowledge close to a subject: ``{model?, vector?, query_text?, types?, domains?, top_k?}`` ('kb:review').
+
+    Either the client computes ``vector`` with the same model as the stored vectors (as before), or it sends only
+    ``query_text`` and the server encodes it with its local reference model (issue #94, lot E4): clients no longer need
+    to embed an encoder. Naming another ``model`` than the reference one without a vector is a ``409 model-mismatch``
+    (the server can only encode with its own model). The result is **never a decision**: every item has
+    ``requires_confirmation: true`` and shows its provenance and its documented assumptions.
     """
     from mcp_server.core.auth import has_scope
     from pipelines.kb_candidates.service import REVIEW_SCOPE
@@ -2076,32 +2262,41 @@ def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
 
     if not has_scope(REVIEW_SCOPE):
         return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
-    store = _embedding_store()
-    if store is None:
+    query_text = body.get("query_text")
+    has_text = isinstance(query_text, str) and bool(query_text.strip())
+    server_side = body.get("vector") is None and has_text
+    store: Any = _embedding_store()
+    if store is None and not server_side:
         return _NO_DB
     try:
-        query_text = body.get("query_text")
         types = _str_list(body.get("types"), "types")
         if isinstance(types, dict):
             return types
         domains = _str_list(body.get("domains"), "domains")
         if isinstance(domains, dict):
             return domains
+        model, vector, vector_score = str(body.get("model") or ""), body.get("vector"), None
+        if server_side:
+            served = _server_side_query(str(query_text).strip(), model)
+            if "status" in served:
+                return served
+            model, vector, store, vector_score = served["model"], served["vector"], served["store"], served["score"]
         lexical = None
-        if isinstance(query_text, str) and query_text.strip():
+        if has_text:
             lexical = _lexical_factory()(query_text)
         judgements = summary = None
         fingerprint = body.get("subject_fingerprint")
-        if isinstance(fingerprint, str) and fingerprint:
+        if isinstance(fingerprint, str) and fingerprint and _embedding_store() is not None:
             from pipelines.kb_candidates.kb import load_assets
             from pipelines.similarity.reuse import ReuseStore
 
             reuse = ReuseStore()
             judgements = reuse.judgements(fingerprint, {a.id: a for a in load_assets(server_config.kb_dir)})
             summary = reuse.summary()
-        res = similar(store, server_config.kb_dir, str(body.get("model") or ""), body.get("vector"),
+        res = similar(store, server_config.kb_dir, model, vector,
                       query_text if isinstance(query_text, str) else None, types or None, domains or None,
-                      body.get("top_k") or 10, lexical, judgements, summary)
+                      body.get("top_k") or 10, lexical, judgements, summary, vector_score)
+        res["encoded_by"] = "server" if server_side else "client"
         return ok_response(res, count=len(res["results"]))
     except EmbeddingError as exc:
         return invalid_argument_response(exc.argument, exc.reason)

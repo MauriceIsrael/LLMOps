@@ -81,7 +81,23 @@ Minor versions only add interfaces or optional fields:
   proposes a local rule, same schema and checks as K19), ``…/rules/{id}/{assert,withdraw}`` (a decider other than the author
   asserts), ``GET /api/engagements/{id}/rules``. The engine reads the pinned base minus deactivations plus asserted local rules;
   the engagement snapshot gains ``rule_adjustments`` and the ``scope`` of each lineage item (``schemaVersion`` ``1.5``).
-* ``1.25`` — trigger rules and facts-vocabulary keys in the candidate cycle, and their review (K22): candidate ``asset_type``
+* ``1.25`` — local multilingual semantic search (issue #94): the Hub encodes with a local model on the processor
+  (``intfloat/multilingual-e5-small`` through ``fastembed``, files pinned by SHA-256 in ``data/models/``, never a network
+  call at query time). ``GET /health`` gains ``embedding {model, version, sha256, local: true, status}``; the doctrine
+  context gains, per item, ``relevant``, ``semantic_relevance``, ``combined_relevance`` and ``relevance_method``, and
+  ``relevance_method`` / ``embedding`` for the package (lexical ranking unchanged when the model is absent or
+  ``KB_EMBEDDINGS=off``); ``POST /api/knowledge/similar`` encodes ``query_text`` itself when no ``vector`` is sent
+  (``encoded_by``, ``409 model-mismatch``); a publication indexes the active assets (``embedding_index`` in its response)
+  and the sealed snapshot declares ``embedding_model`` and ``embedding_index`` (outside ``payload_sha256``).
+* ``1.26`` — decision on each check clause (issues #101, #105): a clause carries its own ``status``
+  (``draft|validated|rejected``) and ``review {by, at, decision, comment}``; only ``validated`` blocks, ``rejected`` is
+  never evaluated; ``checks_status`` becomes their aggregate (``draft|partial|validated``). Promoting a candidate never
+  validates a clause (an unchanged clause keeps its decision, any other is a draft). ``GET /api/knowledge/checks``
+  lists the clauses (``may_decide``, ``mandatory_without_clause``, ``pending_publication``);
+  ``PATCH /api/knowledge/assets/{asset_id}/checks/{check_id}`` decides (``validate|amend|reject``, owner of the domain
+  or ``kb:maintain``); decisions are appended to ``data/kb/clause-decisions.jsonl`` and taken into account by the next
+  publication (CHANGELOG, ``clause_decisions`` in its response).
+* ``1.27`` — trigger rules and facts-vocabulary keys in the candidate cycle, and their review (K22): candidate ``asset_type``
   ``trigger`` and ``fact_key`` (``source.system`` ``kb-extraction``); ``GET /api/knowledge/triggers``,
   ``POST /api/knowledge/triggers/{validate,preview}``, ``POST /api/knowledge/candidates/{id}/merge-key``; offline command
   ``kb extract-triggers``.
@@ -89,5 +105,5 @@ Minor versions only add interfaces or optional fields:
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.25"
+CONTRACT_VERSION = "1.27"
 SNAPSHOT_SCHEMA_VERSION = "1.0"

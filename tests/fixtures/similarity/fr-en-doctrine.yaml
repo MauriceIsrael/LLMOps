@@ -1,0 +1,232 @@
+# Jeu d'évaluation de la recherche sémantique multilingue (issue #94, lot E5).
+#
+# Chaque cas : un sujet d'architecture rédigé comme dans un appel d'offres (en français, sauf la famille « en »
+# qui garde les requêtes anglaises existantes pour vérifier l'absence de régression), et les identifiants de la base
+# (data/kb) qu'un architecte attend en tête de la doctrine applicable.
+#
+# - `frameworks` (facultatif) : référentiels déclarés pour le sujet. Le rappel est alors mesuré parmi les contrôles
+#   imposés de ces référentiels (ce que voit Archinex sous « imposé par les référentiels », trié par pertinence).
+#   Sans `frameworks`, il est mesuré sur toute la doctrine active (principes, patterns, décisions, contrôles).
+# - `expected` : au moins un identifiant ; le rappel à 5 est la part des identifiants attendus classés dans les 5
+#   premiers.
+#
+# Anonymisé : aucun nom de client, d'opérateur, de site ni de programme.
+version: 1
+cases:
+  # --- NIS2, article 21(2) : sujets déclarés avec le référentiel ---------------------------------------------------
+  - id: fr-01
+    subject: "Équipe habilitée BUILD/RUN 24/7 : modèle de dotation, souveraineté et coût"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2I]
+  - id: fr-02
+    subject: "Sauvegardes hors site et plan de reprise d'activité"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2C]
+  - id: fr-03
+    subject: "Accès d'administration à distance des équipements par les équipes d'exploitation"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2J]
+  - id: fr-04
+    subject: "Gestion des sous-traitants et des fournisseurs de rang 1 dans la chaîne d'approvisionnement"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2D]
+  - id: fr-05
+    subject: "Signalement des incidents de sécurité et processus de réponse"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2B]
+  - id: fr-06
+    subject: "Développement sécurisé, maintenance applicative et divulgation des vulnérabilités"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2E]
+  - id: fr-07
+    subject: "Sensibilisation et formation du personnel à la cybersécurité"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2G]
+  - id: fr-08
+    subject: "Chiffrement des données au repos et en transit"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2H]
+  - id: fr-09
+    subject: "Analyse de risques et politique de sécurité du système d'information"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2A]
+  - id: fr-10
+    subject: "Audits de sécurité et mesure de l'efficacité des mesures de protection"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2F]
+  - id: fr-11
+    subject: "Habilitations, gestion des comptes à privilèges et départs des collaborateurs"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2I]
+  - id: fr-12
+    subject: "Authentification forte des utilisateurs et messagerie sécurisée"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2J]
+  - id: fr-13
+    subject: "Gestion de crise cyber et continuité du service en mode dégradé"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2C]
+  - id: fr-14
+    subject: "Inventaire des actifs matériels et logiciels du système d'information"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2I]
+  # --- SecNumCloud ------------------------------------------------------------------------------------------------
+  - id: fr-15
+    subject: "Hébergement souverain des données en Europe, à l'abri des lois extraterritoriales"
+    frameworks: [SecNumCloud]
+    expected: [SNC-REQ-01]
+  - id: fr-16
+    subject: "Bastion d'administration et cloisonnement du réseau d'administration"
+    frameworks: [SecNumCloud]
+    expected: [SNC-REQ-02]
+  - id: fr-17
+    subject: "Conservation des clés de chiffrement dans un HSM qualifié"
+    frameworks: [SecNumCloud]
+    expected: [SNC-REQ-03]
+  - id: fr-18
+    subject: "Durcissement des conteneurs et isolation entre locataires"
+    frameworks: [SecNumCloud]
+    expected: [SNC-REQ-04]
+  - id: fr-19
+    subject: "Journalisation des accès et remontée des événements vers le SOC"
+    frameworks: [SecNumCloud]
+    expected: [SNC-REQ-05]
+  - id: fr-20
+    subject: "Deux centres de données distants et bascule automatique en cas de sinistre"
+    frameworks: [SecNumCloud]
+    expected: [SNC-REQ-06]
+  # --- ISO 27001 --------------------------------------------------------------------------------------------------
+  - id: fr-21
+    subject: "Clauses de sécurité dans les contrats des fournisseurs et prestataires"
+    frameworks: [ISO27001]
+    expected: [ISO-27001-A5-15]
+  - id: fr-22
+    subject: "Sécurisation et gestion du parc de postes de travail et de terminaux mobiles"
+    frameworks: [ISO27001]
+    expected: [ISO-27001-A8-01]
+  - id: fr-23
+    subject: "Veille sur les vulnérabilités et application des correctifs de sécurité"
+    frameworks: [ISO27001]
+    expected: [ISO-27001-A8-08]
+  - id: fr-24
+    subject: "Gestion de configuration et détection des écarts par rapport à la référence"
+    frameworks: [ISO27001]
+    expected: [ISO-27001-A8-09]
+  - id: fr-25
+    subject: "Politique cryptographique et cycle de vie des clés"
+    frameworks: [ISO27001]
+    expected: [ISO-27001-A8-24]
+  - id: fr-26
+    subject: "Intégrité et conservation des journaux d'événements"
+    frameworks: [ISO27001]
+    expected: [ISO-27001-A8-28]
+  # --- RGPD, CRA, CER, ISO 22301, ISO 27005 : plusieurs référentiels déclarés ------------------------------------
+  - id: fr-27
+    subject: "Notification d'une violation de données personnelles sous 72 heures"
+    frameworks: [RGPD, CRA]
+    expected: [RGPD-REQ-BREACH-02]
+  - id: fr-28
+    subject: "Protection de la vie privée dès la conception pour la géolocalisation des utilisateurs"
+    frameworks: [RGPD, CRA]
+    expected: [RGPD-REQ-PRIVACY-01]
+  - id: fr-29
+    subject: "Nomenclature logicielle (SBOM) et traitement des vulnérabilités des produits livrés"
+    frameworks: [RGPD, CRA]
+    expected: [CRA-REQ-VULN-01]
+  - id: fr-30
+    subject: "Configuration sécurisée par défaut des équipements livrés au client"
+    frameworks: [RGPD, CRA]
+    expected: [CRA-REQ-SECBYDES-02]
+  - id: fr-31
+    subject: "Résilience des entités critiques et sécurité physique des sites"
+    frameworks: [CER, ISO22301]
+    expected: [CER-ART13-RESIL]
+  - id: fr-32
+    subject: "Système de management de la continuité d'activité et plans de secours"
+    frameworks: [CER, ISO22301]
+    expected: [ISO-22301-BCP]
+  - id: fr-33
+    subject: "Appréciation des risques selon la méthode EBIOS"
+    frameworks: [ISO27005, NIS2]
+    expected: [ISO-27005-RISK, NIS2-ART21-2A]
+  # --- Sans référentiel déclaré : toute la doctrine ---------------------------------------------------------------
+  - id: fr-34
+    subject: "Centres de données redondants de niveau Tier IV sur deux sites"
+    expected: [TELCO-RESIL-TIER4]
+  - id: fr-35
+    subject: "Synchronisation de phase et de fréquence du réseau de transport"
+    expected: [TELCO-RESIL-PTP-01]
+  - id: fr-36
+    subject: "Résistance au brouillage GPS et maintien de l'horloge en autonomie"
+    expected: [TELCO-RESIL-GNSS-HOLDOVER]
+  - id: fr-37
+    subject: "Validation humaine obligatoire avant toute action corrective automatisée"
+    expected: [P-002, PAT-001]
+  - id: fr-38
+    subject: "Configuration du réseau versionnée dans Git avec revue des changements"
+    expected: [P-001, ADR-0001]
+  - id: fr-39
+    subject: "Modèle d'IA hébergé sur site, aucune donnée envoyée à un fournisseur externe"
+    expected: [P-015, ADR-0011]
+  - id: fr-40
+    subject: "Procédure de secours indépendante de l'infrastructure de production"
+    expected: [P-009, PAT-004]
+  - id: fr-41
+    subject: "Un seul système maître par domaine de données et inventaire de référence"
+    expected: [P-010, ADR-0009]
+  - id: fr-42
+    subject: "Séparation des plans de supervision du service et de l'infrastructure"
+    expected: [P-011, PAT-005, ADR-0008]
+  - id: fr-43
+    subject: "L'assistant conversationnel conseille l'opérateur mais n'exécute aucune action"
+    expected: [P-012, PAT-007]
+  - id: fr-44
+    subject: "Fin de vie des équipements, recyclage et empreinte carbone"
+    expected: [ISO-14001-DECOM]
+  - id: fr-45
+    subject: "Calcul de disponibilité et fiabilité des équipements (MTBF)"
+    expected: [TELCO-RESIL-MTBF]
+  - id: fr-46
+    subject: "Gestion des services informatiques et base de configuration (CMDB)"
+    expected: [ITIL-SERV-MGMT]
+  - id: fr-47
+    subject: "Valider les règles de détection sur le trafic réel avant de les activer"
+    expected: [P-005, PAT-002]
+  - id: fr-48
+    subject: "Séparation du réseau en plans service, contrôle, gestion et hors bande"
+    expected: [PAT-010]
+  # --- Requêtes anglaises (non-régression du classement lexical) --------------------------------------------------
+  - id: en-01
+    language: en
+    subject: "supervised closed loop remediation"
+    expected: [PAT-001, P-002]
+  - id: en-02
+    language: en
+    subject: "human approval before remediation"
+    expected: [P-002]
+  - id: en-03
+    language: en
+    subject: "shadow validation of detection rules"
+    expected: [P-005, PAT-002]
+  - id: en-04
+    language: en
+    subject: "GitOps configuration source of truth"
+    expected: [P-001, ADR-0001]
+  - id: en-05
+    language: en
+    subject: "backup management and disaster recovery"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2C]
+  - id: en-06
+    language: en
+    subject: "multi-factor authentication"
+    frameworks: [NIS2]
+    expected: [NIS2-ART21-2J]
+  - id: en-07
+    language: en
+    subject: "break-glass independent failure domain"
+    expected: [P-009, PAT-004]
+  - id: en-08
+    language: en
+    subject: "local inference inside the trust boundary"
+    expected: [P-015, ADR-0011]

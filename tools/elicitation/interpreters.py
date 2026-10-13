@@ -20,6 +20,7 @@ from typing import Any, Protocol
 import yaml
 
 from tools.elicitation.profile import engagement_file, load_profile
+from tools.elicitation.resolve import engagement_of
 
 SCRIPT_FILE = "scripted_interpretations.yaml"
 
@@ -48,7 +49,7 @@ def _context(state: dict[str, Any], defaults: dict[str, Any]) -> dict[str, Any]:
         "question_id": q.get("id", "Q-0001"),
         "author": state.get("author", defaults.get("author", "")),
         "role": state.get("role", defaults.get("role", "architect")),
-        "engagement": state.get("engagement") or q.get("engagement", "demo-2026"),
+        "engagement": engagement_of(state.get("engagement") or q.get("engagement")),
         "subject": q.get("subject", defaults.get("subject", "")),
     }
 

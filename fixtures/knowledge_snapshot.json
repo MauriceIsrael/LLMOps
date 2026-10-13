@@ -2,9 +2,9 @@
   "status": "ok",
   "count": 1,
   "data": {
-    "schema_version": "1.25",
+    "schema_version": "1.27",
     "knowledge": {
-      "dataset": "data/knowledge.lbug",
+      "dataset": "data\\knowledge.lbug",
       "node_counts": {
         "Asset": 65,
         "GlossaryTerm": 17
@@ -12,17 +12,8 @@
     },
     "engagements": [
       {
-        "id": "default",
-        "dataset": "data/engagements/default.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
-        }
-      },
-      {
         "id": "dep-eng",
-        "dataset": "data/engagements/dep-eng.lbug",
+        "dataset": "data\\engagements\\dep-eng.lbug",
         "node_counts": {
           "Subject": 0,
           "Statement": 0,
@@ -31,7 +22,7 @@
       },
       {
         "id": "nordwave-mcx-2027",
-        "dataset": "data/engagements/nordwave-mcx-2027.lbug",
+        "dataset": "data\\engagements\\nordwave-mcx-2027.lbug",
         "node_counts": {
           "Subject": 8,
           "Statement": 9,

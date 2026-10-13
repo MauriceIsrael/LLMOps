@@ -1,11 +1,11 @@
 {
-  "snapshot_id": "snapshot-2026-10-04-b3fa465",
-  "created_at": "2026-10-04T08:51:08Z",
-  "source_revision": "b3fa46531fb59d7e9fc8c0b6c288c59bb7ddd602",
-  "payload_sha256": "sha256:625d5aeebbbe4a957c59e8be6265a1f916ae55b91db16d919537d705434218f1",
+  "snapshot_id": "snapshot-2026-10-12-7393586",
+  "created_at": "2026-10-12T20:03:56Z",
+  "source_revision": "7393586b88f7fe4fb74dec6e5d6a24f179030f39",
+  "payload_sha256": "sha256:c3ab979159585845af7829720f28b585915956c11eea16f9f2656de0d9753778",
   "schema_version": "1.0",
   "emitter": "knowledge-hub",
-  "checksum": "sha256:625d5aeebbbe4a957c59e8be6265a1f916ae55b91db16d919537d705434218f1",
+  "checksum": "sha256:c3ab979159585845af7829720f28b585915956c11eea16f9f2656de0d9753778",
   "rebuiltByEmitterTest": true,
   "regenerate": "poetry run python scripts/export_fixtures.py",
   "is_provisional": false,
@@ -315,20 +315,533 @@
     ],
     "content_sha256": "sha256:b6b901976cbb15861ede58e3cbba4061fe2e19a14b0e062160423f5936dd2dd7"
   },
+  "embedding_model": {
+    "id": "intfloat/multilingual-e5-small",
+    "version": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+    "sha256": "dd476dd0c2514e9b9be83aeb3853fac0763e0bdf4a71645407587d77c48a2d88",
+    "dim": 384,
+    "local": true,
+    "query_prefix": "query: ",
+    "passage_prefix": "passage: "
+  },
+  "embedding_index": {
+    "model": "intfloat/multilingual-e5-small",
+    "count": 102,
+    "items": [
+      {
+        "ref": "3GPP-TS28104-MDA",
+        "type": "control",
+        "text_sha256": "b0c5e9644a21c261b63be47ac61d7eaa6e81e71a85c8fe7f09c75255b174b5ec"
+      },
+      {
+        "ref": "3GPP-TS29522-NEF",
+        "type": "control",
+        "text_sha256": "bf7e5715865d2a81711038eb6bed6125610d37d1fac92e0d15f027052d1a2384"
+      },
+      {
+        "ref": "3GPP-TS33179-AFFILIATION",
+        "type": "control",
+        "text_sha256": "9801f02859f425bce447299067fa4bd56775096138be6f22929664d5bdd83549"
+      },
+      {
+        "ref": "3GPP-TS33179-ISOLATED",
+        "type": "control",
+        "text_sha256": "b5d5ddb52334e0d2854d3b508d29cd62f5f9966ed743286c4a020e5316195423"
+      },
+      {
+        "ref": "3GPP-TS33179-KMS",
+        "type": "control",
+        "text_sha256": "3c7aaa4ed0e316945ce8c6aa523b78290f12b98cbb79700d007a5a46c66842dd"
+      },
+      {
+        "ref": "3GPP-TS33501-SBI",
+        "type": "control",
+        "text_sha256": "73dacd8a372a4b85c6f66a9bd7918b798790f24ecb8ec69037f1a745170fed77"
+      },
+      {
+        "ref": "3GPP-TS33501-SEPP",
+        "type": "control",
+        "text_sha256": "08b4eec7dcc0b32ad5f1b1e8684dbc46fede2b4faa1e8830b8e0b3f5c8940aa7"
+      },
+      {
+        "ref": "3GPP-TS33926-SCAS",
+        "type": "control",
+        "text_sha256": "f6848327eadbff3c6158d63f87fe77c9e2920f7c530606ece586e5f717bf79d8"
+      },
+      {
+        "ref": "3GPP-TS37579-ICS",
+        "type": "control",
+        "text_sha256": "3eb2f2875ce13d4e2830fa88fdabed28d25f9e6689019f4114f9f84bd5d4cd41"
+      },
+      {
+        "ref": "CER-ART13-RESIL",
+        "type": "control",
+        "text_sha256": "f3bb0934d4983066f295a2a9fc975fd030b2466b7c670a14687de7073bf06ff8"
+      },
+      {
+        "ref": "CRA-REQ-SECBYDES-02",
+        "type": "control",
+        "text_sha256": "3a2e4eb5bd073168d3133bd524862dd0e6d923ab1bdecb88ace304f6ea99f124"
+      },
+      {
+        "ref": "CRA-REQ-VULN-01",
+        "type": "control",
+        "text_sha256": "dd36a22546635c83c5a1740f0619e310859353caab506ad1d8de59293f54b168"
+      },
+      {
+        "ref": "FCAPS-OAM-PROT",
+        "type": "control",
+        "text_sha256": "279f4cbd8aa52e3207b6ed6b6e0ef41c53a672a31abffe0babe64934064c0b15"
+      },
+      {
+        "ref": "GSMA-CEIR-PEI",
+        "type": "control",
+        "text_sha256": "e4a548a5755a5eeccfa551eec898dbaf7f6af1d82629d498446d5ac0bbf2b8f7"
+      },
+      {
+        "ref": "GSMA-SAS-EAL4",
+        "type": "control",
+        "text_sha256": "54abf6d53dc12c7b78c6a64da2d81f962d2b1f06a4b228d4a604da59226a03f2"
+      },
+      {
+        "ref": "GSMA-SGP22-RSP",
+        "type": "control",
+        "text_sha256": "7e82d39b65c084eba6e80b058c29826ff4e78350266a61072a928b712f2a225e"
+      },
+      {
+        "ref": "GSMA-SGP32-IOT",
+        "type": "control",
+        "text_sha256": "1791fc955a6843423865aec9d53316dd56997a8285389d944e5b6424d17024b8"
+      },
+      {
+        "ref": "ISO-14001-DECOM",
+        "type": "control",
+        "text_sha256": "eb14a52751a9fd26b7327632273a5e71421773790ae2be6f289b0b87442496ac"
+      },
+      {
+        "ref": "ISO-22301-BCP",
+        "type": "control",
+        "text_sha256": "dc5326949af992929f7a10b8c24224bd7a2e3a01472cb844fd0e59e8a0dc9c42"
+      },
+      {
+        "ref": "ISO-27001-A5-15",
+        "type": "control",
+        "text_sha256": "c226886b13cfef79c7d7ecfa95d4ad587b4c0a750d425883cde4276ea671a189"
+      },
+      {
+        "ref": "ISO-27001-A8-01",
+        "type": "control",
+        "text_sha256": "42d6089a0c90792f116d4de5140bd81c1e8d6280e0fc776a1b2dc46a69292fff"
+      },
+      {
+        "ref": "ISO-27001-A8-08",
+        "type": "control",
+        "text_sha256": "a9944b304bb621994c63b135b8994c8d4e25f2752bfd66571c3bb64ddde2789a"
+      },
+      {
+        "ref": "ISO-27001-A8-09",
+        "type": "control",
+        "text_sha256": "819e9413c76df34063c0bac18511063578d442f8a4d934f827037f3c7dc0c0e7"
+      },
+      {
+        "ref": "ISO-27001-A8-24",
+        "type": "control",
+        "text_sha256": "a27457531bb9a7b0a44d05dd94e48abeefc431d659b779d44e9750a18b2b2c58"
+      },
+      {
+        "ref": "ISO-27001-A8-28",
+        "type": "control",
+        "text_sha256": "764f63960934da127ca1f48adc3176ad1a89b3713cdf010ed00a727b05830b05"
+      },
+      {
+        "ref": "ISO-27005-RISK",
+        "type": "control",
+        "text_sha256": "9d77aaeddc8458def53f4da01cd247cb4a2912d70036ce314f70d69e6a16210f"
+      },
+      {
+        "ref": "ITIL-SERV-MGMT",
+        "type": "control",
+        "text_sha256": "5e8c1a84432f8983e62f6e68a10c93b7d47f3244eb50c603846dac18cff7d0b1"
+      },
+      {
+        "ref": "NIS2-ART20-1",
+        "type": "control",
+        "text_sha256": "001e2aabba987d4b629c15af40b60a091521db0914e868d87901b4360342f57a"
+      },
+      {
+        "ref": "NIS2-ART20-2",
+        "type": "control",
+        "text_sha256": "09fee7f7094c9e0b81a56cec2910742bc80bca19278636c7d9c635f54015783a"
+      },
+      {
+        "ref": "NIS2-ART21-1",
+        "type": "control",
+        "text_sha256": "8ff270951ab606bad364485c0160596fd90984105d4d61b5988435625e9a6685"
+      },
+      {
+        "ref": "NIS2-ART21-2A",
+        "type": "control",
+        "text_sha256": "ea9c17c29e2741a3b0e10aa89929aa9422e09afab3c2857ac1d6788d6862b467"
+      },
+      {
+        "ref": "NIS2-ART21-2B",
+        "type": "control",
+        "text_sha256": "2ee192bd82bba81de58728e3632a513c5afe645c497a9ff0eafedddfbde07cd3"
+      },
+      {
+        "ref": "NIS2-ART21-2C",
+        "type": "control",
+        "text_sha256": "0db7b96380a67a682c396910a1f5f76cc3f1b9875cf4fff006e35a73f9d13cd4"
+      },
+      {
+        "ref": "NIS2-ART21-2D",
+        "type": "control",
+        "text_sha256": "208c0bf3e4697261f8f581755c04111c81905dce34836cc2920d9291853e0743"
+      },
+      {
+        "ref": "NIS2-ART21-2E",
+        "type": "control",
+        "text_sha256": "6d35ba3eb6eb20255577a023045487f1f375d6a39dd7f78b6962b5cd72d49d03"
+      },
+      {
+        "ref": "NIS2-ART21-2F",
+        "type": "control",
+        "text_sha256": "cf437c60e72b58204aa4cf3be01b7aa74fa133d0c1d617380121b35ea96a4fde"
+      },
+      {
+        "ref": "NIS2-ART21-2G",
+        "type": "control",
+        "text_sha256": "63ca4886b22eb05b803d47397316dc08b125d3cfa8bec0b057e00eba9f2d7ce9"
+      },
+      {
+        "ref": "NIS2-ART21-2H",
+        "type": "control",
+        "text_sha256": "2ed2c487040b019de512953cb3676e40c0b5e3110563e4df3f638b9f19190c29"
+      },
+      {
+        "ref": "NIS2-ART21-2I",
+        "type": "control",
+        "text_sha256": "ee261a2d34945a0f657e4e2a91bb525a27ffbf0439ff5aa95db46dc28dd6bf0e"
+      },
+      {
+        "ref": "NIS2-ART21-2J",
+        "type": "control",
+        "text_sha256": "5a874bd556ae1adb937c7aff71710fdd91ce15ba3d7ae4f31e1ee0434a83a8bf"
+      },
+      {
+        "ref": "NIS2-ART21-3",
+        "type": "control",
+        "text_sha256": "572ff3ad5214ff3e744a398c9a38cc442f0da07d76660e0489420d6e5f239112"
+      },
+      {
+        "ref": "NIS2-ART21-4",
+        "type": "control",
+        "text_sha256": "deab47a686cb20eb3e85e8e8079e2f05380c75f34ec12b6edd65e466a7547d24"
+      },
+      {
+        "ref": "NIS2-ART23-1",
+        "type": "control",
+        "text_sha256": "5b11075829e4c9595f7fc8a2773bd9f255c3574bd911de70dd1731a040cc7181"
+      },
+      {
+        "ref": "NIS2-ART23-2",
+        "type": "control",
+        "text_sha256": "e44afd6b8f7b085f0e118dcb0aa150d167b98cc6c608bac17b189671d396f655"
+      },
+      {
+        "ref": "NIS2-ART23-3",
+        "type": "control",
+        "text_sha256": "28ec94ce1d688bdab118ecedc3822c0768ab71c6c5e39c87de4d061c7028467d"
+      },
+      {
+        "ref": "NIS2-ART23-4",
+        "type": "control",
+        "text_sha256": "207ada1cc18eeec83c85f091f489c0e23da35f8244c408cd31c8a82c7a0607d3"
+      },
+      {
+        "ref": "PPDR-DEVICE-ATEX",
+        "type": "control",
+        "text_sha256": "bca2eb23cf78a7968d4db4d3b8a8cb989a1ba902e52ae29089e8761e6c90b237"
+      },
+      {
+        "ref": "PPDR-DMO-LEGACY",
+        "type": "control",
+        "text_sha256": "5a73b49efeb6fd18ea3f0debcd7fdb2d44df701591768dd767cd6fcd0e1e616c"
+      },
+      {
+        "ref": "PPDR-RADIO-B68",
+        "type": "control",
+        "text_sha256": "766826054f33d59db8f4df0b0b5ddcb135ad2c59d52360432560ed3cd969ae40"
+      },
+      {
+        "ref": "PPDR-VEHICLE-CEM",
+        "type": "control",
+        "text_sha256": "bf5eaf6da22aeea342f550f13f38fd1a76182bcca9234f44f16b7c890c3f6a57"
+      },
+      {
+        "ref": "RGPD-REQ-BREACH-02",
+        "type": "control",
+        "text_sha256": "1b4c049fd21533ffacda4e2456dd15f926f1bb4c84efd432c5c5888700e7bb9b"
+      },
+      {
+        "ref": "RGPD-REQ-PRIVACY-01",
+        "type": "control",
+        "text_sha256": "b421a6c597ef1eff0030748b8ffee81406227e9ee5d8fa9cc863491f74790b7d"
+      },
+      {
+        "ref": "SNC-REQ-01",
+        "type": "control",
+        "text_sha256": "b052a5461d504cab6e7d6b6b024118e2a68910cf6cf6726d80b8c51e34f6033f"
+      },
+      {
+        "ref": "SNC-REQ-02",
+        "type": "control",
+        "text_sha256": "cfda4cb015f08d4f648cf2e87c47cade58f5a8a1aedb3728da2bf12d5792cd7a"
+      },
+      {
+        "ref": "SNC-REQ-03",
+        "type": "control",
+        "text_sha256": "2bb2aeb6c4d27222df5f91e9ab412219eaba5308013f7811d10b96ccce5b006a"
+      },
+      {
+        "ref": "SNC-REQ-04",
+        "type": "control",
+        "text_sha256": "9771cab68446d253b4ec1bc92e6fb856ca4a49e9121c4e86e3c81578c59a17d0"
+      },
+      {
+        "ref": "SNC-REQ-05",
+        "type": "control",
+        "text_sha256": "c5f5137f32b26a08266648f7fe2084bd9b2aab30561091dac5f2ea6234ac3064"
+      },
+      {
+        "ref": "SNC-REQ-06",
+        "type": "control",
+        "text_sha256": "c03ae1d5fe7166a33bf1d7aedfe21b380a229845a24d753a161453b233389045"
+      },
+      {
+        "ref": "TELCO-RESIL-GNSS-HOLDOVER",
+        "type": "control",
+        "text_sha256": "cdaf335faccb33dcfee0f791cae95e6e39d580fb9b92c30722579f5dcc6c7cf8"
+      },
+      {
+        "ref": "TELCO-RESIL-MTBF",
+        "type": "control",
+        "text_sha256": "4d4ff05073411cb7d2974e8ebd3725f97e710c859538e1a69879d7daeee94d0d"
+      },
+      {
+        "ref": "TELCO-RESIL-PTP-01",
+        "type": "control",
+        "text_sha256": "cb58839f25a62a13eefb684271eda0836491756aed0001e46e6b02b0beff9a17"
+      },
+      {
+        "ref": "TELCO-RESIL-TIER4",
+        "type": "control",
+        "text_sha256": "cc98ce634e347d203745c8f68542a04ed59b1fce880e2f187d931053e5cadf06"
+      },
+      {
+        "ref": "ADR-0001",
+        "type": "decision",
+        "text_sha256": "aadc4743a63ca0c4fbe0ed37781fef165cf548793ca5e85164056417967f32fe"
+      },
+      {
+        "ref": "ADR-0002",
+        "type": "decision",
+        "text_sha256": "bb66037e6a60f6875d6743a90c1dddbd32fbbe9a50ff16157254852e380ce077"
+      },
+      {
+        "ref": "ADR-0003",
+        "type": "decision",
+        "text_sha256": "5fd402ce7a95e766dedfb4e506b9fb2382038835885f8b1ffb1d48b347104482"
+      },
+      {
+        "ref": "ADR-0004",
+        "type": "decision",
+        "text_sha256": "fe73bc58d194209a8dcad4ee660efd2f422e628b9cc5454797bbc0cb91b37cda"
+      },
+      {
+        "ref": "ADR-0005",
+        "type": "decision",
+        "text_sha256": "6a279b670428dff3439a6007ef1a3faeea8d929ac32c2bab63e9dd63642e8f1a"
+      },
+      {
+        "ref": "ADR-0006",
+        "type": "decision",
+        "text_sha256": "2ed736cd0fd0a6900d2923dfed1fbb27af1bb99d862004819c24a6355f69f0a4"
+      },
+      {
+        "ref": "ADR-0007",
+        "type": "decision",
+        "text_sha256": "ad61c4cdd6b6b421e1620b6e4952f00d46f537450e8ce8824531aba0747b6207"
+      },
+      {
+        "ref": "ADR-0008",
+        "type": "decision",
+        "text_sha256": "c87f72b28f446e88b4298d0ff0a04fe13f4ba4b7490b1c2881a39be2da8cfe94"
+      },
+      {
+        "ref": "ADR-0009",
+        "type": "decision",
+        "text_sha256": "7a04854b68444518ee2380ef950751b4c6b2d9a50ef3948244843e5e1342d55a"
+      },
+      {
+        "ref": "ADR-0011",
+        "type": "decision",
+        "text_sha256": "16fe8d548e9c82d7a8d09af7295e14efd07aba9ba87ef19cee53b5821270754c"
+      },
+      {
+        "ref": "ADR-0012",
+        "type": "decision",
+        "text_sha256": "85644bef3d5b9294dfed2be82218bd74fef57ab3f9ae248ddcb50d3bbd6c1172"
+      },
+      {
+        "ref": "ADR-0013",
+        "type": "decision",
+        "text_sha256": "0005a6f361145c3b87da6cef4435e4c923d57f9e906690550ba41d6ca7a0b2e1"
+      },
+      {
+        "ref": "ADR-0014",
+        "type": "decision",
+        "text_sha256": "684aef11441edc149cdcdfa0fb4d77a57a088e533741cfb942fcc57a521ab765"
+      },
+      {
+        "ref": "ADR-0015",
+        "type": "decision",
+        "text_sha256": "f827c5f8070300ce35ef06ac65d8447dce5760d63b7fc36c35723c9501694dca"
+      },
+      {
+        "ref": "PAT-001",
+        "type": "pattern",
+        "text_sha256": "b7a68cebb5fa9b71e0780e07b2e7787bea885105fdd6050becedc7bf8ef39ec5"
+      },
+      {
+        "ref": "PAT-002",
+        "type": "pattern",
+        "text_sha256": "3f57577d4962789276b68e4d0c8b512056ad0c9be0074637cc819ed315ff6ab2"
+      },
+      {
+        "ref": "PAT-003",
+        "type": "pattern",
+        "text_sha256": "8836aacc614961a9b21ffd0e8cd366019dfa6bf6c4ee1b9bbfdadc7d989e674a"
+      },
+      {
+        "ref": "PAT-004",
+        "type": "pattern",
+        "text_sha256": "ef1457e7071d34605102562c9e86947bad9c3f798a3c43a57bb26bcac9e76ce2"
+      },
+      {
+        "ref": "PAT-005",
+        "type": "pattern",
+        "text_sha256": "7bd841f1aa7149ea30ebcf9bb30d27641a3fa9fe2d34c6840bb1f93aab0bb509"
+      },
+      {
+        "ref": "PAT-006",
+        "type": "pattern",
+        "text_sha256": "254b621633ad7c6bfad856e22118170ce002caa5e2be2ffdb077feed46245844"
+      },
+      {
+        "ref": "PAT-007",
+        "type": "pattern",
+        "text_sha256": "6f18d5383e89675cfbe90b3f6f641f3a57d8e4dead82923b9ea3e6292295e0e4"
+      },
+      {
+        "ref": "PAT-008",
+        "type": "pattern",
+        "text_sha256": "caf5a19cd15b44caa88984a5371bc026c0b4a336dbc11efa1d485af063331450"
+      },
+      {
+        "ref": "PAT-009",
+        "type": "pattern",
+        "text_sha256": "e9e9d88b5ad954cf52f1ca95c3a568f76cbfc0aeb01c80dc414a35ccc366f4c2"
+      },
+      {
+        "ref": "PAT-010",
+        "type": "pattern",
+        "text_sha256": "5c75d8b6bfb414c6d5e79b48a82a50f9f616fa6ae8087fab2362e7e72f49ae81"
+      },
+      {
+        "ref": "PAT-011",
+        "type": "pattern",
+        "text_sha256": "cba29add6132d055b9afeee9364433736f8a4b948aac91eb7f01374d6a2d1d42"
+      },
+      {
+        "ref": "P-001",
+        "type": "principle",
+        "text_sha256": "91e5c2a16f0158e6dedcdee04a89097cf9ab5d9526b0b63dd4f5914e4c8a2acc"
+      },
+      {
+        "ref": "P-002",
+        "type": "principle",
+        "text_sha256": "d6d58fe910cca494cc57820438d3e2c0fddcd314e2109d222e7ffc699a56b60a"
+      },
+      {
+        "ref": "P-003",
+        "type": "principle",
+        "text_sha256": "f8fdcf3c956abc513cf41e604077e0e09724752d1c38061761dbed1af456eeaa"
+      },
+      {
+        "ref": "P-004",
+        "type": "principle",
+        "text_sha256": "8edc8e619bd0914bc96c215fd18cea622432e929e238f83fc56dd39f930630c2"
+      },
+      {
+        "ref": "P-005",
+        "type": "principle",
+        "text_sha256": "7984f1c78aa3e7c6d9664360e57eb0922308fee8e7b306869789260113e9febf"
+      },
+      {
+        "ref": "P-006",
+        "type": "principle",
+        "text_sha256": "b20ee2d8306b20eadd4a9fde55de4a57062586dbdc26d8c3b07398815eba03fa"
+      },
+      {
+        "ref": "P-007",
+        "type": "principle",
+        "text_sha256": "32ee5af554484ed0f67923dba9d433a46f4052d57ff7f067a46c883d8b0eb796"
+      },
+      {
+        "ref": "P-008",
+        "type": "principle",
+        "text_sha256": "df1bf7cfe52fb410d7540cb18f51ca7e96a95bba4dcf5361158ac8e942ee2f9a"
+      },
+      {
+        "ref": "P-009",
+        "type": "principle",
+        "text_sha256": "a815aab8699ecd6b5a0b68f8da4c18c9ce6073dfaf2aede9c4d5e4d3199a142d"
+      },
+      {
+        "ref": "P-010",
+        "type": "principle",
+        "text_sha256": "3950f1c45c34e30952f3c5d960956bc844e1ca687dfc9335a6b7f9d9080200b2"
+      },
+      {
+        "ref": "P-011",
+        "type": "principle",
+        "text_sha256": "319120f78c362768e5a3c576fc4aa5997f74b7aca7a6564f95b01b4a58cecfbe"
+      },
+      {
+        "ref": "P-012",
+        "type": "principle",
+        "text_sha256": "db346c4b89cba475e5a62f7f6cc5b8e65f846440141660b967add2186ee3f4d5"
+      },
+      {
+        "ref": "P-013",
+        "type": "principle",
+        "text_sha256": "a87f956db33fec87538871733a8157da570f4a5110853b871524f503cc342d74"
+      },
+      {
+        "ref": "P-014",
+        "type": "principle",
+        "text_sha256": "ed76de8d6a3483c6484491829f1eb8c8ae11f06b75065fd315aba53f21be2a6f"
+      },
+      {
+        "ref": "P-015",
+        "type": "principle",
+        "text_sha256": "2b3e928f85d561b93b446c47b3e34b1437a1b6ac996e004d43605dba29ec4b1c"
+      }
+    ],
+    "content_sha256": "sha256:61e9bdee378ba0325380e4782452db663fb9262c4f91db5db11e7acf1abfafdd"
+  },
   "applicability_index": {
-    "TPL-getting-started": {
-      "domains": [
-        "delivery"
-      ],
-      "phases": [
-        "BID",
-        "BUILD",
-        "RUN"
-      ],
-      "rules": [
-        "rule:tpl-getting-started"
-      ]
-    },
     "BLU-hla-it-platform": {
       "domains": [
         "it-infrastructure",
@@ -552,6 +1065,19 @@
       ],
       "rules": [
         "rule:est-netdevops-telco"
+      ]
+    },
+    "TPL-getting-started": {
+      "domains": [
+        "delivery"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:tpl-getting-started"
       ]
     },
     "TPL-glossary": {
@@ -1062,6 +1588,28 @@
         "rule:skl-telco-core"
       ]
     },
+    "TPL-claims-register": {
+      "domains": [
+        "delivery"
+      ],
+      "phases": [
+        "BID"
+      ],
+      "rules": [
+        "rule:tpl-claims-register"
+      ]
+    },
+    "TPL-hla-section-map": {
+      "domains": [
+        "delivery"
+      ],
+      "phases": [
+        "BID"
+      ],
+      "rules": [
+        "rule:tpl-hla-section-map"
+      ]
+    },
     "TPL-zero-draft-hld-en": {
       "domains": [
         "delivery",
@@ -1088,28 +1636,6 @@
       ],
       "rules": [
         "rule:tpl-zero-draft-hld"
-      ]
-    },
-    "TPL-claims-register": {
-      "domains": [
-        "delivery"
-      ],
-      "phases": [
-        "BID"
-      ],
-      "rules": [
-        "rule:tpl-claims-register"
-      ]
-    },
-    "TPL-hla-section-map": {
-      "domains": [
-        "delivery"
-      ],
-      "phases": [
-        "BID"
-      ],
-      "rules": [
-        "rule:tpl-hla-section-map"
       ]
     }
   },
@@ -2997,7 +3523,7 @@
     {
       "framework": "NIS2",
       "version": "2022/2555",
-      "controls_count": 10
+      "controls_count": 19
     },
     {
       "framework": "PPDR-DEVICE",
@@ -3366,6 +3892,33 @@
       ]
     },
     {
+      "id": "NIS2-ART20-1",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Governance \u2014 Member States shall ensure that the management bodies of essential and important\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART20-2",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Governance \u2014 Member States shall ensure that the members of the management bodies of essential and\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART21-1",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that essential and important entities take appropriate and\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
       "id": "NIS2-ART21-2A",
       "framework": "NIS2",
       "version": "2022/2555",
@@ -3489,6 +4042,60 @@
       "implemented_by": [
         "PAT-004"
       ]
+    },
+    {
+      "id": "NIS2-ART21-3",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that, when considering which measures referred to in\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART21-4",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that an entity that finds that it does not comply with the\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART23-1",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Reporting obligations \u2014 Each Member State shall ensure that essential and important entities notify, without\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART23-2",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Reporting obligations \u2014 Where applicable, Member States shall ensure that essential and important entities\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART23-3",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Reporting obligations \u2014 An incident shall be considered to be significant if",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "NIS2-ART23-4",
+      "framework": "NIS2",
+      "version": "2022/2555",
+      "title": "Reporting obligations \u2014 Member States shall ensure that, for the purpose of notification under paragraph 1, the\u2026",
+      "domain": "security-governance",
+      "severity": "mandatory",
+      "implemented_by": []
     },
     {
       "id": "PPDR-DEVICE-ATEX",
@@ -3969,6 +4576,24 @@
       }
     },
     "NIS2": {
+      "NIS2-ART20-1": {
+        "title": "Governance \u2014 Member States shall ensure that the management bodies of essential and important\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART20-2": {
+        "title": "Governance \u2014 Member States shall ensure that the members of the management bodies of essential and\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART21-1": {
+        "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that essential and important entities take appropriate and\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
       "NIS2-ART21-2A": {
         "title": "Risk Analysis and Information System Security Policies",
         "version": "2022/2555",
@@ -4063,6 +4688,42 @@
         "implemented_by": [
           "PAT-004"
         ]
+      },
+      "NIS2-ART21-3": {
+        "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that, when considering which measures referred to in\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART21-4": {
+        "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that an entity that finds that it does not comply with the\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART23-1": {
+        "title": "Reporting obligations \u2014 Each Member State shall ensure that essential and important entities notify, without\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART23-2": {
+        "title": "Reporting obligations \u2014 Where applicable, Member States shall ensure that essential and important entities\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART23-3": {
+        "title": "Reporting obligations \u2014 An incident shall be considered to be significant if",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "NIS2-ART23-4": {
+        "title": "Reporting obligations \u2014 Member States shall ensure that, for the purpose of notification under paragraph 1, the\u2026",
+        "version": "2022/2555",
+        "severity": "mandatory",
+        "implemented_by": []
       }
     },
     "PPDR-DEVICE": {

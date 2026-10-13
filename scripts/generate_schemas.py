@@ -84,11 +84,26 @@ def generate_doctrine_context_schema() -> dict[str, Any]:
                                 "has_checks": {"type": "boolean"},
                                 "framework": {"type": ["string", "null"]},
                                 "required": {"type": "boolean", "description": "Control of a framework listed in 'frameworks'."},
+                                "relevant": {"type": "boolean", "description": "Relevant for the subject (contract 1.25): "
+                                             "lexical or semantic relevance above its threshold. Separates the doctrine "
+                                             "that is relevant from the controls only required by the frameworks. Orders, "
+                                             "never decides (D9)."},
+                                "semantic_relevance": {"type": ["number", "null"], "minimum": 0, "maximum": 1,
+                                                       "description": "Calibrated similarity in the local model's space "
+                                                       "(contract 1.25); null without the model."},
+                                "combined_relevance": {"type": "number", "minimum": 0, "maximum": 1,
+                                                       "description": "Score that orders the package (contract 1.25)."},
+                                "relevance_method": {"enum": ["lexical", "semantic", "hybrid"],
+                                                     "description": "lexical: no model; semantic: found by meaning only; "
+                                                     "hybrid: both kinds of evidence (contract 1.25)."},
                             },
                         },
                     },
                     "truncated": {"type": "boolean"},
                     "snapshot_id": {"type": ["string", "null"]},
+                    "relevance_method": {"enum": ["lexical", "hybrid"], "description": "Contract 1.25."},
+                    "embedding": {"type": ["object", "null"], "description": "Local model of the semantic relevance "
+                                  "{model, version, sha256, local: true}; null in lexical mode (contract 1.25)."},
                 },
             },
         },
@@ -261,6 +276,7 @@ def generate_framework_coverage_schema() -> dict[str, Any]:
             "validated": {"type": "integer", "minimum": 0},
             "missing_ids": {"type": "array", "items": {"type": "string"}},
             "declared_by": {"type": ["string", "null"]},
+            "declared_at": {"type": ["string", "null"]},
             "provisional": {"type": ["boolean", "null"]},
             "manifest": {"type": "boolean"},
         },
@@ -505,8 +521,11 @@ def generate_similar_schema() -> dict[str, Any]:
     return _envelope("SimilarKnowledgeResponse", {
         "type": "object", "required": ["model", "dim", "config", "results"],
         "properties": {"model": {"type": "string"}, "dim": {"type": "integer"}, "model_version": {"type": "string"},
-                       "config": {"type": "object"}, "results": {"type": "array", "items": result}}},
-        "Validated knowledge close to a subject (POST /api/knowledge/similar, contract 1.9). Never a decision.")
+                       "config": {"type": "object"}, "results": {"type": "array", "items": result},
+                       "encoded_by": {"enum": ["client", "server"], "description": "server: the query_text was encoded "
+                                      "by the Hub's local reference model (contract 1.25)."}}},
+        "Validated knowledge close to a subject (POST /api/knowledge/similar, contract 1.9; server-side encoding of "
+        "query_text, contract 1.25). Never a decision.")
 
 
 def generate_reuse_confirmation_schema() -> dict[str, Any]:
@@ -550,7 +569,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.25")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.27")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 
@@ -739,12 +758,21 @@ export interface DoctrineContextItem {{
   has_checks: boolean;
   framework?: string | null;
   required?: boolean;
+  /** Contract 1.25 (local semantic search): what ordered the item. Orders, never decides (D9). */
+  relevant?: boolean;
+  semantic_relevance?: number | null;
+  combined_relevance?: number;
+  relevance_method?: "lexical" | "semantic" | "hybrid";
 }}
+
+export interface EmbeddingModelInfo {{ model: string; version: string; sha256: string | null; local: true }}
 
 export interface DoctrineContext {{
   items: DoctrineContextItem[];
   truncated: boolean;
   snapshot_id: string | null;
+  relevance_method?: "lexical" | "hybrid";   // contract 1.25
+  embedding?: EmbeddingModelInfo | null;      // contract 1.25
 }}
 
 export interface DoctrineContextRequest {{
@@ -1102,8 +1130,10 @@ export interface EmbeddingDeposit {{
   items: Array<{{ ref: string; text_sha256: string; vector: number[]; language?: "fr" | "en" }}>;
 }}
 
+/** Contract 1.25: send only ``query_text`` (no ``vector``, no ``model`` or the reference one) and the Hub encodes it
+ *  with its local reference model; another ``model`` without a vector answers 409 ``model-mismatch``. */
 export interface SimilarKnowledgeRequest {{
-  model: string; vector: number[]; query_text?: string; types?: string[]; domains?: string[]; top_k?: number;
+  model?: string; vector?: number[]; query_text?: string; types?: string[]; domains?: string[]; top_k?: number;
   subject_fingerprint?: string;
 }}
 

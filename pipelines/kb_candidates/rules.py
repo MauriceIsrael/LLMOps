@@ -66,6 +66,7 @@ def check_schema(candidate: dict[str, Any], kb_dir: Path) -> dict[str, str]:
     problems, doc = problems_of(candidate, kb_dir)
     if problems:
         return _result("fail", "; ".join(f"{p['path']} [{p['code']}] {p['reason']}" for p in problems))
+    assert doc is not None  # no problem means the content parsed
     if candidate["asset_type"] == "fact_key":
         return _result("pass", f"vocabulary key '{doc['key']}' ({doc['type']}) is valid" + (f", justified by {doc['asset']}" if doc.get("asset") else ""))
     vocabulary = fact_module.load(vocabulary_path(kb_dir))

@@ -1,0 +1,247 @@
+{
+  "interface": "rest.POST /api/frameworks/ingestions/{ingestion_id}/abandon",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "abandon_reason": {
+                "type": [
+                  "string"
+                ]
+              },
+              "abandoned_at": {
+                "type": [
+                  "string"
+                ]
+              },
+              "abandoned_by": {
+                "type": [
+                  "string"
+                ]
+              },
+              "created_at": {
+                "type": [
+                  "string"
+                ]
+              },
+              "created_by": {
+                "type": [
+                  "string"
+                ]
+              },
+              "decided": {
+                "type": [
+                  "number"
+                ]
+              },
+              "declaration_reset": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "framework": {
+                "type": [
+                  "string"
+                ]
+              },
+              "id": {
+                "type": [
+                  "number"
+                ]
+              },
+              "requirements": {
+                "items": {
+                  "keys": {
+                    "acceptance_criteria": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "comment": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "decision": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "domain": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "in_kb": {
+                      "type": [
+                        "boolean"
+                      ]
+                    },
+                    "legal_text": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "links": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "links_production_mode": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "proposed_acceptance_criteria": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "proposed_links": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "proposed_terms": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "proposed_title_fr": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "requirement_id": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "result": {
+                      "type": [
+                        "null"
+                      ]
+                    },
+                    "reviewer": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "source_ref": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "status": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "terms": {
+                      "items": null,
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "title_fr": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "source_name": {
+                "type": [
+                  "string"
+                ]
+              },
+              "source_sha256": {
+                "type": [
+                  "string"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "tag": {
+                "type": [
+                  "null"
+                ]
+              },
+              "total": {
+                "type": [
+                  "number"
+                ]
+              },
+              "version": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

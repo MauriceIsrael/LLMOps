@@ -19,3 +19,6 @@ htmlcov
 *.kz
 *.hindex
 *.lbug
+
+# Embedding models are fetched (and verified) by the image build itself
+data/models

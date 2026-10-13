@@ -19,6 +19,11 @@ COPY pyproject.toml poetry.lock* README.md ./
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi --no-root --without dev,eval -E postgres
 
+# Modèle d'embedding local (issue #94) : téléchargé une fois à la construction, dans une couche mise en cache, et
+# vérifié contre son empreinte SHA-256 épinglée. Le serveur n'appelle jamais le réseau à l'exécution.
+COPY pipelines/similarity/models.py /tmp/fetch_model.py
+RUN python /tmp/fetch_model.py fetch intfloat/multilingual-e5-small /app/data/models && rm /tmp/fetch_model.py
+
 # Copie des dossiers de l'application
 COPY mcp_server ./mcp_server
 COPY pipelines ./pipelines

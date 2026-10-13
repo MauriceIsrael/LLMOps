@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 
 	/**
-	 * Review of the question trigger rules (K22, Hub contract 1.25).
+	 * Review of the question trigger rules (K22, Hub contract 1.27).
 	 *
 	 * A rule says "when these facts are asserted, this question becomes relevant". Rules reach the knowledge base only through
 	 * the candidate cycle: a model proposes (llm-derived), a person accepts, amends or rejects, the maintainer promotes and

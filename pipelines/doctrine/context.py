@@ -1,4 +1,11 @@
-"""Doctrine context package: which doctrine applies to a subject (deterministic ranking)."""
+"""Doctrine context package: which doctrine applies to a subject (deterministic ranking).
+
+Relevance is lexical (query concepts and glossary synonyms found in the asset) and, when the server holds its local
+embedding model (issue #94), semantic as well: the similarity between the subject and the asset in the model's space,
+which finds an English control for a French subject. The two are combined into one score that **orders** the package
+and sets ``relevant``; it never decides anything about an option (ADR-KH-01 D9). Without the model the ranking is
+exactly the lexical one (``relevance_method: "lexical"``).
+"""
 
 from __future__ import annotations
 
@@ -18,6 +25,19 @@ BODY_WEIGHT = 0.5
 # Minimum relevance for an asset to be part of the package (required controls excepted).
 MIN_RELEVANCE = 0.2
 
+# Minimum calibrated semantic relevance (in [0, 1], see pipelines/similarity/models.py floor/ceil) for an asset to be
+# relevant by meaning. Calibrated on tests/fixtures/similarity/fr-en-doctrine.yaml (docs/deployment.md §7).
+MIN_SEMANTIC = 0.50
+
+# Among the required controls of a declared framework, the one closest to the subject is relevant from this lower
+# calibrated score: cosine levels vary with the wording of a subject, and the closest control of a framework the
+# subject is declared under is the one an architect looks at first (same calibration run).
+MIN_SEMANTIC_BEST = 0.40
+
+# Combination of the two relevances: ``None`` takes the maximum (a French subject has no lexical evidence and must not
+# be penalised for it); a number w in [0, 1] takes w * semantic + (1 - w) * lexical (``KB_HYBRID_WEIGHT``).
+DEFAULT_HYBRID_WEIGHT: float | None = None
+
 # Priority order of the package: principle > required control > pattern > decision > other control.
 TYPE_PRIORITY = {"principle": 0, "required-control": 1, "pattern": 2, "decision": 3, "control": 4}
 
@@ -35,8 +55,18 @@ MIN_EXCERPT_CHARS = 120
 @dataclass
 class ScoredEntry:
     entry: DoctrineEntry
-    relevance: float
+    relevance: float  # lexical
     required: bool
+    semantic: float | None = None  # calibrated semantic relevance, None without a model
+    score: float = 0.0  # combined score that orders the package (the lexical relevance without a model)
+    relevant: bool = False
+
+    @property
+    def method(self) -> str:
+        """``lexical`` (no model), ``semantic`` (found by meaning only) or ``hybrid`` (both kinds of evidence)."""
+        if self.semantic is None:
+            return "lexical"
+        return "hybrid" if self.relevance > 0 else "semantic"
 
     @property
     def priority(self) -> int:
@@ -74,18 +104,42 @@ def relevance(entry: DoctrineEntry, concepts: list[frozenset[str]]) -> float:
     return round(total / len(concepts), 4)
 
 
+def combine(lexical: float, semantic: float | None, weight: float | None = DEFAULT_HYBRID_WEIGHT) -> float:
+    """One score from the lexical and the semantic relevance (the lexical one alone without a model)."""
+    if semantic is None:
+        return lexical
+    if weight is None:
+        return round(max(lexical, semantic), 4)
+    return round(weight * semantic + (1.0 - weight) * lexical, 4)
+
+
 def rank(
     index: DoctrineIndex,
     subject: str,
     domains: list[str] | None = None,
     frameworks: list[str] | None = None,
     phase: str | None = None,
+    semantic: dict[str, float] | None = None,
+    weight: float | None = DEFAULT_HYBRID_WEIGHT,
+    min_semantic: float = MIN_SEMANTIC,
 ) -> list[ScoredEntry]:
     """Active doctrine relevant to the subject, plus every active control of the required
-    frameworks, ordered by type priority, then relevance, then identifier."""
+    frameworks, ordered by type priority, then relevant first, then score, then identifier.
+
+    ``semantic`` maps an asset id to its calibrated semantic relevance in [0, 1] (``None``: no model, lexical ranking).
+    An asset is *relevant* when its lexical relevance reaches ``MIN_RELEVANCE`` or its semantic relevance reaches
+    ``min_semantic``; only relevant assets enter the package, except the controls of the required frameworks, which are
+    all included and flagged ``relevant`` or not (the closest control of each required framework is relevant from
+    ``MIN_SEMANTIC_BEST``)."""
     domains = [d for d in (domains or []) if d]
     required_fw = {f.lower() for f in (frameworks or []) if f}
     concepts = query_concepts(subject, index.vocabulary)
+    best: dict[str, float] = {}
+    if semantic is not None:
+        for entry in index.active():
+            if entry.type == "control" and entry.framework.lower() in required_fw:
+                fw = entry.framework.lower()
+                best[fw] = max(best.get(fw, 0.0), semantic.get(entry.id, 0.0))
     scored: list[ScoredEntry] = []
     for entry in index.active():
         required = entry.type == "control" and entry.framework.lower() in required_fw
@@ -94,10 +148,15 @@ def rank(
                 continue
             if phase and entry.phase and phase.upper() not in {p.upper() for p in entry.phase}:
                 continue
-        score = relevance(entry, concepts)
-        if required or score >= MIN_RELEVANCE:
-            scored.append(ScoredEntry(entry=entry, relevance=score, required=required))
-    scored.sort(key=lambda s: (s.priority, -s.relevance, s.entry.id))
+        lexical = relevance(entry, concepts)
+        sem = None if semantic is None else semantic.get(entry.id, 0.0)
+        relevant = lexical >= MIN_RELEVANCE or (sem is not None and sem >= min_semantic)
+        if required and sem is not None and sem >= MIN_SEMANTIC_BEST and sem >= best[entry.framework.lower()]:
+            relevant = True
+        if required or relevant:
+            scored.append(ScoredEntry(entry=entry, relevance=lexical, required=required, semantic=sem,
+                                      score=combine(lexical, sem, weight), relevant=relevant))
+    scored.sort(key=lambda s: (s.priority, not s.relevant, -s.score, s.entry.id))
     return scored
 
 
@@ -145,11 +204,18 @@ def build_doctrine_context(
     max_items: int = 20,
     max_chars: int = 8000,
     snapshot_id: str | None = None,
+    semantic: dict[str, float] | None = None,
+    weight: float | None = DEFAULT_HYBRID_WEIGHT,
+    min_semantic: float = MIN_SEMANTIC,
+    embedding: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Doctrine package for a subject: at most ``max_items`` items whose excerpts total at
-    most ``max_chars`` characters. ``truncated`` tells whether anything was left out or cut."""
+    most ``max_chars`` characters. ``truncated`` tells whether anything was left out or cut.
+
+    ``semantic`` (asset id -> calibrated semantic relevance) and ``embedding`` (the model that computed it) come from
+    the server's local model; without them the package is the lexical one (``relevance_method: "lexical"``)."""
     concepts = query_concepts(subject, index.vocabulary)
-    ranked = rank(index, subject, domains, frameworks, phase)
+    ranked = rank(index, subject, domains, frameworks, phase, semantic, weight, min_semantic)
     selected = ranked[: max(0, max_items)]
     truncated = len(selected) < len(ranked)
 
@@ -166,7 +232,9 @@ def build_doctrine_context(
         truncated = truncated or cut
         used += len(excerpt)
         items.append(context_item(scored, excerpt))
-    return {"items": items, "truncated": truncated, "snapshot_id": snapshot_id}
+    return {"items": items, "truncated": truncated, "snapshot_id": snapshot_id,
+            "relevance_method": "lexical" if semantic is None else "hybrid",
+            "embedding": embedding if semantic is not None else None}
 
 
 def context_item(scored: ScoredEntry, excerpt: str) -> dict[str, Any]:
@@ -185,4 +253,10 @@ def context_item(scored: ScoredEntry, excerpt: str) -> dict[str, Any]:
         "has_checks": bool(e.checks),
         "framework": e.framework or None,
         "required": scored.required,
+        # Issue #94 (additive): what ordered the item. ``relevant`` separates the doctrine that is relevant for the
+        # subject from the controls that are only required by the declared frameworks. D9: it orders, never decides.
+        "relevant": scored.relevant,
+        "semantic_relevance": scored.semantic,
+        "combined_relevance": round(scored.score, 4),
+        "relevance_method": scored.method,
     }

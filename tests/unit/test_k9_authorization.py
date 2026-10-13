@@ -89,10 +89,12 @@ def test_intake_conflict_query_binds_the_engagement(monkeypatch):
             return []
 
     monkeypatch.setattr(intake, "make_graph_store", lambda **_: FakeStore())
-    hostile = "o'brien'}) RETURN 1 //"
-    intake.check_node({"engagement": hostile, "db_path": "unused"})
-    assert hostile not in seen["query"] and "$engagement" in seen["query"]
-    assert seen["params"] == {"engagement": hostile}
+    intake.check_node({"engagement": "eng-a", "db_path": "unused"})
+    assert "eng-a" not in seen["query"] and "$engagement" in seen["query"]  # bound as a parameter, never spliced into the query
+    assert seen["params"] == {"engagement": "eng-a"}
+    # and a hostile identifier no longer gets that far: the engagement is validated before any query (issue #81)
+    with pytest.raises(ValueError, match="Invalid engagement identifier"):
+        intake.check_node({"engagement": "o'brien'}) RETURN 1 //", "db_path": "unused"})
 
 
 def test_open_access_is_announced(monkeypatch, caplog):

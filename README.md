@@ -68,8 +68,15 @@ persistent governance database (SQLite) and a delegating service token:
 
 ```bash
 poetry install
+poetry run kb models fetch                    # once: local multilingual embedding model into data/models/ (~120 MB)
+                                              # behind an HTTPS-inspecting proxy: see docs/deployment.md §7
 poetry run python scripts/serve_local.py      # or: make serve   (Linux/macOS; Windows has no make, use the first form)
 ```
+
+- **Semantic search** (contract 1.25): with the model fetched, the doctrine context finds an English control for a French
+  subject, locally and offline (`GET /health` → `embedding.status: "ready"`, `local: true`); run
+  `poetry run kb embeddings index` once (publications then keep the index up to date). Without the model the ranking stays
+  lexical. See [docs/deployment.md §7](docs/deployment.md).
 
 - **Restart** = `Ctrl+C`, then run it again: the state (candidates, reviews, owners, embeddings, reuse journal) lives in
   `data/governance.db`, not in the process. Run it again after changing `data/kb/owners.yaml`
