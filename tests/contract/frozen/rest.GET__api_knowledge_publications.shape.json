@@ -1,0 +1,356 @@
+{
+  "interface": "rest.GET /api/knowledge/publications",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "items": {
+              "keys": {
+                "assets_added": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "assets_count": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "assets_removed": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "assets_revised": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "changelog": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "clause_decisions": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "date": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "entry_path": {
+                  "keys": {
+                    "description": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "framework": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "ingested_at": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "source_name": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "source_sha256": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "version": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "workshop": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "published_at": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "published_by": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "published_candidates": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "reviewers": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "sha256_checksum": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "snapshot_id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "storage_persistent": {
+                  "type": [
+                    "boolean"
+                  ]
+                },
+                "version": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "publications": {
+            "items": {
+              "keys": {
+                "assets_added": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "assets_count": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "assets_removed": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "assets_revised": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "changelog": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "clause_decisions": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "date": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "entry_path": {
+                  "keys": {
+                    "description": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "framework": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "ingested_at": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "source_name": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "source_sha256": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "version": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "workshop": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "published_at": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "published_by": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "published_candidates": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "reviewers": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "sha256_checksum": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "snapshot_id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "storage_persistent": {
+                  "type": [
+                    "boolean"
+                  ]
+                },
+                "version": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

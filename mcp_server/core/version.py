@@ -107,8 +107,16 @@ Minor versions only add interfaces or optional fields:
   (``schemaVersion`` ``1.6``); an engagement that uses neither is sealed as before. Nothing is exported when a decision to
   deliberate has no subject, or an evacuation no motive.
 
+* ``1.28`` — doctrine explorer and asset history (issues Archinex #95, LLMOps #108):
+  ``GET /api/knowledge/publications`` lists published snapshots with dates, added/revised/removed
+  assets, entry path (``framework_ingestion``, ``doctrine_workshop``, ``amendment``, ``initial_baseline``)
+  with source SHA-256 and version, and reviewers; ``GET /api/knowledge/assets/{id}/history`` returns successive
+  revisions (date, snapshot, author, reviewers, change summary), entry path, initial date, validators,
+  and clause decisions; ``list_frameworks`` enriched with ingested source, SHA-256, and associated publications.
+
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.27"
+CONTRACT_VERSION = "1.28"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
+

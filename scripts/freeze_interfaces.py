@@ -392,6 +392,7 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/snapshot/latest"),
         _rest("GET", "/snapshot/{snapshot_id}", "/snapshot/snapshot-does-not-exist"),
         _rest("GET", "/api/knowledge/assets/{asset_id}", "/api/knowledge/assets/decision:ADR-0001?version=1"),
+        _rest("GET", "/api/knowledge/assets/{asset_id}/history", "/api/knowledge/assets/P-001/history"),
         _rest("GET", "/api/knowledge/search", "/api/knowledge/search?query=MCX"),
         _rest("GET", "/api/knowledge/engagements"),
         _rest("POST", "/api/engagements", json_body={
@@ -627,6 +628,10 @@ def build_catalogue() -> list[Interface]:
               "/api/frameworks/ingestions/{abandon_ingestion}/abandon",
               json_body={"reason": "Contract freeze"}, headers=DELEGATED, delegate=True,
               setup=_seed_abandon_ingestion),
+        # Contract 1.27 — doctrine explorer and asset history
+        _rest("GET", "/api/knowledge/publications", headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/assets/{asset_id}/history", "/api/knowledge/assets/P-002/history",
+              headers=DELEGATED, delegate=True),
     ]
 
 

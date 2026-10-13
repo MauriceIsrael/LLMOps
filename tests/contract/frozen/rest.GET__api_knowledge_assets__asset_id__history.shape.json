@@ -1,0 +1,423 @@
+{
+  "interface": "rest.GET /api/knowledge/assets/{asset_id}/history",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "asset_id": {
+            "type": [
+              "string"
+            ]
+          },
+          "asset_type": {
+            "type": [
+              "string"
+            ]
+          },
+          "checks_status": {
+            "type": [
+              "string"
+            ]
+          },
+          "clause_decisions": {
+            "items": {
+              "keys": {
+                "after": {
+                  "keys": {
+                    "expect": {
+                      "keys": {
+                        "terms_any": {
+                          "items": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "type": [
+                            "array"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "kind": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "message": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "status": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "when": {
+                      "keys": {
+                        "terms_any": {
+                          "items": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "type": [
+                            "array"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "asset_id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "at": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "before": {
+                  "keys": {
+                    "expect": {
+                      "keys": {
+                        "terms_any": {
+                          "items": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "type": [
+                            "array"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "kind": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "message": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "status": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "when": {
+                      "keys": {
+                        "terms_any": {
+                          "items": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "type": [
+                            "array"
+                          ]
+                        }
+                      },
+                      "type": [
+                        "object"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "by": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "check_id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "comment": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "decision": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "published_in": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "revision": {
+                  "type": [
+                    "number"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "clauses": {
+            "items": {
+              "keys": {
+                "expect": {
+                  "keys": {
+                    "terms_any": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "kind": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "message": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "review": {
+                  "keys": {
+                    "at": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "by": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "decision": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "when": {
+                  "keys": {
+                    "terms_any": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "confidence": {
+            "type": [
+              "string"
+            ]
+          },
+          "current_snapshot_id": {
+            "type": [
+              "string"
+            ]
+          },
+          "domain": {
+            "items": {
+              "type": [
+                "string"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "entry_path": {
+            "keys": {
+              "description": {
+                "type": [
+                  "string"
+                ]
+              },
+              "type": {
+                "type": [
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "framework": {
+            "type": [
+              "null"
+            ]
+          },
+          "initial_date": {
+            "type": [
+              "string"
+            ]
+          },
+          "revisions": {
+            "items": {
+              "keys": {
+                "author": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "change_summary": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "date": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "reviewers": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "revision": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "snapshot_id": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          },
+          "status_doctrine": {
+            "type": [
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "string"
+            ]
+          },
+          "typed_id": {
+            "type": [
+              "string"
+            ]
+          },
+          "validators": {
+            "items": {
+              "type": [
+                "string"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}
