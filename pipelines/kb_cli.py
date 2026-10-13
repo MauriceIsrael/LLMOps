@@ -57,8 +57,40 @@ def _doctrine_loader(db_path: Path, kb_dir: Path):
     return load
 
 
+ROOT = Path(__file__).resolve().parents[1]
+GOVERNANCE_DB = ROOT / "data" / "governance.db"
+
+
+def apply_governance_defaults(environ: dict[str, str] | None = None) -> bool:
+    """Point the CLI at ``data/governance.db`` when it exists, as ``scripts/serve_local.py`` does.
+
+    An explicit ``GOVERNANCE_DATABASE_URL`` or ``CANDIDATES_BACKEND`` always wins. Returns whether a governance
+    database is configured after the defaults are applied.
+    """
+    import os
+
+    env = os.environ if environ is None else environ
+    if not env.get("GOVERNANCE_DATABASE_URL", "").strip() and not env.get("CANDIDATES_BACKEND", "").strip() and GOVERNANCE_DB.exists():
+        env["CANDIDATES_BACKEND"] = "sql"
+        env["GOVERNANCE_DATABASE_URL"] = f"sqlite:///{GOVERNANCE_DB.as_posix()}"
+    return bool(env.get("GOVERNANCE_DATABASE_URL", "").strip()) or env.get("CANDIDATES_BACKEND", "").strip().lower() == "sql"
+
+
+@app.callback()
+def _main() -> None:
+    load_dotenv()
+    apply_governance_defaults()
+
+
 def _service(kb_dir: Path, db_path: Path) -> CandidateService:
     load_dotenv()
+    if not apply_governance_defaults():
+        console.print(
+            f"[yellow]! No governance database found ({GOVERNANCE_DB.relative_to(ROOT).as_posix()} is absent and "
+            "GOVERNANCE_DATABASE_URL is not set): using the file queue (data/candidates), which the LLMOps server "
+            "does not read when it runs with CANDIDATES_BACKEND=sql. Start "
+            "scripts/serve_local.py once (or set GOVERNANCE_DATABASE_URL) to create it.[/yellow]"
+        )
     return CandidateService(kb_dir=kb_dir, doctrine_index_loader=_doctrine_loader(db_path, kb_dir))
 
 
