@@ -1,0 +1,118 @@
+{
+  "interface": "rest.POST /api/engagements/{engagement}/requirements/{requirement_id}/disposition",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "created": {
+                "type": [
+                  "boolean"
+                ]
+              },
+              "requirement": {
+                "keys": {
+                  "category": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "criticality": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "disposition": {
+                    "keys": {
+                      "author": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "reason": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "status": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated_at": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "validated_by": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "value": {
+                        "type": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "id": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "section": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "status": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

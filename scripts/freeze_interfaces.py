@@ -392,6 +392,7 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/snapshot/latest"),
         _rest("GET", "/snapshot/{snapshot_id}", "/snapshot/snapshot-does-not-exist"),
         _rest("GET", "/api/knowledge/assets/{asset_id}", "/api/knowledge/assets/decision:ADR-0001?version=1"),
+        _rest("GET", "/api/knowledge/assets/{asset_id}/history", "/api/knowledge/assets/P-001/history"),
         _rest("GET", "/api/knowledge/search", "/api/knowledge/search?query=MCX"),
         _rest("GET", "/api/knowledge/engagements"),
         _rest("POST", "/api/engagements", json_body={
@@ -474,6 +475,17 @@ def build_catalogue() -> list[Interface]:
               "/api/engagements/contract-eng/statements/{stmt3}/withdraw", member="contrib@example.org"),
         _rest("POST", "/api/engagements/{engagement}/requirements", "/api/engagements/contract-eng/requirements",
               json_body={"requirements": [{"id": "REQ-1", "text": "Encrypt data at rest"}]}, member="contrib@example.org"),
+        # Contract 1.27 — decision on a requirement, and the requirements a subject carries
+        _rest("POST", "/api/engagements/{engagement}/requirements/{requirement_id}/disposition",
+              "/api/engagements/contract-eng/requirements/REQ-1/disposition",
+              json_body={"disposition": "evacuated", "reason": "Out of the architecture scope"}, member="contrib@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/requirements/{requirement_id}/disposition/assert",
+              "/api/engagements/contract-eng/requirements/REQ-1/disposition/assert", member="decider@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/requirements/{requirement_id}/disposition/withdraw",
+              "/api/engagements/contract-eng/requirements/REQ-1/disposition/withdraw", member="admin@example.org"),
+        _rest("POST", "/api/engagements/{engagement}/subjects/{name}/requirements",
+              "/api/engagements/contract-eng/subjects/mcx-services/requirements", json_body={"add": ["REQ-1"]},
+              member="contrib@example.org"),
         _rest("POST", "/api/engagements/{engagement}/import", "/api/engagements/contract-eng/import?dry_run=true", json_body={
             "batch_id": "contract-batch", "subjects": [{"name": "imported-subject", "maturity": "L1_framed"}],
             "statements": [{"key": "imp-1", "subject": "imported-subject", "value": "Imported fact", "confidence": "designed",
@@ -622,6 +634,10 @@ def build_catalogue() -> list[Interface]:
               "/api/frameworks/ingestions/{abandon_ingestion}/abandon",
               json_body={"reason": "Contract freeze"}, headers=DELEGATED, delegate=True,
               setup=_seed_abandon_ingestion),
+        # Contract 1.27 — doctrine explorer and asset history
+        _rest("GET", "/api/knowledge/publications", headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/assets/{asset_id}/history", "/api/knowledge/assets/P-002/history",
+              headers=DELEGATED, delegate=True),
     ]
 
 

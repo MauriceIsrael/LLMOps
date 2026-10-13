@@ -433,6 +433,8 @@ def list_frameworks() -> dict[str, Any]:
         rows = kb_client.execute_cypher(query)
         meta = _framework_metadata()
         controls_by_fw = _controls(Path(server_config.kb_dir))
+        from pipelines.publication.history import get_framework_sources
+        fw_sources = get_framework_sources(Path(server_config.kb_dir))
         res = []
         for r in rows:
             fw = r.get("framework", "")
@@ -448,6 +450,7 @@ def list_frameworks() -> dict[str, Any]:
                 for c in fw_ctrls
                 if c.get("id") and c.get("validated_by")
             ]
+            fw_info = fw_sources.get(fw.upper()) or {}
             res.append({
                 "framework": fw,
                 "version": r.get("version", "1.0.0"),
@@ -463,6 +466,9 @@ def list_frameworks() -> dict[str, Any]:
                 "declared_at": cov["declared_at"],
                 "provisional": cov["provisional"],
                 "validated_controls": validated_controls,
+                "ingested_source": fw_info.get("ingested_source"),
+                "source_sha256": fw_info.get("source_sha256"),
+                "associated_publications": fw_info.get("associated_publications") or [],
             })
         return ok_response(res, count=len(res))
     except Exception as e:
@@ -2042,6 +2048,37 @@ def publish_kb_candidates() -> dict[str, Any]:
         return {**ok_response(result, count=len(result.get("published") or [])), "warnings": storage_warnings()}
     except Exception as e:
         return handle_exception_response(e, context_action="publish_kb_candidates")
+
+
+def list_knowledge_publications(entry_type: str | None = None, framework: str | None = None) -> dict[str, Any]:
+    """List sealed snapshot publications of the knowledge base with changelog and entry paths (contract 1.27)."""
+    try:
+        from pipelines.publication.history import get_publications
+        res = get_publications(
+            Path(server_config.kb_dir),
+            snapshots_dir=Path("data/snapshots"),
+            entry_type=entry_type,
+            framework=framework,
+        )
+        return res
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_knowledge_publications")
+
+
+def get_knowledge_asset_history(asset_id: str) -> dict[str, Any]:
+    """Retrieve full successive revision history, entry path, and clause decisions for an asset (contract 1.27)."""
+    if not asset_id:
+        return invalid_argument_response("asset_id", "An asset identifier is required.")
+    try:
+        from pipelines.publication.history import get_asset_history
+        res = get_asset_history(
+            asset_id,
+            Path(server_config.kb_dir),
+            snapshots_dir=Path("data/snapshots"),
+        )
+        return res
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_knowledge_asset_history")
 
 
 def list_check_clauses(status: str | None = None, framework: str | None = None, asset_type: str | None = None,

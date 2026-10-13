@@ -38,7 +38,9 @@ que la règle de tolérance zéro (D8) supprime côté réutilisation, déplacé
 8. **Échec bruyant** : un export est refusé s'il ne passe pas la vérification.
 9. **Pas de donnée personnelle** : handles de propriétaires, libellé client anonymisé, `confidentiality` obligatoire.
 
-## 2. Le bundle (schéma `schemas/engagement_bundle.schema.json`, version `1.0`, contrat **proposé**)
+## 2. Le bundle (schéma `schemas/engagement_bundle.schema.json`, versions `1.0` et `1.1`, contrat **proposé**)
+
+> **Statut de la version 1.1 (2026-10-13).** Le dossier d'Archinex (A16 à A19) reste émis **jusqu'à la parité** avec l'instantané du Hub, puis cesse de l'être (directive du 2026-10-03, [`SUITE-MAP.md`](../SUITE-MAP.md) §7ter). La version 1.1 est donc le **modèle de contenu cible** et la source des tests de parité, pas un second canal vers la suite. Elle ajoute : l'audit des exigences d'un appel d'offres (`requirements[].disposition`, `disposition_reason`, `clarification_question`, `assertion_level`, `provenance`, `title`, `criticality`, `category`), quatre types de manque (`requirement_unqualified`, `requirement_clarification`, `decided_without_decision`, `statement_without_subject`), et des épingles `kb` et `llmops_contract_version` facultatives (un engagement peut n'utiliser aucune base de connaissance). Un document 1.0 ne peut rien utiliser de cela. Un exemple scellé par Archinex, rejoué par `verify.py`, figure dans `schemas/examples/engagement_bundle_1_1.example.json` : il prouve que le sceau d'Archinex et le profil canonique de la suite coïncident octet pour octet. Le contrat 1.27 porte la part engagée de ce contenu (décision sur chaque exigence, sujet qui la porte) dans l'instantané du Hub, pour que la parité se mesure sur le même contenu. Pour un projet basculé sur le Hub, Archinex n'émet aucun dossier : l'instantané du Hub est le seul artefact scellé.
 
 | Section de `data` | Contenu |
 |---|---|
@@ -85,11 +87,11 @@ décision affirmée ; `is_provisional` et ses raisons **dérivés, jamais décla
 | **K10** | LLMOps | Lever la dépréciation du plan d'engagement (contrat 1.14) — #48 | — |
 | **K11** | LLMOps | Émission de l'instantané d'engagement par le Hub — **livré** (#49), schéma `engagement_snapshot` plus restreint que ce bundle | K1, K2, K3, K5, K14, K15 |
 | **K12** | LLMOps | Mode import et simulation pour la reprise des projets d'Archinex — **livré** (#50) ; l'import lui-même est fait par Archinex (archinex#34) | K15 |
-| **K18** | LLMOps | Vocabulaire des faits d'architecture et faits portés par les décisions affirmées (contrat 1.21) — **livré** (#67) ; premier lot de la cascade de questions (K18 → K19 → K20 → K21 → K22, #67 à #71) | K16 |
-| **K19** | LLMOps | Règles de déclenchement de questions attachées aux actifs (contrat 1.22) — **livré** (#68) | K18 |
-| **K20** | LLMOps | Moteur de cascade déterministe (contrat 1.23) — **livré** (#69) | K18, K19, K16 |
-| **K21** | LLMOps | Ajustements des règles par engagement (contrat 1.24) — **livré** sauf la capitalisation (étape 4, dépend de K7 #44 et K13 #51) (#70) | K19, K20 |
-| **K22** | LLMOps | Amorçage des règles depuis les sections « Conséquences » et revue dans l'application d'administration (contrat 1.27) — **livré** (#71) ; l'écran n'est pas validé visuellement ; l'amorçage réel demande un modèle local (`LLM_ENDPOINT`) | K18, K19 |
+| **K18** | LLMOps | Vocabulaire des faits d'architecture et faits portés par les décisions affirmées (contrat 1.29) — **livré** (#67) ; premier lot de la cascade de questions (K18 → K19 → K20 → K21 → K22, #67 à #71) | K16 |
+| **K19** | LLMOps | Règles de déclenchement de questions attachées aux actifs (contrat 1.29) — **livré** (#68) | K18 |
+| **K20** | LLMOps | Moteur de cascade déterministe (contrat 1.29) — **livré** (#69) | K18, K19, K16 |
+| **K21** | LLMOps | Ajustements des règles par engagement (contrat 1.29) — **livré** sauf la capitalisation (étape 4, dépend de K7 #44 et K13 #51) (#70) | K19, K20 |
+| **K22** | LLMOps | Amorçage des règles depuis les sections « Conséquences » et revue dans l'application d'administration (contrat 1.29) — **livré** (#71) ; l'écran n'est pas validé visuellement ; l'amorçage réel demande un modèle local (`LLM_ENDPOINT`) | K18, K19 |
 | **K13** | LLMOps | Étanchéité de la capitalisation : aucune ancre de programme dans la base de connaissance — #51 | — |
 | **A16** *(à reformuler, équipe Archinex)* | Archinex | Export du bundle comme instantané scellé de la suite (TypeScript, vecteurs partagés), construit **sans rien inventer** ; refus si la vérification échoue ou si `confidentiality` manque | B1, K1 |
 | **A17** | Archinex | Publication : fichier et référence `SnapshotRef` (`sourceSystem`, `snapshotId`, `checksum`, `producedAt`) pour les consommateurs ; bouton « Exporter le dossier », bandeau « provisoire » et liste des écarts bloquants | A16 |

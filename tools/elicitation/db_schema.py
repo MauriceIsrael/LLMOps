@@ -36,12 +36,14 @@ class ElicitationSchemaInitializer:
                     trigger_id STRING DEFAULT '',
                     foundation STRING DEFAULT '',
                     derivation STRING DEFAULT '',
+                    requirements STRING DEFAULT '[]',
                     PRIMARY KEY(id)
                 );
                 """
             )
         else:
-            for column, default in (("origin", "'declared'"), ("trigger_id", "''"), ("foundation", "''"), ("derivation", "''")):
+            for column, default in (("origin", "'declared'"), ("trigger_id", "''"), ("foundation", "''"), ("derivation", "''"),
+                                    ("requirements", "'[]'")):
                 try:
                     self.graph_store.execute_cypher(f"ALTER TABLE Subject ADD {column} STRING DEFAULT {default};")
                 except Exception:
@@ -173,10 +175,25 @@ class ElicitationSchemaInitializer:
                     matched_assets STRING,
                     matched_controls STRING,
                     rationale STRING,
+                    disposition STRING DEFAULT '',
+                    disposition_reason STRING DEFAULT '',
+                    disposition_status STRING DEFAULT '',
+                    disposition_author STRING DEFAULT '',
+                    disposition_at STRING DEFAULT '',
+                    disposition_by STRING DEFAULT '',
+                    disposition_validated_at STRING DEFAULT '',
                     PRIMARY KEY(id)
                 );
                 """
             )
+        else:
+            # Contract 1.27: the decision on a requirement (what the deliberation does with the clause), proposed then asserted.
+            for column in ("disposition", "disposition_reason", "disposition_status", "disposition_author", "disposition_at",
+                           "disposition_by", "disposition_validated_at"):
+                try:
+                    self.graph_store.execute_cypher(f"ALTER TABLE Requirement ADD {column} STRING DEFAULT '';")
+                except Exception:
+                    pass
 
         # 6bis. Table Decision (K16): what the deliberation engaged, with its rationale and the alternatives set aside
         if "Decision" not in table_names:

@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 /**
- * Proxy to the review API of trigger rules and facts-vocabulary keys (Hub contract 1.27).
+ * Proxy to the review API of trigger rules and facts-vocabulary keys (Hub contract 1.29).
  *
  * Only the routes of the review screen are forwarded, to the Hub named by the server environment (never by the browser):
  *   GET   triggers                            rules by carrying element, vocabulary, queue

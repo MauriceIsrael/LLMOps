@@ -97,7 +97,23 @@ Minor versions only add interfaces or optional fields:
   ``PATCH /api/knowledge/assets/{asset_id}/checks/{check_id}`` decides (``validate|amend|reject``, owner of the domain
   or ``kb:maintain``); decisions are appended to ``data/kb/clause-decisions.jsonl`` and taken into account by the next
   publication (CHANGELOG, ``clause_decisions`` in its response).
-* ``1.27`` — trigger rules and facts-vocabulary keys in the candidate cycle, and their review (K22): candidate ``asset_type``
+* ``1.27`` — the decision on each requirement of an engagement, and the requirements a subject carries (the sealed engagement
+  snapshot is the content model for traceability): ``POST /api/engagements/{id}/requirements/{requirement_id}/disposition``
+  (a contributor proposes ``deliberated``, ``evacuated`` with its motive or ``clarification_needed`` with the question for the
+  client), ``…/disposition/assert`` (a decider other than the author) and ``…/disposition/withdraw``;
+  ``POST /api/engagements/{id}/subjects/{name}/requirements`` (``add`` / ``remove``) and an optional ``requirement_ids`` on
+  ``POST …/subjects``. A requirement decided ``evacuated`` or ``clarification_needed`` cannot be carried by a subject (``409``).
+  The engagement snapshot gains, optionally, ``requirements[].disposition`` and ``subjects[].requirement_ids``
+  (``schemaVersion`` ``1.6``); an engagement that uses neither is sealed as before. Nothing is exported when a decision to
+  deliberate has no subject, or an evacuation no motive.
+
+* ``1.28`` — doctrine explorer and asset history (issues Archinex #95, LLMOps #108):
+  ``GET /api/knowledge/publications`` lists published snapshots with dates, added/revised/removed
+  assets, entry path (``framework_ingestion``, ``doctrine_workshop``, ``amendment``, ``initial_baseline``)
+  with source SHA-256 and version, and reviewers; ``GET /api/knowledge/assets/{id}/history`` returns successive
+  revisions (date, snapshot, author, reviewers, change summary), entry path, initial date, validators,
+  and clause decisions; ``list_frameworks`` enriched with ingested source, SHA-256, and associated publications.
+* ``1.29`` — trigger rules and facts-vocabulary keys in the candidate cycle, and their review (K22): candidate ``asset_type``
   ``trigger`` and ``fact_key`` (``source.system`` ``kb-extraction``); ``GET /api/knowledge/triggers``,
   ``POST /api/knowledge/triggers/{validate,preview}``, ``POST /api/knowledge/candidates/{id}/merge-key``; offline command
   ``kb extract-triggers``.
@@ -105,5 +121,6 @@ Minor versions only add interfaces or optional fields:
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.27"
+CONTRACT_VERSION = "1.29"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
+

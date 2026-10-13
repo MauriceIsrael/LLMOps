@@ -88,6 +88,7 @@ from mcp_server.knowledge.tools import (
     get_kb_candidate,
     get_kb_health,
     get_kb_me,
+    get_knowledge_asset_history,
     get_principles_for,
     get_review_inbox,
     get_rfp_compliance_matrix,
@@ -102,6 +103,7 @@ from mcp_server.knowledge.tools import (
     list_frameworks,
     list_kb_candidates,
     list_kb_comments,
+    list_knowledge_publications,
     list_reuse_confirmations,
     list_skills,
     list_trigger_rules,
@@ -1225,6 +1227,18 @@ def create_starlette_app() -> Starlette:
         res = publish_kb_candidates()
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_publications_list(request):
+        res = list_knowledge_publications(
+            entry_type=request.query_params.get("entry_type") or request.query_params.get("type"),
+            framework=request.query_params.get("framework"),
+        )
+        return JSONResponse(res, status_code=200 if res.get("status") == "ok" else 400)
+
+    async def handle_knowledge_asset_history(request):
+        res = get_knowledge_asset_history(request.path_params["asset_id"])
+        code = 200 if res.get("status") == "ok" else (404 if res.get("status") == "not_found" else 400)
+        return JSONResponse(res, status_code=code)
+
     async def handle_kb_health(request):
         res = get_kb_health()
         return JSONResponse(res, status_code=_candidate_status_code(res))
@@ -1433,6 +1447,7 @@ def create_starlette_app() -> Starlette:
             Route("/snapshot/latest", endpoint=handle_snapshot_latest, methods=["GET"]),
             Route("/snapshot/{snapshot_id}", endpoint=handle_snapshot_by_id, methods=["GET"]),
             Route("/api/knowledge/assets/{asset_id}", endpoint=handle_knowledge_asset, methods=["GET"]),
+            Route("/api/knowledge/assets/{asset_id}/history", endpoint=handle_knowledge_asset_history, methods=["GET"]),
             Route("/api/knowledge/search", endpoint=handle_knowledge_search, methods=["GET"]),
             Route("/api/knowledge/engagements", endpoint=handle_knowledge_engagements, methods=["GET"]),
             Route("/api/engagements", endpoint=handle_engagement_create, methods=["POST"]),
@@ -1469,6 +1484,7 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_confirm, methods=["POST"]),
             Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_list, methods=["GET"]),
             Route("/api/knowledge/health", endpoint=handle_kb_health, methods=["GET"]),
+            Route("/api/knowledge/publications", endpoint=handle_publications_list, methods=["GET"]),
             Route("/api/knowledge/publications", endpoint=handle_publications_create, methods=["POST"]),
             Route("/api/knowledge/candidates/{candidate_id}/promote", endpoint=handle_candidate_promote,
                   methods=["POST"]),

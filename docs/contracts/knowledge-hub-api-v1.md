@@ -852,7 +852,7 @@ Archinex est l'outil de délibération ; le Hub enregistre. Toutes les routes so
 
 | Route | Rôle | Effet |
 |---|---|---|
-| `POST subjects` `{name, definition?}` | `contributor` | crée (`201`) ou retrouve (`200`) un sujet |
+| `POST subjects` `{name, definition?, requirement_ids?}` | `contributor` | crée (`201`) ou retrouve (`200`) un sujet ; `requirement_ids` (1.27) : exigences qu'il porte, qui doivent exister |
 | `POST subjects/{name}/maturity` `{level}` | `decider` | avance la maturité ; `L3_decided` et `L4_specified` exigent un énoncé **affirmé** sur le sujet et **aucun conflit ouvert** (`409 no_asserted_statement`, `open_conflict`) |
 | `POST statements` `{subject, value, confidence, section?, predicate?, role?, verbatim?, based_on?, origin?}` | `contributor` | propose un énoncé, `status: proposed` |
 | `POST statements/{id}/assert` | `decider` | l'énoncé devient `active`, avec `validated_by` et `validated_at` ; ouvre les conflits détectés (`conflicts_opened`) |
@@ -860,6 +860,10 @@ Archinex est l'outil de délibération ; le Hub enregistre. Toutes les routes so
 | `POST questions` `{question, subject?, section?, …}` | `contributor` | question ouverte |
 | `POST questions/{id}/answers` `{value, confidence, …}` | `contributor` | énoncé **proposé** lié à la question, qui devient `answered` |
 | `POST requirements` `{requirements: [{id, text, section?, category?, criticality?}]}` | `contributor` | 1 à 500 exigences ; un `id` existant avec le même texte est ignoré (`unchanged`), avec un autre texte : `409 requirement_changed` |
+| `POST requirements/{id}/disposition` `{disposition, reason?}` | `contributor` | **1.27.** Propose ce que la délibération fait de l'exigence : `deliberated`, `evacuated` (`reason` = le motif) ou `clarification_needed` (`reason` = la question au client), 12 caractères au moins pour les deux dernières. `201` ; le rejeu à l'identique `200` (`created: false`, rien n'est remis à zéro) ; `409 disposition_pending` / `disposition_exists` |
+| `POST requirements/{id}/disposition/assert` | `decider` | **1.27.** La décision devient `active` (`validated_by`, `validated_at`) ; refusée à son auteur (`409 self_validation`) et, pour `evacuated` / `clarification_needed`, tant qu'un sujet porte l'exigence (`409 carried_by_subject`) |
+| `POST requirements/{id}/disposition/withdraw` | `contributor` (auteur) ou `decider` | **1.27.** `withdrawn` ; l'exigence peut recevoir une autre décision |
+| `POST subjects/{name}/requirements` `{add?, remove?}` | `contributor` | **1.27.** Ajoute ou retire des exigences portées par le sujet (idempotent) ; `400 unknown_requirement`, `409 requirement_not_deliberated` |
 | `POST conflicts/{id}/arbitrate` `{keep_statement_id, reason}` | `decider` | arbitre ; refusé si l'arbitre a écrit un des énoncés en cause |
 
 Règles communes :
@@ -1027,7 +1031,41 @@ Une clause `checks:` ne devient opposable (elle bloque un arbitrage) que par une
 
 **Évaluation** : `tests/fixtures/similarity/fr-en-doctrine.yaml` (48 sujets français anonymisés, 8 requêtes anglaises), `make eval-semantic`. Rappel à 5 : 0,90 en hybride contre 0,72 en lexical (français 0,88 contre 0,67 ; anglais 1,00 contre 0,92).
 
-### 5.27 Contrat 1.27 — Amorçage et revue des règles de déclenchement (K22)
+### 5.27 Contrat 1.27 — Décision sur chaque exigence (archinex#34)
+
+**Pourquoi.** Le dossier d'engagement d'Archinex portait, pour chaque exigence d'un appel d'offres, son état (à délibérer, évacuée avec son motif, à clarifier) et le sujet qui la porte. L'instantané du Hub n'avait ni l'un ni l'autre : on ne pouvait pas en tirer une matrice de traçabilité. `schemas/engagement_bundle.schema.json` en version 1.1 est le modèle de contenu ; ce contrat en porte la part **engagée** dans l'instantané du Hub.
+
+**Ce qui est engagé, et ce qui ne l'est pas.** Une exigence **évacuée** par une personne, avec son motif, est un fait engagé : c'est ce qui fonde que rien n'a été écarté sans que l'on sache qui l'a décidé. La **proposition brute d'un modèle**, elle, reste dans le poste de travail : elle n'entre pas au Hub tant qu'un membre ne la propose pas à son nom. « À qualifier » n'est pas une décision, c'est l'absence de décision : elle n'a pas de valeur ici.
+
+**Règles** (celles des décisions, K16) : la décision est **proposée** par un membre (l'auteur est son handle) ; seul un `decider` **autre que l'auteur** l'affirme (`409 self_validation`) ; un `decider` ou l'auteur la retire. Une exigence a au plus une décision en cours (`proposed` ou `active`) ; pour en prendre une autre, on retire la première. Une exigence décidée `evacuated` ou `clarification_needed` n'est portée par aucun sujet : le Hub refuse de l'affirmer tant qu'un sujet la porte, et de la faire porter ensuite.
+
+**Instantané** (`schemaVersion` `1.6`, champs facultatifs) : `requirements[].disposition {value, reason, status, assertion_level, author, validated_by, validated_at}` tant que la décision est proposée ou affirmée (retirée : elle disparaît) et `subjects[].requirement_ids` quand le sujet en porte. Un engagement qui n'utilise ni l'une ni l'autre est scellé **à l'identique**. Rien n'est émis (`verification_failed`) si une décision affirmée n'a pas de personne distincte de son auteur (`ASSERTED_WITHOUT_PERSON`, `SELF_VALIDATION`), si une évacuation n'a pas de motif ni une clarification de question (`DISPOSITION_UNJUSTIFIED`), si une exigence à délibérer n'a aucun sujet (`REQ_UNCOVERED`), si une exigence évacuée ou à clarifier est portée par un sujet (`REQ_NOT_DELIBERATED`) ou si un sujet porte une exigence inconnue (`DANGLING`).
+
+**Hors périmètre.** La conformité (K17), les éléments d'architecture et le journal de réutilisation que le modèle `engagement_bundle` prévoit ne sont toujours pas dans l'instantané : tant qu'ils n'y sont pas, Archinex garde son dossier pour les documents qui en ont besoin (OSCAL, vues d'architecture).
+
+### 5.28 Contrat 1.28 — Explorateur de doctrine complet et historique d'actif (issues Archinex #95, LLMOps #108)
+
+Le Hub permet la reconstitution exhaustive de la traçabilité de la doctrine opposable : chaque actif actif dispose d'un chemin d'entrée (`entry_path`), d'une date initiale d'introduction, de relecteurs/valideurs, de l'historique de ses révisions successives et des décisions portées sur ses clauses. Les référentiels réglementaires tracent leurs textes ingérés d'origine avec version et SHA-256.
+
+**`GET /api/knowledge/publications`** — Liste chronologique des publications scellées avec filtres optionnels `entry_type` (`framework_ingestion`, `doctrine_workshop`, `amendment`, `initial_baseline`) et `framework`.
+Réponse :
+* `publications[]` : `snapshot_id`, `created_at`, `entry_path`, `source` (`framework`, `version`, `sha256`, `file_name`), `reviewers`, `added[]`, `revised[]`, `removed[]`, `summary`, `clause_decisions[]`.
+* `count` : nombre de publications retournées.
+
+**`GET /api/knowledge/assets/{asset_id}/history`** — Historique des révisions et chaîne de traçabilité pour un actif donné.
+Réponse :
+* `asset_id` : identifiant de l'actif.
+* `initial_date` : date ISO de publication initiale.
+* `initial_snapshot` : identifiant de l'instantané scellé initial.
+* `entry_path` : vecteur d'entrée initial de l'actif (`framework_ingestion`, `doctrine_workshop`, `amendment`, `initial_baseline`).
+* `source` : métadonnées de source (`framework`, `version`, `sha256`).
+* `validators` : relecteurs et experts ayant validé ou promu l'actif.
+* `revisions[]` : liste chronologique des révisions (`revision`, `date`, `snapshot_id`, `author`, `reviewers`, `change_summary`, `content_sha256`).
+* `clause_decisions[]` : historique des décisions prises sur les clauses de l'actif (#105).
+
+**`list_frameworks`** : chaque référentiel s'enrichit de `ingested_source`, `source_sha256` et `associated_publications` listant les instantanés scellés contenant des contrôles de ce référentiel.
+
+### 5.29 Contrat 1.29 — Amorçage et revue des règles de déclenchement (K22)
 
 Les règles (§5.22) et les clés du vocabulaire (§5.21) entrent dans la base de connaissance par le **même cycle que toute connaissance** (§5.2) : candidat, contrôles déterministes, revue humaine, promotion, publication (§5.8). Rien n'est publié automatiquement, quelle que soit l'origine.
 
