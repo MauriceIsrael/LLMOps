@@ -1,11 +1,11 @@
 {
-  "snapshot_id": "snapshot-2026-10-12-7393586",
-  "created_at": "2026-10-12T20:03:56Z",
-  "source_revision": "7393586b88f7fe4fb74dec6e5d6a24f179030f39",
-  "payload_sha256": "sha256:c3ab979159585845af7829720f28b585915956c11eea16f9f2656de0d9753778",
+  "snapshot_id": "snapshot-2026-10-12-689e8e6",
+  "created_at": "2026-10-12T21:09:03Z",
+  "source_revision": "689e8e60c8658deca7d8792e280c761a5ef2f13f",
+  "payload_sha256": "sha256:bb0a66cb66f749445781ba7cc355398fe2eb7152e69b9ef0d3ac53300943e0c4",
   "schema_version": "1.0",
   "emitter": "knowledge-hub",
-  "checksum": "sha256:c3ab979159585845af7829720f28b585915956c11eea16f9f2656de0d9753778",
+  "checksum": "sha256:bb0a66cb66f749445781ba7cc355398fe2eb7152e69b9ef0d3ac53300943e0c4",
   "rebuiltByEmitterTest": true,
   "regenerate": "poetry run python scripts/export_fixtures.py",
   "is_provisional": false,
@@ -326,7 +326,7 @@
   },
   "embedding_index": {
     "model": "intfloat/multilingual-e5-small",
-    "count": 102,
+    "count": 131,
     "items": [
       {
         "ref": "3GPP-TS28104-MDA",
@@ -377,6 +377,151 @@
         "ref": "CER-ART13-RESIL",
         "type": "control",
         "text_sha256": "f3bb0934d4983066f295a2a9fc975fd030b2466b7c670a14687de7073bf06ff8"
+      },
+      {
+        "ref": "CRA-ANXI-PI-1",
+        "type": "control",
+        "text_sha256": "e1a23c447c6ccd78c6785c1a0c31ffba14d5621b7865e6815815ac025800ba7d"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2A",
+        "type": "control",
+        "text_sha256": "0ab842280bd196d48db926c81de446b5091ebae55c0d5854c90754662a7401c8"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2B",
+        "type": "control",
+        "text_sha256": "18a38a035b3f4d9ab37cb802e46db28b984d9d405fe0270ffc48a094392ea543"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2C",
+        "type": "control",
+        "text_sha256": "21a888f1e9ab0d3efb2eb722efc4d5a4a0af169d32a74d53fbb70b50a50defbe"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2D",
+        "type": "control",
+        "text_sha256": "7f823cd577ed41fc7de7ae8605f15bae0bf9a68edbe7b9532962cf818d83865a"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2E",
+        "type": "control",
+        "text_sha256": "9d9f458bc9ebb73d8d701e61fa0836b3472af976560ff6209ca99fb4cfe97a49"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2F",
+        "type": "control",
+        "text_sha256": "e3a2e756effe3a6f0ec3c100bf9d275539494de89c8c8f4c5ceac67ace9cb5af"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2G",
+        "type": "control",
+        "text_sha256": "e180c7aa0552eb9bfbef60479de9b7a263960543de73f5b405a76e99d8ad38f0"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2H",
+        "type": "control",
+        "text_sha256": "745e89e045aba3268af62bfb2010f7bcd6c23a19ff0d3fdebd3c83f0bc242b41"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2I",
+        "type": "control",
+        "text_sha256": "76bd71adea8bca8c1caad2ecc49ba14db49385d70d71c7ec46ed2d317223d8d0"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2J",
+        "type": "control",
+        "text_sha256": "e658dadbedc93e87f95b75a3b5246d686531c0a72fc1b6c9f174ee0170bfc3fe"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2K",
+        "type": "control",
+        "text_sha256": "abf3b5473e35671e5ffb6844d95d48bc481d3055e66f5329e769029cef4ef457"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2L",
+        "type": "control",
+        "text_sha256": "5293bf6c5f0e42970ed3170bee69223ef2a9593f3f76f340d25a30757308e3ff"
+      },
+      {
+        "ref": "CRA-ANXI-PI-2M",
+        "type": "control",
+        "text_sha256": "aa33dec072cce6c43866dcac76a64f68a3e0cd2676647f43441c05cfaa0ab492"
+      },
+      {
+        "ref": "CRA-ANXI-PII-1",
+        "type": "control",
+        "text_sha256": "daf02e6741d48eb2cb13b3fd8d613623de0b3675cb5e659ca4ab4a8a8f30aa6b"
+      },
+      {
+        "ref": "CRA-ANXI-PII-2",
+        "type": "control",
+        "text_sha256": "678fce44699c621ae5c67386e455543350bedbbc517e1e4921dc644b29e5d096"
+      },
+      {
+        "ref": "CRA-ANXI-PII-3",
+        "type": "control",
+        "text_sha256": "9fbbf60808ff9f4a1f28368ecc8949628d52a683704c11423b8af463f60a412f"
+      },
+      {
+        "ref": "CRA-ANXI-PII-4",
+        "type": "control",
+        "text_sha256": "603c4201890c64b87bf15b5119634ab084a379d44f6b9ae89d900969029dc41f"
+      },
+      {
+        "ref": "CRA-ANXI-PII-5",
+        "type": "control",
+        "text_sha256": "7bf68cab1f9756718721378cd943c906c0ff7ec82fdf440e300f85b7bfa96093"
+      },
+      {
+        "ref": "CRA-ANXI-PII-6",
+        "type": "control",
+        "text_sha256": "7dcd767631ad6609f39d61522b9648ca5a2871602eb2cafb1b7d794d5f7d5cf2"
+      },
+      {
+        "ref": "CRA-ANXI-PII-7",
+        "type": "control",
+        "text_sha256": "8762c030927f777dbb359ab029e4313606d15ad76dda79ed05aeb2a142fc2b03"
+      },
+      {
+        "ref": "CRA-ANXI-PII-8",
+        "type": "control",
+        "text_sha256": "384753ca299d0d8caa2bbf010f2853e085a7fe5c422af89b603665ff15599152"
+      },
+      {
+        "ref": "CRA-ART14-1",
+        "type": "control",
+        "text_sha256": "c47dad710b8684961862c2e0231c74f4e0606b1941caa1e7878d50d267016881"
+      },
+      {
+        "ref": "CRA-ART14-2",
+        "type": "control",
+        "text_sha256": "e5c2a1894ea1cf60200bd882c6e1b5018e7883debb8482dd0fb65080afaa5f8b"
+      },
+      {
+        "ref": "CRA-ART14-3",
+        "type": "control",
+        "text_sha256": "a5c34e59d4e19631d71fdc338ba45cb3a5e9212297e38b64c5ca42ed386b54c5"
+      },
+      {
+        "ref": "CRA-ART14-4",
+        "type": "control",
+        "text_sha256": "db99dff3a115ecb7fb323d8c9e5dc3ae3e675605fc4f78c90efe1b49effcca2a"
+      },
+      {
+        "ref": "CRA-ART14-5",
+        "type": "control",
+        "text_sha256": "cf289ceb27d52c34a86119afd51a08f61213b3e07b2676a0fd1914826785d3bd"
+      },
+      {
+        "ref": "CRA-ART14-7",
+        "type": "control",
+        "text_sha256": "0d199ac14a4b9350ce93551cf92136211f110a6e6f6682104176dd7e859a0040"
+      },
+      {
+        "ref": "CRA-ART14-8",
+        "type": "control",
+        "text_sha256": "5bdcb2303380f05b66c0cc70c28588b966bce6e4a034e12f28334dab8e1962e3"
       },
       {
         "ref": "CRA-REQ-SECBYDES-02",
@@ -839,7 +984,7 @@
         "text_sha256": "2b3e928f85d561b93b446c47b3e34b1437a1b6ac996e004d43605dba29ec4b1c"
       }
     ],
-    "content_sha256": "sha256:61e9bdee378ba0325380e4782452db663fb9262c4f91db5db11e7acf1abfafdd"
+    "content_sha256": "sha256:3416087aa4059172dd7764a5c9be674477b7f78bf931d0331aa43390d219cb57"
   },
   "applicability_index": {
     "BLU-hla-it-platform": {
@@ -3487,8 +3632,8 @@
     },
     {
       "framework": "CRA",
-      "version": "2024/2847",
-      "controls_count": 2
+      "version": "1.0",
+      "controls_count": 31
     },
     {
       "framework": "GSMA",
@@ -3676,6 +3821,267 @@
         "P-003",
         "PAT-003"
       ]
+    },
+    {
+      "id": "CRA-ANXI-PI-1",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 Products with digital elements shall be designed, developed and produced in such a way\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2A",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 be made available on the market without known exploitable vulnerabilities",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2B",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 be made available on the market with a secure by default configuration, unless otherwise\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2C",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 ensure that vulnerabilities can be addressed through security updates, including, where\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2D",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 ensure protection from unauthorised access by appropriate control mechanisms, including\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2E",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 protect the confidentiality of stored, transmitted or otherwise processed data, personal\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2F",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 protect the integrity of stored, transmitted or otherwise processed data, personal or\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2G",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 process only data, personal or other, that are adequate, relevant and limited to what is\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2H",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 protect the availability of essential and basic functions, also after an incident,\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2I",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 minimise the negative impact by the products themselves or connected devices on the\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2J",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 be designed, developed and produced to limit attack surfaces, including external\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2K",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 be designed, developed and produced to reduce the impact of an incident using\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2L",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 provide security related information by recording and monitoring relevant internal\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PI-2M",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 provide the possibility for users to securely and easily remove on a permanent basis all\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PII-1",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 identify and document vulnerabilities and components contained in products with digital\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PII-2",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 in relation to the risks posed to products with digital elements, address and remediate\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PII-3",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 apply effective and regular tests and reviews of the security of the product with\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PII-4",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 once a security update has been made available, share and publicly disclose information\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PII-5",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 put in place and enforce a policy on coordinated vulnerability disclosure",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PII-6",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 take measures to facilitate the sharing of information about potential vulnerabilities\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PII-7",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 provide for mechanisms to securely distribute updates for products with digital elements\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ANXI-PII-8",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 ensure that, where security updates are available to address identified security issues,\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ART14-1",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "Reporting obligations of manufacturers \u2014 A manufacturer shall notify any actively exploited vulnerability contained in the\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ART14-2",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "Reporting obligations of manufacturers \u2014 For the purposes of the notification referred to in paragraph 1, the manufacturer shall\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ART14-3",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "Reporting obligations of manufacturers \u2014 A manufacturer shall notify any severe incident having an impact on the security of the\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ART14-4",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "Reporting obligations of manufacturers \u2014 For the purposes of the notification referred to in paragraph 3, the manufacturer shall\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ART14-5",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "Reporting obligations of manufacturers \u2014 For the purposes of paragraph 3, an incident having an impact on the security of the\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ART14-7",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "Reporting obligations of manufacturers \u2014 The notifications referred to in paragraphs 1 and 3 of this Article shall be submitted\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
+    },
+    {
+      "id": "CRA-ART14-8",
+      "framework": "CRA",
+      "version": "1.0",
+      "title": "Reporting obligations of manufacturers \u2014 After becoming aware of an actively exploited vulnerability or a severe incident having\u2026",
+      "domain": "secure-development,vulnerability-management",
+      "severity": "mandatory",
+      "implemented_by": []
     },
     {
       "id": "CRA-REQ-SECBYDES-02",
@@ -4399,6 +4805,180 @@
       }
     },
     "CRA": {
+      "CRA-ANXI-PI-1": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 Products with digital elements shall be designed, developed and produced in such a way\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2A": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 be made available on the market without known exploitable vulnerabilities",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2B": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 be made available on the market with a secure by default configuration, unless otherwise\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2C": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 ensure that vulnerabilities can be addressed through security updates, including, where\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2D": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 ensure protection from unauthorised access by appropriate control mechanisms, including\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2E": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 protect the confidentiality of stored, transmitted or otherwise processed data, personal\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2F": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 protect the integrity of stored, transmitted or otherwise processed data, personal or\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2G": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 process only data, personal or other, that are adequate, relevant and limited to what is\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2H": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 protect the availability of essential and basic functions, also after an incident,\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2I": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 minimise the negative impact by the products themselves or connected devices on the\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2J": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 be designed, developed and produced to limit attack surfaces, including external\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2K": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 be designed, developed and produced to reduce the impact of an incident using\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2L": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 provide security related information by recording and monitoring relevant internal\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PI-2M": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 provide the possibility for users to securely and easily remove on a permanent basis all\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PII-1": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 identify and document vulnerabilities and components contained in products with digital\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PII-2": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 in relation to the risks posed to products with digital elements, address and remediate\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PII-3": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 apply effective and regular tests and reviews of the security of the product with\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PII-4": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 once a security update has been made available, share and publicly disclose information\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PII-5": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 put in place and enforce a policy on coordinated vulnerability disclosure",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PII-6": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 take measures to facilitate the sharing of information about potential vulnerabilities\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PII-7": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 provide for mechanisms to securely distribute updates for products with digital elements\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ANXI-PII-8": {
+        "title": "ESSENTIAL CYBERSECURITY REQUIREMENTS \u2014 ensure that, where security updates are available to address identified security issues,\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ART14-1": {
+        "title": "Reporting obligations of manufacturers \u2014 A manufacturer shall notify any actively exploited vulnerability contained in the\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ART14-2": {
+        "title": "Reporting obligations of manufacturers \u2014 For the purposes of the notification referred to in paragraph 1, the manufacturer shall\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ART14-3": {
+        "title": "Reporting obligations of manufacturers \u2014 A manufacturer shall notify any severe incident having an impact on the security of the\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ART14-4": {
+        "title": "Reporting obligations of manufacturers \u2014 For the purposes of the notification referred to in paragraph 3, the manufacturer shall\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ART14-5": {
+        "title": "Reporting obligations of manufacturers \u2014 For the purposes of paragraph 3, an incident having an impact on the security of the\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ART14-7": {
+        "title": "Reporting obligations of manufacturers \u2014 The notifications referred to in paragraphs 1 and 3 of this Article shall be submitted\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
+      "CRA-ART14-8": {
+        "title": "Reporting obligations of manufacturers \u2014 After becoming aware of an actively exploited vulnerability or a severe incident having\u2026",
+        "version": "1.0",
+        "severity": "mandatory",
+        "implemented_by": []
+      },
       "CRA-REQ-SECBYDES-02": {
         "title": "Essential Cybersecurity Requirements and Secure by Default Configuration",
         "version": "2024/2847",

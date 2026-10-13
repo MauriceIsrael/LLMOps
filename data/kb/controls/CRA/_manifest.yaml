@@ -6,7 +6,7 @@ title: Regulation (EU) 2024/2847 (Cyber Resilience Act)
 source:
   file: CELEX_32024R2847_EN.html
   sha256: 3551fbf856d2e65ffc445a87ede903f0da097e27edddf1f1a781597ef0396302
-  ingested_at: '2026-10-11T19:15:35Z'
+  ingested_at: '2026-10-11T21:11:52Z'
 source_sha256: 3551fbf856d2e65ffc445a87ede903f0da097e27edddf1f1a781597ef0396302
 provisional: false
 expected_requirements:
@@ -39,5 +39,5 @@ expected_requirements:
 - CRA-ANXI-PII-6
 - CRA-ANXI-PII-7
 - CRA-ANXI-PII-8
-coverage_declared_by: null
-coverage_declared_at: null
+coverage_declared_by: '@maintainers'
+coverage_declared_at: '2026-10-12T21:09:33Z'

@@ -1043,6 +1043,28 @@ Une clause `checks:` ne devient opposable (elle bloque un arbitrage) que par une
 
 **Hors périmètre.** La conformité (K17), les éléments d'architecture et le journal de réutilisation que le modèle `engagement_bundle` prévoit ne sont toujours pas dans l'instantané : tant qu'ils n'y sont pas, Archinex garde son dossier pour les documents qui en ont besoin (OSCAL, vues d'architecture).
 
+### 5.28 Contrat 1.28 — Explorateur de doctrine complet et historique d'actif (issues Archinex #95, LLMOps #108)
+
+Le Hub permet la reconstitution exhaustive de la traçabilité de la doctrine opposable : chaque actif actif dispose d'un chemin d'entrée (`entry_path`), d'une date initiale d'introduction, de relecteurs/valideurs, de l'historique de ses révisions successives et des décisions portées sur ses clauses. Les référentiels réglementaires tracent leurs textes ingérés d'origine avec version et SHA-256.
+
+**`GET /api/knowledge/publications`** — Liste chronologique des publications scellées avec filtres optionnels `entry_type` (`framework_ingestion`, `doctrine_workshop`, `amendment`, `initial_baseline`) et `framework`.
+Réponse :
+* `publications[]` : `snapshot_id`, `created_at`, `entry_path`, `source` (`framework`, `version`, `sha256`, `file_name`), `reviewers`, `added[]`, `revised[]`, `removed[]`, `summary`, `clause_decisions[]`.
+* `count` : nombre de publications retournées.
+
+**`GET /api/knowledge/assets/{asset_id}/history`** — Historique des révisions et chaîne de traçabilité pour un actif donné.
+Réponse :
+* `asset_id` : identifiant de l'actif.
+* `initial_date` : date ISO de publication initiale.
+* `initial_snapshot` : identifiant de l'instantané scellé initial.
+* `entry_path` : vecteur d'entrée initial de l'actif (`framework_ingestion`, `doctrine_workshop`, `amendment`, `initial_baseline`).
+* `source` : métadonnées de source (`framework`, `version`, `sha256`).
+* `validators` : relecteurs et experts ayant validé ou promu l'actif.
+* `revisions[]` : liste chronologique des révisions (`revision`, `date`, `snapshot_id`, `author`, `reviewers`, `change_summary`, `content_sha256`).
+* `clause_decisions[]` : historique des décisions prises sur les clauses de l'actif (#105).
+
+**`list_frameworks`** : chaque référentiel s'enrichit de `ingested_source`, `source_sha256` et `associated_publications` listant les instantanés scellés contenant des contrôles de ce référentiel.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés
