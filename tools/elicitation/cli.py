@@ -39,6 +39,15 @@ def _require_blueprint_path(value: str | None) -> str:
     return str(path)
 
 
+def _refuse_if_managed(engagement: str, command: str) -> None:
+    """Commands that assert or decide never write into a managed engagement (issue #78): the API is the way in."""
+    from tools.elicitation.resolve import MANAGED_REFUSAL, is_managed
+
+    if is_managed(engagement):
+        console.print(f"[bold red]{MANAGED_REFUSAL.format(engagement=engagement, command=command)}[/bold red]")
+        raise typer.Exit(code=2)
+
+
 @app.command()
 def plan(
     engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement projet"),
@@ -194,7 +203,12 @@ def confirm(
     else:
         p_ids = result.get("persisted_statement_ids", [])
         c_ids = result.get("created_conflict_ids", [])
-        console.print(f"[bold green]✅ Flux terminé ! Énoncés enregistrés : {p_ids}[/bold green]")
+        if result.get("managed"):
+            console.print(f"[bold green]✅ Énoncés enregistrés comme PROPOSÉS : {p_ids}[/bold green]")
+            console.print("Engagement géré : rien n'est affirmé, la maturité n'avance pas, aucun conflit n'est détecté. "
+                          "Un décideur autre que l'auteur affirme par l'API (POST /api/engagements/{id}/statements/{id}/assert).")
+        else:
+            console.print(f"[bold green]✅ Flux terminé ! Énoncés enregistrés : {p_ids}[/bold green]")
         if c_ids:
             console.print(f"[bold red]⚠️ Conflits générés suite à une contradiction : {c_ids}[/bold red]")
 
@@ -234,6 +248,7 @@ def arbitrate(
     engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Arbitrer un conflit (réservé à l'architecte en chef). Passe l'énoncé perdant à superseded ou l'amende."""
+    _refuse_if_managed(engagement, "elicit arbitrate")
     by_user, _ = resolve_impersonation(as_user, by, "chief-architect", engagement)
     repo = ElicitationRepository(db_path=database_path(None, engagement))
     repo.arbitrate_conflict(
@@ -265,6 +280,7 @@ def demote(
     engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Rétrograde la maturité d'un sujet (demotion non-monotone) et réouvre les questions fermées."""
+    _refuse_if_managed(engagement, "elicit demote")
     author, _ = resolve_impersonation(as_user, "sofia", "chief-architect", engagement)
     repo = ElicitationRepository(db_path=database_path(None, engagement))
     repo.demote_subject(subject_name=subject_name, to_level=to, author=author, reason=reason, engagement=engagement)
@@ -454,6 +470,7 @@ def contest(
     engagement: str = typer.Option(None, "--engagement", "-e", envvar="LLMOPS_ENGAGEMENT", callback=_require_engagement, help="Identifiant de l'engagement"),
 ) -> None:
     """Contester un énoncé existant et créer un conflit d'architecture."""
+    _refuse_if_managed(engagement, "elicit contest")
     author, role = resolve_impersonation(as_user, "rui", "mobile-core-architect", engagement)
     repo = ElicitationRepository(db_path=database_path(None, engagement))
     s_id, c_id = repo.contest_statement(
@@ -586,6 +603,8 @@ def import_data(
     if dry_run:
         console.print("[bold yellow]🔍 Dry-run complete. No changes written to database.[/bold yellow]")
         return
+
+    _refuse_if_managed(target_engagement, "elicit import")
 
     repo = ElicitationRepository(db_path=database_path(None, target_engagement))
     for s in subjects:

@@ -262,12 +262,42 @@ def detect_gaps_node(state: ScanState) -> dict[str, Any]:
 
     gaps_dicts = [g.to_dict() for g in gap_objects]
 
+    # Sujets dérivés par la cascade (K20, issue #80) : un sujet resté à L0 est un manque comme un autre, routé vers le rôle
+    # suggéré par sa règle. Pas de question tant que sa fondation est contestée ; pas de doublon avec le blueprint ni avec la
+    # question obligatoire que la cascade a déjà posée.
+    derived = repo.list_derived_subjects(engagement)
+    contested = {d["name"] for d in derived if d["foundation"] == "contested"}
+    in_blueprint = {r.subject for sec in bp.sections for r in sec.get_requirements()}
+    for d in derived:
+        info = d["derivation"]
+        if d["name"] in contested or d["name"] in in_blueprint or info.get("mandatory"):
+            continue
+        if (levels.get(d["name"]) or d["level"]) != "L0_named":
+            continue
+        question = info.get("question") or {}
+        gaps_dicts.append({
+            "gap_type": "G1_empty_section",
+            "section": f"derived:{d['name']}",
+            "section_name": d["name"],
+            "subject": d["name"],
+            "required_level": "L1_framed",
+            "current_level": "L0_named",
+            "status": "dispatchable",
+            "hold_reason": None,
+            "blocking": [],
+            "blocking_count": 0,
+            "routes_to": info.get("suggested_role") or "chief-architect",
+            "must_answer": question.get("en") or question.get("fr") or f"Quelle est l'architecture de {d['name']} ?",
+            "required_skills": [],
+            "trigger_id": d["trigger_id"],
+        })
+
     # Génération dynamique des manques de décomposition L2 pour tous les sujets à L1_framed
     from tools.elicitation.profile import load_profile
 
     decomposition_route = load_profile(engagement).decomposition_route
     for sub, lvl in levels.items():
-        if lvl == "L1_framed":
+        if lvl == "L1_framed" and sub not in contested:
             gaps_dicts.append({
                 "gap_type": "G1_empty_section",
                 "section": "4.1",

@@ -10,9 +10,8 @@ from langgraph.graph import END, StateGraph
 from langgraph.types import interrupt
 from typing_extensions import TypedDict
 
-from tools.adapters.kuzu_store import make_graph_store
 from tools.elicitation.repository import ElicitationRepository
-from tools.elicitation.resolve import database_path, engagement_of
+from tools.elicitation.resolve import database_path, engagement_of, is_managed
 
 
 class IntakeState(TypedDict, total=False):
@@ -35,6 +34,7 @@ class IntakeState(TypedDict, total=False):
     rejected: bool
     persisted_statement_ids: list[str]
     detected_conflicts: list[dict[str, Any]]
+    managed: bool
     created_conflict_ids: list[str]
 
 
@@ -116,16 +116,21 @@ def confirm_node(state: IntakeState) -> dict[str, Any]:
 
 
 def persist_node(state: IntakeState) -> dict[str, Any]:
-    """Persiste les énoncés confirmés dans Kùzu DB avec statut 'active' et fait évoluer la maturité du sujet."""
+    """Persiste les énoncés confirmés dans Kùzu DB et fait évoluer la maturité du sujet.
+
+    Engagement non géré : statut 'active' (démo, scénarios). Engagement **géré** (K14) : statut 'proposed', maturité
+    inchangée ; l'affirmation passe par l'API, avec un décideur distinct de l'auteur (issue #78).
+    """
     if state.get("rejected"):
         return {}
+    managed = is_managed(state.get("engagement"))
 
     db_path = database_path(state.get("db_path"), state.get("engagement"))
     repo = ElicitationRepository(db_path=db_path)
     persisted_ids = []
 
     for st in state.get("candidate_statements", []):
-        st["status"] = "active"
+        st["status"] = "proposed" if managed else "active"
         sid = repo.save_statement(st)
         persisted_ids.append(sid)
 
@@ -134,7 +139,7 @@ def persist_node(state: IntakeState) -> dict[str, Any]:
         repo.save_uncertainty(unc)
 
     # Avancement de maturité du sujet principal
-    adv_lvl = state.get("advance_level_to")
+    adv_lvl = None if managed else state.get("advance_level_to")
     candidates = state.get("candidate_statements") or []
     if adv_lvl and candidates:
         target_sub = candidates[0].get("subject") or (state.get("question") or {}).get("subject", "")
@@ -151,62 +156,24 @@ def persist_node(state: IntakeState) -> dict[str, Any]:
     if q_id:
         repo.update_question_status(q_id, "confirmed")
 
-    return {"persisted_statement_ids": persisted_ids}
+    return {"persisted_statement_ids": persisted_ids, "managed": managed}
 
 
 
 def check_node(state: IntakeState) -> dict[str, Any]:
-    """Vérifie déterministement si les nouveaux énoncés provoquent des contradictions."""
-    if state.get("rejected"):
-        return {}
+    """Détecte les contradictions des nouveaux énoncés avec la **seule** définition du dépôt (``run_checks``, issue #79).
 
-    db_path = database_path(state.get("db_path"), state.get("engagement"))
-    db_client = make_graph_store(db_path=db_path, read_only=False)
-    engagement = engagement_of(state.get("engagement"))
-
-    detected_conflicts = []
-
-    query = """
-    MATCH (s1:Statement {engagement: $engagement, status: 'active'})-[:ABOUT]->(sub:Subject),
-          (s2:Statement {engagement: $engagement, status: 'active'})-[:ABOUT]->(sub:Subject)
-    WHERE s1.id < s2.id AND (
-        (s1.predicate = s2.predicate AND s1.value <> s2.value) OR
-        (s1.author <> s2.author AND s1.predicate <> s2.predicate)
-    )
-    RETURN s1.id as id1, s1.author as author1, s1.value as val1, s1.predicate as pred1,
-           s2.id as id2, s2.author as author2, s2.value as val2, s2.predicate as pred2,
-           sub.name as subject;
+    ``run_checks`` est celle de l'API d'écriture (K15) : le même état du graphe donne les mêmes conflits par les deux
+    chemins. Elle enregistre elle-même les nœuds Conflict, sans écraser ni retirer aucun énoncé. Un engagement géré
+    n'affirme rien ici (les énoncés sont proposés) : rien à détecter.
     """
-    rows = db_client.execute_cypher(query, {"engagement": engagement})
-
-    if rows and "error" not in rows[0]:
-        for r in rows:
-            pred_str = f"{r.get('pred1')}/{r.get('pred2')}" if r.get('pred1') != r.get('pred2') else r.get('pred1')
-            detected_conflicts.append(
-                {
-                    "kind": "contradiction",
-                    "detail": f"Tension/Contradiction décelée sur {r.get('subject')} ({pred_str}): {r.get('author1')} propose '{r.get('val1')}' vs {r.get('author2')} propose '{r.get('val2')}'.",
-                    "statement_ids": [r.get("id1"), r.get("id2")],
-                }
-            )
-
-    db_client.close()
-    return {"detected_conflicts": detected_conflicts}
-
-
-def raise_conflicts_node(state: IntakeState) -> dict[str, Any]:
-    """Crée les nœuds Conflict dans Kùzu DB sans écraser ni retirer aucun énoncé."""
-    if state.get("rejected") or not state.get("detected_conflicts"):
+    engagement = engagement_of(state.get("engagement"))  # validated before any query (issue #81)
+    if state.get("rejected") or state.get("managed"):
         return {}
 
-    db_path = database_path(state.get("db_path"), state.get("engagement"))
-    repo = ElicitationRepository(db_path=db_path)
-    conflict_ids = []
-    for conf in state.get("detected_conflicts", []):
-        cid = repo.save_conflict(conf, conf["statement_ids"])
-        conflict_ids.append(cid)
-
-    return {"created_conflict_ids": conflict_ids}
+    repo = ElicitationRepository(db_path=database_path(state.get("db_path"), engagement))
+    found = repo.run_checks(engagement, state.get("persisted_statement_ids") or None)
+    return {"detected_conflicts": found, "created_conflict_ids": [c["id"] for c in found]}
 
 
 def get_sqlite_checkpointer(engagement: str, base_dir: str | Path = "projects") -> SqliteSaver:
@@ -226,14 +193,12 @@ def build_intake_graph(checkpointer: SqliteSaver | None = None) -> Any:
     workflow.add_node("confirm", confirm_node)
     workflow.add_node("persist", persist_node)
     workflow.add_node("check", check_node)
-    workflow.add_node("raise_conflicts", raise_conflicts_node)
 
     workflow.set_entry_point("load_question")
     workflow.add_edge("load_question", "interpret")
     workflow.add_edge("interpret", "confirm")
     workflow.add_edge("confirm", "persist")
     workflow.add_edge("persist", "check")
-    workflow.add_edge("check", "raise_conflicts")
-    workflow.add_edge("raise_conflicts", END)
+    workflow.add_edge("check", END)
 
     return workflow.compile(checkpointer=checkpointer)

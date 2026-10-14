@@ -1,12 +1,12 @@
 """Integration tests for publications list and asset history APIs (Archinex #95, LLMOps #108)."""
 
 from pathlib import Path
+
 import pytest
 from starlette.testclient import TestClient
 
-from mcp_server.main import create_starlette_app
-from mcp_server.core.config import server_config
 from mcp_server.knowledge.tools import list_frameworks
+from mcp_server.main import create_starlette_app
 
 ROOT = Path(__file__).parent.parent.parent
 CLIENT = {"Authorization": "Bearer archinex-token"}

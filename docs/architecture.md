@@ -232,7 +232,7 @@ Chaque sujet d'architecture (`Subject`) possède une maturité observable qui pr
 
 ### 6.3 Conflits Déclarés vs Détectés (`intake.py` & `repository.py`)
 - **Déclaré (`origin: declared`)** : Un architecte conteste explicitement un énoncé via `contest_statement()`. L'énoncé cible passe au statut `contested`, un contre-énoncé `assumed` est créé, et un nœud `Conflict` est réifié.
-- **Détecté (`origin: detected`)** : Le nœud de vérification (`check_node` dans `intake.py`) exécute des requêtes Cypher pour détecter automatiquement des affirmations contradictoires sur le même sujet/propriété sans intervention humaine.
+- **Détecté (`origin: detected`)** : Le nœud de vérification (`check_node` dans `intake.py`) appelle `ElicitationRepository.run_checks`, la définition unique partagée avec l'API d'écriture, pour détecter automatiquement des affirmations contradictoires sur le même sujet/propriété sans intervention humaine.
 
 ### 6.4 Arbitrage Non-Manichéen (`arbitrate_conflict`)
 L'arbitrage d'un conflit par un architecte référent ne se limite pas à désigner un vainqueur :
