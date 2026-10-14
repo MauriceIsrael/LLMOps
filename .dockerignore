@@ -16,6 +16,8 @@ htmlcov
 *.wal
 *.shadow
 *.lock
+# …but the dependency lock is exactly what a build must honour (the pattern above targets the graph database lock files).
+!poetry.lock
 *.kz
 *.hindex
 *.lbug

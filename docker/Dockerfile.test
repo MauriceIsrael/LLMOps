@@ -1,0 +1,35 @@
+# Clean-slate test image: the whole test suite on dependencies installed FROM THE LOCK, on a checkout that carries no leftovers
+# (no graph database written by another engine version, no scratch engagement). NOT for deployment.
+#
+#   make test-docker                                   # build, then run the suite once
+#   docker build -f docker/Dockerfile.test -t llmops-test:latest .
+#   docker run --rm llmops-test:latest                 # the default suite (see docs/TESTING.md)
+#   docker run --rm llmops-test:latest pytest tests/unit -k k17       # any pytest arguments
+#
+# Build argument WITH_EVAL=1 also installs the `eval` group (deepeval) so that tests/evals can be collected.
+# Python 3.11 is the version of the deployed images (Dockerfile, docker/Dockerfile.*).
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl build-essential g++ libstdc++6 git \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir poetry
+
+# The lock is part of the build context (see .dockerignore): without it, `poetry install` would resolve afresh and pick
+# whatever the newest dependencies are, which is precisely what makes a test base unreproducible.
+COPY pyproject.toml poetry.lock README.md ./
+ARG WITH_EVAL=0
+RUN poetry config virtualenvs.create false \
+    && if [ "$WITH_EVAL" = "1" ]; then POETRY_GROUPS="dev,eval"; else POETRY_GROUPS="dev"; fi \
+    && poetry install --no-interaction --no-ansi --no-root --with "$POETRY_GROUPS"
+
+COPY . .
+RUN poetry install --no-interaction --no-ansi --only-root
+
+ENV PYTHONPATH=/app \
+    PYTHONDONTWRITEBYTECODE=1 \
+    LLMOPS_ENV=development
+
+# Same selection as `make test-all`: everything but the evaluations that need a model (tests/evals).
+CMD ["pytest", "tests", "--ignore=tests/evals", "-p", "no:cacheprovider", "-q", "-rfEs"]

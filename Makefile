@@ -1,4 +1,4 @@
-.PHONY: serve demo demo-check install models-fetch eval-semantic test test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
+.PHONY: serve demo demo-check install models-fetch eval-semantic test test-all test-docker test-env-check test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
 
 install:
 	poetry install
@@ -21,6 +21,19 @@ demo-check:
 
 test:
 	poetry run pytest tests/contract tests/unit tests/integration tests/e2e -v
+
+# Everything the repository tests, except the evaluations that need a model (tests/evals). This is the suite of docs/TESTING.md.
+test-all:
+	poetry run pytest tests --ignore=tests/evals -p no:cacheprovider -q -rfEs
+
+# The same suite in a clean container, on dependencies installed from the lock (docs/TESTING.md, "Clean slate").
+test-docker:
+	docker build -f docker/Dockerfile.test -t llmops-test:latest .
+	docker run --rm llmops-test:latest
+
+# Fails with a plain message when the environment does not match the lock (graph engine out of range, runtime leftovers).
+test-env-check:
+	poetry run pytest tests/unit/test_ladybug_version_guard.py -q -p no:cacheprovider
 
 test-unit:
 	poetry run pytest tests/unit -v
