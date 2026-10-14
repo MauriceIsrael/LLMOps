@@ -7,9 +7,13 @@ from pipelines.compliance_mapper import (
 )
 
 
+HAND_CURATED_CONTROLS = 62  # the controls the base held before any framework was ingested from a source; it only grows
+
+
 def test_load_all_controls():
     controls = load_all_controls("data/kb/controls")
-    assert len(controls) == 62
+    # A floor, not an exact count: every framework ingestion (`kb ingest-framework`) adds controls to the base.
+    assert len(controls) >= HAND_CURATED_CONTROLS
     assert "SNC-REQ-01" in controls
     assert "ISO-27001-A8-09" in controls
     assert "NIS2-ART21-2A" in controls
@@ -53,24 +57,28 @@ def test_match_text_to_controls_gitops():
 
 
 def test_audit_compliance_gaps_100_percent():
+    """Every hand-curated control is implemented by a KB asset; only controls ingested from a source can still be unlinked."""
+    controls = load_all_controls("data/kb/controls")
     report = audit_compliance_gaps("data/kb")
-    # The 9 NIS2 requirements published by the first full ingestion are not yet implemented by a KB asset
+    fw = report["frameworks"]
+
+    uncovered = {c["id"] for f in fw.values() for c in f["controls"] if not c["covered"]}
+    curated = {cid for cid, c in controls.items() if not c.from_source}
+    assert curated, "no hand-curated control left to check"
+    assert not (uncovered & curated), f"hand-curated controls without an implementing asset: {sorted(uncovered & curated)}"
+
+    # The report accounts for every control, once.
+    assert report["global_total"] == len(controls)
+    assert report["global_covered"] == len(controls) - len(uncovered)
+
+    # The 9 NIS2 requirements published by the first full ingestion are not yet implemented by a KB asset.
     nis2_unlinked = {"NIS2-ART20-1", "NIS2-ART20-2", "NIS2-ART21-1", "NIS2-ART21-3", "NIS2-ART21-4",
                      "NIS2-ART23-1", "NIS2-ART23-2", "NIS2-ART23-3", "NIS2-ART23-4"}
-    assert report["global_total"] == 62
-    assert report["global_covered"] == 62 - len(nis2_unlinked)
-
-    fw = report["frameworks"]
     assert {c["id"] for c in fw["NIS2"]["controls"] if not c["covered"]} == nis2_unlinked
-    assert fw["SecNumCloud"]["uncovered"] == 0
-    assert fw["ISO27001"]["uncovered"] == 0
-    assert fw["3GPP"]["uncovered"] == 0
-    assert fw["CER"]["uncovered"] == 0
-    assert fw["CRA"]["uncovered"] == 0
-    assert fw["GSMA"]["uncovered"] == 0
-    assert fw["TELCO-RESIL"]["uncovered"] == 0
-    assert fw["PPDR-DEVICE"]["uncovered"] == 0
-    assert fw["3GPP"]["uncovered"] == 0
+
+    # Frameworks that were fully curated stay fully covered.
+    for name in ("SecNumCloud", "ISO27001", "3GPP", "CER", "GSMA", "TELCO-RESIL", "PPDR-DEVICE"):
+        assert fw[name]["uncovered"] == 0, name
 
 
 # --- Controls ingested from a source are matched on their legal text -------------------------------
