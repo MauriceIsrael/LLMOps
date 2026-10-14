@@ -463,7 +463,7 @@ For document generators requiring sealed regulatory compliance matrices (e.g., `
 ### 16.1 Architecture & Provenance Contract
 The Knowledge Hub emits machine-validated conformity snapshots under the canonical envelope `ExternalSnapshotEnvelope<ConformityData>`:
 * **Route**: `GET /api/compliance/conformity-snapshot?framework=ISO27001&engagement=your-engagement`
-* **Provenance**: `sourceSystem` defaults to `"knowledge-hub"`. The snapshot identifier adheres to `kh-<engagement>-<framework>-<timestamp>`. (A backward-compatible query parameter `?source_system=tuleap` is temporarily supported for legacy validators).
+* **Provenance**: `sourceSystem` defaults to `"knowledge-hub"`. The snapshot identifier adheres to `kh-<engagement>-<framework>-<timestamp>`. The origin is fixed (contract 1.30): `?source_system=` with another value is refused with `400`, and requirements are `allocated` (declared coverage), never `verified` — the Hub verifies nothing.
 * **Integrity & Checksum**: Sealed with `sha256:<hex>` computed strictly over the canonicalized `data` payload according to `canonical-json (v1)` (lexicographically sorted keys, compact separators `","` and `":"`, UTF-8 direct encoding).
 
 ### 16.2 Out-of-Band Integration (ADR-DE-05)

@@ -118,9 +118,14 @@ Minor versions only add interfaces or optional fields:
   ``POST /api/knowledge/triggers/{validate,preview}``, ``POST /api/knowledge/candidates/{id}/merge-key``; offline command
   ``kb extract-triggers``.
 
+* ``1.30`` — honest conformity snapshot (K6, issue #43): ``GET /api/compliance/conformity-snapshot`` no longer emits
+  ``verified`` (a presence in the graph is a declared coverage: ``allocated``), evidence carries its real origin
+  (``source: knowledge-hub``), and ``sourceSystem`` is fixed to ``knowledge-hub``: ``?source_system=`` / ``X-Source-System``
+  with another value is refused (``400 invalid_argument``). The Hub verifies nothing (ADR-KH-01 D2).
+
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.29"
+CONTRACT_VERSION = "1.30"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 

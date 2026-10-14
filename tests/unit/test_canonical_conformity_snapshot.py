@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
+import pytest
+
 from pipelines.compliance_mapper import to_conformity_snapshot
 
 
@@ -40,10 +42,16 @@ def test_to_conformity_snapshot_defaults_to_knowledge_hub():
     assert snapshot["checksum"] == expected_hash
 
 
-def test_to_conformity_snapshot_backward_compat_tuleap():
-    """Vérifie que le Hub peut émettre 'tuleap' si expressément demandé pour rétrocompatibilité."""
-    snapshot = to_conformity_snapshot(engagement="nordwave-mcx-2027", framework="ISO27001", source_system="tuleap")
+def test_the_origin_is_not_declarative():
+    """K6: no caller can make the Hub emit another origin (mutation: ``source_system="tuleap"``)."""
+    with pytest.raises(ValueError, match="fixed"):
+        to_conformity_snapshot(engagement="nordwave-mcx-2027", framework="ISO27001", source_system="tuleap")
 
-    assert snapshot["sourceSystem"] == "tuleap"
-    assert snapshot["snapshotId"].startswith("tuleap-kh-nordwave-mcx-2027-iso27001-")
 
+def test_the_hub_never_emits_verified_nor_a_foreign_origin():
+    snapshot = to_conformity_snapshot(engagement="nordwave-mcx-2027", framework="ALL")
+    requirements = snapshot["data"]["requirements"]
+    assert requirements
+    assert {r["status"] for r in requirements} <= {"allocated", "proposed", "uncovered"}
+    assert {e["source"] for r in requirements for e in r["evidence"]} <= {"knowledge-hub"}
+    assert snapshot["sourceSystem"] == "knowledge-hub"

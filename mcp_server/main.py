@@ -554,6 +554,11 @@ def create_starlette_app() -> Starlette:
             or "knowledge-hub"
         ).strip()
         guard_engagement(engagement)  # K9
+        if source_system != "knowledge-hub":  # K6: the origin of a snapshot is not declarative
+            return JSONResponse(
+                {"status": "invalid_argument", "error": "source_system is fixed to 'knowledge-hub': the origin of a snapshot is not declarative"},
+                status_code=400,
+            )
 
         try:
             from pipelines.compliance_mapper import to_conformity_snapshot

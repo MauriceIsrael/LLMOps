@@ -472,14 +472,25 @@ def set_applicable_frameworks(engagement: str, frameworks: list[str]) -> dict[st
     }
 
 
+SOURCE_SYSTEM = "knowledge-hub"
+
+
 def to_conformity_snapshot(
     engagement: str = "default",
     framework: str = "ALL",
     controls_dir: Path | str = "data/kb/controls",
     source_system: str = "knowledge-hub",
 ) -> dict[str, Any]:
-    """Génère un ConformitySnapshot conforme au contrat ExternalSnapshotEnvelope<ConformityData> pour document-engine."""
+    """Génère un ConformitySnapshot conforme au contrat ExternalSnapshotEnvelope<ConformityData> pour document-engine.
+
+    Le Hub **ne vérifie rien** (ADR-KH-01 D2, K6) : la présence d'un actif qui référence un contrôle est une couverture
+    *déclarée* (``allocated``), jamais un résultat de vérification (``verified`` n'est émis par aucun chemin du Hub), et
+    l'origine est fixée à ``knowledge-hub`` : elle n'est pas déclarative.
+    """
     from datetime import datetime
+
+    if source_system != SOURCE_SYSTEM:
+        raise ValueError(f"source_system is fixed to '{SOURCE_SYSTEM}' (got '{source_system}'): the origin of a snapshot is not declarative")
 
     from pipelines import canonical
 
@@ -517,7 +528,7 @@ def to_conformity_snapshot(
                 "mode": "architecture-model",
                 "type": "graph-item",
                 "reference": ref,
-                "source": "architecture-studio",
+                "source": SOURCE_SYSTEM,
             }
             for ref in sorted(covered_by)
         ]
@@ -527,7 +538,7 @@ def to_conformity_snapshot(
             "title": ctrl.title_fr or ctrl.title,
             "domain": domain,
             "verificationModes": ["architecture-model"],
-            "status": "verified" if covered_by else "allocated",
+            "status": "allocated",  # declared coverage at best; the Hub never emits "verified" (K6)
             "evidence": evidence,
             "appliesTo": {
                 "programRef": engagement.upper(),
@@ -546,11 +557,11 @@ def to_conformity_snapshot(
 
     checksum = canonical.sha256(data)  # canonical-json v1 (K1)
     now_iso = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    prefix = "kh" if source_system == "knowledge-hub" else ("tuleap-kh" if source_system == "tuleap" else f"{source_system}-kh")
+    prefix = "kh"
 
     return {
         "snapshotId": f"{prefix}-{engagement}-{framework.lower()}-{int(datetime.now().timestamp())}",
-        "sourceSystem": source_system,
+        "sourceSystem": SOURCE_SYSTEM,
         "schemaVersion": "2.0",
         "createdAt": now_iso,
         "checksum": checksum,
