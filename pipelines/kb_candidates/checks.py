@@ -8,7 +8,8 @@ blocks the candidate (``checks_failed``); warnings must be handled by the review
 2. ``references``        every cited asset (related, implements_controls, supersedes,
                          requires, typed ids) exists in the KB;
 3. ``duplicate``         title or content too close to an existing asset (warn);
-4. ``anonymization``     no client/site name (denylist), IP address or CIDR (fail);
+4. ``anonymization``     no programme anchor (K13): client/site name (denylist), engagement identifier, e-mail,
+                         member handle, IP address or CIDR, programme front matter field (fail);
                          identifying volumes (warn);
 5. ``doctrine_conflict`` the content violates a doctrine check clause (warn);
 6. ``llm_unreviewed``    ``production_mode: llm-derived`` (warn);
@@ -28,7 +29,7 @@ from pathlib import Path
 from typing import Any
 
 from pipelines.doctrine.checks import validate_clause
-from pipelines.doctrine.text import content_tokens, normalize, normalize_phrase
+from pipelines.doctrine.text import content_tokens, normalize
 from pipelines.kb_candidates.kb import KbAsset, load_assets, split_frontmatter
 
 DEFAULT_DUPLICATE_THRESHOLD = 0.6
@@ -305,19 +306,20 @@ def find_ip_addresses(text: str) -> list[str]:
 
 
 def check_anonymization(candidate: dict[str, Any], ctx: CheckContext) -> dict[str, str]:
-    text = "\n".join(
-        str(candidate.get(k) or "") for k in ("title", "rationale", "proposed_content")
-    )
-    norm = normalize(text)
-    names = sorted({t for t in ctx.denylist if normalize_phrase(t) and f" {normalize_phrase(t)} " in norm})
-    ips = find_ip_addresses(text)
-    problems = []
-    if names:
-        problems.append(f"denylisted name(s): {names}")
-    if ips:
-        problems.append(f"IP address(es)/CIDR: {sorted(set(ips))}")
-    if problems:
-        return _result("anonymization", "fail", "; ".join(problems) + " — generalize before submitting")
+    """No programme anchor in the text bound for the knowledge base (K13): the check fails and names what it found."""
+    from pipelines.kb_candidates import anchors as anchor_module
+
+    text = "\n".join(str(candidate.get(k) or "") for k in ("title", "rationale", "proposed_content"))
+    source = candidate.get("source") or {}
+    ids = anchor_module.known_engagement_ids([source.get("engagement"), candidate.get("engagement")])
+    frontmatter, body = split_frontmatter(candidate.get("proposed_content", ""))
+    prose = "\n".join([str(candidate.get("title") or ""), str(candidate.get("rationale") or ""), body or ""])
+    found = anchor_module.anchors(text, ctx.kb_dir, ids, handle_text=prose)
+    fields = anchor_module.anchor_fields(frontmatter)
+    if fields:
+        found["fields"] = fields
+    if found:
+        return _result("anonymization", "fail", anchor_module.describe(found) + " — generalize before submitting (the knowledge base holds no programme)")
     volumes = [m.group(0).strip() for m in VOLUME.finditer(text)]
     if volumes:
         return _result("anonymization", "warn", f"possibly identifying figures: {volumes[:5]}")

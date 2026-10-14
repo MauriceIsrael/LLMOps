@@ -1,11 +1,11 @@
 {
-  "snapshot_id": "snapshot-2026-10-13-d1619ce",
-  "created_at": "2026-10-13T21:31:38Z",
-  "source_revision": "d1619cef1c96a92534f6d3fa9d8f0d7bab296602",
-  "payload_sha256": "sha256:bb0a66cb66f749445781ba7cc355398fe2eb7152e69b9ef0d3ac53300943e0c4",
+  "snapshot_id": "snapshot-2026-10-14-c4df39f",
+  "created_at": "2026-10-14T22:03:22Z",
+  "source_revision": "c4df39fc37da7d4c5a09b6f83f4559121b47490f",
+  "payload_sha256": "sha256:be4b8720f252fdbfddd9bf399b0cc06958b04b00441d6de752a46b53aabd8763",
   "schema_version": "1.0",
   "emitter": "knowledge-hub",
-  "checksum": "sha256:bb0a66cb66f749445781ba7cc355398fe2eb7152e69b9ef0d3ac53300943e0c4",
+  "checksum": "sha256:be4b8720f252fdbfddd9bf399b0cc06958b04b00441d6de752a46b53aabd8763",
   "rebuiltByEmitterTest": true,
   "regenerate": "poetry run python scripts/export_fixtures.py",
   "is_provisional": false,
@@ -891,7 +891,7 @@
       {
         "ref": "PAT-008",
         "type": "pattern",
-        "text_sha256": "caf5a19cd15b44caa88984a5371bc026c0b4a336dbc11efa1d485af063331450"
+        "text_sha256": "25c979042dc865d6239004268a15a611cf5b394b475efe7c187ba429f8fbbaf8"
       },
       {
         "ref": "PAT-009",
@@ -984,7 +984,7 @@
         "text_sha256": "2b3e928f85d561b93b446c47b3e34b1437a1b6ac996e004d43605dba29ec4b1c"
       }
     ],
-    "content_sha256": "sha256:3416087aa4059172dd7764a5c9be674477b7f78bf931d0331aa43390d219cb57"
+    "content_sha256": "sha256:a968b01d0711472ca2d081a2c46b481503cd4edd7884911fd90e6f4e8228d220"
   },
   "applicability_index": {
     "BLU-hla-it-platform": {
@@ -2956,17 +2956,17 @@
       "phase": "BUILD,RUN",
       "owner": "Alice (Cloud Architect)",
       "last_reviewed": "2026-09-03",
-      "revision": 1,
+      "revision": 2,
       "knowledge_ref": {
         "sourceId": "knowledge-hub",
         "knowledgeKey": "pattern:PAT-008",
-        "version": "1"
+        "version": "2"
       },
-      "content_sha256": "sha256:9a6825b69594484437fb832dd23e4c54475d3b8740e3d2d8c02698866fe6e27f",
-      "content": "---\nid: PAT-008\ntitle: \"Proposition de Pattern : Double Validation Canary pour NetDevOps\"\ntype: pattern\nstatus: active\nconfidence: verified\nphase: [BUILD, RUN]\ndomain: [telecom-core, security-architecture]\nowner: \"Alice (Cloud Architect)\"\nlast_reviewed: \"2026-09-03\"\nsource_suggestion: \"SUG-20260903-7022B8\"\nsource_engagement: \"nordwave-mcx-2027\"\n---\n\n# Proposition de Pattern : Double Validation Canary pour NetDevOps\n\n## Contexte & Justification\n\u00c9vite les r\u00e9gressions de routage BGP en injectant un pr\u00e9fixe canary avant d\u00e9ploiement g\u00e9n\u00e9ralis\u00e9.\n\n## Motif Architectural & Recommandation\nCr\u00e9er un nouveau pattern PAT-007 sp\u00e9cifiant le canary testing r\u00e9seau.\n\n## Historique d'\u00c9licitation\nPromu automatiquement depuis le projet `nordwave-mcx-2027` suite \u00e0 l'arbitrage du Lead Architect (Maurice Israel (Lead Architect)) le 03/09/2026.\n",
+      "content_sha256": "sha256:176636d0dde25bf30f6a802e74fb1a9a757d4f26edc671a8907977de6161f17d",
+      "content": "---\nid: PAT-008\ntitle: \"Proposition de Pattern : Double Validation Canary pour NetDevOps\"\ntype: pattern\nstatus: active\nconfidence: verified\nphase: [BUILD, RUN]\ndomain: [telecom-core, security-architecture]\nowner: \"Alice (Cloud Architect)\"\nlast_reviewed: \"2026-09-03\"\nrevision: 2\nsource_suggestion: \"SUG-20260903-7022B8\"\n---\n\n# Proposition de Pattern : Double Validation Canary pour NetDevOps\n\n## Contexte & Justification\n\u00c9vite les r\u00e9gressions de routage BGP en injectant un pr\u00e9fixe canary avant d\u00e9ploiement g\u00e9n\u00e9ralis\u00e9.\n\n## Motif Architectural & Recommandation\nCr\u00e9er un nouveau pattern PAT-007 sp\u00e9cifiant le canary testing r\u00e9seau.\n\n## Historique d'\u00c9licitation\nPromu depuis un retour d'exp\u00e9rience de projet, apr\u00e8s arbitrage d'un architecte en chef, le 03/09/2026. Aucune r\u00e9f\u00e9rence de programme n'est conserv\u00e9e dans la base de connaissance.\n",
       "provenance": {
         "document": "PAT-008.md",
-        "version": "1",
+        "version": "2",
         "section": "architecture",
         "text_sha256": "aab8edba381df414d61829c37595c8e5f831961ec3d7018b98ea4d8cccce682d"
       },

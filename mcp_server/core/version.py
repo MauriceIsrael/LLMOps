@@ -130,9 +130,17 @@ Minor versions only add interfaces or optional fields:
   ``verified`` does not exist and ``origin`` is always ``knowledge-hub``. The verification refuses a status that its
   decisions do not support (``COVERAGE_STATUS``) and any dangling reference. No route changes.
 
+* ``1.32`` — the knowledge base holds no programme (K13, issue #51): the ``anonymization`` check of the candidate cycle and the
+  ``subject_label`` of the reuse journal share one definition of a programme anchor
+  (``pipelines/kb_candidates/anchors.py``): engagement identifier (registered, working base, or the one the candidate comes
+  from), e-mail address (masked in the result), member handle, IP address or CIDR, denylisted name, and the front matter fields
+  ``source_engagement`` / ``engagement`` / ``client`` / ``site``. An anchor fails the check (``checks_failed``), the message names
+  what was found, and a refused reuse confirmation writes nothing. PAT-008, which still carried such an anchor, is cleaned
+  (revision 2). No route or response shape changes.
+
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.31"
+CONTRACT_VERSION = "1.32"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 
