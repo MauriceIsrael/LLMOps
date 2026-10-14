@@ -123,9 +123,16 @@ Minor versions only add interfaces or optional fields:
   (``source: knowledge-hub``), and ``sourceSystem`` is fixed to ``knowledge-hub``: ``?source_system=`` / ``X-Source-System``
   with another value is refused (``400 invalid_argument``). The Hub verifies nothing (ADR-KH-01 D2).
 
+* ``1.31`` — requirement → control coverage in the engagement snapshot (K17, issue #65; schema ``1.7``): section
+  ``compliance {origin, kb_snapshot, items, unresolved}``. For each requirement and each control it was matched to
+  (resolved in the pinned knowledge snapshot), ``status`` is ``allocated`` (an **asserted** decision cites the control or an
+  asset that implements it), ``proposed`` (only a proposed decision does) or ``uncovered``. The Hub verifies nothing:
+  ``verified`` does not exist and ``origin`` is always ``knowledge-hub``. The verification refuses a status that its
+  decisions do not support (``COVERAGE_STATUS``) and any dangling reference. No route changes.
+
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.30"
+CONTRACT_VERSION = "1.31"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 

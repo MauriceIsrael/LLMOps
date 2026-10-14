@@ -34,18 +34,21 @@ def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
         "assets": [{"id": "ADR-0001", "typed_id": "decision:ADR-0001", "revision": 1, "confidence": "verified",
                     "knowledge_ref": knowledge_ref("decision:ADR-0001", 1), "content": adr, "content_sha256": content_sha256(adr),
                     "title": "Git as the source of truth", "type": "decision", "status": "active"}],
+        "controls": [
+            {"id": "NIS2-ART21-2C", "framework": "NIS2", "title": "Business continuity", "severity": "mandatory", "implemented_by": ["ADR-0001"]},
+            {"id": "NIS2-ART21-2H", "framework": "NIS2", "title": "Cryptography", "severity": "mandatory", "implemented_by": []}],
     }
     raw = {
         "requirements": [
             {"id": "REQ-001", "text": "The gateway shall survive the loss of one site.", "section": "3.2", "category": "resilience",
              "criticality": "mandatory", "status": "gap", "disposition": "deliberated", "disposition_reason": "",
              "disposition_status": "active", "disposition_author": "@carl", "disposition_by": "@ada",
-             "disposition_validated_at": "2026-10-02T09:40:00"},
+             "disposition_validated_at": "2026-10-02T09:40:00", "matched_controls": '["NIS2-ART21-2C"]'},
             {"id": "REQ-002", "text": "Data at rest shall be encrypted.", "section": "4.1", "category": "security",
              "criticality": "mandatory", "status": "gap", "disposition": "clarification_needed",
              "disposition_reason": "Which key custody model does the client expect for data at rest?",
              "disposition_status": "proposed", "disposition_author": "@dan", "disposition_by": "",
-             "disposition_validated_at": ""},
+             "disposition_validated_at": "", "matched_controls": '["GHOST-1", "NIS2-ART21-2H"]'},
         ],
         "subject_requirements": {"gateway-services": ["REQ-001"]},
         "subjects": [{"name": "core-network", "definition": "", "level": "L1_framed"},
