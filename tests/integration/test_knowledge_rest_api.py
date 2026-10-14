@@ -257,12 +257,11 @@ def test_compliance_conformity_snapshot_rest_endpoint():
         assert "verificationModes" in req
         assert "evidence" in req
 
-        # Vérification rétrocompatibilité ?source_system=tuleap
+        # K6 : l'origine n'est pas déclarative, une autre valeur est refusée
         res_tuleap = client.get("/api/compliance/conformity-snapshot?framework=ISO27001&engagement=rrf&source_system=tuleap", headers=headers)
-        assert res_tuleap.status_code == 200
-        snap_tuleap = res_tuleap.json()
-        assert snap_tuleap["sourceSystem"] == "tuleap"
-        assert snap_tuleap["snapshotId"].startswith("tuleap-kh-rrf-iso27001-")
+        assert res_tuleap.status_code == 400
+        assert res_tuleap.json()["status"] == "invalid_argument"
+        assert {r["status"] for r in snap["data"]["requirements"]} == {"allocated"}
 
 
 def test_compliance_frameworks_endpoints(request):

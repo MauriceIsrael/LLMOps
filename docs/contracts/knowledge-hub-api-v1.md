@@ -331,7 +331,7 @@ Permet de soumettre un motif éprouvé, un arbitrage ou une correction vers la g
 Produit un instantané réglementaire scellé par checksum SHA-256 calculé sur le profil strict `canonical-json (v1)`.
 * **Paramètres de requête** :
   * `framework` : `SecNumCloud` | `ISO27001` | `NIS2` | `3GPP` | `ALL` (défaut : `ALL`).
-  * `source_system` *(optionnel)* : `knowledge-hub` (défaut) | `tuleap` (rétrocompatibilité).
+  * `source_system` *(optionnel)* : seule la valeur `knowledge-hub` est acceptée (1.30, K6) ; toute autre valeur est refusée en `400`.
 * **Réponse HTTP 200** :
 ```json
 {
@@ -347,13 +347,13 @@ Produit un instantané réglementaire scellé par checksum SHA-256 calculé sur 
         "title": "Immunité aux lois extraterritoriales et localisation européenne des données",
         "domain": "SECURITY",
         "verificationModes": ["architecture-model"],
-        "status": "verified",
+        "status": "allocated",
         "evidence": [
           {
             "mode": "architecture-model",
             "type": "graph-item",
             "reference": "ADR-0011",
-            "source": "architecture-studio"
+            "source": "knowledge-hub"
           }
         ],
         "appliesTo": {
@@ -1085,6 +1085,19 @@ Les règles (§5.22) et les clés du vocabulaire (§5.21) entrent dans la base d
 L'aperçu et le moteur de cascade (§5.23) utilisent **la même évaluation** (`pipelines.triggers.evaluate`) : mêmes faits, mêmes règles, mêmes questions (test de recette). La revue elle-même (accepter, amender, rejeter) passe par `PATCH /api/knowledge/candidates/{id}` (§5.2), la promotion et la publication par §5.8.
 
 **Application d'administration** (`apps/kb-client-app`, `/governance/triggers`) : liste des règles par actif, file des candidats, éditeur avec validation en direct, aperçu, actions accepter, amender, rejeter et fusion de clé, appuyés sur ces routes (proxy `api/kb/triggers`, jeton `LLMOPS_REVIEW_TOKEN`). **Vérifiée par `svelte-check` et par le build, non validée visuellement.**
+
+### 5.30 Contrat 1.30 — Snapshot de conformité honnête (K6, issue #43)
+
+**Pourquoi.** Le Hub « ne détient ni résultat de vérification, ni preuve » (ADR-KH-01 D2). Or `GET /api/compliance/conformity-snapshot` marquait `verified` toute exigence dont un actif du graphe était référencé (une **présence** devenait un **résultat de vérification**), étiquetait ses preuves `architecture-studio`, et laissait l'appelant choisir `sourceSystem`.
+
+**Ce qui change** (comportement corrigé, sans changement de forme) :
+
+* `status` vaut `allocated` (couverture **déclarée**, non vérifiée) ; aucun chemin du Hub n'émet `verified`.
+* Les preuves portent `source: "knowledge-hub"` (leur vraie origine).
+* `sourceSystem` est fixé à `knowledge-hub` ; `?source_system=` (ou `X-Source-System`) avec une autre valeur est refusé : `400 {"status": "invalid_argument"}`. L'ancienne valeur `tuleap` n'est plus servie.
+* Le consommateur (`validateConformitySnapshot`) accepte toujours l'enveloppe : `allocated` est un statut déjà prévu.
+
+La couverture exigence → contrôle d'un **engagement** (décisions affirmées) est l'objet de K17 (§5.31), dans l'instantané d'engagement, pas dans cette route.
 
 ---
 

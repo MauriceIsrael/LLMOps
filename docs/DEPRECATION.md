@@ -6,6 +6,8 @@ response field, CLI command) is deprecated and eventually withdrawn. It compleme
 
 > **Status (contract `1.14`): nothing is deprecated.** The deprecation of the engagement part announced in `1.13` was **cancelled** by `1.14` (K10): the Hub holds two bases, knowledge and engagement ([ADR-KH-01](adr/ADR-KH-01-contrats-exposes.md) A10, draft). The mechanism below stays for the next deprecation.
 
+> **Correction, not deprecation (contract `1.30`, K6).** `GET /api/compliance/conformity-snapshot` stopped emitting `verified` (the Hub verifies nothing) and refuses a `source_system` other than `knowledge-hub`. A false verification with a falsifiable origin is a defect, so the "never changes behaviour" rule below does not apply; the change is recorded in [contract §5.30](contracts/knowledge-hub-api-v1.md).
+
 ---
 
 ## 1. Principles
