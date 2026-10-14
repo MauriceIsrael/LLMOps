@@ -123,4 +123,16 @@ Tout ce qui précède est corrigé ou nommé ici.
 
 ## Dernier état connu
 
-_(à compléter par la dernière exécution en copie neuve)_
+Exécution en **copie neuve** (`git worktree`), Python 3.13, dépendances du verrou (`ladybug` 0.19.1), `make test-all` :
+
+| | |
+|---|---|
+| Tests | 1252 |
+| Échecs | **0** |
+| Ignorés | 6, tous documentés : modèle d'embedding local absent (4, `KB_SEMANTIC_EVAL=1`), backend SQL seulement (1), « le vrai blueprint n'est pas encore dans le dépôt » (1) |
+| Durée | environ 8 minutes |
+
+Contre-épreuve sur le moteur : la même suite, sur `main` avant ces corrections et avec `ladybug` **0.20.4**, ne donne que les trois
+échecs de tests périmés corrigés ici (compteurs de `compliance_mapper`, fixtures en chemins Windows) ; la 0.20.x est donc compatible.
+Avec la **0.21.2** : trois échecs de fond (`OPTIONAL MATCH`, `get_compliance_matrix` et sa forme figée). C'est pourquoi la borne
+est `<0.21`.
