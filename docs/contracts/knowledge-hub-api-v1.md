@@ -1099,6 +1099,21 @@ L'aperçu et le moteur de cascade (§5.23) utilisent **la même évaluation** (`
 
 La couverture exigence → contrôle d'un **engagement** (décisions affirmées) est l'objet de K17 (§5.31), dans l'instantané d'engagement, pas dans cette route.
 
+### 5.31 Contrat 1.31 — Couverture exigence → contrôle dans l'instantané d'engagement (K17, issue #65)
+
+**Pourquoi.** Le bundle d'Archinex portait une matrice de conformité ; l'instantané du Hub n'en avait pas (écart de parité, archinex#34). Le Hub la calcule désormais, de façon **déterministe et déclarative** : il ne vérifie rien (D2, K6).
+
+**Section `compliance`** (instantané d'engagement, `schemaVersion` `1.7`, additif) : `{origin, kb_snapshot, items, unresolved}`.
+
+* Pour chaque exigence de l'engagement et chaque contrôle auquel elle a été rapprochée (`matched_controls`, résolu dans la base de connaissance **épinglée**), une ligne `{requirement_id, control_id, framework, severity, status, decisions, assets}`.
+* `status` : `allocated` si une décision **affirmée** cite le contrôle ou un actif qui le met en œuvre (`based_on`) ; `proposed` si seule une décision proposée le fait ; `uncovered` sinon. Une décision retirée ou remplacée ne couvre rien.
+* Une exigence **évacuée** par une décision affirmée n'est pas délibérée : aucune ligne. Un contrôle que la base épinglée ne connaît pas est listé dans `unresolved`, jamais inventé.
+* `verified` n'existe pas ; `origin` vaut toujours `knowledge-hub` (le schéma n'admet pas d'autre valeur).
+
+**Vérification** : un statut que les décisions citées ne soutiennent pas est refusé (`COVERAGE_STATUS`), ainsi que toute référence pendante (`DANGLING`). Abaisser une décision de « affirmée » à « proposée » change la couverture et le checksum.
+
+Les manques G3 `principle_unaddressed` ne sont pas inclus : ils demandent une règle d'applicabilité des principes que la doctrine ne porte pas encore.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

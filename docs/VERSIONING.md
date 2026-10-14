@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.30"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.31"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.30"
+  "schema_version": "1.31"
 }
 ```
 
@@ -50,6 +50,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.27` | Decision on each requirement and requirements carried by a subject ([contract §5.27](contracts/knowledge-hub-api-v1.md)): `POST /api/engagements/{id}/requirements/{requirement_id}/disposition` (+ `/assert`, `/withdraw`), `POST …/subjects/{name}/requirements`, optional `requirement_ids` on `POST …/subjects`; engagement snapshot schema `1.6` (`requirements[].disposition`, `subjects[].requirement_ids`, both optional: an engagement that uses neither is sealed as before). |
 | `1.29` | Trigger rules and facts-vocabulary keys in the candidate cycle, and their review (K22, [contract §5.29](contracts/knowledge-hub-api-v1.md)): candidate types `trigger` and `fact_key`, `kb extract-triggers`, `GET /api/knowledge/triggers`, `POST …/triggers/{validate,preview}`, `POST …/candidates/{id}/merge-key`. |
 | `1.30` | Honest conformity snapshot (K6, [contract §5.30](contracts/knowledge-hub-api-v1.md)): no `verified` status, evidence origin `knowledge-hub`, `sourceSystem` not declarative (another `source_system` is refused with `400`). |
+| `1.31` | Requirement → control coverage in the engagement snapshot (K17, [contract §5.31](contracts/knowledge-hub-api-v1.md)): section `compliance` (schema `1.7`), statuses `allocated` / `proposed` / `uncovered`, never `verified`, origin `knowledge-hub`. |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

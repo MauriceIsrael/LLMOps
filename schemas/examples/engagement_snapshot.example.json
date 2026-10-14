@@ -1,18 +1,18 @@
 {
-  "schemaVersion": "1.6",
-  "snapshotId": "eng-example-eng-f7c7d855d5bb",
+  "schemaVersion": "1.7",
+  "snapshotId": "eng-example-eng-81b30ebeb19f",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:f7c7d855d5bbde6358e5b4e948fa3cd395f5c62eadaa33b25106f0ceb61ecd9e",
+  "checksum": "sha256:81b30ebeb19f69a0abf7c248d7197db5999ee87b171f5f1855bfe791924ca8e0",
   "data": {
     "engagement": {
       "id": "example-eng",
       "confidentiality": "confidential"
     },
     "pins": {
-      "contract_version": "1.30",
+      "contract_version": "1.31",
       "kb_snapshot": {
         "snapshot_id": "snapshot-2026-10-03-0000000",
         "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
@@ -59,6 +59,43 @@
         }
       }
     ],
+    "compliance": {
+      "origin": "knowledge-hub",
+      "kb_snapshot": {
+        "snapshot_id": "snapshot-2026-10-03-0000000",
+        "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "items": [
+        {
+          "requirement_id": "REQ-001",
+          "control_id": "NIS2-ART21-2C",
+          "framework": "NIS2",
+          "severity": "mandatory",
+          "status": "allocated",
+          "decisions": [
+            "D-0001"
+          ],
+          "assets": [
+            "ADR-0001"
+          ]
+        },
+        {
+          "requirement_id": "REQ-002",
+          "control_id": "NIS2-ART21-2H",
+          "framework": "NIS2",
+          "severity": "mandatory",
+          "status": "uncovered",
+          "decisions": [],
+          "assets": []
+        }
+      ],
+      "unresolved": [
+        {
+          "requirement_id": "REQ-002",
+          "control_id": "GHOST-1"
+        }
+      ]
+    },
     "subjects": [
       {
         "id": "example-eng:core-network",

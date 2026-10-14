@@ -5,8 +5,8 @@ it with the suite's canonical-json v1 profile. Archinex, the workbench where arc
 nowhere in the snapshot.
 
 What it holds is what the engagement plane holds: requirements, subjects and their maturity, statements with their attribution,
-conflicts, gaps. It does **not** invent what the plane does not hold (decisions with alternatives, architecture elements,
-compliance links, reuse log): ``schemas/engagement_bundle.schema.json`` remains the target model for those.
+conflicts, gaps, decisions, and (K17) the requirement -> control coverage that the decisions declare. It does **not** invent
+what the plane does not hold (architecture elements, reuse log): ``schemas/engagement_bundle.schema.json`` remains the target model for those.
 
 Envelope (suite ``ExternalSnapshotEnvelope``): ``schemaVersion, snapshotId, sourceSystem, emitter, createdAt, sourceRevision,
 checksum, data``. ``checksum`` is the sha256 of ``data`` alone; ``snapshotId`` derives from it (the same state gives the same
@@ -36,7 +36,7 @@ from pipelines.snapshot_envelope import provisional
 from tools.elicitation.config import SUBJECT_LEVELS
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "engagement_snapshot.schema.json"
-SCHEMA_VERSION = "1.6"
+SCHEMA_VERSION = "1.7"
 EMITTER = "knowledge-hub"
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+")
 HANDLE = re.compile(r"^@[a-z0-9][a-z0-9._-]{0,62}$")
@@ -177,6 +177,7 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
 
     facts_section = fact_module.pinned(decisions, kb_snapshot)  # K18: only asserted decisions bring facts
     from pipelines.engagement import cascade as cascade_module  # noqa: PLC0415
+    from pipelines.engagement import compliance as compliance_module  # noqa: PLC0415
 
     origins = raw.get("origins") or {}
     adjustments = raw.get("adjustments") or []
@@ -219,6 +220,9 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
               "subject": q.get("subject") or "", "blocking": (q.get("gap_type") or "G2_unanswered_blocking") == "G2_unanswered_blocking"}
              for q in sorted(raw["questions"], key=lambda q: q["id"]) if q.get("status") in OPEN_QUESTION]
 
+    requirements_out = [_requirement(r) for r in sorted(raw["requirements"], key=lambda r: r["id"])]
+    matched = {r["id"]: r.get("matched_controls") for r in raw["requirements"]}
+    compliance = compliance_module.coverage([{**r, "matched_controls": matched[r["id"]]} for r in requirements_out], decisions, kb_snapshot)
     unripe = sum(1 for s in subjects if s["maturity"] in UNRIPE)
     open_conflicts = sum(1 for c in conflicts if c["status"] == "open")
     return {
@@ -226,7 +230,8 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
         "pins": {"contract_version": CONTRACT_VERSION,
                  "kb_snapshot": {"snapshot_id": kb_snapshot["snapshot_id"], "checksum": kb_snapshot["payload_sha256"]} if kb_snapshot else None},
         **provisional(unripe, open_conflicts),
-        "requirements": [_requirement(r) for r in sorted(raw["requirements"], key=lambda r: r["id"])],
+        "requirements": requirements_out,
+        "compliance": compliance,
         "subjects": subjects, "statements": statements, "decisions": decisions, "facts": facts_section, "lineage": lineage, "rule_adjustments": rule_adjustments, "conflicts": conflicts,
         "gaps": sorted(gaps, key=lambda g: g["id"]),
         "kb_references": kb_refs, "unresolved_references": unresolved,
@@ -383,6 +388,21 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
             problems.append(Problem("FACT_NOT_ASSERTED", f"$.data.facts.items[{i}]", f"fact {f['key']} comes from decision {d['id']}, which is not asserted"))
         elif not any(x["key"] == f["key"] and x["value"] == f["value"] for x in d["facts"]):
             problems.append(Problem("FACT_NOT_IN_DECISION", f"$.data.facts.items[{i}]", f"decision {d['id']} does not carry fact {f['key']}"))
+    decision_status = {d["id"]: d["status"] for d in data["decisions"]}
+    for i, item in enumerate(data["compliance"]["items"]):
+        where = f"$.data.compliance.items[{i}]"
+        if item["requirement_id"] not in requirement_ids:
+            problems.append(Problem("DANGLING", where, f"compliance row cites unknown requirement {item['requirement_id']}"))
+        levels = set()
+        for did in item["decisions"]:
+            if did not in decision_status:
+                problems.append(Problem("DANGLING", where, f"compliance row cites unknown decision {did}"))
+            else:
+                levels.add(decision_status[did])
+        # the coverage is what the decisions declare: asserted -> allocated, only proposed -> proposed, none -> uncovered
+        expected_status = "allocated" if "active" in levels else ("proposed" if levels & {"proposed"} else "uncovered")
+        if item["status"] != expected_status:
+            problems.append(Problem("COVERAGE_STATUS", where, f"{item['requirement_id']} / {item['control_id']}: the status is {item['status']} but its decisions say {expected_status}"))
     adj = data["rule_adjustments"]
     for i, d in enumerate(adj["disabled"]):
         where = f"$.data.rule_adjustments.disabled[{i}]"
