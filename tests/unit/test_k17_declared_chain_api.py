@@ -1,4 +1,4 @@
-"""K17, contract 1.34 (issue #123): a requirement written through the API — which never carries ``matched_controls`` — reaches the
+"""K17, contract 1.35 (issue #123): a requirement written through the API — which never carries ``matched_controls`` — reaches the
 controls its decisions declare, on the real knowledge snapshot, without any matching of text."""
 
 import json

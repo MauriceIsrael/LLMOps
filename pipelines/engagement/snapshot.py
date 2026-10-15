@@ -409,7 +409,7 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
         if pair in pairs:
             problems.append(Problem("COVERAGE_DUPLICATE", where, f"{item['requirement_id']} / {item['control_id']} appears twice"))
         pairs.add(pair)
-        if item.get("basis") == "declared_by_decision":  # contract 1.34: the row exists only because a decision stands behind it
+        if item.get("basis") == "declared_by_decision":  # contract 1.35: the row exists only because a decision stands behind it
             if not item["decisions"]:
                 problems.append(Problem("COVERAGE_WITHOUT_DECISION", where, f"{item['requirement_id']} / {item['control_id']} is declared by a decision but cites none"))
             for did in item["decisions"]:

@@ -294,7 +294,7 @@ flowchart LR
 
 - **Identité non signée** (§7) : confiance dans le client délégué.
 - **Parité avec le bundle d'Archinex** : la matrice de conformité exigence → contrôle est dans l'instantané d'engagement depuis le contrat 1.31 (K17, après la correction de `compliance_mapper`, K6) ; les manques G3 dérivés n'y sont pas encore (ils demandent une règle d'applicabilité des principes). C'est la porte du retrait de l'émission locale d'Archinex.
-- **Capitalisation** : le canal (K7) et l'étanchéité (K13) sont livrés ; reste à produire, côté Hub, la proposition de capitalisation d'une règle locale (K21 point 4) à partir de l'engagement.
+- **Capitalisation** : le canal (K7), l'étanchéité (K13) et la proposition de capitalisation d'une règle locale (K21 point 4, `…/rules/{trigger_id}/capitalise`) sont livrés ; la remontée d'une **décision** d'engagement n'a pas encore son pendant.
 - **Lecture directe de la base** par `get_asset(id)` sans paramètre : conservée pour la compatibilité ; sa dépréciation reste à planifier.
 - **Consommateur de l'instantané d'engagement** : adaptateur non attribué (issue #40).
 - **Application d'administration** : l'écran de revue des règles est vérifié par `svelte-check` et par le build, non validé visuellement.

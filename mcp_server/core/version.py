@@ -146,7 +146,15 @@ Minor versions only add interfaces or optional fields:
   candidate of the ordinary cycle with its provenance (``source.system``, ``source.snapshot_id``, ``source.snapshot_checksum``,
   ``source.candidate_ref``); an altered snapshot is refused whole (``400``, ``problems``); reading it twice creates nothing twice
   (``skipped``). ``source.system`` accepts ``architecture-studio`` and ``requirements-intake``.
-* ``1.34`` — requirement → control coverage also from the chain the engagement declares (K17, issue #123): a requirement carried by a
+
+* ``1.34`` — capitalisation of a local rule toward the reference base (K21 point 4, issue #70): ``POST
+  /api/engagements/{id}/rules/{trigger_id}/capitalise`` (role ``decide``; body ``{asset}``, the element of the base that carries
+  the rule) returns the **sealed snapshot of proposals** of the channel K7 (``sourceSystem`` ``hub-engagement``,
+  ``schemas/proposal_snapshot.schema.json``), never a direct write; a maintainer reads it with ``kb import-proposals`` and a
+  person reviews the candidate. ``TRG-local-x`` becomes ``TRG-x``; a free text that still carries a programme anchor (K13) is
+  refused with ``anchors_found``. Proposal ``asset_type`` accepts ``trigger`` and ``fact_key``; ``source.system`` accepts
+  ``hub-engagement``.
+* ``1.35`` — requirement → control coverage also from the chain the engagement declares (K17, issue #123): a requirement carried by a
   subject reaches the controls that an asset cited by a decision on that subject implements in the pinned knowledge snapshot, without
   any matching of text. Such rows carry ``basis: "declared_by_decision"`` (engagement snapshot ``schemaVersion`` ``1.8``); the rows
   already produced by ``matched_controls`` are unchanged. A typed key in ``based_on`` (``decision:ADR-0001``) is read as the asset it
@@ -155,6 +163,6 @@ Minor versions only add interfaces or optional fields:
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.34"
+CONTRACT_VERSION = "1.35"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 

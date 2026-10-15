@@ -23,7 +23,7 @@ def test_coverage_is_what_asserted_decisions_declare():
     assert section["origin"] == "knowledge-hub"
     assert rows(data_of()) == {
         ("REQ-001", "NIS2-ART21-2C"): "allocated",
-        ("REQ-001", "NIS2-ART21-2D"): "allocated",  # declared by the chain, not matched (contract 1.34)
+        ("REQ-001", "NIS2-ART21-2D"): "allocated",  # declared by the chain, not matched (contract 1.35)
         ("REQ-002", "NIS2-ART21-2H"): "uncovered",
     }
     covered = next(i for i in section["items"] if i["status"] == "allocated")
@@ -103,7 +103,7 @@ def _rechecksummed(mutate):
     return seal(data, "example-eng", CREATED_AT, "x")  # a valid seal: only the content rules can stop it
 
 
-# --- contract 1.34: the chain requirement <- subject <- decision -> asset -> control, without any matching of text -------------------
+# --- contract 1.35: the chain requirement <- subject <- decision -> asset -> control, without any matching of text -------------------
 
 
 def unmatched(raw):

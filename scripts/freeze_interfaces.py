@@ -447,6 +447,10 @@ def build_catalogue() -> list[Interface]:
             "initial_level": "L1_framed", "suggested_role": "network-architect", "mandatory": False}, member="contrib@example.org"),
         _rest("POST", "/api/engagements/{engagement}/rules/{trigger_id}/assert",
               "/api/engagements/contract-eng/rules/TRG-local-time-sync/assert", member="decider@example.org"),
+        # Contract 1.34 (K21 point 4): propose an asserted local rule to the reference base
+        _rest("POST", "/api/engagements/{engagement}/rules/{trigger_id}/capitalise",
+              "/api/engagements/contract-eng/rules/TRG-local-time-sync/capitalise", json_body={"asset": "PAT-001"},
+              member="decider@example.org"),
         _rest("POST", "/api/engagements/{engagement}/rules/{trigger_id}/withdraw",
               "/api/engagements/contract-eng/rules/TRG-local-time-sync/withdraw", member="admin@example.org"),
         _rest("PUT", "/api/engagements/{engagement}/kb-pin", "/api/engagements/contract-eng/kb-pin", member="admin@example.org",

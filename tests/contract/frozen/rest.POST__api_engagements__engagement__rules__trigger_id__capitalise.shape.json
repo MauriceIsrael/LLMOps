@@ -1,0 +1,152 @@
+{
+  "interface": "rest.POST /api/engagements/{engagement}/rules/{trigger_id}/capitalise",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "data": {
+            "keys": {
+              "next": {
+                "type": [
+                  "string"
+                ]
+              },
+              "proposed_as": {
+                "type": [
+                  "string"
+                ]
+              },
+              "snapshot": {
+                "keys": {
+                  "checksum": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "createdAt": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "data": {
+                    "keys": {
+                      "candidates": {
+                        "items": {
+                          "keys": {
+                            "id": {
+                              "type": [
+                                "string"
+                              ]
+                            },
+                            "proposal": {
+                              "keys": {
+                                "asset_type": {
+                                  "type": [
+                                    "string"
+                                  ]
+                                },
+                                "kind": {
+                                  "type": [
+                                    "string"
+                                  ]
+                                },
+                                "production_mode": {
+                                  "type": [
+                                    "string"
+                                  ]
+                                },
+                                "proposed_content": {
+                                  "type": [
+                                    "string"
+                                  ]
+                                },
+                                "rationale": {
+                                  "type": [
+                                    "string"
+                                  ]
+                                },
+                                "title": {
+                                  "type": [
+                                    "string"
+                                  ]
+                                }
+                              },
+                              "type": [
+                                "object"
+                              ]
+                            },
+                            "suggestedDestination": {
+                              "type": [
+                                "string"
+                              ]
+                            }
+                          },
+                          "type": [
+                            "object"
+                          ]
+                        },
+                        "type": [
+                          "array"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "schemaVersion": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "snapshotId": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "sourceSystem": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}
