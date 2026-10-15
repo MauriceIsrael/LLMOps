@@ -138,9 +138,18 @@ Minor versions only add interfaces or optional fields:
   what was found, and a refused reuse confirmation writes nothing. PAT-008, which still carried such an anchor, is cleaned
   (revision 2). No route or response shape changes.
 
+* ``1.33`` — channel of proposals from the suite to the Hub (K7, issue #44; amendment KH-1 of ADR-SUITE-05): a suite application
+  never calls the Hub, it **publishes** a sealed snapshot of proposals (``schemas/proposal_snapshot.schema.json``, suite envelope,
+  canonical-json v1 seal; candidate type ``ExtractedCandidate`` with destination ``knowledge-hub-reference`` and the proposal in
+  ``proposal``) and the Hub **reads** it: ``kb import-proposals <snapshot> [--dry-run]`` and ``POST
+  /api/knowledge/proposals/import`` (``?dry_run=1``; for the clients that carry the file, not for the suite). Every proposal becomes a
+  candidate of the ordinary cycle with its provenance (``source.system``, ``source.snapshot_id``, ``source.snapshot_checksum``,
+  ``source.candidate_ref``); an altered snapshot is refused whole (``400``, ``problems``); reading it twice creates nothing twice
+  (``skipped``). ``source.system`` accepts ``architecture-studio`` and ``requirements-intake``.
+
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.32"
+CONTRACT_VERSION = "1.33"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 

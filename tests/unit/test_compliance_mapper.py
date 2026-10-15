@@ -6,7 +6,6 @@ from pipelines.compliance_mapper import (
     match_text_to_controls,
 )
 
-
 HAND_CURATED_CONTROLS = 62  # the controls the base held before any framework was ingested from a source; it only grows
 
 

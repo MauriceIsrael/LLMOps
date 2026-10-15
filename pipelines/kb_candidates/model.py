@@ -13,7 +13,7 @@ from typing import Any
 
 KINDS = ("new_asset", "amendment", "rex", "framework_ingestion")
 ASSET_TYPES = ("principle", "pattern", "decision", "control", "glossary", "trigger", "fact_key")  # K22: rules and vocabulary keys
-SOURCE_SYSTEMS = ("archinex", "document-studio", "mcp", "cli-ingestion", "kb-extraction")
+SOURCE_SYSTEMS = ("archinex", "document-studio", "architecture-studio", "requirements-intake", "mcp", "cli-ingestion", "kb-extraction")
 PRODUCTION_MODES = ("human-authored", "llm-proposed-human-approved", "llm-derived")
 EVIDENCE_KINDS = ("measure", "audit", "engagement", "vendor-doc")
 STATUSES = ("proposed", "checks_failed", "in_review", "accepted", "rejected", "published")
@@ -107,6 +107,8 @@ def validate_submission(payload: Any) -> dict[str, Any]:
             "author": opt("author"),
             "contact": opt("contact"),
             "production_mode": mode,
+            # K7: where a proposal published by a suite application comes from (sealed snapshot, candidate inside it)
+            **{k: v for k in ("snapshot_id", "snapshot_checksum", "candidate_ref") if (v := opt(k)) is not None},
         },
         "evidence": clean_evidence,
     }
