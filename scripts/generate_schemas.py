@@ -572,7 +572,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.33")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.34")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 

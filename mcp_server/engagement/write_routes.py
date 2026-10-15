@@ -298,6 +298,10 @@ def build_write_routes() -> list[Route]:
         tid = request.path_params["trigger_id"]
         return await _handle(request, "contribute", lambda w, b, m: (200, w.rules.withdraw_local(tid, m["role"] in DECIDING_ROLES)))
 
+    async def capitalise_rule(request):
+        tid = request.path_params["trigger_id"]
+        return await _handle(request, "decide", lambda w, b, m: (200, w.rules.capitalise(tid, b)))
+
     async def disable_rule(request):
         tid = request.path_params["trigger_id"]
         return await _handle(request, "decide", lambda w, b, m: (200, w.rules.disable(tid, b)))
@@ -323,6 +327,7 @@ def build_write_routes() -> list[Route]:
         Route(f"{base}/rules", endpoint=propose_rule, methods=["POST"]),
         Route(f"{base}/rules/{{trigger_id}}/disable", endpoint=disable_rule, methods=["POST"]),
         Route(f"{base}/rules/{{trigger_id}}/enable", endpoint=enable_rule, methods=["POST"]),
+        Route(f"{base}/rules/{{trigger_id}}/capitalise", endpoint=capitalise_rule, methods=["POST"]),
         Route(f"{base}/rules/{{trigger_id}}/assert", endpoint=assert_rule, methods=["POST"]),
         Route(f"{base}/rules/{{trigger_id}}/withdraw", endpoint=withdraw_rule, methods=["POST"]),
         Route(f"{base}/kb-pin", endpoint=_kb_pin, methods=["PUT"]),

@@ -72,6 +72,7 @@
   "rest.POST /api/engagements/{engagement}/requirements/{requirement_id}/disposition/withdraw": 200,
   "rest.POST /api/engagements/{engagement}/rules": 201,
   "rest.POST /api/engagements/{engagement}/rules/{trigger_id}/assert": 200,
+  "rest.POST /api/engagements/{engagement}/rules/{trigger_id}/capitalise": 200,
   "rest.POST /api/engagements/{engagement}/rules/{trigger_id}/disable": 200,
   "rest.POST /api/engagements/{engagement}/rules/{trigger_id}/enable": 200,
   "rest.POST /api/engagements/{engagement}/rules/{trigger_id}/withdraw": 200,

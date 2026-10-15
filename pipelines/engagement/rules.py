@@ -10,7 +10,8 @@ elements**: they belong to the engagement base, never to the knowledge base.
   proposes it; it applies only once a ``decider`` **other than its author** has asserted it.
 * The engine reads ``rules of the pinned base - deactivations + asserted local rules``.
 
-Capitalising a useful local rule toward the reference base goes through the proposals channel (K7, K13): not in this lot.
+Capitalising a useful local rule toward the reference base goes through the proposals channel (K7), after the removal of every
+programme anchor (K13): ``capitalise`` builds the sealed snapshot of proposals; a maintainer reads it with ``kb import-proposals``.
 """
 
 from __future__ import annotations
@@ -18,6 +19,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+import yaml
 
 from pipelines import triggers
 from pipelines.engagement import facts as fact_module
@@ -131,6 +134,60 @@ class RuleAdjuster:
         self.repo.set_adjustment_status(record["id"], "withdrawn", record["validated_by"], record["validated_at"])
         self.access.audit(self.engagement, self.actor, "rule_withdraw", "allowed", {"trigger_id": trigger_id})
         return self._done({"adjustment": self._public(self.repo.get_adjustment(record["id"]))})
+
+    # --- capitalising a local rule toward the reference base (K21 point 4) ---------------------------------------------
+
+    def capitalise(self, trigger_id: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
+        """The sealed snapshot of proposals (K7) that proposes an asserted local rule to the reference base.
+
+        Never a direct write: the response is the envelope the channel reads (``kb import-proposals``), and the rule then goes
+        through the candidate cycle and its review. What ties the rule to the programme is removed (``TRG-local-`` becomes
+        ``TRG-``; author, validator and engagement are not in a rule); a free text that still carries an anchor is refused, and
+        the refusal names it (K13). A reference rule lives with the element of the base that carries it: the local rule's own, or
+        ``body.asset`` (a local rule usually has none). The same rule always gives the same snapshot, so reading it twice
+        creates one candidate.
+        """
+        from mcp_server.core.config import server_config
+        from pipelines.kb_candidates import anchors as anchor_module
+        from pipelines.kb_candidates.proposals import seal
+
+        record = self._local(trigger_id)
+        if record["status"] != "active":
+            raise WriteError(409, "not_asserted", f"{trigger_id} is '{record['status']}': only an asserted local rule is proposed to the reference base")
+        snapshot = self._snapshot()
+        vocabulary = fact_module.from_snapshot(snapshot)
+        if vocabulary is None:
+            raise WriteError(409, "kb_snapshot_unavailable", "the pinned knowledge snapshot has no facts vocabulary")
+        new_id = "TRG-" + trigger_id.removeprefix("TRG-local-")
+        if new_id in rules_of(snapshot):
+            raise WriteError(409, "id_taken", f"'{new_id}' is already a reference rule: rename the local rule before proposing it")
+        doc = {k: (record["payload"] or {}).get(k) for k in LOCAL_FIELDS}
+        doc["trigger_id"] = new_id
+        carrier = (body or {}).get("asset")
+        if carrier is not None:
+            doc["asset"] = carrier
+        if not doc.get("asset"):
+            raise WriteError(400, "asset_required", "a reference rule is carried by an element of the knowledge base: pass 'asset'", "asset")
+        problems = triggers.validate_rule(doc, new_id, vocabulary, carrier_index(snapshot))
+        if problems:
+            first = problems[0]
+            raise WriteError(409, first["code"], first["reason"], first["path"], problems=problems)
+        content = yaml.safe_dump(doc, sort_keys=False, allow_unicode=True, width=1000, default_flow_style=None)
+        found = anchor_module.anchors(content, server_config.kb_dir, anchor_module.known_engagement_ids([self.engagement]))
+        if found:
+            raise WriteError(409, "anchors_found", f"the rule still carries a programme anchor ({anchor_module.describe(found)}): "
+                             "the knowledge base holds no programme")
+        title = f"Trigger {new_id}"
+        envelope = seal([{"id": f"cand-{new_id}", "suggestedDestination": "knowledge-hub-reference",
+                          "proposal": {"kind": "new_asset", "asset_type": "trigger", "title": title, "proposed_content": content,
+                                       "rationale": "A rule used in a programme and asserted by its deciders, proposed for the reference base.",
+                                       "production_mode": "human-authored"}}],
+                        "hub-engagement", "pending", (record["validated_at"] or _now()) + "Z")
+        envelope["snapshotId"] = f"hub-engagement-{envelope['checksum'][7:19]}"
+        self.access.audit(self.engagement, self.actor, "rule_capitalise", "allowed", {"trigger_id": trigger_id, "proposed_as": new_id,
+                                                                                      "checksum": envelope["checksum"]})
+        return {"snapshot": envelope, "proposed_as": new_id,
+                "next": "A maintainer of the knowledge base reads this snapshot with `kb import-proposals`; a person reviews the candidate."}
 
     def _local(self, trigger_id: str) -> dict[str, Any]:
         record = self.repo.get_adjustment(f"ADJ-local-{trigger_id}")
