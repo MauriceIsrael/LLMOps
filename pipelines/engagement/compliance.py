@@ -1,4 +1,4 @@
-"""Requirement → control coverage of an engagement, computed by the Hub (K17, contract 1.31; declared chain, contract 1.33).
+"""Requirement → control coverage of an engagement, computed by the Hub (K17, contract 1.31; declared chain, contract 1.34).
 
 Deterministic and declarative: the Hub **verifies nothing** (ADR-KH-01 D2, K6). For each requirement of the engagement and each
 control it was matched to (``matched_controls``, resolved against the pinned knowledge snapshot), the coverage is what the
@@ -9,7 +9,7 @@ engagement's decisions *declare*:
 * ``uncovered``: no decision does.
 
 A requirement can also reach a control **without any matching of text**, through the chain the engagement itself declares
-(contract 1.33): the requirement is carried by a subject, a decision on that subject cites an asset (or the control itself), and
+(contract 1.34): the requirement is carried by a subject, a decision on that subject cites an asset (or the control itself), and
 the pinned snapshot says that asset implements the control. Such a row has ``basis: "declared_by_decision"`` and is never
 ``uncovered`` (it exists because a decision stands behind it). A pair already matched keeps its single, unchanged row.
 

@@ -214,6 +214,9 @@ def generate_kb_candidate_schema() -> dict[str, Any]:
                     "author": nullable_str,
                     "contact": nullable_str,
                     "production_mode": {"enum": list(PRODUCTION_MODES)},
+                    "snapshot_id": {"type": "string"},
+                    "snapshot_checksum": {"type": "string"},
+                    "candidate_ref": {"type": "string"},
                 },
             },
             "evidence": {
@@ -569,7 +572,7 @@ def generate_typescript_types() -> str:
     stmt_statuses_union = " | ".join(f'"{s}"' for s in sorted(STATEMENT_STATUSES | {"contested", "under_review"}))
 
     return f"""/**
- * LLMOps MCP Tool Response Contract (schema_version: "1.33")
+ * LLMOps MCP Tool Response Contract (schema_version: "1.34")
  * Generated automatically by scripts/generate_schemas.py. Do not edit manually.
  */
 

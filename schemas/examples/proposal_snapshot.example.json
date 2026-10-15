@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0",
+  "snapshotId": "document-studio-proposals-0001",
+  "sourceSystem": "document-studio",
+  "createdAt": "2026-10-15T09:00:00Z",
+  "checksum": "sha256:709cc64aa711995393c53c4fbaec0b6255cf93e3d83c870cd42326c7e6e0d36c",
+  "data": {
+    "candidates": [
+      {
+        "id": "cand-REQ-0007",
+        "suggestedDestination": "knowledge-hub-reference",
+        "candidateKind": "technical-requirement",
+        "sourceFragment": {
+          "id": "frag-REQ-0007",
+          "documentId": "lessons-learned-2026",
+          "documentVersion": "1.0",
+          "sectionPath": [
+            "3.2"
+          ],
+          "originalText": "Routing changes went out to every node at once.",
+          "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "proposal": {
+          "kind": "new_asset",
+          "asset_type": "pattern",
+          "title": "Canary before general deployment",
+          "rationale": "A routing change went to every node at once and could not be rolled back in time.",
+          "proposed_content": "---\nid: PAT-NEW\ntitle: Canary before general deployment\ntype: pattern\nphase: [BUILD]\ndomain: [network-automation]\n---\n\n# Canary before general deployment\n\n## Problem\nA routing change that is wrong everywhere at once cannot be rolled back in time.\n\n## Solution\nInject the change on one canary node, observe, then widen.\n\n## Trade-offs\nSlower roll-out.\n\n## When not to use this\nChanges that are atomic by nature.\n",
+          "domain": [
+            "network-automation"
+          ],
+          "production_mode": "llm-derived"
+        }
+      }
+    ]
+  }
+}

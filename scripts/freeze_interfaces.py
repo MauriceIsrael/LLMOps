@@ -520,6 +520,8 @@ def build_catalogue() -> list[Interface]:
         _rest("POST", "/api/knowledge/check", json_body={
             "option": SAMPLE_OPTION, "subject": "Network incident remediation", "frameworks": ["NIS2"]}),
         _rest("POST", "/api/knowledge/candidates", json_body=SAMPLE_CANDIDATE, remember="rest"),
+        # Contract 1.33 (K7): sealed snapshot of proposals published by a suite application
+        _rest("POST", "/api/knowledge/proposals/import", json_body=_proposal_snapshot()),
         _rest("GET", "/api/knowledge/candidates", "/api/knowledge/candidates?source=mcp"),
         _rest("GET", "/api/knowledge/candidates/{candidate_id}", "/api/knowledge/candidates/{rest}"),
         # Contract 1.5
@@ -771,6 +773,12 @@ def status_codes(results: dict[str, Any]) -> dict[str, int]:
         for name, result in results.items()
         if name.startswith("rest.") and isinstance(result, dict) and "status_code" in result
     }
+
+
+def _proposal_snapshot() -> dict[str, Any]:
+    from scripts.export_proposal_example import build_example
+
+    return build_example()
 
 
 def main() -> None:

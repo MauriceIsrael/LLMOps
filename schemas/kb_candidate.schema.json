@@ -81,6 +81,8 @@
           "enum": [
             "archinex",
             "document-studio",
+            "architecture-studio",
+            "requirements-intake",
             "mcp",
             "cli-ingestion",
             "kb-extraction"
@@ -116,6 +118,15 @@
             "llm-proposed-human-approved",
             "llm-derived"
           ]
+        },
+        "snapshot_id": {
+          "type": "string"
+        },
+        "snapshot_checksum": {
+          "type": "string"
+        },
+        "candidate_ref": {
+          "type": "string"
         }
       }
     },

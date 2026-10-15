@@ -97,6 +97,7 @@
   "rest.POST /api/knowledge/checks/simulate": 200,
   "rest.POST /api/knowledge/evals/{dataset}/cases": 201,
   "rest.POST /api/knowledge/evals/{dataset}/runs": 201,
+  "rest.POST /api/knowledge/proposals/import": 201,
   "rest.POST /api/knowledge/publications": 200,
   "rest.POST /api/knowledge/reuse-confirmations": 201,
   "rest.POST /api/knowledge/similar": 200,
