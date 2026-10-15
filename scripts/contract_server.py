@@ -7,7 +7,9 @@ end to end without touching the repository or any deployment.
     poetry run python scripts/contract_server.py [--port 8099]
 
 Service token (header ``Authorization: Bearer contract-service-token``) carries ``kb:review`` and
-``kb:delegate``; ``demo-token`` is the public demo token (no governance scope). Experts, acting
+``kb:delegate``; ``demo-token`` is the public demo token (no governance scope). Two more tokens serve the engagement
+channel (contract 1.17+): ``arx-token`` (``eng:delegate``: acts for a member, named by ``X-Actor-Email``, as Archinex does) and
+``suite-token`` (``eng:service``: reads a sealed engagement snapshot, as the suite does). Experts, acting
 through ``X-Actor-Email``:
 
     alice@example.org  @core-owner-architecture  (owns architecture, automation, network-automation...)
@@ -76,13 +78,18 @@ def prepare(tmp: Path) -> dict[str, str]:
         sim_yaml.write_text(yaml.safe_dump(sim_cfg, sort_keys=False, allow_unicode=True), encoding="utf-8")
     db = tmp / "knowledge.lbug"
     shutil.copy(ROOT / "data" / "knowledge.lbug", db)
+    # An engagement snapshot resolves what its decisions and facts cite in the sealed knowledge snapshot: give the server the
+    # repository's, so that a client can export an engagement end to end.
+    (tmp / "data" / "snapshots").mkdir(parents=True, exist_ok=True)
+    for snapshot in (ROOT / "data" / "snapshots").glob("*.json"):
+        shutil.copy(snapshot, tmp / "data" / "snapshots" / snapshot.name)
     return {
         "LLMOPS_KB_DIR": str(kb),
         "LLMOPS_KNOWLEDGE_DB_PATH": str(db),
         "CANDIDATES_BACKEND": "sql",
         "GOVERNANCE_DATABASE_URL": f"sqlite:///{tmp / 'governance.db'}",
         "SERVER_TOKEN": "demo-token",
-        "ENGAGEMENT_TOKENS": f"{SERVICE_TOKEN}:kb:review,kb:delegate,*",
+        "ENGAGEMENT_TOKENS": f"{SERVICE_TOKEN}:kb:review,kb:delegate,*;arx-token:*,eng:delegate;suite-token:*,eng:service",
         "LLMOPS_STORAGE_PERSISTENT": "true",
         "PYTHONPATH": str(ROOT),
     }

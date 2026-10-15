@@ -312,7 +312,7 @@ def get_graph_summary() -> dict[str, Any]:
 
         engagements_list.append({
             "id": eng_id,
-            "dataset": eng_path,
+            "dataset": Path(eng_path).as_posix(),  # the same text on every OS: a fixture generated on Windows stays valid on Linux
             "node_counts": {
                 "Subject": sub_cnt,
                 "Statement": stmt_cnt,
@@ -323,7 +323,7 @@ def get_graph_summary() -> dict[str, Any]:
     payload = {
         "schema_version": CONTRACT_VERSION,
         "knowledge": {
-            "dataset": str(server_config.knowledge_db_path),
+            "dataset": Path(server_config.knowledge_db_path).as_posix(),
             "node_counts": kb_counts,
         },
         "engagements": engagements_list,
