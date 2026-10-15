@@ -13,7 +13,7 @@ from typing import Any
 
 KINDS = ("new_asset", "amendment", "rex", "framework_ingestion")
 ASSET_TYPES = ("principle", "pattern", "decision", "control", "glossary", "trigger", "fact_key")  # K22: rules and vocabulary keys
-SOURCE_SYSTEMS = ("archinex", "document-studio", "architecture-studio", "requirements-intake", "mcp", "cli-ingestion", "kb-extraction")
+SOURCE_SYSTEMS = ("archinex", "document-studio", "architecture-studio", "requirements-intake", "hub-engagement", "mcp", "cli-ingestion", "kb-extraction")
 PRODUCTION_MODES = ("human-authored", "llm-proposed-human-approved", "llm-derived")
 EVIDENCE_KINDS = ("measure", "audit", "engagement", "vendor-doc")
 STATUSES = ("proposed", "checks_failed", "in_review", "accepted", "rejected", "published")

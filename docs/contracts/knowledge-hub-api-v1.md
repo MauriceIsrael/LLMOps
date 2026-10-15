@@ -1148,6 +1148,19 @@ Les manques G3 `principle_unaddressed` ne sont pas inclus : ils demandent une r�
 
 Réponse `201` : `{snapshot, dry_run, imported: [{candidate_ref, id, status}], skipped: [...], refused: [{candidate_ref, argument, reason}]}`.
 
+### 5.34 Contrat 1.34 — Capitalisation d'une règle locale (K21 point 4, issue #70)
+
+Une règle locale utile (§5.24) peut remonter vers le référentiel, **par le canal de propositions (§5.33), jamais par un `POST` direct**, et sans rien qui rattache la règle au programme (§5.32).
+
+`POST /api/engagements/{id}/rules/{trigger_id}/capitalise` — rôle `decide` ; corps `{asset}` : l'élément de la base de connaissance qui portera la règle (une règle de référence vit avec un actif ; la règle locale n'en a en général pas). Réponse `200` : `{snapshot, proposed_as, next}` où `snapshot` est l'**instantané scellé de propositions** du canal K7 (`sourceSystem` `hub-engagement`, un candidat `asset_type: trigger`, `production_mode: human-authored`). Un responsable de la base le lit avec `kb import-proposals` ; une personne relit ensuite le candidat.
+
+* Seule une règle **affirmée** est proposée (`409 not_asserted`).
+* `TRG-local-x` devient `TRG-x` (`409 id_taken` si ce nom existe déjà dans la base épinglée) ; l'auteur, le validateur et l'engagement ne figurent pas dans une règle.
+* La règle est validée comme une règle de référence (vocabulaire K18, porteur) ; un texte libre qui porte encore une ancre de programme (identifiant d'engagement, handle, e-mail, IP, nom interdit) est **refusé et nommé** : `409 anchors_found`.
+* Le même instantané est produit pour la même règle : le lire deux fois ne crée qu'un candidat. L'opération est tracée dans le journal d'accès de l'engagement (`rule_capitalise`).
+
+Le canal accepte désormais `asset_type` `trigger` et `fact_key`, et l'émetteur `hub-engagement`.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

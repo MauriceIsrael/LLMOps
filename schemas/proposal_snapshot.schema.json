@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "ProposalSnapshot",
-  "description": "Sealed snapshot of proposals a suite application publishes toward the Knowledge Hub (contract 1.33, K7, ADR-KH-01 amendment KH-1). Suite ExternalSnapshotEnvelope; checksum = sha256 of data at the canonical-json v1 profile. The Hub reads it and turns every proposal into a candidate in review; nothing becomes active without a human review. The candidate type is the suite's ExtractedCandidate (destination knowledge-hub-reference), with the proposal in `proposal`.",
+  "description": "Sealed snapshot of proposals a suite application publishes toward the Knowledge Hub (contract 1.33, K7, ADR-KH-01 amendment KH-1). Suite ExternalSnapshotEnvelope; checksum = sha256 of data at the canonical-json v1 profile. The Hub reads it and turns every proposal into a candidate in review; nothing becomes active without a human review. The candidate type is the suite's ExtractedCandidate (destination knowledge-hub-reference), with the proposal in `proposal`. `hub-engagement` is the engagement plane of the Hub itself, capitalising a local rule (K21 point 4).",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -25,7 +25,8 @@
       "enum": [
         "document-studio",
         "architecture-studio",
-        "requirements-intake"
+        "requirements-intake",
+        "hub-engagement"
       ]
     },
     "createdAt": {
@@ -107,7 +108,9 @@
                       "pattern",
                       "decision",
                       "control",
-                      "glossary"
+                      "glossary",
+                      "trigger",
+                      "fact_key"
                     ]
                   },
                   "title": {
