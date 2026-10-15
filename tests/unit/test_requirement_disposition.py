@@ -199,7 +199,7 @@ def test_the_snapshot_states_the_decisions_and_the_carried_requirements_and_veri
     res, data = snapshot(client)
     assert res.status_code == 201, res.text
     env = client.get(f"{BASE}/exports/{data['snapshotRef']['snapshotId']}", headers={"Authorization": "Bearer suite-token"}).json()
-    assert env["schemaVersion"] == "1.7" and verify(env) == []
+    assert env["schemaVersion"] == "1.8" and verify(env) == []
     by_id = {r["id"]: r for r in env["data"]["requirements"]}
     assert by_id[R1]["disposition"] == {"value": "deliberated", "reason": "", "status": "active", "assertion_level": "asserted",
                                         "author": "@carl", "validated_by": "@dan", "validated_at": by_id[R1]["disposition"]["validated_at"]}

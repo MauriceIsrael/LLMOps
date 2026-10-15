@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.32"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.33"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.32"
+  "schema_version": "1.33"
 }
 ```
 
@@ -52,6 +52,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.30` | Honest conformity snapshot (K6, [contract §5.30](contracts/knowledge-hub-api-v1.md)): no `verified` status, evidence origin `knowledge-hub`, `sourceSystem` not declarative (another `source_system` is refused with `400`). |
 | `1.31` | Requirement → control coverage in the engagement snapshot (K17, [contract §5.31](contracts/knowledge-hub-api-v1.md)): section `compliance` (schema `1.7`), statuses `allocated` / `proposed` / `uncovered`, never `verified`, origin `knowledge-hub`. |
 | `1.32` | Sealed capitalisation: no programme anchor in the knowledge base (K13, [contract §5.32](contracts/knowledge-hub-api-v1.md)): shared definition of an anchor for the candidate cycle and the reuse journal; engagement identifier, e-mail, member handle and programme front matter field now fail the `anonymization` check. |
+| `1.33` | Requirement → control coverage also from the declared chain requirement ← subject ← decision → asset → control ([contract §5.33](contracts/knowledge-hub-api-v1.md)): rows with `basis: "declared_by_decision"` (engagement snapshot schema `1.8`), no matching of text; rows already produced by `matched_controls` unchanged. No route added or changed. |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

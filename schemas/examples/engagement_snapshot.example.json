@@ -1,18 +1,18 @@
 {
-  "schemaVersion": "1.7",
-  "snapshotId": "eng-example-eng-76be05a2e568",
+  "schemaVersion": "1.8",
+  "snapshotId": "eng-example-eng-baf3d3883b94",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:76be05a2e568d203ef83d309adc2663a9012fde93f29c03bb43487f006539fa1",
+  "checksum": "sha256:baf3d3883b946c1d0c80f41eb9c932b9db948a58667cb352d487bda5b51ce81d",
   "data": {
     "engagement": {
       "id": "example-eng",
       "confidentiality": "confidential"
     },
     "pins": {
-      "contract_version": "1.32",
+      "contract_version": "1.33",
       "kb_snapshot": {
         "snapshot_id": "snapshot-2026-10-03-0000000",
         "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
@@ -78,6 +78,20 @@
           "assets": [
             "ADR-0001"
           ]
+        },
+        {
+          "requirement_id": "REQ-001",
+          "control_id": "NIS2-ART21-2D",
+          "framework": "NIS2",
+          "severity": "mandatory",
+          "status": "allocated",
+          "decisions": [
+            "D-0001"
+          ],
+          "assets": [
+            "ADR-0001"
+          ],
+          "basis": "declared_by_decision"
         },
         {
           "requirement_id": "REQ-002",
