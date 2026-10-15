@@ -1114,6 +1114,20 @@ La couverture exigence → contrôle d'un **engagement** (décisions affirmées)
 
 Les manques G3 `principle_unaddressed` ne sont pas inclus : ils demandent une règle d'applicabilité des principes que la doctrine ne porte pas encore.
 
+### 5.32 Contrat 1.32 — Étanchéité de la capitalisation (K13, issue #51)
+
+**Pourquoi.** La base de connaissance est agnostique de tout programme (ADR-KH-01 A10-d-3) : une décision de projet n'y entre que par un candidat revu par un humain, et rien ne doit permettre de remonter à l'engagement d'origine.
+
+**Une seule définition d'une ancre de programme** (`pipelines/kb_candidates/anchors.py`), partagée par le contrôle `anonymization` du cycle des candidats et par le `subject_label` du journal de réutilisation :
+
+* l'**identifiant d'un engagement** (les engagements enregistrés, les bases de travail présentes, et celui dont vient le candidat) ;
+* une **adresse e-mail** (masquée dans le résultat : `j***@domaine`), un **handle de membre** (`@nom`, cherché dans le titre, la justification et le corps ; le front matter, où la promotion consigne les relecteurs de la base, en est exclu), une **adresse IP ou CIDR** (plages de documentation admises), un **nom interdit** (liste `anonymization_denylist.txt`) ;
+* les champs de front matter `source_engagement`, `engagement`, `engagement_id`, `client`, `site`.
+
+**Effet.** Une ancre fait échouer le contrôle (`checks_failed`, jamais `in_review`) et le message nomme précisément ce qui a été trouvé : le relecteur voit ce qui est refusé. Une confirmation de réutilisation dont le libellé contient une ancre est refusée en `400` et n'écrit rien dans le journal. Les **hypothèses** et la provenance générique (rôle, pas personne) du candidat sont conservées.
+
+**Vérification continue.** Un test parcourt la base de connaissance et échoue si l'identifiant d'un engagement connu y apparaît. PAT-008, qui portait encore `source_engagement` et le nom d'un projet, est nettoyé (révision 2).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

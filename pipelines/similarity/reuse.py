@@ -15,10 +15,8 @@ from typing import Any
 
 from sqlalchemy import select
 
-from pipelines.doctrine.text import normalize, normalize_phrase
 from pipelines.governance.log import now_iso
 from pipelines.governance.store import get_engine, reuse_confirmations
-from pipelines.kb_candidates.checks import find_ip_addresses, load_denylist
 from pipelines.kb_candidates.kb import KbAsset, load_assets
 
 OUTCOMES = ("reused", "reused_with_exception", "rejected_not_same", "rejected_assumption_fails", "deferred")
@@ -65,9 +63,12 @@ def validate_confirmation(body: dict[str, Any], asset: KbAsset | None, kb_dir: s
     label = str(body.get("subject_label") or "").strip()
     if not label or len(label) > 200:
         raise ReuseError("subject_label", "'subject_label' (short, anonymised) is required, at most 200 characters.")
-    if find_ip_addresses(label) or _EMAIL.search(label) or any(
-            normalize_phrase(t) and f" {normalize_phrase(t)} " in f" {normalize(label)} " for t in load_denylist(kb_dir)):
-        raise ReuseError("subject_label", "'subject_label' must be anonymised: no client name, address or e-mail.")
+    from pipelines.kb_candidates import anchors as anchor_module
+
+    found = anchor_module.anchors(label, kb_dir, anchor_module.known_engagement_ids())
+    if found:  # K13: the journal is as agnostic of programmes as the base (same definition as the candidate cycle)
+        raise ReuseError("subject_label", "'subject_label' must be anonymised: no client name, engagement identifier, address, handle or e-mail "
+                         f"({anchor_module.describe(found)}).")
     comment = str(body.get("comment") or "").strip() or None
     if asset is None:
         raise ReuseError("matched_ref", f"'{body.get('matched_ref')}' is not an asset of the knowledge base.")
