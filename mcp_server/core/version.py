@@ -154,10 +154,15 @@ Minor versions only add interfaces or optional fields:
   person reviews the candidate. ``TRG-local-x`` becomes ``TRG-x``; a free text that still carries a programme anchor (K13) is
   refused with ``anchors_found``. Proposal ``asset_type`` accepts ``trigger`` and ``fact_key``; ``source.system`` accepts
   ``hub-engagement``.
+* ``1.35`` — requirement → control coverage also from the chain the engagement declares (K17, issue #123): a requirement carried by a
+  subject reaches the controls that an asset cited by a decision on that subject implements in the pinned knowledge snapshot, without
+  any matching of text. Such rows carry ``basis: "declared_by_decision"`` (engagement snapshot ``schemaVersion`` ``1.8``); the rows
+  already produced by ``matched_controls`` are unchanged. A typed key in ``based_on`` (``decision:ADR-0001``) is read as the asset it
+  designates. No route is added or changed.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.34"
+CONTRACT_VERSION = "1.35"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 

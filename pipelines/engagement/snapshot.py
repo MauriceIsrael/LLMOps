@@ -36,7 +36,7 @@ from pipelines.snapshot_envelope import provisional
 from tools.elicitation.config import SUBJECT_LEVELS
 
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "engagement_snapshot.schema.json"
-SCHEMA_VERSION = "1.7"
+SCHEMA_VERSION = "1.8"
 EMITTER = "knowledge-hub"
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+")
 HANDLE = re.compile(r"^@[a-z0-9][a-z0-9._-]{0,62}$")
@@ -222,7 +222,7 @@ def build_data(raw: dict[str, Any], engagement: str, confidentiality: str, kb_sn
 
     requirements_out = [_requirement(r) for r in sorted(raw["requirements"], key=lambda r: r["id"])]
     matched = {r["id"]: r.get("matched_controls") for r in raw["requirements"]}
-    compliance = compliance_module.coverage([{**r, "matched_controls": matched[r["id"]]} for r in requirements_out], decisions, kb_snapshot)
+    compliance = compliance_module.coverage([{**r, "matched_controls": matched[r["id"]]} for r in requirements_out], decisions, kb_snapshot, subjects)
     unripe = sum(1 for s in subjects if s["maturity"] in UNRIPE)
     open_conflicts = sum(1 for c in conflicts if c["status"] == "open")
     return {
@@ -389,6 +389,8 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
         elif not any(x["key"] == f["key"] and x["value"] == f["value"] for x in d["facts"]):
             problems.append(Problem("FACT_NOT_IN_DECISION", f"$.data.facts.items[{i}]", f"decision {d['id']} does not carry fact {f['key']}"))
     decision_status = {d["id"]: d["status"] for d in data["decisions"]}
+    decision_subject = {d["id"]: d["subject"] for d in data["decisions"]}
+    pairs: set[tuple[str, str]] = set()
     for i, item in enumerate(data["compliance"]["items"]):
         where = f"$.data.compliance.items[{i}]"
         if item["requirement_id"] not in requirement_ids:
@@ -403,6 +405,17 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
         expected_status = "allocated" if "active" in levels else ("proposed" if levels & {"proposed"} else "uncovered")
         if item["status"] != expected_status:
             problems.append(Problem("COVERAGE_STATUS", where, f"{item['requirement_id']} / {item['control_id']}: the status is {item['status']} but its decisions say {expected_status}"))
+        pair = (item["requirement_id"], item["control_id"])
+        if pair in pairs:
+            problems.append(Problem("COVERAGE_DUPLICATE", where, f"{item['requirement_id']} / {item['control_id']} appears twice"))
+        pairs.add(pair)
+        if item.get("basis") == "declared_by_decision":  # contract 1.35: the row exists only because a decision stands behind it
+            if not item["decisions"]:
+                problems.append(Problem("COVERAGE_WITHOUT_DECISION", where, f"{item['requirement_id']} / {item['control_id']} is declared by a decision but cites none"))
+            for did in item["decisions"]:
+                carried_by = next((s for s in data["subjects"] if s["name"] == decision_subject.get(did)), None)
+                if carried_by is not None and item["requirement_id"] not in carried_by.get("requirement_ids", []):
+                    problems.append(Problem("COVERAGE_NOT_CARRIED", where, f"decision {did} is not on a subject that carries {item['requirement_id']}"))
     adj = data["rule_adjustments"]
     for i, d in enumerate(adj["disabled"]):
         where = f"$.data.rule_adjustments.disabled[{i}]"

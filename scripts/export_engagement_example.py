@@ -36,6 +36,7 @@ def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
                     "title": "Git as the source of truth", "type": "decision", "status": "active"}],
         "controls": [
             {"id": "NIS2-ART21-2C", "framework": "NIS2", "title": "Business continuity", "severity": "mandatory", "implemented_by": ["ADR-0001"]},
+            {"id": "NIS2-ART21-2D", "framework": "NIS2", "title": "Supply chain security", "severity": "mandatory", "implemented_by": ["ADR-0001"]},
             {"id": "NIS2-ART21-2H", "framework": "NIS2", "title": "Cryptography", "severity": "mandatory", "implemented_by": []}],
     }
     raw = {

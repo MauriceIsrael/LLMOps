@@ -1163,6 +1163,26 @@ Le canal accepte désormais `asset_type` `trigger` et `fact_key`, et l'émetteur
 
 ---
 
+### 5.35 Contrat 1.35 — Couverture exigence → contrôle déclarée par la chaîne des décisions (K17, issue #123)
+
+**Pourquoi.** La couverture du contrat 1.31 ne produit une ligne que pour un contrôle *rapproché* de l'exigence (`matched_controls`). Seules les exigences ingérées par le dépeceur de RFP du Hub portent ce rapprochement : une exigence créée par l'API d'écriture (la voie d'Archinex) n'en a pas, et la section restait vide, quoi que les décisions citent.
+
+**Ce qui est ajouté.** Des lignes que **aucun appariement de texte ne produit**, tirées de la chaîne que l'engagement déclare lui-même :
+
+> exigence ← portée par ← sujet ← décidé par ← décision → cite (`based_on`) → actif de la base → met en œuvre → contrôle
+
+L'exigence est portée par le sujet (1.27), la décision est celle de ce sujet et cite l'actif (ou le contrôle lui-même), et l'instantané de connaissances **épinglé** dit que l'actif met en œuvre le contrôle. Une telle ligne a `basis: "declared_by_decision"` ; elle n'est **jamais `uncovered`** (une décision la soutient) : `allocated` si une décision **affirmée** la soutient, `proposed` si seules des décisions proposées le font. Abaisser une décision d'affirmée à proposée change la ligne et le sceau.
+
+**Ce qui ne change pas.** Les lignes issues de `matched_controls` sont inchangées (même contenu, pas de `basis`) ; un couple déjà rapproché garde sa ligne unique. Une exigence évacuée par une décision affirmée n'a aucune ligne. Aucune route n'est ajoutée ni modifiée ; le schéma de l'instantané passe à `1.8` (champ facultatif `basis`).
+
+**Une correction au passage.** Une clé typée dans `based_on` (`decision:ADR-0001`) est lue comme l'actif qu'elle désigne, pour les lignes rapprochées comme pour les lignes déclarées : auparavant elle ne couvrait rien, faute d'être comparée à l'identifiant nu des actifs qui mettent le contrôle en œuvre.
+
+**Vérification.** Une ligne `declared_by_decision` sans décision (`COVERAGE_WITHOUT_DECISION`), dont une décision n'est pas sur un sujet qui porte l'exigence (`COVERAGE_NOT_CARRIED`), ou un couple exigence / contrôle en double (`COVERAGE_DUPLICATE`) fait refuser l'export.
+
+**Ce que ça n'est pas.** Elle ne dit pas que le contrôle est satisfait ni que le texte de l'actif répond à l'exigence. Un contrôle que l'exigence *devrait* viser et qu'aucune décision ne déclare reste absent (ou `uncovered` s'il a été rapproché). Les manques G3 dérivés ne sont toujours pas inclus.
+
+---
+
 ## 4. Oracles & Vecteurs de Test Partagés
 
 Afin de garantir une interopérabilité sans faille entre implémentations Python et TypeScript, les vecteurs de référence suivants sont tenus à disposition dans le dépôt :
