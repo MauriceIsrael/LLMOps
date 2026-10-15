@@ -265,12 +265,12 @@ flowchart LR
   end
   HUB -- "instantané scellé\nde la base" --> S["La suite\n(Architecture Studio, Document Engine, …)"]
   HUB -- "instantané scellé\nd'un engagement" --> S
-  S -. "propositions\n(canal scellé à définir, K7)" .-> HUB
+  S -. "propositions\n(instantané scellé, K7)" .-> HUB
 ```
 
 - **Archinex → Hub** : écriture dans l'engagement par l'API (membre, rôle, clé d'idempotence), reprise des projets existants par `import`, lecture des règles et des faits. Archinex extrait les faits des décisions (assisté) et affiche la cascade ; il n'ouvre aucun sujet lui-même.
 - **Hub → suite** : par fichiers scellés, jamais en RPC ; la suite ne connaît pas Archinex.
-- **Suite → Hub** : le canal de propositions (K7) n'existe pas encore ; aujourd'hui `POST /api/knowledge/candidates` est réservé aux clients non-suite. Qui consomme l'instantané d'engagement (adaptateur vers le graphe projeté, issue #40) reste à désigner.
+- **Suite → Hub** : le canal de propositions existe depuis le contrat 1.33 (K7) : la suite **publie** un instantané scellé (`schemas/proposal_snapshot.schema.json`), le Hub le **lit** (`kb import-proposals`, `POST /api/knowledge/proposals/import` pour les clients qui portent le fichier) et chaque proposition devient un candidat relu par une personne ; `POST /api/knowledge/candidates` reste réservé aux clients non-suite. Qui consomme l'instantané d'engagement (adaptateur vers le graphe projeté, issue #40) reste à désigner.
 
 ---
 
@@ -294,7 +294,7 @@ flowchart LR
 
 - **Identité non signée** (§7) : confiance dans le client délégué.
 - **Parité avec le bundle d'Archinex** : la matrice de conformité exigence → contrôle est dans l'instantané d'engagement depuis le contrat 1.31 (K17, après la correction de `compliance_mapper`, K6) ; les manques G3 dérivés n'y sont pas encore (ils demandent une règle d'applicabilité des principes). C'est la porte du retrait de l'émission locale d'Archinex.
-- **Capitalisation** : la remontée d'une règle locale ou d'une décision d'engagement vers la base de connaissance, sans ancre de programme, n'est pas livrée (K13, K7).
+- **Capitalisation** : le canal (K7) et l'étanchéité (K13) sont livrés ; reste à produire, côté Hub, la proposition de capitalisation d'une règle locale (K21 point 4) à partir de l'engagement.
 - **Lecture directe de la base** par `get_asset(id)` sans paramètre : conservée pour la compatibilité ; sa dépréciation reste à planifier.
 - **Consommateur de l'instantané d'engagement** : adaptateur non attribué (issue #40).
 - **Application d'administration** : l'écran de revue des règles est vérifié par `svelte-check` et par le build, non validé visuellement.

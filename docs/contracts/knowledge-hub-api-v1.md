@@ -1128,6 +1128,26 @@ Les manques G3 `principle_unaddressed` ne sont pas inclus : ils demandent une r�
 
 **Vérification continue.** Un test parcourt la base de connaissance et échoue si l'identifiant d'un engagement connu y apparaît. PAT-008, qui portait encore `source_engagement` et le nom d'un projet, est nettoyé (révision 2).
 
+### 5.33 Contrat 1.33 — Canal de propositions suite → Hub (K7, issue #44)
+
+**Pourquoi.** L'amendement KH-1 d'`ADR-SUITE-05` interdit à la suite d'appeler le Hub (ni RPC, ni HTTP, ni MCP) : elle **publie** un instantané scellé, le Hub le **lit**. Aucun canal ne disait comment une application de la suite propose de la connaissance au Hub ; `POST /api/knowledge/candidates` aurait violé l'amendement.
+
+**Instantané de propositions** (`schemas/proposal_snapshot.schema.json`, exemple `schemas/examples/proposal_snapshot.example.json`) : enveloppe de la suite `{schemaVersion, snapshotId, sourceSystem, createdAt, checksum, data}`, scellée au profil canonical-json v1 (`checksum` = sha256 de `data`). `sourceSystem` ∈ `document-studio`, `architecture-studio`, `requirements-intake` (le Hub n'est pas un émetteur de propositions). `data.candidates[]` reprend le type `ExtractedCandidate` de la suite (`id`, `sourceFragment`, `suggestedDestination: "knowledge-hub-reference"` obligatoire…) et porte la proposition elle-même dans `proposal {kind, asset_type?, title, rationale?, proposed_content, target_asset_id?, domain?, production_mode?}` (`production_mode` vaut `llm-derived` par défaut : une proposition extraite n'est pas relue).
+
+**Lecture par le Hub** :
+
+* `kb import-proposals <fichier> [--dry-run]` ;
+* `POST /api/knowledge/proposals/import` (corps = l'enveloppe ; `?dry_run=1`) pour les clients qui portent le fichier (Archinex, outils internes), pas pour la suite, qui publie.
+
+**Garanties.**
+
+* L'instantané est vérifié **en entier** (schéma, sceau, identifiants uniques, amendement avec cible) et refusé en bloc sinon : `400`, `problems [{code, path, message}]`, aucun candidat créé (`SEAL` si le contenu a été altéré).
+* Chaque proposition devient un candidat du cycle ordinaire (contrôles automatiques dont l'anonymisation K13, revue par le propriétaire du domaine, double validation) : **rien ne devient actif sans revue humaine**.
+* Provenance sur le candidat : `source.system` (l'émetteur), `source.snapshot_id`, `source.snapshot_checksum`, `source.candidate_ref` (le candidat dans l'instantané). `source.system` accepte désormais `architecture-studio` et `requirements-intake`.
+* **Idempotent** : relire le même instantané ne crée rien deux fois (`skipped`).
+
+Réponse `201` : `{snapshot, dry_run, imported: [{candidate_ref, id, status}], skipped: [...], refused: [{candidate_ref, argument, reason}]}`.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

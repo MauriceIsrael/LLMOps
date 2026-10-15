@@ -1171,6 +1171,25 @@ def submit_kb_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
         return handle_exception_response(e, context_action="submit_kb_candidate")
 
 
+def import_proposal_snapshot(envelope: dict[str, Any], dry_run: bool = False) -> dict[str, Any]:
+    """Read a sealed snapshot of proposals published by a suite application into candidates (K7, contract 1.33).
+
+    The snapshot is verified whole (schema, canonical-json v1 seal, no duplicate candidate) and refused as a whole when it does not
+    verify (``400``, ``problems``). Each proposal then goes through the ordinary cycle: automatic checks and review by a person;
+    nothing becomes active here. Idempotent: a candidate already read from the same ``snapshotId`` is reported in ``skipped``.
+    """
+    from pipelines.kb_candidates.proposals import ProposalSnapshotError, import_snapshot
+
+    try:
+        res = import_snapshot(_candidate_service(), envelope, actor=_actor(), dry_run=bool(dry_run))
+        return ok_response(res, count=len(res["imported"]))
+    except ProposalSnapshotError as exc:
+        return {**invalid_argument_response("snapshot", str(exc)),
+                "problems": [{"code": p.code, "path": p.path, "message": p.message} for p in exc.problems]}
+    except Exception as e:
+        return handle_exception_response(e, context_action="import_proposal_snapshot")
+
+
 def list_kb_candidates(
     status: str | None = None,
     source: str | None = None,

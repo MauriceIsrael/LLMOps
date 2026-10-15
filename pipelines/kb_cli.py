@@ -215,6 +215,37 @@ def submit_cmd(
         console.print(f"{c['id']}  {c['status']:<13} {c['title']}  [dim]{', '.join(flags)}[/dim]")
 
 
+@app.command("import-proposals")
+def import_proposals_cmd(
+    snapshot: Path = typer.Argument(..., help="Sealed snapshot of proposals published by a suite application (JSON)."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Run the checks without creating any candidate."),
+    kb_dir: Path = KB_DIR_OPTION,
+    db_path: Path = DB_PATH_OPTION,
+) -> None:
+    """Read a sealed snapshot of proposals into candidates (K7): refused whole if altered, reviewed by a person, idempotent."""
+    from pipelines.kb_candidates.proposals import ProposalSnapshotError, import_snapshot
+
+    try:
+        envelope = json.loads(snapshot.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        _fail(f"cannot read {snapshot}: {exc}")
+    try:
+        res = import_snapshot(_service(kb_dir, db_path), envelope, actor="kb import-proposals", dry_run=dry_run)
+    except ProposalSnapshotError as exc:
+        for p in exc.problems:
+            console.print(f"[red]{p.code} {p.path}: {p.message}[/red]")
+        _fail("snapshot refused: nothing was imported.")
+    snap = res["snapshot"]
+    console.print(f"[bold]{snap['sourceSystem']} / {snap['snapshotId']}[/bold] ({snap['checksum'][:19]}…)")
+    for item in res["imported"]:
+        label = item.get("id") or "(dry run)"
+        console.print(f"{label}  {item.get('status') or item.get('would_be_status'):<13} {item['candidate_ref']}")
+    for item in res["skipped"]:
+        console.print(f"[dim]{item['id']}  already read  {item['candidate_ref']}[/dim]")
+    for item in res["refused"]:
+        console.print(f"[red]{item['candidate_ref']}: {item['argument']}: {item['reason']}[/red]")
+
+
 STAGING_OPTION = typer.Option(Path("data/staging"), "--staging-dir", help="Staging directory (ignored by git).")
 
 

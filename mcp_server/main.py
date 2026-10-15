@@ -95,6 +95,7 @@ from mcp_server.knowledge.tools import (
     get_similarity_eval,
     get_similarity_eval_run,
     get_skills_matrix,
+    import_proposal_snapshot,
     list_assets,
     list_check_clauses,
     list_controls,
@@ -950,6 +951,22 @@ def create_starlette_app() -> Starlette:
         res = submit_kb_candidate(body)
         return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
 
+    async def handle_proposals_import(request):
+        """Lecture d'un instantané scellé de propositions publié par une application de la suite (K7, contrat 1.33).
+
+        Réservée aux clients qui portent le fichier (Archinex, outils internes) : une application de la suite publie, elle n'appelle pas.
+        """
+        try:
+            body = await request.json()
+        except Exception:
+            body = None
+        if not isinstance(body, dict):
+            return JSONResponse(
+                invalid_argument_response("body", "Le corps de requête doit être l'enveloppe JSON de l'instantané"), status_code=400
+            )
+        res = import_proposal_snapshot(body, dry_run=request.query_params.get("dry_run") in ("1", "true"))
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
     async def handle_candidates_list(request):
         """File des candidats (filtres : status, source, domain, engagement)."""
         params = request.query_params
@@ -1535,6 +1552,7 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/candidates/{candidate_id}/comments",
                   endpoint=handle_candidate_comments_list, methods=["GET"]),
             Route("/api/knowledge/candidates", endpoint=handle_candidates_create, methods=["POST"]),
+            Route("/api/knowledge/proposals/import", endpoint=handle_proposals_import, methods=["POST"]),
             Route("/api/knowledge/candidates", endpoint=handle_candidates_list, methods=["GET"]),
             Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_get, methods=["GET"]),
             Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_review, methods=["PATCH"]),
