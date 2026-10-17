@@ -2,6 +2,31 @@
 
 Published changes, newest first (written by `kb publish`).
 
+## 2026-10-17 — snapshot-2026-10-17-8379cb7
+
+- clause `NIS2-ART21-2C-C1` of `NIS2-ART21-2C` validated by @maintainers
+- clause `NIS2-ART21-2C-C2` of `NIS2-ART21-2C` validated by @maintainers
+- clause `NIS2-ART21-2D-C1` of `NIS2-ART21-2D` validated by @maintainers
+- clause `NIS2-ART21-2E-C1` of `NIS2-ART21-2E` validated by @maintainers
+- clause `NIS2-ART21-2E-C2` of `NIS2-ART21-2E` validated by @maintainers
+- clause `NIS2-ART21-2H-C1` of `NIS2-ART21-2H` validated by @maintainers
+- clause `NIS2-ART21-2H-C2` of `NIS2-ART21-2H` validated by @maintainers
+- clause `NIS2-ART21-2J-C1` of `NIS2-ART21-2J` validated by @maintainers
+- clause `NIS2-ART21-2J-C2` of `NIS2-ART21-2J` validated by @maintainers
+- clause `RGPD-REQ-BREACH-02-C1` of `RGPD-REQ-BREACH-02` validated by @maintainers
+- clause `RGPD-REQ-BREACH-02-C2` of `RGPD-REQ-BREACH-02` validated by @maintainers
+- clause `RGPD-REQ-PRIVACY-01-C1` of `RGPD-REQ-PRIVACY-01` validated by @maintainers
+- clause `P-001-C1` of `P-001` validated by @maintainers
+- clause `P-001-C2` of `P-001` validated by @maintainers
+- clause `P-002-C1` of `P-002` validated by @maintainers
+- clause `P-002-C2` of `P-002` validated by @maintainers
+- clause `P-009-C1` of `P-009` validated by @maintainers
+- clause `P-009-C2` of `P-009` validated by @maintainers
+- clause `P-012-C1` of `P-012` validated by @maintainers
+- clause `P-012-C2` of `P-012` validated by @maintainers
+- clause `P-015-C1` of `P-015` validated by @maintainers
+- clause `P-015-C2` of `P-015` validated by @maintainers
+
 ## 2026-10-12 — snapshot-2026-10-12-689e8e6
 
 - `CRA-ANXI-PII-8` (framework_ingestion, confidence `verified`): ESSENTIAL CYBERSECURITY REQUIREMENTS — ensure that, where security updates are available to address identified security issues,… — CAND-20261012-0048, reviewed by @maintainers

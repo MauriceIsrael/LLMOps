@@ -3,7 +3,7 @@ id: RGPD-REQ-PRIVACY-01
 title: Privacy by Design & Default for Real-Time Location, CDRs and MCX Media
 type: control
 framework: RGPD
-version: "2016/679"
+version: 2016/679
 jurisdiction: EU
 domain: [data-protection, privacy, security]
 severity: mandatory
@@ -11,18 +11,19 @@ target_entities: [telecom-operator, public-safety, application-provider]
 terms: [gdpr, rgpd, privacy-by-design, location-data, call-detail-records, cdr, data-retention]
 status: active
 confidence: verified
-last_reviewed: 2026-09-08
+last_reviewed: '2026-10-17'
 owner: data-protection-officer
-source_ref: "Regulation (EU) 2016/679 (GDPR), Article 25 (Data protection by design and by default)"
-# Draft check clauses proposed by the coding agent (regulatory frameworks) — NOT validated.
-# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).
-checks_status: draft
+source_ref: Regulation (EU) 2016/679 (GDPR), Article 25 (Data protection by design and by default)
+checks_status: validated
 checks:
-  - id: RGPD-REQ-PRIVACY-01-C1
-    kind: forbids
-    when:
-      terms_any: [production data in test, production data copied to test, production data in the test environment, real personal data in test, unlimited retention, indefinite retention, kept indefinitely, retained indefinitely, no retention period, donnees de production en recette, donnees de production en test, copie de la production en recette, donnees reelles en recette, conservation illimitee, conservation indefinie, conservees indefiniment, sans duree de conservation]
-    message: "GDPR Art. 5(1)(c) and (e), Art. 25: personal data are minimised and kept no longer than necessary; real production data in test and unlimited retention are not acceptable."
+- id: RGPD-REQ-PRIVACY-01-C1
+  kind: forbids
+  when:
+    terms_any: [production data in test, production data copied to test, production data in the test environment, real personal data in test, unlimited retention, indefinite retention, kept indefinitely, retained indefinitely, no retention period, donnees de production en recette, donnees de production en test, copie de la production en recette, donnees reelles en recette, conservation illimitee, conservation indefinie, conservees indefiniment, sans duree de conservation]
+  message: 'GDPR Art. 5(1)(c) and (e), Art. 25: personal data are minimised and kept no longer than necessary; real production data in test and unlimited retention are not acceptable.'
+  status: validated
+  review: {by: '@maintainers', at: '2026-10-17T08:59:26Z', decision: validate}
+revision: 2
 ---
 
 # RGPD-REQ-PRIVACY-01 — Privacy by Design & Default for Real-Time Location, CDRs and MCX Media
