@@ -60,6 +60,7 @@ def prepare(tmp: Path) -> dict[str, str]:
         parts = text.split("---\n", 2)
         if len(parts) >= 3:
             fm = yaml.safe_load(parts[1]) or {}
+            fm["revision"] = int(fm.get("revision", 1)) + 1  # an amended element is a new revision (K3 ledger)
             fm["assumptions"] = [
                 "The control plane handles fewer than 10000 managed devices.",
                 "Every site keeps an out-of-band access path to its routers."
@@ -83,6 +84,10 @@ def prepare(tmp: Path) -> dict[str, str]:
     (tmp / "data" / "snapshots").mkdir(parents=True, exist_ok=True)
     for snapshot in (ROOT / "data" / "snapshots").glob("*.json"):
         shutil.copy(snapshot, tmp / "data" / "snapshots" / snapshot.name)
+    # The demonstration engagement, for the clients whose tests read it (get_board on nordwave-mcx-2027).
+    (tmp / "data" / "engagements").mkdir(parents=True, exist_ok=True)
+    for engagement in (ROOT / "data" / "engagements").glob("nordwave-mcx-2027.lbug"):
+        shutil.copy(engagement, tmp / "data" / "engagements" / engagement.name)
     return {
         "LLMOPS_KB_DIR": str(kb),
         "LLMOPS_KNOWLEDGE_DB_PATH": str(db),
