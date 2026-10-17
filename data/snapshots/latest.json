@@ -1,11 +1,11 @@
 {
-  "snapshot_id": "snapshot-2026-10-14-c4df39f",
-  "created_at": "2026-10-14T22:03:22Z",
-  "source_revision": "c4df39fc37da7d4c5a09b6f83f4559121b47490f",
-  "payload_sha256": "sha256:be4b8720f252fdbfddd9bf399b0cc06958b04b00441d6de752a46b53aabd8763",
+  "snapshot_id": "snapshot-2026-10-17-8379cb7",
+  "created_at": "2026-10-17T09:07:15Z",
+  "source_revision": "8379cb788c5fdddf9628dac12daae3d2e0feb1c2",
+  "payload_sha256": "sha256:6815dce410638ddcc6865eae018377fb237d2a857b37eb642975c1fea0f99f61",
   "schema_version": "1.0",
   "emitter": "knowledge-hub",
-  "checksum": "sha256:be4b8720f252fdbfddd9bf399b0cc06958b04b00441d6de752a46b53aabd8763",
+  "checksum": "sha256:6815dce410638ddcc6865eae018377fb237d2a857b37eb642975c1fea0f99f61",
   "rebuiltByEmitterTest": true,
   "regenerate": "poetry run python scripts/export_fixtures.py",
   "is_provisional": false,
@@ -106,7 +106,7 @@
           "knowledge_ref": {
             "sourceId": "knowledge-hub",
             "knowledgeKey": "principle:P-009",
-            "version": "1"
+            "version": "3"
           }
         },
         "when": [
@@ -148,7 +148,7 @@
           "knowledge_ref": {
             "sourceId": "knowledge-hub",
             "knowledgeKey": "principle:P-009",
-            "version": "1"
+            "version": "3"
           }
         },
         "when": [
@@ -185,7 +185,7 @@
           "knowledge_ref": {
             "sourceId": "knowledge-hub",
             "knowledgeKey": "principle:P-009",
-            "version": "1"
+            "version": "3"
           }
         },
         "when": [
@@ -313,7 +313,7 @@
         "mandatory": true
       }
     ],
-    "content_sha256": "sha256:b6b901976cbb15861ede58e3cbba4061fe2e19a14b0e062160423f5936dd2dd7"
+    "content_sha256": "sha256:ac04d504bb6b27a369a9adbbf10345d0e4ef63e8ca17a8399b777081142066ac"
   },
   "embedding_model": {
     "id": "intfloat/multilingual-e5-small",
@@ -2339,18 +2339,18 @@
       "domain": "network-automation,cloud-platform",
       "phase": "BID,BUILD,RUN",
       "owner": "core-owner-architecture",
-      "last_reviewed": "2026-07-25",
-      "revision": 1,
+      "last_reviewed": "2026-10-17",
+      "revision": 3,
       "knowledge_ref": {
         "sourceId": "knowledge-hub",
         "knowledgeKey": "principle:P-001",
-        "version": "1"
+        "version": "3"
       },
-      "content_sha256": "sha256:dcfe5bf222072e39cad22712ed33d7e74e5a909cb92332bfec25031b054c251e",
-      "content": "---\nid: P-001\ntitle: Generalized GitOps\ntype: principle\nstatus: active\nconfidence: verified\nphase:\n- BID\n- BUILD\n- RUN\ndomain:\n- network-automation\n- cloud-platform\nowner: core-owner-architecture\nlast_reviewed: 2026-07-25\napplicability: Supervised operation of systems where an incorrect automated action\n  has service impact.\nrelated:\n- P-008\n- ADR-0001\nimplements_controls:\n- ISO-14001-DECOM\n- ISO-27001-A8-09\n- NIS2-ART21-2A\n- SNC-REQ-04\n# Draft check clauses proposed by the coding agent (plan L1) \u2014 NOT validated.\n# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).\nchecks_status: draft\nchecks:\n  - id: P-001-C1\n    kind: forbids\n    when:\n      terms_any: [manual configuration change, configuration changed by hand, direct change in production, hotfix in production, ssh into production, click-ops]\n    message: \"Configurations, fallback plans and automation code are versioned in Git; no change reaches a managed system outside review and the validation pipeline.\"\n  - id: P-001-C2\n    kind: requires\n    when:\n      terms_any: [automation code, playbook, correlation rule, triggering rule, fallback plan]\n    expect:\n      terms_any: [git, gitops, version control, versioned, pull request, merge request, validation pipeline]\n    message: \"Automation artefacts must be versioned in Git and promoted through review and a validation pipeline.\"\n---\n# P-001 \u2014 Generalized GitOps\n\n## Statement\n\nIntended configurations, fallback plans, triggering rules, correlation rules and automation code are versioned in Git. Every change goes through review and a validation pipeline before it can reach a managed system.\n\n## Why\n\nA managed system with more than one entry path cannot be reasoned about. Versioning is not primarily about rollback; it is about making every change reviewable, attributable and reproducible, which is what an accreditation authority asks for.\n\n## Implications\n\n- The pipeline, not an operator, is the only writer.\n- Rollback becomes a revert plus a redeploy rather than a separate procedure.\n- Anything not in Git does not exist: undocumented manual changes appear as drift, which is the intended behaviour.\n\n## How to verify\n\nAttempt a manual change on a managed asset outside the pipeline; it must surface in the next drift report.\n",
+      "content_sha256": "sha256:fa70ef80927baec27396636474ca042b2b6b398480b8f737ef9097975d68fbbb",
+      "content": "---\nid: P-001\ntitle: Generalized GitOps\ntype: principle\nstatus: active\nconfidence: verified\nphase: [BID, BUILD, RUN]\ndomain: [network-automation, cloud-platform]\nowner: core-owner-architecture\nlast_reviewed: '2026-10-17'\napplicability: Supervised operation of systems where an incorrect automated action has service impact.\nrelated: [P-008, ADR-0001]\nimplements_controls: [ISO-14001-DECOM, ISO-27001-A8-09, NIS2-ART21-2A, SNC-REQ-04]\nchecks_status: validated\nchecks:\n- id: P-001-C1\n  kind: forbids\n  when:\n    terms_any: [manual configuration change, configuration changed by hand, direct change in production, hotfix in production, ssh into production, click-ops]\n  message: Configurations, fallback plans and automation code are versioned in Git; no change reaches a managed system outside review and the validation pipeline.\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T08:59:27Z', decision: validate}\n- id: P-001-C2\n  kind: requires\n  when:\n    terms_any: [automation code, playbook, correlation rule, triggering rule, fallback plan]\n  expect:\n    terms_any: [git, gitops, version control, versioned, pull request, merge request, validation pipeline]\n  message: Automation artefacts must be versioned in Git and promoted through review and a validation pipeline.\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T08:59:48Z', decision: validate}\nrevision: 3\n---\n\n# P-001 \u2014 Generalized GitOps\n\n## Statement\n\nIntended configurations, fallback plans, triggering rules, correlation rules and automation code are versioned in Git. Every change goes through review and a validation pipeline before it can reach a managed system.\n\n## Why\n\nA managed system with more than one entry path cannot be reasoned about. Versioning is not primarily about rollback; it is about making every change reviewable, attributable and reproducible, which is what an accreditation authority asks for.\n\n## Implications\n\n- The pipeline, not an operator, is the only writer.\n- Rollback becomes a revert plus a redeploy rather than a separate procedure.\n- Anything not in Git does not exist: undocumented manual changes appear as drift, which is the intended behaviour.\n\n## How to verify\n\nAttempt a manual change on a managed asset outside the pipeline; it must surface in the next drift report.\n",
       "provenance": {
         "document": "P-001.md",
-        "version": "1",
+        "version": "3",
         "section": "architecture",
         "text_sha256": "e2505a26bb5ff0304b7ecf8166bab401d05b5e9b8213dd596aa4e3f7189d6044"
       },
@@ -2367,18 +2367,18 @@
       "domain": "network-automation,security",
       "phase": "BID,BUILD,RUN",
       "owner": "core-owner-architecture",
-      "last_reviewed": "2026-07-25",
-      "revision": 1,
+      "last_reviewed": "2026-10-17",
+      "revision": 3,
       "knowledge_ref": {
         "sourceId": "knowledge-hub",
         "knowledgeKey": "principle:P-002",
-        "version": "1"
+        "version": "3"
       },
-      "content_sha256": "sha256:cbd0e42b86616e722749e343ba331971524a37cca1bb2ce9f086dda700b553c6",
-      "content": "---\nid: P-002\ntitle: Human in the loop\ntype: principle\nstatus: active\nconfidence: verified\nphase: [BID, BUILD, RUN]\ndomain: [network-automation, security]\nowner: core-owner-architecture\nlast_reviewed: 2026-07-25\napplicability: Supervised operation of systems where an incorrect automated action has service impact.\nrelated: [P-003, P-004, PAT-001]\nimplements_controls: [NIS2-ART21-2B]\n# Draft check clauses proposed by the coding agent (plan L1) \u2014 NOT validated.\n# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).\nchecks_status: draft\nchecks:\n  - id: P-002-C1\n    kind: requires\n    when:\n      terms_any: [closed loop, auto-remediation, automated remediation, automatic remediation, self-healing]\n    expect:\n      terms_any: [human approval, human-in-the-loop, supervised, manual approval, approval workflow, change approval]\n    message: \"Any closed loop must stay supervised: no remediation reaches production without an explicit, recorded human approval.\"\n  - id: P-002-C2\n    kind: forbids\n    when:\n      terms_any: [fully autonomous remediation, remediation without approval, unattended remediation, no human approval, without human validation]\n    message: \"Autonomous remediation is never a design default: detection is automatic, decision is human.\"\n---\n\n# P-002 \u2014 Human in the loop\n\n## Statement\n\nDetection is automatic, decision is human, execution is automated. No remediation action reaches production without an explicit human approval, recorded in the service management system.\n\n## Why\n\nThe failure mode of autonomous remediation is not a wrong action; it is a wrong action taken confidently during an incident, when nobody is watching the automation because everybody is watching the outage.\n\n## Implications\n\n- Every remediation workflow starts with an approval node carrying full context.\n- Approval can be delegated to the ITSM change process so it lands in the customer's own governance.\n- Autonomy is granted later, per class of event, never as a design default (see P-004).\n\n## How to verify\n\nTrace any production change back to an approval record with an actor and a timestamp. A change without one is a defect.\n",
+      "content_sha256": "sha256:bf7947861a35ccee0138d564be039122862a267cc4a557b3e7756c6080dcc69b",
+      "content": "---\nid: P-002\ntitle: Human in the loop\ntype: principle\nstatus: active\nconfidence: verified\nphase: [BID, BUILD, RUN]\ndomain: [network-automation, security]\nowner: core-owner-architecture\nlast_reviewed: '2026-10-17'\napplicability: Supervised operation of systems where an incorrect automated action has service impact.\nrelated: [P-003, P-004, PAT-001]\nimplements_controls: [NIS2-ART21-2B]\nchecks_status: validated\nchecks:\n- id: P-002-C1\n  kind: requires\n  when:\n    terms_any: [closed loop, auto-remediation, automated remediation, automatic remediation, self-healing]\n  expect:\n    terms_any: [human approval, human-in-the-loop, supervised, manual approval, approval workflow, change approval]\n  message: 'Any closed loop must stay supervised: no remediation reaches production without an explicit, recorded human approval.'\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T08:59:59Z', decision: validate}\n- id: P-002-C2\n  kind: forbids\n  when:\n    terms_any: [fully autonomous remediation, remediation without approval, unattended remediation, no human approval, without human validation]\n  message: 'Autonomous remediation is never a design default: detection is automatic, decision is human.'\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T09:00:00Z', decision: validate}\nrevision: 3\n---\n\n# P-002 \u2014 Human in the loop\n\n## Statement\n\nDetection is automatic, decision is human, execution is automated. No remediation action reaches production without an explicit human approval, recorded in the service management system.\n\n## Why\n\nThe failure mode of autonomous remediation is not a wrong action; it is a wrong action taken confidently during an incident, when nobody is watching the automation because everybody is watching the outage.\n\n## Implications\n\n- Every remediation workflow starts with an approval node carrying full context.\n- Approval can be delegated to the ITSM change process so it lands in the customer's own governance.\n- Autonomy is granted later, per class of event, never as a design default (see P-004).\n\n## How to verify\n\nTrace any production change back to an approval record with an actor and a timestamp. A change without one is a defect.\n",
       "provenance": {
         "document": "P-002.md",
-        "version": "1",
+        "version": "3",
         "section": "architecture",
         "text_sha256": "f1e9457858515eb756b1cc98a7d670a7c8556cc31e75475193b100553eb4e2ad"
       },
@@ -2563,18 +2563,18 @@
       "domain": "cloud-platform,network-automation",
       "phase": "BID,BUILD,RUN",
       "owner": "core-owner-architecture",
-      "last_reviewed": "2026-07-25",
-      "revision": 1,
+      "last_reviewed": "2026-10-17",
+      "revision": 3,
       "knowledge_ref": {
         "sourceId": "knowledge-hub",
         "knowledgeKey": "principle:P-009",
-        "version": "1"
+        "version": "3"
       },
-      "content_sha256": "sha256:495182f0558044229f2437c24682a4b98b686a1c5c85a0c628e52870cb9a9261",
-      "content": "---\nid: P-009\ntitle: Independent failure domain\ntype: principle\nstatus: active\nconfidence: verified\nphase:\n- BID\n- BUILD\n- RUN\ndomain:\n- cloud-platform\n- network-automation\nowner: core-owner-architecture\nlast_reviewed: 2026-07-25\napplicability: Supervised operation of systems where an incorrect automated action\n  has service impact.\nrelated:\n- P-014\n- PAT-004\nimplements_controls:\n- NIS2-ART21-2C\n- SNC-REQ-02\n- SNC-REQ-06\n- TELCO-RESIL-MTBF\n- TELCO-RESIL-PTP-01\n- TELCO-RESIL-TIER4\n# Draft check clauses proposed by the coding agent (plan L1) \u2014 NOT validated.\n# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).\nchecks_status: draft\nchecks:\n  - id: P-009-C1\n    kind: forbids\n    when:\n      terms_any: [shared cluster with production, same cluster as the workloads, co-located with the managed services, shares storage with production, same network path as production]\n    message: \"The restoration chain must not share cluster, storage or network path with the services it restores.\"\n  - id: P-009-C2\n    kind: requires\n    when:\n      terms_any: [restoration chain, remediation platform, automation platform, management platform]\n    expect:\n      terms_any: [break-glass, independent failure domain, dedicated cluster, out-of-band, separate failure domain]\n    message: \"The chain that restores service needs its own failure domain and a break-glass procedure for its own unavailability.\"\n---\n# P-009 \u2014 Independent failure domain\n\n## Statement\n\nThe chain that restores service does not share cluster, storage or network path with the services it restores, and a break-glass procedure exists for its own unavailability.\n\n## Why\n\nThe classic embarrassment of automated operations is the recovery tooling being unavailable during the incident it was built for.\n\n## Implications\n\n- Dedicated management cluster with its own storage and southbound paths.\n- Critical fallback plans exported to a location reachable without the platform, refreshed by the same pipeline.\n- At least two operators trained and periodically drilled.\n\n## How to verify\n\nRun the break-glass drill: apply a critical fallback plan with the management platform shut down.\n",
+      "content_sha256": "sha256:24b3670aab85a7cfa8df1e32b0fae816eefb253a04a5acef9f44749c6e0a2dbb",
+      "content": "---\nid: P-009\ntitle: Independent failure domain\ntype: principle\nstatus: active\nconfidence: verified\nphase: [BID, BUILD, RUN]\ndomain: [cloud-platform, network-automation]\nowner: core-owner-architecture\nlast_reviewed: '2026-10-17'\napplicability: Supervised operation of systems where an incorrect automated action has service impact.\nrelated: [P-014, PAT-004]\nimplements_controls: [NIS2-ART21-2C, SNC-REQ-02, SNC-REQ-06, TELCO-RESIL-MTBF, TELCO-RESIL-PTP-01, TELCO-RESIL-TIER4]\nchecks_status: validated\nchecks:\n- id: P-009-C1\n  kind: forbids\n  when:\n    terms_any: [shared cluster with production, same cluster as the workloads, co-located with the managed services, shares storage with production, same network path as production]\n  message: The restoration chain must not share cluster, storage or network path with the services it restores.\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T09:00:13Z', decision: validate}\n- id: P-009-C2\n  kind: requires\n  when:\n    terms_any: [restoration chain, remediation platform, automation platform, management platform]\n  expect:\n    terms_any: [break-glass, independent failure domain, dedicated cluster, out-of-band, separate failure domain]\n  message: The chain that restores service needs its own failure domain and a break-glass procedure for its own unavailability.\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T09:00:15Z', decision: validate}\nrevision: 3\n---\n\n# P-009 \u2014 Independent failure domain\n\n## Statement\n\nThe chain that restores service does not share cluster, storage or network path with the services it restores, and a break-glass procedure exists for its own unavailability.\n\n## Why\n\nThe classic embarrassment of automated operations is the recovery tooling being unavailable during the incident it was built for.\n\n## Implications\n\n- Dedicated management cluster with its own storage and southbound paths.\n- Critical fallback plans exported to a location reachable without the platform, refreshed by the same pipeline.\n- At least two operators trained and periodically drilled.\n\n## How to verify\n\nRun the break-glass drill: apply a critical fallback plan with the management platform shut down.\n",
       "provenance": {
         "document": "P-009.md",
-        "version": "1",
+        "version": "3",
         "section": "architecture",
         "text_sha256": "c134abf371b53d1d6e391e6f55cb811835fe0b9272c3297e96cff8e9def2e632"
       },
@@ -2647,18 +2647,18 @@
       "domain": "ai-assistance,security",
       "phase": "BID,BUILD,RUN",
       "owner": "core-owner-architecture",
-      "last_reviewed": "2026-07-25",
-      "revision": 1,
+      "last_reviewed": "2026-10-17",
+      "revision": 3,
       "knowledge_ref": {
         "sourceId": "knowledge-hub",
         "knowledgeKey": "principle:P-012",
-        "version": "1"
+        "version": "3"
       },
-      "content_sha256": "sha256:85b871550b1623bc3acf9bb2d969b7e1733344f096960316e00d67b01420592c",
-      "content": "---\nid: P-012\ntitle: The assistant advises, it does not act\ntype: principle\nstatus: active\nconfidence: verified\nphase:\n- BID\n- BUILD\n- RUN\ndomain:\n- ai-assistance\n- security\nowner: core-owner-architecture\nlast_reviewed: 2026-07-25\napplicability: Supervised operation of systems where an incorrect automated action\n  has service impact.\nrelated:\n- P-013\n- P-014\n- PAT-007\nimplements_controls:\n- RGPD-REQ-BREACH-02\n# Draft check clauses proposed by the coding agent (plan L1) \u2014 NOT validated.\n# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).\nchecks_status: draft\nchecks:\n  - id: P-012-C1\n    kind: requires\n    when:\n      terms_any: [assistant, copilot, chatbot, ai agent, llm agent, generative ai]\n    expect:\n      terms_any: [read-only, advisory, advises, human confirmation, approved workflow, suggestions only]\n    message: \"Assistant tooling is read-only in production: every state change goes through the approved workflow.\"\n  - id: P-012-C2\n    kind: forbids\n    when:\n      terms_any: [assistant applies changes, agent executes changes in production, autonomous agent in production, assistant with write access]\n    message: \"The assistant advises, it does not act.\"\n---\n# P-012 \u2014 The assistant advises, it does not act\n\n## Statement\n\nAssistant tooling is read-only in production. It may explain, diagnose and prepare, but every state change continues through the approved workflow.\n\n## Why\n\nAn assistant is a probabilistic component. Giving it a write path makes its failure mode operational instead of informational, and makes the audit trail ambiguous about who decided.\n\n## Implications\n\n- Custom tools expose read operations, plus at most a prepare operation returning a pre-filled workflow reference.\n- Any write capability offered by a platform tool is disabled in the production profile.\n\n## How to verify\n\nEnumerate the tools exposed in production and confirm none can change state.\n",
+      "content_sha256": "sha256:996b0434e2ba37518c6c211e282505de1262c860fe60e5c1a922adb4dd4d183c",
+      "content": "---\nid: P-012\ntitle: The assistant advises, it does not act\ntype: principle\nstatus: active\nconfidence: verified\nphase: [BID, BUILD, RUN]\ndomain: [ai-assistance, security]\nowner: core-owner-architecture\nlast_reviewed: '2026-10-17'\napplicability: Supervised operation of systems where an incorrect automated action has service impact.\nrelated: [P-013, P-014, PAT-007]\nimplements_controls: [RGPD-REQ-BREACH-02]\nchecks_status: validated\nchecks:\n- id: P-012-C1\n  kind: requires\n  when:\n    terms_any: [assistant, copilot, chatbot, ai agent, llm agent, generative ai]\n  expect:\n    terms_any: [read-only, advisory, advises, human confirmation, approved workflow, suggestions only]\n  message: 'Assistant tooling is read-only in production: every state change goes through the approved workflow.'\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T09:00:43Z', decision: validate}\n- id: P-012-C2\n  kind: forbids\n  when:\n    terms_any: [assistant applies changes, agent executes changes in production, autonomous agent in production, assistant with write access]\n  message: The assistant advises, it does not act.\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T09:00:44Z', decision: validate}\nrevision: 3\n---\n\n# P-012 \u2014 The assistant advises, it does not act\n\n## Statement\n\nAssistant tooling is read-only in production. It may explain, diagnose and prepare, but every state change continues through the approved workflow.\n\n## Why\n\nAn assistant is a probabilistic component. Giving it a write path makes its failure mode operational instead of informational, and makes the audit trail ambiguous about who decided.\n\n## Implications\n\n- Custom tools expose read operations, plus at most a prepare operation returning a pre-filled workflow reference.\n- Any write capability offered by a platform tool is disabled in the production profile.\n\n## How to verify\n\nEnumerate the tools exposed in production and confirm none can change state.\n",
       "provenance": {
         "document": "P-012.md",
-        "version": "1",
+        "version": "3",
         "section": "architecture",
         "text_sha256": "1069b572db48164b6c7d4c43b4fd0f4e6d407b377bee37413370cfcfa2a7a626"
       },
@@ -2731,18 +2731,18 @@
       "domain": "ai-assistance,security",
       "phase": "BID,BUILD,RUN",
       "owner": "core-owner-architecture",
-      "last_reviewed": "2026-07-25",
-      "revision": 1,
+      "last_reviewed": "2026-10-17",
+      "revision": 3,
       "knowledge_ref": {
         "sourceId": "knowledge-hub",
         "knowledgeKey": "principle:P-015",
-        "version": "1"
+        "version": "3"
       },
-      "content_sha256": "sha256:2a9c266f65807205c3162da261fd4e1ca5f28228795a9209179879f25449a9a2",
-      "content": "---\nid: P-015\ntitle: The model stays inside the trust boundary\ntype: principle\nstatus: active\nconfidence: verified\nphase:\n- BID\n- BUILD\n- RUN\ndomain:\n- ai-assistance\n- security\nowner: core-owner-architecture\nlast_reviewed: 2026-07-25\napplicability: Supervised operation of systems where an incorrect automated action\n  has service impact.\nrelated:\n- ADR-0011\n- P-012\nimplements_controls:\n- ISO-27001-A8-24\n- NIS2-ART21-2H\n- RGPD-REQ-PRIVACY-01\n- SNC-REQ-01\n# Draft check clauses proposed by the coding agent (plan L1) \u2014 NOT validated.\n# To be accepted, amended or rejected by the domain expert through the KB review cycle (L2).\nchecks_status: draft\nchecks:\n  - id: P-015-C1\n    kind: forbids\n    when:\n      terms_any: [public llm api, external llm api, saas llm, third-party model api, hosted model api, openai api, prompts sent outside]\n    message: \"Inference is served on infrastructure operated by the project: no prompt, context or result leaves the platform.\"\n  - id: P-015-C2\n    kind: requires\n    when:\n      terms_any: [llm, language model, inference, generative ai]\n    expect:\n      terms_any: [self-hosted, on-premise, on premises, sovereign, inside the trust boundary, private deployment, operated by the project]\n    message: \"Model inference must stay inside the trust boundary (project-operated infrastructure).\"\n---\n# P-015 \u2014 The model stays inside the trust boundary\n\n## Statement\n\nInference is served on infrastructure operated by the project. No prompt, retrieved context or generated result leaves the platform.\n\n## Why\n\nTool outputs may contain configuration fragments, addresses, credentials and subscriber identifiers. Controlling what crosses a boundary is a procedural control that must be proven repeatedly; not crossing it is a structural property proven once.\n\n## Implications\n\n- Capacity, not confidentiality, becomes the limiting factor; latency must be measured before committing to an interactive use.\n- The endpoint is a configuration value, so adding acceleration hardware later is not a redesign.\n- Compatible with a fully disconnected deployment.\n\n## How to verify\n\nConfirm no outbound network path exists from the inference service, and that the deployment survives disconnection.\n",
+      "content_sha256": "sha256:f0bce98c4fc4790fc89404d035379a64edf3c968600f4203b60375ff3518de82",
+      "content": "---\nid: P-015\ntitle: The model stays inside the trust boundary\ntype: principle\nstatus: active\nconfidence: verified\nphase: [BID, BUILD, RUN]\ndomain: [ai-assistance, security]\nowner: core-owner-architecture\nlast_reviewed: '2026-10-17'\napplicability: Supervised operation of systems where an incorrect automated action has service impact.\nrelated: [ADR-0011, P-012]\nimplements_controls: [ISO-27001-A8-24, NIS2-ART21-2H, RGPD-REQ-PRIVACY-01, SNC-REQ-01]\nchecks_status: validated\nchecks:\n- id: P-015-C1\n  kind: forbids\n  when:\n    terms_any: [public llm api, external llm api, saas llm, third-party model api, hosted model api, openai api, prompts sent outside]\n  message: 'Inference is served on infrastructure operated by the project: no prompt, context or result leaves the platform.'\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T09:06:46Z', decision: validate}\n- id: P-015-C2\n  kind: requires\n  when:\n    terms_any: [llm, language model, inference, generative ai]\n  expect:\n    terms_any: [self-hosted, on-premise, on premises, sovereign, inside the trust boundary, private deployment, operated by the project]\n  message: Model inference must stay inside the trust boundary (project-operated infrastructure).\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T09:06:48Z', decision: validate}\nrevision: 3\n---\n\n# P-015 \u2014 The model stays inside the trust boundary\n\n## Statement\n\nInference is served on infrastructure operated by the project. No prompt, retrieved context or generated result leaves the platform.\n\n## Why\n\nTool outputs may contain configuration fragments, addresses, credentials and subscriber identifiers. Controlling what crosses a boundary is a procedural control that must be proven repeatedly; not crossing it is a structural property proven once.\n\n## Implications\n\n- Capacity, not confidentiality, becomes the limiting factor; latency must be measured before committing to an interactive use.\n- The endpoint is a configuration value, so adding acceleration hardware later is not a redesign.\n- Compatible with a fully disconnected deployment.\n\n## How to verify\n\nConfirm no outbound network path exists from the inference service, and that the deployment survives disconnection.\n",
       "provenance": {
         "document": "P-015.md",
-        "version": "1",
+        "version": "3",
         "section": "architecture",
         "text_sha256": "6601223074a186ac0bc56cf0b72a9e8836f1c455cece785af1c23d6f04fb090e"
       },
