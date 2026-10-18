@@ -142,7 +142,7 @@ make lint
 # Fast local gate: lint + frozen interface contract + unit tests
 make verify
 
-# Install the git pre-push hook running `make verify`
+# Install the git pre-push hook running `make quick` (ruff + project-name guard, a few seconds; the CI runs the tests)
 make hooks
 
 # End-to-end scenarios of the reference demo (examples/), and the project-name guard
