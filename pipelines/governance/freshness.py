@@ -9,14 +9,13 @@ et des doctrines internes :
 
 from __future__ import annotations
 
-import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 from pipelines.frameworks.ingest import load_manifest
-from pipelines.kb_candidates.kb import load_assets, split_frontmatter
+from pipelines.kb_candidates.kb import load_assets
 
 DEFAULT_REVIEW_CYCLE_DAYS = 180
 

@@ -247,7 +247,7 @@ def get_publications(
         elif sid == "snapshot-2026-09-29-75fa05f" or "Socle initial" in body:
             entry_path = {
                 "type": "initial_baseline",
-                "description": "Socle initial de la doctrine d'entreprise (architecture transverse, télécom MCX & cloud platform)",
+                "description": "Socle initial de la doctrine d'entreprise (architecture transverse, télécom & cloud platform)",
             }
             added = _baseline_asset_ids(kb)
             if not reviewers_set:

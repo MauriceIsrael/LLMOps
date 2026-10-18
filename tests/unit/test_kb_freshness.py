@@ -3,7 +3,6 @@
 from datetime import date, timedelta
 from pathlib import Path
 
-import pytest
 from starlette.testclient import TestClient
 
 from mcp_server.core.auth import set_current_caller
@@ -12,7 +11,6 @@ from pipelines.governance.freshness import (
     check_kb_freshness,
     render_freshness_report,
 )
-
 
 KB = Path(__file__).parent.parent.parent / "data" / "kb"
 
