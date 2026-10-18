@@ -1,7 +1,11 @@
-"""CLI Typer pour lancer le pipeline d'ingestion de la base de connaissances dans Kùzu DB."""
-
+import sys
 from pathlib import Path
 from typing import Any
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 import typer
 from dotenv import load_dotenv

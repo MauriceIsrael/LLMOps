@@ -1,0 +1,228 @@
+{
+  "interface": "mcp.get_kb_freshness",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "alerts_by_owner": {
+            "type": [
+              "object"
+            ],
+            "values": {
+              "keys": {
+                "controls_to_revalidate": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "drift_count": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "overdue_assets": {
+                  "items": null,
+                  "type": [
+                    "array"
+                  ]
+                },
+                "overdue_count": {
+                  "type": [
+                    "number"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            }
+          },
+          "checked_at": {
+            "type": [
+              "string"
+            ]
+          },
+          "doctrine_dependencies": {
+            "items": {
+              "keys": {
+                "affected_controls": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "asset_id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "asset_title": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "asset_type": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "owner": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "overdue_reviews": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          },
+          "source_drifts": {
+            "items": {
+              "keys": {
+                "action_required": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "checks_count": {
+                  "type": [
+                    "number"
+                  ]
+                },
+                "control_id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "current_version": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "framework": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "manifest_version": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "owner": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "source_sha256_changed": {
+                  "type": [
+                    "boolean"
+                  ]
+                },
+                "upstream_latest_version": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "upstream_standard_ref": {
+                  "type": [
+                    "null"
+                  ]
+                },
+                "validated_checks_count": {
+                  "type": [
+                    "number"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          },
+          "summary": {
+            "keys": {
+              "affected_doctrine_count": {
+                "type": [
+                  "number"
+                ]
+              },
+              "overdue_count": {
+                "type": [
+                  "number"
+                ]
+              },
+              "revalidation_required_count": {
+                "type": [
+                  "number"
+                ]
+              },
+              "source_drift_count": {
+                "type": [
+                  "number"
+                ]
+              },
+              "total_assets_checked": {
+                "type": [
+                  "number"
+                ]
+              },
+              "total_controls": {
+                "type": [
+                  "number"
+                ]
+              },
+              "total_standards": {
+                "type": [
+                  "number"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

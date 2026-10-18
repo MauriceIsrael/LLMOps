@@ -92,6 +92,7 @@ MAP_KEYS: dict[str, int] = {
     "sections": 1,              # asset sections by heading / skills matrix by section id
     "breakdown_by_category": 1,  # RFP shredding: category -> counts
     "drafts": 1,                # prose suggest-batch: block id -> draft
+    "alerts_by_owner": 1,       # freshness: owner handle -> alerts summary
 }
 
 
@@ -370,6 +371,9 @@ def build_catalogue() -> list[Interface]:
         _mcp("get_framework_coverage", lambda: kn.get_framework_coverage(["NIS2", "ISO27001", "UNKNOWN-FW"])),
         # Contract 1.4 — acting expert (identity by e-mail)
         _mcp("get_kb_me", lambda: _as_reviewer(lambda: kn.get_kb_me(), delegate=True)),
+        # Contract 1.36 — governance freshness & RFP coverage gaps
+        _mcp("get_kb_freshness", lambda: _as_reviewer(lambda: kn.get_kb_freshness(), delegate=True)),
+        _mcp("get_rfp_coverage_gaps", lambda: kn.get_rfp_coverage_gaps(engagement=demo)),
         # --- MCP Engagement ------------------------------------------------
         _mcp("get_subject", lambda: eng.get_subject("mcx-services", engagement=demo)),
         _mcp("get_subject_trajectory", lambda: eng.get_subject_trajectory("mcx-services", engagement=demo)),
@@ -512,6 +516,8 @@ def build_catalogue() -> list[Interface]:
         _rest("PUT", "/api/compliance/frameworks/applicable", json_body={"engagement": scratch, "frameworks": ["NIS2", "SecNumCloud"]}),
         _rest("POST", "/api/compliance/frameworks/applicable", json_body={"engagement": scratch, "frameworks": ["NIS2"]}),
         _rest("POST", "/api/rfp/shred-to-candidates", json_body={"rfp_text": SAMPLE_RFP, "engagement": scratch}),
+        _rest("GET", "/api/rfp/coverage-gaps", f"/api/rfp/coverage-gaps?engagement={demo}"),
+        _rest("POST", "/api/rfp/coverage-gaps", json_body={"engagement": scratch, "rfp_text": SAMPLE_RFP}),
         _rest("POST", "/api/documents/zero-draft-blueprint", json_body={"engagement": scratch}),
         _rest("POST", "/api/prose/suggest-batch", json_body={"requests": [{"blockId": "b1", "anchorIds": ["MCX"], "instructions": ""}]}),
         _rest("POST", "/api/elicitation/trigger", json_body={"engagement": scratch}),
@@ -569,6 +575,7 @@ def build_catalogue() -> list[Interface]:
               headers=DELEGATED, delegate=True),
         _rest("POST", "/api/knowledge/publications", headers=DELEGATED, delegate=True),
         _rest("GET", "/api/knowledge/health", headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/freshness", headers=DELEGATED, delegate=True),
         # Contract 1.7 — framework ingestion through the API
         _rest("POST", "/api/frameworks/ingestions", form={"framework": "NIS2", "version": "2022/2555"},
               files={"file": ("nis2_excerpt.txt", Path("tests/fixtures/frameworks/nis2_excerpt.txt").read_bytes(), "text/plain")},

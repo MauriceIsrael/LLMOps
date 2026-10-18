@@ -918,6 +918,47 @@ def get_rfp_compliance_matrix(
         return handle_exception_response(e, context_action="get_rfp_compliance_matrix")
 
 
+def get_rfp_coverage_gaps(
+    engagement: str = "default",
+    rfp_text: str | None = None,
+) -> dict[str, Any]:
+    """Analyze KB coverage blind spots (coverage gaps) on an RFP (Issue #133).
+
+    Identifies chapters, sections, and thematic categories with zero or low KB coverage,
+    assesses blind spot severity, and suggests candidate frameworks and standards to ingest.
+
+    Args:
+        engagement: Target engagement identifier (loads persisted requirements if rfp_text is omitted).
+        rfp_text: Optional raw/markdown text of the tender to shred and analyze on the fly.
+    """
+    guard_engagement(engagement)  # K9
+    try:
+        from pipelines.rfp_shredder import RFPShredder, compute_rfp_coverage_gaps
+
+        if rfp_text and rfp_text.strip():
+            shredder = RFPShredder(kb_dir=server_config.kb_dir)
+            requirements = shredder.shred_text(rfp_text, engagement=engagement)
+            gaps_report = compute_rfp_coverage_gaps(requirements, kb_dir=server_config.kb_dir)
+            gaps_report["engagement"] = engagement
+            return ok_response(gaps_report, count=len(gaps_report.get("blind_spots", [])))
+
+        from tools.elicitation.repository import ElicitationRepository
+
+        eng_path = server_config.engagements_dir / f"{engagement}.lbug"
+        if not eng_path.exists():
+            empty_report = compute_rfp_coverage_gaps([], kb_dir=server_config.kb_dir)
+            empty_report["engagement"] = engagement
+            return ok_response(empty_report, count=0)
+
+        repo = ElicitationRepository(db_path=eng_path)
+        reqs = repo.get_requirements(engagement)
+        gaps_report = compute_rfp_coverage_gaps(reqs, kb_dir=server_config.kb_dir)
+        gaps_report["engagement"] = engagement
+        return ok_response(gaps_report, count=len(gaps_report.get("blind_spots", [])))
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_rfp_coverage_gaps")
+
+
 def trigger_rfp_elicitation(
     engagement: str = "default",
 ) -> dict[str, Any]:
@@ -2185,6 +2226,39 @@ def get_kb_health() -> dict[str, Any]:
         return ok_response(report, count=1)
     except Exception as e:
         return handle_exception_response(e, context_action="get_kb_health")
+
+
+def get_kb_freshness(
+    framework: str | None = None,
+    owner: str | None = None,
+    days: int = 180,
+) -> dict[str, Any]:
+    """Regulatory and doctrine freshness indicators (requires 'kb:review') (Issue #131).
+
+    Detects overdue reviews, upstream standard version drifts, and controls requiring clause revalidation.
+    """
+    from mcp_server.core.auth import has_scope
+    from pipelines.governance.freshness import check_kb_freshness
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+    try:
+        report = check_kb_freshness(Path(server_config.kb_dir), default_review_cycle_days=days)
+        if framework:
+            fw_lower = framework.lower()
+            report["source_drifts"] = [d for d in report["source_drifts"] if str(d.get("framework") or "").lower() == fw_lower]
+            report["overdue_reviews"] = [o for o in report["overdue_reviews"] if o.get("type") == "control" and fw_lower in o.get("id", "").lower()]
+        if owner:
+            owner_clean = owner if owner.startswith("@") else f"@{owner}"
+            report["overdue_reviews"] = [o for o in report["overdue_reviews"] if o.get("owner") == owner_clean]
+            report["source_drifts"] = [d for d in report["source_drifts"] if d.get("owner") == owner_clean]
+            report["doctrine_dependencies"] = [a for a in report["doctrine_dependencies"] if a.get("owner") == owner_clean]
+            report["alerts_by_owner"] = {k: v for k, v in report["alerts_by_owner"].items() if k == owner_clean}
+        return ok_response(report, count=len(report["source_drifts"]) + len(report["overdue_reviews"]))
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_kb_freshness")
+
 
 
 # ---------------------------------------------------------------------------

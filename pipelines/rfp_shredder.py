@@ -285,7 +285,12 @@ class RFPShredder:
             "coverage_rate": coverage_rate,
             "breakdown_by_category": by_cat,
             "matrix": matrix_rows,
+            "coverage_gaps": self.analyze_coverage_gaps(requirements),
         }
+
+    def analyze_coverage_gaps(self, requirements: list[RFPRequirement]) -> dict[str, Any]:
+        """Analyse détaillée des angles morts de couverture de la KB sur le lot d'exigences."""
+        return compute_rfp_coverage_gaps(requirements, kb_dir=self.kb_dir)
 
     def persist_to_engagement(
         self,
@@ -381,3 +386,209 @@ def to_extracted_candidates(
             "rationale": req.rationale,
         })
     return candidates
+
+
+SUGGESTED_FRAMEWORKS_BY_CATEGORY: dict[str, list[str]] = {
+    "security": ["ISO 27001", "SecNumCloud", "CIS Controls"],
+    "compliance": ["NIS2", "GDPR", "DORA"],
+    "sovereignty": ["SecNumCloud", "EU CSAM", "Doctrine Cloud au Centre"],
+    "telco-core": ["3GPP TS 33.501", "GSMA FS.31"],
+    "resilience": ["ISO 22301", "DORA", "NIS2"],
+    "network": ["ANSSI PSSI", "CIS Benchmark Network"],
+    "cloud-platform": ["SecNumCloud", "CIS Kubernetes Benchmark"],
+    "infrastructure": ["ISO 27001 A.11", "ANSSI PSSI"],
+    "observability": ["OpenTelemetry", "SRE Best Practices"],
+    "ai-assistance": ["EU AI Act", "NIST AI RMF"],
+}
+
+SUGGESTED_DOMAINS_BY_CATEGORY: dict[str, list[str]] = {
+    "security": ["security/iam", "security/cryptography", "security/soc"],
+    "compliance": ["compliance/regulatory", "compliance/governance"],
+    "sovereignty": ["sovereignty/cloud", "sovereignty/data-residency"],
+    "telco-core": ["telco/5g-core", "telco/edge"],
+    "resilience": ["resilience/bcdr", "resilience/high-availability"],
+    "network": ["network/segmentation", "network/sdn"],
+    "cloud-platform": ["platform/kubernetes", "platform/serverless"],
+    "infrastructure": ["infrastructure/datacenter", "infrastructure/virtualization"],
+    "observability": ["observability/logging", "observability/metrics"],
+    "ai-assistance": ["ai/llm-safety", "ai/evaluation"],
+}
+
+
+def compute_rfp_coverage_gaps(
+    requirements: list[RFPRequirement] | list[dict[str, Any]],
+    kb_dir: Path | str = "data/kb",
+) -> dict[str, Any]:
+    """Analyse les angles morts de couverture de la base de connaissances sur les exigences d'un RFP (Issue #133)."""
+    req_dicts: list[dict[str, Any]] = [
+        r.to_dict() if isinstance(r, RFPRequirement) else r for r in requirements
+    ]
+
+    total = len(req_dicts)
+    covered = sum(1 for r in req_dicts if r.get("status") == "covered")
+    partial = sum(1 for r in req_dicts if r.get("status") == "partially_covered")
+    gaps = sum(1 for r in req_dicts if r.get("status") == "gap")
+
+    critical_gaps = sum(
+        1 for r in req_dicts if r.get("status") == "gap" and r.get("criticality") == "mandatory"
+    )
+
+    overall_gap_rate = round((gaps / total * 100), 1) if total > 0 else 0.0
+    overall_coverage_rate = round((covered / total * 100), 1) if total > 0 else 0.0
+
+    # Analyse par section / chapitre du RFP
+    by_section: dict[str, dict[str, Any]] = {}
+    for r in req_dicts:
+        sec = r.get("section") or "unspecified"
+        entry = by_section.setdefault(
+            sec,
+            {
+                "section": sec,
+                "total": 0,
+                "covered": 0,
+                "partially_covered": 0,
+                "gaps": 0,
+                "critical_gaps": 0,
+                "gap_ids": [],
+            },
+        )
+        entry["total"] += 1
+        st = r.get("status")
+        if st == "covered":
+            entry["covered"] += 1
+        elif st == "partially_covered":
+            entry["partially_covered"] += 1
+        elif st == "gap":
+            entry["gaps"] += 1
+            entry["gap_ids"].append(r.get("id"))
+            if r.get("criticality") == "mandatory":
+                entry["critical_gaps"] += 1
+
+    section_gaps: list[dict[str, Any]] = []
+    for sec, data in by_section.items():
+        s_total = data["total"]
+        s_gaps = data["gaps"]
+        s_crit = data["critical_gaps"]
+        s_gap_rate = round((s_gaps / s_total * 100), 1) if s_total > 0 else 0.0
+        s_cov_rate = round((data["covered"] / s_total * 100), 1) if s_total > 0 else 0.0
+        severity = "critical" if s_crit > 0 else ("warning" if s_gaps > 0 else "ok")
+        section_gaps.append({
+            "section": sec,
+            "total": s_total,
+            "covered": data["covered"],
+            "partially_covered": data["partially_covered"],
+            "gaps": s_gaps,
+            "critical_gaps": s_crit,
+            "gap_rate": s_gap_rate,
+            "coverage_rate": s_cov_rate,
+            "severity": severity,
+            "gap_requirement_ids": data["gap_ids"],
+        })
+
+    section_gaps.sort(key=lambda s: (-s["critical_gaps"], -s["gaps"], -s["gap_rate"]))
+
+    # Analyse par catégorie thématique
+    by_category: dict[str, dict[str, Any]] = {}
+    for r in req_dicts:
+        cat = r.get("category") or "general"
+        entry = by_category.setdefault(
+            cat,
+            {
+                "category": cat,
+                "total": 0,
+                "covered": 0,
+                "partially_covered": 0,
+                "gaps": 0,
+                "critical_gaps": 0,
+                "gap_ids": [],
+            },
+        )
+        entry["total"] += 1
+        st = r.get("status")
+        if st == "covered":
+            entry["covered"] += 1
+        elif st == "partially_covered":
+            entry["partially_covered"] += 1
+        elif st == "gap":
+            entry["gaps"] += 1
+            entry["gap_ids"].append(r.get("id"))
+            if r.get("criticality") == "mandatory":
+                entry["critical_gaps"] += 1
+
+    category_gaps: list[dict[str, Any]] = []
+    for cat, data in by_category.items():
+        c_total = data["total"]
+        c_gaps = data["gaps"]
+        c_crit = data["critical_gaps"]
+        c_gap_rate = round((c_gaps / c_total * 100), 1) if c_total > 0 else 0.0
+        c_cov_rate = round((data["covered"] / c_total * 100), 1) if c_total > 0 else 0.0
+        severity = "critical" if c_crit > 0 else ("warning" if c_gaps > 0 else "ok")
+        category_gaps.append({
+            "category": cat,
+            "total": c_total,
+            "covered": data["covered"],
+            "partially_covered": data["partially_covered"],
+            "gaps": c_gaps,
+            "critical_gaps": c_crit,
+            "gap_rate": c_gap_rate,
+            "coverage_rate": c_cov_rate,
+            "severity": severity,
+            "suggested_frameworks": SUGGESTED_FRAMEWORKS_BY_CATEGORY.get(cat, []),
+            "suggested_domains": SUGGESTED_DOMAINS_BY_CATEGORY.get(cat, []),
+            "gap_requirement_ids": data["gap_ids"],
+        })
+
+    category_gaps.sort(key=lambda c: (-c["critical_gaps"], -c["gaps"], -c["gap_rate"]))
+
+    # Identification des angles morts majeurs (Blind Spots)
+    blind_spots: list[dict[str, Any]] = []
+    for s in section_gaps:
+        if s["gaps"] > 0 and (s["gap_rate"] >= 50.0 or s["critical_gaps"] > 0):
+            recs = [f"Élicitation prioritaire des {s['gaps']} exigences non couvertes dans la section {s['section']}."]
+            if s["critical_gaps"] > 0:
+                recs.insert(0, f"Risque critique : {s['critical_gaps']} exigences obligatoires sans motif standard.")
+            blind_spots.append({
+                "scope": "section",
+                "name": s["section"],
+                "gaps": s["gaps"],
+                "critical_gaps": s["critical_gaps"],
+                "gap_rate": s["gap_rate"],
+                "severity": s["severity"],
+                "recommendations": recs,
+            })
+
+    for c in category_gaps:
+        if c["gaps"] > 0 and (c["gap_rate"] >= 50.0 or c["critical_gaps"] > 0):
+            fw_str = ", ".join(c["suggested_frameworks"][:2]) if c["suggested_frameworks"] else "normes sectorielles"
+            recs = [
+                f"Ingestion ou rapprochement recommandé avec les référentiels : {fw_str}.",
+                f"Création de patterns KB sur le domaine : {', '.join(c['suggested_domains'][:2]) or c['category']}.",
+            ]
+            if c["critical_gaps"] > 0:
+                recs.insert(0, f"Risque critique d'offre : {c['critical_gaps']} exigences obligatoires non satisfaites.")
+            blind_spots.append({
+                "scope": "category",
+                "name": c["category"],
+                "gaps": c["gaps"],
+                "critical_gaps": c["critical_gaps"],
+                "gap_rate": c["gap_rate"],
+                "severity": c["severity"],
+                "recommendations": recs,
+            })
+
+    status = "high_risk" if critical_gaps > 0 else ("moderate_risk" if gaps > 0 else "ready")
+
+    return {
+        "status": status,
+        "total_requirements": total,
+        "covered": covered,
+        "partially_covered": partial,
+        "gaps": gaps,
+        "critical_gaps": critical_gaps,
+        "coverage_rate": overall_coverage_rate,
+        "gap_rate": overall_gap_rate,
+        "section_gaps": section_gaps,
+        "category_gaps": category_gaps,
+        "blind_spots": blind_spots,
+    }
+

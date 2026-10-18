@@ -9,8 +9,10 @@ import pytest
 
 
 def _run_cli_script(script_name: str, *args: str) -> None:
+    import os
     cmd = [sys.executable, "-m", f"scripts.{script_name}"] + list(args)
-    res = subprocess.run(cmd, capture_output=True, text=True)
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+    res = subprocess.run(cmd, capture_output=True, text=True, env=env)
     assert res.returncode == 0, f"Script scripts.{script_name} failed with stderr:\n{res.stderr}"
 
 

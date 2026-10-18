@@ -1,0 +1,300 @@
+{
+  "interface": "rest.POST /api/rfp/coverage-gaps",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "blind_spots": {
+                "items": {
+                  "keys": {
+                    "critical_gaps": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "gap_rate": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "gaps": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "name": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "recommendations": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "scope": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "severity": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "category_gaps": {
+                "items": {
+                  "keys": {
+                    "category": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "coverage_rate": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "covered": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "critical_gaps": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "gap_rate": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "gap_requirement_ids": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "gaps": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "partially_covered": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "severity": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "suggested_domains": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "suggested_frameworks": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "total": {
+                      "type": [
+                        "number"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "coverage_rate": {
+                "type": [
+                  "number"
+                ]
+              },
+              "covered": {
+                "type": [
+                  "number"
+                ]
+              },
+              "critical_gaps": {
+                "type": [
+                  "number"
+                ]
+              },
+              "engagement": {
+                "type": [
+                  "string"
+                ]
+              },
+              "gap_rate": {
+                "type": [
+                  "number"
+                ]
+              },
+              "gaps": {
+                "type": [
+                  "number"
+                ]
+              },
+              "partially_covered": {
+                "type": [
+                  "number"
+                ]
+              },
+              "section_gaps": {
+                "items": {
+                  "keys": {
+                    "coverage_rate": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "covered": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "critical_gaps": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "gap_rate": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "gap_requirement_ids": {
+                      "items": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "type": [
+                        "array"
+                      ]
+                    },
+                    "gaps": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "partially_covered": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "section": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "severity": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "total": {
+                      "type": [
+                        "number"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              },
+              "status": {
+                "type": [
+                  "string"
+                ]
+              },
+              "total_requirements": {
+                "type": [
+                  "number"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

@@ -86,12 +86,14 @@ from mcp_server.knowledge.tools import (
     get_governance_events,
     get_graph_summary,
     get_kb_candidate,
+    get_kb_freshness,
     get_kb_health,
     get_kb_me,
     get_knowledge_asset_history,
     get_principles_for,
     get_review_inbox,
     get_rfp_compliance_matrix,
+    get_rfp_coverage_gaps,
     get_similarity_eval,
     get_similarity_eval_run,
     get_skills_matrix,
@@ -156,6 +158,7 @@ mcp.tool()(suggest_knowledge_improvement)
 mcp.tool()(shred_rfp)
 mcp.tool()(generate_zero_draft_hld)
 mcp.tool()(get_rfp_compliance_matrix)
+mcp.tool()(get_rfp_coverage_gaps)
 mcp.tool()(trigger_rfp_elicitation)
 mcp.tool()(get_doctrine_context)
 mcp.tool()(check_option)
@@ -170,6 +173,7 @@ mcp.tool()(assign_kb_candidate)
 mcp.tool()(request_kb_review)
 mcp.tool()(comment_kb_candidate)
 mcp.tool()(list_domain_owners)
+mcp.tool()(get_kb_freshness)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -721,6 +725,26 @@ def create_starlette_app() -> Starlette:
                 status_code=500,
             )
 
+    async def handle_rfp_coverage_gaps(request):
+        """Indicateur d'angles morts de couverture KB sur un appel d'offres (Issue #133)."""
+        engagement = "default"
+        rfp_text = None
+        if request.method == "POST":
+            try:
+                body = await request.json()
+            except Exception:
+                body = {}
+            if isinstance(body, dict):
+                engagement = str(body.get("engagement") or "default").strip()
+                rfp_text = body.get("rfp_text")
+        else:
+            engagement = str(request.query_params.get("engagement") or "default").strip()
+            rfp_text = request.query_params.get("rfp_text")
+
+        res = get_rfp_coverage_gaps(engagement=engagement, rfp_text=rfp_text)
+        status_code = 200 if res.get("status") == "ok" else (403 if res.get("status") == "unauthorized" else 400)
+        return JSONResponse(res, status_code=status_code)
+
     async def handle_zero_draft_blueprint(request):
         """Génère un couple Blueprint + ProseStore pour document-engine à partir des connaissances du Hub."""
         try:
@@ -1265,6 +1289,17 @@ def create_starlette_app() -> Starlette:
         res = get_kb_health()
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
+    async def handle_kb_freshness(request):
+        q = request.query_params
+        days_str = q.get("days")
+        days = int(days_str) if days_str and days_str.isdigit() else 180
+        res = get_kb_freshness(
+            framework=q.get("framework"),
+            owner=q.get("owner"),
+            days=days,
+        )
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_embeddings_pending(request):
         res = get_embeddings_pending(request.query_params.get("model") or "")
         return JSONResponse(res, status_code=_candidate_status_code(res))
@@ -1484,6 +1519,7 @@ def create_starlette_app() -> Starlette:
             Route("/api/compliance/frameworks/applicable", endpoint=handle_compliance_applicable_frameworks_get, methods=["GET"]),
             Route("/api/compliance/frameworks/applicable", endpoint=handle_compliance_applicable_frameworks_put, methods=["PUT", "POST"]),
             Route("/api/rfp/shred-to-candidates", endpoint=handle_rfp_shred_to_candidates, methods=["POST"]),
+            Route("/api/rfp/coverage-gaps", endpoint=handle_rfp_coverage_gaps, methods=["GET", "POST"]),
             Route("/api/documents/zero-draft-blueprint", endpoint=handle_zero_draft_blueprint, methods=["POST"]),
             Route("/api/prose/suggest-batch", endpoint=handle_prose_suggest_batch, methods=["POST"]),
             Route("/api/elicitation/trigger", endpoint=handle_elicitation_trigger, methods=["POST"]),
@@ -1506,6 +1542,7 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_confirm, methods=["POST"]),
             Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_list, methods=["GET"]),
             Route("/api/knowledge/health", endpoint=handle_kb_health, methods=["GET"]),
+            Route("/api/knowledge/freshness", endpoint=handle_kb_freshness, methods=["GET"]),
             Route("/api/knowledge/publications", endpoint=handle_publications_list, methods=["GET"]),
             Route("/api/knowledge/publications", endpoint=handle_publications_create, methods=["POST"]),
             Route("/api/knowledge/candidates/{candidate_id}/promote", endpoint=handle_candidate_promote,

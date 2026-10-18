@@ -27,7 +27,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from pipelines.doctrine.text import Vocabulary, match_terms
+from pipelines.doctrine.text import Vocabulary, expand_terms, match_terms
 
 CHECK_KINDS = ("requires", "forbids")
 MATCHER_KEYS = ("terms_any", "terms_all")
@@ -175,3 +175,16 @@ def evaluate_clause(clause: CheckClause, normalized_text: str, vocabulary: Vocab
     if satisfied:
         return ClauseResult(clause, "supports", when_terms + [t for t in expect_terms if t not in when_terms])
     return ClauseResult(clause, "violates", when_terms)
+
+
+def expand_clause_terms(clause: CheckClause, vocabulary: Vocabulary) -> dict[str, list[str]]:
+    """Return dictionary of expanded bilingual terms for when and expect matchers."""
+    res = {
+        "when_terms_any": expand_terms(clause.when.terms_any, vocabulary),
+        "when_terms_all": expand_terms(clause.when.terms_all, vocabulary),
+    }
+    if clause.expect:
+        res["expect_terms_any"] = expand_terms(clause.expect.terms_any, vocabulary)
+        res["expect_terms_all"] = expand_terms(clause.expect.terms_all, vocabulary)
+    return res
+

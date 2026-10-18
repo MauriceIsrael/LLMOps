@@ -410,6 +410,37 @@ def coverage_report_cmd(
     console.print(f"[bold green]✓ coverage report[/bold green] → {output}")
 
 
+@app.command("check-freshness")
+def check_freshness_cmd(
+    kb_dir: Path = KB_DIR_OPTION,
+    as_json: bool = typer.Option(False, "--json", help="JSON output."),
+    days: int = typer.Option(180, "--days", help="Default review cycle in days."),
+) -> None:
+    """Check freshness of regulatory frameworks and doctrine, alerting on overdue reviews and drifts (Issue #131)."""
+    from pipelines.governance.freshness import check_kb_freshness, render_freshness_report
+
+    report = check_kb_freshness(kb_dir, default_review_cycle_days=days)
+    if as_json:
+        console.print_json(json.dumps(report, ensure_ascii=False))
+        return
+    console.print(render_freshness_report(report))
+
+
+@app.command("freshness-report")
+def freshness_report_cmd(
+    output: Path = typer.Option(Path("docs/FRESHNESS.md"), "--output", help="Markdown report path."),
+    kb_dir: Path = KB_DIR_OPTION,
+    days: int = typer.Option(180, "--days", help="Default review cycle in days."),
+) -> None:
+    """Write the regulatory and doctrine freshness report (docs/FRESHNESS.md)."""
+    from pipelines.governance.freshness import check_kb_freshness, render_freshness_report
+
+    report = check_kb_freshness(kb_dir, default_review_cycle_days=days)
+    output.write_text(render_freshness_report(report), encoding="utf-8")
+    console.print(f"[bold green]✓ freshness report[/bold green] → {output}")
+
+
+
 models_app = typer.Typer(help="Local embedding models (data/models/, git-ignored): fetch once, then offline.",
                          no_args_is_help=True)
 app.add_typer(models_app, name="models")
