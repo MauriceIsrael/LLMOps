@@ -1,3 +1,5 @@
+"""CLI Typer pour lancer le pipeline d'ingestion de la base de connaissances dans Kùzu DB."""
+
 import sys
 from pathlib import Path
 from typing import Any

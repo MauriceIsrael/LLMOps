@@ -127,10 +127,10 @@ Exécution en **copie neuve** (`git worktree`), Python 3.13, dépendances du ver
 
 | | |
 |---|---|
-| Tests | 1252 |
+| Tests | 1331 |
 | Échecs | **0** |
 | Ignorés | 6, tous documentés : modèle d'embedding local absent (4, `KB_SEMANTIC_EVAL=1`), backend SQL seulement (1), « le vrai blueprint n'est pas encore dans le dépôt » (1) |
-| Durée | environ 8 minutes |
+| Durée | environ 8-10 minutes |
 
 Contre-épreuve sur le moteur : la même suite, sur `main` avant ces corrections et avec `ladybug` **0.20.4**, ne donne que les trois
 échecs de tests périmés corrigés ici (compteurs de `compliance_mapper`, fixtures en chemins Windows) ; la 0.20.x est donc compatible.

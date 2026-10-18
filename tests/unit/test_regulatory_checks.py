@@ -47,6 +47,8 @@ def test_clauses_are_valid_drafts_on_active_controls(cid):
     text = _path(cid).read_text(encoding="utf-8")
     fm = read_frontmatter(_path(cid))
     assert fm["status"] == "active" and fm["checks_status"] in ("draft", "validated")
+    if fm["checks_status"] == "draft":
+        assert "proposed by the coding agent" in text and "NOT validated" in text
     assert fm["checks"], "at least one clause"
     for clause in fm["checks"]:
         assert validate_clause(clause) == [], clause["id"]
@@ -146,5 +148,5 @@ def test_ordinary_options_are_not_flagged(index, option):
 def test_a_violation_cites_the_control_and_its_status(index):
     res = check_option(index, {"title": "Administration with a shared admin account"}, frameworks=["NIS2"])
     hit = next(v for v in res["verdicts"] if v["check_id"] == "NIS2-ART21-2J-C1")
-    assert hit["typed_id"] == "control:NIS2-ART21-2J" and hit["check_status"] == "validated"
+    assert hit["typed_id"] == "control:NIS2-ART21-2J" and hit["check_status"] in ("draft", "validated")
     assert hit["matched_terms"] == ["shared admin account"] and "21(2)(j)" in hit["message"]

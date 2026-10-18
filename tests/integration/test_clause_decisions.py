@@ -29,8 +29,28 @@ def env(tmp_path, monkeypatch):
     owners["owners"]["@core-owner-architecture"]["email"] = OTHER
     owners["owners"]["@maintainers"] = {"email": MAINT, "roles": ["kb:maintain"]}
     (kb / "owners.yaml").write_text(yaml.safe_dump(owners), encoding="utf-8")
+    c_path = kb / "controls" / "NIS2" / "NIS2-ART21-2C.md"
+    parts = c_path.read_text(encoding="utf-8").split("---", 2)
+    fm = yaml.safe_load(parts[1])
+    fm["checks_status"] = "draft"
+    fm["revision"] = 2
+    for c in fm.get("checks", []):
+        c.pop("status", None)
+        c.pop("review", None)
+    c_path.write_text(f"---\n{yaml.safe_dump(fm, sort_keys=False)}---{parts[2]}", encoding="utf-8")
+    if (kb / "clause-decisions.jsonl").exists():
+        (kb / "clause-decisions.jsonl").unlink()
     db = tmp_path / "knowledge.lbug"
     shutil.copy(ROOT / "data" / "knowledge.lbug", db)
+    import ladybug as kuzu
+    _kdb = kuzu.Database(str(db))
+    _conn = kuzu.Connection(_kdb)
+    _conn.execute(
+        "MATCH (c:Control) WHERE c.id = 'NIS2-ART21-2C' SET c.checks_status = 'draft', c.checks = $checks;",
+        {"checks": json.dumps(fm["checks"])},
+    )
+    del _conn
+    del _kdb
     (tmp_path / "data").mkdir()
     monkeypatch.chdir(tmp_path)  # snapshots are written under ./data/snapshots
     monkeypatch.setattr(server_config, "kb_dir", kb)

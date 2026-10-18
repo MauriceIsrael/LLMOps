@@ -115,6 +115,12 @@ Stateful monoliths.
 {body_extra}"""
 
 
+@pytest.fixture(autouse=True)
+def _isolate_env(monkeypatch):
+    monkeypatch.delenv("GOVERNANCE_DATABASE_URL", raising=False)
+    monkeypatch.setenv("CANDIDATES_BACKEND", "file")
+
+
 @pytest.fixture
 def kb(tmp_path: Path) -> Path:
     kb = tmp_path / "kb"
