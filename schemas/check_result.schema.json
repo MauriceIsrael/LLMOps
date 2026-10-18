@@ -35,6 +35,7 @@
               "verdict",
               "message",
               "matched_terms",
+              "negated_terms",
               "excerpt",
               "source_ref"
             ],
@@ -62,6 +63,12 @@
                 ]
               },
               "matched_terms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "negated_terms": {
                 "type": "array",
                 "items": {
                   "type": "string"

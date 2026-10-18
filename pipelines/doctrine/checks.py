@@ -27,7 +27,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from pipelines.doctrine.text import Vocabulary, expand_terms, match_terms
+from pipelines.doctrine.text import Vocabulary, expand_terms, match_negated_terms, match_terms
 
 CHECK_KINDS = ("requires", "forbids")
 MATCHER_KEYS = ("terms_any", "terms_all")
@@ -56,6 +56,17 @@ class Matcher:
             ok = False
         return ok, matched
 
+    def match_negated(self, normalized_text: str, vocabulary: Vocabulary) -> list[str]:
+        """Return list of terms from terms_any and terms_all that are present but negated."""
+        negated: list[str] = []
+        if self.terms_any:
+            neg_hits = match_negated_terms(normalized_text, self.terms_any, vocabulary)
+            negated += neg_hits
+        if self.terms_all:
+            neg_hits = match_negated_terms(normalized_text, self.terms_all, vocabulary)
+            negated += [h for h in neg_hits if h not in negated]
+        return negated
+
 
 @dataclass(frozen=True)
 class CheckClause:
@@ -73,6 +84,7 @@ class ClauseResult:
     clause: CheckClause
     verdict: str  # supports | violates
     matched_terms: list[str]
+    negated_terms: list[str] = field(default_factory=list)
 
 
 def validate_clause(raw: Any) -> list[str]:
@@ -172,9 +184,10 @@ def evaluate_clause(clause: CheckClause, normalized_text: str, vocabulary: Vocab
         return ClauseResult(clause, "violates", when_terms)
     assert clause.expect is not None
     satisfied, expect_terms = clause.expect.match(normalized_text, vocabulary)
+    negated_terms = clause.expect.match_negated(normalized_text, vocabulary)
     if satisfied:
-        return ClauseResult(clause, "supports", when_terms + [t for t in expect_terms if t not in when_terms])
-    return ClauseResult(clause, "violates", when_terms)
+        return ClauseResult(clause, "supports", when_terms + [t for t in expect_terms if t not in when_terms], negated_terms)
+    return ClauseResult(clause, "violates", when_terms, negated_terms)
 
 
 def expand_clause_terms(clause: CheckClause, vocabulary: Vocabulary) -> dict[str, list[str]]:

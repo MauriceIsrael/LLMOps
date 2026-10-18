@@ -19,7 +19,7 @@ def test_bootstrap_seeds_once_and_never_overwrites(tmp_path, monkeypatch):
     dispose_engines()
     monkeypatch.setenv("GOVERNANCE_DATABASE_URL", f"sqlite:///{tmp_path / 'g.db'}")
     first = ensure_governance_ready(ROOT / "data" / "kb", DATASET)
-    assert first["owners_seeded"] is True and first["eval_cases"] == {"imported": 30, "skipped": 0}
+    assert first["owners_seeded"] is True and first["eval_cases"] == {"imported": 33, "skipped": 0}
     from pipelines.governance.registry import load_registry_from_db, save_registry
 
     reg = load_registry_from_db()
@@ -27,7 +27,7 @@ def test_bootstrap_seeds_once_and_never_overwrites(tmp_path, monkeypatch):
     reg.owners["@maintainers"] = reg.owner("@maintainers").__class__(handle="@maintainers", email="m@example.org")
     save_registry(reg)
     again = ensure_governance_ready(ROOT / "data" / "kb", DATASET)
-    assert again["owners_seeded"] is False and again["eval_cases"] == {"imported": 0, "skipped": 30}
+    assert again["owners_seeded"] is False and again["eval_cases"] == {"imported": 0, "skipped": 33}
     assert load_registry_from_db().owner("@maintainers").email == "m@example.org"
     dispose_engines()
 

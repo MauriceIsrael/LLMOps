@@ -241,6 +241,7 @@ export interface CheckVerdict {
   verdict: CheckVerdictValue;
   message: string | null;
   matched_terms: string[];
+  negated_terms: string[];
   excerpt: string;
   source_ref: string;
   check_status?: "draft" | "validated" | null;
@@ -423,7 +424,7 @@ export interface CandidateDryRun {
 
 export type ExpectedVerdict = "violates" | "supports";
 
-export interface ClauseVerdictView { check_id: string | null; verdict: ExpectedVerdict; matched_terms: string[] }
+export interface ClauseVerdictView { check_id: string | null; verdict: ExpectedVerdict; matched_terms: string[]; negated_terms: string[] }
 
 export interface JudgeMetrics {
   violation_recall: number; supports_recall: number; unexpected_violations: number; expected_violations: number;

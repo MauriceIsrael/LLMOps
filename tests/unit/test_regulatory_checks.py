@@ -150,3 +150,34 @@ def test_a_violation_cites_the_control_and_its_status(index):
     hit = next(v for v in res["verdicts"] if v["check_id"] == "NIS2-ART21-2J-C1")
     assert hit["typed_id"] == "control:NIS2-ART21-2J" and hit["check_status"] in ("draft", "validated")
     assert hit["matched_terms"] == ["shared admin account"] and "21(2)(j)" in hit["message"]
+
+
+def test_negated_expectation_violates_requires_clause(index):
+    # Issue #110: « sans évaluation de sécurité du fournisseur » must violate NIS2-ART21-2D-C1 and report negated_terms
+    res_fr = check_option(
+        index,
+        {
+            "title": "Sous-traitance de l'exploitation",
+            "description": "le RUN est confié à un prestataire sans évaluation de sécurité du fournisseur",
+        },
+        frameworks=["NIS2"],
+    )
+    hit_fr = next(v for v in res_fr["verdicts"] if v["check_id"] == "NIS2-ART21-2D-C1")
+    assert hit_fr["verdict"] == "violates"
+    assert "sous-traitance" in hit_fr["matched_terms"]
+    assert "evaluation de securite du fournisseur" in hit_fr["negated_terms"]
+
+    # English variant with 'without'
+    res_en = check_option(
+        index,
+        {
+            "title": "Operations outsourcing",
+            "description": "the RUN is entrusted to a managed service provider without supplier assessment",
+        },
+        frameworks=["NIS2"],
+    )
+    hit_en = next(v for v in res_en["verdicts"] if v["check_id"] == "NIS2-ART21-2D-C1")
+    assert hit_en["verdict"] == "violates"
+    assert "managed service provider" in hit_en["matched_terms"]
+    assert "supplier assessment" in hit_en["negated_terms"]
+
