@@ -109,6 +109,9 @@ def kb_health(service: CandidateService, kb_dir: Path, snapshot_dir: Path, now: 
                 "missing": len([r for r in current if r not in stored]),
                 "stale": len([r for r, h in stored.items() if r in current and current[r] != h]),
             })
+    from pipelines.governance.freshness import check_kb_freshness
+
+    freshness_report = check_kb_freshness(kb_dir, now=now)
     return {
         "generated_at": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "assets": {"active": len(assets), "by_type": dict(sorted(by_type.items())), "by_domain": dict(sorted(by_domain.items())),
@@ -117,6 +120,11 @@ def kb_health(service: CandidateService, kb_dir: Path, snapshot_dir: Path, now: 
         "clauses": {"total": clauses, "draft": draft_clauses, "unassessed_verdict_share": unassessed_share},
         "coverage": {fw: {"status": c["status"], "expected": c["expected"], "present": c["present"],
                           "validated": c["validated"], "provisional": c["provisional"]} for fw, c in coverage.items()},
+        "freshness": {
+            "status": freshness_report["status"],
+            "summary": freshness_report["summary"],
+            "alerts_by_owner": freshness_report["alerts_by_owner"],
+        },
         "queue": _queue(service, now),
         "evaluation": evaluation,
         "last_snapshot": _last_snapshot(snapshot_dir),

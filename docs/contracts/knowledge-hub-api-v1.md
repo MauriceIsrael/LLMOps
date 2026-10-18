@@ -1179,7 +1179,26 @@ L'exigence est portée par le sujet (1.27), la décision est celle de ce sujet e
 
 **Vérification.** Une ligne `declared_by_decision` sans décision (`COVERAGE_WITHOUT_DECISION`), dont une décision n'est pas sur un sujet qui porte l'exigence (`COVERAGE_NOT_CARRIED`), ou un couple exigence / contrôle en double (`COVERAGE_DUPLICATE`) fait refuser l'export.
 
-**Ce que ça n'est pas.** Elle ne dit pas que le contrôle est satisfait ni que le texte de l'actif répond à l'exigence. Un contrôle que l'exigence *devrait* viser et qu'aucune décision ne déclare reste absent (ou `uncovered` s'il a été rapproché). Les manques G3 dérivés ne sont toujours pas inclus.
+### 5.36 Contrat 1.36 — Veille réglementaire, matching multilingue FR/EN et indicateur d'angles morts RFP (issues #127, #131, #132, #133)
+
+**1. Correction K17 : Vérification du sujet porteur sur les contrôles rapprochés (Issue #127)**
+- Pour les lignes de conformité issues d'exigences rapprochées (`matched_controls`), une décision ne couvre désormais l'exigence que si le sujet de la décision porte effectivement l'exigence (`d["subject"] in req_subjects`).
+- L'export scellé d'engagement vérifie systématiquement la règle `COVERAGE_NOT_CARRIED` sur l'ensemble des lignes de conformité (`basis: "matched"` comme `basis: "declared_by_decision"`).
+
+**2. Veille de fraîcheur réglementaire et doctrine KB (Issue #131)**
+- `GET /api/knowledge/freshness` (requiert le scope `kb:review`) et outil MCP `get_kb_freshness(framework?, owner?, days=180)`.
+- Détecte les revues documentaires échues (`overdue_reviews`), les dérives de versions et de checksums des référentiels amont (`source_drifts`), ainsi que les doctrines dépendantes devant être réévaluées.
+- Intégration CLI `kb check-freshness` et `kb freshness-report`.
+
+**3. Évaluation sémantique et matching multilingue FR/EN (Issue #132)**
+- Enrichissement du glossaire bilingue (`data/kb/glossary/synonyms.yaml`) avec le vocabulaire technique télécom, résilience et sécurité (`holdover`, `jamming`, `anti-spoofing`, `sepp`, `back-up room`, `four-eyes`, etc.).
+- Fonctions d'extension de termes et de clauses : `expand_terms` et `expand_clause_terms`.
+- Évaluation inter-langues déterministe (options rédigées en français contre clauses en anglais et vice-versa).
+
+**4. Indicateur d'angles morts de couverture KB sur un appel d'offres (Issue #133)**
+- `POST /api/rfp/coverage-gaps` et `GET /api/rfp/coverage-gaps` (outil MCP `get_rfp_coverage_gaps(engagement, rfp_text?)`).
+- La matrice de conformité produite par `build_compliance_matrix` inclut désormais le bloc `coverage_gaps`.
+- Synthèse des angles morts (`blind_spots`) par section et catégorie thématique, identification des lacunes critiques (`critical_gaps`), et recommandations de référentiels et domaines à ingérer.
 
 ---
 

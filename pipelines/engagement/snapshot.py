@@ -412,10 +412,10 @@ def verify(envelope: dict[str, Any]) -> list[Problem]:
         if item.get("basis") == "declared_by_decision":  # contract 1.35: the row exists only because a decision stands behind it
             if not item["decisions"]:
                 problems.append(Problem("COVERAGE_WITHOUT_DECISION", where, f"{item['requirement_id']} / {item['control_id']} is declared by a decision but cites none"))
-            for did in item["decisions"]:
-                carried_by = next((s for s in data["subjects"] if s["name"] == decision_subject.get(did)), None)
-                if carried_by is not None and item["requirement_id"] not in carried_by.get("requirement_ids", []):
-                    problems.append(Problem("COVERAGE_NOT_CARRIED", where, f"decision {did} is not on a subject that carries {item['requirement_id']}"))
+        for did in item["decisions"]:
+            carried_by = next((s for s in data["subjects"] if s["name"] == decision_subject.get(did)), None)
+            if carried_by is None or item["requirement_id"] not in carried_by.get("requirement_ids", []):
+                problems.append(Problem("COVERAGE_NOT_CARRIED", where, f"decision {did} is not on a subject that carries {item['requirement_id']}"))
     adj = data["rule_adjustments"]
     for i, d in enumerate(adj["disabled"]):
         where = f"$.data.rule_adjustments.disabled[{i}]"

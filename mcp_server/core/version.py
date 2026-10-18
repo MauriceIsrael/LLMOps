@@ -159,10 +159,14 @@ Minor versions only add interfaces or optional fields:
   any matching of text. Such rows carry ``basis: "declared_by_decision"`` (engagement snapshot ``schemaVersion`` ``1.8``); the rows
   already produced by ``matched_controls`` are unchanged. A typed key in ``based_on`` (``decision:ADR-0001``) is read as the asset it
   designates. No route is added or changed.
+* ``1.36`` — governance freshness monitoring (issue #131), multilingual FR/EN doctrine matching (issue #132), and RFP coverage gap analytics (issue #133):
+  ``GET /api/knowledge/freshness`` (MCP tool ``get_kb_freshness``), enriched bilingual glossary synonyms and clause term expansion (``expand_terms``,
+  ``expand_clause_terms``), and RFP coverage blind spots analytics ``GET /api/rfp/coverage-gaps``, ``POST /api/rfp/coverage-gaps`` (MCP tool
+  ``get_rfp_coverage_gaps``, and ``coverage_gaps`` in compliance matrix). K17 decision subject verification fix for matched controls (issue #127).
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.35"
+CONTRACT_VERSION = "1.36"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 

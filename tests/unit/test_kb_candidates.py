@@ -121,12 +121,12 @@ def kb(tmp_path: Path) -> Path:
     (kb / "principles").mkdir(parents=True)
     (kb / "controls" / "FW").mkdir(parents=True)
     (kb / "schema").mkdir()
-    (kb / "principles" / "P-001.md").write_text(PRINCIPLE)
-    (kb / "controls" / "FW" / "FW-01.md").write_text(CONTROL)
-    schema = Path("data/kb/schema/frontmatter.schema.json").read_text()
-    (kb / "schema" / "frontmatter.schema.json").write_text(schema)
-    (kb / "owners.yaml").write_text(yaml.safe_dump(OWNERS))
-    (kb / "anonymization_denylist.txt").write_text("# clients\nAcme Telecom\n")
+    (kb / "principles" / "P-001.md").write_text(PRINCIPLE, encoding="utf-8")
+    (kb / "controls" / "FW" / "FW-01.md").write_text(CONTROL, encoding="utf-8")
+    schema = Path("data/kb/schema/frontmatter.schema.json").read_text(encoding="utf-8")
+    (kb / "schema" / "frontmatter.schema.json").write_text(schema, encoding="utf-8")
+    (kb / "owners.yaml").write_text(yaml.safe_dump(OWNERS), encoding="utf-8")
+    (kb / "anonymization_denylist.txt").write_text("# clients\nAcme Telecom\n", encoding="utf-8")
     return kb
 
 
@@ -446,7 +446,7 @@ def test_promote_and_publish(service, kb, recorder, tmp_path):
     promoted = service.promote(c["id"], today=date(2026, 10, 1))
     path = Path(promoted["promoted"]["path"])
     assert path == kb / "patterns" / "PAT-010.md"
-    fm = yaml.safe_load(path.read_text().split("---")[1])
+    fm = yaml.safe_load(path.read_text(encoding="utf-8").split("---")[1])
     assert fm["status"] == "active" and fm["confidence"] == "verified"
     assert fm["validated_by"] == ["@auto"] and str(fm["last_reviewed"]) == "2026-10-01"
     assert fm["revision"] == 1  # K3: a new element starts at revision 1
@@ -459,7 +459,7 @@ def test_promote_and_publish(service, kb, recorder, tmp_path):
     assert calls == ["ingest", "snapshot"]
     assert result["published"] == [c["id"]] and result["snapshot_id"] == "snapshot-test"
     assert service.get(c["id"])["status"] == "published"
-    changelog = (kb / "CHANGELOG.md").read_text()
+    changelog = (kb / "CHANGELOG.md").read_text(encoding="utf-8")
     assert "snapshot-test" in changelog and "PAT-010" in changelog
     assert recorder.consumer_calls[0][0] == "kb_published"
     assert service.publish(ingest=lambda: None, snapshot=lambda: {})["published"] == []
@@ -472,7 +472,7 @@ def test_promote_amendment_rewrites_the_target(service, kb):
     service.review(c["id"], "accept", "@auto")
     service.review(c["id"], "accept", "@maintainers")
     service.promote(c["id"])
-    text = (kb / "principles" / "P-001.md").read_text()
+    text = (kb / "principles" / "P-001.md").read_text(encoding="utf-8")
     assert "runbooks are versioned" in text
     assert "checks_status: draft" in text  # #101: accepting the asset does not validate its clauses
     assert "revision: 2" in text  # K3: an accepted amendment raises the revision (the synthetic base had none: 1 -> 2)
@@ -480,7 +480,7 @@ def test_promote_amendment_rewrites_the_target(service, kb):
 
 def test_two_accepted_amendments_raise_the_revision_twice(service, kb):
     for n, wording in enumerate(("Configurations and runbooks are versioned.", "Configurations, runbooks and policies are versioned.")):
-        base = (kb / "principles" / "P-001.md").read_text()
+        base = (kb / "principles" / "P-001.md").read_text(encoding="utf-8")
         amended = base.replace(
             "Configurations are versioned." if n == 0 else "Configurations and runbooks are versioned.", wording
         )
@@ -489,17 +489,17 @@ def test_two_accepted_amendments_raise_the_revision_twice(service, kb):
         service.review(c["id"], "accept", "@auto")
         service.review(c["id"], "accept", "@maintainers")
         service.promote(c["id"])
-    assert "revision: 3" in (kb / "principles" / "P-001.md").read_text()
+    assert "revision: 3" in (kb / "principles" / "P-001.md").read_text(encoding="utf-8")
 
 
 def test_promote_glossary_entry(service, kb):
     (kb / "glossary").mkdir()
-    (kb / "glossary" / "glossary.md").write_text("---\nid: TPL-glossary\n---\n\n**Drift** — difference.\n")
+    (kb / "glossary" / "glossary.md").write_text("---\nid: TPL-glossary\n---\n\n**Drift** — difference.\n", encoding="utf-8")
     c = service.submit(submission("**Blast radius** — scope of impact of an action.", asset_type="glossary",
                                   title="Blast radius"))
     service.review(c["id"], "accept", "@maintainers")
     service.promote(c["id"])
-    text = (kb / "glossary" / "glossary.md").read_text()
+    text = (kb / "glossary" / "glossary.md").read_text(encoding="utf-8")
     assert "**Drift**" in text and "**Blast radius** — scope of impact" in text
 
 

@@ -190,3 +190,19 @@ def query_concepts(text: str, vocabulary: Vocabulary) -> list[frozenset[str]]:
         if c and c not in unique:
             unique.append(c)
     return unique
+
+
+def expand_terms(terms: Iterable[str], vocabulary: Vocabulary) -> list[str]:
+    """Expand terms with all their bilingual synonyms and variants from vocabulary."""
+    expanded: list[str] = []
+    for term in terms:
+        t_str = str(term)
+        variants = sorted(vocabulary.variants(t_str))
+        if not variants:
+            norm = normalize_phrase(t_str)
+            variants = [norm] if norm else []
+        for v in variants:
+            if v and v not in expanded:
+                expanded.append(v)
+    return expanded
+

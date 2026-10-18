@@ -64,18 +64,32 @@ def coverage(
         disposition = req.get("disposition") or {}
         return disposition.get("status") == "active" and disposition.get("value") == "evacuated"
 
+    open_requirements = {r["id"] for r in requirements if not evacuated(r)}
+    carried: dict[str, list[str]] = {}
+    carriers_of: dict[str, set[str]] = {}
+    for subject in subjects or []:
+        rids = sorted(rid for rid in subject.get("requirement_ids", []) if rid in open_requirements)
+        carried[subject["name"]] = rids
+        for rid in rids:
+            carriers_of.setdefault(rid, set()).add(subject["name"])
+
     items: list[dict[str, Any]] = []
     unresolved: list[dict[str, str]] = []
     for req in sorted(requirements, key=lambda r: r["id"]):
         if evacuated(req):
             continue
+        req_subjects = carriers_of.get(req["id"], set())
         for control_id in matched_controls(req.get("matched_controls")):
             control = controls.get(control_id)
             if control is None:
                 unresolved.append({"requirement_id": req["id"], "control_id": control_id})
                 continue
             implementers = set(control.get("implemented_by") or [])
-            covering = [(d, refs & ({control_id} | implementers)) for d, refs in cited if refs & ({control_id} | implementers)]
+            covering = [
+                (d, refs & ({control_id} | implementers))
+                for d, refs in cited
+                if d.get("subject") in req_subjects and (refs & ({control_id} | implementers))
+            ]
             levels = {d["status"] for d, _ in covering}
             status = "allocated" if "active" in levels else ("proposed" if levels else "uncovered")
             items.append({
@@ -87,10 +101,6 @@ def coverage(
 
     # The declared chain: requirement <- subject <- decision -> cited asset -> control (pinned snapshot). No text is matched.
     seen = {(i["requirement_id"], i["control_id"]) for i in items}
-    open_requirements = {r["id"] for r in requirements if not evacuated(r)}
-    carried: dict[str, list[str]] = {}
-    for subject in subjects or []:
-        carried[subject["name"]] = sorted(rid for rid in subject.get("requirement_ids", []) if rid in open_requirements)
     chain: dict[tuple[str, str], list[tuple[dict[str, Any], set[str]]]] = {}
     for decision, refs in cited:
         for requirement_id in carried.get(decision.get("subject") or "", []):

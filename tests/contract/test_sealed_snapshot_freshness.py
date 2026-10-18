@@ -23,13 +23,17 @@ PROVENANCE_KEYS = ("snapshot_id", "created_at", "source_revision")  # change wit
 
 @pytest.fixture(scope="module")
 def rebuilt(tmp_path_factory):
+    import os
+
     work = tmp_path_factory.mktemp("sealed")
     db = work / "knowledge.lbug"
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
     subprocess.run(
         [sys.executable, "-m", "pipelines.cli", "ingest", "--kb-dir", str(ROOT / "data/kb"), "--db-path", str(db)],
         cwd=ROOT,
         check=True,
         capture_output=True,
+        env=env,
     )
     envelope = export_sealed_snapshot(
         output_fixtures_path=work / "sealed_snapshot.json", output_snapshot_dir=work / "snapshots", db_path=db

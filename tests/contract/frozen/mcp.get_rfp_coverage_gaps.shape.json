@@ -1,0 +1,90 @@
+{
+  "interface": "mcp.get_rfp_coverage_gaps",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "keys": {
+          "blind_spots": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          },
+          "category_gaps": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          },
+          "coverage_rate": {
+            "type": [
+              "number"
+            ]
+          },
+          "covered": {
+            "type": [
+              "number"
+            ]
+          },
+          "critical_gaps": {
+            "type": [
+              "number"
+            ]
+          },
+          "engagement": {
+            "type": [
+              "string"
+            ]
+          },
+          "gap_rate": {
+            "type": [
+              "number"
+            ]
+          },
+          "gaps": {
+            "type": [
+              "number"
+            ]
+          },
+          "partially_covered": {
+            "type": [
+              "number"
+            ]
+          },
+          "section_gaps": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          },
+          "total_requirements": {
+            "type": [
+              "number"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

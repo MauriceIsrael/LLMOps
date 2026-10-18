@@ -191,3 +191,38 @@ def test_the_verification_refuses_an_inconsistent_declared_row():
     assert "COVERAGE_NOT_CARRIED" in mutate(lambda items: items[0].update(decisions=["D-0002"], status="proposed"))
     assert "COVERAGE_DUPLICATE" in mutate(lambda items: items.append(dict(items[0])))
     assert "SCHEMA" in mutate(lambda items: items[0].update(basis="text_match"))
+
+
+# --- Issue #127: matched rows require the decision to be on a subject that carries the requirement -----------------
+
+
+def test_matched_row_uncovered_when_decision_is_on_another_subject():
+    def elsewhere(raw):
+        # D-0001 is on core-network, which carries no requirement
+        raw["decisions"][0]["subject"] = "core-network"
+
+    data = data_of(elsewhere)
+    # REQ-001 is matched to NIS2-ART21-2C and carried by gateway-services.
+    # D-0001 cites ADR-0001 but is on core-network, so REQ-001 is uncovered.
+    assert rows(data)[("REQ-001", "NIS2-ART21-2C")] == "uncovered"
+    item = next(i for i in data["compliance"]["items"] if i["requirement_id"] == "REQ-001" and i["control_id"] == "NIS2-ART21-2C")
+    assert item["decisions"] == [] and item["assets"] == []
+
+
+def test_matched_row_uncovered_when_requirement_carried_by_no_subject():
+    def uncarried(raw):
+        raw["subject_requirements"] = {}
+
+    data = data_of(uncarried)
+    assert rows(data)[("REQ-001", "NIS2-ART21-2C")] == "uncovered"
+
+
+def test_verification_refuses_matched_row_with_decision_not_carried():
+    def mutate(edit):
+        data = data_of()
+        edit(data["compliance"]["items"])
+        return {p.code for p in verify(seal(data, "example-eng", CREATED_AT, "x"))}
+
+    # Tampering a matched row to cite D-0002 (on core-network, not carrying REQ-001) is refused
+    assert "COVERAGE_NOT_CARRIED" in mutate(lambda items: items[0].update(decisions=["D-0002"], status="proposed"))
+
