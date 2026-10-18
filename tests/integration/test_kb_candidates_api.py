@@ -60,6 +60,7 @@ def env(tmp_path, monkeypatch):
     shutil.copytree(ROOT / "data" / "kb", kb)
     monkeypatch.setattr(server_config, "kb_dir", kb)
     monkeypatch.setenv("CANDIDATES_DIR", str(tmp_path / "candidates"))
+    monkeypatch.setenv("CANDIDATES_BACKEND", "file")
     monkeypatch.setenv("SERVER_TOKEN", "demo-token")
     monkeypatch.setenv("ENGAGEMENT_TOKENS", "reviewer-token:kb:review;reviewer-token-2:kb:review")
     for var in ("OWNER_NOTIFICATION_WEBHOOK", "NOTIFICATION_WEBHOOK_URL", "KB_CONSUMER_WEBHOOKS", "KB_CONSUMER_NTFY_TOPIC"):

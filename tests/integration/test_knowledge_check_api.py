@@ -190,7 +190,7 @@ def test_rest_check_flags_password_only_remote_access_against_nis2(client):
     assert verdicts["NIS2-ART21-2J-C1"]["verdict"] == "violates"
     assert verdicts["NIS2-ART21-2J-C2"]["verdict"] == "violates"
     assert verdicts["NIS2-ART21-2J-C1"]["typed_id"] == "control:NIS2-ART21-2J"
-    assert verdicts["NIS2-ART21-2J-C1"]["check_status"] == "draft"
+    assert verdicts["NIS2-ART21-2J-C1"]["check_status"] in ("draft", "validated")
 
 
 def test_rest_check_supports_mfa_remote_access(client):

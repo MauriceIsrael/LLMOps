@@ -6,6 +6,7 @@ test does not depend on whatever local database a developer happens to hold.
 """
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -23,8 +24,6 @@ PROVENANCE_KEYS = ("snapshot_id", "created_at", "source_revision")  # change wit
 
 @pytest.fixture(scope="module")
 def rebuilt(tmp_path_factory):
-    import os
-
     work = tmp_path_factory.mktemp("sealed")
     db = work / "knowledge.lbug"
     env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}

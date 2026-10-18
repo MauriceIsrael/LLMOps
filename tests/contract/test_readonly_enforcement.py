@@ -3,6 +3,7 @@
 import pytest
 
 from tools.adapters.kuzu_store import make_graph_store
+from tools.adapters.ladybug_store import LadybugGraphStore
 
 pytestmark = pytest.mark.deterministic
 
@@ -18,6 +19,7 @@ def test_readonly_store_rejects_cypher_writes(tmp_path):
     res = rw_store.execute_cypher("MATCH (i:Item) RETURN count(i) as c;")
     assert res[0]["c"] == 1
     rw_store.close()
+    LadybugGraphStore.clear_cache(str(db_file))
 
     # 2. Open in read-only mode and attempt write
     ro_store = make_graph_store(db_file, read_only=True)
@@ -31,6 +33,7 @@ def test_readonly_store_rejects_cypher_writes(tmp_path):
     err_msg = str(exc_info.value).lower()
     assert "read" in err_msg or "permission" in err_msg or "cannot" in err_msg
     ro_store.close()
+    LadybugGraphStore.clear_cache(str(db_file))
 
 
 def test_readonly_client_whitelist_and_literals(tmp_path):
@@ -42,6 +45,7 @@ def test_readonly_client_whitelist_and_literals(tmp_path):
     rw_store.execute_cypher("CREATE NODE TABLE Asset (id STRING, domain STRING, PRIMARY KEY(id));")
     rw_store.execute_cypher("CREATE (:Asset {id: 'a1', domain: 'data-merge-pipeline'});")
     rw_store.close()
+    LadybugGraphStore.clear_cache(str(db_file))
 
     client = ReadOnlyLadybugClient(db_path=db_file)
 

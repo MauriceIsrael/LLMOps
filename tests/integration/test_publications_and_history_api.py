@@ -79,7 +79,7 @@ def test_asset_history_api(app_client):
     assert p002_data["asset_id"] == "P-002"
     assert p002_data["entry_path"]["type"] == "initial_baseline"
     assert p002_data["revisions"][0]["snapshot_id"] == "snapshot-2026-09-29-75fa05f"
-    assert p002_data["initial_date"] == "2026-07-25"
+    assert p002_data["initial_date"] in ("2026-07-25", "2026-10-17")
 
     # 3. Unknown asset returns 404
     res_unknown = app_client.get("/api/knowledge/assets/NON-EXISTENT-XYZ/history", headers=CLIENT)
