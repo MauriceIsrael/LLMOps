@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
-# Pre-push hook installed by `make hooks`: blocks a push when lint, the frozen
-# interface contract or the unit tests fail. Bypass (discouraged): git push --no-verify
+# Pre-push hook installed by `make hooks`: blocks a push on a lint error or a project name in the generic code (a few seconds).
+# Types and every test run in the CI (.github/workflows/tests.yml); `make verify` or a targeted pytest remain available by hand.
+# Bypass (discouraged): git push --no-verify
 set -e
-echo "pre-push: running make verify (lint + contract + unit tests)..."
-make verify
+echo "pre-push: running make quick (ruff + project-name guard)..."
+make quick

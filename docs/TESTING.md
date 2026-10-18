@@ -26,8 +26,9 @@ la suite donnait des résultats différents selon la machine (voir « Pourquoi c
 | `tests/bench`, `tests/eval` | bancs et évaluations déterministes | oui |
 | `tests/evals` | évaluations DeepEval : exigent `deepeval` et un modèle | **non** (`--ignore=tests/evals`) |
 
-`make test` (ancien) n'en lance qu'une partie ; `make verify` (le crochet pre-push) ne lance que lint + contrat + unitaires, **pas** les
-tests d'intégration. Pour la suite complète : `make test-all`.
+`make test` (ancien) n'en lance qu'une partie ; `make verify` ne lance que lint + types + contrat + unitaires, **pas** les
+tests d'intégration. Le crochet pre-push (`make hooks`) est plus léger encore : `make quick` (ruff + garde des noms de projet, quelques
+secondes). Les tests, c'est la CI ; en local, un test ciblé suffit (`pytest tests/unit/test_xxx.py -k …`). Pour la suite complète : `make test-all`.
 
 ## Procédure A : copie propre, en local
 
