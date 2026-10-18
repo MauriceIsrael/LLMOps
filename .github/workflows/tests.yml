@@ -1,0 +1,57 @@
+name: tests
+
+# Porte qualité du Hub : lint, types, garde-fou des noms de projet, puis la suite complète de docs/TESTING.md
+# (tout `tests/` sauf `tests/evals`, qui exigent un modèle). C'est `make lint` puis `make test-all`, sur un clone propre,
+# avec les dépendances de `poetry.lock` et Python 3.11 (la version des images déployées).
+#
+# Pourquoi : une publication de base de connaissances (#130) a laissé `main` rouge, sans que rien ne le signale
+# (LLMOps#136). Les tests de fraîcheur des fixtures et du snapshot scellé sont dans cette suite.
+#
+# Hors périmètre : `tests/evals` (DeepEval, modèle requis), le serveur de contrat pour les clients (voir `docs/TESTING.md`).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      # La même version de Poetry que celle qui a écrit poetry.lock (en-tête du fichier).
+      - name: Installer Poetry
+        run: pipx install poetry==2.5.1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: poetry
+
+      - name: Installer les dépendances du verrou
+        run: poetry install --no-interaction --no-ansi --with dev
+
+      - name: Lint (ruff)
+        run: poetry run ruff check .
+
+      - name: Aucun nom de projet dans le code générique
+        run: poetry run python scripts/check_no_project_names.py
+
+      - name: Types (mypy)
+        run: poetry run mypy mcp_server tools pipelines
+
+      # Échoue avec un message net si le moteur de graphe n'est pas celui du verrou (docs/TESTING.md).
+      - name: Environnement conforme au verrou
+        run: poetry run pytest tests/unit/test_ladybug_version_guard.py -q -p no:cacheprovider
+
+      - name: Suite complète
+        run: poetry run pytest tests --ignore=tests/evals -p no:cacheprovider -q -rfEs

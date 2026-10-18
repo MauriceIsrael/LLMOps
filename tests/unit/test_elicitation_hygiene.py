@@ -64,4 +64,6 @@ def test_a_command_without_an_engagement_names_the_option_and_the_variable(monke
             "arbitrate": ["C-1", "--keep", "S-1", "--reason", "r"], "import": ["nofile.json"]}.get(command, [])
     result = CliRunner().invoke(app, [command, *args])
     assert result.exit_code != 0
-    assert "--engagement" in result.output and "LLMOPS_ENGAGEMENT" in result.output
+    # Typer forces colours when GITHUB_ACTIONS or FORCE_COLOR is set: the escape codes cut "--engagement" in pieces.
+    output = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
+    assert "--engagement" in output and "LLMOPS_ENGAGEMENT" in output
