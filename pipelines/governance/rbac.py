@@ -187,12 +187,12 @@ class DelegationStore:
 
         if not records:
             with self._lock:
-                for r in self._memory_delegations.values():
-                    if delegate and r["delegate"] != delegate.strip():
+                for item in self._memory_delegations.values():
+                    if delegate and item["delegate"] != delegate.strip():
                         continue
-                    if delegator and r["delegator"] != delegator.strip():
+                    if delegator and item["delegator"] != delegator.strip():
                         continue
-                    records.append(dict(r))
+                    records.append(dict(item))
 
         if active_only:
             records = [r for r in records if _is_active(r["starts_at"], r["expires_at"], r.get("revoked_at"))]

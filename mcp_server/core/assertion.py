@@ -14,7 +14,7 @@ import os
 import threading
 import time
 import uuid
-from typing import Any
+from typing import Any, cast
 
 import jwt
 from cryptography.hazmat.primitives import serialization
@@ -331,7 +331,7 @@ class ActorAssertionVerifier:
                 algorithms=["EdDSA"],
                 issuer=issuer,
                 audience=audience,
-                options=decode_options,
+                options=cast(Any, decode_options),
             )
         except jwt.ExpiredSignatureError as e:
             raise ActorAssertionError("Actor assertion has expired", code="token_expired") from e
