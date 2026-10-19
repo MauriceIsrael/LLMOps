@@ -45,6 +45,34 @@ def _framework_dir(kb_dir: Path, framework: str) -> str:
     return framework
 
 
+def framework_primary_domain(framework: str, kb_dir: str | Path = "data/kb") -> str | None:
+    """The domain whose owner answers for a framework: who may declare it covered (issue #90).
+
+    ``primary_domain`` of the framework in ``controls/frameworks.yaml`` when set; otherwise the first domain most controls of
+    the framework list (a tie goes to the alphabetical first, so the answer never depends on file order). ``None`` when the
+    framework has no control: nobody owns it, and only a maintainer may act.
+    """
+    import yaml
+
+    kb = Path(kb_dir)
+    name = _framework_dir(kb, framework)
+    meta_path = kb / "controls" / "frameworks.yaml"
+    if meta_path.exists():
+        meta = yaml.safe_load(meta_path.read_text(encoding="utf-8")) or {}
+        entry = next((v for k, v in meta.items() if str(k).lower() == name.lower() and isinstance(v, dict)), {})
+        explicit = str(entry.get("primary_domain") or "").strip()
+        if explicit:
+            return explicit
+    counts: dict[str, int] = {}
+    for control in _controls(kb).get(name.lower(), []):
+        domains = control.get("domain") or []
+        if domains:
+            counts[str(domains[0])] = counts.get(str(domains[0]), 0) + 1
+    if not counts:
+        return None
+    return sorted(counts, key=lambda d: (-counts[d], d))[0]
+
+
 def framework_coverage(framework: str, kb_dir: str | Path = "data/kb") -> dict[str, Any]:
     kb = Path(kb_dir)
     name = _framework_dir(kb, framework)

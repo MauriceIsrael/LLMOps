@@ -2111,18 +2111,40 @@ def abandon_framework_ingestion(ingestion_id: int, reason: str) -> dict[str, Any
 
 def declare_framework_coverage(framework: str) -> dict[str, Any]:
     """Declare a framework covered, as the acting expert; refused with the list of what is missing (409)."""
-    from pipelines.frameworks.coverage import CoverageDeclarationError, declare_coverage
+    from mcp_server.core.auth import resolve_actor
+    from pipelines.frameworks.coverage import (
+        CoverageDeclarationError,
+        declare_coverage,
+        framework_primary_domain,
+    )
+    from pipelines.governance.audit import get_governance_audit
     from pipelines.governance.log import get_log
+    from pipelines.governance.rbac import expert_can_review_domain
 
     who = _acting_expert()
     if isinstance(who, dict):
         return who
-    _, owner = who
+    service, owner = who
+    actor = resolve_actor()
+    audit = get_governance_audit()
+    method = actor.auth_method if actor else "header"
     try:
+        # Declaring a framework covered answers for its content: the owner of its primary domain, a maintainer, or an expert
+        # holding the review role on that domain (assertion claim or delegation) may do it; no one else (issue #90).
+        primary = framework_primary_domain(framework, server_config.kb_dir)
+        if not expert_can_review_domain(owner.handle, [primary] if primary else [], service.owners(),
+                                        domain_roles=actor.domain_roles if actor else None):
+            reason = (f"{owner.handle} does not own the primary domain '{primary}' of {framework} and holds no 'kb:maintain' role."
+                      if primary else f"{framework} has no control: only a maintainer may declare it.")
+            audit.record(owner.handle, "declare_framework_coverage", "denied", resource=framework,
+                         detail={"reason": reason, "primary_domain": primary}, auth_method=method)
+            return {"status": "unauthorized", "reason": reason}
         try:
             cov = declare_coverage(framework, owner.handle, server_config.kb_dir)
         except CoverageDeclarationError as exc:
             return {**invalid_argument_response("framework", str(exc)), "conflict": True}
+        audit.record(owner.handle, "declare_framework_coverage", "allowed", resource=framework,
+                     detail={"primary_domain": primary}, auth_method=method)
         log = get_log()
         if log is not None:
             log.emit("coverage.changed", None, owner.handle, [], framework=framework, reason="declared")
