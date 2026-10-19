@@ -1,11 +1,58 @@
 """Single choke point for engagement authorization (R4) with multi-tenant context support."""
 
+from __future__ import annotations
+
 import os
 from contextvars import ContextVar
+from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any
 
 _current_caller: ContextVar[str] = ContextVar("current_caller", default="default_user")
 _current_actor_email: ContextVar[str | None] = ContextVar("current_actor_email", default=None)
+_current_actor: ContextVar[Actor | None] = ContextVar("current_actor", default=None)
+
+
+@dataclass
+class Actor:
+    """An authenticated expert acting in the knowledge governance plane (issue #7)."""
+
+    handle: str
+    email: str | None = None
+    roles: tuple[str, ...] = ()
+    domain_roles: dict[str, list[str]] = field(default_factory=dict)
+    auth_method: str = "header"  # "assertion" | "header" | "service_token" | "local"
+    jti: str | None = None
+    delegated_by: str | None = None
+    claims: dict[str, Any] = field(default_factory=dict)
+
+    def has_role(self, role: str, domain: str | None = None) -> bool:
+        """Check if the actor holds `role`, taking domain scope and maintainer bypass into account."""
+        if "kb:maintain" in self.roles:
+            return True
+        if role in self.roles and (domain is None or not self.domain_roles):
+            return True
+        if domain and self.domain_roles:
+            from pipelines.governance.rbac import domain_matches
+
+            for pat, roles in self.domain_roles.items():
+                if (role in roles or "*" in roles) and domain_matches(pat, domain):
+                    return True
+        return False
+
+
+def get_current_actor() -> Actor | None:
+    """Retrieve the currently authenticated Actor from context."""
+    return _current_actor.get()
+
+
+def set_current_actor(actor: Actor | None) -> None:
+    """Set the authenticated Actor in the current async execution context."""
+    _current_actor.set(actor)
+    if actor and actor.email:
+        set_current_actor_email(actor.email)
+    elif actor is None:
+        set_current_actor_email(None)
 
 DELEGATE_SCOPE = "kb:delegate"
 ENGAGEMENT_DELEGATE_SCOPE = "eng:delegate"  # a trusted client (Archinex) may act for the person named by X-Actor-Email
@@ -124,19 +171,30 @@ def authorise(caller: str | None = None, engagement: str = "default-engagement")
 
 
 def has_scope(scope: str, caller: str | None = None) -> bool:
-    """Whether the caller's token carries an explicit scope (e.g. ``kb:review``).
+    """Whether the caller's token or authenticated actor carries an explicit scope (e.g. ``kb:review``).
 
     Scopes are declared next to the engagement scopes in ``ENGAGEMENT_TOKENS``
-    (``reviewer-token:kb:review;tenant-token:eng-1,eng-2``). The ``*`` engagement
-    wildcard and the server admin token do **not** grant such scopes: in particular the
-    public demo token (``SERVER_TOKEN``) cannot review knowledge base candidates.
+    (``reviewer-token:kb:review;tenant-token:eng-1,eng-2``), or in the authenticated actor's
+    cryptographic assertion claims / assigned KB roles (issue #7).
     """
     if caller is None:
         caller = get_current_caller()
     env_tokens = os.getenv("ENGAGEMENT_TOKENS", "").strip()
-    if not caller or not env_tokens:
-        return False
-    return scope in parse_engagement_tokens(env_tokens).get(caller, [])
+    if caller and env_tokens:
+        if scope in parse_engagement_tokens(env_tokens).get(caller, []):
+            return True
+
+    # Checked from current authenticated actor (issue #7)
+    actor = _current_actor.get()
+    if actor is not None:
+        if scope in actor.roles:
+            return True
+        if "scopes" in actor.claims and scope in actor.claims["scopes"]:
+            return True
+        if "scope" in actor.claims and scope in str(actor.claims["scope"]).split():
+            return True
+
+    return False
 
 
 def set_current_actor_email(email: str | None) -> None:
@@ -147,13 +205,120 @@ def set_current_actor_email(email: str | None) -> None:
 def delegated_actor_email(caller: str | None = None) -> str | None:
     """E-mail of the person the caller acts for, or ``None``.
 
-    The e-mail is honoured only when the caller's token carries ``kb:delegate`` (the token of
-    a trusted client such as Archinex, plan governance §3.1); for any other token it is
-    ignored, so a header cannot be used to impersonate an owner.
+    The e-mail is honoured when an assertion-verified actor is present, or when the caller's
+    token carries ``kb:delegate`` (the token of a trusted client such as Archinex, plan
+    governance §3.1); for any other token it is ignored, so a raw header cannot be used
+    to impersonate an owner.
     """
+    actor = _current_actor.get()
+    if actor and actor.email:
+        return actor.email
     email = _current_actor_email.get()
     if email and has_scope(DELEGATE_SCOPE, caller):
         return email
+    return None
+
+
+def resolve_actor(request: Any = None) -> Actor | None:
+    """Resolve acting expert from signed assertion, delegation header, or execution context.
+
+    Extension point planned in L5 and delivered in issue #7 (contract 1.37):
+    1. If request carries ``X-Actor-Token`` or ``X-Actor-Assertion``:
+       Validates cryptographic EdDSA assertion against JWKS, enforces anti-replay (jti),
+       and constructs an Actor with assertion claims and domain_owners lookup.
+    2. Else if request carries ``X-Actor-Email`` with a ``kb:delegate`` service token:
+       Resolves handle and roles from domain_owners registry (contract 1.4 backward compat).
+    3. Else returns current context actor if already set.
+    """
+    if request is not None:
+        headers = getattr(request, "headers", {})
+        token = headers.get("X-Actor-Token") or headers.get("X-Actor-Assertion")
+        if token:
+            from mcp_server.core.assertion import ActorAssertionVerifier
+
+            verifier = ActorAssertionVerifier()
+            claims = verifier.verify(token)
+
+            sub = str(claims.get("sub") or "").strip()
+            email = claims.get("email") or (sub if "@" in sub and not sub.startswith("@") else None)
+            handle = claims.get("handle") or (sub if sub.startswith("@") else None)
+
+            from mcp_server.core.config import server_config
+            from pipelines.kb_candidates.owners import load_owners
+
+            registry = load_owners(server_config.kb_dir)
+            owner = None
+            if email:
+                owner = registry.by_email(email)
+            if not owner and handle:
+                owner = registry.owners.get(handle)
+
+            if owner:
+                handle = handle or owner.handle
+                email = email or owner.email
+                roles = tuple(sorted(set(claims.get("roles") or ()).union(owner.roles)))
+            else:
+                handle = handle or (f"@{sub.split('@')[0]}" if email else f"@{sub}")
+                roles = tuple(claims.get("roles") or ("kb:review",))
+
+            domain_roles = claims.get("domain_roles") or {}
+            delegation = claims.get("delegation") or {}
+            delegated_by = delegation.get("delegator")
+
+            actor = Actor(
+                handle=handle,
+                email=email,
+                roles=roles,
+                domain_roles=domain_roles,
+                auth_method="assertion",
+                jti=claims.get("jti"),
+                delegated_by=delegated_by,
+                claims=claims,
+            )
+            set_current_actor(actor)
+            return actor
+
+        email_header = headers.get("X-Actor-Email")
+        if email_header:
+            set_current_actor_email(email_header)
+            caller = getattr(getattr(request, "state", None), "caller", None) or get_current_caller()
+            if has_scope(DELEGATE_SCOPE, caller):
+                from mcp_server.core.config import server_config
+                from pipelines.kb_candidates.owners import load_owners
+
+                registry = load_owners(server_config.kb_dir)
+                owner = registry.by_email(email_header)
+                if owner:
+                    actor = Actor(
+                        handle=owner.handle,
+                        email=owner.email,
+                        roles=tuple(owner.roles),
+                        auth_method="header",
+                    )
+                    set_current_actor(actor)
+                    return actor
+
+    current = _current_actor.get()
+    if current is not None:
+        return current
+
+    email = delegated_actor_email()
+    if email:
+        from mcp_server.core.config import server_config
+        from pipelines.kb_candidates.owners import load_owners
+
+        registry = load_owners(server_config.kb_dir)
+        owner = registry.by_email(email)
+        if owner:
+            actor = Actor(
+                handle=owner.handle,
+                email=owner.email,
+                roles=tuple(owner.roles),
+                auth_method="header",
+            )
+            set_current_actor(actor)
+            return actor
+
     return None
 
 
@@ -243,3 +408,14 @@ def require_distinct_validator(validator_handle: str, author_handle: str | None)
     """Separation of duties: nobody validates what they wrote (raises ``PermissionError``)."""
     if author_handle and validator_handle == author_handle:
         raise PermissionError("self_validation: the author of an item cannot be its only validator")
+
+
+def require_distinct_reviewer(
+    reviewer_handle: str,
+    candidate: dict[str, Any],
+    reviewer_email: str | None = None,
+) -> None:
+    """Separation of duties: candidate author cannot review it (issue #7, raises ``CandidateForbiddenError``)."""
+    from pipelines.governance.rbac import check_separation_of_duties
+
+    check_separation_of_duties(reviewer_handle, candidate, reviewer_email=reviewer_email)

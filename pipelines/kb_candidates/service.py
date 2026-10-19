@@ -249,6 +249,11 @@ class CandidateService:
         if action in ("reject", "amend") and not reason:
             raise CandidateError("reason", f"a reason is required to {action}.")
 
+        # Separation of duties (issue #7): candidate author cannot review it
+        from pipelines.governance.rbac import check_separation_of_duties
+
+        check_separation_of_duties(reviewer, candidate)
+
         entry = {"reviewer": reviewer, "action": action, "reason": reason, "at": now_iso()}
         if action == "reject":
             if candidate.get("review") and candidate["review"].get("action") != "reject":
@@ -352,7 +357,19 @@ class CandidateService:
             else:
                 waiting_on, reason = c.get("assigned_owner"), "review"
             request = by_candidate.get(c["id"])
-            if waiting_on == handle:
+            from pipelines.governance.rbac import domain_matches, get_delegation_store
+
+            delegation_store = get_delegation_store()
+            is_delegated_owner = bool(
+                waiting_on
+                and any(
+                    d["delegator"] == waiting_on
+                    for d in delegation_store.list_delegations(delegate=handle, active_only=True)
+                    if any(domain_matches(pat, dom) for pat in d.get("domains", []) for dom in (c.get("domain") or []))
+                )
+            )
+
+            if waiting_on == handle or is_delegated_owner:
                 entered = _parse_at(self._entered_review_at(c))
                 items.append({"candidate_id": c["id"], "title": c["title"], "kind": c["kind"],
                               "asset_type": c.get("asset_type"), "domain": c.get("domain") or [],
@@ -368,7 +385,8 @@ class CandidateService:
 
     def may_review(self, handle: str, candidate: dict[str, Any]) -> bool:
         """Who may decide on a candidate: an owner of its domain (or a parent), the default owner, a
-        maintainer, **the owner it is assigned to**, or an expert with an open second-review request.
+        maintainer, **the owner it is assigned to**, an expert with an open second-review request,
+        or an expert holding domain roles / active temporary delegations (issue #7).
 
         Assignment and solicitation must grant the right to act, otherwise a reassigned or solicited
         expert would see the candidate in the inbox and be refused (403) when deciding.
@@ -378,7 +396,12 @@ class CandidateService:
         if candidate.get("assigned_owner") == handle:
             return True
         if self.log is not None:
-            return any(r["kind"] == "second_review" for r in self.log.requests(handle=handle, candidate_id=candidate["id"]))
+            if any(r["kind"] == "second_review" for r in self.log.requests(handle=handle, candidate_id=candidate["id"])):
+                return True
+        from pipelines.governance.rbac import expert_can_review_domain
+
+        if expert_can_review_domain(handle, candidate.get("domain") or [], self.owners()):
+            return True
         return False
 
     def assign(self, candidate_id: str, handle: str, actor_handle: str, reason: str | None = None) -> dict[str, Any]:

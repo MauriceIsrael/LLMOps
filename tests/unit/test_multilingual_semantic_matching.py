@@ -13,7 +13,6 @@ from pipelines.doctrine.checks import (
 )
 from pipelines.doctrine.text import Vocabulary, expand_terms, normalize
 
-
 KB_DIR = Path(__file__).parent.parent.parent / "data" / "kb"
 
 

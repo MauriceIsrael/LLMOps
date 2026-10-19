@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-import pytest
 from starlette.testclient import TestClient
 
 from mcp_server.main import create_starlette_app
@@ -11,7 +10,6 @@ from pipelines.rfp_shredder import (
     RFPShredder,
     compute_rfp_coverage_gaps,
 )
-
 
 KB = Path(__file__).parent.parent.parent / "data" / "kb"
 

@@ -253,6 +253,43 @@ governance_meta = Table(
     Column("value", Text, nullable=False),
 )
 
+# Governance RBAC and access audit (issue #7, contract 1.37)
+kb_delegations = Table(
+    "kb_delegations", metadata,
+    Column("id", String(36), primary_key=True),
+    Column("delegator", String(128), nullable=False, index=True),
+    Column("delegate", String(128), nullable=False, index=True),
+    Column("domains", Text, nullable=False, default="[]"),
+    Column("roles", Text, nullable=False, default="[]"),
+    Column("starts_at", String(32), nullable=False),
+    Column("expires_at", String(32), nullable=False),
+    Column("created_at", String(32), nullable=False),
+    Column("created_by", String(256), nullable=False),
+    Column("revoked_at", String(32)),
+    Column("revoked_by", String(256)),
+)
+
+kb_access_audit = Table(
+    "kb_access_audit", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("at", String(32), nullable=False, index=True),
+    Column("actor", String(256), nullable=False, index=True),
+    Column("auth_method", String(32), nullable=False),
+    Column("jti", String(128), index=True),
+    Column("action", String(64), nullable=False, index=True),
+    Column("resource", String(256)),
+    Column("outcome", String(16), nullable=False, index=True),  # allowed | denied
+    Column("detail", Text, nullable=False, default="{}"),
+)
+
+revoked_tokens = Table(
+    "revoked_tokens", metadata,
+    Column("jti", String(128), primary_key=True),
+    Column("revoked_at", String(32), nullable=False),
+    Column("expires_at", String(32)),
+    Column("reason", Text, nullable=False),
+)
+
 _engines: dict[str, Engine] = {}
 _lock = threading.Lock()
 

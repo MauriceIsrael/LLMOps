@@ -362,8 +362,8 @@ def test_act2b_interrupt_resumes_in_a_separate_process(repo, report, state):
 
     del graph, checkpointer  # the process that paused is gone
     repo.close()
-    from tools.adapters.ladybug_store import LadybugGraphStore
     from mcp_server.db.kuzu_client import KuzuClient
+    from tools.adapters.ladybug_store import LadybugGraphStore
     LadybugGraphStore.clear_cache()
     KuzuClient.clear_cache()
 

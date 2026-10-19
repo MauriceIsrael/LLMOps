@@ -22,7 +22,10 @@ def load_qa_dataset():
         return json.load(f)
 
 
-@pytest.mark.skipif(not DATASET_PATH.exists(), reason="Dataset QA introuvable")
+import os
+
+
+@pytest.mark.skipif(not DATASET_PATH.exists() or not os.getenv("OPENAI_API_KEY"), reason="Dataset QA introuvable ou OPENAI_API_KEY non configurée")
 def test_semantic_faithfulness_and_relevancy():
     qa_items = load_qa_dataset()
     if not qa_items:

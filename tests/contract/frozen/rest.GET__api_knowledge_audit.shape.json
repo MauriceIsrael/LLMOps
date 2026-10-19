@@ -1,0 +1,107 @@
+{
+  "interface": "rest.GET /api/knowledge/audit",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "count": {
+            "type": [
+              "number"
+            ]
+          },
+          "data": {
+            "keys": {
+              "events": {
+                "items": {
+                  "keys": {
+                    "action": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "actor": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "at": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "auth_method": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "detail": {
+                      "keys": {},
+                      "type": [
+                        "object"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "number"
+                      ]
+                    },
+                    "jti": {
+                      "type": [
+                        "null"
+                      ]
+                    },
+                    "outcome": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "resource": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                },
+                "type": [
+                  "array"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "status": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

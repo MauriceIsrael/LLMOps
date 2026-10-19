@@ -1,0 +1,38 @@
+{
+  "interface": "rest.GET /.well-known/jwks.json",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "keys": {
+            "items": null,
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

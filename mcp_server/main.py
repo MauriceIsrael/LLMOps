@@ -66,6 +66,7 @@ from mcp_server.knowledge.tools import (
     confirm_reuse,
     convert_verdict_feedback,
     create_framework_ingestion,
+    create_kb_delegation,
     decide_check_clause,
     decide_ingestion_row,
     declare_framework_coverage,
@@ -85,6 +86,8 @@ from mcp_server.knowledge.tools import (
     get_glossary_term,
     get_governance_events,
     get_graph_summary,
+    get_jwks,
+    get_kb_audit,
     get_kb_candidate,
     get_kb_freshness,
     get_kb_health,
@@ -106,6 +109,7 @@ from mcp_server.knowledge.tools import (
     list_frameworks,
     list_kb_candidates,
     list_kb_comments,
+    list_kb_delegations,
     list_knowledge_publications,
     list_reuse_confirmations,
     list_skills,
@@ -120,6 +124,8 @@ from mcp_server.knowledge.tools import (
     request_kb_review,
     resolve_asset_reference,
     review_kb_candidate,
+    revoke_kb_auth,
+    revoke_kb_delegation,
     run_eval,
     run_similarity_eval,
     search_assets,
@@ -174,6 +180,11 @@ mcp.tool()(request_kb_review)
 mcp.tool()(comment_kb_candidate)
 mcp.tool()(list_domain_owners)
 mcp.tool()(get_kb_freshness)
+mcp.tool()(list_kb_delegations)
+mcp.tool()(create_kb_delegation)
+mcp.tool()(revoke_kb_delegation)
+mcp.tool()(revoke_kb_auth)
+mcp.tool()(get_kb_audit)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -253,23 +264,55 @@ sse_transport = TokenPreservingSseServerTransport("/messages")
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
-    """Middleware pour sécuriser l'accès HTTP/SSE par jeton Bearer ou Header HTTP (constant-time, multi-tenant)."""
+    """Middleware pour sécuriser l'accès HTTP/SSE par jeton Bearer, Header HTTP ou Assertion EdDSA (issue #7)."""
 
     async def dispatch(self, request, call_next):
-        if request.url.path in ("/health", "/healthz", "/ready", "/readyz"):
+        if request.url.path in ("/health", "/healthz", "/ready", "/readyz", "/.well-known/jwks.json"):
             return await call_next(request)
+
+        from mcp_server.core.assertion import ActorAssertionError, get_jwks_registry
+        from pipelines.governance.audit import get_governance_audit
+
+        audit = get_governance_audit()
 
         expected_token = os.getenv("SERVER_TOKEN") or os.getenv("LLMOPS_AUTH_TOKEN") or settings.AUTH_TOKEN
         env_tokens = os.getenv("ENGAGEMENT_TOKENS", "").strip()
         tenant_tokens = parse_engagement_tokens(env_tokens) if env_tokens else {}
+        has_jwks = bool(get_jwks_registry().to_jwks().get("keys")) or bool(
+            os.getenv("ARCHINEX_JWKS") or os.getenv("ARCHINEX_JWKS_URL")
+        )
 
-        if (not expected_token or not expected_token.strip()) and not tenant_tokens:
+        if (not expected_token or not expected_token.strip()) and not tenant_tokens and not has_jwks:
             return JSONResponse(
                 {"error": "Unauthorized: SERVER_TOKEN or LLMOPS_AUTH_TOKEN is not configured on server"},
                 status_code=500,
             )
 
-        set_current_actor_email(request.headers.get("X-Actor-Email"))
+        from mcp_server.core.auth import resolve_actor, set_current_actor
+
+        set_current_actor(None)
+
+        actor = None
+        has_assertion = bool(request.headers.get("X-Actor-Token") or request.headers.get("X-Actor-Assertion"))
+        if has_assertion:
+            try:
+                actor = resolve_actor(request)
+            except ActorAssertionError as exc:
+                audit.record(
+                    request.headers.get("X-Actor-Email") or "unknown",
+                    request.url.path,
+                    "denied",
+                    resource=request.url.path,
+                    detail={"reason": exc.reason, "code": exc.code},
+                    auth_method="assertion",
+                )
+                return JSONResponse(
+                    {"status": "unauthorized", "error": exc.code, "reason": exc.reason},
+                    status_code=403 if exc.code in ("replay_detected", "token_revoked") else 401,
+                )
+        else:
+            set_current_actor_email(request.headers.get("X-Actor-Email"))
+
         auth_header = request.headers.get("Authorization")
         header_token = request.headers.get("X-API-Key") or request.headers.get("X-Server-Token")
         session_id_str = request.query_params.get("session_id")
@@ -293,16 +336,52 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if not caller and provided_token and expected_token and secrets.compare_digest(provided_token, expected_token.strip()):
             caller = "server_admin"
 
+        # 3. Dynamic JWT verification via JWKS (issue #7, end of static tokens in env)
+        if not caller and provided_token and has_jwks:
+            from mcp_server.core.assertion import ActorAssertionVerifier
+
+            try:
+                claims = ActorAssertionVerifier().verify(provided_token)
+                caller = str(claims.get("handle") or claims.get("sub") or "jwt_caller")
+                if not actor:
+                    from mcp_server.core.auth import Actor
+
+                    actor = Actor(
+                        handle=str(claims.get("handle") or claims.get("sub") or caller),
+                        email=claims.get("email"),
+                        roles=tuple(claims.get("roles") or ()),
+                        domain_roles=claims.get("domain_roles") or {},
+                        auth_method="assertion",
+                        jti=claims.get("jti"),
+                        claims=claims,
+                    )
+                    set_current_actor(actor)
+            except Exception:
+                pass
+
+        # 4. Authenticated via verified X-Actor-Token assertion
+        if not caller and actor and actor.auth_method == "assertion":
+            caller = actor.handle
+
         if caller:
             request.state.caller = caller
             request.scope["caller"] = caller
             set_current_caller(caller)
+            audit.record(
+                actor.handle if actor else caller,
+                request.url.path,
+                "allowed",
+                resource=request.url.path,
+                jti=actor.jti if actor else None,
+                auth_method=actor.auth_method if actor else "token",
+            )
             return await call_next(request)
 
-        # 3. Validation de secours si session_id appartient à une session SSE active sur la même instance
+        # 5. Validation de secours si session_id appartient à une session SSE active sur la même instance
         if session_id_str and hasattr(sse_transport, "_read_stream_writers"):
             try:
                 from uuid import UUID
+
                 sid = UUID(session_id_str)
                 if sid in sse_transport._read_stream_writers:
                     caller = getattr(sse_transport, "_session_callers", {}).get(sid)
@@ -314,6 +393,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
             except Exception:
                 pass
 
+        audit.record(
+            "anonymous",
+            request.url.path,
+            "denied",
+            resource=request.url.path,
+            detail={"reason": "Missing or invalid authentication token"},
+            auth_method="none",
+        )
         return JSONResponse(
             {"error": "Unauthorized: Invalid or missing LLMOps authentication token in Authorization header"},
             status_code=401,
@@ -1479,6 +1566,73 @@ def create_starlette_app() -> Starlette:
         limit = int(request.query_params.get("limit", "100") or 100)
         return JSONResponse({"status": "ok", "data": {"engagement": engagement, "events": access.audit_events(engagement, limit)}})
 
+    async def handle_jwks(request):
+        """JWKS public keys for verifying EdDSA actor assertions (issue #7)."""
+
+        return JSONResponse(get_jwks()["data"])
+
+    async def handle_delegations_list(request):
+        """List active domain delegations (requires 'kb:review')."""
+        from mcp_server.knowledge.tools import list_kb_delegations
+
+        delegate = request.query_params.get("delegate")
+        delegator = request.query_params.get("delegator")
+        active_only = request.query_params.get("active", "true").lower() in ("true", "1", "yes")
+        res = list_kb_delegations(delegate=delegate, delegator=delegator, active_only=active_only)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_delegations_create(request):
+        """Create a temporary domain delegation."""
+        from mcp_server.knowledge.tools import create_kb_delegation
+
+        try:
+            body = await request.json()
+        except Exception:
+            return JSONResponse({"status": "invalid_argument", "argument": "body", "reason": "invalid JSON"}, status_code=400)
+        res = create_kb_delegation(
+            delegate=body.get("delegate"),
+            domains=body.get("domains") or [],
+            roles=body.get("roles") or [],
+            expires_at=body.get("expires_at"),
+            starts_at=body.get("starts_at"),
+        )
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_delegation_revoke(request):
+        """Revoke a temporary domain delegation."""
+        from mcp_server.knowledge.tools import revoke_kb_delegation
+
+        delegation_id = request.path_params["delegation_id"]
+        res = revoke_kb_delegation(delegation_id)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_auth_revoke(request):
+        """Immediately revoke a token JTI or expert handle/email."""
+        from mcp_server.knowledge.tools import revoke_kb_auth
+
+        try:
+            body = await request.json()
+        except Exception:
+            return JSONResponse({"status": "invalid_argument", "argument": "body", "reason": "invalid JSON"}, status_code=400)
+        identifier = body.get("identifier") or body.get("jti") or body.get("handle") or body.get("email")
+        if not identifier:
+            return JSONResponse({"status": "invalid_argument", "argument": "identifier", "reason": "identifier is required"}, status_code=400)
+        is_jti = bool(body.get("is_jti") or body.get("jti"))
+        reason = body.get("reason", "revoked by admin")
+        res = revoke_kb_auth(identifier, reason=reason, is_jti=is_jti)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_kb_audit(request):
+        """Query KB governance access audit log (requires 'kb:review')."""
+        from mcp_server.knowledge.tools import get_kb_audit
+
+        actor = request.query_params.get("actor")
+        action = request.query_params.get("action")
+        outcome = request.query_params.get("outcome")
+        limit = int(request.query_params.get("limit", 100))
+        res = get_kb_audit(actor=actor, action=action, outcome=outcome, limit=limit)
+        return JSONResponse(res, status_code=_candidate_status_code(res))
+
     async def handle_unauthorised(request, exc):
         """K9: a caller outside the scopes of an engagement gets a 403 in the usual error envelope, never a 500."""
         body = {
@@ -1595,6 +1749,12 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_review, methods=["PATCH"]),
             Route("/api/skills", endpoint=handle_skills_list, methods=["GET"]),
             Route("/api/skills/matrix", endpoint=handle_skills_matrix, methods=["GET"]),
+            Route("/.well-known/jwks.json", endpoint=handle_jwks, methods=["GET"]),
+            Route("/api/knowledge/delegations", endpoint=handle_delegations_list, methods=["GET"]),
+            Route("/api/knowledge/delegations", endpoint=handle_delegations_create, methods=["POST"]),
+            Route("/api/knowledge/delegations/{delegation_id}/revoke", endpoint=handle_delegation_revoke, methods=["POST"]),
+            Route("/api/knowledge/auth/revoke", endpoint=handle_auth_revoke, methods=["POST"]),
+            Route("/api/knowledge/audit", endpoint=handle_kb_audit, methods=["GET"]),
         ],
         middleware=[Middleware(AuthMiddleware)],
         exception_handlers={Unauthorised: handle_unauthorised, InvalidEngagementIdError: handle_invalid_engagement},
