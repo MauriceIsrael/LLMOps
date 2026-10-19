@@ -332,3 +332,65 @@ def test_a_small_clock_difference_is_tolerated(env):
     assert ok.status_code == 200, ok.text  # 20 s ahead: inside the default 30 s tolerance
     late = env["client"].get("/api/knowledge/me", headers={**SERVICE, "X-Actor-Token": token(120)})
     assert late.status_code == 401
+
+
+# ------------------------------------------------------------------ people outside the registry of experts
+
+STRANGER = "nobody@example.org"
+
+
+def _stranger(env, how, **claims):
+    return _legacy(STRANGER) if how == "header" else _signed(env, STRANGER, **claims)
+
+
+@pytest.mark.parametrize("how", ["header", "assertion"])
+def test_a_person_outside_the_registry_is_not_presented_as_an_expert(env, how):
+    """The same answer whether the e-mail comes from the raw header or from a signed assertion: 403, no invented profile."""
+    res = env["client"].get("/api/knowledge/me", headers=_stranger(env, how))
+    assert res.status_code == 403, res.text
+    assert "not a registered expert" in res.json()["reason"]
+
+
+def test_the_claims_of_an_unregistered_person_grant_nothing(env):
+    """A signed ``roles`` or ``domain_roles`` claim is not a role in the registry: it is ignored for someone the registry does not know."""
+    claims = {"roles": ["kb:maintain", "kb:review"], "domain_roles": {"*": ["kb:review"]}}
+    client = env["client"]
+    assert client.get("/api/knowledge/me", headers=_stranger(env, "assertion", **claims)).status_code == 403
+    # Publishing needs kb:maintain: the claim does not provide it.
+    res = client.post("/api/knowledge/publications", headers=_stranger(env, "assertion", **claims))
+    legacy = client.post("/api/knowledge/publications", headers=_stranger(env, "header"))
+    assert res.status_code == legacy.status_code == 403
+
+
+def test_an_unregistered_person_submits_and_reviews_like_with_the_raw_header(env):
+    client = env["client"]
+    body = {"kind": "new_asset", "asset_type": "pattern", "title": "Break-glass access path",
+            "proposed_content": PATTERN, "source": {"system": "archinex", "engagement": "stranger"}}
+    by_header = client.post("/api/knowledge/candidates", headers=_stranger(env, "header"), json=body)
+    by_assertion = client.post("/api/knowledge/candidates", headers=_stranger(env, "assertion"), json=body)
+    assert by_assertion.status_code == by_header.status_code
+    if by_assertion.status_code == 201:
+        # Identified, not dressed up as an expert: the author reads the same in both ways, and is no registry handle.
+        def author(res):
+            return next(h["actor"] for h in res.json()["data"]["history"] if h.get("event") == "submitted")
+
+        assert author(by_assertion) == author(by_header) == f"email:{STRANGER}"
+        cid = by_assertion.json()["data"]["id"]
+        review = client.patch(f"/api/knowledge/candidates/{cid}", headers=_stranger(env, "assertion"),
+                              json={"action": "accept", "reason": "me"})
+        assert review.status_code == 403
+
+
+def test_a_registered_person_is_unchanged_and_the_roles_of_the_claim_are_added(env):
+    me = env["client"].get("/api/knowledge/me", headers=_signed(env, ALICE, roles=["kb:evaluate"]))
+    assert me.status_code == 200
+    data = me.json()["data"]
+    assert data["handle"] == "@core-owner-architecture" and {"kb:review", "kb:evaluate"} <= set(data["kb_roles"])
+
+
+def test_a_deployment_can_choose_to_trust_the_claims_of_unregistered_people(env):
+    """Explicit and off by default (an identity provider that manages its own people)."""
+    env["monkeypatch"].setenv("LLMOPS_ASSERTION_ROLES_FOR_UNREGISTERED", "true")
+    res = env["client"].get("/api/knowledge/me", headers=_stranger(env, "assertion", roles=["kb:review"]))
+    assert res.status_code == 200, res.text
+    assert res.json()["data"]["auth_method"] == "assertion"

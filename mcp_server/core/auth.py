@@ -25,6 +25,7 @@ class Actor:
     jti: str | None = None
     delegated_by: str | None = None
     claims: dict[str, Any] = field(default_factory=dict)
+    registered: bool = True  # False: a signed identity the registry of experts does not know (no role, not an expert)
 
     def has_role(self, role: str, domain: str | None = None) -> bool:
         """Check if the actor holds `role`, taking domain scope and maintainer bypass into account."""
@@ -55,6 +56,17 @@ def signed_actor_required() -> bool:
     from mcp_server.core.config import server_config
 
     return bool(server_config.require_signed_actor)
+
+
+def trust_unregistered_assertions() -> bool:
+    """Deployment choice (``LLMOPS_ASSERTION_ROLES_FOR_UNREGISTERED``, off by default).
+
+    Off: a signed identity absent from the registry of experts holds no role and is not an expert; the ``roles`` and
+    ``domain_roles`` of its assertion are ignored, exactly as an unknown e-mail in the raw header would be. On: the roles
+    the assertion states are believed, for a deployment whose identity provider manages its own people.
+    """
+    raw = os.getenv("LLMOPS_ASSERTION_ROLES_FOR_UNREGISTERED", "").strip().lower()
+    return raw in ("1", "true", "yes", "on")
 
 
 def get_current_actor() -> Actor | None:
@@ -269,17 +281,25 @@ def resolve_actor(request: Any = None) -> Actor | None:
             if not owner and handle:
                 owner = registry.owners.get(handle)
 
+            delegation = claims.get("delegation") or {}
+            delegated_by = delegation.get("delegator")
+            registered = True
             if owner:
                 handle = handle or owner.handle
                 email = email or owner.email
                 roles = tuple(sorted(set(claims.get("roles") or ()).union(owner.roles)))
+                domain_roles = claims.get("domain_roles") or {}
             else:
-                handle = handle or (f"@{sub.split('@')[0]}" if email else f"@{sub}")
-                roles = tuple(claims.get("roles") or ("kb:review",))
-
-            domain_roles = claims.get("domain_roles") or {}
-            delegation = claims.get("delegation") or {}
-            delegated_by = delegation.get("delegator")
+                # Someone the registry of experts does not know: identifiable (audit, engagement membership by e-mail) but
+                # holding nothing. No default role, and the claims of the assertion grant nothing unless the deployment says so.
+                if trust_unregistered_assertions():
+                    handle = handle or (f"@{sub.split('@')[0]}" if email else f"@{sub}")
+                    roles, domain_roles = tuple(claims.get("roles") or ()), claims.get("domain_roles") or {}
+                else:
+                    # No handle is invented (it would look like one of the registry): the label is the one the raw header gives
+                    # an unknown e-mail, so the audit and the candidates read the same in both ways.
+                    handle = f"email:{email}" if email else f"assertion:{sub}"
+                    roles, domain_roles, delegated_by, registered = (), {}, None, False
 
             actor = Actor(
                 handle=handle,
@@ -290,6 +310,7 @@ def resolve_actor(request: Any = None) -> Actor | None:
                 jti=claims.get("jti"),
                 delegated_by=delegated_by,
                 claims=claims,
+                registered=registered,
             )
             set_current_actor(actor)
             return actor
@@ -315,7 +336,7 @@ def resolve_actor(request: Any = None) -> Actor | None:
                     return actor
 
     current = _current_actor.get()
-    if current is not None:
+    if current is not None and current.registered:
         return current
 
     email = delegated_actor_email()

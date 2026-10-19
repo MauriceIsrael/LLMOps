@@ -151,6 +151,7 @@ By default the e-mail in `X-Actor-Email` is believed: anyone holding a `kb:deleg
 | `ARCHINEX_JWKS` / `ARCHINEX_JWKS_FILE` / `ARCHINEX_JWKS_URL` | public keys of the client that signs (Ed25519 JWKS, inline, a file, or an `https` URL kept 5 min, fail closed) |
 | `ARCHINEX_ISSUER`, `ARCHINEX_AUDIENCE` | expected `iss` / `aud` (defaults `archinex`, `knowledge-hub`) |
 | `ARCHINEX_ASSERTION_MAX_TTL`, `ARCHINEX_CLOCK_SKEW` | longest accepted lifetime (900 s), clock tolerance (30 s) |
+| `LLMOPS_ASSERTION_ROLES_FOR_UNREGISTERED=true` | believe the `roles` / `domain_roles` of a person the experts registry does not know (off: such a person holds no role and is not an expert, like an unknown e-mail in the raw header) |
 
 Order of a switch-over: declare the keys, make the client sign (the Hub keeps accepting the raw header meanwhile), check
 `GET /api/knowledge/audit` shows `auth_method: assertion`, then set `LLMOPS_REQUIRE_SIGNED_ACTOR=true`. At start the server logs
