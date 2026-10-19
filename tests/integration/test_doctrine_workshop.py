@@ -88,7 +88,7 @@ def test_simulate_clauses(env):
     current = _clauses("principles/P-002.md")
     same = env.post("/api/knowledge/checks/simulate", headers=CLIENT, json={"asset_id": "P-002", "checks": current}).json()["data"]
     assert same["regressions"] == [] and same["metrics"]["before"] == same["metrics"]["after"]
-    assert same["metrics"]["cases"] == 30
+    assert same["metrics"]["cases"] == 33
 
     removed = env.post("/api/knowledge/checks/simulate", headers=CLIENT, json={"asset_id": "P-002", "checks": []}).json()["data"]
     assert removed["regressions"], "removing the clauses must lose expected verdicts"
@@ -106,7 +106,7 @@ def test_simulate_clauses(env):
 
 def test_evaluation_dataset_annotation_and_runs(env):
     ds = env.get(DS, headers=CLIENT).json()["data"]
-    assert len(ds["cases"]) == 30 and ds["validated"] == 0
+    assert len(ds["cases"]) == 33 and ds["validated"] == 0
     case = ds["cases"][0]
     patch = f"{DS}/cases/{case['id']}"
     assert env.patch(patch, headers=CLIENT, json={"annotation_status": "validated"}).status_code == 403  # no actor
@@ -122,7 +122,7 @@ def test_evaluation_dataset_annotation_and_runs(env):
     run = env.post(f"{DS}/runs", headers=_as(EVALUATOR), json={})
     assert run.status_code == 201
     metrics = run.json()["data"]
-    assert metrics["cases"] == 30 and 0 <= metrics["violation_recall"] <= 1 and metrics["run_by"] == "@ciso-office"
+    assert metrics["cases"] == 33 and 0 <= metrics["violation_recall"] <= 1 and metrics["run_by"] == "@ciso-office"
     only = env.post(f"{DS}/runs", headers=_as(EVALUATOR), json={"validated_only": True}).json()["data"]
     assert only["cases"] == 1
     assert env.get(f"{DS}/runs/{metrics['id']}", headers=CLIENT).json()["data"]["violation_recall"] == metrics["violation_recall"]
@@ -135,7 +135,7 @@ def test_evaluation_dataset_annotation_and_runs(env):
         "option": {"title": "Manual hotfix in production", "description": "ssh into production"},
         "expected": {"principle:P-001": "violates"}})
     assert new.status_code == 201 and new.json()["data"]["annotation_status"] == "proposed"
-    assert len(env.get(DS, headers=CLIENT).json()["data"]["cases"]) == 31
+    assert len(env.get(DS, headers=CLIENT).json()["data"]["cases"]) == 34
 
 
 def test_verdict_feedback_conversion(env):
@@ -182,4 +182,4 @@ def test_evaluation_features_need_the_database(env, monkeypatch, tmp_path):
     # Templates, dry run and simulation (default dataset from the JSONL) work without it.
     assert env.get("/api/knowledge/templates/pattern", headers=CLIENT).status_code == 200
     sim = env.post("/api/knowledge/checks/simulate", headers=CLIENT, json={"asset_id": "P-002", "checks": _clauses("principles/P-002.md")})
-    assert sim.status_code == 200 and sim.json()["data"]["metrics"]["cases"] == 30
+    assert sim.status_code == 200 and sim.json()["data"]["metrics"]["cases"] == 33

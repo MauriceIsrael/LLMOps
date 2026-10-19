@@ -110,9 +110,10 @@ class Vocabulary:
 
 # Negation cues (EN/FR). An occurrence preceded (within NEGATION_WINDOW tokens) by a cue
 # does not count: "without human approval" does not satisfy "human approval".
-NEGATION_CUES = frozenset(
-    ["no", "not", "without", "never", "non", "sans", "pas", "aucun", "aucune", "jamais", "ni", "lack", "absence"]
-)
+_RAW_NEGATION_CUES = [
+    "no", "not", "without", "never", "non", "sans", "pas", "aucun", "aucune", "jamais", "ni", "lack", "absence",
+]
+NEGATION_CUES = frozenset(_RAW_NEGATION_CUES) | frozenset(stem(w) for w in _RAW_NEGATION_CUES)
 NEGATION_WINDOW = 3
 
 
@@ -143,6 +144,15 @@ def contains_affirmed(normalized_text: str, phrase: str) -> bool:
     return False
 
 
+def contains_negated(normalized_text: str, phrase: str) -> bool:
+    """True when whole phrase is found in normalized_text and every occurrence is negated."""
+    if not contains_phrase(normalized_text, phrase):
+        return False
+    if phrase.split()[0] in NEGATION_CUES:
+        return False
+    return not contains_affirmed(normalized_text, phrase)
+
+
 def match_terms(normalized_text: str, terms: Iterable[str], vocabulary: Vocabulary) -> list[str]:
     """Terms (as written) found, affirmed, in the text — literally or through a synonym.
 
@@ -168,6 +178,45 @@ def match_terms(normalized_text: str, terms: Iterable[str], vocabulary: Vocabula
             by_synonym.append(term)
             groups_seen.add(group)
     return [str(t) for t in terms if str(t) in literal or str(t) in by_synonym]
+
+
+def match_negated_terms(normalized_text: str, terms: Iterable[str], vocabulary: Vocabulary) -> list[str]:
+    """Terms (as written) found, but negated, in the text — literally or through a synonym.
+
+    A term that is affirmed (directly or through an equivalent synonym) is not negated.
+    A term found negated only through a synonym is reported once per synonym group.
+    """
+    affirmed_groups: set[frozenset[str]] = set()
+    for term in terms:
+        term = str(term)
+        own = normalize_phrase(term)
+        group = vocabulary.variants(term)
+        if contains_affirmed(normalized_text, own) or any(contains_affirmed(normalized_text, v) for v in group):
+            affirmed_groups.add(group)
+
+    literal_negated: list[str] = []
+    negated_groups_seen: set[frozenset[str]] = set()
+    for term in terms:
+        term = str(term)
+        own = normalize_phrase(term)
+        group = vocabulary.variants(term)
+        if group in affirmed_groups:
+            continue
+        if contains_negated(normalized_text, own):
+            literal_negated.append(term)
+            negated_groups_seen.add(group)
+
+    by_synonym_negated: list[str] = []
+    for term in terms:
+        term = str(term)
+        group = vocabulary.variants(term)
+        if term in literal_negated or group in affirmed_groups or group in negated_groups_seen:
+            continue
+        if any(contains_negated(normalized_text, v) for v in group):
+            by_synonym_negated.append(term)
+            negated_groups_seen.add(group)
+
+    return [str(t) for t in terms if str(t) in literal_negated or str(t) in by_synonym_negated]
 
 
 def query_concepts(text: str, vocabulary: Vocabulary) -> list[frozenset[str]]:

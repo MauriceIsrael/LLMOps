@@ -62,6 +62,7 @@ def _verdict(
         "verdict": verdict,
         "message": (result.clause.message or None) if result else None,
         "matched_terms": list(result.matched_terms) if result else [],
+        "negated_terms": list(result.negated_terms) if result and hasattr(result, "negated_terms") else [],
         "excerpt": excerpt,
         "source_ref": entry.source_ref,
         "check_status": result.clause.status if result else None,

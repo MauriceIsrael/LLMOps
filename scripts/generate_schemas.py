@@ -131,7 +131,7 @@ def generate_check_result_schema() -> dict[str, Any]:
                         "items": {
                             "type": "object",
                             "required": [
-                                "typed_id", "check_id", "verdict", "message", "matched_terms", "excerpt", "source_ref",
+                                "typed_id", "check_id", "verdict", "message", "matched_terms", "negated_terms", "excerpt", "source_ref",
                             ],
                             "properties": {
                                 "typed_id": {"type": "string"},
@@ -139,6 +139,7 @@ def generate_check_result_schema() -> dict[str, Any]:
                                 "verdict": {"enum": verdict_enum},
                                 "message": {"type": ["string", "null"]},
                                 "matched_terms": {"type": "array", "items": {"type": "string"}},
+                                "negated_terms": {"type": "array", "items": {"type": "string"}},
                                 "excerpt": {"type": "string"},
                                 "source_ref": {"type": "string"},
                                 "check_status": {
@@ -412,7 +413,8 @@ def generate_asset_template_schema() -> dict[str, Any]:
 def generate_simulation_schema() -> dict[str, Any]:
     verdicts = {"type": "array", "items": {"type": "object", "properties": {
         "check_id": {"type": ["string", "null"]}, "verdict": {"enum": ["supports", "violates"]},
-        "matched_terms": {"type": "array", "items": {"type": "string"}}}}}
+        "matched_terms": {"type": "array", "items": {"type": "string"}},
+        "negated_terms": {"type": "array", "items": {"type": "string"}}}}}
     metrics = {"type": "object", "properties": {
         "violation_recall": {"type": "number"}, "supports_recall": {"type": "number"},
         "unexpected_violations": {"type": "integer"}, "expected_violations": {"type": "integer"}}}
@@ -814,6 +816,7 @@ export interface CheckVerdict {{
   verdict: CheckVerdictValue;
   message: string | null;
   matched_terms: string[];
+  negated_terms: string[];
   excerpt: string;
   source_ref: string;
   check_status?: "draft" | "validated" | null;
@@ -996,7 +999,7 @@ export interface CandidateDryRun {{
 
 export type ExpectedVerdict = "violates" | "supports";
 
-export interface ClauseVerdictView {{ check_id: string | null; verdict: ExpectedVerdict; matched_terms: string[] }}
+export interface ClauseVerdictView {{ check_id: string | null; verdict: ExpectedVerdict; matched_terms: string[]; negated_terms: string[] }}
 
 export interface JudgeMetrics {{
   violation_recall: number; supports_recall: number; unexpected_violations: number; expected_violations: number;
