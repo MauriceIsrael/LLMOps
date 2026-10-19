@@ -1203,7 +1203,7 @@ L'exigence est portée par le sujet (1.27), la décision est celle de ce sujet e
 ### 5.37 Contrat 1.37 — Authentification des experts, assertions signées EdDSA et RBAC fin pour la gouvernance KB (Issue #7)
 
 **1. Assertion d'acteur cryptographique EdDSA (Ed25519) et registre JWKS**
-- Remplace l'en-tête brut `X-Actor-Email` par une assertion signée asymétrique (`X-Actor-Token` ou `X-Actor-Assertion`) émise par Archinex ou un IdP de confiance.
+- Ajoute l'assertion signée asymétrique (`X-Actor-Token` ou `X-Actor-Assertion`) émise par Archinex ou un IdP de confiance. **L'en-tête brut `X-Actor-Email` reste accepté par défaut** (jeton portant `kb:delegate` ou `eng:delegate`) : tant que le mode strict du §5.39 n'est pas activé, un jeton de service compromis peut se faire passer pour n'importe quel expert, et la séparation des tâches ci-dessous ne vaut que si l'identité est authentifiée.
 - Publication des clés publiques au format RFC 8037 (`OKP` / `Ed25519`) sur le point d'accès standard `GET /.well-known/jwks.json`.
 - Vérification cryptographique dynamique (`ActorAssertionVerifier`) avec extraction sécurisée de l'identité (`handle`, `email`), des rôles globaux (`roles`), des rôles restreints par domaine (`domain_roles`) et des délégations (`delegation`).
 
@@ -1221,11 +1221,47 @@ L'exigence est portée par le sujet (1.27), la décision est celle de ce sujet e
 
 **4. Séparation stricte des tâches (Separation of Duties)**
 - Règle formelle : l'auteur d'un candidat ne peut ni réviser ni auto-valider sa propre contribution.
-- Le rejet `separation_of_duties` (HTTP 403, `CandidateForbiddenError`) est levé si le `reviewer` tente d'émettre une action (`accept`, `amend`, `reject`) sur un candidat dont il est l'auteur (`handle` ou adresse e-mail concordante).
+- Le rejet `separation_of_duties` (réponse réelle : HTTP 400, `status: invalid_argument`, `argument: reviewer`, `reason` commençant par `separation_of_duties:`) est levé si le `reviewer` tente d'émettre une action (`accept`, `amend`, `reject`) sur un candidat dont il est l'auteur (`handle` ou adresse e-mail concordante).
 
 **5. Journal d'audit d'accès et de gouvernance**
 - Table dédiée `kb_access_audit` traçant chaque opération de gouvernance (`login`, `review`, `delegation`, `revocation`) avec l'acteur, le résultat (`allowed`, `denied`), la ressource et l'empreinte `jti`.
 - Consultation via `GET /api/knowledge/audit` (outil MCP `get_kb_audit`, requiert le scope `kb:review`).
+
+### 5.39 Contrat 1.39 — Identité et droits des personnes qui agissent (Issues #144, #90, #91)
+
+Aucune route n'est ajoutée ; les réponses existantes gardent leur forme. Ce qui change est observable : un refus 401 de plus, une borne sur la durée des assertions, une autorisation de plus sur la déclaration de couverture, une 409 de plus à l'application d'une ingestion.
+
+**1. Mode strict d'identité (`LLMOPS_REQUIRE_SIGNED_ACTOR`, issue #144)**
+- Variable d'environnement (ou `.env`) : `true`/`1`/`yes`/`on` l'active. **Absente = mode par défaut** : `X-Actor-Email` reste accepté, comme en 1.4 à 1.37 (serveur de contrat, clients qui ne signent pas encore).
+- Activé, une requête qui nomme sa personne par `X-Actor-Email` **sans** assertion est refusée : `401 {"status":"unauthorized","error":"signed_actor_required","reason":…}`. Le refus est écrit dans le journal d'audit (`GET /api/knowledge/audit`, `outcome: denied`, `auth_method: header`, `detail.code: signed_actor_required`).
+- Si une assertion valide accompagne l'en-tête brut, **l'assertion seule** désigne la personne ; l'en-tête est ignoré. Les requêtes sans personne (lectures par jeton de service, `/health`, `/.well-known/jwks.json`) sont inchangées.
+- Cela couvre aussi les écritures d'engagement (`eng:delegate`) : l'adresse e-mail qui désigne le membre vient de l'assertion (claim `email`).
+- Au démarrage, le serveur écrit dans le journal (`mcp_server.identity`) le nombre de clés de confiance ; en mode strict sans aucune clé il écrit une **erreur explicite** et chaque requête signée est refusée en `unknown_key`.
+
+**2. Clés publiques de confiance**
+- `ARCHINEX_JWKS` : le JWKS lui-même (`{"keys":[…]}`, clés `OKP`/`Ed25519` avec `kid`).
+- `ARCHINEX_JWKS_FILE` : chemin d'un fichier JWKS (un fichier remplacé est relu).
+- `ARCHINEX_JWKS_URL` : URL d'un JWKS (`https`, ou `http` sur boucle locale). Mise en cache 300 s ; relu au plus toutes les 30 s, et immédiatement quand un `kid` est inconnu (rotation). **Échec fermé** : une source illisible n'apporte aucune clé ; si l'URL reste injoignable au-delà de 300 s, ses clés ne sont plus de confiance.
+- Un `kid` nommé mais non déclaré est refusé : `401 unknown_key` (le message nomme les trois variables). Il n'y a plus de repli sur « la seule clé enregistrée » quand un `kid` est donné.
+
+**3. Format et durée de vie d'une assertion**
+- JWT compact, algorithme `EdDSA` (Ed25519) uniquement, en-tête `{"alg":"EdDSA","kid":"<kid déclaré>"}`.
+- Claims obligatoires : `iss` (défaut `archinex`, `ARCHINEX_ISSUER`), `aud` (défaut `knowledge-hub`, `ARCHINEX_AUDIENCE`), `sub`, `exp`, `jti` (unique par assertion). Attendus : `iat`, `nbf`, `email` (adresse de la personne : sans elle une écriture d'engagement n'a pas de membre), `handle` (facultatif ; sinon déduit du registre des experts). Facultatifs : `roles`, `domain_roles`, `delegation`.
+- Durée de vie `exp − iat` au plus **900 s** (`ARCHINEX_ASSERTION_MAX_TTL`) : au-delà, `401 lifetime_too_long`. Valeur recommandée à l'émission : 300 s.
+- Tolérance d'horloge sur `iat`/`nbf`/`exp` : **30 s** (`ARCHINEX_CLOCK_SKEW`). Un `jti` est retenu jusqu'à `exp` + la tolérance.
+- Rappel des refus : `invalid_signature`, `invalid_algorithm`, `token_expired`, `invalid_issuer`, `invalid_audience`, `missing_jti` (401) ; `replay_detected`, `token_revoked` (403).
+
+**4. Déclarer un référentiel couvert (`POST /api/frameworks/{fw}/coverage-declaration`, issue #90)**
+- Il fallait seulement un expert enregistré. Il faut maintenant le **propriétaire du domaine principal** du référentiel, ou `kb:maintain`, ou le rôle de revue sur ce domaine (`domain_roles` d'une assertion, délégation active). Sinon `403 unauthorized` avec le domaine dans `reason`.
+- Domaine principal : `primary_domain` du référentiel dans `data/kb/controls/frameworks.yaml` s'il y est ; sinon le premier domaine que listent le plus de contrôles du référentiel (égalité : ordre alphabétique). Un référentiel sans contrôle n'a pas de propriétaire : un mainteneur seul peut le déclarer.
+- Chaque décision (autorisée ou refusée) est écrite dans le journal d'audit (`action: declare_framework_coverage`, `resource: <référentiel>`) ; le déclarant reste dans `coverage_declared_by`.
+
+**5. Appliquer une ingestion de référentiel (`POST /api/frameworks/ingestions/{id}/apply`, issue #91)**
+- Le mainteneur qui applique ne peut pas être celui qui a **décidé** (`accept` ou `amend`) un contrôle `severity: mandatory` (sévérité absente = obligatoire). Ces lignes ne sont pas appliquées et restent `decided` : `failed[]` les nomme avec `separation_of_duties:`. Si aucune ligne ne peut être appliquée, la réponse est `409` (`invalid_argument`, `conflict: true`). Un autre mainteneur peut les appliquer. Les rejets (`reject`) et les contrôles non obligatoires ne sont pas concernés.
+- `kb apply-review <fichier>` (ligne de commande) n'a pas de personne authentifiée pour appliquer : la règle n'y est **pas** vérifiée.
+
+**Limites connues** : le registre anti-rejeu (`jti`) est en mémoire, par processus : plusieurs processus ou un redémarrage ouvrent une fenêtre de rejeu de la durée de l'assertion. Une assertion pour une personne absente du registre des experts reçoit `kb:review` par défaut. Les `roles` d'une assertion s'ajoutent à ceux du registre : celui qui signe (Archinex) répond de ce qu'il affirme.
+
 
 ---
 
