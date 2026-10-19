@@ -147,5 +147,5 @@ def test_health_indicators(env):
     assert health["queue"]["by_status"]["in_review"] == 1
     assert health["queue"]["per_owner"]["@core-owner-architecture"]["oldest_business_days"] >= 10
     assert [o["candidate_id"] for o in health["queue"]["overdue"]] == [cid]
-    assert health["evaluation"]["cases"] == 30 and health["evaluation"]["last_run"]["cases"] == 30
+    assert health["evaluation"]["cases"] == 33 and health["evaluation"]["last_run"]["cases"] == 33
     assert health["last_snapshot"] is None  # nothing published in this temporary environment

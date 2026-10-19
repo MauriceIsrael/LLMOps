@@ -579,7 +579,7 @@ checks:
 ```
 
 - `forbids` : si `when` correspond → `violates` ; `requires` : si `when` correspond → `supports` si `expect` correspond, sinon `violates` ; sinon la clause ne s'applique pas.
-- Correspondance lexicale sur `title`, `description` et les `statements`, même normalisation que 5.1.1 ; une occurrence précédée d'une négation (`no`, `not`, `without`, `sans`, `pas`…) ne compte pas.
+- Correspondance lexicale sur `title`, `description` et les `statements`, même normalisation que 5.1.1 ; une occurrence précédée d'une négation (`no`, `not`, `without`, `sans`, `pas`…) ne compte pas. Pour une clause `requires`, un terme attendu nié (ex. « sans évaluation de sécurité ») ne satisfait pas la clause et est signalé dans `negated_terms`.
 - Un actif pertinent sans clause applicable → `unassessed` (`check_id: null`) : c'est au vérificateur côté client de juger.
 - **Tout contrôle actif d'un référentiel de `frameworks` est toujours retourné**, au minimum en `unassessed`.
 - Ordre : `violates`, `supports`, `unassessed`, puis priorité de type et identifiant. Champ additionnel `check_status` (`draft` | `validated` | `null`).
@@ -592,9 +592,9 @@ checks:
     "verdicts": [
       {"typed_id": "principle:P-002", "check_id": "P-002-C1", "verdict": "violates",
        "message": "Any closed loop must stay supervised: …", "matched_terms": ["closed loop", "auto-remediation"],
-       "excerpt": "…", "source_ref": "data/kb/principles/P-002.md", "check_status": "draft"},
+       "negated_terms": [], "excerpt": "…", "source_ref": "data/kb/principles/P-002.md", "check_status": "draft"},
       {"typed_id": "control:NIS2-ART21-2A", "check_id": null, "verdict": "unassessed", "message": null,
-       "matched_terms": [], "excerpt": "…", "source_ref": "data/kb/controls/NIS2/NIS2-ART21-2A.md", "check_status": null}
+       "matched_terms": [], "negated_terms": [], "excerpt": "…", "source_ref": "data/kb/controls/NIS2/NIS2-ART21-2A.md", "check_status": null}
     ],
     "summary": {"supports": 0, "violates": 3, "unassessed": 30},
     "method": "deterministic-checks-v1",

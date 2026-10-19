@@ -71,10 +71,10 @@ def test_migration_is_idempotent_and_seeds_owners_once(tmp_path, url):
     files.save(_cand("CAND-20260101-0001"))
     first = migrate_governance(kb, tmp_path / "cands")
     assert first["candidates_imported"] == 1 and first["candidates_skipped"] == 0 and first["owners_seeded"] is True
-    assert first["eval_cases"] == {"imported": 30, "skipped": 0}
+    assert first["eval_cases"] == {"imported": 33, "skipped": 0}
     again = migrate_governance(kb, tmp_path / "cands")
     assert again["candidates_imported"] == 0 and again["candidates_skipped"] == 1 and again["owners_seeded"] is False
-    assert again["eval_cases"] == {"imported": 0, "skipped": 30}
+    assert again["eval_cases"] == {"imported": 0, "skipped": 33}
 
     # The database is now the authority: editing owners.yaml changes nothing until --force-owners.
     data = yaml.safe_load((kb / "owners.yaml").read_text())

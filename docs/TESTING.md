@@ -26,8 +26,9 @@ la suite donnait des résultats différents selon la machine (voir « Pourquoi c
 | `tests/bench`, `tests/eval` | bancs et évaluations déterministes | oui |
 | `tests/evals` | évaluations DeepEval : exigent `deepeval` et un modèle | **non** (`--ignore=tests/evals`) |
 
-`make test` (ancien) n'en lance qu'une partie ; `make verify` (le crochet pre-push) ne lance que lint + contrat + unitaires, **pas** les
-tests d'intégration. Pour la suite complète : `make test-all`.
+`make test` (ancien) n'en lance qu'une partie ; `make verify` ne lance que lint + types + contrat + unitaires, **pas** les
+tests d'intégration. Le crochet pre-push (`make hooks`) est plus léger encore : `make quick` (ruff + garde des noms de projet, quelques
+secondes). Les tests, c'est la CI ; en local, un test ciblé suffit (`pytest tests/unit/test_xxx.py -k …`). Pour la suite complète : `make test-all`.
 
 ## Procédure A : copie propre, en local
 
@@ -115,9 +116,21 @@ compteurs figés sur la taille de la base de connaissances, des fixtures produit
 s'interrompait à la collecte, et un `.dockerignore` qui excluait `poetry.lock` (les images se construisaient donc sans le verrou).
 Tout ce qui précède est corrigé ou nommé ici.
 
+## La CI
+
+`.github/workflows/tests.yml` s'exécute sur chaque PR et sur `main` : Python 3.11, dépendances de `poetry.lock` (Poetry 2.5.1),
+puis `ruff`, `scripts/check_no_project_names.py`, `mypy`, la garde de version du moteur de graphe, et la suite de ce document
+(`pytest tests --ignore=tests/evals`). C'est `make lint` suivi de `make test-all`, sur un clone propre.
+
+- **Elle est utile si elle est exigée** : dans les réglages du dépôt (Branches → règle de protection de `main`), cocher « Require status
+  checks to pass » et choisir `tests`. Sans cela elle informe, elle n'empêche rien.
+- **Après une publication de base de connaissances** (`kb publish`, `kb apply-review`) : les fixtures et le snapshot scellé changent ; la CI
+  échoue tant que `fixtures/` n'est pas régénéré depuis une copie neuve (« Quand on change quelque chose »).
+- **Montée de version du moteur de graphe ou de Python** : changer `python-version` ici et dans `docker/Dockerfile.test` ensemble.
+
 ## Ce que cette procédure ne couvre pas
 
-- **Il n'y a pas de CI** sur ce dépôt : rien n'exécute ces tests automatiquement. Le crochet pre-push ne lance qu'une partie de la suite.
+- **La CI (`.github/workflows/tests.yml`) lance la suite complète, pas les évaluations avec modèle ni les clients.** Les tests « live » d'Archinex contre le serveur de contrat ne tournent pas ici (voir plus haut) ; une PR qui change ce que ces clients lisent doit les rejouer à la main. Le crochet pre-push, lui, ne lance que lint + contrat + unitaires.
 - Les évaluations avec modèle (`tests/evals`) ne sont ni lancées par défaut ni mesurées ici.
 - Les résultats ont été obtenus sous Python 3.13 (procédure A) ; l'image Docker vise 3.11 (voir l'état de la procédure B).
 

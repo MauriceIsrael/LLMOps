@@ -27,7 +27,7 @@ def with_clauses(index: DoctrineIndex, asset_id: str, raw_checks: list[Any]) -> 
 
 
 def _view(verdicts: list[dict[str, Any]], typed_id: str) -> list[dict[str, Any]]:
-    return [{"check_id": v["check_id"], "verdict": v["verdict"], "matched_terms": v["matched_terms"]}
+    return [{"check_id": v["check_id"], "verdict": v["verdict"], "matched_terms": v["matched_terms"], "negated_terms": v.get("negated_terms", [])}
             for v in verdicts if v["typed_id"] == typed_id and v["verdict"] != "unassessed"]
 
 

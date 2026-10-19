@@ -1,4 +1,4 @@
-.PHONY: serve demo demo-check install models-fetch eval-semantic test test-all test-docker test-env-check test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
+.PHONY: quick serve demo demo-check install models-fetch eval-semantic test test-all test-docker test-env-check test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
 
 install:
 	poetry install
@@ -48,7 +48,12 @@ test-integration:
 test-e2e:
 	poetry run pytest tests/e2e -v
 
-# Fast local gate (no CI workflow): lint + frozen contract + unit tests.
+# Fast local gate, a few seconds: what the pre-push hook runs. The CI (.github/workflows/tests.yml) runs everything else.
+quick:
+	poetry run ruff check .
+	poetry run python scripts/check_no_project_names.py
+
+# Lint + types + frozen contract + unit tests, to run by hand before a change that touches a contract (the CI runs the whole suite).
 verify: lint test-contract test-unit
 
 # Seeded server (scratch copy, SQLite governance) for client contract tests, e.g. Archinex.
@@ -68,10 +73,10 @@ eval-semantic:
 	poetry run python scripts/eval/eval_semantic_search.py --verbose
 	KB_SEMANTIC_EVAL=1 poetry run pytest tests/eval/test_semantic_fr_en.py -m semantic_eval -v
 
-# Install the git pre-push hook that runs `make verify`.
+# Install the git pre-push hook that runs `make quick` (ruff + project-name guard; tests and types are the CI's job).
 hooks:
 	git config core.hooksPath .githooks
-	@echo "pre-push hook installed (.githooks/pre-push runs make verify)"
+	@echo "pre-push hook installed (.githooks/pre-push runs make quick)"
 
 typecheck:
 	poetry run mypy mcp_server tools pipelines

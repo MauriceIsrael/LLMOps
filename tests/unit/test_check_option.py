@@ -139,6 +139,22 @@ def test_synonyms_and_accents_are_matched():
 def test_negated_expectation_does_not_count():
     res = _eval(REQUIRES, "Closed-loop remediation without human approval")
     assert res.verdict == "violates"
+    assert res.matched_terms == ["closed-loop"]
+    assert res.negated_terms == ["human-approval"]
+
+
+def test_negated_expectation_french_cue():
+    res = _eval(REQUIRES, "Closed-loop remediation sans validation humaine")
+    assert res.verdict == "violates"
+    assert res.matched_terms == ["closed-loop"]
+    assert res.negated_terms == ["human-approval"]
+
+
+def test_negated_expectation_french_pas_de():
+    res = _eval(REQUIRES, "Closed-loop remediation pas de validation humaine")
+    assert res.verdict == "violates"
+    assert res.matched_terms == ["closed-loop"]
+    assert res.negated_terms == ["human-approval"]
 
 
 def test_terms_all_requires_every_term():
@@ -179,6 +195,7 @@ def test_check_option_reports_violations_first_with_citations(index):
         "verdict": "violates",
         "message": "Closed loops stay supervised.",
         "matched_terms": ["closed-loop", "auto-remediation"],
+        "negated_terms": [],
         "excerpt": first["excerpt"],
         "source_ref": "kb/P-100.md",
         "check_status": "draft",

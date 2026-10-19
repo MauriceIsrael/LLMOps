@@ -127,5 +127,5 @@ The `1.0` contract is enforced mechanically:
   is no longer served.
 - The frozen shapes are **never regenerated** to make the test pass. The script is only
   run with `--only <interface>` to freeze a newly added interface.
-- `make verify` (lint + contract + unit tests) runs this check; `make hooks` installs it
-  as a git `pre-push` hook.
+- `make verify` (lint + types + contract + unit tests) runs this check by hand, and the CI runs it with the whole suite.
+  The `pre-push` hook installed by `make hooks` only runs `make quick` (ruff + project-name guard).

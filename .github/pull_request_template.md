@@ -47,7 +47,7 @@ Supprimer ce commentaire avant de publier.
 
 ## Limites (dites, pas masquées)
 
-<!-- Ce qui n'est pas fait, pas mesuré, pas éprouvé ; ce qui dépend d'une autre PR ou d'une décision. Pas de CI sur ce dépôt : le dire si rien n'a tourné ailleurs que chez l'auteur. -->
+<!-- Ce qui n'est pas fait, pas mesuré, pas éprouvé ; ce qui dépend d'une autre PR ou d'une décision. La CI (`tests`) lance la suite complète ; ce qu'elle ne lance pas (serveur de contrat, clients, `tests/evals`) est à dire ici. -->
 
 ## À décider
 
