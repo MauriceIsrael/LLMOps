@@ -45,6 +45,19 @@ class IngestionNotFoundError(LookupError):
     pass
 
 
+def requires_independent_apply(row: dict[str, Any], applier: str) -> bool:
+    """A mandatory control is not promoted by the person who decided it (issue #91).
+
+    True when ``row`` is an acceptance (``accept`` or ``amend``) of a ``severity: mandatory`` control that ``applier`` decided
+    themselves. A rejection promotes nothing; a recommended control is left to the maintainer. A draft that does not state its
+    severity counts as mandatory, the default of the ingestion.
+    """
+    if row.get("decision") not in ("accept", "amend") or row.get("reviewer") != applier:
+        return False
+    front, _ = split_frontmatter(row.get("draft") or "")
+    return str((front or {}).get("severity") or "mandatory").strip().lower() == "mandatory"
+
+
 def supported_frameworks() -> list[str]:
     return sorted(p.stem.upper() for p in SPLITTERS_DIR.glob("*.yaml"))
 
@@ -294,6 +307,15 @@ class IngestionService:
         decided = [r for r in rows if r["decision"] and r["status"] != "applied"]
         if not decided:
             raise IngestionError("decisions", "no decided requirement to apply.")
+        # Independent review: the maintainer who applies is not the reviewer who decided a mandatory control (issue #91).
+        waiting = [r for r in decided if requires_independent_apply(r, actor)]
+        if waiting:
+            ids = ", ".join(r["requirement_id"] for r in waiting)
+            reason = (f"separation_of_duties: {actor} decided {ids}; a mandatory control is applied by a maintainer who did "
+                      "not decide it.")
+            decided = [r for r in decided if r not in waiting]
+            if not decided:
+                raise IngestionError("apply", reason, conflict=True)
         with tempfile.TemporaryDirectory(prefix="llmops-apply-") as tmp:
             staging = Path(tmp)
             for r in rows:
@@ -312,6 +334,8 @@ class IngestionService:
                         "links": "; ".join(r["links"]), "acceptance_criteria": "; ".join(r["acceptance_criteria"]),
                         "comment": r["comment"]})
             results = apply_review(sheet, self.service, staging=staging)
+        for r in waiting:
+            results["failed"].append({"requirement": r["requirement_id"], "reason": reason})
         failed = {f["requirement"]: f["reason"] for f in results["failed"]}
         for r in decided:
             rid = r["requirement_id"]
