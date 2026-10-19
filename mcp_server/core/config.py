@@ -74,6 +74,10 @@ class ServerConfig(BaseSettings):
         default=None,
         validation_alias="LLMOPS_AUTH_TOKEN",
     )
+    require_signed_actor: bool = Field(
+        default=False,
+        validation_alias="LLMOPS_REQUIRE_SIGNED_ACTOR",
+    )
     dataset: str = "ladybug://data/knowledge.lbug"
 
     # Propriétés de compatibilité majuscules pour settings

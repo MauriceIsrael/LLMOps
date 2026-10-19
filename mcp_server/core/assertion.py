@@ -10,11 +10,16 @@ Implements the cryptographic identity layer for KB governance (issue #7, ADR D3 
 from __future__ import annotations
 
 import base64
+import json
+import logging
 import os
 import threading
 import time
+import urllib.request
 import uuid
+from pathlib import Path
 from typing import Any, cast
+from urllib.parse import urlparse
 
 import jwt
 from cryptography.hazmat.primitives import serialization
@@ -23,6 +28,28 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 DEFAULT_ISSUER = "archinex"
 DEFAULT_AUDIENCE = "knowledge-hub"
 DEFAULT_EXP_SECONDS = 300  # 5 minutes
+DEFAULT_MAX_TTL_SECONDS = 900  # longest lifetime (exp - iat) the Hub accepts, ARCHINEX_ASSERTION_MAX_TTL
+DEFAULT_CLOCK_SKEW_SECONDS = 30  # tolerance on iat / nbf / exp, ARCHINEX_CLOCK_SKEW
+JWKS_URL_TTL_SECONDS = 300  # a fetched key set is trusted this long before it is read again
+JWKS_URL_RETRY_SECONDS = 30  # shortest delay between two fetches (unknown kid, failed fetch)
+
+logger = logging.getLogger(__name__)
+
+
+def _seconds_from_env(name: str, default: int) -> int:
+    try:
+        value = int(os.getenv(name, "").strip())
+    except ValueError:
+        return default
+    return value if value >= 0 else default
+
+
+def max_ttl_seconds() -> int:
+    return _seconds_from_env("ARCHINEX_ASSERTION_MAX_TTL", DEFAULT_MAX_TTL_SECONDS)
+
+
+def clock_skew_seconds() -> int:
+    return _seconds_from_env("ARCHINEX_CLOCK_SKEW", DEFAULT_CLOCK_SKEW_SECONDS)
 
 
 class ActorAssertionError(ValueError):
@@ -79,12 +106,27 @@ class JWKSRegistry:
         self._default_key: ed25519.Ed25519PublicKey | None = None
         self._jwks_cache: dict[str, Any] = {"keys": []}
         self._lock = threading.Lock()
+        self._env_signatures: dict[str, str] = {}  # source name -> what it held when it was last read
+        self._url_kids: set[str] = set()  # the keys that came from ARCHINEX_JWKS_URL (and expire with it)
+        self._url_fetched_at = 0.0
+        self._url_attempted_at = 0.0
 
     def clear(self) -> None:
         with self._lock:
             self._keys_by_kid.clear()
             self._default_key = None
             self._jwks_cache = {"keys": []}
+            self._env_signatures.clear()
+            self._url_kids.clear()
+            self._url_fetched_at = 0.0
+            self._url_attempted_at = 0.0
+
+    def remove_key(self, kid: str) -> None:
+        with self._lock:
+            self._keys_by_kid.pop(kid, None)
+            self._jwks_cache = {"keys": [k for k in self._jwks_cache.get("keys", []) if k.get("kid") != kid]}
+            if self._default_key is not None and not self._keys_by_kid:
+                self._default_key = None
 
     def add_public_key(self, key: ed25519.Ed25519PublicKey, kid: str | None = None) -> str:
         with self._lock:
@@ -108,10 +150,108 @@ class JWKSRegistry:
         for k in jwks.get("keys", []):
             self.add_jwk(k)
 
+    def refresh_from_environment(self, kid: str | None = None) -> None:
+        """Register the public keys a deployment trusts, from the environment (never raises).
+
+        * ``ARCHINEX_JWKS``: a JWKS document (``{"keys": [...]}``) in the variable itself;
+        * ``ARCHINEX_JWKS_FILE``: the path of a file holding one (a file replaced on disk is read again);
+        * ``ARCHINEX_JWKS_URL``: fetched (``https``, or ``http`` on loopback) and kept for ``JWKS_URL_TTL_SECONDS``; read
+          again at most every ``JWKS_URL_RETRY_SECONDS``, and at once when a ``kid`` is unknown (a key rotation).
+
+        Fail closed: a source that cannot be read or parsed contributes no key, and keys that came from the URL are dropped
+        when the URL has been unreachable for longer than the cache lifetime, never trusted past it.
+        """
+        raw = os.getenv("ARCHINEX_JWKS", "").strip()
+        if raw:
+            if raw.startswith(("{", "[")):
+                self._load_text("ARCHINEX_JWKS", raw, raw)
+            else:
+                logger.warning("ARCHINEX_JWKS must hold the JWKS document itself; a file path goes in ARCHINEX_JWKS_FILE")
+        file_path = os.getenv("ARCHINEX_JWKS_FILE", "").strip()
+        if file_path:
+            self._load_file(file_path)
+        url = os.getenv("ARCHINEX_JWKS_URL", "").strip()
+        if url:
+            self._refresh_url(url, kid)
+
+    def _load_file(self, file_path: str) -> None:
+        path = Path(file_path)
+        try:
+            signature = f"{path}:{path.stat().st_mtime_ns}"
+            if self._env_signatures.get("ARCHINEX_JWKS_FILE") == signature:
+                return
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            logger.warning("ARCHINEX_JWKS_FILE: cannot read %s (%s); no key is trusted from it", file_path, exc)
+            return
+        self._load_text(f"ARCHINEX_JWKS_FILE ({path})", text, signature, name="ARCHINEX_JWKS_FILE")
+
+    def _load_text(self, source: str, text: str, signature: str, name: str | None = None) -> None:
+        key = name or source
+        with self._lock:
+            if self._env_signatures.get(key) == signature:
+                return
+            self._env_signatures[key] = signature
+        self._add_document(text, source)
+
+    def _refresh_url(self, url: str, kid: str | None) -> None:
+        now = time.time()
+        stale = now - self._url_fetched_at >= JWKS_URL_TTL_SECONDS
+        unknown = bool(kid) and kid not in self._keys_by_kid
+        if (stale or unknown) and now - self._url_attempted_at >= JWKS_URL_RETRY_SECONDS:
+            self._url_attempted_at = now
+            if self._load_url(url):
+                self._url_fetched_at = now
+        if now - self._url_fetched_at >= JWKS_URL_TTL_SECONDS and self._url_kids:
+            # The URL could not be read again in time: its keys are not trusted any longer (fail closed).
+            logger.error("ARCHINEX_JWKS_URL unreachable for over %s s: its keys are no longer trusted", JWKS_URL_TTL_SECONDS)
+            for old in list(self._url_kids):
+                self.remove_key(old)
+            self._url_kids.clear()
+
+    def _load_url(self, url: str) -> bool:
+        parsed = urlparse(url)
+        loopback = parsed.hostname in ("localhost", "127.0.0.1", "::1")
+        if parsed.scheme != "https" and not (parsed.scheme == "http" and loopback):
+            logger.warning("ARCHINEX_JWKS_URL must be https (or http on loopback); no key is trusted from %s", url)
+            return False
+        try:
+            with urllib.request.urlopen(url, timeout=5) as response:  # noqa: S310 - scheme checked above
+                text = response.read(1_000_000).decode("utf-8")
+        except Exception as exc:  # network, TLS, decoding: trust nothing new
+            logger.warning("ARCHINEX_JWKS_URL: cannot fetch %s (%s); no key is trusted from it", url, exc)
+            return False
+        kids = self._add_document(text, f"ARCHINEX_JWKS_URL ({url})")
+        if kids is None:
+            return False
+        for gone in self._url_kids - kids:  # a key withdrawn from the published set is withdrawn here too
+            self.remove_key(gone)
+        self._url_kids = kids
+        return True
+
+    def _add_document(self, text: str, source: str) -> set[str] | None:
+        try:
+            document = json.loads(text)
+            keys = document.get("keys") if isinstance(document, dict) else document
+            if not isinstance(keys, list) or not keys:
+                raise ValueError("no 'keys' array")
+            parsed = [(jwk_to_public_key(jwk), jwk.get("kid")) for jwk in keys]
+        except Exception as exc:
+            logger.warning("%s: not a usable JWKS (%s); no key is trusted from it", source, exc)
+            return None
+        kids: set[str] = set()
+        for public, key_id in parsed:
+            kids.add(self.add_public_key(public, kid=key_id))
+        return kids
+
+    def key_count(self) -> int:
+        with self._lock:
+            return len(self._keys_by_kid)
+
     def get_key(self, kid: str | None = None) -> ed25519.Ed25519PublicKey | None:
         with self._lock:
-            if kid and kid in self._keys_by_kid:
-                return self._keys_by_kid[kid]
+            if kid:
+                return self._keys_by_kid.get(kid)  # a named key that is not declared is not trusted
             if len(self._keys_by_kid) == 1:
                 return next(iter(self._keys_by_kid.values()))
             return self._default_key
@@ -310,9 +450,14 @@ class ActorAssertionVerifier:
             raise ActorAssertionError(f"Invalid algorithm '{alg}': only EdDSA is permitted", code="invalid_algorithm")
 
         kid = unverified_header.get("kid")
+        self.registry.refresh_from_environment(kid)
         pub_key = self.registry.get_key(kid)
         if pub_key is None:
-            raise ActorAssertionError(f"Unknown or untrusted signing key kid '{kid}'", code="unknown_key")
+            raise ActorAssertionError(
+                f"Unknown or untrusted signing key kid '{kid}': declare its public key in ARCHINEX_JWKS, ARCHINEX_JWKS_FILE or "
+                "ARCHINEX_JWKS_URL",
+                code="unknown_key",
+            )
 
         decode_options: dict[str, Any] = {
             "verify_signature": True,
@@ -324,6 +469,7 @@ class ActorAssertionVerifier:
         issuer = expected_issuer or os.getenv("ARCHINEX_ISSUER", DEFAULT_ISSUER)
         audience = expected_audience or os.getenv("ARCHINEX_AUDIENCE", DEFAULT_AUDIENCE)
 
+        skew = clock_skew_seconds()
         try:
             payload = jwt.decode(
                 token,
@@ -331,6 +477,7 @@ class ActorAssertionVerifier:
                 algorithms=["EdDSA"],
                 issuer=issuer,
                 audience=audience,
+                leeway=skew,
                 options=cast(Any, decode_options),
             )
         except jwt.ExpiredSignatureError as e:
@@ -346,6 +493,15 @@ class ActorAssertionVerifier:
         if not jti:
             raise ActorAssertionError("Assertion lacks mandatory 'jti' anti-replay claim", code="missing_jti")
 
+        # A long-lived assertion is a bearer secret: the lifetime is bounded, not left to the signer.
+        exp_claim = float(payload["exp"])
+        issued = float(payload.get("iat") or payload.get("nbf") or time.time())
+        max_ttl = max_ttl_seconds()
+        if exp_claim - issued > max_ttl:
+            raise ActorAssertionError(
+                f"Assertion lifetime {int(exp_claim - issued)} s exceeds the {max_ttl} s the Hub accepts", code="lifetime_too_long"
+            )
+
         handle = payload.get("handle") or (payload.get("sub") if str(payload.get("sub", "")).startswith("@") else None)
         email = payload.get("email") or (payload.get("sub") if "@" in str(payload.get("sub", "")) else None)
 
@@ -356,7 +512,8 @@ class ActorAssertionVerifier:
 
         # Anti-replay check
         if check_replay:
-            exp = float(payload.get("exp", time.time() + DEFAULT_EXP_SECONDS))
+            # Kept until the clock tolerance is over too, or a token accepted late could be replayed once forgotten.
+            exp = float(payload.get("exp", time.time() + DEFAULT_EXP_SECONDS)) + skew
             if not self.replay_store.record_jti(jti, exp=exp):
                 raise ActorAssertionError(f"Replay detected: token jti '{jti}' has already been used", code="replay_detected")
 

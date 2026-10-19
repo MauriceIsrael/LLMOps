@@ -63,6 +63,10 @@ REQ-004: The solution shall support geo-redundant deployment across two data cen
 REVIEWER_TOKEN = "contract-reviewer-token"
 ACTOR_EMAIL = "contract-expert@example.org"
 DELEGATED = {"Authorization": f"Bearer {REVIEWER_TOKEN}", "X-Actor-Email": ACTOR_EMAIL}
+# A second expert, owner of the domain the ingestion row belongs to: the maintainer who applies an ingestion is not the one who
+# decided its mandatory rows (contract 1.39, issue #91).
+DECIDER_EMAIL = "contract-decider@example.org"
+DECIDER = {"Authorization": f"Bearer {REVIEWER_TOKEN}", "X-Actor-Email": DECIDER_EMAIL}
 SAMPLE_CANDIDATE = {
     "kind": "rex",
     "title": "Contract freeze return of experience",
@@ -597,7 +601,7 @@ def build_catalogue() -> list[Interface]:
         _rest("PATCH", "/api/frameworks/ingestions/{ingestion_id}/rows/{requirement_id}",
               "/api/frameworks/ingestions/{ingestion}/rows/NIS2-ART21-2A", json_body={"decision": "accept",
                                                                                     "comment": "Contract freeze"},
-              headers=DELEGATED, delegate=True),
+              headers=DECIDER, delegate=True),
         _rest("POST", "/api/frameworks/ingestions/{ingestion_id}/apply", "/api/frameworks/ingestions/{ingestion}/apply",
               headers=DELEGATED, delegate=True),
         _rest("POST", "/api/frameworks/{framework}/coverage-declaration", "/api/frameworks/RGPD/coverage-declaration",
@@ -760,6 +764,7 @@ def isolated_environment() -> Iterator[Any]:
         registry = load_owners_file(server_config.kb_dir)
         registry.owners["@maintainers"] = replace(registry.owner("@maintainers"), email=ACTOR_EMAIL,
                                                    roles=("kb:maintain", "kb:admin"))
+        registry.owners["@security-compliance-team"] = replace(registry.owner("@security-compliance-team"), email=DECIDER_EMAIL)
         save_registry(registry)
         from pipelines.governance.evals import EvalStore
 

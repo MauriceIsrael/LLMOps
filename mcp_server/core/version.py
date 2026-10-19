@@ -164,7 +164,7 @@ Minor versions only add interfaces or optional fields:
   ``expand_clause_terms``), and RFP coverage blind spots analytics ``GET /api/rfp/coverage-gaps``, ``POST /api/rfp/coverage-gaps`` (MCP tool
   ``get_rfp_coverage_gaps``, and ``coverage_gaps`` in compliance matrix). K17 decision subject verification fix for matched controls (issue #127).
 * ``1.37`` — expert authentication and fine-grained RBAC for KB governance (issue #7): EdDSA (Ed25519) signed actor assertions with published
-  JWKS (RFC 8037) replacing static tokens, anti-replay protection with mandatory unique ``jti``, immediate token and actor revocation (JTI, handle, email),
+  JWKS (RFC 8037) alongside the static tokens, anti-replay protection with mandatory unique ``jti``, immediate token and actor revocation (JTI, handle, email),
   domain-scoped roles, temporary delegations lifecycle (``kb:review``, ``kb:evaluate``), strict separation of duties (authors cannot review/self-validate
   their contributions), and access audit logging (``kb_access_audit``). MCP tools: ``list_kb_delegations``, ``create_kb_delegation``,
   ``revoke_kb_delegation``, ``revoke_kb_auth``, ``get_kb_audit``. REST routes: ``GET /.well-known/jwks.json``, ``GET|POST /api/knowledge/delegations``,
@@ -173,10 +173,17 @@ Minor versions only add interfaces or optional fields:
   framework (``max_items`` caps the other doctrine; ``required_total`` and ``omitted_required`` in the response), and the knowledge
   health reports whether the compiled graph the judge reads still describes the knowledge base files (``compiled_base``; ``kb check``
   on the command line). Assets in the graph carry the fingerprint of their whole source file (``file_sha256``).
+* ``1.39`` — identity and rights of the people who act (issues #144, #90, #91). Strict identity mode ``LLMOPS_REQUIRE_SIGNED_ACTOR``: the raw
+  ``X-Actor-Email`` header is refused (401 ``signed_actor_required``, audited) and only a signed assertion names a person. The trusted public keys are
+  declared by ``ARCHINEX_JWKS``, ``ARCHINEX_JWKS_FILE`` or ``ARCHINEX_JWKS_URL`` (fail closed; a named ``kid`` that is not declared is ``unknown_key``);
+  an assertion lives at most ``ARCHINEX_ASSERTION_MAX_TTL`` seconds (default 900, ``lifetime_too_long``) with a clock tolerance of
+  ``ARCHINEX_CLOCK_SKEW`` seconds (default 30). ``POST /api/frameworks/{fw}/coverage-declaration`` requires the owner of the framework's primary domain
+  (or ``kb:maintain``, or the review role on that domain) and is audited. Applying a framework ingestion refuses (409 ``separation_of_duties``) the
+  mandatory controls the applying maintainer decided. No route is added.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.38"
+CONTRACT_VERSION = "1.39"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 
