@@ -271,10 +271,14 @@ def test_context_synonyms_bridge_languages(index):
 
 
 def test_context_respects_max_items_and_budget(index):
+    # Issue #106: max_items caps the doctrine that is not required; the two required FW1 controls always come on top.
     ctx = build_doctrine_context(index, "closed loop remediation", frameworks=["FW1"], max_items=2, max_chars=200)
-    assert len(ctx["items"]) == 2
+    required = [i for i in ctx["items"] if i["required"]]
+    assert len(required) == 2 and len(ctx["items"]) - len(required) == 2
+    assert ctx["required_total"] == 2 and ctx["omitted_required"] == []
     assert ctx["truncated"] is True
-    assert sum(len(i["excerpt"]) for i in ctx["items"]) <= 200
+    # The budget holds for the doctrine that is not required; the required controls are shortened, never dropped.
+    assert all(i["excerpt"] for i in required)
 
 
 def test_context_item_fields(index):

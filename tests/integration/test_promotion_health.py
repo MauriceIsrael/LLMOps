@@ -143,6 +143,9 @@ def test_health_indicators(env):
     assert health["assets"]["active"] > 30 and health["assets"]["by_type"]["principle"] > 0
     assert health["assets"]["unvalidated"]["count"] > 0
     assert health["clauses"]["total"] > 0 and 0 <= health["clauses"]["unassessed_verdict_share"] <= 1
+    # Issue #85 (contract 1.38): the report on the compiled graph is there. The committed graph may predate the file
+    # fingerprint (``unverified``); it must never be reported ``stale`` for the files it was built from.
+    assert health["compiled_base"]["status"] in ("ok", "unverified") and health["compiled_base"]["files"] > 30
     assert health["coverage"]["NIS2"]["status"] in ("partial", "covered", "missing")
     assert health["queue"]["by_status"]["in_review"] == 1
     assert health["queue"]["per_owner"]["@core-owner-architecture"]["oldest_business_days"] >= 10

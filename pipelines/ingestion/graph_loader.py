@@ -46,13 +46,14 @@ class LadybugGraphLoader:
                     terms STRING,
                     checks STRING,
                     checks_status STRING,
+                    file_sha256 STRING,
                     PRIMARY KEY (id)
                 );
                 """
             )
         else:
             for col in ("phase", "domain", "version", "markdown_content", "sha256", "external_ref",
-                        "terms", "checks", "checks_status"):
+                        "terms", "checks", "checks_status", "file_sha256"):
                 try:
                     self.store.execute_cypher(f"ALTER TABLE Asset ADD {col} STRING;")
                 except Exception:
@@ -98,13 +99,14 @@ class LadybugGraphLoader:
                     terms STRING,
                     checks STRING,
                     checks_status STRING,
+                    file_sha256 STRING,
                     PRIMARY KEY (id)
                 );
                 """
             )
         else:
             for col in ("framework", "version", "domain", "severity", "target_entities", "external_ref", "markdown_content",
-                        "source_path", "confidence", "phase", "terms", "checks", "checks_status"):
+                        "source_path", "confidence", "phase", "terms", "checks", "checks_status", "file_sha256"):
                 try:
                     self.store.execute_cypher(f"ALTER TABLE Control ADD {col} STRING;")
                 except Exception:
@@ -152,7 +154,8 @@ class LadybugGraphLoader:
                     c.phase = $phase,
                     c.terms = $terms,
                     c.checks = $checks,
-                    c.checks_status = $checks_status;
+                    c.checks_status = $checks_status,
+                    c.file_sha256 = $file_sha256;
                 """
                 self.store.execute_cypher(
                     query,
@@ -173,6 +176,7 @@ class LadybugGraphLoader:
                         "terms": str(props.get("terms", "")),
                         "checks": str(props.get("checks", "")),
                         "checks_status": str(props.get("checks_status", "")),
+                        "file_sha256": str(props.get("file_sha256", "")),
                     },
                 )
             else:
@@ -208,7 +212,8 @@ class LadybugGraphLoader:
                     a.external_ref = $external_ref,
                     a.terms = $terms,
                     a.checks = $checks,
-                    a.checks_status = $checks_status;
+                    a.checks_status = $checks_status,
+                    a.file_sha256 = $file_sha256;
                 """
                 self.store.execute_cypher(
                     query,
@@ -230,6 +235,7 @@ class LadybugGraphLoader:
                         "terms": str(props.get("terms", "")),
                         "checks": str(props.get("checks", "")),
                         "checks_status": str(props.get("checks_status", "")),
+                        "file_sha256": str(props.get("file_sha256", "")),
                     },
                 )
 

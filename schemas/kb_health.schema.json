@@ -119,6 +119,43 @@
               ]
             }
           }
+        },
+        "compiled_base": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Contract 1.38 (issue #85): does the compiled graph, which the option judge reads, describe the knowledge base files? null if the check could not run.",
+          "properties": {
+            "status": {
+              "enum": [
+                "ok",
+                "stale",
+                "unverified"
+              ]
+            },
+            "files": {
+              "type": "integer"
+            },
+            "assets_in_base": {
+              "type": "integer"
+            },
+            "changed_since_build": {
+              "type": "object"
+            },
+            "not_in_base": {
+              "type": "object"
+            },
+            "removed_from_files": {
+              "type": "object"
+            },
+            "unverified": {
+              "type": "object"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
         }
       }
     }
