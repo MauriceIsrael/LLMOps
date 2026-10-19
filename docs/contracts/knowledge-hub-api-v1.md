@@ -1200,6 +1200,33 @@ L'exigence est portée par le sujet (1.27), la décision est celle de ce sujet e
 - La matrice de conformité produite par `build_compliance_matrix` inclut désormais le bloc `coverage_gaps`.
 - Synthèse des angles morts (`blind_spots`) par section et catégorie thématique, identification des lacunes critiques (`critical_gaps`), et recommandations de référentiels et domaines à ingérer.
 
+### 5.37 Contrat 1.37 — Authentification des experts, assertions signées EdDSA et RBAC fin pour la gouvernance KB (Issue #7)
+
+**1. Assertion d'acteur cryptographique EdDSA (Ed25519) et registre JWKS**
+- Remplace l'en-tête brut `X-Actor-Email` par une assertion signée asymétrique (`X-Actor-Token` ou `X-Actor-Assertion`) émise par Archinex ou un IdP de confiance.
+- Publication des clés publiques au format RFC 8037 (`OKP` / `Ed25519`) sur le point d'accès standard `GET /.well-known/jwks.json`.
+- Vérification cryptographique dynamique (`ActorAssertionVerifier`) avec extraction sécurisée de l'identité (`handle`, `email`), des rôles globaux (`roles`), des rôles restreints par domaine (`domain_roles`) et des délégations (`delegation`).
+
+**2. Protection anti-rejeu et révocation immédiate**
+- Chaque assertion d'acteur porte obligatoirement un identifiant unique `jti` (anti-rejeu). Toute tentative de réutilisation d'un même `jti` avant expiration est rejetée avec un code HTTP 403 (`replay_detected`).
+- Révocation immédiate disponible via l'endpoint REST `POST /api/knowledge/auth/revoke` (outil MCP `revoke_kb_auth`) : révocation de jeton par `jti` ou exclusion administrative par `handle` ou `email` d'expert (`token_revoked`).
+
+**3. RBAC fin et cycle de vie des délégations temporaires**
+- Rôles par périmètre/domaine : attribution de privilèges de revue (`kb:review`) ou d'évaluation (`kb:evaluate`) restreints à des motifs hiérarchiques (`architecture/*`, `security/*`).
+- Gestion des délégations temporaires avec date de fin obligatoire (`expires_at`) :
+  - `GET /api/knowledge/delegations` (outil MCP `list_kb_delegations`)
+  - `POST /api/knowledge/delegations` (outil MCP `create_kb_delegation`)
+  - `POST /api/knowledge/delegations/{delegation_id}/revoke` (outil MCP `revoke_kb_delegation`)
+- Un expert ne peut déléguer que des domaines qu'il possède dans le registre `domain_owners` ou s'il détient le rôle `kb:maintain`.
+
+**4. Séparation stricte des tâches (Separation of Duties)**
+- Règle formelle : l'auteur d'un candidat ne peut ni réviser ni auto-valider sa propre contribution.
+- Le rejet `separation_of_duties` (HTTP 403, `CandidateForbiddenError`) est levé si le `reviewer` tente d'émettre une action (`accept`, `amend`, `reject`) sur un candidat dont il est l'auteur (`handle` ou adresse e-mail concordante).
+
+**5. Journal d'audit d'accès et de gouvernance**
+- Table dédiée `kb_access_audit` traçant chaque opération de gouvernance (`login`, `review`, `delegation`, `revocation`) avec l'acteur, le résultat (`allowed`, `denied`), la ressource et l'empreinte `jti`.
+- Consultation via `GET /api/knowledge/audit` (outil MCP `get_kb_audit`, requiert le scope `kb:review`).
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

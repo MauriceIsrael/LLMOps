@@ -1,0 +1,25 @@
+{
+  "interface": "mcp.revoke_kb_delegation",
+  "shape": {
+    "keys": {
+      "data": {
+        "type": [
+          "null"
+        ]
+      },
+      "id": {
+        "type": [
+          "string"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

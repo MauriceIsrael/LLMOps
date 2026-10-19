@@ -2,7 +2,7 @@
   "status": "ok",
   "count": 1,
   "data": {
-    "schema_version": "1.36",
+    "schema_version": "1.37",
     "knowledge": {
       "dataset": "data/knowledge.lbug",
       "node_counts": {
@@ -11,6 +11,15 @@
       }
     },
     "engagements": [
+      {
+        "id": "default",
+        "dataset": "data/engagements/default.lbug",
+        "node_counts": {
+          "Subject": 0,
+          "Statement": 0,
+          "Conflict": 0
+        }
+      },
       {
         "id": "default-project",
         "dataset": "data/engagements/default-project.lbug",

@@ -374,6 +374,13 @@ def build_catalogue() -> list[Interface]:
         # Contract 1.36 — governance freshness & RFP coverage gaps
         _mcp("get_kb_freshness", lambda: _as_reviewer(lambda: kn.get_kb_freshness(), delegate=True)),
         _mcp("get_rfp_coverage_gaps", lambda: kn.get_rfp_coverage_gaps(engagement=demo)),
+        # Contract 1.37 — expert auth and RBAC (issue #7)
+        _mcp("list_kb_delegations", lambda: _as_reviewer(lambda: kn.list_kb_delegations(), delegate=True)),
+        _mcp("create_kb_delegation", lambda: _as_reviewer(lambda: kn.create_kb_delegation(
+            "@ciso-office", ["architecture/*"], ["kb:review"], "2030-01-01T00:00:00Z"), delegate=True)),
+        _mcp("revoke_kb_delegation", lambda: _as_reviewer(lambda: kn.revoke_kb_delegation("del-dummy"), delegate=True)),
+        _mcp("revoke_kb_auth", lambda: _as_reviewer(lambda: kn.revoke_kb_auth("dummy-jti", is_jti=True), delegate=True)),
+        _mcp("get_kb_audit", lambda: _as_reviewer(lambda: kn.get_kb_audit(), delegate=True)),
         # --- MCP Engagement ------------------------------------------------
         _mcp("get_subject", lambda: eng.get_subject("mcx-services", engagement=demo)),
         _mcp("get_subject_trajectory", lambda: eng.get_subject_trajectory("mcx-services", engagement=demo)),
@@ -631,8 +638,11 @@ def build_catalogue() -> list[Interface]:
               "/api/knowledge/verdict-feedback/{feedback}/convert", json_body={"to": "dismiss"},
               headers=DELEGATED, delegate=True),
         _rest("PUT", "/api/knowledge/owners", json_body={
-            "owners": [{"handle": "@maintainers", "email": ACTOR_EMAIL, "roles": ["kb:maintain", "kb:admin"]}],
-            "domains": {}, "default_owner": "@maintainers"}, headers=DELEGATED, delegate=True),
+            "owners": [
+                {"handle": "@maintainers", "email": ACTOR_EMAIL, "roles": ["kb:maintain", "kb:admin"]},
+                {"handle": "@ciso-office", "email": "ciso@example.org", "roles": ["kb:evaluate", "kb:review"]},
+            ],
+            "domains": {"security": "@ciso-office"}, "default_owner": "@maintainers"}, headers=DELEGATED, delegate=True),
         # Contract 1.11 — similarity evaluation (FR/EN dataset, vectors supplied by the client)
         _rest("GET", "/api/knowledge/similarity-evals/{dataset}", "/api/knowledge/similarity-evals/similarity_v1",
               headers=DELEGATED, delegate=True),
@@ -651,6 +661,17 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/knowledge/publications", headers=DELEGATED, delegate=True),
         _rest("GET", "/api/knowledge/assets/{asset_id}/history", "/api/knowledge/assets/P-002/history",
               headers=DELEGATED, delegate=True),
+        # Contract 1.37 — expert auth and RBAC (issue #7)
+        _rest("GET", "/.well-known/jwks.json"),
+        _rest("GET", "/api/knowledge/delegations", headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/delegations", json_body={
+            "delegate": "@ciso-office", "domains": ["architecture/*"], "roles": ["kb:review"], "expires_at": "2030-01-01T00:00:00Z"
+        }, headers=DELEGATED, delegate=True, remember="freeze_del"),
+        _rest("POST", "/api/knowledge/delegations/{delegation_id}/revoke", "/api/knowledge/delegations/{freeze_del}/revoke",
+              headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/auth/revoke", json_body={"identifier": "freeze-jti-1", "is_jti": True},
+              headers=DELEGATED, delegate=True),
+        _rest("GET", "/api/knowledge/audit", headers=DELEGATED, delegate=True),
     ]
 
 

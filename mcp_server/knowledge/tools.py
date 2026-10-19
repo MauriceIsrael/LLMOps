@@ -1166,17 +1166,23 @@ def _candidate_service():
 def _actor() -> str:
     """Identity for the candidate history, without ever recording a raw token.
 
-    A person acting through a delegating client (``X-Actor-Email`` with a ``kb:delegate``
-    token) is recorded by owner handle, or by e-mail when not in the registry.
+    A person acting through a signed assertion or delegating client (``X-Actor-Token`` or
+    ``X-Actor-Email`` with a ``kb:delegate`` token) is recorded by owner handle, or by e-mail
+    when not in the registry.
     """
     import hashlib
 
-    from mcp_server.core.auth import delegated_actor_email, get_current_caller
+    from mcp_server.core.auth import delegated_actor_email, get_current_caller, resolve_actor
+
+    actor = resolve_actor()
+    if actor:
+        return actor.handle if actor.handle else (f"email:{actor.email}" if actor.email else "unknown")
 
     email = delegated_actor_email()
     if email:
         owner = _candidate_service().owners().by_email(email)
         return owner.handle if owner else f"email:{email}"
+
     caller = get_current_caller() or "anonymous"
     if caller in ("server_admin", "system", "admin", "default_user", "local_dev", "anonymous"):
         return caller
@@ -1299,19 +1305,45 @@ def review_kb_candidate(
     if not has_scope(REVIEW_SCOPE):
         return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required to review candidates."}
     try:
-        email = delegated_actor_email()
-        if email:
-            # The reviewer is the person the client acts for, never a free field (plan governance §3.1).
+        from mcp_server.core.auth import (
+            delegated_actor_email,
+            require_distinct_reviewer,
+            resolve_actor,
+        )
+
+        actor = resolve_actor()
+        if actor:
             service = _candidate_service()
-            owner = service.owners().by_email(email)
-            if owner is None:
-                return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
-            if (reviewer or "").strip() not in ("", owner.handle):
+            registry = service.owners()
+            owner = registry.owners.get(actor.handle)
+            if owner is None and actor.email:
+                owner = registry.by_email(actor.email)
+            if owner is None and actor.auth_method != "assertion":
+                return {"status": "unauthorized", "reason": f"'{actor.email or actor.handle}' is not a registered expert."}
+            if (reviewer or "").strip() not in ("", actor.handle):
                 return {"status": "unauthorized", "reason": "'reviewer' does not match the authenticated expert."}
-            reviewer = owner.handle
-            if not service.may_review(owner.handle, service.get(candidate_id)):
+            reviewer = actor.handle
+            candidate = service.get(candidate_id)
+            require_distinct_reviewer(reviewer, candidate, reviewer_email=actor.email)
+            if not service.may_review(actor.handle, candidate):
                 return {"status": "unauthorized",
-                        "reason": f"{owner.handle} does not own the domain of this candidate and is not assigned to it."}
+                        "reason": f"{actor.handle} does not own the domain of this candidate and is not assigned to it."}
+        else:
+            email = delegated_actor_email()
+            if email:
+                service = _candidate_service()
+                owner = service.owners().by_email(email)
+                if owner is None:
+                    return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
+                if (reviewer or "").strip() not in ("", owner.handle):
+                    return {"status": "unauthorized", "reason": "'reviewer' does not match the authenticated expert."}
+                reviewer = owner.handle
+                candidate = service.get(candidate_id)
+                require_distinct_reviewer(reviewer, candidate, reviewer_email=email)
+                if not service.may_review(owner.handle, candidate):
+                    return {"status": "unauthorized",
+                            "reason": f"{owner.handle} does not own the domain of this candidate and is not assigned to it."}
+
         reviewed = _candidate_service().review(
             candidate_id, action, reviewer, reason=reason, amended_content=amended_content, actor=_actor()
         )
@@ -1325,35 +1357,60 @@ def review_kb_candidate(
 
 
 def get_kb_me() -> dict[str, Any]:
-    """Expert the calling client acts for (contract 1.4).
+    """Expert the calling client acts for (contract 1.4 / 1.37).
 
-    Requires a token with the 'kb:delegate' scope and an ``X-Actor-Email`` header naming an
-    expert of the registry. Returns the handle, e-mail, KB roles, owned domains and the number
-    of candidates waiting for this expert's review.
+    Requires an assertion token (X-Actor-Token) or a token with the 'kb:delegate' scope and an
+    ``X-Actor-Email`` header naming an expert of the registry. Returns the handle, e-mail, KB roles,
+    domain roles, active delegations, owned domains and the number of candidates waiting for review.
     """
-    from mcp_server.core.auth import delegated_actor_email
+    from mcp_server.core.auth import delegated_actor_email, resolve_actor
+    from pipelines.governance.rbac import get_delegation_store
 
     try:
-        email = delegated_actor_email()
-        if not email:
-            return {"status": "unauthorized",
-                    "reason": "No acting expert: send X-Actor-Email with a token carrying the 'kb:delegate' scope."}
+        actor = resolve_actor()
+        if not actor:
+            email = delegated_actor_email()
+            if not email:
+                return {"status": "unauthorized",
+                        "reason": "No acting expert: send X-Actor-Email or X-Actor-Token with a token carrying the 'kb:delegate' scope."}
+            service = _candidate_service()
+            registry = service.owners()
+            owner = registry.by_email(email)
+            if owner is None:
+                return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
+            pending = [
+                c for c in service.find(status="in_review")
+                if registry.can_review(owner.handle, c.get("domain") or [])
+                and (c.get("review") or {}).get("reviewer") != owner.handle
+            ]
+            return ok_response({
+                "handle": owner.handle,
+                "email": owner.email,
+                "kb_roles": sorted({"kb:review", *owner.roles}),
+                "owned_domains": registry.owned_domains(owner.handle),
+                "pending_reviews": len(pending),
+            }, count=1)
+
         service = _candidate_service()
         registry = service.owners()
-        owner = registry.by_email(email)
-        if owner is None:
-            return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
+        owner = registry.owners.get(actor.handle)
+        roles = sorted({"kb:review", *actor.roles, *(owner.roles if owner else ())})
+        owned_domains = registry.owned_domains(actor.handle)
+        delegations = get_delegation_store().list_delegations(delegate=actor.handle, active_only=True)
         pending = [
             c for c in service.find(status="in_review")
-            if registry.can_review(owner.handle, c.get("domain") or [])
-            and (c.get("review") or {}).get("reviewer") != owner.handle
+            if service.may_review(actor.handle, c)
+            and (c.get("review") or {}).get("reviewer") != actor.handle
         ]
         return ok_response({
-            "handle": owner.handle,
-            "email": owner.email,
-            "kb_roles": sorted({"kb:review", *owner.roles}),
-            "owned_domains": registry.owned_domains(owner.handle),
+            "handle": actor.handle,
+            "email": actor.email,
+            "kb_roles": roles,
+            "domain_roles": actor.domain_roles,
+            "owned_domains": owned_domains,
+            "active_delegations": delegations,
             "pending_reviews": len(pending),
+            "auth_method": actor.auth_method,
         }, count=1)
     except Exception as e:
         return handle_exception_response(e, context_action="get_kb_me")
@@ -1375,16 +1432,28 @@ def _governance_error(exc: Exception) -> dict[str, Any]:
 
 def _acting_expert(need_review_scope: bool = True) -> tuple[Any, Any] | dict[str, Any]:
     """(service, owner) of the acting expert, or an ``unauthorized`` envelope."""
-    from mcp_server.core.auth import delegated_actor_email, has_scope
+    from mcp_server.core.auth import delegated_actor_email, has_scope, resolve_actor
+    from pipelines.kb_candidates.owners import Owner
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if need_review_scope and not has_scope(REVIEW_SCOPE):
         return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+
+    actor = resolve_actor()
+    service = _candidate_service()
+    if actor:
+        owner = service.owners().owners.get(actor.handle)
+        if owner is None:
+            if actor.email:
+                owner = service.owners().by_email(actor.email)
+            if owner is None:
+                owner = Owner(handle=actor.handle, email=actor.email, roles=actor.roles)
+        return service, owner
+
     email = delegated_actor_email()
     if not email:
         return {"status": "unauthorized",
-                "reason": "No acting expert: send X-Actor-Email with a token carrying the 'kb:delegate' scope."}
-    service = _candidate_service()
+                "reason": "No acting expert: send X-Actor-Email or X-Actor-Token with a token carrying the 'kb:delegate' scope."}
     owner = service.owners().by_email(email)
     if owner is None:
         return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
@@ -2741,3 +2810,151 @@ def merge_fact_key_candidate(candidate_id: str, into: str, reviewer: str, reason
                 for c in service.find() if c.get("asset_type") == "trigger" and c["status"] in ("checks_failed", "in_review")
                 and key in rule_candidates.keys_of(c["proposed_content"])]
     return ok_response({"candidate": res["data"], "merged_into": into, "affected_rules": affected}, count=len(affected))
+
+
+# ---------------------------------------------------------------------------
+# Fine-grained RBAC, delegation, and access audit (issue #7, contract 1.37)
+# ---------------------------------------------------------------------------
+
+def list_kb_delegations(
+    delegate: str | None = None,
+    delegator: str | None = None,
+    active_only: bool = True,
+) -> dict[str, Any]:
+    """List domain ownership and review delegations (requires 'kb:review')."""
+    from mcp_server.core.auth import has_scope, resolve_actor
+    from pipelines.governance.rbac import get_delegation_store
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+
+    actor = resolve_actor()
+    target_delegate = delegate or (actor.handle if actor and not delegator else None)
+    store = get_delegation_store()
+    items = store.list_delegations(delegate=target_delegate, delegator=delegator, active_only=active_only)
+    return ok_response({"delegations": items}, count=len(items))
+
+
+def create_kb_delegation(
+    delegate: str,
+    domains: list[str],
+    roles: list[str],
+    expires_at: str,
+    starts_at: str | None = None,
+) -> dict[str, Any]:
+    """Delegate review rights and domain ownership temporarily to another expert.
+
+    The delegator is the acting expert (contract 1.37).
+    """
+    from mcp_server.core.auth import resolve_actor
+    from pipelines.governance.rbac import get_delegation_store
+
+    actor = resolve_actor()
+    if not actor:
+        return {
+            "status": "unauthorized",
+            "reason": "An acting expert is required: provide X-Actor-Token or X-Actor-Email.",
+        }
+
+    if not isinstance(delegate, str) or not delegate.strip().startswith("@"):
+        return invalid_argument_response("delegate", "'delegate' must be an owner handle starting with '@'.")
+    if not isinstance(domains, list) or not domains:
+        return invalid_argument_response("domains", "'domains' must be a non-empty list of domain patterns.")
+    if not isinstance(roles, list) or not roles:
+        return invalid_argument_response("roles", "'roles' must be a non-empty list of KB roles.")
+    if not isinstance(expires_at, str) or not expires_at.strip():
+        return invalid_argument_response("expires_at", "'expires_at' ISO timestamp is required.")
+
+    service = _candidate_service()
+    registry = service.owners()
+    if delegate.strip() not in registry.owners:
+        return invalid_argument_response("delegate", f"'{delegate}' is not a registered expert.")
+
+    # Expert can only delegate domains they own or if they have kb:maintain
+    if "kb:maintain" not in actor.roles:
+        unowned = [d for d in domains if not registry.can_review(actor.handle, [d])]
+        if unowned:
+            return {"status": "unauthorized", "reason": f"You do not own domain(s): {unowned}"}
+
+    store = get_delegation_store()
+    rec = store.create_delegation(
+        delegator=actor.handle,
+        delegate=delegate,
+        domains=domains,
+        roles=roles,
+        expires_at=expires_at,
+        starts_at=starts_at,
+        created_by=actor.handle,
+    )
+    return ok_response(rec, count=1)
+
+
+def revoke_kb_delegation(delegation_id: str) -> dict[str, Any]:
+    """Revoke an active delegation immediately (delegator or kb:maintain)."""
+    from mcp_server.core.auth import resolve_actor
+    from pipelines.governance.rbac import get_delegation_store
+
+    actor = resolve_actor()
+    if not actor:
+        return {
+            "status": "unauthorized",
+            "reason": "An acting expert is required: provide X-Actor-Token or X-Actor-Email.",
+        }
+
+    store = get_delegation_store()
+    delegations = store.list_delegations(active_only=False)
+    target = next((d for d in delegations if d["id"] == delegation_id), None)
+    if not target:
+        return not_found_response(delegation_id)
+
+    if "kb:maintain" not in actor.roles and target["delegator"] != actor.handle:
+        return {"status": "unauthorized", "reason": "Only the delegator or a maintainer can revoke this delegation."}
+
+    success = store.revoke_delegation(delegation_id, revoked_by=actor.handle)
+    return ok_response({"revoked": success, "id": delegation_id}, count=1 if success else 0)
+
+
+def revoke_kb_auth(identifier: str, reason: str = "revoked by admin", is_jti: bool = False) -> dict[str, Any]:
+    """Immediately revoke a token JTI or an expert handle/email (requires 'kb:admin' or 'kb:maintain')."""
+    from mcp_server.core.assertion import get_revocation_store
+    from mcp_server.core.auth import resolve_actor
+
+    actor = resolve_actor()
+    if not actor or not ({"kb:admin", "kb:maintain"} & set(actor.roles)):
+        return {"status": "unauthorized", "reason": "Requires 'kb:admin' or 'kb:maintain' role."}
+
+    store = get_revocation_store()
+    if is_jti:
+        store.revoke_jti(identifier.strip(), reason=reason)
+    else:
+        store.revoke_actor(identifier.strip(), reason=reason)
+
+    return ok_response({"revoked": True, "identifier": identifier, "reason": reason}, count=1)
+
+
+def get_kb_audit(
+    actor: str | None = None,
+    action: str | None = None,
+    outcome: str | None = None,
+    limit: int = 100,
+) -> dict[str, Any]:
+    """Query the governance access audit log (requires 'kb:review')."""
+    from mcp_server.core.auth import has_scope
+    from pipelines.governance.audit import get_governance_audit
+    from pipelines.kb_candidates.service import REVIEW_SCOPE
+
+    if not has_scope(REVIEW_SCOPE):
+        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+
+    audit = get_governance_audit()
+    records = audit.query(actor=actor, action=action, outcome=outcome, limit=limit)
+    return ok_response({"events": records}, count=len(records))
+
+
+def get_jwks() -> dict[str, Any]:
+    """Return published JWKS public keys for verifying EdDSA actor assertions."""
+    from mcp_server.core.assertion import get_jwks_registry
+
+    jwks = get_jwks_registry().to_jwks()
+    return ok_response(jwks, count=len(jwks.get("keys", [])))

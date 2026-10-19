@@ -1,7 +1,7 @@
 {
-  "snapshot_id": "snapshot-2026-10-18-ed01e7e",
-  "created_at": "2026-10-18T17:04:57Z",
-  "source_revision": "ed01e7e73e4b1a87d9c715afe85a3c8caaba1b50",
+  "snapshot_id": "snapshot-2026-10-19-9096ea3",
+  "created_at": "2026-10-19T05:41:29Z",
+  "source_revision": "9096ea38706f2cc665a3fa14c95556955b7bad77",
   "payload_sha256": "sha256:6815dce410638ddcc6865eae018377fb237d2a857b37eb642975c1fea0f99f61",
   "schema_version": "1.0",
   "emitter": "knowledge-hub",

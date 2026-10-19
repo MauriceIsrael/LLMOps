@@ -163,10 +163,16 @@ Minor versions only add interfaces or optional fields:
   ``GET /api/knowledge/freshness`` (MCP tool ``get_kb_freshness``), enriched bilingual glossary synonyms and clause term expansion (``expand_terms``,
   ``expand_clause_terms``), and RFP coverage blind spots analytics ``GET /api/rfp/coverage-gaps``, ``POST /api/rfp/coverage-gaps`` (MCP tool
   ``get_rfp_coverage_gaps``, and ``coverage_gaps`` in compliance matrix). K17 decision subject verification fix for matched controls (issue #127).
+* ``1.37`` — expert authentication and fine-grained RBAC for KB governance (issue #7): EdDSA (Ed25519) signed actor assertions with published
+  JWKS (RFC 8037) replacing static tokens, anti-replay protection with mandatory unique ``jti``, immediate token and actor revocation (JTI, handle, email),
+  domain-scoped roles, temporary delegations lifecycle (``kb:review``, ``kb:evaluate``), strict separation of duties (authors cannot review/self-validate
+  their contributions), and access audit logging (``kb_access_audit``). MCP tools: ``list_kb_delegations``, ``create_kb_delegation``,
+  ``revoke_kb_delegation``, ``revoke_kb_auth``, ``get_kb_audit``. REST routes: ``GET /.well-known/jwks.json``, ``GET|POST /api/knowledge/delegations``,
+  ``POST /api/knowledge/delegations/{id}/revoke``, ``POST /api/knowledge/auth/revoke``, ``GET /api/knowledge/audit``.
 
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.36"
+CONTRACT_VERSION = "1.37"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 
