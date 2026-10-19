@@ -2302,6 +2302,37 @@ def decide_check_clause(asset_id: str, check_id: str, decision: str, comment: st
         return handle_exception_response(e, context_action="decide_check_clause")
 
 
+def _compiled_base_status() -> dict[str, Any] | None:
+    """Issue #85: does the compiled graph describe the files? ``None`` if the check itself failed (never an exception)."""
+    from pipelines.kb_consistency import check_compiled_base
+
+    try:
+        client = _get_db()
+        return check_compiled_base(server_config.kb_dir, lambda q, p: client.execute_cypher(q, p))
+    except Exception:
+        return None
+
+
+def warn_if_compiled_base_is_not_current() -> dict[str, Any] | None:
+    """Log a clear warning at start when the compiled graph does not describe the knowledge base files (issue #85).
+
+    Reports only: the graph is never rebuilt here, a maintainer decides. Returns the report (``None`` if unchecked)."""
+    import logging
+
+    report = _compiled_base_status()
+    if report is None or report["status"] == "ok":
+        return report
+    log = logging.getLogger("mcp_server.knowledge")
+    if report["status"] == "stale":
+        changed = report["changed_since_build"]["count"] + report["not_in_base"]["count"] + report["removed_from_files"]["count"]
+        log.warning("STALE KNOWLEDGE GRAPH: %d asset(s) differ from the files (%s). %s", changed,
+                    ", ".join((report["changed_since_build"]["ids"] + report["not_in_base"]["ids"]
+                               + report["removed_from_files"]["ids"])[:8]), report["reason"])
+    else:
+        log.warning("UNVERIFIED KNOWLEDGE GRAPH: %s", report["reason"])
+    return report
+
+
 def get_kb_health() -> dict[str, Any]:
     """Health indicators of the knowledge base (requires 'kb:review'): assets by type and domain,
     unvalidated assets, draft clauses, coverage per framework, review queue age per owner, overdue
@@ -2313,7 +2344,8 @@ def get_kb_health() -> dict[str, Any]:
     if not has_scope(REVIEW_SCOPE):
         return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
     try:
-        report = kb_health(_candidate_service(), Path(server_config.kb_dir), Path("data/snapshots"))
+        report = kb_health(_candidate_service(), Path(server_config.kb_dir), Path("data/snapshots"),
+                           compiled_base=_compiled_base_status())
         return ok_response(report, count=1)
     except Exception as e:
         return handle_exception_response(e, context_action="get_kb_health")

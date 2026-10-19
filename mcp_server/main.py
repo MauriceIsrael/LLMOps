@@ -1805,6 +1805,9 @@ def create_starlette_app() -> Starlette:
 
 async def run_sse_authenticated(host: str, port: int) -> None:
     """Démarre le serveur SSE FastMCP enveloppé dans le middleware d'authentification."""
+    from mcp_server.knowledge.tools import warn_if_compiled_base_is_not_current
+
+    warn_if_compiled_base_is_not_current()  # issue #85: a stale graph is said at start, never rebuilt silently
     starlette_app = create_starlette_app()
     config = uvicorn.Config(
         starlette_app,

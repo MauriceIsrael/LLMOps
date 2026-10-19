@@ -169,6 +169,10 @@ Minor versions only add interfaces or optional fields:
   their contributions), and access audit logging (``kb_access_audit``). MCP tools: ``list_kb_delegations``, ``create_kb_delegation``,
   ``revoke_kb_delegation``, ``revoke_kb_auth``, ``get_kb_audit``. REST routes: ``GET /.well-known/jwks.json``, ``GET|POST /api/knowledge/delegations``,
   ``POST /api/knowledge/delegations/{id}/revoke``, ``POST /api/knowledge/auth/revoke``, ``GET /api/knowledge/audit``.
+* ``1.38`` — judge reliability (issues #106, #85), additive fields only: the doctrine context never drops a control of a required
+  framework (``max_items`` caps the other doctrine; ``required_total`` and ``omitted_required`` in the response), and the knowledge
+  health reports whether the compiled graph the judge reads still describes the knowledge base files (``compiled_base``; ``kb check``
+  on the command line). Assets in the graph carry the fingerprint of their whole source file (``file_sha256``).
 * ``1.39`` — identity and rights of the people who act (issues #144, #90, #91). Strict identity mode ``LLMOPS_REQUIRE_SIGNED_ACTOR``: the raw
   ``X-Actor-Email`` header is refused (401 ``signed_actor_required``, audited) and only a signed assertion names a person. The trusted public keys are
   declared by ``ARCHINEX_JWKS``, ``ARCHINEX_JWKS_FILE`` or ``ARCHINEX_JWKS_URL`` (fail closed; a named ``kid`` that is not declared is ``unknown_key``);

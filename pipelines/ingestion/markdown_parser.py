@@ -7,6 +7,8 @@ from typing import Any
 
 import yaml
 
+from pipelines.ingestion.discovery import file_digest
+
 
 class MarkdownDocParser:
     """Parser de document d'architecture (Markdown & YAML) avec validation stricte de l'identifiant."""
@@ -29,9 +31,13 @@ class MarkdownDocParser:
         content = path.read_text(encoding="utf-8")
 
         if path.suffix in (".yaml", ".yml"):
-            return self.parse_yaml_content(content, source_path=path.as_posix())
-
-        return self.parse_content(content, source_path=path.as_posix())
+            parsed = self.parse_yaml_content(content, source_path=path.as_posix())
+        else:
+            parsed = self.parse_content(content, source_path=path.as_posix())
+        if parsed is not None:
+            # Issue #85: the fingerprint of the whole file, which `kb check` compares with what the graph holds.
+            parsed["file_sha256"] = file_digest(content)
+        return parsed
 
     def parse_yaml_content(self, content: str, source_path: str = "") -> dict[str, Any] | None:
         """Parse un document purement YAML (.yaml / .yml)."""

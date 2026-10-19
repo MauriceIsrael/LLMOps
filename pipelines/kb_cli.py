@@ -17,6 +17,10 @@ Framework ingestion (plan L3):
     kb declare-coverage --framework NIS2 --by @expert
     kb coverage NIS2 ISO27001 ...
 
+Consistency of the compiled graph with the files (issue #85):
+
+    kb check [--strict]                 does data/knowledge.lbug describe data/kb? (the judge reads the graph, not the files)
+
 Local semantic search (issue #94):
 
     kb models fetch                     download the pinned embedding model into data/models/ (once)
@@ -408,6 +412,41 @@ def coverage_report_cmd(
 
     output.write_text(render_coverage_report(kb_dir), encoding="utf-8")
     console.print(f"[bold green]✓ coverage report[/bold green] → {output}")
+
+
+@app.command("check")
+def check_cmd(
+    kb_dir: Path = KB_DIR_OPTION,
+    db_path: Path = DB_PATH_OPTION,
+    strict: bool = typer.Option(False, "--strict", help="Also fail when the graph carries no file fingerprint (built before #85)."),
+    as_json: bool = typer.Option(False, "--json", help="JSON output."),
+) -> None:
+    """Check that the compiled graph (what the option judge reads) describes the knowledge base files (issue #85).
+
+    Exit 0: consistent (or, without --strict, unverifiable because the graph predates the fingerprint: said loudly).
+    Exit 1: a file changed, was added or removed since the graph was built. Nothing is rebuilt here."""
+    from mcp_server.core.db import ReadOnlyKuzuClient
+    from pipelines.kb_consistency import check_compiled_base
+
+    client = ReadOnlyKuzuClient(db_path=db_path)
+    report = check_compiled_base(kb_dir, lambda q, p: client.execute_cypher(q, p))
+    if as_json:
+        console.print_json(json.dumps(report, ensure_ascii=False))
+    else:
+        colour = {"ok": "green", "stale": "red", "unverified": "yellow"}[report["status"]]
+        console.print(f"[bold {colour}]{report['status'].upper()}[/bold {colour}]  {report['files']} files, "
+                      f"{report['assets_in_base']} assets in {db_path}")
+        for key, label in (("changed_since_build", "changed since the graph was built"),
+                           ("not_in_base", "in the files, not in the graph"),
+                           ("removed_from_files", "in the graph, no longer in the files"),
+                           ("unverified", "without fingerprint")):
+            if report[key]["count"]:
+                shown = ", ".join(report[key]["ids"][:10]) + (" …" if report[key]["count"] > 10 else "")
+                console.print(f"  {label}: {report[key]['count']} ({shown})")
+        if report.get("reason"):
+            console.print(f"[{'red' if report['status'] == 'stale' else 'yellow'}]{report['reason']}[/]")
+    if report["status"] == "stale" or (strict and report["status"] == "unverified"):
+        raise typer.Exit(code=1)
 
 
 @app.command("check-freshness")

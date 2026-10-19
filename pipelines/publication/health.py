@@ -51,7 +51,10 @@ def _queue(service: CandidateService, now: datetime) -> dict[str, Any]:
             "overdue": sorted(overdue, key=lambda o: -o["business_days"])}
 
 
-def kb_health(service: CandidateService, kb_dir: Path, snapshot_dir: Path, now: datetime | None = None) -> dict[str, Any]:
+def kb_health(
+    service: CandidateService, kb_dir: Path, snapshot_dir: Path, now: datetime | None = None,
+    compiled_base: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     now = now or datetime.now(UTC)
     assets = [a for a in load_assets(kb_dir) if a.type in DOCTRINE_TYPES and a.frontmatter.get("status") == "active"]
     by_type: dict[str, int] = {}
@@ -130,4 +133,6 @@ def kb_health(service: CandidateService, kb_dir: Path, snapshot_dir: Path, now: 
         "last_snapshot": _last_snapshot(snapshot_dir),
         "embeddings": embeddings_state,
         "storage": storage_status(),
+        # Issue #85: does the compiled graph (what the judge reads) describe the files? None when it could not be checked.
+        "compiled_base": compiled_base,
     }

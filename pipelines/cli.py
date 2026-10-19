@@ -63,13 +63,9 @@ def ingest(
     if valid_rules:
         console.print(f"[bold green]🧭 {len(valid_rules)} règles de déclenchement valides.[/bold green]")
 
-    all_files = sorted(
-        [
-            p
-            for p in list(kb_dir.rglob("*.md")) + list(kb_dir.rglob("*.yaml")) + list(kb_dir.rglob("*.yml"))
-            if not p.name.startswith("_") and p.name not in ("README.md", "CONTRIBUTING.md", "GOVERNANCE.md", "deltas.md")
-        ]
-    )
+    from pipelines.ingestion.discovery import kb_source_files
+
+    all_files = kb_source_files(kb_dir)
     console.print(f"[bold green]📄 {len(all_files)} fichiers d'architecture (Markdown & YAML) trouvés.[/bold green]")
 
     parser = MarkdownDocParser()
