@@ -41,6 +41,22 @@ class Actor:
         return False
 
 
+def signed_actor_required() -> bool:
+    """Strict identity mode (``LLMOPS_REQUIRE_SIGNED_ACTOR``): the raw ``X-Actor-Email`` header no longer names a person.
+
+    Read at each call, so a deployment can be switched without a code change. Off by default: the contract server and the
+    clients that do not sign yet keep the header.
+    """
+    import os
+
+    raw = os.getenv("LLMOPS_REQUIRE_SIGNED_ACTOR")
+    if raw is not None and raw.strip():
+        return raw.strip().lower() in ("1", "true", "yes", "on")
+    from mcp_server.core.config import server_config
+
+    return bool(server_config.require_signed_actor)
+
+
 def get_current_actor() -> Actor | None:
     """Retrieve the currently authenticated Actor from context."""
     return _current_actor.get()
@@ -279,7 +295,7 @@ def resolve_actor(request: Any = None) -> Actor | None:
             return actor
 
         email_header = headers.get("X-Actor-Email")
-        if email_header:
+        if email_header and not signed_actor_required():
             set_current_actor_email(email_header)
             caller = getattr(getattr(request, "state", None), "caller", None) or get_current_caller()
             if has_scope(DELEGATE_SCOPE, caller):

@@ -32,6 +32,7 @@ from mcp_server.core.auth import (
     parse_engagement_tokens,
     set_current_actor_email,
     set_current_caller,
+    signed_actor_required,
 )
 from mcp_server.core.config import server_config
 from mcp_server.core.db import guard_engagement
@@ -279,7 +280,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         env_tokens = os.getenv("ENGAGEMENT_TOKENS", "").strip()
         tenant_tokens = parse_engagement_tokens(env_tokens) if env_tokens else {}
         has_jwks = bool(get_jwks_registry().to_jwks().get("keys")) or bool(
-            os.getenv("ARCHINEX_JWKS") or os.getenv("ARCHINEX_JWKS_URL")
+            os.getenv("ARCHINEX_JWKS") or os.getenv("ARCHINEX_JWKS_FILE") or os.getenv("ARCHINEX_JWKS_URL")
         )
 
         if (not expected_token or not expected_token.strip()) and not tenant_tokens and not has_jwks:
@@ -311,7 +312,22 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     status_code=403 if exc.code in ("replay_detected", "token_revoked") else 401,
                 )
         else:
-            set_current_actor_email(request.headers.get("X-Actor-Email"))
+            legacy_actor = request.headers.get("X-Actor-Email")
+            if legacy_actor and signed_actor_required():
+                # Strict identity mode: only a signed assertion names a person (issue #144).
+                reason = "A signed actor assertion is required: send X-Actor-Token (X-Actor-Email is no longer accepted)."
+                audit.record(
+                    legacy_actor,
+                    request.url.path,
+                    "denied",
+                    resource=request.url.path,
+                    detail={"reason": reason, "code": "signed_actor_required"},
+                    auth_method="header",
+                )
+                return JSONResponse(
+                    {"status": "unauthorized", "error": "signed_actor_required", "reason": reason}, status_code=401
+                )
+            set_current_actor_email(legacy_actor)
 
         auth_header = request.headers.get("Authorization")
         header_token = request.headers.get("X-API-Key") or request.headers.get("X-Server-Token")
@@ -407,8 +423,34 @@ class AuthMiddleware(BaseHTTPMiddleware):
         )
 
 
+def log_identity_configuration() -> None:
+    """Say at startup which keys the Hub trusts for actor assertions and whether the raw ``X-Actor-Email`` header still works."""
+    import logging
+
+    from mcp_server.core.assertion import get_jwks_registry
+
+    log = logging.getLogger("mcp_server.identity")
+    registry = get_jwks_registry()
+    registry.refresh_from_environment()
+    keys = registry.key_count()
+    if signed_actor_required():
+        if keys == 0:
+            log.error(
+                "LLMOPS_REQUIRE_SIGNED_ACTOR is on but no trusted key is declared (ARCHINEX_JWKS, ARCHINEX_JWKS_FILE or "
+                "ARCHINEX_JWKS_URL): every request naming an actor is refused until a key is declared."
+            )
+        else:
+            log.info("Strict identity mode: signed actor assertions only, %d trusted key(s).", keys)
+    elif server_config.env != "development":
+        log.warning(
+            "X-Actor-Email is accepted as proof of identity (LLMOPS_REQUIRE_SIGNED_ACTOR is off): any holder of a kb:delegate "
+            "or eng:delegate token can act as any expert. %d trusted assertion key(s).", keys,
+        )
+
+
 def create_starlette_app() -> Starlette:
     """Crée et configure l'application Starlette avec ses routes et son middleware d'authentification."""
+    log_identity_configuration()
 
     async def handle_health(request):
         """Liveness probe: returns 200 if the server process is responsive, with engine and KB version metadata."""
