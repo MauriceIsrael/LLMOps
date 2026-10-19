@@ -209,30 +209,52 @@ def build_doctrine_context(
     min_semantic: float = MIN_SEMANTIC,
     embedding: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Doctrine package for a subject: at most ``max_items`` items whose excerpts total at
-    most ``max_chars`` characters. ``truncated`` tells whether anything was left out or cut.
+    """Doctrine package for a subject: every control of the required frameworks, plus at most ``max_items`` other
+    items (principles, patterns, decisions, other controls), with excerpts totalling about ``max_chars`` characters.
+
+    The controls of the declared frameworks are what an option is judged against: they are **never** left out by
+    ``max_items`` or by the character budget (issue #106). To hold ``max_chars`` their excerpts are shortened (down to
+    nothing when the budget is smaller than the number of controls: the control is still there, with its identifier and
+    title), and ``truncated`` says so. ``required_total`` counts them and ``omitted_required`` lists any that is missing
+    (always empty: a client can check it instead of trusting this docstring). ``truncated`` tells whether anything was
+    left out or cut.
 
     ``semantic`` (asset id -> calibrated semantic relevance) and ``embedding`` (the model that computed it) come from
     the server's local model; without them the package is the lexical one (``relevance_method: "lexical"``)."""
     concepts = query_concepts(subject, index.vocabulary)
     ranked = rank(index, subject, domains, frameworks, phase, semantic, weight, min_semantic)
-    selected = ranked[: max(0, max_items)]
-    truncated = len(selected) < len(ranked)
+    required = [s for s in ranked if s.required]
+    others = [s for s in ranked if not s.required]
+    kept_others = others[: max(0, max_items)]
+    truncated = len(kept_others) < len(others)
+    selected = sorted(required + kept_others, key=lambda s: ranked.index(s))  # the ranking order, unchanged
 
     items: list[dict[str, Any]] = []
-    used = 0
-    per_item = max(MIN_EXCERPT_CHARS, max_chars // max(1, len(selected))) if selected else 0
+    # The character budget is split between the required controls (an even share each, reserved: the doctrine that ranks
+    # before them, the principles, must not starve them) and the rest of the package.
+    count = max(1, len(selected))
+    share = max_chars // count
+    others_budget = max_chars - share * len(required)
+    used_others = 0
+    per_item = max(MIN_EXCERPT_CHARS, others_budget // max(1, len(kept_others))) if kept_others else 0
     for scored in selected:
-        remaining = max_chars - used
-        if remaining < min(MIN_EXCERPT_CHARS // 3, per_item):
-            truncated = True
-            break
-        limit = min(per_item, remaining)
+        if scored.required:
+            limit = share  # shortened to hold the budget, never dropped
+        else:
+            remaining = others_budget - used_others
+            if remaining < min(MIN_EXCERPT_CHARS // 3, per_item):
+                truncated = True
+                continue  # the budget is spent: the doctrine that is not required stops here
+            limit = min(per_item, remaining)
         excerpt, cut = truncate(best_section(scored.entry, concepts), limit)
         truncated = truncated or cut
-        used += len(excerpt)
+        if not scored.required:
+            used_others += len(excerpt)
         items.append(context_item(scored, excerpt))
+    returned = {i["id"] for i in items}
+    omitted = [s.entry.typed_id for s in required if s.entry.id not in returned]
     return {"items": items, "truncated": truncated, "snapshot_id": snapshot_id,
+            "required_total": len(required), "omitted_required": omitted,
             "relevance_method": "lexical" if semantic is None else "hybrid",
             "embedding": embedding if semantic is not None else None}
 
