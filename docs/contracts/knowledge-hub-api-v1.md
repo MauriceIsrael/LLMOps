@@ -1227,6 +1227,22 @@ L'exigence est portée par le sujet (1.27), la décision est celle de ce sujet e
 - Table dédiée `kb_access_audit` traçant chaque opération de gouvernance (`login`, `review`, `delegation`, `revocation`) avec l'acteur, le résultat (`allowed`, `denied`), la ressource et l'empreinte `jti`.
 - Consultation via `GET /api/knowledge/audit` (outil MCP `get_kb_audit`, requiert le scope `kb:review`).
 
+### 5.38 Contrat 1.38 — Fiabilité du juge : contrôles imposés jamais coupés, cohérence du graphe compilé (issues #106, #85)
+
+Évolution **additive** (aucun champ retiré ni renommé).
+
+**1. `GET /api/knowledge/context` / `get_doctrine_context` — les contrôles imposés ne sont jamais coupés (#106)**
+- Tous les contrôles actifs des référentiels listés dans `frameworks` sont renvoyés, quelle que soit la valeur de `max_items`. Le plafond ne s'applique qu'au reste de la doctrine (principes, motifs, décisions, autres contrôles) : le nombre d'éléments renvoyés peut donc dépasser `max_items`.
+- Pour tenir `max_chars`, l'extrait d'un contrôle imposé est raccourci (jusqu'à être vide si le budget est plus petit que le nombre de contrôles), jamais le contrôle retiré : il reste avec son identifiant et son titre. Le total des extraits ne dépasse pas `max_chars`, et `truncated` vaut `true` dès qu'un extrait est coupé.
+- Champs ajoutés dans `data` : `required_total` (entier, nombre de contrôles imposés) et `omitted_required` (liste d'identifiants typés manquants, **toujours vide** : un client peut le vérifier plutôt que de se fier à la garantie).
+- Changement de comportement assumé : avant 1.38, 20 éléments au plus étaient renvoyés par défaut, et au-delà de 20 contrôles imposés, le classement choisissait ceux qui restaient (28 sur 48 perdus avec CRA et NIS2). Un client qui contournait cela avec `max_items=120` n'a rien à changer.
+
+**2. `GET /api/knowledge/health` / `get_kb_health` — le graphe compilé décrit-il les fichiers ? (#85)**
+- Le juge lit ses clauses dans le graphe compilé (`data/knowledge.lbug`), pas dans `data/kb/**/*.md`. Chaque actif du graphe porte désormais l'empreinte du **fichier entier** dont il vient (`file_sha256`, front matter compris, indépendante des fins de ligne).
+- Champ ajouté : `compiled_base` (objet, ou `null` si le contrôle n'a pas pu s'exécuter) : `status` (`ok` | `stale` | `unverified`), `files`, `assets_in_base`, `changed_since_build`, `not_in_base`, `removed_from_files`, `unverified` (chacun `{count, ids}`), et `reason` hors `ok`. `stale` : un fichier a changé, a été ajouté ou retiré depuis la construction du graphe ; `unverified` : le graphe a été construit avant ce contrat et ne peut pas être comparé.
+- Le serveur écrit un avertissement au démarrage dans les deux cas. **Il ne reconstruit jamais le graphe** : un maintainer le décide.
+- Ligne de commande : `kb check [--strict] [--json]` (code 1 si `stale` ; avec `--strict`, aussi si `unverified`). Le graphe versionné (`data/knowledge.lbug`) doit être reconstruit avec les fichiers à chaque publication : un test d'intégration échoue s'il est `stale`, et se saute (avec le message de reconstruction) tant qu'il est `unverified`, c'est-à-dire construit avant cette empreinte.
+
 ---
 
 ## 4. Oracles & Vecteurs de Test Partagés

@@ -101,6 +101,12 @@ def generate_doctrine_context_schema() -> dict[str, Any]:
                     },
                     "truncated": {"type": "boolean"},
                     "snapshot_id": {"type": ["string", "null"]},
+                    "required_total": {"type": "integer", "minimum": 0, "description": "Number of controls of the "
+                                       "frameworks listed in 'frameworks' (contract 1.38). All of them are in 'items': "
+                                       "'max_items' only caps the other doctrine."},
+                    "omitted_required": {"type": "array", "items": {"type": "string"}, "description": "Typed ids of "
+                                         "required controls missing from 'items' (contract 1.38). Always empty: a client "
+                                         "can check it instead of trusting the guarantee."},
                     "relevance_method": {"enum": ["lexical", "hybrid"], "description": "Contract 1.25."},
                     "embedding": {"type": ["object", "null"], "description": "Local model of the semantic relevance "
                                   "{model, version, sha256, local: true}; null in lexical mode (contract 1.25)."},
@@ -503,6 +509,15 @@ def generate_kb_health_schema() -> dict[str, Any]:
             "last_snapshot": {"type": ["object", "null"]},
             "storage": {"type": "object", "properties": {
                 "persistent": {"type": "boolean"}, "mode": {"enum": ["normal", "demo"]}}},
+            "compiled_base": {"type": ["object", "null"], "description": "Contract 1.38 (issue #85): does the compiled "
+                              "graph, which the option judge reads, describe the knowledge base files? null if the "
+                              "check could not run.",
+                              "properties": {
+                                  "status": {"enum": ["ok", "stale", "unverified"]},
+                                  "files": {"type": "integer"}, "assets_in_base": {"type": "integer"},
+                                  "changed_since_build": {"type": "object"}, "not_in_base": {"type": "object"},
+                                  "removed_from_files": {"type": "object"}, "unverified": {"type": "object"},
+                                  "reason": {"type": "string"}}},
         }}, "Health indicators of the knowledge base (GET /api/knowledge/health, contract 1.8).")
 
 

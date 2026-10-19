@@ -67,6 +67,7 @@ class ArchitectureGraphExtractor:
                 "version": version_val,
                 "markdown_content": raw_markdown,
                 "sha256": raw_sha256,
+                "file_sha256": parsed_doc.get("file_sha256", ""),
                 "external_ref": external_ref_val,
                 "framework": parsed_doc.get("framework", ""),
                 "severity": parsed_doc.get("severity", "mandatory"),

@@ -126,6 +126,10 @@ puis `ruff`, `scripts/check_no_project_names.py`, `mypy`, la garde de version du
   checks to pass » et choisir `tests`. Sans cela elle informe, elle n'empêche rien.
 - **Après une publication de base de connaissances** (`kb publish`, `kb apply-review`) : les fixtures et le snapshot scellé changent ; la CI
   échoue tant que `fixtures/` n'est pas régénéré depuis une copie neuve (« Quand on change quelque chose »).
+- **Le juge lit le graphe compilé, pas les fichiers** (issue #85) : après toute modification de `data/kb`, reconstruire le graphe
+  (`poetry run ingest --kb-dir data/kb`, ou `kb publish`) et le **commiter avec les fichiers**. `poetry run kb check` dit si le graphe décrit
+  les fichiers (`--strict` refuse aussi un graphe sans empreinte) ; `tests/integration/test_kb_consistency.py` le vérifie sur le dépôt : la CI échoue si le graphe
+  versionné est périmé, et le test se saute tant qu'il n'a pas d'empreinte (la prochaine publication le reconstruit). Le serveur avertit au démarrage et `GET /api/knowledge/health` (`compiled_base`) le rapporte ; il ne reconstruit jamais seul.
 - **Montée de version du moteur de graphe ou de Python** : changer `python-version` ici et dans `docker/Dockerfile.test` ensemble.
 
 ## Ce que cette procédure ne couvre pas

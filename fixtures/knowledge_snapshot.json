@@ -2,7 +2,7 @@
   "status": "ok",
   "count": 1,
   "data": {
-    "schema_version": "1.37",
+    "schema_version": "1.38",
     "knowledge": {
       "dataset": "data/knowledge.lbug",
       "node_counts": {
@@ -21,35 +21,8 @@
         }
       },
       {
-        "id": "default-project",
-        "dataset": "data/engagements/default-project.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
-        }
-      },
-      {
         "id": "dep-eng",
         "dataset": "data/engagements/dep-eng.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
-        }
-      },
-      {
-        "id": "lou",
-        "dataset": "data/engagements/lou.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
-        }
-      },
-      {
-        "id": "lulu-avec-options-et-criteres-proposes",
-        "dataset": "data/engagements/lulu-avec-options-et-criteres-proposes.lbug",
         "node_counts": {
           "Subject": 0,
           "Statement": 0,
@@ -63,24 +36,6 @@
           "Subject": 8,
           "Statement": 9,
           "Conflict": 2
-        }
-      },
-      {
-        "id": "nouveau-projet-d-architecture",
-        "dataset": "data/engagements/nouveau-projet-d-architecture.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
-        }
-      },
-      {
-        "id": "zako",
-        "dataset": "data/engagements/zako.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
         }
       }
     ]
