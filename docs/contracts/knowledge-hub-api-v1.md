@@ -1095,7 +1095,7 @@ L'aperçu et le moteur de cascade (§5.23) utilisent **la même évaluation** (`
 * `status` vaut `allocated` (couverture **déclarée**, non vérifiée) ; aucun chemin du Hub n'émet `verified`.
 * Les preuves portent `source: "knowledge-hub"` (leur vraie origine).
 * `sourceSystem` est fixé à `knowledge-hub` ; `?source_system=` (ou `X-Source-System`) avec une autre valeur est refusé : `400 {"status": "invalid_argument"}`. L'ancienne valeur `tuleap` n'est plus servie.
-* Le consommateur (`validateConformitySnapshot`) accepte toujours l'enveloppe : `allocated` est un statut déjà prévu.
+* **Correction (contrat 1.40) :** cette ligne affirmait que le consommateur (`validateConformitySnapshot` du Document Engine) « accepte toujours l'enveloppe ». C'est inexact : voir §5.40 pour ce qu'il refuse, mesuré.
 
 La couverture exigence → contrôle d'un **engagement** (décisions affirmées) est l'objet de K17 (§5.31), dans l'instantané d'engagement, pas dans cette route.
 
@@ -1278,6 +1278,22 @@ Aucune route n'est ajoutée ; les réponses existantes gardent leur forme. Ce qu
 
 **Limites connues** : le registre anti-rejeu (`jti`) est en mémoire, par processus : plusieurs processus ou un redémarrage ouvrent une fenêtre de rejeu de la durée de l'assertion. Les `roles` d'une assertion s'ajoutent à ceux du registre pour une personne **connue** : celui qui signe (Archinex) répond de ce qu'il affirme. Une personne **absente du registre des experts** n'a aucun rôle (pas de `kb:review` par défaut) : ses claims `roles` et `domain_roles` sont ignorés, elle n'est pas présentée comme un expert (`GET /api/knowledge/me` → 403 « not a registered expert », comme avec l'en-tête brut), elle reste identifiable pour l'audit sous l'étiquette `email:<adresse>` (celle que donne l'en-tête brut à une adresse inconnue : aucun handle n'est inventé) et, par son e-mail, pour l'appartenance à un engagement. Le réglage `LLMOPS_ASSERTION_ROLES_FOR_UNREGISTERED=true` (éteint par défaut) fait croire les claims d'une personne inconnue, pour un fournisseur d'identité qui gère ses propres personnes.
 
+
+### 5.40 Contrat 1.40 — Snapshot de conformité honnête et reproductible (Issues #148, #149)
+
+Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. Deux comportements changent, et le contrat dit enfin ce que le consommateur fait de la sortie.
+
+**1. Identifiant dérivé du contenu (#149).** `snapshotId` = `kh-<engagement>-<référentiel>-<12 premiers hex du checksum>`, comme l'instantané d'engagement (K11) : le même état donne le même identifiant, un contenu différent un autre. Avant, il portait l'horodatage de l'appel (`int(datetime.now().timestamp())`) : deux appels sur le même état donnaient deux identifiants, et le test de l'émetteur ne pouvait pas reconstruire un témoin. `createdAt` reste l'instant d'émission, **hors sceau** ; l'émetteur accepte un instant injecté (`now`) pour que le test reconstruise le témoin. L'enveloppe n'est donc pas strictement identique d'un appel à l'autre (`createdAt`) : seul le contenu scellé et l'identifiant le sont. Stocker les émissions pour rendre l'enveloppe entière idempotente (comme `POST …/exports`) n'est pas retenu ici.
+
+**2. `allocated` exige une preuve (#148).** Un contrôle qu'aucun actif ne déclare couvrir est émis `identified`, plus `allocated`. Sur la base de démonstration (`nordwave-mcx-2027`, tous référentiels, mesuré le 2026-10-24), **40 des 91** contrôles étaient émis `allocated` avec `evidence: []` : une couverture que personne n'avait déclarée. Le Hub n'émet toujours jamais `verified`. `proposed` et `uncovered` sont le vocabulaire de l'instantané d'engagement (K17), pas celui de `ConformityData` (huit statuts du consommateur).
+
+**3. Ce que le lecteur du Document Engine fait de cette sortie** (mesuré le 2026-10-24 sur `document-engine` `4a9361b`, avec son code ; `make verify-suite`).
+- **Checksum : identique.** `computeSnapshotChecksum` du Document Engine recalcule exactement le `checksum` du Hub, sur le témoin de conformité et sur l'exemple d'instantané d'engagement. Les vecteurs `canonical-json` sont identiques octet pour octet.
+- **Provenance : refusée.** `'sourceSystem' attendu 'tuleap', reçu 'knowledge-hub'` (ADR-DE-41 ; l'admission est l'objet de l'issue #152).
+- **Ce qui refuserait ensuite, mesuré en expérience locale hors dépôt** (provenance et `ref` posées à la main) : la **version** (le lecteur oppose la majeure `4`, le Hub émet `2.0`), l'absence de **`ref`** (`RequirementRef`, requise en majeure 4 : issue #150) et la **source de preuve** : `evidence[].source` est un vocabulaire fermé (`architecture-studio`, `ip-flow-manager`, `document-engine`, `edm`, `tuleap`, `external-registry`) ; `knowledge-hub` n'en fait pas partie.
+- La sortie du Hub n'est donc **pas** consommable aujourd'hui. Ce contrat ne la déclare pas branchée.
+
+**Vérification** : `tests/contract/test_conformity_golden.py` (témoin reconstruit par l'émetteur, `tests/fixtures/suite/conformity-snapshot.golden.json`), `tests/unit/test_canonical_conformity_snapshot.py`, et `make verify-suite` (code du Document Engine, dépôt voisin ; code de sortie `3` quand il n'a rien pu comparer).
 
 ---
 

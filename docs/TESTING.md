@@ -132,6 +132,21 @@ puis `ruff`, `scripts/check_no_project_names.py`, `mypy`, la garde de version du
   versionné est périmé, et le test se saute tant qu'il n'a pas d'empreinte (la prochaine publication le reconstruit). Le serveur avertit au démarrage et `GET /api/knowledge/health` (`compiled_base`) le rapporte ; il ne reconstruit jamais seul.
 - **Montée de version du moteur de graphe ou de Python** : changer `python-version` ici et dans `docker/Dockerfile.test` ensemble.
 
+## Vérification croisée avec le Document Engine (`make verify-suite`)
+
+Le Document Engine est un dépôt voisin (`../document-engine`, ou `DOCUMENT_ENGINE_DIR`) ; il faut y avoir lancé `npm ci`. Le script `scripts/verify_suite.py`
+n'écrit rien dans l'un ni l'autre dépôt. Il rejoue **avec le code du Document Engine** : (1) l'identité octet pour octet des vecteurs `canonical-json` ;
+(2) le recalcul du `checksum` des témoins du Hub (`tests/fixtures/suite/conformity-snapshot.golden.json`, reconstruit par
+`tests/contract/test_conformity_golden.py`, et `schemas/examples/engagement_snapshot.example.json`) ; (3) le verdict de son lecteur de conformité sur le témoin de
+conformité.
+
+Le verdict attendu aujourd'hui est un **refus de provenance** (`knowledge-hub` n'est pas admis, ADR-DE-41) : c'est un test de refus, il passe. Le jour de
+l'admission, il change, le script échoue, et `EXPECTED_READER_REFUSAL` doit être mis à jour avec la preuve (issue #152). Codes de sortie : `0` tout vérifié et
+conforme, `1` écart, **`3` non vérifié** (dépôt, node ou `npm ci` absents) : jamais un vert silencieux quand rien n'a été comparé. Cette cible n'est pas dans
+`make test-all` : elle exige un autre dépôt.
+
+Régénérer le témoin de conformité après un changement de l'émetteur : `CONFORMITY_WRITE_GOLDEN=1 poetry run pytest tests/contract/test_conformity_golden.py`.
+
 ## Ce que cette procédure ne couvre pas
 
 - **La CI (`.github/workflows/tests.yml`) lance la suite complète, pas les évaluations avec modèle ni les clients.** Les tests « live » d'Archinex contre le serveur de contrat ne tournent pas ici (voir plus haut) ; une PR qui change ce que ces clients lisent doit les rejouer à la main. Le crochet pre-push, lui, ne lance que lint + contrat + unitaires.
