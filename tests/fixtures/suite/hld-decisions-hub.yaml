@@ -1,0 +1,25 @@
+# Plan de document minimal pour l'essai de bout en bout (#155) : les décisions affirmées d'un engagement du Hub.
+# Les composants viennent d'un autre producteur (Architecture Studio, remplacé ici par un graphe de démonstration).
+# Le Hub ne publie NI hypothèses NI risques : ce plan n'a donc volontairement aucun registre de risques (un registre vide se
+# lirait « aucun risque », ADR-DE-44).
+version: "1.0"
+documentType: hld
+expectedContext:
+  Author: string
+sections:
+  - id: decisions
+    title: "Décisions d'architecture affirmées"
+    blocks:
+      - type: table
+        id: tbl-decisions
+        caption: "Décisions affirmées, issues de la base d'engagement du Knowledge Hub"
+        query:
+          select: governance-statements
+          filters:
+            governanceKind: decision
+        columns: ["label", "decision-status", "reversibility", "description", "rejected-options", "consequences", "based-on", "validated-by", "source-snapshot"]
+      - type: callout
+        variant: warning
+        text: >-
+          Les hypothèses et les risques ne sont pas publiés par le Knowledge Hub : leur absence de ce dossier ne dit pas
+          qu'il n'y en a pas.

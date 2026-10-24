@@ -50,12 +50,20 @@ def _not_verified(reason: str) -> int:
     return NOT_VERIFIED
 
 
-def main() -> int:
+def locate_document_engine() -> tuple[Path | None, str]:
+    """Le dépôt voisin du Document Engine, prêt à servir (``npm ci`` fait), ou la raison pour laquelle il ne l'est pas."""
     de = Path(os.environ.get("DOCUMENT_ENGINE_DIR") or ROOT.parent / "document-engine").resolve()
     if not (de / "contracts" / "canonical-json.vectors.json").is_file():
-        return _not_verified(f"dépôt du Document Engine introuvable à {de} (DOCUMENT_ENGINE_DIR)")
+        return None, f"dépôt du Document Engine introuvable à {de} (DOCUMENT_ENGINE_DIR)"
     if shutil.which("node") is None or not (de / "node_modules" / ".bin" / "tsx").exists():
-        return _not_verified(f"node absent, ou `npm ci` non lancé dans {de}")
+        return None, f"node absent, ou `npm ci` non lancé dans {de}"
+    return de, ""
+
+
+def main() -> int:
+    de, reason = locate_document_engine()
+    if de is None:
+        return _not_verified(reason)
 
     problems: list[str] = []
 

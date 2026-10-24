@@ -1,0 +1,24 @@
+[
+  {
+    "id": "example-eng:D-0001",
+    "name": "Active-active gateway across two sites",
+    "governanceKind": "decision",
+    "description": "Meets REQ-001 within the latency budget.",
+    "attributes": {
+      "governance-kind": "decision",
+      "decision-status": "accepted",
+      "assertion-level": "asserted",
+      "origin": "human",
+      "subject": "gateway-services",
+      "reversibility": "costly",
+      "source": "knowledge-hub",
+      "source-snapshot": "eng-example-eng-117b8db2d726",
+      "validated-by": "@ada",
+      "validated-at": "2026-10-02T10:00:00",
+      "rejected-options": "Active-passive gateway — Failover time above the budget.",
+      "consequences": "Two sites to operate.",
+      "based-on": "ADR-0001",
+      "facts": "topology.dc_count=2; topology.mode=active-active"
+    }
+  }
+]
