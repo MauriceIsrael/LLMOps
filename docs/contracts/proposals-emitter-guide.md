@@ -59,4 +59,4 @@ la candidate était **refusée** (`originalText`, `normalizedText`) ; après, ac
 ## À ne pas confondre
 
 L'adaptateur `knowledge-hub` de Requirements Intake (`src/extraction/classifier/adapters/knowledgeHub.ts`) appelle `POST {INTAKE_KNOWLEDGE_HUB_URL}/classify` : c'est une **classification** de fragments par un service
-qui reçoit une invite, pas ce canal. Le Hub n'expose pas cette route (voir l'issue correspondante).
+qui reçoit une invite, pas ce canal. Le Hub n'expose pas cette route (issue #161).
