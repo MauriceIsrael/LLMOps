@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.39"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.40"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.39"
+  "schema_version": "1.40"
 }
 ```
 
@@ -59,6 +59,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.37` | Expert authentication and fine-grained RBAC for KB governance (issue #7, [contract §5.37](contracts/knowledge-hub-api-v1.md)): EdDSA (Ed25519) signed actor assertions with published JWKS (RFC 8037), anti-replay protection with mandatory unique `jti`, immediate token/actor revocation, domain-scoped roles, temporary delegations lifecycle (`kb:review`, `kb:evaluate`), strict separation of duties, and access audit logging (`kb_access_audit`). MCP tools: `list_kb_delegations`, `create_kb_delegation`, `revoke_kb_delegation`, `revoke_kb_auth`, `get_kb_audit`. REST routes: `GET /.well-known/jwks.json`, `GET|POST /api/knowledge/delegations`, `POST /api/knowledge/delegations/{id}/revoke`, `POST /api/knowledge/auth/revoke`, `GET /api/knowledge/audit`. |
 | `1.38` | Judge reliability (issues #106, #85, [contract §5.38](contracts/knowledge-hub-api-v1.md)), additive: `GET /api/knowledge/context` (`get_doctrine_context`) always returns every control of the required frameworks (`max_items` caps the other doctrine only) and adds `required_total` and `omitted_required`; `GET /api/knowledge/health` (`get_kb_health`) adds `compiled_base` (status `ok`, `stale` or `unverified`: does the compiled graph describe the files?). CLI: `kb check [--strict]`. |
 | `1.39` | Identity and rights of the people who act (issues #144, #90, #91, [contract §5.39](contracts/knowledge-hub-api-v1.md)): strict identity mode `LLMOPS_REQUIRE_SIGNED_ACTOR` (raw `X-Actor-Email` refused with 401 `signed_actor_required`), trusted assertion keys from `ARCHINEX_JWKS` / `ARCHINEX_JWKS_FILE` / `ARCHINEX_JWKS_URL`, bounded assertion lifetime and clock tolerance, rights to declare a framework covered, independent application of mandatory controls. No route added. |
+| `1.40` | Conformity snapshot made honest and reproducible (issues #148, #149, [contract §5.40](contracts/knowledge-hub-api-v1.md)): `snapshotId` derives from the `checksum` (not the clock); a control no asset declares is `identified`, not `allocated`. Shape (`schemaVersion` `2.0`) unchanged and still refused by the Document Engine reader. No route added. |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 

@@ -181,9 +181,15 @@ Minor versions only add interfaces or optional fields:
   (or ``kb:maintain``, or the review role on that domain) and is audited. Applying a framework ingestion refuses (409 ``separation_of_duties``) the
   mandatory controls the applying maintainer decided. No route is added.
 
+* ``1.40`` — conformity snapshot made honest and reproducible (issues #148, #149), no route added. ``GET /api/compliance/conformity-snapshot``:
+  ``snapshotId`` now derives from the ``checksum`` (``kh-<engagement>-<framework>-<12 hex>``, as the engagement snapshot does) instead of the clock,
+  so the same state gives the same identifier; a control that no asset declares to cover is ``identified`` instead of ``allocated`` (``allocated``
+  needs at least one declaring asset, otherwise it was a coverage nobody declared). The shape (``schemaVersion`` ``2.0``) is unchanged and is still
+  refused by the Document Engine's reader (§5.40: provenance, version, ``ref``, evidence source).
+
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.39"
+CONTRACT_VERSION = "1.40"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 

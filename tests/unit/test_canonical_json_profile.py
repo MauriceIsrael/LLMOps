@@ -14,7 +14,9 @@ VECTORS = json.loads(VECTORS_FILE.read_text(encoding="utf-8"))
 
 def test_vectors_file_is_the_one_of_the_suite():
     # Pinned: the suite requires this file to be identical byte for byte in every repository that holds it.
-    assert hashlib.sha256(VECTORS_FILE.read_bytes().replace(b"\r\n", b"\n")).hexdigest()[:16] == "3f629da8a4b9bd8a"
+    # Full digest (#151): sixteen hex digits would also pin the file, but 64 leaves no room for a deliberate collision.
+    digest = hashlib.sha256(VECTORS_FILE.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    assert digest == "3f629da8a4b9bd8a25721d77f87d16fc781c144bc5e8527905473a53847ab56d"
     assert VECTORS["profile"] == "architecture-suite/canonical-json" and VECTORS["version"] == 1
 
 

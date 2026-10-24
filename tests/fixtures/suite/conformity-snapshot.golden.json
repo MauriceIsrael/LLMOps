@@ -1,0 +1,54 @@
+{
+  "snapshotId": "kh-golden-engagement-nis2-c3d22dc506dd",
+  "sourceSystem": "knowledge-hub",
+  "schemaVersion": "2.0",
+  "createdAt": "2026-10-01T12:00:00Z",
+  "checksum": "sha256:c3d22dc506ddf5a63bc9c725b72244655a0c8e910cd91cb2bd22c9f2f92026f9",
+  "data": {
+    "requirements": [
+      {
+        "id": "NIS2-ART20-1",
+        "title": "Governance — Member States shall ensure that the management bodies of essential and important…",
+        "domain": "COMPLIANCE",
+        "verificationModes": [
+          "architecture-model"
+        ],
+        "status": "identified",
+        "evidence": [],
+        "appliesTo": {
+          "programRef": "GOLDEN-ENGAGEMENT",
+          "lotRefs": [],
+          "pbsRefs": []
+        }
+      },
+      {
+        "id": "NIS2-ART21-2A",
+        "title": "Politiques d'analyse des risques et sécurité des systèmes d'information",
+        "domain": "COMPLIANCE",
+        "verificationModes": [
+          "architecture-model"
+        ],
+        "status": "allocated",
+        "evidence": [
+          {
+            "mode": "architecture-model",
+            "type": "graph-item",
+            "reference": "ADR-0001",
+            "source": "knowledge-hub"
+          },
+          {
+            "mode": "architecture-model",
+            "type": "graph-item",
+            "reference": "P-001",
+            "source": "knowledge-hub"
+          }
+        ],
+        "appliesTo": {
+          "programRef": "GOLDEN-ENGAGEMENT",
+          "lotRefs": [],
+          "pbsRefs": []
+        }
+      }
+    ]
+  }
+}

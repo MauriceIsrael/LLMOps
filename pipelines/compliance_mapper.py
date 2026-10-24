@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from datetime import UTC
+from datetime import UTC, datetime
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -480,15 +480,19 @@ def to_conformity_snapshot(
     framework: str = "ALL",
     controls_dir: Path | str = "data/kb/controls",
     source_system: str = "knowledge-hub",
+    now: datetime | None = None,
 ) -> dict[str, Any]:
-    """Génère un ConformitySnapshot conforme au contrat ExternalSnapshotEnvelope<ConformityData> pour document-engine.
+    """Génère un ConformitySnapshot de la forme ExternalSnapshotEnvelope<ConformityData> (majeure 2.0 : voir #148).
 
     Le Hub **ne vérifie rien** (ADR-KH-01 D2, K6) : la présence d'un actif qui référence un contrôle est une couverture
     *déclarée* (``allocated``), jamais un résultat de vérification (``verified`` n'est émis par aucun chemin du Hub), et
-    l'origine est fixée à ``knowledge-hub`` : elle n'est pas déclarative.
-    """
-    from datetime import datetime
+    l'origine est fixée à ``knowledge-hub`` : elle n'est pas déclarative. Un contrôle qu'aucun actif ne déclare couvrir
+    reste ``identified`` : ``allocated`` sans la moindre preuve serait une couverture inventée.
 
+    Contrat 1.40 (#149) : ``snapshotId`` dérive du ``checksum`` (comme l'instantané d'engagement, K11) : le même état donne
+    le même identifiant, un contenu différent un autre. ``createdAt`` est l'instant d'émission, **hors sceau** ; ``now``
+    l'injecte (le test de l'émetteur reconstruit le témoin avec un instant fixe, comme pour K11).
+    """
     if source_system != SOURCE_SYSTEM:
         raise ValueError(f"source_system is fixed to '{SOURCE_SYSTEM}' (got '{source_system}'): the origin of a snapshot is not declarative")
 
@@ -538,7 +542,8 @@ def to_conformity_snapshot(
             "title": ctrl.title_fr or ctrl.title,
             "domain": domain,
             "verificationModes": ["architecture-model"],
-            "status": "allocated",  # declared coverage at best; the Hub never emits "verified" (K6)
+            # Declared coverage at best; the Hub never emits "verified" (K6). No declaring asset, no allocation (#148).
+            "status": "allocated" if evidence else "identified",
             "evidence": evidence,
             "appliesTo": {
                 "programRef": engagement.upper(),
@@ -556,11 +561,12 @@ def to_conformity_snapshot(
     }
 
     checksum = canonical.sha256(data)  # canonical-json v1 (K1)
-    now_iso = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now_iso = (now or datetime.now(UTC)).strftime("%Y-%m-%dT%H:%M:%SZ")
     prefix = "kh"
 
     return {
-        "snapshotId": f"{prefix}-{engagement}-{framework.lower()}-{int(datetime.now().timestamp())}",
+        # Content-addressed (#149): the same state gives the same identifier, a different content another one.
+        "snapshotId": f"{prefix}-{engagement}-{framework.lower()}-{checksum[len('sha256:'):][:12]}",
         "sourceSystem": SOURCE_SYSTEM,
         "schemaVersion": "2.0",
         "createdAt": now_iso,

@@ -1,4 +1,4 @@
-.PHONY: quick serve demo demo-check install models-fetch eval-semantic test test-all test-docker test-env-check test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
+.PHONY: verify-suite quick serve demo demo-check install models-fetch eval-semantic test test-all test-docker test-env-check test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
 
 install:
 	poetry install
@@ -59,6 +59,11 @@ verify: lint test-contract test-unit
 # Seeded server (scratch copy, SQLite governance) for client contract tests, e.g. Archinex.
 contract-server:
 	poetry run python scripts/contract_server.py
+
+# Cross-check with the Document Engine (a sibling checkout, or DOCUMENT_ENGINE_DIR; `npm ci` done there): shared vectors, seals of
+# the Hub's witnesses recomputed by its code, verdict of its conformity reader. Exit 3 = NOT verified (never a silent green).
+verify-suite:
+	poetry run python scripts/verify_suite.py
 
 # Option judge evaluation: recall of expected violations on the annotated dataset.
 eval-check:
