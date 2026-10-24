@@ -4,6 +4,19 @@
 > Spécification machine : [`requirements-source.openapi.yaml`](requirements-source.openapi.yaml) (OpenAPI 3.1).
 > Relevé du 2026-10-24 sur `tuleap` `e5766fd`, `requirements-intake` `cadafc8`, Archinex (branche de travail), LLMOps contrat 1.40. **Rien n'a été exécuté contre une instance Tuleap** ; ce qui dépend du comportement réel de Tuleap est marqué **« à recetter »**.
 
+## 0. Ce qui est à nous, ce qui est upstream
+
+« Tuleap » désigne ici deux choses, et la proposition ne touche qu'une seule.
+
+| | Qui le possède | Ce que cette proposition y change |
+|---|---|---|
+| **Tuleap Community Edition** (le produit, GPL-2.0, Enalean) | un tiers, indépendant de la suite | **rien**. Elle n'utilise que son API REST publique (artifacts, changesets) ; aucune modification de Tuleap, aucune demande à son éditeur |
+| **Le socle `tuleap`** (dépôt `AM-padawan-coder/tuleap`) : déploiement de l'instance, **définition du tracker** (`tracker/exigences.xml`), ports et adaptateur Python, CLI `treg` | **l'équipe de la suite** (même organisation que les autres dépôts) | la façade HTTP ; les champs ajoutés au tracker (obligation, pointeur de fragment) sont une édition de **notre** fichier XML, importé par notre recette |
+
+Conséquence : les points marqués « à recetter » (plafond de pagination, limites de débit, filtre par date, fidélité du HTML) sont des **contraintes de l'amont à contourner**, pas des demandes. Ce qui est à décider en §11 est de la décision **interne** à la suite, sauf le point 4, qui est une mesure à faire contre l'instance.
+
+**État du socle au 2026-10-24** (`ROADMAP.md` du dépôt) : T2 (le tracker) fait ; T3 (recette de l'API) 14/15, exécutée sur une **instance jetable**, sous le compte `admin` ; **T1 (instance souveraine : VPS, déploiement, sauvegarde, compte de service) 0/6 et T4 (branchement de Requirements Intake) 0/3, à faire.** Il n'y a donc pas, d'après le dépôt, d'instance Tuleap en production avec de vraies exigences.
+
 ## 1. Ce qu'il faut reproduire
 
 Aujourd'hui Archinex enregistre l'audit d'un appel d'offres par `POST /api/projects/{id}/requirements` : une **source** (`kind: rfp`, `sha256` du texte intégral, titre, langue, version) et des **clauses** (`clauseRef`, `title`, `text`, `criticality`, `category`, `position`, proposition de disposition par un modèle). L'opération est idempotente (même empreinte, mêmes lignes) et **la décision humaine n'est jamais écrasée** par un réimport.
@@ -129,7 +142,7 @@ Champ additif sur les exigences de l'engagement : `external_ref {sourceId, requi
 - Erreurs au format `application/problem+json` : `registry_unavailable` (503, avec `Retry-After`, réessayable), `classification_ceiling` (403), `extract_expired` (410), `key_not_found` (404), `version_not_found` (404), `invalid_cursor` (400), `scope_too_broad` (422).
 - Limites de débit et plafond de `limit` de Tuleap : **à recetter** (le service doit les absorber, pas les exposer).
 
-## 11. Ce qui est à décider avec l'équipe Tuleap
+## 11. Ce qui est à décider (équipe de la suite, sauf le point 4)
 
 1. **Où vit la façade** : service dans le dépôt `tuleap` (aujourd'hui sans dépendance web : `pydantic`, `httpx`, `PyYAML` seulement) ou dans Requirements Intake ? La suite ne connaît pas Archinex (SUITE-MAP) : le registre de canaux doit accepter un **consommateur qui n'est pas un composant de la suite**, la même question que pour le Hub (MauriceIsrael/LLMOps#154).
 2. **Identité des documents** : `source_ref.document` est un texte libre (`CCTP-RRF-2026-03`) : sans liste de codes de documents, `GET /v1/documents` expose des variantes. Une liste tenue par Requirements Intake règlerait le problème.
