@@ -1,0 +1,494 @@
+openapi: 3.1.0
+info:
+  title: Requirements Source API (proposition)
+  version: 0.1.0-draft
+  summary: Façade HTTP en lecture seule du registre d'exigences Tuleap, pour les consommateurs qui importent des exigences avec leur référence.
+  description: |
+    **Proposition à discuter, aucun code.** Voir `PROPOSITION-API-source-exigences-tuleap.md`.
+
+    Façade du `RequirementRegistryPort` et du lecteur de baselines : aucune écriture, aucune clé d'accès Tuleap n'en sort,
+    l'identifiant d'artifact n'est pas exposé (la clé fait foi). Les extraits et les baselines sont **scellés** (enveloppe de la suite,
+    `canonical-json` v1, `sourceSystem: tuleap`). `GET /v1/requirements` est un **aperçu en direct, non scellé**.
+
+    Un flux NDJSON est : une ligne `manifest`, N lignes `requirement`, une ligne `end`. Le client recalcule l'empreinte de `data`
+    (`{scope, requirements}`) et refuse l'extrait entier si elle diffère, si le compte diffère ou si `end` manque.
+servers:
+  - url: https://{host}/requirements-source
+    variables:
+      host:
+        default: tuleap-socle.example
+security:
+  - serviceToken: []
+tags:
+  - name: Registres
+  - name: Exigences (aperçu en direct)
+  - name: Extraits scellés
+  - name: Baselines figées
+paths:
+  /v1/registries:
+    get:
+      tags: [Registres]
+      operationId: listRegistries
+      summary: Registres déclarés et plafond de classification de l'appelant
+      responses:
+        '200':
+          description: Registres visibles par l'appelant.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Registry' }
+        default: { $ref: '#/components/responses/Problem' }
+  /v1/documents:
+    get:
+      tags: [Registres]
+      operationId: listDocuments
+      summary: Documents sources (dérivés de `source_ref.document` et `revision`)
+      description: >-
+        Liste **dérivée** : Tuleap n'a pas d'entité « document », seulement un texte libre dans chaque exigence. Les variantes d'écriture
+        d'un même document apparaissent séparément tant qu'une liste de codes n'est pas tenue par Requirements Intake.
+      parameters:
+        - { $ref: '#/components/parameters/Registry' }
+      responses:
+        '200':
+          description: Documents et révisions, avec compteurs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SourceDocument' }
+        default: { $ref: '#/components/responses/Problem' }
+  /v1/requirements:
+    get:
+      tags: [Exigences (aperçu en direct)]
+      operationId: searchRequirements
+      summary: Exploration paginée en direct (non scellée)
+      description: >-
+        Aperçu pour choisir quoi importer. **Pas une vue cohérente** : une exigence peut changer entre deux pages. `X-Registry-Watermark`
+        rend le plus grand identifiant de changeset vu. Ce qui doit être rejoué passe par un extrait scellé.
+      parameters:
+        - { $ref: '#/components/parameters/Registry' }
+        - { name: document, in: query, schema: { type: string } }
+        - { name: revision, in: query, schema: { type: string } }
+        - { name: section, in: query, schema: { type: string } }
+        - { name: editorialStatus, in: query, schema: { $ref: '#/components/schemas/EditorialStatus' } }
+        - { name: domain, in: query, schema: { type: string } }
+        - { name: q, in: query, description: Texte libre sur l'intitulé et l'énoncé., schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+        - { name: cursor, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: Une page.
+          headers:
+            X-Registry-Watermark: { schema: { type: integer }, description: Plus grand changeset vu pendant la lecture. }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RequirementPage' }
+        default: { $ref: '#/components/responses/Problem' }
+  /v1/requirements/{key}:
+    get:
+      tags: [Exigences (aperçu en direct)]
+      operationId: getRequirement
+      summary: Une exigence par sa clé fonctionnelle
+      parameters:
+        - { $ref: '#/components/parameters/Key' }
+        - { $ref: '#/components/parameters/Registry' }
+        - { name: atVersion, in: query, schema: { type: integer, minimum: 1 } }
+      responses:
+        '200':
+          description: L'exigence, à la version demandée ou la plus récente.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Requirement' }
+        '404': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+  /v1/requirements/{key}/versions:
+    get:
+      tags: [Exigences (aperçu en direct)]
+      operationId: listVersions
+      summary: Historique des versions, de la création à la plus récente
+      parameters:
+        - { $ref: '#/components/parameters/Key' }
+        - { $ref: '#/components/parameters/Registry' }
+      responses:
+        '200':
+          description: Versions (un changeset chacune), le motif conservé.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/RequirementVersion' }
+        '404': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+  /v1/refs:check:
+    post:
+      tags: [Exigences (aperçu en direct)]
+      operationId: checkRefs
+      summary: Mes références sont-elles à jour ? (lot)
+      description: >-
+        Pour chaque référence, la version courante et la dérive. Remplace un flux de changements, dont la faisabilité sur Tuleap est à recetter.
+        Une clé inconnue est **dite** (`found: false`), jamais omise.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refs]
+              properties:
+                refs:
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  items: { $ref: '#/components/schemas/RequirementRef' }
+      responses:
+        '200':
+          description: Un verdict par référence, dans l'ordre de la demande.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [ref, found]
+                  properties:
+                    ref: { $ref: '#/components/schemas/RequirementRef' }
+                    found: { type: boolean }
+                    currentVersion: { type: integer, minimum: 1 }
+                    drifted: { type: boolean, description: "`currentVersion` est supérieure à `ref.version`." }
+                    editorialStatus: { $ref: '#/components/schemas/EditorialStatus' }
+        default: { $ref: '#/components/responses/Problem' }
+  /v1/extracts:
+    post:
+      tags: [Extraits scellés]
+      operationId: createExtract
+      summary: Calcule un extrait scellé pour une portée
+      description: >-
+        Lit le registre, calcule l'empreinte, conserve le résultat un temps limité, rend le manifeste. Même contenu : même `extractId`
+        (`200`). Ce n'est **pas** une baseline : figer une baseline est un acte de release, hors de cette API.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExtractRequest' }
+      responses:
+        '201':
+          description: Extrait calculé.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Manifest' }
+        '200':
+          description: Un extrait de contenu identique existe déjà.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Manifest' }
+        default: { $ref: '#/components/responses/Problem' }
+  /v1/extracts/{extractId}:
+    get:
+      tags: [Extraits scellés]
+      operationId: getExtractManifest
+      summary: Manifeste d'un extrait
+      parameters:
+        - { $ref: '#/components/parameters/ExtractId' }
+      responses:
+        '200':
+          description: Le manifeste.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Manifest' }
+        '410': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+  /v1/extracts/{extractId}/records:
+    get:
+      tags: [Extraits scellés]
+      operationId: streamExtract
+      summary: Les enregistrements d'un extrait, en flux ou par pages
+      description: >-
+        `Accept: application/x-ndjson` : manifeste, exigences, ligne `end`. `Accept: application/json` : une page. Reprise par `after`
+        (dernière clé reçue) tant que l'extrait n'a pas expiré.
+      parameters:
+        - { $ref: '#/components/parameters/ExtractId' }
+        - { name: after, in: query, description: Dernière clé reçue., schema: { type: string } }
+        - { name: limit, in: query, description: Pages seulement., schema: { type: integer, minimum: 1, maximum: 1000, default: 200 } }
+      responses:
+        '200':
+          description: Le flux ou la page.
+          content:
+            application/x-ndjson:
+              schema:
+                description: 'Une ligne JSON par objet, dans cet ordre : `Manifest`, puis des `RequirementLine`, puis `EndLine`.'
+                oneOf:
+                  - $ref: '#/components/schemas/Manifest'
+                  - $ref: '#/components/schemas/RequirementLine'
+                  - $ref: '#/components/schemas/EndLine'
+            application/json:
+              schema: { $ref: '#/components/schemas/RecordPage' }
+        '410': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+  /v1/baselines:
+    get:
+      tags: [Baselines figées]
+      operationId: listBaselines
+      summary: Baselines figées par la release (lecture seule)
+      parameters:
+        - { $ref: '#/components/parameters/Registry' }
+      responses:
+        '200':
+          description: Références adressables, de la plus ancienne à la plus récente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/BaselineRef' }
+        default: { $ref: '#/components/responses/Problem' }
+  /v1/baselines/{identifier}/records:
+    get:
+      tags: [Baselines figées]
+      operationId: streamBaseline
+      summary: Contenu d'une baseline figée, empreinte vérifiée avant d'être servie
+      description: >-
+        Même forme que `/v1/extracts/{id}/records`. Une baseline dont l'empreinte ne correspond pas est **refusée** (`500 baseline_integrity`) :
+        altérée, elle n'est pas servie.
+      parameters:
+        - { name: identifier, in: path, required: true, schema: { type: string } }
+        - { name: after, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: Flux NDJSON ou page.
+          content:
+            application/x-ndjson:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Manifest'
+                  - $ref: '#/components/schemas/RequirementLine'
+                  - $ref: '#/components/schemas/EndLine'
+        '404': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+components:
+  securitySchemes:
+    serviceToken:
+      type: http
+      scheme: bearer
+      description: >-
+        Jeton de service d'un appelant **nommé** (par exemple `archinex`, `knowledge-hub`). Il porte un plafond de classification et une portée
+        (registres, programmes). Jamais un jeton d'utilisateur ; jamais une clé d'accès Tuleap.
+  parameters:
+    Registry:
+      name: registry
+      in: query
+      description: '`sourceId` du registre (par exemple `tuleap:rrf`).'
+      schema: { $ref: '#/components/schemas/SourceId' }
+    Key:
+      name: key
+      in: path
+      required: true
+      schema: { type: string, minLength: 1, maxLength: 128 }
+    ExtractId:
+      name: extractId
+      in: path
+      required: true
+      schema: { type: string, pattern: '^tuleap-[a-z0-9-]+-[0-9a-f]{12}$' }
+  responses:
+    Problem:
+      description: Erreur (`application/problem+json`).
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  schemas:
+    SourceId:
+      type: string
+      pattern: '^[a-z0-9-]+:[a-z0-9-]+$'
+      description: Le registre qui fait foi, **déclaré** par l'opérateur, jamais construit par l'appelant (contrat `requirement-ref`).
+    RequirementRef:
+      type: object
+      required: [sourceId, requirementKey, version]
+      additionalProperties: false
+      description: 'Trois champs ou rien : une référence partielle n''existe pas.'
+      properties:
+        sourceId: { $ref: '#/components/schemas/SourceId' }
+        requirementKey: { type: string, minLength: 1, maxLength: 128, description: Clé fonctionnelle immuable. }
+        version: { type: integer, minimum: 1, description: Rang du changeset, 1 = création. Émis par Tuleap seul. }
+    Classification:
+      type: string
+      enum: [NON_PROTEGE, DIFFUSION_RESTREINTE, SECRET, TRES_SECRET]
+    EditorialStatus:
+      type: string
+      enum: [proposed, approved, amended, obsolete]
+      description: 'Cycle éditorial uniquement. Aucun état calculé (`allocated`, `verified`…) : ils appartiennent au moteur de conformité.'
+    Registry:
+      type: object
+      required: [sourceId, label, contractVersion, callerCeiling]
+      properties:
+        sourceId: { $ref: '#/components/schemas/SourceId' }
+        label: { type: string }
+        contractVersion: { type: string }
+        callerCeiling: { $ref: '#/components/schemas/Classification' }
+        programmes: { type: array, items: { type: string } }
+    SourceDocument:
+      type: object
+      required: [document, revisions]
+      properties:
+        document: { type: string }
+        revisions:
+          type: array
+          items:
+            type: object
+            required: [revision, requirementCount]
+            properties:
+              revision: { type: [string, 'null'] }
+              requirementCount: { type: integer, minimum: 0 }
+              lastChangeAt: { type: string, format: date-time }
+    SourceRef:
+      type: object
+      required: [document, section]
+      properties:
+        document: { type: string }
+        section: { type: string }
+        revision: { type: [string, 'null'] }
+        page: { type: [integer, 'null'], minimum: 1 }
+        fragment:
+          description: 'Phase 2 : pointeur de fragment, inscrit par Requirements Intake. Facultatif.'
+          type: object
+          required: [id, hash]
+          properties:
+            id: { type: string }
+            hash: { type: string, pattern: '^sha256:[0-9a-f]{64}$' }
+    Applicability:
+      type: object
+      required: [programRef, lotRefs, pbsRefs]
+      properties:
+        programRef: { type: string }
+        lotRefs: { type: array, items: { type: string } }
+        pbsRefs: { type: array, items: { type: string } }
+    RequirementVersion:
+      type: object
+      required: [number, changesetId, submittedOn]
+      properties:
+        number: { type: integer, minimum: 1 }
+        changesetId: { type: integer, minimum: 1 }
+        submittedOn: { type: string, format: date-time }
+        submittedBy:
+          type: string
+          description: 'Nom d''auteur Tuleap. **À décider** avec l''équipe : le Hub n''accepte que des handles, jamais une adresse.'
+        comment: { type: [string, 'null'], description: Le motif du changeset ; absent à la création. }
+    Requirement:
+      type: object
+      required: [ref, title, statement, statementText, domain, verificationModes, appliesTo, sourceRef, editorialStatus, classification, version]
+      properties:
+        ref: { $ref: '#/components/schemas/RequirementRef' }
+        title: { type: string, minLength: 1, maxLength: 255 }
+        statement: { type: string, description: Énoncé tel que Tuleap le détient (HTML restreint). }
+        statementText: { type: string, description: Projection déterministe en texte brut (règle écrite et testée). }
+        domain: { type: string }
+        verificationModes: { type: array, items: { type: string } }
+        appliesTo: { $ref: '#/components/schemas/Applicability' }
+        service: { type: [string, 'null'] }
+        quality: { type: [string, 'null'] }
+        sourceRef: { $ref: '#/components/schemas/SourceRef' }
+        editorialStatus: { $ref: '#/components/schemas/EditorialStatus' }
+        classification: { $ref: '#/components/schemas/Classification' }
+        curatedDecision:
+          type: [object, 'null']
+          properties:
+            status: { type: string }
+            justification: { type: string }
+        targetThreshold:
+          type: [object, 'null']
+          properties:
+            attribute: { type: string }
+            operator: { type: string, enum: ['>=', '<=', '='] }
+            value: { type: number }
+        version: { $ref: '#/components/schemas/RequirementVersion' }
+    RequirementPage:
+      type: object
+      required: [items, total, nextCursor]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/Requirement' } }
+        total: { type: integer, description: 'Majorant : le total de Tuleap, avant les critères appliqués localement.' }
+        nextCursor: { type: [string, 'null'] }
+        withheld: { $ref: '#/components/schemas/Withheld' }
+    Withheld:
+      type: object
+      required: [count, aboveClassification]
+      description: Ce que l'API retient en raison du plafond de l'appelant. Le nombre est exact ; aucun énoncé ne sort.
+      properties:
+        count: { type: integer, minimum: 0 }
+        aboveClassification: { $ref: '#/components/schemas/Classification' }
+    Scope:
+      type: object
+      properties:
+        document: { type: string }
+        revision: { type: string }
+        programme: { type: string }
+        keys: { type: array, items: { type: string }, maxItems: 5000 }
+    ExtractRequest:
+      type: object
+      required: [registry, scope]
+      properties:
+        registry: { $ref: '#/components/schemas/SourceId' }
+        scope: { $ref: '#/components/schemas/Scope' }
+        label: { type: string }
+    Manifest:
+      type: object
+      required: [type, schemaVersion, extractId, sourceSystem, sourceId, createdAt, checksum, counts, withheld, scope]
+      properties:
+        type: { const: manifest }
+        schemaVersion: { type: string, examples: ['1.0'] }
+        extractId: { type: string, description: 'Dérivé du contenu : `tuleap-<registre>-<12 hex de l’empreinte>`.' }
+        sourceSystem: { const: tuleap }
+        sourceId: { $ref: '#/components/schemas/SourceId' }
+        createdAt: { type: string, format: date-time, description: Hors sceau. }
+        checksum:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+          description: sha256 au profil canonical-json v1 de `data` = `{scope, requirements}`, exigences triées par section (ordre naturel) puis clé.
+        counts:
+          type: object
+          required: [requirements]
+          properties:
+            requirements: { type: integer, minimum: 0 }
+        withheld: { $ref: '#/components/schemas/Withheld' }
+        scope: { $ref: '#/components/schemas/Scope' }
+        expiresAt: { type: string, format: date-time }
+    RequirementLine:
+      allOf:
+        - $ref: '#/components/schemas/Requirement'
+        - type: object
+          required: [type]
+          properties:
+            type: { const: requirement }
+    EndLine:
+      type: object
+      required: [type, count]
+      description: 'Dernière ligne. Absente, le flux est tronqué : le client refuse l''extrait entier.'
+      properties:
+        type: { const: end }
+        count: { type: integer, minimum: 0 }
+    RecordPage:
+      type: object
+      required: [manifest, items, nextAfter]
+      properties:
+        manifest: { $ref: '#/components/schemas/Manifest' }
+        items: { type: array, items: { $ref: '#/components/schemas/Requirement' } }
+        nextAfter: { type: [string, 'null'] }
+    BaselineRef:
+      type: object
+      required: [kind, identifier, contentDigest]
+      properties:
+        kind: { type: string, enum: [tuleap_plugin, frozen_export] }
+        identifier: { type: string }
+        label: { type: [string, 'null'] }
+        snapshotDate: { type: [string, 'null'], format: date-time }
+        contentDigest: { type: string, pattern: '^sha256:[0-9a-f]{64}$' }
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          description: >-
+            `registry_unavailable` (503, réessayable, `Retry-After`), `classification_ceiling` (403), `extract_expired` (410),
+            `key_not_found` (404), `version_not_found` (404), `invalid_cursor` (400), `scope_too_broad` (422), `baseline_integrity` (500).
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
