@@ -1,0 +1,27 @@
+{
+  "route": "POST /api/prose/suggest-batch",
+  "contract": "docs/contracts/knowledge-hub-api-v1.md §3.13",
+  "note": "Vecteurs de FORME : ils fixent ce qui est lu, ignoré et refusé, pas le texte des brouillons (il suit la base de connaissances).",
+  "vectors": [
+    {
+      "name": "libellé ancré et consigne : un brouillon qui cite la doctrine",
+      "request": {"blockId": "block-gitops", "anchorIds": ["gitops-pipeline"], "instructions": "Préciser le versionnement des configurations.", "context": {"anchoredItems": [{"id": "gitops-pipeline", "attributes": {"label": "GitOps configuration pipeline"}}]}},
+      "expect": "draft"
+    },
+    {
+      "name": "ni libellé ni consigne : aucun brouillon, un avertissement",
+      "request": {"blockId": "block-no-label", "anchorIds": ["core-5g"]},
+      "expect": "warning"
+    },
+    {
+      "name": "libellé sans rapport avec la base : aucun brouillon, un avertissement",
+      "request": {"blockId": "block-unknown", "anchorIds": ["x"], "context": {"anchoredItems": [{"id": "x", "attributes": {"label": "zzqxv unmatched wibble"}}]}},
+      "expect": "warning"
+    },
+    {
+      "name": "élément sans blockId : ignoré, sans erreur ni avertissement",
+      "request": {"anchorIds": ["x"], "instructions": "Préciser le versionnement des configurations."},
+      "expect": "ignored"
+    }
+  ]
+}

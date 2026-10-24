@@ -147,6 +147,12 @@ conforme, `1` écart, **`3` non vérifié** (dépôt, node ou `npm ci` absents) 
 
 Régénérer le témoin de conformité après un changement de l'émetteur : `CONFORMITY_WRITE_GOLDEN=1 poetry run pytest tests/contract/test_conformity_golden.py`.
 
+## Le canal de propositions avec le schéma de la suite (`make verify-proposals`)
+
+Même idée que `verify-suite`, pour le canal suite → Hub (K7) : `scripts/verify_proposals.py` relit chaque candidate de `schemas/examples/proposal_snapshot.example.json` avec `extractedCandidateSchema`
+de Requirements Intake (dépôt voisin `../requirements-intake`, ou `REQUIREMENTS_INTAKE_DIR` ; `npm ci` fait). Le schéma du Hub lisant ces champs comme facultatifs, il ne suffit pas à prouver qu'un émetteur réel passe.
+Codes de sortie : `0` conforme, `1` candidate refusée, `3` non vérifié. Il ne prouve pas qu'un émetteur existe (`docs/contracts/proposals-emitter-guide.md`).
+
 ## Ce que cette procédure ne couvre pas
 
 - **La CI (`.github/workflows/tests.yml`) lance la suite complète, pas les évaluations avec modèle ni les clients.** Les tests « live » d'Archinex contre le serveur de contrat ne tournent pas ici (voir plus haut) ; une PR qui change ce que ces clients lisent doit les rejouer à la main. Le crochet pre-push, lui, ne lance que lint + contrat + unitaires.

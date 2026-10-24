@@ -65,6 +65,10 @@ contract-server:
 verify-suite:
 	poetry run python scripts/verify_suite.py
 
+# The K7 example of proposals read with the suite's own schema (sibling checkout of requirements-intake, or REQUIREMENTS_INTAKE_DIR). Exit 3 = NOT verified.
+verify-proposals:
+	poetry run python scripts/verify_proposals.py
+
 # Option judge evaluation: recall of expected violations on the annotated dataset.
 eval-check:
 	poetry run python scripts/eval/eval_check_option.py

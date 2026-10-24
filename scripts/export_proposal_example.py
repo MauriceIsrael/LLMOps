@@ -44,6 +44,10 @@ Changes that are atomic by nature.
 def build_example() -> dict[str, Any]:
     candidate = {
         "id": "cand-REQ-0007", "suggestedDestination": "knowledge-hub-reference", "candidateKind": "technical-requirement",
+        # The suite's `ExtractedCandidate` requires both texts (Requirements Intake, packages/contracts); without them its own
+        # schema refuses what an emitter of the suite would send (#157). The Hub reads them as optional.
+        "originalText": "Routing changes went out to every node at once.",
+        "normalizedText": "Routing changes are rolled out progressively, one node first, never to every node at once.",
         "sourceFragment": {"id": "frag-REQ-0007", "documentId": "lessons-learned-2026", "documentVersion": "1.0",
                            "sectionPath": ["3.2"], "originalText": "Routing changes went out to every node at once.",
                            "hash": "sha256:" + "0" * 64},
