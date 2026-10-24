@@ -43,7 +43,7 @@ Une propriété sans valeur n'est pas émise (cellule vide : « cette décision 
 
 1. **Seul un instantané vérifié est projeté** (`verify` du canal K11) ; sinon `ProjectionRefusedError`, rien n'est produit.
 2. **Une décision proposée ne sort jamais comme un fait.** Par défaut elle n'est pas publiée ; avec `include_proposed=True` elle l'est, marquée `decision-status: proposed`
-   et sans validateur. **Choix de référence à confirmer** (voir « À décider »).
+   et sans validateur. **Choix confirmé par le mainteneur le 2026-10-24** : l'exclusion par défaut.
 3. Une décision **remplacée** ou **retirée** n'engage plus personne : jamais publiée.
 4. Un statut inconnu **lève** : on ne devine pas. `accepted` et `proposed` sont les seules valeurs de `decision-status` constatées dans le catalogue lu par le
    Document Engine ; le Hub n'en invente pas d'autres.
@@ -62,5 +62,5 @@ Une propriété sans valeur n'est pas émise (cellule vide : « cette décision 
 
 ## À décider
 
-- Décision proposée : exclue (défaut actuel) ou publiée marquée. Un HLD qui montre une proposition marquée aide la relecture ; il expose aussi à la lire comme une décision.
+- ~~Décision proposée : exclue ou publiée marquée~~ **Tranché le 2026-10-24 : exclue par défaut** ; `include_proposed=True` reste disponible pour une relecture, jamais comme défaut d'un livrable.
 - Où vit l'adaptateur (A20) : chez le consommateur, qui connaît `ProjectedGraph`, ou au Hub.
