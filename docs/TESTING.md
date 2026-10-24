@@ -147,6 +147,12 @@ conforme, `1` écart, **`3` non vérifié** (dépôt, node ou `npm ci` absents) 
 
 Régénérer le témoin de conformité après un changement de l'émetteur : `CONFORMITY_WRITE_GOLDEN=1 poetry run pytest tests/contract/test_conformity_golden.py`.
 
+## Le canal de propositions avec le schéma de la suite (`make verify-proposals`)
+
+Même idée que `verify-suite`, pour le canal suite → Hub (K7) : `scripts/verify_proposals.py` relit chaque candidate de `schemas/examples/proposal_snapshot.example.json` avec `extractedCandidateSchema`
+de Requirements Intake (dépôt voisin `../requirements-intake`, ou `REQUIREMENTS_INTAKE_DIR` ; `npm ci` fait). Le schéma du Hub lisant ces champs comme facultatifs, il ne suffit pas à prouver qu'un émetteur réel passe.
+Codes de sortie : `0` conforme, `1` candidate refusée, `3` non vérifié. Il ne prouve pas qu'un émetteur existe (`docs/contracts/proposals-emitter-guide.md`).
+
 ## Essai de bout en bout avec le Document Engine (`make e2e-suite`)
 
 Même dépôt voisin et mêmes codes de sortie que `make verify-suite` (`3` = non vérifié). Le script `scripts/e2e_suite.py` monte un instantané d'engagement du Hub (le

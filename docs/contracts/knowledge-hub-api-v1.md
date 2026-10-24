@@ -421,30 +421,37 @@ Génère le squelette formel de document d'architecture (`DocumentBlueprint`) et
 ---
 
 ### 3.13 `POST /api/prose/suggest-batch` — Assistance de Rédaction Prose par Lot (ADR-DE-02)
-Fournit des suggestions de rédaction pour les blocs de prose de `document-engine` en exploitant les motifs d'architecture du Knowledge Hub, sans jamais altérer directement le `ProseStore` du compilateur pur.
-* **Corps de requête** :
+Fournit, pour les blocs de prose de `document-engine`, la **doctrine de la base de connaissances qui s'applique** : des extraits cités, pas une rédaction. Elle n'écrit jamais dans le `ProseStore` du compilateur pur et ne dit jamais que la conception du projet est validée ou conforme (le Hub ne connaît pas le projet). Ce n'est pas un canal (ADR-SUITE-05, second amendement, D5) : un appel d'assistance, dont la circulation des données est décrite dans `docs/plans/NOTE-circulation-donnees-assistance-prose.md`. Forme rejouée par `tests/contract/test_prose_suggest_batch_contract.py` et `tests/fixtures/suite/prose-suggest-batch.vectors.json`.
+
+* **Corps de requête** (corrigé le 2026-10-24 : l'exemple précédent n'avait pas suivi le correctif de contenu de §5 « assistance de prose » ; il ne montrait pas `context` et laissait croire que `anchorIds` était lu, et sa réponse affichait la phrase « Conception validée… » que la route ne produit plus) :
 ```json
 {
   "requests": [
     {
-      "blockId": "contexte-projet",
-      "anchorIds": ["ADR-0014", "PAT-001"],
-      "instructions": "Souligner les contraintes de haute disponibilité et de souveraineté."
+      "blockId": "block-gitops",
+      "anchorIds": ["gitops-pipeline"],
+      "instructions": "Préciser le versionnement des configurations.",
+      "context": {"anchoredItems": [{"id": "gitops-pipeline", "attributes": {"label": "GitOps configuration pipeline"}}]}
     }
   ]
 }
 ```
+  * **Lu** : `blockId` (chaîne non vide, sinon l'élément est ignoré sans erreur), `instructions` (facultatif), `context.anchoredItems[].attributes.label` (chaînes non vides). La requête adressée à la base est formée de ces libellés et de la consigne.
+  * **Reçu mais ignoré** : `anchorIds` et tout autre champ, y compris le reste du `ProseContext`. Le Hub ne les lit, ne les journalise ni ne les conserve (voir la note de circulation).
+  * Corps non JSON ou qui n'est pas un objet : `400`. `requests` qui n'est pas une liste : `400`.
 * **Réponse HTTP 200** :
 ```json
 {
-  "drafts": {
-    "contexte-projet": "Conception validée pour le bloc 'contexte-projet' : ..."
-  },
-  "warnings": [],
+  "drafts": {"block-gitops": "Connaissances de la base applicables à ce bloc — à reformuler et à valider par l'auteur ; elles ne démontrent pas que la conception du projet s'y conforme :\n- [P-001] … (principe, conçu, à valider) : …"},
+  "warnings": [{"blockId": "block-sans-libelle", "message": "Aucun libellé d'élément ancré ni consigne : rien à confronter à la base de connaissances."}],
   "basedOnModelHash": "fa1ecf2b8be24ab7",
-  "generatedAt": "2026-09-17T16:00:00Z"
+  "generatedAt": "2026-10-24T16:00:00Z"
 }
 ```
+  * Un bloc n'a **un brouillon que si de la doctrine s'applique** ; sinon **aucun brouillon** et un avertissement `{blockId, message}`. Un bloc n'est jamais à la fois dans `drafts` et dans `warnings`.
+  * La confiance est donnée telle que publiée ; `vendor-stated`, `stated-by-client` et `assumed` ne sont jamais présentées comme vérifiées.
+  * `basedOnModelHash` est une empreinte **opaque** (16 premiers hex du sha256 de la représentation texte du corps côté Python) : elle ne se rejoue pas hors du Hub. `generatedAt` est l'instant de l'appel.
+* **Authentification** : jeton de service (`Authorization: Bearer`), jamais l'identité d'un expert.
 
 ---
 
@@ -1132,7 +1139,7 @@ Les manques G3 `principle_unaddressed` ne sont pas inclus : ils demandent une r�
 
 **Pourquoi.** L'amendement KH-1 d'`ADR-SUITE-05` interdit à la suite d'appeler le Hub (ni RPC, ni HTTP, ni MCP) : elle **publie** un instantané scellé, le Hub le **lit**. Aucun canal ne disait comment une application de la suite propose de la connaissance au Hub ; `POST /api/knowledge/candidates` aurait violé l'amendement.
 
-**Instantané de propositions** (`schemas/proposal_snapshot.schema.json`, exemple `schemas/examples/proposal_snapshot.example.json`) : enveloppe de la suite `{schemaVersion, snapshotId, sourceSystem, createdAt, checksum, data}`, scellée au profil canonical-json v1 (`checksum` = sha256 de `data`). `sourceSystem` ∈ `document-studio`, `architecture-studio`, `requirements-intake` (le Hub n'est pas un émetteur de propositions). `data.candidates[]` reprend le type `ExtractedCandidate` de la suite (`id`, `sourceFragment`, `suggestedDestination: "knowledge-hub-reference"` obligatoire…) et porte la proposition elle-même dans `proposal {kind, asset_type?, title, rationale?, proposed_content, target_asset_id?, domain?, production_mode?}` (`production_mode` vaut `llm-derived` par défaut : une proposition extraite n'est pas relue).
+**Instantané de propositions** (`schemas/proposal_snapshot.schema.json`, exemple `schemas/examples/proposal_snapshot.example.json`) : enveloppe de la suite `{schemaVersion, snapshotId, sourceSystem, createdAt, checksum, data}`, scellée au profil canonical-json v1 (`checksum` = sha256 de `data`). `sourceSystem` ∈ `document-studio`, `architecture-studio`, `requirements-intake` (le Hub n'est pas un émetteur de propositions). `data.candidates[]` reprend le type `ExtractedCandidate` de la suite (`id`, `sourceFragment`, `suggestedDestination: "knowledge-hub-reference"` obligatoire…) et porte la proposition elle-même dans `proposal {kind, asset_type?, title, rationale?, proposed_content, target_asset_id?, domain?, production_mode?}` (**le schéma de la suite exige `originalText` et `normalizedText` ; le Hub les lit comme facultatifs**, et `proposal` n'appartient pas au schéma de la suite, qui le retire à la lecture : voir `docs/contracts/proposals-emitter-guide.md`) (`production_mode` vaut `llm-derived` par défaut : une proposition extraite n'est pas relue).
 
 **Lecture par le Hub** :
 

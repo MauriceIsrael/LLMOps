@@ -3,13 +3,15 @@
   "snapshotId": "document-studio-proposals-0001",
   "sourceSystem": "document-studio",
   "createdAt": "2026-10-15T09:00:00Z",
-  "checksum": "sha256:709cc64aa711995393c53c4fbaec0b6255cf93e3d83c870cd42326c7e6e0d36c",
+  "checksum": "sha256:2724477afbec2757eefdd428cb5a72d35ec9c9ffac992b1f54c7dab390be1d9d",
   "data": {
     "candidates": [
       {
         "id": "cand-REQ-0007",
         "suggestedDestination": "knowledge-hub-reference",
         "candidateKind": "technical-requirement",
+        "originalText": "Routing changes went out to every node at once.",
+        "normalizedText": "Routing changes are rolled out progressively, one node first, never to every node at once.",
         "sourceFragment": {
           "id": "frag-REQ-0007",
           "documentId": "lessons-learned-2026",
