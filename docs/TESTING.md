@@ -147,6 +147,16 @@ conforme, `1` écart, **`3` non vérifié** (dépôt, node ou `npm ci` absents) 
 
 Régénérer le témoin de conformité après un changement de l'émetteur : `CONFORMITY_WRITE_GOLDEN=1 poetry run pytest tests/contract/test_conformity_golden.py`.
 
+## Essai de bout en bout avec le Document Engine (`make e2e-suite`)
+
+Même dépôt voisin et mêmes codes de sortie que `make verify-suite` (`3` = non vérifié). Le script `scripts/e2e_suite.py` monte un instantané d'engagement du Hub (le
+scénario du canal K11, sans serveur), le projette en `governanceStatements` (`docs/contracts/suite-governance-projection.md`), le greffe sur un graphe de démonstration
+du Document Engine et lance son vrai CLI (`generate.ts`, plan `tests/fixtures/suite/hld-decisions-hub.yaml`). Il contrôle sur le Markdown produit : la décision affirmée
+y est avec son statut, sa réversibilité, son alternative écartée et son validateur ; l'instantané source est cité ; la décision seulement proposée n'y est pas ; mêmes
+octets au second passage ; la **mutation** (abaisser la décision à « proposée ») la retire ; « le graphe ne publie aucun énoncé » est signalé et distinct de « aucun énoncé ».
+Il affiche en `LIMITE` ce que le document ne dit pas encore (l'instantané provisoire). Il ne prouve ni les composants du HLD (ils viennent d'un graphe de démonstration), ni la
+conformité (refusée, voir `verify-suite`). Régénérer le témoin de projection : `GOVERNANCE_WRITE_GOLDEN=1 poetry run pytest tests/unit/test_governance_projection.py`.
+
 ## Ce que cette procédure ne couvre pas
 
 - **La CI (`.github/workflows/tests.yml`) lance la suite complète, pas les évaluations avec modèle ni les clients.** Les tests « live » d'Archinex contre le serveur de contrat ne tournent pas ici (voir plus haut) ; une PR qui change ce que ces clients lisent doit les rejouer à la main. Le crochet pre-push, lui, ne lance que lint + contrat + unitaires.

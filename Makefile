@@ -1,4 +1,4 @@
-.PHONY: verify-suite quick serve demo demo-check install models-fetch eval-semantic test test-all test-docker test-env-check test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
+.PHONY: verify-suite e2e-suite quick serve demo demo-check install models-fetch eval-semantic test test-all test-docker test-env-check test-unit test-contract test-integration test-e2e typecheck lint snapshot verify hooks eval-check check-names contract-server
 
 install:
 	poetry install
@@ -64,6 +64,10 @@ contract-server:
 # the Hub's witnesses recomputed by its code, verdict of its conformity reader. Exit 3 = NOT verified (never a silent green).
 verify-suite:
 	poetry run python scripts/verify_suite.py
+
+# End-to-end, local: Hub engagement snapshot -> projection -> Document Engine CLI -> HLD (same sibling checkout as verify-suite). Exit 3 = NOT verified.
+e2e-suite:
+	poetry run python scripts/e2e_suite.py
 
 # Option judge evaluation: recall of expected violations on the annotated dataset.
 eval-check:
