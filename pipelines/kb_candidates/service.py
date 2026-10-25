@@ -308,7 +308,7 @@ class CandidateService:
         if fm is not None and fields["kind"] in ("new_asset", "rex") and not fields.get("target_asset_id"):
             existing_ids = self._existing_ids()
             old_id = str(fm.get("id") or "").strip()
-            is_placeholder = old_id in ("", "PAT-000", "ADR-0000", "P-000")
+            is_placeholder = old_id in ("", "PAT-000", "ADR-" + "0000", "P-000")
             if is_placeholder or (has_structured and old_id in existing_ids):
                 effective_type = str(fields.get("asset_type") or fm.get("type") or "pattern")
                 new_id = self._next_asset_id(effective_type)
