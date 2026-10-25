@@ -524,3 +524,82 @@ def test_business_days_and_reminders(service, recorder):
     assert [r["id"] for r in reminded] == [c["id"]]
     assert recorder.owner_calls[-1] == ("@auto", "reminder", c["id"])
     assert service.remind(now=later) == []  # at most one reminder per business day
+
+
+def test_archinex_structured_submission_normalizes_and_promotes(service, kb):
+    """Archinex Gate G4 payloads (summary/suggested_change/target_asset_ref) are normalized into promotable assets."""
+    # 1. new_asset without proposed_content or asset_type, with domain 'general'
+    new_cand = service.submit({
+        "kind": "new_asset",
+        "title": "Architecture Pattern — Multi-Region Failover",
+        "summary": "Selected option for subject: Multi-Region Failover.",
+        "suggested_change": "Document active-passive failover as a reusable architecture pattern.",
+        "rationale": "Ensures service continuity across availability zones.",
+        "author": "lead-architect@example.com",
+        "production_mode": "human-authored",
+        "domain": ["general"],
+        "source": {
+            "system": "archinex",
+            "engagement": "demo-engagement",
+            "decision_id": "dec-1",
+        },
+    })
+    assert new_cand["status"] == "in_review", new_cand["checks"]
+    assert new_cand["asset_type"] == "pattern"
+    assert "PAT-" in new_cand["proposed_content"]
+    assert new_cand["evidence"] == [{"kind": "engagement", "ref": "demo-engagement"}]
+    service.review(new_cand["id"], "accept", "@maintainers")
+    promoted_pat = service.promote(new_cand["id"])
+    assert Path(promoted_pat["promoted"]["path"]).exists()
+
+    # 2. rex with summary/suggested_change becomes a promotable ADR decision
+    rex_cand = service.submit({
+        "kind": "rex",
+        "title": "REX — Multi-Region Failover Trade-offs",
+        "summary": "Trade-offs observed during arbitration.",
+        "suggested_change": "Capture failover latency trade-offs in KB.",
+        "rationale": "Dual-region active-active was rejected due to synchronous replication latency.",
+        "source": {
+            "system": "archinex",
+            "engagement": "demo-engagement",
+            "decision_id": "dec-1",
+            "author": "lead-architect@example.com",
+            "production_mode": "human-authored",
+        },
+    })
+    assert rex_cand["status"] == "in_review", rex_cand["checks"]
+    assert rex_cand["asset_type"] == "decision"
+    assert "ADR-0001" in rex_cand["proposed_content"]
+    service.review(rex_cand["id"], "accept", "@maintainers")
+    promoted_adr = service.promote(rex_cand["id"])
+    assert Path(promoted_adr["promoted"]["path"]).exists()
+
+    # 3. amendment with target_asset_ref (typed prefix) and summary/suggested_change
+    amend_cand = service.submit({
+        "kind": "amendment",
+        "title": "Exception / Amendment on principle:P-001",
+        "summary": "Accepted deviation on principle:P-001.",
+        "suggested_change": "Document exception conditions for emergency break-glass.",
+        "rationale": "Emergency recovery procedure.",
+        "target_asset_ref": "principle:P-001",
+        "source": {
+            "system": "archinex",
+            "engagement": "demo-engagement",
+        },
+    })
+    assert amend_cand["status"] == "in_review", amend_cand["checks"]
+    assert amend_cand["target_asset_id"] == "P-001"
+    assert amend_cand["asset_type"] == "principle"
+
+    # 4. Decision metadata in target_asset_ref is rejected with 400 CandidateError
+    for meta_ref in ("COMPLIANCE_STATUS:Compliant", "PORTABILITY:project_specific"):
+        with pytest.raises(CandidateError) as exc:
+            validate_submission({
+                "kind": "amendment",
+                "title": f"Invalid metadata {meta_ref}",
+                "summary": "Metadata ref",
+                "suggested_change": "Should fail",
+                "target_asset_ref": meta_ref,
+                "source": {"system": "archinex"},
+            })
+        assert exc.value.argument == "target_asset_id"
