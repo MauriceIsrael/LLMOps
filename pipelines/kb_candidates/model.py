@@ -110,7 +110,7 @@ def validate_submission(payload: Any) -> dict[str, Any]:
         raise CandidateError("kind", f"'kind' must be one of {list(KINDS)}.")
 
     has_structured_fields = any(
-        isinstance(payload.get(k), str) and payload.get(k).strip()
+        isinstance(v := payload.get(k), str) and bool(v.strip())
         for k in ("summary", "suggested_change", "target_asset_ref")
     )
     raw_target = payload.get("target_asset_id")

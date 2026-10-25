@@ -212,7 +212,7 @@ class CandidateService:
     def _prepare(self, payload: Any) -> dict[str, Any]:
         fields = validate_submission(payload)
         has_structured = isinstance(payload, dict) and any(
-            isinstance(payload.get(k), str) and payload.get(k).strip()
+            isinstance(v := payload.get(k), str) and bool(v.strip())
             for k in ("summary", "suggested_change", "target_asset_ref")
         )
         summary = str(payload.get("summary") or "").strip() if isinstance(payload, dict) else ""
