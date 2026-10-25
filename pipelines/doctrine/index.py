@@ -178,6 +178,38 @@ def load_index(execute: ExecuteCypher, kb_dir: str | Path = "data/kb") -> Doctri
         source = str(row.get("source_path") or "") or str(kb_dir / "controls" / framework / f"{row.get('id')}.md")
         entries.append(_entry(row, "control", source, has_cols, framework=framework))
 
+    seen_ids = {e.id for e in entries}
+    if kb_dir.is_dir():
+        from pipelines.kb_candidates.kb import load_assets
+
+        for disk_asset in load_assets(kb_dir):
+            atype = disk_asset.type
+            if atype == "adr":
+                atype = "decision"
+            if atype not in DOCTRINE_TYPES or disk_asset.id in seen_ids:
+                continue
+            fm = disk_asset.frontmatter
+            if str(fm.get("status") or "") != "active":
+                continue
+            entries.append(
+                DoctrineEntry(
+                    id=disk_asset.id,
+                    type=atype,
+                    title=disk_asset.title,
+                    status="active",
+                    confidence=str(fm.get("confidence") or "assumed"),
+                    domain=_split(fm.get("domain")),
+                    phase=_split(fm.get("phase")),
+                    source_ref=str(disk_asset.path).replace("\\", "/"),
+                    body=disk_asset.body,
+                    framework=str(fm.get("framework") or ""),
+                    applicability=str(fm.get("applicability") or ""),
+                    terms=[str(t) for t in (_split(fm.get("terms")) or [])],
+                    checks=parse_checks(fm.get("checks"), fm.get("checks_status")),
+                )
+            )
+            seen_ids.add(disk_asset.id)
+
     entries.sort(key=lambda e: (e.type, e.id))
     return DoctrineIndex(entries=entries, vocabulary=load_vocabulary(execute, kb_dir))
 

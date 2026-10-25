@@ -211,3 +211,54 @@ def test_repository_is_the_configured_directory(env):
     })
     assert list((env["tmp"] / "candidates").glob("CAND-*.json"))
     assert os.environ["CANDIDATES_DIR"] == str(env["tmp"] / "candidates")
+
+
+def test_archinex_g4_capitalized_decision_becomes_reusable_doctrine(env):
+    """An anonymized and generalized Archinex G4 decision can be submitted, accepted, promoted, and queried as doctrine."""
+    client, kb = env["client"], env["kb"]
+    res = client.post("/api/knowledge/candidates", headers=DEMO, json={
+        "kind": "new_asset",
+        "title": "Architecture Pattern — Sovereign Key Escrow Segregation",
+        "summary": "Selected option for subject: Sovereign Key Escrow Segregation.",
+        "suggested_change": "Enforce dual-custody hardware security module partitioning for tenant cryptographic keys.",
+        "rationale": "Prevents cross-tenant key leakage while satisfying regulatory auditability.",
+        "author": "architect@example.com",
+        "production_mode": "human-authored",
+        "source": {
+            "system": "archinex",
+            "engagement": "lulu-demo-engagement",
+            "decision_id": "dec-sub-91",
+            "subject_id": "sub-91",
+        },
+    })
+    assert res.status_code == 201, res.text
+    candidate = res.json()["data"]
+    assert candidate["status"] == "in_review", candidate["checks"]
+    assert candidate["asset_type"] == "pattern"
+    assert candidate["assigned_owner"] == "@core-owner-architecture"
+
+    # Reviewer accepts
+    rev = client.patch(
+        f"/api/knowledge/candidates/{candidate['id']}",
+        headers=REVIEWER,
+        json={"action": "accept", "reviewer": "@core-owner-architecture", "reason": "Reusable across engagements"},
+    )
+    assert rev.status_code == 200
+    assert rev.json()["data"]["status"] == "accepted"
+
+    # Promote into KB
+    from pipelines.kb_cli import app
+
+    runner = CliRunner()
+    out = runner.invoke(app, ["promote", candidate["id"], "--kb-dir", str(kb)])
+    assert out.exit_code == 0, out.output
+
+    # Query doctrine context for the next deliberation on a similar subject
+    ctx_res = client.get(
+        "/api/knowledge/context",
+        headers=DEMO,
+        params={"subject": "Sovereign Key Escrow Segregation hardware security module partitioning"},
+    )
+    assert ctx_res.status_code == 200
+    items = ctx_res.json()["data"]["items"]
+    assert any("Sovereign Key Escrow Segregation" in item["title"] for item in items)

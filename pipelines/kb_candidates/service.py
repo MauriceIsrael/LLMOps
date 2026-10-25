@@ -15,7 +15,14 @@ from pathlib import Path
 from typing import Any
 
 from pipelines.governance.log import REQUEST_KINDS, GovernanceLog, default_due_at, get_log
-from pipelines.kb_candidates.checks import build_context, has_failure, run_checks
+from pipelines.kb_candidates.checks import (
+    BARE_ID,
+    TYPED_ID,
+    build_context,
+    has_failure,
+    load_known_domains,
+    run_checks,
+)
 from pipelines.kb_candidates.clauses import (
     carry_clause_decisions,
     mark_published,
@@ -152,15 +159,168 @@ class CandidateService:
         channels = self.notify_owner(owner.as_dict(), "in_review", candidate)
         add_history(candidate, "system", "owner_notified", owner=owner.handle, channels=channels)
 
+    def _existing_ids(self) -> set[str]:
+        ids = {a.id for a in load_assets(self.kb_dir)}
+        for c in self.repo.find():
+            if c.get("status") == "rejected":
+                continue
+            c_fm, _ = split_frontmatter(c.get("proposed_content", ""))
+            if c_fm and c_fm.get("id"):
+                ids.add(str(c_fm["id"]))
+        return ids
+
+    def _next_asset_id(self, asset_type: str) -> str:
+        ids = self._existing_ids()
+        if asset_type == "decision":
+            nums = [int(m.group(1)) for i in ids if (m := re.match(r"^ADR-(\d+)$", i))]
+            return f"ADR-{max(nums, default=0) + 1:04d}"
+        if asset_type == "principle":
+            nums = [int(m.group(1)) for i in ids if (m := re.match(r"^P-(\d+)$", i))]
+            return f"P-{max(nums, default=0) + 1:03d}"
+        nums = [int(m.group(1)) for i in ids if (m := re.match(r"^PAT-(\d+)$", i))]
+        return f"PAT-{max(nums, default=0) + 1:03d}"
+
+    def _normalize_domains(self, domains: list[str], fallback_default: bool = False) -> list[str]:
+        known = load_known_domains(self.kb_dir)
+        default_dom = "architecture" if not known or "architecture" in known else sorted(known)[0]
+        result: list[str] = []
+        for d in domains:
+            mapped = "architecture" if d.lower() == "general" else d
+            if known and mapped not in known:
+                mapped = default_dom
+            if mapped not in result:
+                result.append(mapped)
+        if not result and fallback_default:
+            result = [default_dom]
+        return result
+
     @staticmethod
-    def _prepare(payload: Any) -> dict[str, Any]:
+    def _sanitize_unknown_refs(text: str, known_ids: set[str]) -> str:
+        def _replace_typed(match: re.Match[str]) -> str:
+            if match.group(2) in known_ids:
+                return match.group(0)
+            return f"{match.group(1)} ({match.group(2)})"
+
+        def _replace_bare(match: re.Match[str]) -> str:
+            if match.group(1) in known_ids:
+                return match.group(0)
+            return match.group(1).replace("-", " ")
+
+        cleaned = TYPED_ID.sub(_replace_typed, text)
+        return BARE_ID.sub(_replace_bare, cleaned)
+
+    def _prepare(self, payload: Any) -> dict[str, Any]:
         fields = validate_submission(payload)
-        fm, _ = split_frontmatter(fields["proposed_content"])
+        has_structured = isinstance(payload, dict) and any(
+            isinstance(v := payload.get(k), str) and bool(v.strip())
+            for k in ("summary", "suggested_change", "target_asset_ref")
+        )
+        summary = str(payload.get("summary") or "").strip() if isinstance(payload, dict) else ""
+        suggested_change = str(payload.get("suggested_change") or "").strip() if isinstance(payload, dict) else ""
+        rationale = fields.get("rationale") or ""
+
+        fm, body = split_frontmatter(fields["proposed_content"])
+        known_ids = {a.id for a in load_assets(self.kb_dir)}
+
+        if fields["kind"] == "amendment" and fields.get("target_asset_id"):
+            target_asset = next((a for a in load_assets(self.kb_dir) if a.id == fields["target_asset_id"]), None)
+            if target_asset is not None:
+                fields["asset_type"] = target_asset.type
+                if not fields["domain"]:
+                    t_dom = target_asset.frontmatter.get("domain")
+                    fields["domain"] = [str(d) for d in (t_dom if isinstance(t_dom, list) else [t_dom])] if t_dom else []
+                if fm is None:
+                    safe_summary = self._sanitize_unknown_refs(summary, known_ids)
+                    safe_suggested = self._sanitize_unknown_refs(suggested_change, known_ids)
+                    safe_rationale = self._sanitize_unknown_refs(rationale, known_ids)
+                    amend_lines = [f"## Proposed Amendment ({fields['title']})"]
+                    if safe_summary:
+                        amend_lines.append(safe_summary)
+                    if safe_suggested and safe_suggested != safe_summary:
+                        amend_lines.append(safe_suggested)
+                    if not safe_summary and not safe_suggested:
+                        amend_lines.append(self._sanitize_unknown_refs(fields["proposed_content"].strip(), known_ids))
+                    if safe_rationale:
+                        amend_lines.append(f"**Rationale:** {safe_rationale}")
+                    new_body = target_asset.body.rstrip() + "\n\n" + "\n\n".join(amend_lines) + "\n"
+                    fields["proposed_content"] = join_frontmatter(dict(target_asset.frontmatter), new_body).strip() + "\n"
+                    fm, body = split_frontmatter(fields["proposed_content"])
+
+        if fm is None and has_structured and fields["kind"] in ("new_asset", "rex"):
+            target_type = "decision" if fields["kind"] == "rex" else (fields.get("asset_type") or "pattern")
+            fields["asset_type"] = target_type
+            fields["domain"] = self._normalize_domains(fields["domain"], fallback_default=True)
+            asset_id = self._next_asset_id(target_type)
+            fm_title = fields["title"] if len(fields["title"]) >= 5 else f"{fields['title']} — Architecture Asset"
+            safe_summary = self._sanitize_unknown_refs(summary or fields["title"], known_ids)
+            safe_suggested = self._sanitize_unknown_refs(suggested_change or safe_summary, known_ids)
+            safe_rationale = self._sanitize_unknown_refs(
+                rationale or "Generalized from an arbitrated project architecture decision.",
+                known_ids,
+            )
+            if target_type == "decision":
+                fm_dict: dict[str, Any] = {
+                    "id": asset_id,
+                    "title": fm_title,
+                    "type": "decision",
+                    "status": "draft",
+                    "confidence": "assumed",
+                    "phase": ["BID", "BUILD", "RUN"],
+                    "domain": fields["domain"],
+                    "assumptions": [
+                        "Applicable to architecture engagements sharing similar operational and governance constraints."
+                    ],
+                }
+                md_body = (
+                    f"# {asset_id} — {fm_title}\n\n"
+                    f"## Context\n{safe_summary}\n\n"
+                    f"## Options considered\n{safe_rationale}\n\n"
+                    f"## Decision\n{safe_suggested}\n\n"
+                    f"## Consequences\n{safe_rationale}\n"
+                )
+            else:
+                fm_dict = {
+                    "id": asset_id,
+                    "title": fm_title,
+                    "type": "pattern",
+                    "status": "draft",
+                    "confidence": "assumed",
+                    "phase": ["BID", "BUILD", "RUN"],
+                    "domain": fields["domain"],
+                }
+                md_body = (
+                    f"# {asset_id} — {fm_title}\n\n"
+                    f"## Problem\n{safe_summary}\n\n"
+                    f"## Solution\n{safe_suggested}\n\n"
+                    f"## Trade-offs\n{safe_rationale}\n\n"
+                    f"## When not to use this\n"
+                    "When project-specific regulatory or operational constraints require a dedicated exception.\n"
+                )
+            fields["proposed_content"] = join_frontmatter(fm_dict, md_body).strip() + "\n"
+            fm, body = split_frontmatter(fields["proposed_content"])
+
         if fields["asset_type"] is None and fm and fm.get("type") in ASSET_TYPES:
             fields["asset_type"] = fm["type"]
         if not fields["domain"] and fm and fm.get("domain"):
             dom = fm["domain"]
             fields["domain"] = [str(d) for d in (dom if isinstance(dom, list) else [dom])]
+
+        if fm is not None and fields["kind"] in ("new_asset", "rex") and not fields.get("target_asset_id"):
+            existing_ids = self._existing_ids()
+            old_id = str(fm.get("id") or "").strip()
+            is_placeholder = old_id in ("", "PAT-000", "ADR-" + "0000", "P-000")
+            if is_placeholder or (has_structured and old_id in existing_ids):
+                effective_type = str(fields.get("asset_type") or fm.get("type") or "pattern")
+                new_id = self._next_asset_id(effective_type)
+                fm["id"] = new_id
+                if old_id:
+                    body = re.sub(rf"^#\s+{re.escape(old_id)}\b", f"# {new_id}", body.lstrip(), count=1)
+                if has_structured:
+                    fields["domain"] = self._normalize_domains(fields["domain"], fallback_default=True)
+                    fm["domain"] = fields["domain"]
+                    body = self._sanitize_unknown_refs(body, known_ids | {new_id})
+                fields["proposed_content"] = join_frontmatter(fm, body).strip() + "\n"
+
         return fields
 
     def dry_run(self, payload: Any, actor: str = "anonymous") -> dict[str, Any]:
