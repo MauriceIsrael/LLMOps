@@ -167,12 +167,15 @@ def test_kb_check_non_regression_without_flag(tmp_path):
     shutil.copytree(ROOT / "data" / "kb", kb_copy)
 
     # 1. Output without ontology directory
+    ont_dir = kb_copy / "ontology"
+    if ont_dir.exists():
+        shutil.rmtree(ont_dir)
+
     res1 = runner.invoke(app, ["check", "--kb-dir", str(kb_copy), "--json"])
     data1 = res1.output
 
     # 2. Add an ontology directory with broken files
-    ont_dir = kb_copy / "ontology"
-    ont_dir.mkdir()
+    ont_dir.mkdir(exist_ok=True)
     (ont_dir / "broken.yaml").write_text("invalid_broken_yaml: [", encoding="utf-8")
 
     # 3. Output with ontology directory present, but flag absent
