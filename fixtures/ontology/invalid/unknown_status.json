@@ -1,0 +1,9 @@
+{
+  "id": "urn:llmops:ontology:ComputeSubstrate:invalid_status",
+  "term": "Terme Statut Invalide",
+  "concept_class": "ComputeSubstrate",
+  "definition": "Statut inconnu dans l'ontologie.",
+  "synonyms": ["Statut KO"],
+  "status": "deprecated",
+  "revision": 1
+}

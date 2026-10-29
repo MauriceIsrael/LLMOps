@@ -1,0 +1,33 @@
+{
+  "id": "urn:llmops:ontology:SecurityZone:signaling",
+  "term": "Zone de Signalisation Telco",
+  "concept_class": "SecurityZone",
+  "definition": "Périmètre réseau isolé hébergeant les fonctions de contrôle et de signalisation 5G Core.",
+  "synonyms": [
+    "Signaling security zone",
+    "Zone contrôle 5G"
+  ],
+  "relationships": {
+    "isolated_from": [
+      "urn:llmops:ontology:SecurityZone:public_internet"
+    ],
+    "allowed_traffic_classes": [
+      "urn:llmops:ontology:TrafficFlow:3gpp_sba_control"
+    ]
+  },
+  "projections": {
+    "kubernetes_cilium": {
+      "namespace": "telco-signaling",
+      "labels": {
+        "security-zone": "signaling",
+        "tier": "control-plane"
+      }
+    },
+    "nautobot": {
+      "vrf": "VRF-SIGNALING",
+      "tags": ["security-zone", "signaling"]
+    }
+  },
+  "status": "draft",
+  "revision": 1
+}
