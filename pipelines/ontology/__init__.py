@@ -6,7 +6,10 @@ from pipelines.ontology.export import (
     build_ontology_payload,
     export_ontology_snapshot,
 )
-from pipelines.ontology.gateway import is_ontology_experimental_enabled, project_ontology_to_vocabulary
+from pipelines.ontology.gateway import (
+    is_ontology_experimental_enabled,
+    project_ontology_to_vocabulary,
+)
 from pipelines.ontology.ledger import (
     DEFAULT_LEDGER_NAME,
     OntologyLedgerError,

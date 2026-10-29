@@ -88,14 +88,13 @@ from mcp_server.knowledge.tools import (
     get_governance_events,
     get_graph_summary,
     get_jwks,
-    get_ontology_term,
-    list_ontology_terms,
     get_kb_audit,
     get_kb_candidate,
     get_kb_freshness,
     get_kb_health,
     get_kb_me,
     get_knowledge_asset_history,
+    get_ontology_term,
     get_principles_for,
     get_review_inbox,
     get_rfp_compliance_matrix,
@@ -114,6 +113,7 @@ from mcp_server.knowledge.tools import (
     list_kb_comments,
     list_kb_delegations,
     list_knowledge_publications,
+    list_ontology_terms,
     list_reuse_confirmations,
     list_skills,
     list_trigger_rules,
@@ -190,6 +190,7 @@ mcp.tool()(revoke_kb_auth)
 mcp.tool()(get_kb_audit)
 
 from pipelines.ontology.gateway import is_ontology_experimental_enabled
+
 if is_ontology_experimental_enabled():
     mcp.tool()(list_ontology_terms)
     mcp.tool()(get_ontology_term)

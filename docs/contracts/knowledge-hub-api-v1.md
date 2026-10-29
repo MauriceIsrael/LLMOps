@@ -1354,7 +1354,7 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
 
 ---
 
-## 4. Oracles & Vecteurs de Test Partagés Partagés
+## 4. Oracles & Vecteurs de Test Partagés
 
 Afin de garantir une interopérabilité sans faille entre implémentations Python et TypeScript, les vecteurs de référence suivants sont tenus à disposition dans le dépôt :
 * **Vecteur de Test Canonique (`canonical-json v1` + SHA-256)** : [`tests/fixtures/canonical_conformity_vector.json`](../../tests/fixtures/canonical_conformity_vector.json)

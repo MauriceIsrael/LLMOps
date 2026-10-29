@@ -1,16 +1,13 @@
 """Tests for ontology revision ledger and citable references (Issue #172)."""
 
-import json
-from pathlib import Path
 import pytest
-from typer.testing import CliRunner
 import yaml
+from typer.testing import CliRunner
 
 from pipelines.kb_cli import app
 from pipelines.ontology.ledger import (
     OntologyLedgerError,
     OntologyResolutionError,
-    entry_content_sha256,
     load_ontology_ledger,
     resolve_ontology_entry,
     verify_or_record_ontology_ledger,

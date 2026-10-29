@@ -600,8 +600,12 @@ def ontology_record_cmd(
     all_statuses: bool = typer.Option(False, "--all", help="Record all entries regardless of status (default: validated only)."),
 ) -> None:
     """Record new ontology revisions into version-ledger.json (Issue #172)."""
+    from pipelines.ontology.ledger import (
+        DEFAULT_LEDGER_NAME,
+        verify_or_record_ontology_ledger,
+        write_ontology_ledger,
+    )
     from pipelines.ontology.loader import load_ontology_entries
-    from pipelines.ontology.ledger import DEFAULT_LEDGER_NAME, verify_or_record_ontology_ledger, write_ontology_ledger
 
     entries = load_ontology_entries(ontology_dir)
     l_path = ledger_path if ledger_path is not None else ontology_dir / DEFAULT_LEDGER_NAME

@@ -2,11 +2,11 @@
 
 import json
 from pathlib import Path
-import pytest
+
 import yaml
 
 from pipelines.doctrine.index import load_vocabulary
-from pipelines.doctrine.text import Vocabulary, match_terms, normalize
+from pipelines.doctrine.text import match_terms, normalize
 from pipelines.ontology.gateway import project_ontology_to_vocabulary
 
 ROOT = Path(__file__).parent.parent.parent
@@ -111,9 +111,10 @@ def test_golden_outputs_identical_when_flag_absent(tmp_path, monkeypatch):
     """Golden test: sealed snapshot, get_doctrine_context and check_option are byte-for-byte identical with or without ontology directory when flag is absent."""
     monkeypatch.delenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", raising=False)
 
+    import shutil
+
     from mcp_server.core.config import server_config
     from mcp_server.knowledge.tools import check_option, get_doctrine_context
-    import shutil
 
     kb_without = tmp_path / "kb_without"
     shutil.copytree(ROOT / "data" / "kb", kb_without)

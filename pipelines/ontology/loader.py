@@ -6,10 +6,11 @@ schemas/ontology_entry.schema.json, and returns typed, deterministically sorted 
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import json
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
 import jsonschema
 import yaml
 

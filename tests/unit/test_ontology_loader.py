@@ -1,6 +1,7 @@
 """Tests for the deterministic ontology loader (Issue #168)."""
 
 from pathlib import Path
+
 import pytest
 import yaml
 

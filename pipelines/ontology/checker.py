@@ -10,6 +10,7 @@ Performs:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -123,17 +124,21 @@ def check_ontology(
                 errors.append(f"Review requirement: validated entry '{entry.id}' must declare 'reviewed_at'")
 
     # 5. Projection tool shapes
-    valid_tools = {"nautobot", "kubernetes_cilium", "suse_sylva_capi", "ansible", "otel_semconv"}
+    tool_key_re = re.compile(r"^[a-z0-9_]+$")
     for entry in entries:
         for tool_name, tool_data in entry.projections.items():
             if tool_name.startswith("_"):
                 continue  # internal metadata
+            if not tool_key_re.match(tool_name):
+                errors.append(
+                    f"Projection tool name: key '{tool_name}' in '{entry.id}' must be snake_case"
+                )
             if not isinstance(tool_data, dict):
                 errors.append(
                     f"Projection shape: projection '{tool_name}' in '{entry.id}' must be a mapping"
                 )
                 continue
-            if tool_name in valid_tools and len(tool_data) == 0:
+            if len(tool_data) == 0:
                 warnings.append(
                     f"Projection shape: empty projection for tool '{tool_name}' in '{entry.id}'"
                 )

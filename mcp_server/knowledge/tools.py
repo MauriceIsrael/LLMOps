@@ -3053,8 +3053,8 @@ def get_ontology_term(
         revision: Optional revision integer. If specified and not held, raises error without fallback.
     """
     from pipelines.ontology.gateway import is_ontology_experimental_enabled
+    from pipelines.ontology.ledger import OntologyResolutionError, resolve_ontology_entry
     from pipelines.ontology.loader import load_ontology_entries
-    from pipelines.ontology.ledger import resolve_ontology_entry, OntologyResolutionError
 
     if not is_ontology_experimental_enabled():
         return not_found_response("experimental_ontology_disabled")

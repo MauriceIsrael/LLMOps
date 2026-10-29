@@ -91,37 +91,22 @@
     },
     "projections": {
       "type": "object",
-      "description": "Projections taxonomiques par outil d'infrastructure.",
+      "description": "Projections taxonomiques par outil d'infrastructure (cles snake_case).",
+      "propertyNames": {
+        "pattern": "^[a-z0-9_]+$"
+      },
       "additionalProperties": {
         "type": "object"
-      },
-      "properties": {
-        "nautobot": {
-          "type": "object",
-          "description": "Attributs taxonomiques Nautobot DCIM / IPAM."
-        },
-        "kubernetes_cilium": {
-          "type": "object",
-          "description": "Labels, namespaces et sélecteurs de NetworkPolicy Cilium."
-        },
-        "suse_sylva_capi": {
-          "type": "object",
-          "description": "Définitions SUSE Sylva / Cluster API (Metal3, RKE2)."
-        },
-        "ansible": {
-          "type": "object",
-          "description": "Variables de groupe et rôles d'inventaire Ansible."
-        },
-        "otel_semconv": {
-          "type": "object",
-          "description": "Attributs OpenTelemetry Semantic Conventions."
-        }
       }
     },
     "status": {
       "type": "string",
       "description": "Statut de gouvernance de l'entrée.",
-      "enum": ["draft", "validated", "rejected"]
+      "enum": [
+        "draft",
+        "validated",
+        "rejected"
+      ]
     },
     "revision": {
       "type": "integer",

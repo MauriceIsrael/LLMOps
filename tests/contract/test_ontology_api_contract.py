@@ -1,7 +1,7 @@
 """Contract and integration tests for experimental ontology API and MCP tools (Issue #175)."""
 
-import json
 from pathlib import Path
+
 import pytest
 from starlette.testclient import TestClient
 

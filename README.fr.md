@@ -154,6 +154,7 @@ poetry run kb remind   # à planifier par cron
 
 ## Liens vers la Documentation
 
+- **[Ontologie Fédératrice & Projections Outillage (ADR-KH-02)](docs/adr/ADR-KH-02-ontologie-federatrice-projections.md)** : Spécification d'architecture de l'ontologie fédératrice (concepts intensionnels, projections outillage Nautobot, Cilium, Sylva/CAPI, Ansible, OTel, registre de révisions et endpoints REST/MCP sous le drapeau `LLMOPS_EXPERIMENTAL_ONTOLOGY=1`). Voir le [Guide de Rédaction](data/kb/ontology/README.md).
 - **[Couverture réglementaire](docs/COVERAGE.md)** : couverture de chaque référentiel par la base (manifestes, exigences manquantes).
 - **[Versionnement](docs/VERSIONING.md)** et **[Politique de dépréciation](docs/DEPRECATION.md)** : garanties du contrat `1.x`, formes d'interfaces gelées (`tests/contract/frozen/`), signaux de dépréciation. La partie engagement (élicitation / arbitrage) est **dépréciée depuis la 1.13** au profit d'Archinex : voir le [guide de migration](docs/migration-archinex.md).
 - **[Contrat d'API Knowledge Hub v1](docs/contracts/knowledge-hub-api-v1.md)** : Spécification contractuelle pour l'Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).

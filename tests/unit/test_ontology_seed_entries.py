@@ -7,9 +7,8 @@ Verifies:
 4. Status is draft.
 """
 
-from pathlib import Path
 import re
-import pytest
+from pathlib import Path
 
 from pipelines.ontology.checker import check_ontology
 from pipelines.ontology.loader import load_ontology_entries

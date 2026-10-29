@@ -6,8 +6,9 @@ Every invalid fixture must fail validation, naming the specific causing field.
 
 import json
 from pathlib import Path
-import pytest
+
 import jsonschema
+import pytest
 
 ROOT = Path(__file__).parent.parent.parent
 SCHEMA_PATH = ROOT / "schemas" / "ontology_entry.schema.json"
