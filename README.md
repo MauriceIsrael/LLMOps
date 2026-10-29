@@ -174,6 +174,7 @@ poetry run elicit scan --engagement demo-engagement-2027 --max-questions 3
 
 ## Documentation Links
 
+- **[Federating Ontology & Tool Projections (ADR-KH-02)](docs/adr/ADR-KH-02-ontologie-federatrice-projections.md)**: Architecture decision and specification for the federating ontology (intensional concepts, tool projections to Nautobot, Cilium, Sylva/CAPI, Ansible, OTel, revision ledger, and experimental REST/MCP endpoints under `LLMOPS_EXPERIMENTAL_ONTOLOGY=1`). See the [Authoring Guide](data/kb/ontology/README.md).
 - **[Knowledge Hub API v1 Contract](docs/contracts/knowledge-hub-api-v1.md)**: Formal contract specification for the Architecture Suite (`requirements-intake`, `document-engine`, `Document-studio`, `WBS-engine`).
 - **[Regulatory Coverage](docs/COVERAGE.md)**: coverage of each framework by the knowledge base (manifests, missing requirements).
 - **[Versioning](docs/VERSIONING.md)** and **[Deprecation Policy](docs/DEPRECATION.md)**: contract `1.x` guarantees, frozen interface shapes (`tests/contract/frozen/`), deprecation signals. The engagement part (elicitation / arbitration) is **deprecated since 1.13** in favour of Archinex: see the [migration guide](docs/migration-archinex.md).

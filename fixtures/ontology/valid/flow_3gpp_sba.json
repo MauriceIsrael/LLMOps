@@ -1,0 +1,39 @@
+{
+  "id": "urn:llmops:ontology:TrafficFlow:3gpp_sba_control",
+  "term": "Flux de Contrôle 3GPP SBA",
+  "concept_class": "TrafficFlow",
+  "definition": "Flux HTTP/2 TLS véhiculant les communications orientées services (Service Based Architecture) entre fonctions réseau 5G.",
+  "synonyms": [
+    "3GPP SBA Control Flow",
+    "Flux SBA 5G"
+  ],
+  "relationships": {
+    "forbids_substrate": [
+      "urn:llmops:ontology:ComputeSubstrate:virtualized_vm"
+    ]
+  },
+  "projections": {
+    "kubernetes_cilium": {
+      "port": 8443,
+      "protocol": "TCP",
+      "l7_rules": [
+        {
+          "http": [
+            {
+              "method": "POST"
+            }
+          ]
+        }
+      ]
+    },
+    "otel_semconv": {
+      "rpc_system": "http",
+      "network_transport": "tcp"
+    }
+  },
+  "status": "validated",
+  "revision": 1,
+  "reviewed_by": "@telecom-security-lead",
+  "reviewed_at": "2026-10-29T10:00:00Z",
+  "review_source": "3GPP TS 29.500 v17.4.0 & validation Lab Sylva"
+}

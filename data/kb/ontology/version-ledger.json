@@ -1,0 +1,4 @@
+{
+  "description": "Append-only record of canonical-json v1 SHA-256 content hashes for ontology revisions (cadre expérimental EDP, Issue #172). An entry's {urn, revision} always resolves to the exact same bytes.",
+  "revisions": {}
+}

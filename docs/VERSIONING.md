@@ -109,6 +109,16 @@ A major version increment occurs when breaking changes are introduced.
 
 ---
 
+## 3.1 Experimental Features (Flagged)
+
+Capabilities under experimental evaluation (such as the Federating Ontology & Tool Projections, [ADR-KH-02](adr/ADR-KH-02-ontologie-federatrice-projections.md) and [contract §5.41](contracts/knowledge-hub-api-v1.md#541-expérimental-ontologie-fédératrice-à-projections-taxonomiques-issues-165-175)) are gated behind specific environment variables (e.g. `LLMOPS_EXPERIMENTAL_ONTOLOGY=1`).
+
+- **Non-regression guarantee**: When the experimental flag is absent or falsy (`0`, `false`, unset), all existing behavior, endpoints, and snapshot formats remain strictly byte-for-byte identical.
+- **Contract versioning**: Experimental features do not advance the stable `schema_version` (remains `1.40`). Experimental endpoints and tools return `"experimental": true` in their envelopes.
+- **Graduation**: An experimental capability is graduated to the stable contract only after formal review, RFC closure, and explicit contract version increment (`1.41+`).
+
+---
+
 ## 4. Contract Schemas & Types
 
 - **JSON Schemas**: Available in [`schemas/envelope.schema.json`](../schemas/envelope.schema.json).

@@ -1,0 +1,14 @@
+{
+  "id": "urn:llmops:ontology:SecurityZone:invalid_rel",
+  "term": "Terme Relation Invalide",
+  "concept_class": "SecurityZone",
+  "definition": "Relation non autorisée par le schéma.",
+  "synonyms": ["Zone test"],
+  "relationships": {
+    "connected_to": [
+      "urn:llmops:ontology:SecurityZone:public_internet"
+    ]
+  },
+  "status": "draft",
+  "revision": 1
+}

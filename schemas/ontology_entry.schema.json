@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OntologyEntry",
+  "description": "Schéma formel d'une entrée d'ontologie fédératrice (cadre expérimental EDP).",
+  "type": "object",
+  "required": [
+    "id",
+    "term",
+    "concept_class",
+    "definition",
+    "synonyms",
+    "status",
+    "revision"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Alias URN citable unique (ex. urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s).",
+      "pattern": "^urn:llmops:ontology:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$"
+    },
+    "term": {
+      "type": "string",
+      "description": "Nom lisible du terme ou concept.",
+      "minLength": 1
+    },
+    "concept_class": {
+      "type": "string",
+      "description": "Classe conceptuelle fermée de l'ontologie.",
+      "enum": [
+        "SecurityZone",
+        "NetworkFunction",
+        "ComputeSubstrate",
+        "DataClassification",
+        "TrafficFlow",
+        "Actor"
+      ]
+    },
+    "definition": {
+      "type": "string",
+      "description": "Définition sémantique concise et intensionnelle du concept.",
+      "minLength": 1
+    },
+    "synonyms": {
+      "type": "array",
+      "description": "Liste de synonymes ou variantes lexicales (sans doublons dans l'entrée).",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "relationships": {
+      "type": "object",
+      "description": "Relations formelles vers d'autres URNs d'ontologie.",
+      "additionalProperties": false,
+      "properties": {
+        "isolated_from": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^urn:llmops:ontology:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$"
+          },
+          "uniqueItems": true
+        },
+        "forbids_substrate": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^urn:llmops:ontology:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$"
+          },
+          "uniqueItems": true
+        },
+        "requires_capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^urn:llmops:ontology:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$"
+          },
+          "uniqueItems": true
+        },
+        "allowed_traffic_classes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^urn:llmops:ontology:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "projections": {
+      "type": "object",
+      "description": "Projections taxonomiques par outil d'infrastructure (cles snake_case).",
+      "propertyNames": {
+        "pattern": "^[a-z0-9_]+$"
+      },
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "status": {
+      "type": "string",
+      "description": "Statut de gouvernance de l'entrée.",
+      "enum": [
+        "draft",
+        "validated",
+        "rejected"
+      ]
+    },
+    "revision": {
+      "type": "integer",
+      "description": "Numéro de révision séquentiel (entier >= 1).",
+      "minimum": 1
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "Identifiant ou handle du relecteur expert (requis si validated)."
+    },
+    "reviewed_at": {
+      "type": "string",
+      "description": "Horodatage de la validation de l'entrée."
+    },
+    "review_source": {
+      "type": "string",
+      "description": "Référence documentaire ou environnement de test validant les projections."
+    }
+  }
+}
