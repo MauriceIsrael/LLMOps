@@ -588,6 +588,28 @@ def embeddings_index_cmd(kb_dir: Path = KB_DIR_OPTION) -> None:
     console.print_json(json.dumps(res, ensure_ascii=False))
 
 
+
+ontology_app = typer.Typer(help="Ontology operations (EDP experimental, Issues #172, #173).", no_args_is_help=True)
+app.add_typer(ontology_app, name="ontology")
+
+
+@ontology_app.command("record")
+def ontology_record_cmd(
+    ontology_dir: Path = typer.Option(Path("data/kb/ontology"), "--ontology-dir", help="Path to ontology directory."),
+    ledger_path: Path | None = typer.Option(None, "--ledger", help="Path to version-ledger.json."),
+    all_statuses: bool = typer.Option(False, "--all", help="Record all entries regardless of status (default: validated only)."),
+) -> None:
+    """Record new ontology revisions into version-ledger.json (Issue #172)."""
+    from pipelines.ontology.loader import load_ontology_entries
+    from pipelines.ontology.ledger import DEFAULT_LEDGER_NAME, verify_or_record_ontology_ledger, write_ontology_ledger
+
+    entries = load_ontology_entries(ontology_dir)
+    l_path = ledger_path if ledger_path is not None else ontology_dir / DEFAULT_LEDGER_NAME
+    updated = verify_or_record_ontology_ledger(entries, l_path, record=True, validated_only=not all_statuses)
+    write_ontology_ledger(l_path, updated)
+    console.print(f"[green]Successfully recorded ontology revisions into {l_path}[/green]")
+
+
 def main() -> None:
     app()
 
