@@ -88,6 +88,8 @@ from mcp_server.knowledge.tools import (
     get_governance_events,
     get_graph_summary,
     get_jwks,
+    get_ontology_term,
+    list_ontology_terms,
     get_kb_audit,
     get_kb_candidate,
     get_kb_freshness,
@@ -186,6 +188,11 @@ mcp.tool()(create_kb_delegation)
 mcp.tool()(revoke_kb_delegation)
 mcp.tool()(revoke_kb_auth)
 mcp.tool()(get_kb_audit)
+
+from pipelines.ontology.gateway import is_ontology_experimental_enabled
+if is_ontology_experimental_enabled():
+    mcp.tool()(list_ontology_terms)
+    mcp.tool()(get_ontology_term)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -621,6 +628,30 @@ def create_starlette_app() -> Starlette:
         data = json.loads(snap_file.read_text(encoding="utf-8"))
         etag = data.get("payload_sha256", "")
         return JSONResponse(data, headers={"ETag": etag, "Cache-Control": "public, max-age=86400"})
+
+    async def handle_ontology_list(request):
+        from pipelines.ontology.gateway import is_ontology_experimental_enabled
+        if not is_ontology_experimental_enabled():
+            return JSONResponse({"error": "Experimental ontology feature is disabled"}, status_code=404)
+        c_class = request.query_params.get("concept_class") or None
+        status = request.query_params.get("status") or None
+        res = list_ontology_terms(concept_class=c_class, status=status)
+        return JSONResponse(res, status_code=200)
+
+    async def handle_ontology_get(request):
+        from pipelines.ontology.gateway import is_ontology_experimental_enabled
+        if not is_ontology_experimental_enabled():
+            return JSONResponse({"error": "Experimental ontology feature is disabled"}, status_code=404)
+        urn = request.path_params.get("urn", "")
+        rev_param = request.query_params.get("revision")
+        rev = int(rev_param) if rev_param and rev_param.isdigit() else None
+        res = get_ontology_term(urn, revision=rev)
+        status_code = 200
+        if res.get("status") == "not_found":
+            status_code = 404
+        elif res.get("status") == "invalid_argument":
+            status_code = 400
+        return JSONResponse(res, status_code=status_code)
 
     async def handle_knowledge_asset(request):
         """Citable resolution of one element from a sealed snapshot (K3): ``?version=`` and ``?snapshot=`` are optional."""
@@ -1687,9 +1718,7 @@ def create_starlette_app() -> Starlette:
             body.update(action=exc.action, reason=exc.reason, message="The caller lacks the role this action requires")
         return JSONResponse(body, status_code=403)
 
-    return Starlette(
-        debug=settings.DEBUG,
-        routes=[
+    routes = [
             Route("/health", endpoint=handle_health, methods=["GET"]),
             Route("/healthz", endpoint=handle_health, methods=["GET"]),
             Route("/ready", endpoint=handle_ready, methods=["GET"]),
@@ -1699,6 +1728,7 @@ def create_starlette_app() -> Starlette:
             Route("/visualize", endpoint=handle_visualize, methods=["GET"]),
             Route("/snapshot/latest", endpoint=handle_snapshot_latest, methods=["GET"]),
             Route("/snapshot/{snapshot_id}", endpoint=handle_snapshot_by_id, methods=["GET"]),
+            
             Route("/api/knowledge/assets/{asset_id}", endpoint=handle_knowledge_asset, methods=["GET"]),
             Route("/api/knowledge/assets/{asset_id}/history", endpoint=handle_knowledge_asset_history, methods=["GET"]),
             Route("/api/knowledge/search", endpoint=handle_knowledge_search, methods=["GET"]),
@@ -1797,7 +1827,16 @@ def create_starlette_app() -> Starlette:
             Route("/api/knowledge/delegations/{delegation_id}/revoke", endpoint=handle_delegation_revoke, methods=["POST"]),
             Route("/api/knowledge/auth/revoke", endpoint=handle_auth_revoke, methods=["POST"]),
             Route("/api/knowledge/audit", endpoint=handle_kb_audit, methods=["GET"]),
-        ],
+    ]
+    from pipelines.ontology.gateway import is_ontology_experimental_enabled
+    if is_ontology_experimental_enabled():
+        routes.extend([
+            Route("/api/knowledge/ontology", endpoint=handle_ontology_list, methods=["GET"]),
+            Route("/api/knowledge/ontology/{urn:path}", endpoint=handle_ontology_get, methods=["GET"]),
+        ])
+    return Starlette(
+        debug=settings.DEBUG,
+        routes=routes,
         middleware=[Middleware(AuthMiddleware)],
         exception_handlers={Unauthorised: handle_unauthorised, InvalidEngagementIdError: handle_invalid_engagement},
     )

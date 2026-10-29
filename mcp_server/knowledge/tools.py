@@ -3012,3 +3012,67 @@ def get_jwks() -> dict[str, Any]:
 
     jwks = get_jwks_registry().to_jwks()
     return ok_response(jwks, count=len(jwks.get("keys", [])))
+
+def list_ontology_terms(
+    concept_class: str | None = None,
+    status: str | None = None,
+) -> dict[str, Any]:
+    """List federated ontology terms and projections (experimental EDP feature, Issue #175).
+
+    Args:
+        concept_class: Optional filter by concept class (e.g. 'SecurityZone', 'ComputeSubstrate').
+        status: Optional status filter ('draft', 'validated', 'rejected').
+    """
+    from pipelines.ontology.gateway import is_ontology_experimental_enabled
+    from pipelines.ontology.loader import load_ontology_entries
+
+    if not is_ontology_experimental_enabled():
+        return not_found_response("experimental_ontology_disabled")
+
+    try:
+        ont_dir = Path(server_config.kb_dir) / "ontology"
+        entries = load_ontology_entries(ont_dir)
+        if concept_class:
+            entries = [e for e in entries if e.concept_class == concept_class]
+        if status:
+            entries = [e for e in entries if e.status == status]
+        items = [e.to_dict() for e in entries]
+        return ok_response(items, count=len(items), experimental=True)
+    except Exception as e:
+        return handle_exception_response(e, context_action="list_ontology_terms")
+
+
+def get_ontology_term(
+    urn: str,
+    revision: int | None = None,
+) -> dict[str, Any]:
+    """Retrieve a specific ontology term by its citable URN and optional revision (Issue #175).
+
+    Args:
+        urn: Citable ontology URN (e.g. 'urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s').
+        revision: Optional revision integer. If specified and not held, raises error without fallback.
+    """
+    from pipelines.ontology.gateway import is_ontology_experimental_enabled
+    from pipelines.ontology.loader import load_ontology_entries
+    from pipelines.ontology.ledger import resolve_ontology_entry, OntologyResolutionError
+
+    if not is_ontology_experimental_enabled():
+        return not_found_response("experimental_ontology_disabled")
+
+    try:
+        ont_dir = Path(server_config.kb_dir) / "ontology"
+        entries = load_ontology_entries(ont_dir)
+        entry = resolve_ontology_entry(entries, urn, revision=revision)
+        return ok_response(entry.to_dict(), count=1, experimental=True)
+    except OntologyResolutionError as exc:
+        return {
+            "status": "not_found",
+            "reason": exc.reason,
+            "message": str(exc),
+            "id": urn,
+            "requested_revision": exc.detail.get("requested_revision"),
+            "experimental": True,
+        }
+    except Exception as e:
+        return handle_exception_response(e, context_action="get_ontology_term")
+
