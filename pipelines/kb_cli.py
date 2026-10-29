@@ -610,6 +610,20 @@ def ontology_record_cmd(
     console.print(f"[green]Successfully recorded ontology revisions into {l_path}[/green]")
 
 
+
+@ontology_app.command("export")
+def ontology_export_cmd(
+    ontology_dir: Path = typer.Option(Path("data/kb/ontology"), "--ontology-dir", help="Path to ontology directory."),
+    output_path: Path = typer.Option(Path("data/snapshots/ontology_export.json"), "--output", "-o", help="Output path for ontology export."),
+    ledger_path: Path | None = typer.Option(None, "--ledger", help="Path to version-ledger.json."),
+) -> None:
+    """Export sealed ontology snapshot (canonical-json v1, Issue #173)."""
+    from pipelines.ontology.export import export_ontology_snapshot
+
+    export_ontology_snapshot(ontology_dir, output_path=output_path, ledger_path=ledger_path)
+    console.print(f"[green]Ontology exported and sealed to {output_path}[/green]")
+
+
 def main() -> None:
     app()
 
