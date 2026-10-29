@@ -420,6 +420,7 @@ def check_cmd(
     db_path: Path = DB_PATH_OPTION,
     strict: bool = typer.Option(False, "--strict", help="Also fail when the graph carries no file fingerprint (built before #85)."),
     as_json: bool = typer.Option(False, "--json", help="JSON output."),
+    experimental_ontology: bool = typer.Option(False, "--experimental-ontology", help="Check referential integrity and quality of ontology entries (Issue #169)."),
 ) -> None:
     """Check that the compiled graph (what the option judge reads) describes the knowledge base files (issue #85).
 
@@ -430,6 +431,14 @@ def check_cmd(
 
     client = ReadOnlyKuzuClient(db_path=db_path)
     report = check_compiled_base(kb_dir, lambda q, p: client.execute_cypher(q, p))
+
+    ont_report = None
+    if experimental_ontology:
+        from pipelines.ontology.checker import check_ontology
+        ont_report = check_ontology(kb_dir / "ontology", strict=strict)
+        if as_json:
+            report["experimental_ontology"] = ont_report.to_dict()
+
     if as_json:
         console.print_json(json.dumps(report, ensure_ascii=False))
     else:
@@ -445,7 +454,18 @@ def check_cmd(
                 console.print(f"  {label}: {report[key]['count']} ({shown})")
         if report.get("reason"):
             console.print(f"[{'red' if report['status'] == 'stale' else 'yellow'}]{report['reason']}[/]")
-    if report["status"] == "stale" or (strict and report["status"] == "unverified"):
+
+        if ont_report is not None:
+            ont_colour = "green" if ont_report.status == "ok" else "red"
+            console.print(f"[bold {ont_colour}]ONTOLOGY CHECK {ont_report.status.upper()}[/bold {ont_colour}]  "
+                          f"{ont_report.entries_count} entries in {kb_dir / 'ontology'}")
+            for err in ont_report.errors:
+                console.print(f"  [red]error:[/] {err}")
+            for warn in ont_report.warnings:
+                console.print(f"  [yellow]warning:[/] {warn}")
+
+    has_ont_error = ont_report is not None and ont_report.status == "error"
+    if report["status"] == "stale" or (strict and report["status"] == "unverified") or has_ont_error:
         raise typer.Exit(code=1)
 
 
