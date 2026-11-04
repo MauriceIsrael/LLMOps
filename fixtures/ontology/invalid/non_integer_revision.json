@@ -1,0 +1,9 @@
+{
+  "id": "urn:llmops:ontology:ComputeSubstrate:invalid_rev",
+  "term": "Terme Révision Invalide",
+  "concept_class": "ComputeSubstrate",
+  "definition": "Révision non entière (nombre flottant).",
+  "synonyms": ["Revision float"],
+  "status": "draft",
+  "revision": 1.5
+}

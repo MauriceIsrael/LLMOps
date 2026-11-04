@@ -1,0 +1,8 @@
+{
+  "id": "urn:llmops:ontology:ComputeSubstrate:invalid_missing_term",
+  "concept_class": "ComputeSubstrate",
+  "definition": "Description valide sans le champ obligatoire term.",
+  "synonyms": ["Substrat"],
+  "status": "draft",
+  "revision": 1
+}

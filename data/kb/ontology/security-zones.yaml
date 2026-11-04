@@ -1,0 +1,82 @@
+- id: urn:llmops:ontology:SecurityZone:signaling
+  term: Zone de Signalisation
+  concept_class: SecurityZone
+  definition: Zone de sécurité logique réservée aux fonctions de contrôle et de signalisation du cœur de réseau télécom.
+  synonyms:
+    - Zone de signalisation
+    - Signaling security zone
+  relationships:
+    isolated_from:
+      - urn:llmops:ontology:SecurityZone:public_internet
+    allowed_traffic_classes:
+      - urn:llmops:ontology:TrafficFlow:3gpp_sba_control
+  projections:
+    kubernetes_cilium:
+      namespace: telco-signaling
+      zone_label: signaling
+    nautobot:
+      vrf: VRF-SIGNALING
+      security_zone: signaling
+  status: draft
+  revision: 1
+  review_source: Architecture de sécurité 3GPP TS 33.501
+
+- id: urn:llmops:ontology:SecurityZone:user_plane
+  term: Zone Plan Utilisateur
+  concept_class: SecurityZone
+  definition: Zone de sécurité acheminant le trafic de données utiles des abonnés (UPF, encapsulation GTP-U).
+  synonyms:
+    - Zone plan utilisateur
+    - User plane security zone
+  relationships:
+    isolated_from:
+      - urn:llmops:ontology:SecurityZone:public_internet
+  projections:
+    kubernetes_cilium:
+      namespace: telco-user-plane
+      zone_label: user-plane
+    nautobot:
+      vrf: VRF-USER-PLANE
+      security_zone: user-plane
+  status: draft
+  revision: 1
+  review_source: Architecture de sécurité 3GPP TS 33.501
+
+- id: urn:llmops:ontology:SecurityZone:public_internet
+  term: Zone Internet Public
+  concept_class: SecurityZone
+  definition: Zone non fiable externe représentant le réseau Internet public et les points d'interconnexion non maîtrisés.
+  synonyms:
+    - Internet public
+    - Public internet untrusted zone
+  relationships:
+    isolated_from:
+      - urn:llmops:ontology:SecurityZone:signaling
+      - urn:llmops:ontology:SecurityZone:user_plane
+  projections:
+    kubernetes_cilium:
+      zone_label: public-internet
+    nautobot:
+      vrf: VRF-EXTERNAL
+      security_zone: public-internet
+  status: draft
+  revision: 1
+  review_source: Norme de segmentation réseau ANSSI / CIS
+
+- id: urn:llmops:ontology:TrafficFlow:3gpp_sba_control
+  term: Flux de Contrôle 3GPP SBA
+  concept_class: TrafficFlow
+  definition: Flux d'appels d'API REST HTTP/2 chiffrés mutuellement (mTLS) échangés entre Network Functions dans l'architecture SBA 5G.
+  synonyms:
+    - Flux de contrôle SBA
+    - 3GPP SBA control traffic flow
+  relationships:
+    forbids_substrate:
+      - urn:llmops:ontology:ComputeSubstrate:virtualized_vm
+  projections:
+    kubernetes_cilium:
+      protocol: TCP
+      port: 8443
+  status: draft
+  revision: 1
+  review_source: Spécification technique 3GPP TS 29.500

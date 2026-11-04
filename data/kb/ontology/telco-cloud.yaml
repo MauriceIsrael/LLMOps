@@ -1,0 +1,57 @@
+- id: urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s
+  term: Bare Metal Kubernetes
+  concept_class: ComputeSubstrate
+  definition: Substrat d'infrastructure de nœuds d'exécution Kubernetes déployés directement sur serveurs physiques sans hyperviseur.
+  synonyms:
+    - Nœud Kubernetes physique
+    - Bare metal K8s node
+  relationships:
+    requires_capabilities:
+      - urn:llmops:ontology:ComputeSubstrate:oob_redfish
+      - urn:llmops:ontology:ComputeSubstrate:realtime_kernel
+    forbids_substrate:
+      - urn:llmops:ontology:ComputeSubstrate:virtualized_vm
+  projections:
+    suse_sylva_capi:
+      cluster_class: Metal3Cluster
+      control_plane: RKE2ControlPlane
+      os_profile: sle-micro-rt
+    nautobot:
+      role: telco-baremetal-worker
+      device_type: telco-baremetal-server
+  status: draft
+  revision: 1
+  review_source: Spécification PoC ADR-012 SUSE Sylva & Nautobot DCIM
+
+- id: urn:llmops:ontology:ComputeSubstrate:virtualized_vm
+  term: Machine Virtuelle Hypervisée
+  concept_class: ComputeSubstrate
+  definition: Substrat d'exécution virtualisé hébergé au-dessus d'une couche d'hypervision de type 1 ou 2.
+  synonyms:
+    - Machine virtuelle
+    - Virtualized VM substrate
+  status: draft
+  revision: 1
+  review_source: Spécification PoC ADR-012
+
+- id: urn:llmops:ontology:ComputeSubstrate:oob_redfish
+  term: Gestion Hors-Bande Redfish
+  concept_class: ComputeSubstrate
+  definition: Capacité de télégestion et contrôle matériel hors-bande via protocole standard DMTF Redfish / IPMI.
+  synonyms:
+    - Contrôle hors bande Redfish
+    - Out-of-band Redfish management
+  status: draft
+  revision: 1
+  review_source: Spécification PoC ADR-012
+
+- id: urn:llmops:ontology:ComputeSubstrate:realtime_kernel
+  term: Noyau Temps Réel
+  concept_class: ComputeSubstrate
+  definition: Noyau de système d'exploitation patché PREEMPT_RT garantissant des latences d'ordonnancement déterministes pour charges télécoms.
+  synonyms:
+    - Noyau temps réel RT
+    - Real-time kernel
+  status: draft
+  revision: 1
+  review_source: Spécification PoC ADR-012

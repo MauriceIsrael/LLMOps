@@ -1,0 +1,12 @@
+{
+  "id": "urn:llmops:ontology:ComputeSubstrate:dup_syn",
+  "term": "Terme Synonyme Dupliqué",
+  "concept_class": "ComputeSubstrate",
+  "definition": "Synonyme présent en double dans l'entrée.",
+  "synonyms": [
+    "Serveur bare-metal",
+    "Serveur bare-metal"
+  ],
+  "status": "draft",
+  "revision": 1
+}

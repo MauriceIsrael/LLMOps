@@ -16,6 +16,7 @@ Ask one question: **what kind of thing did I just produce?**
 | learned what something actually cost | `estimates/` | existing `EST-xxx` |
 | been bitten by something foreseeable | `risks/` | existing `RSK-xxx` |
 | produced a diagram I will need again | `views/generators/` | generator script |
+| formalised an architecture concept with projections to infra tools (EDP) | `ontology/` | `urn:llmops:ontology:<class>:<slug>` (see [ontology guide](ontology/README.md)) |
 | agreed something with one client only | `projects/<engagement>/` | project instance |
 
 If none fits, it is probably **project context** and belongs in

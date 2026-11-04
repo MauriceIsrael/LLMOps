@@ -1,0 +1,9 @@
+{
+  "id": "invalid:urn:format",
+  "term": "Terme URN Invalide",
+  "concept_class": "ComputeSubstrate",
+  "definition": "URN ne respectant pas le motif urn:llmops:ontology:<classe>:<slug>.",
+  "synonyms": ["Mauvaise URN"],
+  "status": "draft",
+  "revision": 1
+}

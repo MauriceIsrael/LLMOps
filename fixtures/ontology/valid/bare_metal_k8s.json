@@ -1,0 +1,30 @@
+{
+  "id": "urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s",
+  "term": "Bare Metal Kubernetes",
+  "concept_class": "ComputeSubstrate",
+  "definition": "Nœud d'exécution Kubernetes déployé directement sur serveur physique sans couche d'hypervision intermédiaire.",
+  "synonyms": [
+    "Serveur physique K8s",
+    "Bare-metal K8s node",
+    "BM K8s"
+  ],
+  "relationships": {
+    "requires_capabilities": [
+      "urn:llmops:ontology:ComputeSubstrate:oob_redfish",
+      "urn:llmops:ontology:ComputeSubstrate:realtime_kernel"
+    ]
+  },
+  "projections": {
+    "suse_sylva_capi": {
+      "cluster_class": "Metal3Cluster",
+      "control_plane": "RKE2ControlPlane",
+      "os_profile": "sle-micro-rt"
+    },
+    "nautobot": {
+      "role": "telco-baremetal-worker",
+      "tags": ["bare-metal", "kubernetes"]
+    }
+  },
+  "status": "draft",
+  "revision": 1
+}

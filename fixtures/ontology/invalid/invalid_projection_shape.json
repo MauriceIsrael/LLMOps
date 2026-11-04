@@ -1,0 +1,12 @@
+{
+  "id": "urn:llmops:ontology:ComputeSubstrate:invalid_proj",
+  "term": "Terme Projection Invalide",
+  "concept_class": "ComputeSubstrate",
+  "definition": "Projection sous forme de chaîne scalaire au lieu d'un objet.",
+  "synonyms": ["Mauvaise projection"],
+  "projections": {
+    "nautobot": "tag-as-string-should-be-object"
+  },
+  "status": "draft",
+  "revision": 1
+}

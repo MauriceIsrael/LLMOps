@@ -1,0 +1,9 @@
+{
+  "id": "urn:llmops:ontology:CloudService:invalid_class",
+  "term": "Terme Invalide",
+  "concept_class": "CloudService",
+  "definition": "Classe conceptuelle absente de l'énumération autorisée.",
+  "synonyms": ["Cloud"],
+  "status": "draft",
+  "revision": 1
+}
