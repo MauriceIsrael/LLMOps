@@ -9,7 +9,9 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl build-essential g++ libstdc++6 \
     && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir poetry
+RUN python -m venv /opt/poetry \
+    && /opt/poetry/bin/pip install --no-cache-dir poetry \
+    && ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry
 
 COPY pyproject.toml poetry.lock* README.md ./
 RUN poetry config virtualenvs.create false \

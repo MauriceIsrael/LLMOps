@@ -11,7 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libstdc++6 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir poetry
+RUN python -m venv /opt/poetry \
+    && /opt/poetry/bin/pip install --no-cache-dir poetry \
+    && ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry
 
 # Ingestion de la configuration et verrou de dépendances
 COPY pyproject.toml poetry.lock* README.md ./
@@ -51,6 +53,7 @@ ENV POETRY_VIRTUALENVS_CREATE=false
 # Default engagement and blueprint of the public demo instance (formerly hard-coded defaults).
 ENV LLMOPS_ENGAGEMENT=nordwave-mcx-2027
 ENV LLMOPS_BLUEPRINT=BLU-hla-mcx
+ENV BODY_SIZE_LIMIT=50M
 
 # Ingestion et migration déterministe de la base de connaissances (Knowledge Plane)
 RUN poetry run python -m pipelines.ingestion.migrate_adr0015
