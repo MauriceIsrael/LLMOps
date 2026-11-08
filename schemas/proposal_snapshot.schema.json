@@ -139,6 +139,28 @@
                       "llm-proposed-human-approved",
                       "llm-derived"
                     ]
+                  },
+                  "assumptions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 5
+                    }
+                  },
+                  "trigger_condition": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "resulting_compliance_status": {
+                    "enum": [
+                      "Compliant",
+                      "Partially compliant",
+                      "Non-compliant"
+                    ]
+                  },
+                  "standard_reservation_template": {
+                    "type": "string",
+                    "minLength": 5
                   }
                 }
               }

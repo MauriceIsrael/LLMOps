@@ -29,6 +29,13 @@ MIN_RELEVANCE = 0.2
 # relevant by meaning. Calibrated on tests/fixtures/similarity/fr-en-doctrine.yaml (docs/deployment.md §7).
 MIN_SEMANTIC = 0.50
 
+# Non-required controls of other frameworks with zero lexical overlap require stronger semantic evidence to avoid
+# pulling unrelated regulatory articles into a subject's context package (issue #98).
+MIN_SEMANTIC_OTHER_CONTROL = 0.65
+
+# Maximum semantic drop from the top semantic match for purely semantic (lexical == 0) non-required entries (issue #98).
+MAX_SEMANTIC_DROP = 0.25
+
 # Among the required controls of a declared framework, the one closest to the subject is relevant from this lower
 # calibrated score: cosine levels vary with the wording of a subject, and the closest control of a framework the
 # subject is declared under is the one an architect looks at first (same calibration run).
@@ -135,11 +142,14 @@ def rank(
     required_fw = {f.lower() for f in (frameworks or []) if f}
     concepts = query_concepts(subject, index.vocabulary)
     best: dict[str, float] = {}
+    best_non_req_sem = 0.0
     if semantic is not None:
         for entry in index.active():
             if entry.type == "control" and entry.framework.lower() in required_fw:
                 fw = entry.framework.lower()
                 best[fw] = max(best.get(fw, 0.0), semantic.get(entry.id, 0.0))
+            else:
+                best_non_req_sem = max(best_non_req_sem, semantic.get(entry.id, 0.0))
     scored: list[ScoredEntry] = []
     for entry in index.active():
         required = entry.type == "control" and entry.framework.lower() in required_fw
@@ -150,7 +160,14 @@ def rank(
                 continue
         lexical = relevance(entry, concepts)
         sem = None if semantic is None else semantic.get(entry.id, 0.0)
-        relevant = lexical >= MIN_RELEVANCE or (sem is not None and sem >= min_semantic)
+        eff_min_sem = (
+            max(min_semantic, MIN_SEMANTIC_OTHER_CONTROL)
+            if (entry.type == "control" and not required and lexical < MIN_RELEVANCE)
+            else min_semantic
+        )
+        if not required and lexical == 0.0 and best_non_req_sem > 0.0:
+            eff_min_sem = max(eff_min_sem, round(best_non_req_sem - MAX_SEMANTIC_DROP, 4))
+        relevant = lexical >= MIN_RELEVANCE or (sem is not None and sem >= eff_min_sem)
         if required and sem is not None and sem >= MIN_SEMANTIC_BEST and sem >= best[entry.framework.lower()]:
             relevant = True
         if required or relevant:

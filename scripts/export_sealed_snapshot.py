@@ -240,6 +240,14 @@ def export_sealed_snapshot(
         if vendor_name:
             asset_obj["vendor"] = vendor_name
 
+        from pipelines.kb_candidates.kb import split_frontmatter
+
+        asset_fm, _ = split_frontmatter(full_content)
+        if asset_fm:
+            for harv_key in ("trigger_condition", "resulting_compliance_status", "standard_reservation_template"):
+                if asset_fm.get(harv_key):
+                    asset_obj[harv_key] = asset_fm[harv_key]
+
         enriched_assets.append(asset_obj)
 
         applicability_index[aid] = {

@@ -80,7 +80,8 @@ def test_ingest_review_apply_declare(env):
     for r in rows:
         r.update(decision="accept", reviewer=EXPERT, comment="Verbatim text checked against the OJ")
         if r["requirement_id"] == "NIS2-ART23-4":
-            r.update(decision="amend", links="P-008",
+            r.update(decision="amend", title="Notification stages, timelines and early warning (Art. 23(4))",
+                     links="P-008",
                      acceptance_criteria="Incident notification pipeline meets the 24h/72h/1-month deadlines")
     with sheet.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=list(rows[0]))
@@ -92,8 +93,12 @@ def test_ingest_review_apply_declare(env):
     assert "promoted: 19" in out.output
     new = _fm(kb / "controls" / "NIS2" / "NIS2-ART23-4.md")
     assert new["status"] == "active" and new["validated_by"] == [EXPERT]
+    assert new["title"] == "Notification stages, timelines and early warning (Art. 23(4))"
     assert new["satisfied_by"] == ["P-008"] and new["links_production_mode"] == "human-authored"
     assert "24h/72h/1-month" in (kb / "controls" / "NIS2" / "NIS2-ART23-4.md").read_text()
+    assert "# NIS2-ART23-4 — Notification stages, timelines and early warning (Art. 23(4))" in (
+        kb / "controls" / "NIS2" / "NIS2-ART23-4.md"
+    ).read_text()
     existing = kb / "controls" / "NIS2" / "NIS2-ART21-2A.md"
     assert "Formal risk identification" in existing.read_text()  # curated content kept
     assert _fm(existing)["validated_by"] == [EXPERT]

@@ -330,3 +330,44 @@ def test_settings_are_read_from_the_environment(monkeypatch):
     monkeypatch.setenv("KB_EMBEDDINGS", "no")
     s = encoder_mod.settings()
     assert s.threads == 4 and s.enabled == "off" and s.model == E5_SMALL.id
+
+
+def test_similarity_config_calibrates_reference_model_and_keeps_toy_uncalibrated():
+    """Issue #97 — Reference model uses calibrated thresholds while client/toy models keep uncalibrated defaults."""
+    from pipelines.similarity.search import load_config
+
+    kb = ROOT / "data" / "kb"
+    default_cfg = load_config(kb)
+    assert default_cfg["status"] == "uncalibrated"
+    assert load_config(kb, model="toy-bow")["status"] == "uncalibrated"
+
+    e5_cfg = load_config(kb, model=E5_SMALL.id)
+    assert e5_cfg["status"] == "calibrated"
+    assert e5_cfg["thresholds"] == {"strong": 0.72, "possible": 0.50}
+
+
+def test_hybrid_context_filters_noisy_non_required_tail(index):  # noqa: F811
+    """Issue #98 — Purely semantic non-required items far below the top match or unrelated controls are filtered out."""
+    semantic = {
+        "P-100": 0.88,
+        "PAT-100": 0.52,  # 0.36 behind P-100 (> MAX_SEMANTIC_DROP=0.25) with 0 lexical overlap -> filtered
+        "FW2-01": 0.60,   # non-required control below MIN_SEMANTIC_OTHER_CONTROL (0.65) -> filtered
+    }
+    ctx = build_doctrine_context(index, "validation par une personne", frameworks=["FW1"], semantic=semantic)
+    non_required_ids = [i["id"] for i in ctx["items"] if not i["required"]]
+    assert non_required_ids == ["P-100"]
+
+
+def test_index_status_and_warm_up_report_readiness(gov, monkeypatch):
+    """Issue #100 — index_status reports missing -> ready after warm_up."""
+    kb, _ = gov
+    monkeypatch.setenv("KB_EMBEDDINGS", "on")
+    monkeypatch.setenv("KB_EMBEDDING_MODEL", "toy-bow")
+    reset_cache()
+    semantic_mod.reset()
+
+    before = semantic_mod.index_status(kb)
+    assert before["index_status"] == "missing" and before["indexed_assets"] == 0 and before["active_assets"] > 50
+
+    after = semantic_mod.warm_up(kb)
+    assert after["index_status"] == "ready" and after["indexed_assets"] == after["active_assets"]

@@ -94,4 +94,4 @@ signal.
 | Interface | Status | Since | Replaced by | Guide |
 |---|---|---|---|---|
 | `POST /api/elicitation/trigger`, `GET /api/elicitation/questions`, `GET /api/arbitration/{board,conflicts,statements}`, MCP engagement tools (`get_subject`, `get_subject_trajectory`, `get_board`, `get_statements`, `get_conflicts`, `get_open_questions`, `get_diagram_graph`, `get_render_payload`, `get_dangling_references`, `get_engagement_export`) | **in service** | deprecated 1.13, cancelled 1.14 | — | [migration-archinex.md](migration-archinex.md) (history) |
-| `/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint`, `shred_rfp`, `generate_zero_draft_hld`, `trigger_rfp_elicitation`, skills catalogue | legacy | 1.13 | — (other consumers) | — |
+| `/api/rfp/shred-to-candidates`, `/api/documents/zero-draft-blueprint`, `/api/rfp/coverage-gaps`, `shred_rfp`, `generate_zero_draft_hld`, `get_rfp_coverage_gaps`, `trigger_rfp_elicitation`, skills catalogue | **frozen / legacy (K4)** | 1.13 | Suite Document Engine (`POST /api/prose/suggest-batch` + sealed snapshots) & Requirements Intake | [ADR-KH-01 K4](adr/ADR-KH-01-contrats-exposes.md) |

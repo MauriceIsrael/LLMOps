@@ -117,13 +117,27 @@ def _content_for(row: dict[str, str], staging: Path, kb_dir: Path, meta: dict[st
         fm, body, target = dict(draft_fm), draft_body, None
         if criteria:
             body = _with_criteria(body, criteria)
+    row_title = (row.get("title") or "").strip()
+    draft_title = str(draft_fm.get("title") or "").strip()
+    amended_title = row_title if (amend and row_title and row_title != draft_title) else str(draft_fm.get("proposed_title") or "").strip()
+    title_en_override = bool((amend and row_title and row_title != draft_title) or draft_fm.get("title_override"))
     proposed_terms = [str(x) for x in draft_fm.get("proposed_terms") or []]
     proposed_title_fr = str(draft_fm.get("proposed_title_fr") or "")
     terms_mode = draft_fm.get("terms_production_mode")
     title_override = bool(draft_fm.get("title_fr_override"))
     for key in ("proposed_links", "proposed_acceptance_criteria", "links_model", "links_production_mode",
-                "proposed_terms", "proposed_title_fr", "terms_production_mode", "title_fr_override"):
+                "proposed_terms", "proposed_title_fr", "terms_production_mode", "title_fr_override",
+                "proposed_title", "title_override"):
         fm.pop(key, None)
+    if amended_title and (title_en_override or not fm.get("title")):
+        fm["title"] = amended_title
+        body = re.sub(
+            rf"^#\s+{re.escape(req_id)}\s+—\s+.*$",
+            f"# {req_id} — {amended_title}",
+            body,
+            count=1,
+            flags=re.MULTILINE,
+        )
     if proposed_terms:
         # Search terms are merged with those of an existing (curated) control, never replaced.
         fm["terms"] = list(dict.fromkeys([*[str(x) for x in fm.get("terms") or []], *proposed_terms]))

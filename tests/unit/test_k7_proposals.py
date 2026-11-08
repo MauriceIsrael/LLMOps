@@ -127,3 +127,48 @@ def test_the_example_is_what_the_code_rebuilds():
     from scripts.export_proposal_example import build_example
 
     assert json.loads(EXAMPLE.read_text(encoding="utf-8")) == build_example(), "regenerate with: poetry run python scripts/export_proposal_example.py"
+
+
+def test_harvested_proposal_preserves_assumptions_and_reservation_triplet(service, kb):
+    """Issues #134 & #135 — Assumptions and compliance reservation triplet survive proposal import, promotion, and similarity provenance."""
+    from pipelines.kb_candidates.kb import load_assets, split_frontmatter
+    from pipelines.similarity.search import _provenance
+
+    draft_pat = PATTERN.replace("id: PAT-001", "id: PAT-000").replace("# PAT-001", "# PAT-000 — Conditional Edge Gateway")
+    cand = proposal(
+        "cand-res-1",
+        title="Conditional Edge Gateway with Standard Reservation",
+        content=draft_pat,
+        assumptions=[
+            "Dual carrier backhaul is unavailable at remote outposts.",
+            "Local cache survival window is bounded to 4 hours.",
+        ],
+        trigger_condition="Remote site operates over a single terrestrial backhaul link",
+        resulting_compliance_status="Partially compliant",
+        standard_reservation_template="Subject to local survival cache sizing for 4h autonomy and periodic failover drills.",
+    )
+    env = snapshot(cand, source="architecture-studio", snapshot_id="as-harvest-134")
+    res = import_snapshot(service, env, actor="@maintainer")
+    cid = res["imported"][0]["id"]
+    created = service.get(cid)
+    fm, _ = split_frontmatter(created["proposed_content"])
+    assert fm is not None
+    assert fm["assumptions"] == [
+        "Dual carrier backhaul is unavailable at remote outposts.",
+        "Local cache survival window is bounded to 4 hours.",
+    ]
+    assert fm["trigger_condition"] == "Remote site operates over a single terrestrial backhaul link"
+    assert fm["resulting_compliance_status"] == "Partially compliant"
+    assert fm["standard_reservation_template"].startswith("Subject to local survival cache")
+
+    reviewer = created.get("assigned_owner") or "@maintainers"
+    service.review(cid, "accept", reviewer, reason="Validated reservation pattern", actor=reviewer)
+    promoted = service.promote(cid, actor="@maintainers")
+    promoted_id = promoted["promoted"]["asset_id"]
+    asset = next(a for a in load_assets(kb) if a.id == promoted_id)
+    prov = _provenance(asset)
+    assert prov["assumptions_documented"] is True
+    assert len(prov["assumptions"]) == 2
+    assert prov["trigger_condition"] == "Remote site operates over a single terrestrial backhaul link"
+    assert prov["resulting_compliance_status"] == "Partially compliant"
+    assert prov["standard_reservation_template"].startswith("Subject to local survival cache")
