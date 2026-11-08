@@ -56,6 +56,7 @@ from mcp_server.engagement.write_routes import build_write_routes
 from mcp_server.knowledge.tools import (
     _suggest_knowledge_improvement,
     abandon_framework_ingestion,
+    add_check_clause_to_asset,
     add_eval_case,
     add_ingestion_link_proposals,
     annotate_eval_case,
@@ -247,16 +248,19 @@ class TokenPreservingSseServerTransport(SseServerTransport):
                     await sse_stream_writer.send(
                         {
                             "event": "message",
-                            "data": session_message.message.model_dump_json(by_alias=True, exclude_none=True),
+                            "data": session_message.message.model_dump_json(
+                                by_alias=True, exclude_none=True
+                            ),
                         }
                     )
 
         try:
             async with anyio.create_task_group() as tg:
+
                 async def response_wrapper(scope: Scope, receive: Receive, send: Send):
-                    await EventSourceResponse(content=sse_stream_reader, data_sender_callable=sse_writer)(
-                        scope, receive, send
-                    )
+                    await EventSourceResponse(
+                        content=sse_stream_reader, data_sender_callable=sse_writer
+                    )(scope, receive, send)
                     await read_stream_writer.aclose()
                     await write_stream_reader.aclose()
                     await sse_stream_reader.aclose()
@@ -276,7 +280,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
     """Middleware pour sécuriser l'accès HTTP/SSE par jeton Bearer, Header HTTP ou Assertion EdDSA (issue #7)."""
 
     async def dispatch(self, request, call_next):
-        if request.url.path in ("/health", "/healthz", "/ready", "/readyz", "/.well-known/jwks.json"):
+        if request.url.path in (
+            "/health",
+            "/healthz",
+            "/ready",
+            "/readyz",
+            "/.well-known/jwks.json",
+        ):
             return await call_next(request)
 
         from mcp_server.core.assertion import ActorAssertionError, get_jwks_registry
@@ -284,16 +294,26 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         audit = get_governance_audit()
 
-        expected_token = os.getenv("SERVER_TOKEN") or os.getenv("LLMOPS_AUTH_TOKEN") or settings.AUTH_TOKEN
+        expected_token = (
+            os.getenv("SERVER_TOKEN") or os.getenv("LLMOPS_AUTH_TOKEN") or settings.AUTH_TOKEN
+        )
         env_tokens = os.getenv("ENGAGEMENT_TOKENS", "").strip()
         tenant_tokens = parse_engagement_tokens(env_tokens) if env_tokens else {}
         has_jwks = bool(get_jwks_registry().to_jwks().get("keys")) or bool(
-            os.getenv("ARCHINEX_JWKS") or os.getenv("ARCHINEX_JWKS_FILE") or os.getenv("ARCHINEX_JWKS_URL")
+            os.getenv("ARCHINEX_JWKS")
+            or os.getenv("ARCHINEX_JWKS_FILE")
+            or os.getenv("ARCHINEX_JWKS_URL")
         )
 
-        if (not expected_token or not expected_token.strip()) and not tenant_tokens and not has_jwks:
+        if (
+            (not expected_token or not expected_token.strip())
+            and not tenant_tokens
+            and not has_jwks
+        ):
             return JSONResponse(
-                {"error": "Unauthorized: SERVER_TOKEN or LLMOPS_AUTH_TOKEN is not configured on server"},
+                {
+                    "error": "Unauthorized: SERVER_TOKEN or LLMOPS_AUTH_TOKEN is not configured on server"
+                },
                 status_code=500,
             )
 
@@ -302,7 +322,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         set_current_actor(None)
 
         actor = None
-        has_assertion = bool(request.headers.get("X-Actor-Token") or request.headers.get("X-Actor-Assertion"))
+        has_assertion = bool(
+            request.headers.get("X-Actor-Token") or request.headers.get("X-Actor-Assertion")
+        )
         if has_assertion:
             try:
                 actor = resolve_actor(request)
@@ -333,7 +355,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     auth_method="header",
                 )
                 return JSONResponse(
-                    {"status": "unauthorized", "error": "signed_actor_required", "reason": reason}, status_code=401
+                    {"status": "unauthorized", "error": "signed_actor_required", "reason": reason},
+                    status_code=401,
                 )
             set_current_actor_email(legacy_actor)
 
@@ -357,7 +380,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     break
 
         # 2. Sinon, validation du jeton d'administration serveur explicite à temps constant
-        if not caller and provided_token and expected_token and secrets.compare_digest(provided_token, expected_token.strip()):
+        if (
+            not caller
+            and provided_token
+            and expected_token
+            and secrets.compare_digest(provided_token, expected_token.strip())
+        ):
             caller = "server_admin"
 
         # 3. Dynamic JWT verification via JWKS (issue #7, end of static tokens in env)
@@ -426,7 +454,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
             auth_method="none",
         )
         return JSONResponse(
-            {"error": "Unauthorized: Invalid or missing LLMOps authentication token in Authorization header"},
+            {
+                "error": "Unauthorized: Invalid or missing LLMOps authentication token in Authorization header"
+            },
             status_code=401,
         )
 
@@ -452,7 +482,8 @@ def log_identity_configuration() -> None:
     elif server_config.env != "development":
         log.warning(
             "X-Actor-Email is accepted as proof of identity (LLMOPS_REQUIRE_SIGNED_ACTOR is off): any holder of a kb:delegate "
-            "or eng:delegate token can act as any expert. %d trusted assertion key(s).", keys,
+            "or eng:delegate token can act as any expert. %d trusted assertion key(s).",
+            keys,
         )
 
 
@@ -499,7 +530,10 @@ def create_starlette_app() -> Starlette:
         from pipelines.similarity.encoder import embedding_status
 
         emb = await run_in_threadpool(embedding_status)
-        embedding = {k: emb.get(k) for k in ("model", "version", "sha256", "dim", "local", "provider", "status", "reason")}
+        embedding = {
+            k: emb.get(k)
+            for k in ("model", "version", "sha256", "dim", "local", "provider", "status", "reason")
+        }
 
         return JSONResponse(
             {
@@ -524,7 +558,9 @@ def create_starlette_app() -> Starlette:
 
             store = make_graph_store(db_path, read_only=True)
             res = store.execute_cypher("MATCH (a:Asset) RETURN count(a) as count;")
-            asset_count = res[0]["count"] if res and isinstance(res, list) and "count" in res[0] else 0
+            asset_count = (
+                res[0]["count"] if res and isinstance(res, list) and "count" in res[0] else 0
+            )
             store.close()
 
             if asset_count == 0:
@@ -560,7 +596,9 @@ def create_starlette_app() -> Starlette:
             )
 
     async def handle_sse(request):
-        caller = getattr(request.state, "caller", None) or request.scope.get("caller") or "default_user"
+        caller = (
+            getattr(request.state, "caller", None) or request.scope.get("caller") or "default_user"
+        )
         set_current_caller(caller)
         async with sse_transport.connect_sse(
             request.scope, request.receive, request._send
@@ -580,6 +618,7 @@ def create_starlette_app() -> Starlette:
         if not caller and session_id_str:
             try:
                 from uuid import UUID
+
                 sid = UUID(session_id_str)
                 caller = getattr(sse_transport, "_session_callers", {}).get(sid, "default_user")
             except Exception:
@@ -606,14 +645,17 @@ def create_starlette_app() -> Starlette:
 
     async def handle_snapshot_latest(request):
         from pathlib import Path
+
         latest_file = Path("data/snapshots/latest.json")
         if not latest_file.exists():
             latest_file = Path("fixtures/sealed_snapshot.json")
         if not latest_file.exists():
             from scripts.export_sealed_snapshot import export_sealed_snapshot
+
             snapshot_data = export_sealed_snapshot()
             return JSONResponse(snapshot_data, headers={"Cache-Control": "public, max-age=3600"})
         import json
+
         data = json.loads(latest_file.read_text(encoding="utf-8"))
         etag = data.get("payload_sha256", "")
         return JSONResponse(data, headers={"ETag": etag, "Cache-Control": "public, max-age=3600"})
@@ -632,8 +674,11 @@ def create_starlette_app() -> Starlette:
 
     async def handle_ontology_list(request):
         from pipelines.ontology.gateway import is_ontology_experimental_enabled
+
         if not is_ontology_experimental_enabled():
-            return JSONResponse({"error": "Experimental ontology feature is disabled"}, status_code=404)
+            return JSONResponse(
+                {"error": "Experimental ontology feature is disabled"}, status_code=404
+            )
         c_class = request.query_params.get("concept_class") or None
         status = request.query_params.get("status") or None
         res = list_ontology_terms(concept_class=c_class, status=status)
@@ -641,8 +686,11 @@ def create_starlette_app() -> Starlette:
 
     async def handle_ontology_get(request):
         from pipelines.ontology.gateway import is_ontology_experimental_enabled
+
         if not is_ontology_experimental_enabled():
-            return JSONResponse({"error": "Experimental ontology feature is disabled"}, status_code=404)
+            return JSONResponse(
+                {"error": "Experimental ontology feature is disabled"}, status_code=404
+            )
         urn = request.path_params.get("urn", "")
         rev_param = request.query_params.get("revision")
         rev = int(rev_param) if rev_param and rev_param.isdigit() else None
@@ -661,7 +709,9 @@ def create_starlette_app() -> Starlette:
             version=request.query_params.get("version"),
             snapshot=request.query_params.get("snapshot"),
         )
-        status_code = {"ok": 200, "not_found": 404, "invalid_argument": 400}.get(res.get("status"), 500)
+        status_code = {"ok": 200, "not_found": 404, "invalid_argument": 400}.get(
+            res.get("status"), 500
+        )
         return JSONResponse(res, status_code=status_code)
 
     async def handle_knowledge_search(request):
@@ -693,18 +743,23 @@ def create_starlette_app() -> Starlette:
                 except Unauthorised:
                     continue
                 friendly_name = eid.replace("-", " ").replace("_", " ").title()
-                engagements.append({
-                    "id": eid,
-                    "name": friendly_name,
-                    "description": f"Référentiel d'engagement et base projet pour {friendly_name}",
-                    "is_default": False,
-                })
+                engagements.append(
+                    {
+                        "id": eid,
+                        "name": friendly_name,
+                        "description": f"Référentiel d'engagement et base projet pour {friendly_name}",
+                        "is_default": False,
+                    }
+                )
 
-        return JSONResponse({
-            "status": "ok",
-            "engagements": engagements,
-            "count": len(engagements),
-        }, status_code=200)
+        return JSONResponse(
+            {
+                "status": "ok",
+                "engagements": engagements,
+                "count": len(engagements),
+            },
+            status_code=200,
+        )
 
     async def handle_compliance_conformity_snapshot(request):
         """Exporte un ConformitySnapshot scellé pour injection directe dans document-engine (ADR-DE-05)."""
@@ -722,12 +777,16 @@ def create_starlette_app() -> Starlette:
         guard_engagement(engagement)  # K9
         if source_system != "knowledge-hub":  # K6: the origin of a snapshot is not declarative
             return JSONResponse(
-                {"status": "invalid_argument", "error": "source_system is fixed to 'knowledge-hub': the origin of a snapshot is not declarative"},
+                {
+                    "status": "invalid_argument",
+                    "error": "source_system is fixed to 'knowledge-hub': the origin of a snapshot is not declarative",
+                },
                 status_code=400,
             )
 
         try:
             from pipelines.compliance_mapper import to_conformity_snapshot
+
             snapshot = to_conformity_snapshot(
                 engagement=engagement,
                 framework=framework,
@@ -758,6 +817,7 @@ def create_starlette_app() -> Starlette:
             compute_framework_coverage,
             get_applicable_frameworks,
         )
+
         guard_engagement(engagement)  # K9
         fws = get_applicable_frameworks(engagement=engagement)
         payload: dict[str, Any] = {
@@ -787,7 +847,10 @@ def create_starlette_app() -> Starlette:
         ).strip()
         fws = body.get("frameworks", []) if isinstance(body, dict) else []
         from pipelines.compliance_mapper import set_applicable_frameworks
-        guard_engagement(engagement, action="decide")  # K9/K14: the applicable frameworks frame the engagement
+
+        guard_engagement(
+            engagement, action="decide"
+        )  # K9/K14: the applicable frameworks frame the engagement
         res = set_applicable_frameworks(engagement=engagement, frameworks=fws)
         return JSONResponse(res, status_code=200)
 
@@ -903,7 +966,11 @@ def create_starlette_app() -> Starlette:
             rfp_text = request.query_params.get("rfp_text")
 
         res = get_rfp_coverage_gaps(engagement=engagement, rfp_text=rfp_text)
-        status_code = 200 if res.get("status") == "ok" else (403 if res.get("status") == "unauthorized" else 400)
+        status_code = (
+            200
+            if res.get("status") == "ok"
+            else (403 if res.get("status") == "unauthorized" else 400)
+        )
         return JSONResponse(res, status_code=status_code)
 
     async def handle_zero_draft_blueprint(request):
@@ -913,9 +980,21 @@ def create_starlette_app() -> Starlette:
         except Exception:
             body = {}
 
-        engagement = str(body.get("engagement", "default")).strip() if isinstance(body, dict) else "default"
-        project_title = str(body.get("project_title", "Système d'Architecture Télécom & Plateforme Sécurisée")).strip() if isinstance(body, dict) else "Système d'Architecture Télécom & Plateforme Sécurisée"
-        client_name = str(body.get("client_name", "Client RFP")).strip() if isinstance(body, dict) else "Client RFP"
+        engagement = (
+            str(body.get("engagement", "default")).strip() if isinstance(body, dict) else "default"
+        )
+        project_title = (
+            str(
+                body.get("project_title", "Système d'Architecture Télécom & Plateforme Sécurisée")
+            ).strip()
+            if isinstance(body, dict)
+            else "Système d'Architecture Télécom & Plateforme Sécurisée"
+        )
+        client_name = (
+            str(body.get("client_name", "Client RFP")).strip()
+            if isinstance(body, dict)
+            else "Client RFP"
+        )
         guard_engagement(engagement)  # K9
 
         try:
@@ -930,7 +1009,9 @@ def create_starlette_app() -> Starlette:
                 project_title=project_title,
                 client_name=client_name,
             )
-            return JSONResponse({"status": "ok", "proseStore": res.get("prose_store", {}), **res}, status_code=200)
+            return JSONResponse(
+                {"status": "ok", "proseStore": res.get("prose_store", {}), **res}, status_code=200
+            )
         except Exception as e:
             return JSONResponse(
                 {"status": "error", "error": f"Échec de la génération Blueprint : {e}"},
@@ -1075,7 +1156,9 @@ def create_starlette_app() -> Starlette:
             max_chars = int(params.get("max_chars", "8000"))
         except ValueError:
             return JSONResponse(
-                invalid_argument_response("max_items", "'max_items' and 'max_chars' must be integers."),
+                invalid_argument_response(
+                    "max_items", "'max_items' and 'max_chars' must be integers."
+                ),
                 status_code=400,
             )
         res = get_doctrine_context(
@@ -1131,7 +1214,8 @@ def create_starlette_app() -> Starlette:
             body = None
         if not isinstance(body, dict):
             return JSONResponse(
-                invalid_argument_response("body", "Le corps de requête doit être un objet JSON"), status_code=400
+                invalid_argument_response("body", "Le corps de requête doit être un objet JSON"),
+                status_code=400,
             )
         res = submit_kb_candidate(body)
         return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
@@ -1147,9 +1231,14 @@ def create_starlette_app() -> Starlette:
             body = None
         if not isinstance(body, dict):
             return JSONResponse(
-                invalid_argument_response("body", "Le corps de requête doit être l'enveloppe JSON de l'instantané"), status_code=400
+                invalid_argument_response(
+                    "body", "Le corps de requête doit être l'enveloppe JSON de l'instantané"
+                ),
+                status_code=400,
             )
-        res = import_proposal_snapshot(body, dry_run=request.query_params.get("dry_run") in ("1", "true"))
+        res = import_proposal_snapshot(
+            body, dry_run=request.query_params.get("dry_run") in ("1", "true")
+        )
         return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
 
     async def handle_candidates_list(request):
@@ -1175,7 +1264,8 @@ def create_starlette_app() -> Starlette:
             body = None
         if not isinstance(body, dict):
             return JSONResponse(
-                invalid_argument_response("body", "Le corps de requête doit être un objet JSON"), status_code=400
+                invalid_argument_response("body", "Le corps de requête doit être un objet JSON"),
+                status_code=400,
             )
         res = review_kb_candidate(
             request.path_params["candidate_id"],
@@ -1195,7 +1285,8 @@ def create_starlette_app() -> Starlette:
 
     def _bad_body():
         return JSONResponse(
-            invalid_argument_response("body", "Le corps de requête doit être un objet JSON"), status_code=400
+            invalid_argument_response("body", "Le corps de requête doit être un objet JSON"),
+            status_code=400,
         )
 
     async def handle_review_inbox(request):
@@ -1206,16 +1297,22 @@ def create_starlette_app() -> Starlette:
         body = await _json_body(request)
         if body is None:
             return _bad_body()
-        res = assign_kb_candidate(request.path_params["candidate_id"], str(body.get("handle") or ""),
-                                  body.get("reason"))
+        res = assign_kb_candidate(
+            request.path_params["candidate_id"], str(body.get("handle") or ""), body.get("reason")
+        )
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     async def handle_candidate_request_review(request):
         body = await _json_body(request)
         if body is None:
             return _bad_body()
-        res = request_kb_review(request.path_params["candidate_id"], str(body.get("handle") or ""),
-                                str(body.get("kind") or "second_review"), body.get("message"), body.get("due_at"))
+        res = request_kb_review(
+            request.path_params["candidate_id"],
+            str(body.get("handle") or ""),
+            str(body.get("kind") or "second_review"),
+            body.get("message"),
+            body.get("due_at"),
+        )
         return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
 
     async def handle_candidate_comment_create(request):
@@ -1234,8 +1331,10 @@ def create_starlette_app() -> Starlette:
         try:
             since, limit = int(params.get("since") or 0), int(params.get("limit") or 100)
         except ValueError:
-            return JSONResponse(invalid_argument_response("since", "'since' and 'limit' must be integers"),
-                                status_code=400)
+            return JSONResponse(
+                invalid_argument_response("since", "'since' and 'limit' must be integers"),
+                status_code=400,
+            )
         res = get_governance_events(since, limit)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
@@ -1283,8 +1382,12 @@ def create_starlette_app() -> Starlette:
         body = await _json_body(request)
         if body is None:
             return _bad_body()
-        res = merge_fact_key_candidate(request.path_params["candidate_id"], str(body.get("into") or ""),
-                                       str(body.get("reviewer") or ""), body.get("reason"))
+        res = merge_fact_key_candidate(
+            request.path_params["candidate_id"],
+            str(body.get("into") or ""),
+            str(body.get("reviewer") or ""),
+            body.get("reason"),
+        )
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     async def handle_checks_simulate(request):
@@ -1297,8 +1400,12 @@ def create_starlette_app() -> Starlette:
     async def handle_check_clauses(request):
         """Clauses vérifiables de la doctrine et leur statut propre (contrat 1.26)."""
         p = request.query_params
-        res = list_check_clauses(status=p.get("status") or None, framework=p.get("framework") or None,
-                                 asset_type=p.get("type") or None, asset_id=p.get("asset_id") or None)
+        res = list_check_clauses(
+            status=p.get("status") or None,
+            framework=p.get("framework") or None,
+            asset_type=p.get("type") or None,
+            asset_id=p.get("asset_id") or None,
+        )
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     async def handle_check_clause_decide(request):
@@ -1306,10 +1413,27 @@ def create_starlette_app() -> Starlette:
         body = await _json_body(request)
         if body is None:
             return _bad_body()
-        res = decide_check_clause(request.path_params["asset_id"], request.path_params["check_id"],
-                                  decision=str(body.get("decision") or ""), comment=body.get("comment"),
-                                  clause=body.get("clause"))
+        res = decide_check_clause(
+            request.path_params["asset_id"],
+            request.path_params["check_id"],
+            decision=str(body.get("decision") or ""),
+            comment=body.get("comment"),
+            clause=body.get("clause"),
+        )
         return JSONResponse(res, status_code=_candidate_status_code(res))
+
+    async def handle_asset_checks_create(request):
+        """Ajoute une clause de vérification en brouillon à un actif (Issue #99, contrat 1.26)."""
+        body = await _json_body(request)
+        if body is None:
+            return _bad_body()
+        clause = body.get("clause")
+        if not clause or not isinstance(clause, dict):
+            return JSONResponse(
+                invalid_argument_response("clause", "'clause' is required"), status_code=400
+            )
+        res = add_check_clause_to_asset(request.path_params["asset_id"], clause)
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
 
     async def handle_eval_dataset(request):
         res = get_eval_dataset(request.path_params["dataset"])
@@ -1319,7 +1443,9 @@ def create_starlette_app() -> Starlette:
         body = await _json_body(request)
         if body is None:
             return _bad_body()
-        res = annotate_eval_case(request.path_params["dataset"], request.path_params["case_id"], body)
+        res = annotate_eval_case(
+            request.path_params["dataset"], request.path_params["case_id"], body
+        )
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     async def handle_eval_case_add(request):
@@ -1338,7 +1464,9 @@ def create_starlette_app() -> Starlette:
         try:
             run_id = int(request.path_params["run_id"])
         except ValueError:
-            return JSONResponse(invalid_argument_response("run_id", "'run_id' must be an integer"), status_code=400)
+            return JSONResponse(
+                invalid_argument_response("run_id", "'run_id' must be an integer"), status_code=400
+            )
         res = get_eval_run(request.path_params["dataset"], run_id)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
@@ -1360,7 +1488,9 @@ def create_starlette_app() -> Starlette:
         try:
             feedback_id = int(request.path_params["feedback_id"])
         except ValueError:
-            return JSONResponse(invalid_argument_response("feedback_id", "must be an integer"), status_code=400)
+            return JSONResponse(
+                invalid_argument_response("feedback_id", "must be an integer"), status_code=400
+            )
         res = convert_verdict_feedback(feedback_id, body)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
@@ -1368,13 +1498,23 @@ def create_starlette_app() -> Starlette:
         try:
             form = await request.form()
         except Exception:
-            return JSONResponse(invalid_argument_response("body", "multipart/form-data expected"), status_code=400)
+            return JSONResponse(
+                invalid_argument_response("body", "multipart/form-data expected"), status_code=400
+            )
         upload = form.get("file")
         if upload is None or not hasattr(upload, "read"):
-            return JSONResponse(invalid_argument_response("file", "'file' is required (multipart field)"), status_code=400)
+            return JSONResponse(
+                invalid_argument_response("file", "'file' is required (multipart field)"),
+                status_code=400,
+            )
         data = await upload.read(21 * 1024 * 1024)
-        res = create_framework_ingestion(str(form.get("framework") or ""), str(form.get("version") or ""),
-                                         str(form.get("tag") or ""), getattr(upload, "filename", "") or "", data)
+        res = create_framework_ingestion(
+            str(form.get("framework") or ""),
+            str(form.get("version") or ""),
+            str(form.get("tag") or ""),
+            getattr(upload, "filename", "") or "",
+            data,
+        )
         return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
 
     async def handle_ingestion_list(request):
@@ -1390,7 +1530,9 @@ def create_starlette_app() -> Starlette:
     async def handle_ingestion_get(request):
         ingestion_id = _ingestion_id(request)
         if ingestion_id is None:
-            return JSONResponse(invalid_argument_response("ingestion_id", "must be an integer"), status_code=400)
+            return JSONResponse(
+                invalid_argument_response("ingestion_id", "must be an integer"), status_code=400
+            )
         res = get_framework_ingestion(ingestion_id)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
@@ -1443,7 +1585,9 @@ def create_starlette_app() -> Starlette:
 
     async def handle_knowledge_asset_history(request):
         res = get_knowledge_asset_history(request.path_params["asset_id"])
-        code = 200 if res.get("status") == "ok" else (404 if res.get("status") == "not_found" else 400)
+        code = (
+            200 if res.get("status") == "ok" else (404 if res.get("status") == "not_found" else 400)
+        )
         return JSONResponse(res, status_code=code)
 
     async def handle_kb_health(request):
@@ -1488,7 +1632,9 @@ def create_starlette_app() -> Starlette:
 
     async def handle_reuse_list(request):
         q = request.query_params
-        res = list_reuse_confirmations(q.get("matched_ref"), q.get("outcome"), q.get("subject_fingerprint"))
+        res = list_reuse_confirmations(
+            q.get("matched_ref"), q.get("outcome"), q.get("subject_fingerprint")
+        )
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     async def handle_simeval_get(request):
@@ -1499,7 +1645,9 @@ def create_starlette_app() -> Starlette:
         body = await _json_body(request)
         if body is None:
             return _bad_body()
-        res = annotate_similarity_case(request.path_params["dataset"], request.path_params["case_id"], body)
+        res = annotate_similarity_case(
+            request.path_params["dataset"], request.path_params["case_id"], body
+        )
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
     async def handle_simeval_run(request):
@@ -1513,7 +1661,9 @@ def create_starlette_app() -> Starlette:
         try:
             run_id = int(request.path_params["run_id"])
         except ValueError:
-            return JSONResponse(invalid_argument_response("run_id", "must be an integer"), status_code=400)
+            return JSONResponse(
+                invalid_argument_response("run_id", "must be an integer"), status_code=400
+            )
         res = get_similarity_eval_run(request.path_params["dataset"], run_id)
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
@@ -1548,7 +1698,6 @@ def create_starlette_app() -> Starlette:
             status_code=400,
         )
 
-
     # --- Engagement access (K14, ADR-KH-01 A11) -----------------------------------------------------------------
 
     def _access_or_503():
@@ -1557,13 +1706,20 @@ def create_starlette_app() -> Starlette:
         access = get_access()
         if access is None:
             return None, JSONResponse(
-                {"status": "error", "error": "governance_database_required",
-                 "message": "Managed engagements need a governance database (GOVERNANCE_DATABASE_URL or CANDIDATES_BACKEND=sql)."},
-                status_code=503)
+                {
+                    "status": "error",
+                    "error": "governance_database_required",
+                    "message": "Managed engagements need a governance database (GOVERNANCE_DATABASE_URL or CANDIDATES_BACKEND=sql).",
+                },
+                status_code=503,
+            )
         return access, None
 
     def _access_error(err):
-        return JSONResponse({"status": "invalid_argument", "argument": err.argument, "reason": err.reason}, status_code=400)
+        return JSONResponse(
+            {"status": "invalid_argument", "argument": err.argument, "reason": err.reason},
+            status_code=400,
+        )
 
     async def handle_engagement_create(request):
         """Create a managed engagement with its first admin. Operator token (``server_admin``) or scope ``eng:create``."""
@@ -1571,7 +1727,10 @@ def create_starlette_app() -> Starlette:
 
         caller = getattr(request.state, "caller", "")
         if caller != "server_admin" and not has_scope(ENGAGEMENT_CREATE_SCOPE, caller):
-            return JSONResponse({"status": "error", "error": "forbidden", "reason": "eng_create_scope_required"}, status_code=403)
+            return JSONResponse(
+                {"status": "error", "error": "forbidden", "reason": "eng_create_scope_required"},
+                status_code=403,
+            )
         access, failure = _access_or_503()
         if failure:
             return failure
@@ -1583,11 +1742,17 @@ def create_starlette_app() -> Starlette:
             body = {}
         try:
             created = access.create(
-                str(body.get("engagement", "")), str(body.get("confidentiality", "")),
-                body.get("admin_email", ""), str(body.get("admin_handle", "")), caller_label(caller))
+                str(body.get("engagement", "")),
+                str(body.get("confidentiality", "")),
+                body.get("admin_email", ""),
+                str(body.get("admin_handle", "")),
+                caller_label(caller),
+            )
         except AccessError as err:
-            return JSONResponse({"status": "invalid_argument", "argument": err.argument, "reason": err.reason},
-                                status_code=409 if "already exists" in err.reason else 400)
+            return JSONResponse(
+                {"status": "invalid_argument", "argument": err.argument, "reason": err.reason},
+                status_code=409 if "already exists" in err.reason else 400,
+            )
         for m in created["members"]:
             m.pop("email", None)  # e-mails never leave the registry through a response either
         return JSONResponse({"status": "ok", "data": created}, status_code=201)
@@ -1602,16 +1767,29 @@ def create_starlette_app() -> Starlette:
         if failure:
             return failure
         if not access.is_managed(engagement):
-            return JSONResponse({"status": "not_found", "id": engagement, "reason": "not_managed"}, status_code=404)
+            return JSONResponse(
+                {"status": "not_found", "id": engagement, "reason": "not_managed"}, status_code=404
+            )
         if request.method == "PUT":
             try:
                 body = await request.json()
-                members = access.replace_members(engagement, body.get("members") if isinstance(body, dict) else None,
-                                                 (acting_member(engagement) or {}).get("handle") or caller_label(request.state.caller))
+                members = access.replace_members(
+                    engagement,
+                    body.get("members") if isinstance(body, dict) else None,
+                    (acting_member(engagement) or {}).get("handle")
+                    or caller_label(request.state.caller),
+                )
             except AccessError as err:
                 return _access_error(err)
-            return JSONResponse({"status": "ok", "data": {"engagement": engagement, "members": members}})
-        return JSONResponse({"status": "ok", "data": {"engagement": engagement, "members": access.members(engagement)}})
+            return JSONResponse(
+                {"status": "ok", "data": {"engagement": engagement, "members": members}}
+            )
+        return JSONResponse(
+            {
+                "status": "ok",
+                "data": {"engagement": engagement, "members": access.members(engagement)},
+            }
+        )
 
     async def handle_engagement_me(request):
         """The caller's own role on an engagement: managed or not, role, allowed actions."""
@@ -1621,14 +1799,36 @@ def create_starlette_app() -> Starlette:
         guard_engagement(engagement, action="read")
         access = get_access()
         if access is None or not access.is_managed(engagement):
-            return JSONResponse({"status": "ok", "data": {"engagement": engagement, "managed": False, "handle": None,
-                                                           "role": None, "actions": [], "confidentiality": None}})
+            return JSONResponse(
+                {
+                    "status": "ok",
+                    "data": {
+                        "engagement": engagement,
+                        "managed": False,
+                        "handle": None,
+                        "role": None,
+                        "actions": [],
+                        "confidentiality": None,
+                    },
+                }
+            )
         member = acting_member(engagement)
         role = member["role"] if member else None
-        return JSONResponse({"status": "ok", "data": {
-            "engagement": engagement, "managed": True, "handle": member["handle"] if member else None, "role": role,
-            "actions": sorted(ROLE_ACTIONS[role]) if role else ["read"],  # a read-only service token has no role
-            "confidentiality": access.confidentiality(engagement)}})
+        return JSONResponse(
+            {
+                "status": "ok",
+                "data": {
+                    "engagement": engagement,
+                    "managed": True,
+                    "handle": member["handle"] if member else None,
+                    "role": role,
+                    "actions": sorted(ROLE_ACTIONS[role])
+                    if role
+                    else ["read"],  # a read-only service token has no role
+                    "confidentiality": access.confidentiality(engagement),
+                },
+            }
+        )
 
     async def handle_engagement_audit(request):
         """The access journal of an engagement (role admin): refusals and every non-read action."""
@@ -1638,7 +1838,15 @@ def create_starlette_app() -> Starlette:
         if failure:
             return failure
         limit = int(request.query_params.get("limit", "100") or 100)
-        return JSONResponse({"status": "ok", "data": {"engagement": engagement, "events": access.audit_events(engagement, limit)}})
+        return JSONResponse(
+            {
+                "status": "ok",
+                "data": {
+                    "engagement": engagement,
+                    "events": access.audit_events(engagement, limit),
+                },
+            }
+        )
 
     async def handle_jwks(request):
         """JWKS public keys for verifying EdDSA actor assertions (issue #7)."""
@@ -1662,7 +1870,10 @@ def create_starlette_app() -> Starlette:
         try:
             body = await request.json()
         except Exception:
-            return JSONResponse({"status": "invalid_argument", "argument": "body", "reason": "invalid JSON"}, status_code=400)
+            return JSONResponse(
+                {"status": "invalid_argument", "argument": "body", "reason": "invalid JSON"},
+                status_code=400,
+            )
         res = create_kb_delegation(
             delegate=body.get("delegate"),
             domains=body.get("domains") or [],
@@ -1687,10 +1898,22 @@ def create_starlette_app() -> Starlette:
         try:
             body = await request.json()
         except Exception:
-            return JSONResponse({"status": "invalid_argument", "argument": "body", "reason": "invalid JSON"}, status_code=400)
-        identifier = body.get("identifier") or body.get("jti") or body.get("handle") or body.get("email")
+            return JSONResponse(
+                {"status": "invalid_argument", "argument": "body", "reason": "invalid JSON"},
+                status_code=400,
+            )
+        identifier = (
+            body.get("identifier") or body.get("jti") or body.get("handle") or body.get("email")
+        )
         if not identifier:
-            return JSONResponse({"status": "invalid_argument", "argument": "identifier", "reason": "identifier is required"}, status_code=400)
+            return JSONResponse(
+                {
+                    "status": "invalid_argument",
+                    "argument": "identifier",
+                    "reason": "identifier is required",
+                },
+                status_code=400,
+            )
         is_jti = bool(body.get("is_jti") or body.get("jti"))
         reason = body.get("reason", "revoked by admin")
         res = revoke_kb_auth(identifier, reason=reason, is_jti=is_jti)
@@ -1716,130 +1939,279 @@ def create_starlette_app() -> Starlette:
             "engagement": exc.engagement,
         }
         if getattr(exc, "reason", None):  # K14: the role a managed engagement requires
-            body.update(action=exc.action, reason=exc.reason, message="The caller lacks the role this action requires")
+            body.update(
+                action=exc.action,
+                reason=exc.reason,
+                message="The caller lacks the role this action requires",
+            )
         return JSONResponse(body, status_code=403)
 
     routes = [
-            Route("/health", endpoint=handle_health, methods=["GET"]),
-            Route("/healthz", endpoint=handle_health, methods=["GET"]),
-            Route("/ready", endpoint=handle_ready, methods=["GET"]),
-            Route("/readyz", endpoint=handle_ready, methods=["GET"]),
-            Route("/sse", endpoint=handle_sse),
-            Route("/messages", endpoint=handle_messages, methods=["POST"]),
-            Route("/visualize", endpoint=handle_visualize, methods=["GET"]),
-            Route("/snapshot/latest", endpoint=handle_snapshot_latest, methods=["GET"]),
-            Route("/snapshot/{snapshot_id}", endpoint=handle_snapshot_by_id, methods=["GET"]),
-            
-            Route("/api/knowledge/assets/{asset_id}", endpoint=handle_knowledge_asset, methods=["GET"]),
-            Route("/api/knowledge/assets/{asset_id}/history", endpoint=handle_knowledge_asset_history, methods=["GET"]),
-            Route("/api/knowledge/search", endpoint=handle_knowledge_search, methods=["GET"]),
-            Route("/api/knowledge/engagements", endpoint=handle_knowledge_engagements, methods=["GET"]),
-            Route("/api/engagements", endpoint=handle_engagement_create, methods=["POST"]),
-            Route("/api/engagements/{engagement}/members", endpoint=handle_engagement_members, methods=["GET", "PUT"]),
-            Route("/api/engagements/{engagement}/me", endpoint=handle_engagement_me, methods=["GET"]),
-            Route("/api/engagements/{engagement}/audit", endpoint=handle_engagement_audit, methods=["GET"]),
-            *build_write_routes(),  # K15
-            *build_export_routes(),  # K11
-            Route("/api/knowledge/suggestions", endpoint=handle_knowledge_suggestions, methods=["POST"]),
-            Route("/api/compliance/conformity-snapshot", endpoint=handle_compliance_conformity_snapshot, methods=["GET"]),
-            Route("/api/compliance/frameworks", endpoint=handle_compliance_frameworks, methods=["GET"]),
-            Route("/api/compliance/frameworks/applicable", endpoint=handle_compliance_applicable_frameworks_get, methods=["GET"]),
-            Route("/api/compliance/frameworks/applicable", endpoint=handle_compliance_applicable_frameworks_put, methods=["PUT", "POST"]),
-            Route("/api/rfp/shred-to-candidates", endpoint=handle_rfp_shred_to_candidates, methods=["POST"]),
-            Route("/api/rfp/coverage-gaps", endpoint=handle_rfp_coverage_gaps, methods=["GET", "POST"]),
-            Route("/api/documents/zero-draft-blueprint", endpoint=handle_zero_draft_blueprint, methods=["POST"]),
-            Route("/api/prose/suggest-batch", endpoint=handle_prose_suggest_batch, methods=["POST"]),
-            Route("/api/elicitation/trigger", endpoint=handle_elicitation_trigger, methods=["POST"]),
-            Route("/api/elicitation/questions", endpoint=handle_elicitation_questions, methods=["GET"]),
-            Route("/api/arbitration/board", endpoint=handle_arbitration_board, methods=["GET"]),
-            Route("/api/arbitration/conflicts", endpoint=handle_arbitration_conflicts, methods=["GET"]),
-            Route("/api/arbitration/statements", endpoint=handle_arbitration_statements, methods=["GET"]),
-            Route("/api/knowledge/context", endpoint=handle_knowledge_context, methods=["GET"]),
-            Route("/api/knowledge/check", endpoint=handle_knowledge_check, methods=["POST"]),
-            Route("/api/knowledge/me", endpoint=handle_kb_me, methods=["GET"]),
-            Route("/api/knowledge/embeddings/pending", endpoint=handle_embeddings_pending, methods=["GET"]),
-            Route("/api/knowledge/embeddings", endpoint=handle_embeddings_put, methods=["PUT"]),
-            Route("/api/knowledge/similar", endpoint=handle_similar, methods=["POST"]),
-            Route("/api/knowledge/similarity-evals/{dataset}", endpoint=handle_simeval_get, methods=["GET"]),
-            Route("/api/knowledge/similarity-evals/{dataset}/cases/{case_id}", endpoint=handle_simeval_annotate,
-                  methods=["PATCH"]),
-            Route("/api/knowledge/similarity-evals/{dataset}/runs", endpoint=handle_simeval_run, methods=["POST"]),
-            Route("/api/knowledge/similarity-evals/{dataset}/runs/{run_id}", endpoint=handle_simeval_run_get,
-                  methods=["GET"]),
-            Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_confirm, methods=["POST"]),
-            Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_list, methods=["GET"]),
-            Route("/api/knowledge/health", endpoint=handle_kb_health, methods=["GET"]),
-            Route("/api/knowledge/freshness", endpoint=handle_kb_freshness, methods=["GET"]),
-            Route("/api/knowledge/publications", endpoint=handle_publications_list, methods=["GET"]),
-            Route("/api/knowledge/publications", endpoint=handle_publications_create, methods=["POST"]),
-            Route("/api/knowledge/candidates/{candidate_id}/promote", endpoint=handle_candidate_promote,
-                  methods=["POST"]),
-            Route("/api/frameworks/ingestions", endpoint=handle_ingestion_create, methods=["POST"]),
-            Route("/api/frameworks/ingestions", endpoint=handle_ingestion_list, methods=["GET"]),
-            Route("/api/frameworks/ingestions/{ingestion_id}", endpoint=handle_ingestion_get, methods=["GET"]),
-            Route("/api/frameworks/ingestions/{ingestion_id}/rows/{requirement_id}", endpoint=handle_ingestion_row,
-                  methods=["PATCH"]),
-            Route("/api/frameworks/ingestions/{ingestion_id}/link-proposals", endpoint=handle_ingestion_proposals,
-                  methods=["POST"]),
-            Route("/api/frameworks/ingestions/{ingestion_id}/apply", endpoint=handle_ingestion_apply, methods=["POST"]),
-            Route("/api/frameworks/ingestions/{ingestion_id}/abandon", endpoint=handle_ingestion_abandon, methods=["POST"]),
-            Route("/api/frameworks/{framework}/coverage-declaration", endpoint=handle_coverage_declaration,
-                  methods=["POST"]),
-            Route("/api/knowledge/templates/{asset_type}", endpoint=handle_template, methods=["GET"]),
-            Route("/api/knowledge/candidates/validate", endpoint=handle_candidate_validate, methods=["POST"]),
-            Route("/api/knowledge/triggers", endpoint=handle_trigger_rules, methods=["GET"]),
-            Route("/api/knowledge/triggers/validate", endpoint=handle_trigger_validate, methods=["POST"]),
-            Route("/api/knowledge/triggers/preview", endpoint=handle_trigger_preview, methods=["POST"]),
-            Route("/api/knowledge/candidates/{candidate_id}/merge-key", endpoint=handle_merge_key, methods=["POST"]),
-            Route("/api/knowledge/checks/simulate", endpoint=handle_checks_simulate, methods=["POST"]),
-            Route("/api/knowledge/checks", endpoint=handle_check_clauses, methods=["GET"]),
-            Route("/api/knowledge/assets/{asset_id}/checks/{check_id}", endpoint=handle_check_clause_decide,
-                  methods=["PATCH"]),
-            Route("/api/knowledge/evals/{dataset}", endpoint=handle_eval_dataset, methods=["GET"]),
-            Route("/api/knowledge/evals/{dataset}/cases", endpoint=handle_eval_case_add, methods=["POST"]),
-            Route("/api/knowledge/evals/{dataset}/cases/{case_id}", endpoint=handle_eval_case_annotate, methods=["PATCH"]),
-            Route("/api/knowledge/evals/{dataset}/runs", endpoint=handle_eval_run_create, methods=["POST"]),
-            Route("/api/knowledge/evals/{dataset}/runs/{run_id}", endpoint=handle_eval_run_get, methods=["GET"]),
-            Route("/api/knowledge/verdict-feedback", endpoint=handle_feedback_create, methods=["POST"]),
-            Route("/api/knowledge/verdict-feedback", endpoint=handle_feedback_list, methods=["GET"]),
-            Route("/api/knowledge/verdict-feedback/{feedback_id}/convert", endpoint=handle_feedback_convert,
-                  methods=["POST"]),
-            Route("/api/knowledge/reviews/inbox", endpoint=handle_review_inbox, methods=["GET"]),
-            Route("/api/knowledge/events", endpoint=handle_governance_events, methods=["GET"]),
-            Route("/api/knowledge/owners", endpoint=handle_owners_list, methods=["GET"]),
-            Route("/api/knowledge/owners", endpoint=handle_owners_update, methods=["PUT"]),
-            Route("/api/knowledge/candidates/{candidate_id}/assign", endpoint=handle_candidate_assign, methods=["POST"]),
-            Route("/api/knowledge/candidates/{candidate_id}/request-review",
-                  endpoint=handle_candidate_request_review, methods=["POST"]),
-            Route("/api/knowledge/candidates/{candidate_id}/comments",
-                  endpoint=handle_candidate_comment_create, methods=["POST"]),
-            Route("/api/knowledge/candidates/{candidate_id}/comments",
-                  endpoint=handle_candidate_comments_list, methods=["GET"]),
-            Route("/api/knowledge/candidates", endpoint=handle_candidates_create, methods=["POST"]),
-            Route("/api/knowledge/proposals/import", endpoint=handle_proposals_import, methods=["POST"]),
-            Route("/api/knowledge/candidates", endpoint=handle_candidates_list, methods=["GET"]),
-            Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_get, methods=["GET"]),
-            Route("/api/knowledge/candidates/{candidate_id}", endpoint=handle_candidate_review, methods=["PATCH"]),
-            Route("/api/skills", endpoint=handle_skills_list, methods=["GET"]),
-            Route("/api/skills/matrix", endpoint=handle_skills_matrix, methods=["GET"]),
-            Route("/.well-known/jwks.json", endpoint=handle_jwks, methods=["GET"]),
-            Route("/api/knowledge/delegations", endpoint=handle_delegations_list, methods=["GET"]),
-            Route("/api/knowledge/delegations", endpoint=handle_delegations_create, methods=["POST"]),
-            Route("/api/knowledge/delegations/{delegation_id}/revoke", endpoint=handle_delegation_revoke, methods=["POST"]),
-            Route("/api/knowledge/auth/revoke", endpoint=handle_auth_revoke, methods=["POST"]),
-            Route("/api/knowledge/audit", endpoint=handle_kb_audit, methods=["GET"]),
+        Route("/health", endpoint=handle_health, methods=["GET"]),
+        Route("/healthz", endpoint=handle_health, methods=["GET"]),
+        Route("/ready", endpoint=handle_ready, methods=["GET"]),
+        Route("/readyz", endpoint=handle_ready, methods=["GET"]),
+        Route("/sse", endpoint=handle_sse),
+        Route("/messages", endpoint=handle_messages, methods=["POST"]),
+        Route("/visualize", endpoint=handle_visualize, methods=["GET"]),
+        Route("/snapshot/latest", endpoint=handle_snapshot_latest, methods=["GET"]),
+        Route("/snapshot/{snapshot_id}", endpoint=handle_snapshot_by_id, methods=["GET"]),
+        Route("/api/knowledge/assets/{asset_id}", endpoint=handle_knowledge_asset, methods=["GET"]),
+        Route(
+            "/api/knowledge/assets/{asset_id}/history",
+            endpoint=handle_knowledge_asset_history,
+            methods=["GET"],
+        ),
+        Route("/api/knowledge/search", endpoint=handle_knowledge_search, methods=["GET"]),
+        Route("/api/knowledge/engagements", endpoint=handle_knowledge_engagements, methods=["GET"]),
+        Route("/api/engagements", endpoint=handle_engagement_create, methods=["POST"]),
+        Route(
+            "/api/engagements/{engagement}/members",
+            endpoint=handle_engagement_members,
+            methods=["GET", "PUT"],
+        ),
+        Route("/api/engagements/{engagement}/me", endpoint=handle_engagement_me, methods=["GET"]),
+        Route(
+            "/api/engagements/{engagement}/audit", endpoint=handle_engagement_audit, methods=["GET"]
+        ),
+        *build_write_routes(),  # K15
+        *build_export_routes(),  # K11
+        Route(
+            "/api/knowledge/suggestions", endpoint=handle_knowledge_suggestions, methods=["POST"]
+        ),
+        Route(
+            "/api/compliance/conformity-snapshot",
+            endpoint=handle_compliance_conformity_snapshot,
+            methods=["GET"],
+        ),
+        Route("/api/compliance/frameworks", endpoint=handle_compliance_frameworks, methods=["GET"]),
+        Route(
+            "/api/compliance/frameworks/applicable",
+            endpoint=handle_compliance_applicable_frameworks_get,
+            methods=["GET"],
+        ),
+        Route(
+            "/api/compliance/frameworks/applicable",
+            endpoint=handle_compliance_applicable_frameworks_put,
+            methods=["PUT", "POST"],
+        ),
+        Route(
+            "/api/rfp/shred-to-candidates",
+            endpoint=handle_rfp_shred_to_candidates,
+            methods=["POST"],
+        ),
+        Route("/api/rfp/coverage-gaps", endpoint=handle_rfp_coverage_gaps, methods=["GET", "POST"]),
+        Route(
+            "/api/documents/zero-draft-blueprint",
+            endpoint=handle_zero_draft_blueprint,
+            methods=["POST"],
+        ),
+        Route("/api/prose/suggest-batch", endpoint=handle_prose_suggest_batch, methods=["POST"]),
+        Route("/api/elicitation/trigger", endpoint=handle_elicitation_trigger, methods=["POST"]),
+        Route("/api/elicitation/questions", endpoint=handle_elicitation_questions, methods=["GET"]),
+        Route("/api/arbitration/board", endpoint=handle_arbitration_board, methods=["GET"]),
+        Route("/api/arbitration/conflicts", endpoint=handle_arbitration_conflicts, methods=["GET"]),
+        Route(
+            "/api/arbitration/statements", endpoint=handle_arbitration_statements, methods=["GET"]
+        ),
+        Route("/api/knowledge/context", endpoint=handle_knowledge_context, methods=["GET"]),
+        Route("/api/knowledge/check", endpoint=handle_knowledge_check, methods=["POST"]),
+        Route("/api/knowledge/me", endpoint=handle_kb_me, methods=["GET"]),
+        Route(
+            "/api/knowledge/embeddings/pending", endpoint=handle_embeddings_pending, methods=["GET"]
+        ),
+        Route("/api/knowledge/embeddings", endpoint=handle_embeddings_put, methods=["PUT"]),
+        Route("/api/knowledge/similar", endpoint=handle_similar, methods=["POST"]),
+        Route(
+            "/api/knowledge/similarity-evals/{dataset}",
+            endpoint=handle_simeval_get,
+            methods=["GET"],
+        ),
+        Route(
+            "/api/knowledge/similarity-evals/{dataset}/cases/{case_id}",
+            endpoint=handle_simeval_annotate,
+            methods=["PATCH"],
+        ),
+        Route(
+            "/api/knowledge/similarity-evals/{dataset}/runs",
+            endpoint=handle_simeval_run,
+            methods=["POST"],
+        ),
+        Route(
+            "/api/knowledge/similarity-evals/{dataset}/runs/{run_id}",
+            endpoint=handle_simeval_run_get,
+            methods=["GET"],
+        ),
+        Route(
+            "/api/knowledge/reuse-confirmations", endpoint=handle_reuse_confirm, methods=["POST"]
+        ),
+        Route("/api/knowledge/reuse-confirmations", endpoint=handle_reuse_list, methods=["GET"]),
+        Route("/api/knowledge/health", endpoint=handle_kb_health, methods=["GET"]),
+        Route("/api/knowledge/freshness", endpoint=handle_kb_freshness, methods=["GET"]),
+        Route("/api/knowledge/publications", endpoint=handle_publications_list, methods=["GET"]),
+        Route("/api/knowledge/publications", endpoint=handle_publications_create, methods=["POST"]),
+        Route(
+            "/api/knowledge/candidates/{candidate_id}/promote",
+            endpoint=handle_candidate_promote,
+            methods=["POST"],
+        ),
+        Route("/api/frameworks/ingestions", endpoint=handle_ingestion_create, methods=["POST"]),
+        Route("/api/frameworks/ingestions", endpoint=handle_ingestion_list, methods=["GET"]),
+        Route(
+            "/api/frameworks/ingestions/{ingestion_id}",
+            endpoint=handle_ingestion_get,
+            methods=["GET"],
+        ),
+        Route(
+            "/api/frameworks/ingestions/{ingestion_id}/rows/{requirement_id}",
+            endpoint=handle_ingestion_row,
+            methods=["PATCH"],
+        ),
+        Route(
+            "/api/frameworks/ingestions/{ingestion_id}/link-proposals",
+            endpoint=handle_ingestion_proposals,
+            methods=["POST"],
+        ),
+        Route(
+            "/api/frameworks/ingestions/{ingestion_id}/apply",
+            endpoint=handle_ingestion_apply,
+            methods=["POST"],
+        ),
+        Route(
+            "/api/frameworks/ingestions/{ingestion_id}/abandon",
+            endpoint=handle_ingestion_abandon,
+            methods=["POST"],
+        ),
+        Route(
+            "/api/frameworks/{framework}/coverage-declaration",
+            endpoint=handle_coverage_declaration,
+            methods=["POST"],
+        ),
+        Route("/api/knowledge/templates/{asset_type}", endpoint=handle_template, methods=["GET"]),
+        Route(
+            "/api/knowledge/candidates/validate",
+            endpoint=handle_candidate_validate,
+            methods=["POST"],
+        ),
+        Route("/api/knowledge/triggers", endpoint=handle_trigger_rules, methods=["GET"]),
+        Route(
+            "/api/knowledge/triggers/validate", endpoint=handle_trigger_validate, methods=["POST"]
+        ),
+        Route("/api/knowledge/triggers/preview", endpoint=handle_trigger_preview, methods=["POST"]),
+        Route(
+            "/api/knowledge/candidates/{candidate_id}/merge-key",
+            endpoint=handle_merge_key,
+            methods=["POST"],
+        ),
+        Route("/api/knowledge/checks/simulate", endpoint=handle_checks_simulate, methods=["POST"]),
+        Route("/api/knowledge/checks", endpoint=handle_check_clauses, methods=["GET"]),
+        Route(
+            "/api/knowledge/assets/{asset_id}/checks",
+            endpoint=handle_asset_checks_create,
+            methods=["POST"],
+        ),
+        Route(
+            "/api/knowledge/assets/{asset_id}/checks/{check_id}",
+            endpoint=handle_check_clause_decide,
+            methods=["PATCH"],
+        ),
+        Route("/api/knowledge/evals/{dataset}", endpoint=handle_eval_dataset, methods=["GET"]),
+        Route(
+            "/api/knowledge/evals/{dataset}/cases", endpoint=handle_eval_case_add, methods=["POST"]
+        ),
+        Route(
+            "/api/knowledge/evals/{dataset}/cases/{case_id}",
+            endpoint=handle_eval_case_annotate,
+            methods=["PATCH"],
+        ),
+        Route(
+            "/api/knowledge/evals/{dataset}/runs", endpoint=handle_eval_run_create, methods=["POST"]
+        ),
+        Route(
+            "/api/knowledge/evals/{dataset}/runs/{run_id}",
+            endpoint=handle_eval_run_get,
+            methods=["GET"],
+        ),
+        Route("/api/knowledge/verdict-feedback", endpoint=handle_feedback_create, methods=["POST"]),
+        Route("/api/knowledge/verdict-feedback", endpoint=handle_feedback_list, methods=["GET"]),
+        Route(
+            "/api/knowledge/verdict-feedback/{feedback_id}/convert",
+            endpoint=handle_feedback_convert,
+            methods=["POST"],
+        ),
+        Route("/api/knowledge/reviews/inbox", endpoint=handle_review_inbox, methods=["GET"]),
+        Route("/api/knowledge/events", endpoint=handle_governance_events, methods=["GET"]),
+        Route("/api/knowledge/owners", endpoint=handle_owners_list, methods=["GET"]),
+        Route("/api/knowledge/owners", endpoint=handle_owners_update, methods=["PUT"]),
+        Route(
+            "/api/knowledge/candidates/{candidate_id}/assign",
+            endpoint=handle_candidate_assign,
+            methods=["POST"],
+        ),
+        Route(
+            "/api/knowledge/candidates/{candidate_id}/request-review",
+            endpoint=handle_candidate_request_review,
+            methods=["POST"],
+        ),
+        Route(
+            "/api/knowledge/candidates/{candidate_id}/comments",
+            endpoint=handle_candidate_comment_create,
+            methods=["POST"],
+        ),
+        Route(
+            "/api/knowledge/candidates/{candidate_id}/comments",
+            endpoint=handle_candidate_comments_list,
+            methods=["GET"],
+        ),
+        Route("/api/knowledge/candidates", endpoint=handle_candidates_create, methods=["POST"]),
+        Route(
+            "/api/knowledge/proposals/import", endpoint=handle_proposals_import, methods=["POST"]
+        ),
+        Route("/api/knowledge/candidates", endpoint=handle_candidates_list, methods=["GET"]),
+        Route(
+            "/api/knowledge/candidates/{candidate_id}",
+            endpoint=handle_candidate_get,
+            methods=["GET"],
+        ),
+        Route(
+            "/api/knowledge/candidates/{candidate_id}",
+            endpoint=handle_candidate_review,
+            methods=["PATCH"],
+        ),
+        Route("/api/skills", endpoint=handle_skills_list, methods=["GET"]),
+        Route("/api/skills/matrix", endpoint=handle_skills_matrix, methods=["GET"]),
+        Route("/.well-known/jwks.json", endpoint=handle_jwks, methods=["GET"]),
+        Route("/api/knowledge/delegations", endpoint=handle_delegations_list, methods=["GET"]),
+        Route("/api/knowledge/delegations", endpoint=handle_delegations_create, methods=["POST"]),
+        Route(
+            "/api/knowledge/delegations/{delegation_id}/revoke",
+            endpoint=handle_delegation_revoke,
+            methods=["POST"],
+        ),
+        Route("/api/knowledge/auth/revoke", endpoint=handle_auth_revoke, methods=["POST"]),
+        Route("/api/knowledge/audit", endpoint=handle_kb_audit, methods=["GET"]),
     ]
     from pipelines.ontology.gateway import is_ontology_experimental_enabled
+
     if is_ontology_experimental_enabled():
-        routes.extend([
-            Route("/api/knowledge/ontology", endpoint=handle_ontology_list, methods=["GET"]),
-            Route("/api/knowledge/ontology/{urn:path}", endpoint=handle_ontology_get, methods=["GET"]),
-        ])
+        routes.extend(
+            [
+                Route("/api/knowledge/ontology", endpoint=handle_ontology_list, methods=["GET"]),
+                Route(
+                    "/api/knowledge/ontology/{urn:path}",
+                    endpoint=handle_ontology_get,
+                    methods=["GET"],
+                ),
+            ]
+        )
     return Starlette(
         debug=settings.DEBUG,
         routes=routes,
         middleware=[Middleware(AuthMiddleware)],
-        exception_handlers={Unauthorised: handle_unauthorised, InvalidEngagementIdError: handle_invalid_engagement},
+        exception_handlers={
+            Unauthorised: handle_unauthorised,
+            InvalidEngagementIdError: handle_invalid_engagement,
+        },
     )
 
 
@@ -1869,7 +2241,9 @@ def main() -> None:
         from pipelines.governance.bootstrap import ensure_governance_ready
 
         ensure_governance_ready(server_config.kb_dir)
-        expected_token = os.getenv("SERVER_TOKEN") or os.getenv("LLMOPS_AUTH_TOKEN") or settings.AUTH_TOKEN
+        expected_token = (
+            os.getenv("SERVER_TOKEN") or os.getenv("LLMOPS_AUTH_TOKEN") or settings.AUTH_TOKEN
+        )
         if not expected_token or not expected_token.strip():
             raise RuntimeError(
                 "CRITICAL SECURITY FAILURE: SERVER_TOKEN or LLMOPS_AUTH_TOKEN environment variable must be set to start the HTTP/SSE server. Refusing to run in unauthenticated mode."

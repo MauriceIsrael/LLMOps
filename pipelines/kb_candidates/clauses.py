@@ -214,3 +214,56 @@ def mark_published(kb_dir: str | Path, snapshot_id: str | None) -> None:
             d["published_in"] = snapshot_id or "unsealed"
     (Path(kb_dir) / TRAIL).write_text(
         "".join(json.dumps(d, ensure_ascii=False, sort_keys=True) + "\n" for d in entries), encoding="utf-8")
+
+
+def add_check_clause(kb_dir: str | Path, asset_id: str, clause: dict[str, Any],
+                     author: str | None = None) -> dict[str, Any]:
+    """Add a new check clause with status 'draft' to an asset (Issue #99, contract 1.26)."""
+    if not isinstance(clause, dict):
+        raise CandidateError("clause", "A 'clause' object is required.")
+    kind = clause.get("kind")
+    if kind not in ("requires", "forbids"):
+        raise CandidateError("clause.kind", "'kind' must be 'requires' or 'forbids'.")
+    when = clause.get("when")
+    if not isinstance(when, dict) or not when.get("terms_any"):
+        raise CandidateError("clause.when", "'when.terms_any' is required.")
+    if kind == "requires":
+        expect = clause.get("expect")
+        if not isinstance(expect, dict) or not expect.get("terms_any"):
+            raise CandidateError("clause.expect", "'expect.terms_any' is required for requires clause.")
+
+    asset = find_asset(kb_dir, asset_id)
+    text = asset.path.read_text(encoding="utf-8")
+    fm, body = split_frontmatter(text)
+    if fm is None:
+        raise CandidateNotFoundError(asset_id)
+
+    checks = fm.get("checks")
+    if not isinstance(checks, list):
+        checks = []
+        fm["checks"] = checks
+
+    seq = len(checks) + 1
+    check_id = f"{asset_id}-C{seq}"
+    while any(isinstance(c, dict) and c.get("id") == check_id for c in checks):
+        seq += 1
+        check_id = f"{asset_id}-C{seq}"
+
+    new_clause: dict[str, Any] = {
+        "id": check_id,
+        "kind": kind,
+        "when": when,
+        "message": (clause.get("message") or f"Contrôle pour {asset_id}").strip(),
+        "status": "draft",
+        "provenance": clause.get("provenance") or "llm-derived",
+    }
+    if kind == "requires" and clause.get("expect"):
+        new_clause["expect"] = clause["expect"]
+
+    checks.append(new_clause)
+    fm["checks_status"] = aggregate_checks_status(checks)
+    fm["revision"] = bump_revision(text)
+    asset.path.write_text(join_frontmatter(fm, body), encoding="utf-8")
+
+    return _row(find_asset(kb_dir, asset_id), new_clause)
+
