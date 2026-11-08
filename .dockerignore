@@ -7,20 +7,29 @@ apps/kb-client-app/.svelte-kit
 artifacts
 projects
 __pycache__
-*.pyc
-*.pyo
-*.pyd
+**/*.pyc
+**/*.pyo
+**/*.pyd
 .pytest_cache
 .coverage
 htmlcov
 *.wal
+**/*.wal
 *.shadow
+**/*.shadow
 *.lock
-# …but the dependency lock is exactly what a build must honour (the pattern above targets the graph database lock files).
+**/*.lock
 !poetry.lock
 *.kz
+**/*.kz
 *.hindex
+**/*.hindex
 *.lbug
+**/*.lbug
+data/engagements
+data/staging
+data/*.db
+data/snapshots
 
 # Embedding models are fetched (and verified) by the image build itself
 data/models

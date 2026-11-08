@@ -59,7 +59,7 @@ def configure(environ: dict[str, str] | None = None) -> dict[str, str]:
     if not env.get("ENGAGEMENT_TOKENS", "").strip():
         service = env.get("LLMOPS_SERVICE_TOKEN", "").strip() or persistent_token()
         env["LLMOPS_SERVICE_TOKEN"] = service
-        default("ENGAGEMENT_TOKENS", f"{service}:kb:review,kb:delegate,*")
+        default("ENGAGEMENT_TOKENS", f"{service}:kb:review,kb:delegate,kb:admin,*")
     return applied
 
 
