@@ -22,7 +22,7 @@ def test_service_token_is_stable_across_restarts_and_delegating(tmp_path, monkey
     serve_local.configure(first)
     serve_local.configure(second)
     assert first["LLMOPS_SERVICE_TOKEN"] == second["LLMOPS_SERVICE_TOKEN"]  # a restart does not break Archinex
-    assert first["ENGAGEMENT_TOKENS"] == f"{first['LLMOPS_SERVICE_TOKEN']}:kb:review,kb:delegate,*"
+    assert first["ENGAGEMENT_TOKENS"] == f"{first['LLMOPS_SERVICE_TOKEN']}:kb:review,kb:delegate,kb:admin,*"
     assert first["CANDIDATES_BACKEND"] == "sql" and first["GOVERNANCE_DATABASE_URL"].startswith("sqlite:///")
 
 

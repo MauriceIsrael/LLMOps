@@ -13,7 +13,10 @@ from mcp_server.core.config import server_config
 ROOT = Path(__file__).parent.parent.parent
 CLIENT = {"Authorization": "Bearer archinex-token"}
 SEC, MAINT, OTHER = "sec@example.org", "maint@example.org", "bob@example.org"
-NO_BACKUP = {"title": "Single site", "description": "One data centre, no backup and no disaster recovery plan."}
+NO_BACKUP = {
+    "title": "Single site",
+    "description": "One data centre, no backup and no disaster recovery plan.",
+}
 
 
 def _as(email: str) -> dict:
@@ -25,7 +28,9 @@ def env(tmp_path, monkeypatch):
     kb = tmp_path / "kb"
     shutil.copytree(ROOT / "data" / "kb", kb)
     owners = yaml.safe_load((kb / "owners.yaml").read_text())
-    owners["owners"]["@security-compliance-team"]["email"] = SEC  # owns business-continuity (NIS2-ART21-2C)
+    owners["owners"]["@security-compliance-team"]["email"] = (
+        SEC  # owns business-continuity (NIS2-ART21-2C)
+    )
     owners["owners"]["@core-owner-architecture"]["email"] = OTHER
     owners["owners"]["@maintainers"] = {"email": MAINT, "roles": ["kb:maintain"]}
     (kb / "owners.yaml").write_text(yaml.safe_dump(owners), encoding="utf-8")
@@ -43,6 +48,7 @@ def env(tmp_path, monkeypatch):
     db = tmp_path / "knowledge.lbug"
     shutil.copy(ROOT / "data" / "knowledge.lbug", db)
     import ladybug as kuzu
+
     _kdb = kuzu.Database(str(db))
     _conn = kuzu.Connection(_kdb)
     _conn.execute(
@@ -81,21 +87,35 @@ def _fm(kb: Path, rel: str) -> dict:
 
 
 def _verdicts(client, option: dict) -> list[dict]:
-    res = client.post("/api/knowledge/check", headers=CLIENT, json={"option": option, "frameworks": ["NIS2"]})
+    res = client.post(
+        "/api/knowledge/check", headers=CLIENT, json={"option": option, "frameworks": ["NIS2"]}
+    )
     assert res.status_code == 200, res.text
-    return [v for v in res.json()["data"]["verdicts"] if v["typed_id"] == "control:NIS2-ART21-2C" and v["verdict"] != "unassessed"]
+    return [
+        v
+        for v in res.json()["data"]["verdicts"]
+        if v["typed_id"] == "control:NIS2-ART21-2C" and v["verdict"] != "unassessed"
+    ]
 
 
 def test_list_decide_publish_then_the_judge_blocks(env):
     client, kb = env["client"], env["kb"]
 
-    listed = client.get("/api/knowledge/checks?framework=NIS2&status=draft", headers=_as(SEC)).json()["data"]
+    listed = client.get(
+        "/api/knowledge/checks?framework=NIS2&status=draft", headers=_as(SEC)
+    ).json()["data"]
     row = next(r for r in listed["clauses"] if r["check_id"] == "NIS2-ART21-2C-C1")
     assert row["kind"] == "forbids" and row["status"] == "draft" and row["may_decide"] is True
-    assert row["asset_excerpt"] and row["severity"] == "mandatory" and "business-continuity" in row["domain"]
+    assert (
+        row["asset_excerpt"]
+        and row["severity"] == "mandatory"
+        and "business-continuity" in row["domain"]
+    )
     assert any(m["asset_id"] == "NIS2-ART23-4" for m in listed["mandatory_without_clause"])
     assert listed["pending_publication"] == 0
-    other = client.get("/api/knowledge/checks?asset_id=NIS2-ART21-2C", headers=_as(OTHER)).json()["data"]
+    other = client.get("/api/knowledge/checks?asset_id=NIS2-ART21-2C", headers=_as(OTHER)).json()[
+        "data"
+    ]
     assert {r["may_decide"] for r in other["clauses"]} == {False}
 
     # Draft: the judge reports the violation, but only as a draft (it does not block).
@@ -104,48 +124,121 @@ def test_list_decide_publish_then_the_judge_blocks(env):
     url = "/api/knowledge/assets/NIS2-ART21-2C/checks/NIS2-ART21-2C-C1"
     assert client.patch(url, headers=_as(OTHER), json={"decision": "validate"}).status_code == 403
     assert client.patch(url, headers=_as(SEC), json={"decision": "bogus"}).status_code == 400
-    assert client.patch(url, headers=_as(SEC), json={"decision": "reject"}).status_code == 400  # comment required
-    assert client.patch("/api/knowledge/assets/NIS2-ART21-2C/checks/NOPE", headers=_as(SEC),
-                        json={"decision": "validate"}).status_code == 404
+    assert (
+        client.patch(url, headers=_as(SEC), json={"decision": "reject"}).status_code == 400
+    )  # comment required
+    assert (
+        client.patch(
+            "/api/knowledge/assets/NIS2-ART21-2C/checks/NOPE",
+            headers=_as(SEC),
+            json={"decision": "validate"},
+        ).status_code
+        == 404
+    )
 
     done = client.patch(url, headers=_as(SEC), json={"decision": "validate"})
     assert done.status_code == 200, done.text
-    assert done.json()["data"]["status"] == "validated" and done.json()["data"]["review"]["by"] == "@security-compliance-team"
+    assert (
+        done.json()["data"]["status"] == "validated"
+        and done.json()["data"]["review"]["by"] == "@security-compliance-team"
+    )
     fm = _fm(kb, "controls/NIS2/NIS2-ART21-2C.md")
-    assert [c["status"] for c in fm["checks"]] == ["validated", "draft"] and fm["checks_status"] == "partial"
+    assert [c["status"] for c in fm["checks"]] == ["validated", "draft"] and fm[
+        "checks_status"
+    ] == "partial"
     assert fm["revision"] == 3
 
     # The second clause is amended (validated with corrected terms); a rejected clause would no longer be evaluated.
-    amended = client.patch("/api/knowledge/assets/NIS2-ART21-2C/checks/NIS2-ART21-2C-C2", headers=_as(SEC), json={
-        "decision": "amend", "comment": "Recovery objectives are enough evidence",
-        "clause": {"expect": {"terms_any": ["off-site", "hors site", "rpo", "rto"]}}})
+    amended = client.patch(
+        "/api/knowledge/assets/NIS2-ART21-2C/checks/NIS2-ART21-2C-C2",
+        headers=_as(SEC),
+        json={
+            "decision": "amend",
+            "comment": "Recovery objectives are enough evidence",
+            "clause": {"expect": {"terms_any": ["off-site", "hors site", "rpo", "rto"]}},
+        },
+    )
     assert amended.status_code == 200, amended.text
-    assert amended.json()["data"]["expect"] == {"terms_any": ["off-site", "hors site", "rpo", "rto"]}
+    assert amended.json()["data"]["expect"] == {
+        "terms_any": ["off-site", "hors site", "rpo", "rto"]
+    }
     assert _fm(kb, "controls/NIS2/NIS2-ART21-2C.md")["checks_status"] == "validated"
 
-    trail = [json.loads(line) for line in (kb / "clause-decisions.jsonl").read_text(encoding="utf-8").splitlines()]
+    trail = [
+        json.loads(line)
+        for line in (kb / "clause-decisions.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
     assert [(d["check_id"], d["decision"], d["published_in"]) for d in trail] == [
-        ("NIS2-ART21-2C-C1", "validate", None), ("NIS2-ART21-2C-C2", "amend", None)]
+        ("NIS2-ART21-2C-C1", "validate", None),
+        ("NIS2-ART21-2C-C2", "amend", None),
+    ]
 
     # Nothing changes for the judge until the publication (re-ingestion + sealed snapshot).
     assert client.post("/api/knowledge/publications", headers=_as(SEC)).status_code == 403
     pub = client.post("/api/knowledge/publications", headers=_as(MAINT))
     assert pub.status_code == 200, pub.text
-    assert pub.json()["data"]["clause_decisions"] == ["NIS2-ART21-2C/NIS2-ART21-2C-C1", "NIS2-ART21-2C/NIS2-ART21-2C-C2"]
-    assert "clause `NIS2-ART21-2C-C1` of `NIS2-ART21-2C` validated by @security-compliance-team" in (
-        kb / "CHANGELOG.md").read_text(encoding="utf-8")
-    assert client.get("/api/knowledge/checks", headers=_as(SEC)).json()["data"]["pending_publication"] == 0
+    assert pub.json()["data"]["clause_decisions"] == [
+        "NIS2-ART21-2C/NIS2-ART21-2C-C1",
+        "NIS2-ART21-2C/NIS2-ART21-2C-C2",
+    ]
+    assert (
+        "clause `NIS2-ART21-2C-C1` of `NIS2-ART21-2C` validated by @security-compliance-team"
+        in (kb / "CHANGELOG.md").read_text(encoding="utf-8")
+    )
+    assert (
+        client.get("/api/knowledge/checks", headers=_as(SEC)).json()["data"]["pending_publication"]
+        == 0
+    )
 
     assert [v["check_status"] for v in _verdicts(client, NO_BACKUP)] == ["validated"]
-    assert client.post("/api/knowledge/publications", headers=_as(MAINT)).json()["data"]["published"] == []
+    assert (
+        client.post("/api/knowledge/publications", headers=_as(MAINT)).json()["data"]["published"]
+        == []
+    )
 
 
 def test_a_rejected_clause_is_no_longer_evaluated(env):
     client = env["client"]
-    res = client.patch("/api/knowledge/assets/NIS2-ART21-2C/checks/NIS2-ART21-2C-C1", headers=_as(MAINT),
-                       json={"decision": "reject", "comment": "Too broad"})
+    res = client.patch(
+        "/api/knowledge/assets/NIS2-ART21-2C/checks/NIS2-ART21-2C-C1",
+        headers=_as(MAINT),
+        json={"decision": "reject", "comment": "Too broad"},
+    )
     assert res.status_code == 200 and res.json()["data"]["status"] == "rejected"
     assert client.post("/api/knowledge/publications", headers=_as(MAINT)).status_code == 200
     assert _verdicts(client, NO_BACKUP) == []
-    rejected = client.get("/api/knowledge/checks?status=rejected", headers=_as(MAINT)).json()["data"]
+    rejected = client.get("/api/knowledge/checks?status=rejected", headers=_as(MAINT)).json()[
+        "data"
+    ]
     assert [r["check_id"] for r in rejected["clauses"]] == ["NIS2-ART21-2C-C1"]
+
+
+def test_add_draft_clause_to_asset_appears_in_draft_checks(env):
+    client = env["client"]
+    # NIS2-ART23-4 is initially in mandatory_without_clause
+    initial = client.get("/api/knowledge/checks", headers=_as(SEC)).json()["data"]
+    assert any(m["asset_id"] == "NIS2-ART23-4" for m in initial["mandatory_without_clause"])
+
+    # Add draft check clause
+    draft_clause = {
+        "kind": "requires",
+        "when": {"terms_any": ["incident", "breach"]},
+        "expect": {"terms_any": ["notification", "csirt"]},
+        "message": "Incident reporting to CSIRT within 24h",
+        "provenance": "llm-derived",
+    }
+    res = client.post(
+        "/api/knowledge/assets/NIS2-ART23-4/checks", headers=_as(SEC), json={"clause": draft_clause}
+    )
+    assert res.status_code == 201, res.text
+    created = res.json()["data"]
+    assert created["asset_id"] == "NIS2-ART23-4"
+    assert created["status"] == "draft"
+    assert created["check_id"] == "NIS2-ART23-4-C1"
+
+    # Now verify it appears in draft clauses
+    after = client.get("/api/knowledge/checks?status=draft", headers=_as(SEC)).json()["data"]
+    assert any(
+        r["check_id"] == "NIS2-ART23-4-C1" and r["status"] == "draft" for r in after["clauses"]
+    )
+    assert not any(m["asset_id"] == "NIS2-ART23-4" for m in after["mandatory_without_clause"])

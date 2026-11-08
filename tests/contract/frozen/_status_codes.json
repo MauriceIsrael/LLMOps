@@ -92,6 +92,7 @@
   "rest.POST /api/frameworks/ingestions/{ingestion_id}/apply": 200,
   "rest.POST /api/frameworks/ingestions/{ingestion_id}/link-proposals": 200,
   "rest.POST /api/frameworks/{framework}/coverage-declaration": 409,
+  "rest.POST /api/knowledge/assets/{asset_id}/checks": 201,
   "rest.POST /api/knowledge/auth/revoke": 200,
   "rest.POST /api/knowledge/candidates": 201,
   "rest.POST /api/knowledge/candidates/validate": 200,

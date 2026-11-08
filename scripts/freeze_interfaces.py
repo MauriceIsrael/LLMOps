@@ -619,6 +619,9 @@ def build_catalogue() -> list[Interface]:
             {"title": "Fully autonomous remediation", "description": "no human approval"}]}),
         # Contract 1.26 — decision on each check clause
         _rest("GET", "/api/knowledge/checks", "/api/knowledge/checks?type=principle", headers=DELEGATED, delegate=True),
+        _rest("POST", "/api/knowledge/assets/{asset_id}/checks", "/api/knowledge/assets/P-002/checks",
+              json_body={"clause": {"kind": "requires", "when": {"terms_any": ["test"]}, "expect": {"terms_any": ["test"]}, "message": "test", "provenance": "llm-derived"}},
+              headers=DELEGATED, delegate=True),
         _rest("PATCH", "/api/knowledge/assets/{asset_id}/checks/{check_id}",
               "/api/knowledge/assets/P-002/checks/P-002-C1", json_body={"decision": "validate"},
               headers=DELEGATED, delegate=True),

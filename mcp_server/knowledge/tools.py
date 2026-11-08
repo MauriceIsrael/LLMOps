@@ -73,7 +73,9 @@ def list_assets(
 SNAPSHOTS_DIR = Path("data/snapshots")
 
 
-def resolve_asset_reference(id: str, version: str | None = None, snapshot: str | None = None) -> dict[str, Any]:
+def resolve_asset_reference(
+    id: str, version: str | None = None, snapshot: str | None = None
+) -> dict[str, Any]:
     """Resolve a citable reference ``{knowledgeKey, version}`` from a sealed snapshot (K3), never from the live base.
 
     ``id`` is a typed key (``decision:ADR-0001``) or a bare identifier; ``snapshot`` designates the snapshot (default: the
@@ -90,7 +92,13 @@ def resolve_asset_reference(id: str, version: str | None = None, snapshot: str |
             return invalid_argument_response("snapshot", str(err))
         if err.reason in ("snapshot_corrupt", "content_corrupt"):
             return {"status": "error", "reason": err.reason, "error": str(err), **err.detail}
-        return {"status": "not_found", "id": id, "reason": err.reason, "error": str(err), **err.detail}
+        return {
+            "status": "not_found",
+            "id": id,
+            "reason": err.reason,
+            "error": str(err),
+            **err.detail,
+        }
 
 
 def get_asset(id: str, version: str | None = None, snapshot: str | None = None) -> dict[str, Any]:
@@ -127,7 +135,11 @@ def get_asset(id: str, version: str | None = None, snapshot: str | None = None) 
         row = res[0]
         markdown_content = row.get("markdown_content") or ""
         parser = MarkdownDocParser()
-        parsed = parser.parse_content(markdown_content, source_path=row.get("source_path", "")) if markdown_content else None
+        parsed = (
+            parser.parse_content(markdown_content, source_path=row.get("source_path", ""))
+            if markdown_content
+            else None
+        )
         if not parsed and row.get("source_path") and Path(row["source_path"]).exists():
             parsed = parser.parse_file(row["source_path"])
 
@@ -290,8 +302,12 @@ def get_graph_summary() -> dict[str, Any]:
         terms = []
 
     kb_counts = {
-        "Asset": next(iter(assets[0].values())) if assets and isinstance(assets[0], dict) and assets[0] else 0,
-        "GlossaryTerm": next(iter(terms[0].values())) if terms and isinstance(terms[0], dict) and terms[0] else 0,
+        "Asset": next(iter(assets[0].values()))
+        if assets and isinstance(assets[0], dict) and assets[0]
+        else 0,
+        "GlossaryTerm": next(iter(terms[0].values()))
+        if terms and isinstance(terms[0], dict) and terms[0]
+        else 0,
     }
 
     discovered = discover_engagements()
@@ -310,15 +326,19 @@ def get_graph_summary() -> dict[str, Any]:
         except Exception:
             sub_cnt, stmt_cnt, conf_cnt = 0, 0, 0
 
-        engagements_list.append({
-            "id": eng_id,
-            "dataset": Path(eng_path).as_posix(),  # the same text on every OS: a fixture generated on Windows stays valid on Linux
-            "node_counts": {
-                "Subject": sub_cnt,
-                "Statement": stmt_cnt,
-                "Conflict": conf_cnt,
-            },
-        })
+        engagements_list.append(
+            {
+                "id": eng_id,
+                "dataset": Path(
+                    eng_path
+                ).as_posix(),  # the same text on every OS: a fixture generated on Windows stays valid on Linux
+                "node_counts": {
+                    "Subject": sub_cnt,
+                    "Statement": stmt_cnt,
+                    "Conflict": conf_cnt,
+                },
+            }
+        )
 
     payload = {
         "schema_version": CONTRACT_VERSION,
@@ -337,17 +357,23 @@ def get_knowledge_analytics() -> dict[str, Any]:
     kb_client = _get_db()
 
     try:
-        type_res = kb_client.execute_cypher("MATCH (a:Asset) RETURN a.type as type, count(a) as count;")
+        type_res = kb_client.execute_cypher(
+            "MATCH (a:Asset) RETURN a.type as type, count(a) as count;"
+        )
     except Exception:
         type_res = []
 
     try:
-        status_res = kb_client.execute_cypher("MATCH (a:Asset) RETURN a.status as status, count(a) as count;")
+        status_res = kb_client.execute_cypher(
+            "MATCH (a:Asset) RETURN a.status as status, count(a) as count;"
+        )
     except Exception:
         status_res = []
 
     try:
-        confidence_res = kb_client.execute_cypher("MATCH (a:Asset) RETURN a.confidence as confidence, count(a) as count;")
+        confidence_res = kb_client.execute_cypher(
+            "MATCH (a:Asset) RETURN a.confidence as confidence, count(a) as count;"
+        )
     except Exception:
         confidence_res = []
 
@@ -358,13 +384,17 @@ def get_knowledge_analytics() -> dict[str, Any]:
         glossary_count = 0
 
     try:
-        requires_res = kb_client.execute_cypher("MATCH ()-[r:REQUIRES]->() RETURN count(r) as count;")
+        requires_res = kb_client.execute_cypher(
+            "MATCH ()-[r:REQUIRES]->() RETURN count(r) as count;"
+        )
         requires_count = requires_res[0]["count"] if requires_res else 0
     except Exception:
         requires_count = 0
 
     try:
-        supersedes_res = kb_client.execute_cypher("MATCH ()-[r:SUPERSEDES]->() RETURN count(r) as count;")
+        supersedes_res = kb_client.execute_cypher(
+            "MATCH ()-[r:SUPERSEDES]->() RETURN count(r) as count;"
+        )
         supersedes_count = supersedes_res[0]["count"] if supersedes_res else 0
     except Exception:
         supersedes_count = 0
@@ -434,6 +464,7 @@ def list_frameworks() -> dict[str, Any]:
         meta = _framework_metadata()
         controls_by_fw = _controls(Path(server_config.kb_dir))
         from pipelines.publication.history import get_framework_sources
+
         fw_sources = get_framework_sources(Path(server_config.kb_dir))
         res = []
         for r in rows:
@@ -451,25 +482,27 @@ def list_frameworks() -> dict[str, Any]:
                 if c.get("id") and c.get("validated_by")
             ]
             fw_info = fw_sources.get(fw.upper()) or {}
-            res.append({
-                "framework": fw,
-                "version": r.get("version", "1.0.0"),
-                "title": info["title"],
-                "jurisdiction": info["jurisdiction"],
-                "description": info["description"],
-                "control_count": r.get("control_count", 0),
-                "status": cov["status"],
-                "expected": cov["expected"],
-                "present": cov["present"],
-                "validated": cov["validated"],
-                "declared_by": cov["declared_by"],
-                "declared_at": cov["declared_at"],
-                "provisional": cov["provisional"],
-                "validated_controls": validated_controls,
-                "ingested_source": fw_info.get("ingested_source"),
-                "source_sha256": fw_info.get("source_sha256"),
-                "associated_publications": fw_info.get("associated_publications") or [],
-            })
+            res.append(
+                {
+                    "framework": fw,
+                    "version": r.get("version", "1.0.0"),
+                    "title": info["title"],
+                    "jurisdiction": info["jurisdiction"],
+                    "description": info["description"],
+                    "control_count": r.get("control_count", 0),
+                    "status": cov["status"],
+                    "expected": cov["expected"],
+                    "present": cov["present"],
+                    "validated": cov["validated"],
+                    "declared_by": cov["declared_by"],
+                    "declared_at": cov["declared_at"],
+                    "provisional": cov["provisional"],
+                    "validated_controls": validated_controls,
+                    "ingested_source": fw_info.get("ingested_source"),
+                    "source_sha256": fw_info.get("source_sha256"),
+                    "associated_publications": fw_info.get("associated_publications") or [],
+                }
+            )
         return ok_response(res, count=len(res))
     except Exception as e:
         return handle_exception_response(e, context_action="list_frameworks")
@@ -547,7 +580,9 @@ def get_compliance_trail(control_id: str) -> dict[str, Any]:
         patterns = [a for a in impl_res if a.get("type") == "pattern"]
         principles = [a for a in impl_res if a.get("type") == "principle"]
         decisions = [a for a in impl_res if a.get("type") in ("decision", "adr")]
-        others = [a for a in impl_res if a.get("type") not in ("pattern", "principle", "decision", "adr")]
+        others = [
+            a for a in impl_res if a.get("type") not in ("pattern", "principle", "decision", "adr")
+        ]
 
         trail = {
             "control": ctrl,
@@ -597,26 +632,35 @@ def get_compliance_matrix(engagement: str, framework: str) -> dict[str, Any]:
                 based_on = str(stmt.get("based_on") or "")
                 val = str(stmt.get("value") or "")
                 verb = str(stmt.get("verbatim") or "")
-                if c_id in based_on or c_id in val or c_id in verb or any(a in based_on for a in impl_assets):
-                    matching_statements.append({
-                        "statement_id": stmt["id"],
-                        "subject": stmt["subject"],
-                        "value": val,
-                        "confidence": stmt["confidence"],
-                    })
+                if (
+                    c_id in based_on
+                    or c_id in val
+                    or c_id in verb
+                    or any(a in based_on for a in impl_assets)
+                ):
+                    matching_statements.append(
+                        {
+                            "statement_id": stmt["id"],
+                            "subject": stmt["subject"],
+                            "value": val,
+                            "confidence": stmt["confidence"],
+                        }
+                    )
 
             status = "covered" if matching_statements else "unaddressed"
             if status == "covered":
                 covered_count += 1
 
-            matrix.append({
-                "control_id": c_id,
-                "title": c["title"],
-                "severity": c["severity"],
-                "status": status,
-                "implementing_kb_assets": list(impl_assets),
-                "satisfying_statements": matching_statements,
-            })
+            matrix.append(
+                {
+                    "control_id": c_id,
+                    "title": c["title"],
+                    "severity": c["severity"],
+                    "status": status,
+                    "implementing_kb_assets": list(impl_assets),
+                    "satisfying_statements": matching_statements,
+                }
+            )
 
         total = len(ctrls)
         coverage_pct = round((covered_count / total) * 100, 1) if total > 0 else 0.0
@@ -709,7 +753,9 @@ def _suggest_knowledge_improvement(
     except Exception as exc:  # the suggestion itself must never fail because of the queue
         import logging
 
-        logging.getLogger("mcp_server").warning("KB candidate creation failed for suggestion: %s", exc)
+        logging.getLogger("mcp_server").warning(
+            "KB candidate creation failed for suggestion: %s", exc
+        )
     return ok_response(res, count=1)
 
 
@@ -732,15 +778,17 @@ def list_skills(domain: str | None = None) -> dict[str, Any]:
         meta = doc.get("frontmatter", {})
         if domain and meta.get("domain") != domain:
             continue
-        skills.append({
-            "id": doc.get("id", f.stem),
-            "title": doc.get("title", f.stem),
-            "domain": meta.get("domain", "general"),
-            "criticality": meta.get("criticality", "medium"),
-            "status": meta.get("status", "active"),
-            "keywords": meta.get("keywords", []),
-            "description": doc.get("raw_body", "")[:300].strip(),
-        })
+        skills.append(
+            {
+                "id": doc.get("id", f.stem),
+                "title": doc.get("title", f.stem),
+                "domain": meta.get("domain", "general"),
+                "criticality": meta.get("criticality", "medium"),
+                "status": meta.get("status", "active"),
+                "keywords": meta.get("keywords", []),
+                "description": doc.get("raw_body", "")[:300].strip(),
+            }
+        )
 
     return ok_response(skills, count=len(skills))
 
@@ -761,11 +809,15 @@ def get_skills_matrix(
 
     engagement = resolve_engagement(engagement)
     if not engagement:
-        return invalid_argument_response("engagement", "No engagement given and LLMOPS_ENGAGEMENT is not set.")
+        return invalid_argument_response(
+            "engagement", "No engagement given and LLMOPS_ENGAGEMENT is not set."
+        )
     guard_engagement(engagement)  # K9
     bp_path = resolve_blueprint_path(blueprint_path)
     if bp_path is None:
-        return invalid_argument_response("blueprint_path", "No blueprint given and LLMOPS_BLUEPRINT is not set.")
+        return invalid_argument_response(
+            "blueprint_path", "No blueprint given and LLMOPS_BLUEPRINT is not set."
+        )
     bp = load_blueprint(bp_path)
     mgr = RosterManager(engagement=engagement)
     covered = mgr.get_all_covered_skills()
@@ -784,8 +836,14 @@ def get_skills_matrix(
             all_required.update(s_skills)
 
     uncovered = all_required - covered
-    coverage_pct = round((len(all_required - uncovered) / len(all_required)) * 100, 1) if all_required else 100.0
-    risk_level = "low" if coverage_pct == 100.0 else ("moderate" if coverage_pct >= 75.0 else "high")
+    coverage_pct = (
+        round((len(all_required - uncovered) / len(all_required)) * 100, 1)
+        if all_required
+        else 100.0
+    )
+    risk_level = (
+        "low" if coverage_pct == 100.0 else ("moderate" if coverage_pct >= 75.0 else "high")
+    )
 
     payload = {
         "engagement": engagement,
@@ -815,7 +873,9 @@ def shred_rfp(
     if not rfp_text.strip():
         return invalid_argument_response("rfp_text", "rfp_text cannot be empty.")
     if persist:
-        guard_engagement(engagement, action="contribute")  # K9/K14: before anything is written under data/engagements/
+        guard_engagement(
+            engagement, action="contribute"
+        )  # K9/K14: before anything is written under data/engagements/
 
     try:
         from pipelines.rfp_shredder import RFPShredder
@@ -885,15 +945,18 @@ def get_rfp_compliance_matrix(
 
         eng_path = server_config.engagements_dir / f"{engagement}.lbug"
         if not eng_path.exists():
-            return ok_response({
-                "engagement": engagement,
-                "total_requirements": 0,
-                "covered": 0,
-                "partially_covered": 0,
-                "gaps": 0,
-                "coverage_rate": 0.0,
-                "requirements": [],
-            }, count=0)
+            return ok_response(
+                {
+                    "engagement": engagement,
+                    "total_requirements": 0,
+                    "covered": 0,
+                    "partially_covered": 0,
+                    "gaps": 0,
+                    "coverage_rate": 0.0,
+                    "requirements": [],
+                },
+                count=0,
+            )
 
         repo = ElicitationRepository(db_path=eng_path)
         reqs = repo.get_requirements(engagement)
@@ -982,14 +1045,10 @@ def trigger_rfp_elicitation(
         return handle_exception_response(e, context_action="trigger_rfp_elicitation")
 
 
-
-
-
-
-
 # ---------------------------------------------------------------------------
 # Doctrine context & option judge (contract 1.1) — deterministic, no LLM.
 # ---------------------------------------------------------------------------
+
 
 def _doctrine_index():
     from pipelines.doctrine import load_index
@@ -1044,8 +1103,15 @@ def _semantic_relevance(subject: str) -> tuple[dict[str, float] | None, dict[str
         if encoder is None:
             return None, None
         scores = scorer_for(encoder).scores(server_config.kb_dir, subject)
-        return ({ref: s["semantic"] for ref, s in scores.items()},
-                {"model": status["model"], "version": status["version"], "sha256": status["sha256"], "local": True})
+        return (
+            {ref: s["semantic"] for ref, s in scores.items()},
+            {
+                "model": status["model"],
+                "version": status["version"],
+                "sha256": status["sha256"],
+                "local": True,
+            },
+        )
     except Exception as exc:  # the lexical ranking is always available
         logger.warning("semantic relevance unavailable, lexical ranking: %s", exc)
         return None, None
@@ -1079,9 +1145,17 @@ def get_doctrine_context(
     if isinstance(fws, dict):
         return fws
     if not isinstance(max_items, int) or isinstance(max_items, bool) or not 1 <= max_items <= 200:
-        return invalid_argument_response("max_items", "'max_items' must be an integer between 1 and 200.")
-    if not isinstance(max_chars, int) or isinstance(max_chars, bool) or not 200 <= max_chars <= 100000:
-        return invalid_argument_response("max_chars", "'max_chars' must be an integer between 200 and 100000.")
+        return invalid_argument_response(
+            "max_items", "'max_items' must be an integer between 1 and 200."
+        )
+    if (
+        not isinstance(max_chars, int)
+        or isinstance(max_chars, bool)
+        or not 200 <= max_chars <= 100000
+    ):
+        return invalid_argument_response(
+            "max_chars", "'max_chars' must be an integer between 200 and 100000."
+        )
     try:
         from pipelines.doctrine import build_doctrine_context
 
@@ -1157,6 +1231,7 @@ def check_option(
 # KB candidate cycle (contract 1.2) — queue, automatic checks, human review.
 # ---------------------------------------------------------------------------
 
+
 def _candidate_service():
     from pipelines.kb_candidates.service import CandidateService
 
@@ -1176,7 +1251,9 @@ def _actor() -> str:
 
     actor = resolve_actor()
     if actor:
-        return actor.handle if actor.handle else (f"email:{actor.email}" if actor.email else "unknown")
+        return (
+            actor.handle if actor.handle else (f"email:{actor.email}" if actor.email else "unknown")
+        )
 
     email = delegated_actor_email()
     if email:
@@ -1192,7 +1269,9 @@ def _actor() -> str:
 def _candidate_error(exc: Exception) -> dict[str, Any]:
     from pipelines.kb_candidates.service import CandidateStateError
 
-    res = invalid_argument_response(getattr(exc, "argument", "candidate"), getattr(exc, "reason", str(exc)))
+    res = invalid_argument_response(
+        getattr(exc, "argument", "candidate"), getattr(exc, "reason", str(exc))
+    )
     if isinstance(exc, CandidateStateError):
         res["conflict"] = True
     return res
@@ -1231,8 +1310,12 @@ def import_proposal_snapshot(envelope: dict[str, Any], dry_run: bool = False) ->
         res = import_snapshot(_candidate_service(), envelope, actor=_actor(), dry_run=bool(dry_run))
         return ok_response(res, count=len(res["imported"]))
     except ProposalSnapshotError as exc:
-        return {**invalid_argument_response("snapshot", str(exc)),
-                "problems": [{"code": p.code, "path": p.path, "message": p.message} for p in exc.problems]}
+        return {
+            **invalid_argument_response("snapshot", str(exc)),
+            "problems": [
+                {"code": p.code, "path": p.path, "message": p.message} for p in exc.problems
+            ],
+        }
     except Exception as e:
         return handle_exception_response(e, context_action="import_proposal_snapshot")
 
@@ -1255,7 +1338,9 @@ def list_kb_candidates(
     from pipelines.kb_candidates.service import REVIEW_SCOPE, redact
 
     try:
-        items = _candidate_service().find(status=status, source=source, domain=domain, engagement=engagement)
+        items = _candidate_service().find(
+            status=status, source=source, domain=domain, engagement=engagement
+        )
         if not has_scope(REVIEW_SCOPE):
             items = [redact(c) for c in items]
         return ok_response(items, count=len(items))
@@ -1303,7 +1388,10 @@ def review_kb_candidate(
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required to review candidates."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required to review candidates.",
+        }
     try:
         from mcp_server.core.auth import (
             delegated_actor_email,
@@ -1319,33 +1407,54 @@ def review_kb_candidate(
             if owner is None and actor.email:
                 owner = registry.by_email(actor.email)
             if owner is None and actor.auth_method != "assertion":
-                return {"status": "unauthorized", "reason": f"'{actor.email or actor.handle}' is not a registered expert."}
+                return {
+                    "status": "unauthorized",
+                    "reason": f"'{actor.email or actor.handle}' is not a registered expert.",
+                }
             if (reviewer or "").strip() not in ("", actor.handle):
-                return {"status": "unauthorized", "reason": "'reviewer' does not match the authenticated expert."}
+                return {
+                    "status": "unauthorized",
+                    "reason": "'reviewer' does not match the authenticated expert.",
+                }
             reviewer = actor.handle
             candidate = service.get(candidate_id)
             require_distinct_reviewer(reviewer, candidate, reviewer_email=actor.email)
             if not service.may_review(actor.handle, candidate):
-                return {"status": "unauthorized",
-                        "reason": f"{actor.handle} does not own the domain of this candidate and is not assigned to it."}
+                return {
+                    "status": "unauthorized",
+                    "reason": f"{actor.handle} does not own the domain of this candidate and is not assigned to it.",
+                }
         else:
             email = delegated_actor_email()
             if email:
                 service = _candidate_service()
                 owner = service.owners().by_email(email)
                 if owner is None:
-                    return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
+                    return {
+                        "status": "unauthorized",
+                        "reason": f"'{email}' is not a registered expert.",
+                    }
                 if (reviewer or "").strip() not in ("", owner.handle):
-                    return {"status": "unauthorized", "reason": "'reviewer' does not match the authenticated expert."}
+                    return {
+                        "status": "unauthorized",
+                        "reason": "'reviewer' does not match the authenticated expert.",
+                    }
                 reviewer = owner.handle
                 candidate = service.get(candidate_id)
                 require_distinct_reviewer(reviewer, candidate, reviewer_email=email)
                 if not service.may_review(owner.handle, candidate):
-                    return {"status": "unauthorized",
-                            "reason": f"{owner.handle} does not own the domain of this candidate and is not assigned to it."}
+                    return {
+                        "status": "unauthorized",
+                        "reason": f"{owner.handle} does not own the domain of this candidate and is not assigned to it.",
+                    }
 
         reviewed = _candidate_service().review(
-            candidate_id, action, reviewer, reason=reason, amended_content=amended_content, actor=_actor()
+            candidate_id,
+            action,
+            reviewer,
+            reason=reason,
+            amended_content=amended_content,
+            actor=_actor(),
         )
         return ok_response(reviewed, count=1)
     except CandidateNotFoundError:
@@ -1371,47 +1480,62 @@ def get_kb_me() -> dict[str, Any]:
         if not actor:
             email = delegated_actor_email()
             if not email:
-                return {"status": "unauthorized",
-                        "reason": "No acting expert: send X-Actor-Email or X-Actor-Token with a token carrying the 'kb:delegate' scope."}
+                return {
+                    "status": "unauthorized",
+                    "reason": "No acting expert: send X-Actor-Email or X-Actor-Token with a token carrying the 'kb:delegate' scope.",
+                }
             service = _candidate_service()
             registry = service.owners()
             owner = registry.by_email(email)
             if owner is None:
-                return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
+                return {
+                    "status": "unauthorized",
+                    "reason": f"'{email}' is not a registered expert.",
+                }
             pending = [
-                c for c in service.find(status="in_review")
+                c
+                for c in service.find(status="in_review")
                 if registry.can_review(owner.handle, c.get("domain") or [])
                 and (c.get("review") or {}).get("reviewer") != owner.handle
             ]
-            return ok_response({
-                "handle": owner.handle,
-                "email": owner.email,
-                "kb_roles": sorted({"kb:review", *owner.roles}),
-                "owned_domains": registry.owned_domains(owner.handle),
-                "pending_reviews": len(pending),
-            }, count=1)
+            return ok_response(
+                {
+                    "handle": owner.handle,
+                    "email": owner.email,
+                    "kb_roles": sorted({"kb:review", *owner.roles}),
+                    "owned_domains": registry.owned_domains(owner.handle),
+                    "pending_reviews": len(pending),
+                },
+                count=1,
+            )
 
         service = _candidate_service()
         registry = service.owners()
         owner = registry.owners.get(actor.handle)
         roles = sorted({"kb:review", *actor.roles, *(owner.roles if owner else ())})
         owned_domains = registry.owned_domains(actor.handle)
-        delegations = get_delegation_store().list_delegations(delegate=actor.handle, active_only=True)
+        delegations = get_delegation_store().list_delegations(
+            delegate=actor.handle, active_only=True
+        )
         pending = [
-            c for c in service.find(status="in_review")
+            c
+            for c in service.find(status="in_review")
             if service.may_review(actor.handle, c)
             and (c.get("review") or {}).get("reviewer") != actor.handle
         ]
-        return ok_response({
-            "handle": actor.handle,
-            "email": actor.email,
-            "kb_roles": roles,
-            "domain_roles": actor.domain_roles,
-            "owned_domains": owned_domains,
-            "active_delegations": delegations,
-            "pending_reviews": len(pending),
-            "auth_method": actor.auth_method,
-        }, count=1)
+        return ok_response(
+            {
+                "handle": actor.handle,
+                "email": actor.email,
+                "kb_roles": roles,
+                "domain_roles": actor.domain_roles,
+                "owned_domains": owned_domains,
+                "active_delegations": delegations,
+                "pending_reviews": len(pending),
+                "auth_method": actor.auth_method,
+            },
+            count=1,
+        )
     except Exception as e:
         return handle_exception_response(e, context_action="get_kb_me")
 
@@ -1419,6 +1543,7 @@ def get_kb_me() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Review and solicitation of experts (contract 1.5).
 # ---------------------------------------------------------------------------
+
 
 def _governance_error(exc: Exception) -> dict[str, Any]:
     from pipelines.kb_candidates.service import CandidateForbiddenError, GovernanceUnavailableError
@@ -1437,7 +1562,10 @@ def _acting_expert(need_review_scope: bool = True) -> tuple[Any, Any] | dict[str
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if need_review_scope and not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
 
     actor = resolve_actor()
     service = _candidate_service()
@@ -1452,8 +1580,10 @@ def _acting_expert(need_review_scope: bool = True) -> tuple[Any, Any] | dict[str
 
     email = delegated_actor_email()
     if not email:
-        return {"status": "unauthorized",
-                "reason": "No acting expert: send X-Actor-Email or X-Actor-Token with a token carrying the 'kb:delegate' scope."}
+        return {
+            "status": "unauthorized",
+            "reason": "No acting expert: send X-Actor-Email or X-Actor-Token with a token carrying the 'kb:delegate' scope.",
+        }
     owner = service.owners().by_email(email)
     if owner is None:
         return {"status": "unauthorized", "reason": f"'{email}' is not a registered expert."}
@@ -1477,7 +1607,9 @@ def get_review_inbox() -> dict[str, Any]:
         return handle_exception_response(e, context_action="get_review_inbox")
 
 
-def assign_kb_candidate(candidate_id: str, handle: str, reason: str | None = None) -> dict[str, Any]:
+def assign_kb_candidate(
+    candidate_id: str, handle: str, reason: str | None = None
+) -> dict[str, Any]:
     """Reassign a candidate in review to another owner (acting expert: current owner or 'kb:maintain').
 
     Args:
@@ -1501,8 +1633,13 @@ def assign_kb_candidate(candidate_id: str, handle: str, reason: str | None = Non
         return handle_exception_response(e, context_action="assign_kb_candidate")
 
 
-def request_kb_review(candidate_id: str, handle: str, kind: str = "second_review", message: str | None = None,
-                      due_at: str | None = None) -> dict[str, Any]:
+def request_kb_review(
+    candidate_id: str,
+    handle: str,
+    kind: str = "second_review",
+    message: str | None = None,
+    due_at: str | None = None,
+) -> dict[str, Any]:
     """Ask a specific expert for a second review or an advisory opinion on a candidate in review.
 
     Needs the governance database. Args:
@@ -1519,7 +1656,10 @@ def request_kb_review(candidate_id: str, handle: str, kind: str = "second_review
         if isinstance(who, dict):
             return who
         service, owner = who
-        return ok_response(service.request_review(candidate_id, handle, kind, owner.handle, message, due_at), count=1)
+        return ok_response(
+            service.request_review(candidate_id, handle, kind, owner.handle, message, due_at),
+            count=1,
+        )
     except CandidateNotFoundError:
         return not_found_response(candidate_id)
     except CandidateError as exc:
@@ -1544,7 +1684,10 @@ def comment_kb_candidate(candidate_id: str, body: str) -> dict[str, Any]:
 
     try:
         if not has_scope(REVIEW_SCOPE):
-            return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+            return {
+                "status": "unauthorized",
+                "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+            }
         return ok_response(_candidate_service().comment(candidate_id, body, _actor()), count=1)
     except CandidateNotFoundError:
         return not_found_response(candidate_id)
@@ -1561,7 +1704,10 @@ def list_kb_comments(candidate_id: str) -> dict[str, Any]:
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     try:
         items = _candidate_service().comments(candidate_id)
         return ok_response(items, count=len(items))
@@ -1582,11 +1728,17 @@ def get_governance_events(since: int = 0, limit: int = 100) -> dict[str, Any]:
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     try:
         log = get_log()
         if log is None:
-            return {"status": "unavailable", "reason": "this feature needs the governance database."}
+            return {
+                "status": "unavailable",
+                "reason": "this feature needs the governance database.",
+            }
         feed = log.events_since(max(int(since), 0), min(max(int(limit), 1), 500))
         return ok_response(feed, count=len(feed["events"]))
     except Exception as e:
@@ -1597,11 +1749,17 @@ def list_domain_owners() -> dict[str, Any]:
     """Registry of domain owners: owners (without notification secrets), domains, default owner."""
     try:
         registry = _candidate_service().owners()
-        return ok_response({
-            "owners": [o.public_dict() for o in sorted(registry.owners.values(), key=lambda o: o.handle)],
-            "domains": dict(sorted(registry.domains.items())),
-            "default_owner": registry.default_owner,
-        }, count=len(registry.owners))
+        return ok_response(
+            {
+                "owners": [
+                    o.public_dict()
+                    for o in sorted(registry.owners.values(), key=lambda o: o.handle)
+                ],
+                "domains": dict(sorted(registry.domains.items())),
+                "default_owner": registry.default_owner,
+            },
+            count=len(registry.owners),
+        )
     except Exception as e:
         return handle_exception_response(e, context_action="list_domain_owners")
 
@@ -1623,18 +1781,31 @@ def update_domain_owners(payload: dict[str, Any]) -> dict[str, Any]:
         if email:
             owner = service.owners().by_email(email)
             if owner is None or "kb:admin" not in owner.roles:
-                return {"status": "unauthorized", "reason": "the 'kb:admin' role is required to edit the registry."}
+                return {
+                    "status": "unauthorized",
+                    "reason": "the 'kb:admin' role is required to edit the registry.",
+                }
             actor = owner.handle
         elif has_scope("kb:admin"):
             actor = _actor()
         else:
-            return {"status": "unauthorized", "reason": "the 'kb:admin' role or token scope is required."}
+            return {
+                "status": "unauthorized",
+                "reason": "the 'kb:admin' role or token scope is required.",
+            }
         log = get_log()
         if log is None:
-            return {"status": "unavailable", "reason": "this feature needs the governance database."}
+            return {
+                "status": "unavailable",
+                "reason": "this feature needs the governance database.",
+            }
         current = service.owners()
-        for item in payload.get("owners") or []:  # the public view omits notification secrets: keep them
-            existing = current.owners.get(str(item.get("handle"))) if isinstance(item, dict) else None
+        for item in (
+            payload.get("owners") or []
+        ):  # the public view omits notification secrets: keep them
+            existing = (
+                current.owners.get(str(item.get("handle"))) if isinstance(item, dict) else None
+            )
             if existing is not None:
                 item.setdefault("discord_webhook", existing.discord_webhook)
                 item.setdefault("ntfy_topic", existing.ntfy_topic)
@@ -1643,9 +1814,17 @@ def update_domain_owners(payload: dict[str, Any]) -> dict[str, Any]:
         except ValueError as exc:
             return invalid_argument_response("owners", str(exc))
         save_registry(registry)
-        log.emit("owners.updated", None, actor, [registry.default_owner], owners=len(registry.owners))
-        return ok_response({"owners": len(registry.owners), "domains": len(registry.domains),
-                            "default_owner": registry.default_owner}, count=1)
+        log.emit(
+            "owners.updated", None, actor, [registry.default_owner], owners=len(registry.owners)
+        )
+        return ok_response(
+            {
+                "owners": len(registry.owners),
+                "domains": len(registry.domains),
+                "default_owner": registry.default_owner,
+            },
+            count=1,
+        )
     except Exception as e:
         return handle_exception_response(e, context_action="update_domain_owners")
 
@@ -1653,6 +1832,7 @@ def update_domain_owners(payload: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Doctrine workshop and evaluations (contract 1.6) — REST only, no MCP tool.
 # ---------------------------------------------------------------------------
+
 
 def _eval_error(exc: Exception) -> dict[str, Any] | None:
     from pipelines.governance.evals import EvalError, EvalNotFoundError
@@ -1731,8 +1911,12 @@ def simulate_checks(body: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(checks, list):
             return invalid_argument_response("checks", "'checks' must be a list of clauses.")
         options = body.get("options") or []
-        if not isinstance(options, list) or not all(isinstance(o, dict) and str(o.get("title") or "").strip() for o in options):
-            return invalid_argument_response("options", "'options' must be a list of objects with a 'title'.")
+        if not isinstance(options, list) or not all(
+            isinstance(o, dict) and str(o.get("title") or "").strip() for o in options
+        ):
+            return invalid_argument_response(
+                "options", "'options' must be a list of objects with a 'title'."
+            )
         dataset = body.get("dataset", "check_option_v1")
         cases: list[dict[str, Any]] = []
         if dataset:
@@ -1742,7 +1926,11 @@ def simulate_checks(body: dict[str, Any]) -> dict[str, Any]:
             elif dataset == "check_option_v1":
                 path = Path("tests/evals/datasets/check_option_v1.jsonl")
                 if path.is_file():
-                    cases = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+                    cases = [
+                        json.loads(line)
+                        for line in path.read_text(encoding="utf-8").splitlines()
+                        if line.strip()
+                    ]
             else:
                 return not_found_response(str(dataset))
         if body.get("only_validated"):
@@ -1766,15 +1954,25 @@ def get_eval_dataset(dataset: str) -> dict[str, Any]:
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     store = _eval_store()
     if store is None:
         return _NO_DB
     try:
         cases = store.cases(dataset)
         validated = sum(1 for c in cases if c["annotation_status"] == "validated")
-        return ok_response({"dataset": dataset, "cases": cases, "validated": validated, "runs": store.runs(dataset)[:10]},
-                           count=len(cases))
+        return ok_response(
+            {
+                "dataset": dataset,
+                "cases": cases,
+                "validated": validated,
+                "runs": store.runs(dataset)[:10],
+            },
+            count=len(cases),
+        )
     except Exception as e:
         return _eval_error(e) or handle_exception_response(e, context_action="get_eval_dataset")
 
@@ -1795,13 +1993,22 @@ def annotate_eval_case(dataset: str, case_id: str, body: dict[str, Any]) -> dict
         # An unknown payload must not look like a successful annotation (silent no-op).
         return invalid_argument_response("body", "send 'expected' and/or 'annotation_status'.")
     try:
-        case = store.annotate(dataset, case_id, owner.handle, body.get("expected"), body.get("annotation_status"))
+        case = store.annotate(
+            dataset, case_id, owner.handle, body.get("expected"), body.get("annotation_status")
+        )
         from pipelines.governance.log import get_log
 
         log = get_log()
         if log is not None:
-            log.emit("eval.updated", None, owner.handle, [], dataset=dataset, case_id=case_id,
-                     annotation_status=case["annotation_status"])
+            log.emit(
+                "eval.updated",
+                None,
+                owner.handle,
+                [],
+                dataset=dataset,
+                case_id=case_id,
+                annotation_status=case["annotation_status"],
+            )
         return ok_response(case, count=1)
     except Exception as e:
         return _eval_error(e) or handle_exception_response(e, context_action="annotate_eval_case")
@@ -1842,8 +2049,15 @@ def run_eval(dataset: str, validated_only: bool = False) -> dict[str, Any]:
         run = store.save_run(dataset, who[1].handle, metrics)
         log = get_log()
         if log is not None:
-            log.emit("eval.updated", None, who[1].handle, [], dataset=dataset, run_id=run["id"],
-                     violation_recall=round(metrics["violation_recall"], 4))
+            log.emit(
+                "eval.updated",
+                None,
+                who[1].handle,
+                [],
+                dataset=dataset,
+                run_id=run["id"],
+                violation_recall=round(metrics["violation_recall"], 4),
+            )
         return ok_response(run, count=1)
     except Exception as e:
         return _eval_error(e) or handle_exception_response(e, context_action="run_eval")
@@ -1855,7 +2069,10 @@ def get_eval_run(dataset: str, run_id: int) -> dict[str, Any]:
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     store = _eval_store()
     if store is None:
         return _NO_DB
@@ -1876,12 +2093,24 @@ def submit_verdict_feedback(body: dict[str, Any]) -> dict[str, Any]:
         return _NO_DB
     try:
         reporter = _actor()
-        context = {"option": body.get("option"), "subject": body.get("subject"), "frameworks": body.get("frameworks") or []}
-        fb = store.add_feedback(reporter, str(body.get("typed_id") or ""), str(body.get("feedback") or ""),
-                                str(body.get("justification") or ""), context, body.get("check_id"))
+        context = {
+            "option": body.get("option"),
+            "subject": body.get("subject"),
+            "frameworks": body.get("frameworks") or [],
+        }
+        fb = store.add_feedback(
+            reporter,
+            str(body.get("typed_id") or ""),
+            str(body.get("feedback") or ""),
+            str(body.get("justification") or ""),
+            context,
+            body.get("check_id"),
+        )
         return ok_response(fb, count=1)
     except Exception as e:
-        return _eval_error(e) or handle_exception_response(e, context_action="submit_verdict_feedback")
+        return _eval_error(e) or handle_exception_response(
+            e, context_action="submit_verdict_feedback"
+        )
 
 
 def list_verdict_feedback(status: str | None = None) -> dict[str, Any]:
@@ -1890,7 +2119,10 @@ def list_verdict_feedback(status: str | None = None) -> dict[str, Any]:
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     store = _eval_store()
     if store is None:
         return _NO_DB
@@ -1917,33 +2149,61 @@ def convert_verdict_feedback(feedback_id: int, body: dict[str, Any]) -> dict[str
     try:
         fb = store.feedback(feedback_id)
         if fb["status"] != "open":
-            return {**invalid_argument_response("status", f"feedback already {fb['status']}."), "conflict": True}
+            return {
+                **invalid_argument_response("status", f"feedback already {fb['status']}."),
+                "conflict": True,
+            }
         target = body.get("to")
         if target == "eval_case":
-            case = store.add_case(str(body.get("dataset") or "check_option_v1"), {
-                "option": fb["option"], "subject": fb.get("subject"), "frameworks": fb.get("frameworks"),
-                "expected": {fb["typed_id"]: body.get("expected")}}, owner.handle)
-            return ok_response(store.close_feedback(feedback_id, "converted", f"eval_case:{case['id']}"), count=1)
+            case = store.add_case(
+                str(body.get("dataset") or "check_option_v1"),
+                {
+                    "option": fb["option"],
+                    "subject": fb.get("subject"),
+                    "frameworks": fb.get("frameworks"),
+                    "expected": {fb["typed_id"]: body.get("expected")},
+                },
+                owner.handle,
+            )
+            return ok_response(
+                store.close_feedback(feedback_id, "converted", f"eval_case:{case['id']}"), count=1
+            )
         if target == "amendment":
-            candidate = service.submit({
-                "kind": "amendment", "asset_type": body.get("asset_type"), "target_asset_id": body.get("target_asset_id"),
-                "title": f"Verdict feedback on {fb['typed_id']}", "rationale": fb["justification"],
-                "proposed_content": body.get("proposed_content"),
-                "source": {"system": "archinex", "author": owner.handle},
-            }, actor=owner.handle)
-            return ok_response(store.close_feedback(feedback_id, "converted", f"candidate:{candidate['id']}"), count=1)
+            candidate = service.submit(
+                {
+                    "kind": "amendment",
+                    "asset_type": body.get("asset_type"),
+                    "target_asset_id": body.get("target_asset_id"),
+                    "title": f"Verdict feedback on {fb['typed_id']}",
+                    "rationale": fb["justification"],
+                    "proposed_content": body.get("proposed_content"),
+                    "source": {"system": "archinex", "author": owner.handle},
+                },
+                actor=owner.handle,
+            )
+            return ok_response(
+                store.close_feedback(feedback_id, "converted", f"candidate:{candidate['id']}"),
+                count=1,
+            )
         if target == "dismiss":
             return ok_response(store.close_feedback(feedback_id, "dismissed"), count=1)
-        return invalid_argument_response("to", "'to' must be 'eval_case', 'amendment' or 'dismiss'.")
+        return invalid_argument_response(
+            "to", "'to' must be 'eval_case', 'amendment' or 'dismiss'."
+        )
     except (EvalError, CandidateError) as exc:
-        return invalid_argument_response(getattr(exc, "argument", "body"), getattr(exc, "reason", str(exc)))
+        return invalid_argument_response(
+            getattr(exc, "argument", "body"), getattr(exc, "reason", str(exc))
+        )
     except Exception as e:
-        return _eval_error(e) or handle_exception_response(e, context_action="convert_verdict_feedback")
+        return _eval_error(e) or handle_exception_response(
+            e, context_action="convert_verdict_feedback"
+        )
 
 
 # ---------------------------------------------------------------------------
 # Framework ingestion through the API (contract 1.7) — REST only.
 # ---------------------------------------------------------------------------
+
 
 def _ingestion_service(service: Any = None):
     from pipelines.frameworks.api import IngestionService
@@ -1967,7 +2227,9 @@ def _ingestion_error(exc: Exception) -> dict[str, Any] | None:
     return None
 
 
-def create_framework_ingestion(framework: str, version: str, tag: str, filename: str, data: bytes) -> dict[str, Any]:
+def create_framework_ingestion(
+    framework: str, version: str, tag: str, filename: str, data: bytes
+) -> dict[str, Any]:
     """Upload a regulatory source and split it into draft requirements ('kb:maintain').
 
     The extraction runs in a bounded subprocess (20 MB, 120 s). The framework needs a splitter
@@ -1986,11 +2248,20 @@ def create_framework_ingestion(framework: str, version: str, tag: str, filename:
         created = ingestion.create(framework, version, tag, filename, data, who[1].handle)
         log = get_log()
         if log is not None:
-            log.emit("coverage.changed", None, who[1].handle, [], framework=created["framework"],
-                     reason="ingested", version=created["version"])
+            log.emit(
+                "coverage.changed",
+                None,
+                who[1].handle,
+                [],
+                framework=created["framework"],
+                reason="ingested",
+                version=created["version"],
+            )
         return ok_response(created, count=created["total"])
     except Exception as e:
-        return _ingestion_error(e) or handle_exception_response(e, context_action="create_framework_ingestion")
+        return _ingestion_error(e) or handle_exception_response(
+            e, context_action="create_framework_ingestion"
+        )
 
 
 def list_framework_ingestions(status: str | None = None) -> dict[str, Any]:
@@ -2000,15 +2271,22 @@ def list_framework_ingestions(status: str | None = None) -> dict[str, Any]:
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     ingestion = _ingestion_service()
     if ingestion is None:
         return _NO_DB
     try:
         items = ingestion.list(status=status)
-        return ok_response({"ingestions": items, "splitters": supported_frameworks()}, count=len(items))
+        return ok_response(
+            {"ingestions": items, "splitters": supported_frameworks()}, count=len(items)
+        )
     except Exception as e:
-        return _ingestion_error(e) or handle_exception_response(e, context_action="list_framework_ingestions")
+        return _ingestion_error(e) or handle_exception_response(
+            e, context_action="list_framework_ingestions"
+        )
 
 
 def get_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
@@ -2017,7 +2295,10 @@ def get_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     ingestion = _ingestion_service()
     if ingestion is None:
         return _NO_DB
@@ -2025,10 +2306,14 @@ def get_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
         res = ingestion.get(ingestion_id)
         return ok_response(res, count=res["total"])
     except Exception as e:
-        return _ingestion_error(e) or handle_exception_response(e, context_action="get_framework_ingestion")
+        return _ingestion_error(e) or handle_exception_response(
+            e, context_action="get_framework_ingestion"
+        )
 
 
-def decide_ingestion_row(ingestion_id: int, requirement_id: str, body: dict[str, Any]) -> dict[str, Any]:
+def decide_ingestion_row(
+    ingestion_id: int, requirement_id: str, body: dict[str, Any]
+) -> dict[str, Any]:
     """Decision on one requirement: ``{decision: accept|amend|reject|'', links?, acceptance_criteria?, comment?}``.
 
     The reviewer is the acting expert, who must own the domain of the requirement (or be a maintainer).
@@ -2043,10 +2328,17 @@ def decide_ingestion_row(ingestion_id: int, requirement_id: str, body: dict[str,
     try:
         row = ingestion._row(ingestion_id, requirement_id)
         if not service.owners().can_review(owner.handle, row.get("domain") or []):
-            return {"status": "unauthorized", "reason": f"{owner.handle} does not own the domain of {requirement_id}."}
-        return ok_response(ingestion.decide(ingestion_id, requirement_id, owner.handle, body), count=1)
+            return {
+                "status": "unauthorized",
+                "reason": f"{owner.handle} does not own the domain of {requirement_id}.",
+            }
+        return ok_response(
+            ingestion.decide(ingestion_id, requirement_id, owner.handle, body), count=1
+        )
     except Exception as e:
-        return _ingestion_error(e) or handle_exception_response(e, context_action="decide_ingestion_row")
+        return _ingestion_error(e) or handle_exception_response(
+            e, context_action="decide_ingestion_row"
+        )
 
 
 def add_ingestion_link_proposals(ingestion_id: int, body: dict[str, Any]) -> dict[str, Any]:
@@ -2061,9 +2353,14 @@ def add_ingestion_link_proposals(ingestion_id: int, body: dict[str, Any]) -> dic
     if ingestion is None:
         return _NO_DB
     try:
-        return ok_response(ingestion.add_link_proposals(ingestion_id, body.get("proposals"), body.get("model")), count=1)
+        return ok_response(
+            ingestion.add_link_proposals(ingestion_id, body.get("proposals"), body.get("model")),
+            count=1,
+        )
     except Exception as e:
-        return _ingestion_error(e) or handle_exception_response(e, context_action="add_ingestion_link_proposals")
+        return _ingestion_error(e) or handle_exception_response(
+            e, context_action="add_ingestion_link_proposals"
+        )
 
 
 def apply_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
@@ -2077,7 +2374,9 @@ def apply_framework_ingestion(ingestion_id: int) -> dict[str, Any]:
     try:
         return ok_response(ingestion.apply(ingestion_id, who[1].handle), count=1)
     except Exception as e:
-        return _ingestion_error(e) or handle_exception_response(e, context_action="apply_framework_ingestion")
+        return _ingestion_error(e) or handle_exception_response(
+            e, context_action="apply_framework_ingestion"
+        )
 
 
 def abandon_framework_ingestion(ingestion_id: int, reason: str) -> dict[str, Any]:
@@ -2106,7 +2405,9 @@ def abandon_framework_ingestion(ingestion_id: int, reason: str) -> dict[str, Any
             )
         return ok_response(abandoned, count=abandoned["total"])
     except Exception as e:
-        return _ingestion_error(e) or handle_exception_response(e, context_action="abandon_framework_ingestion")
+        return _ingestion_error(e) or handle_exception_response(
+            e, context_action="abandon_framework_ingestion"
+        )
 
 
 def declare_framework_coverage(framework: str) -> dict[str, Any]:
@@ -2132,22 +2433,43 @@ def declare_framework_coverage(framework: str) -> dict[str, Any]:
         # Declaring a framework covered answers for its content: the owner of its primary domain, a maintainer, or an expert
         # holding the review role on that domain (assertion claim or delegation) may do it; no one else (issue #90).
         primary = framework_primary_domain(framework, server_config.kb_dir)
-        if not expert_can_review_domain(owner.handle, [primary] if primary else [], service.owners(),
-                                        domain_roles=actor.domain_roles if actor else None):
-            reason = (f"{owner.handle} does not own the primary domain '{primary}' of {framework} and holds no 'kb:maintain' role."
-                      if primary else f"{framework} has no control: only a maintainer may declare it.")
-            audit.record(owner.handle, "declare_framework_coverage", "denied", resource=framework,
-                         detail={"reason": reason, "primary_domain": primary}, auth_method=method)
+        if not expert_can_review_domain(
+            owner.handle,
+            [primary] if primary else [],
+            service.owners(),
+            domain_roles=actor.domain_roles if actor else None,
+        ):
+            reason = (
+                f"{owner.handle} does not own the primary domain '{primary}' of {framework} and holds no 'kb:maintain' role."
+                if primary
+                else f"{framework} has no control: only a maintainer may declare it."
+            )
+            audit.record(
+                owner.handle,
+                "declare_framework_coverage",
+                "denied",
+                resource=framework,
+                detail={"reason": reason, "primary_domain": primary},
+                auth_method=method,
+            )
             return {"status": "unauthorized", "reason": reason}
         try:
             cov = declare_coverage(framework, owner.handle, server_config.kb_dir)
         except CoverageDeclarationError as exc:
             return {**invalid_argument_response("framework", str(exc)), "conflict": True}
-        audit.record(owner.handle, "declare_framework_coverage", "allowed", resource=framework,
-                     detail={"primary_domain": primary}, auth_method=method)
+        audit.record(
+            owner.handle,
+            "declare_framework_coverage",
+            "allowed",
+            resource=framework,
+            detail={"primary_domain": primary},
+            auth_method=method,
+        )
         log = get_log()
         if log is not None:
-            log.emit("coverage.changed", None, owner.handle, [], framework=framework, reason="declared")
+            log.emit(
+                "coverage.changed", None, owner.handle, [], framework=framework, reason="declared"
+            )
         return ok_response(cov, count=1)
     except Exception as e:
         return handle_exception_response(e, context_action="declare_framework_coverage")
@@ -2156,6 +2478,7 @@ def declare_framework_coverage(framework: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Promotion, publication and health (contract 1.8) — REST only.
 # ---------------------------------------------------------------------------
+
 
 def promote_kb_candidate(candidate_id: str) -> dict[str, Any]:
     """Write an accepted candidate into the knowledge base on the server ('kb:maintain').
@@ -2194,17 +2517,28 @@ def publish_kb_candidates() -> dict[str, Any]:
         return who
     service, owner = who
     try:
-        result = publish(service, Path(server_config.kb_dir), Path(server_config.knowledge_db_path),
-                         Path("data/snapshots"), owner.handle)
-        return {**ok_response(result, count=len(result.get("published") or [])), "warnings": storage_warnings()}
+        result = publish(
+            service,
+            Path(server_config.kb_dir),
+            Path(server_config.knowledge_db_path),
+            Path("data/snapshots"),
+            owner.handle,
+        )
+        return {
+            **ok_response(result, count=len(result.get("published") or [])),
+            "warnings": storage_warnings(),
+        }
     except Exception as e:
         return handle_exception_response(e, context_action="publish_kb_candidates")
 
 
-def list_knowledge_publications(entry_type: str | None = None, framework: str | None = None) -> dict[str, Any]:
+def list_knowledge_publications(
+    entry_type: str | None = None, framework: str | None = None
+) -> dict[str, Any]:
     """List sealed snapshot publications of the knowledge base with changelog and entry paths (contract 1.27)."""
     try:
         from pipelines.publication.history import get_publications
+
         res = get_publications(
             Path(server_config.kb_dir),
             snapshots_dir=Path("data/snapshots"),
@@ -2222,6 +2556,7 @@ def get_knowledge_asset_history(asset_id: str) -> dict[str, Any]:
         return invalid_argument_response("asset_id", "An asset identifier is required.")
     try:
         from pipelines.publication.history import get_asset_history
+
         res = get_asset_history(
             asset_id,
             Path(server_config.kb_dir),
@@ -2232,8 +2567,12 @@ def get_knowledge_asset_history(asset_id: str) -> dict[str, Any]:
         return handle_exception_response(e, context_action="get_knowledge_asset_history")
 
 
-def list_check_clauses(status: str | None = None, framework: str | None = None, asset_type: str | None = None,
-                       asset_id: str | None = None) -> dict[str, Any]:
+def list_check_clauses(
+    status: str | None = None,
+    framework: str | None = None,
+    asset_type: str | None = None,
+    asset_id: str | None = None,
+) -> dict[str, Any]:
     """Check clauses of the active doctrine with their own status (contract 1.26, requires 'kb:review').
 
     Each row carries its asset (title, legal text excerpt, framework, severity, domain), the rule (kind, when, expect,
@@ -2251,28 +2590,43 @@ def list_check_clauses(status: str | None = None, framework: str | None = None, 
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     if status is not None and status not in CLAUSE_STATUSES:
-        return invalid_argument_response("status", f"'status' must be one of {list(CLAUSE_STATUSES)}.")
+        return invalid_argument_response(
+            "status", f"'status' must be one of {list(CLAUSE_STATUSES)}."
+        )
     try:
         kb = Path(server_config.kb_dir)
-        rows = list_clauses(kb, status=status, framework=framework, asset_type=asset_type, asset_id=asset_id)
+        rows = list_clauses(
+            kb, status=status, framework=framework, asset_type=asset_type, asset_id=asset_id
+        )
         email = delegated_actor_email()
         registry = _candidate_service().owners()
         owner = registry.by_email(email) if email else None
         for row in rows:
             row["may_decide"] = bool(owner and registry.can_review(owner.handle, row["domain"]))
         counts = {s: sum(1 for r in rows if r["status"] == s) for s in CLAUSE_STATUSES}
-        data = {"clauses": rows, "counts": counts,
-                "mandatory_without_clause": [] if asset_id else mandatory_without_clause(kb, framework),
-                "pending_publication": len(pending_decisions(kb))}
+        data = {
+            "clauses": rows,
+            "counts": counts,
+            "mandatory_without_clause": [] if asset_id else mandatory_without_clause(kb, framework),
+            "pending_publication": len(pending_decisions(kb)),
+        }
         return ok_response(data, count=len(rows))
     except Exception as e:
         return handle_exception_response(e, context_action="list_check_clauses")
 
 
-def decide_check_clause(asset_id: str, check_id: str, decision: str, comment: str | None = None,
-                        clause: dict[str, Any] | None = None) -> dict[str, Any]:
+def decide_check_clause(
+    asset_id: str,
+    check_id: str,
+    decision: str,
+    comment: str | None = None,
+    clause: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Decide on one check clause (contract 1.26): 'validate', 'amend' (validate a corrected clause) or 'reject'.
 
     Requires 'kb:review' and an acting expert owning the asset's domain (or ``kb:maintain``). A comment is required to
@@ -2290,9 +2644,16 @@ def decide_check_clause(asset_id: str, check_id: str, decision: str, comment: st
         kb = Path(server_config.kb_dir)
         asset = find_asset(kb, asset_id)
         domain = asset.frontmatter.get("domain") or []
-        if not service.owners().can_review(owner.handle, [str(d) for d in (domain if isinstance(domain, list) else [domain])]):
-            return {"status": "unauthorized", "reason": f"{owner.handle} does not own the domain of {asset_id}."}
-        row = decide(kb, asset_id, check_id, decision, owner.handle, comment=comment, amended=clause)
+        if not service.owners().can_review(
+            owner.handle, [str(d) for d in (domain if isinstance(domain, list) else [domain])]
+        ):
+            return {
+                "status": "unauthorized",
+                "reason": f"{owner.handle} does not own the domain of {asset_id}.",
+            }
+        row = decide(
+            kb, asset_id, check_id, decision, owner.handle, comment=comment, amended=clause
+        )
         return ok_response(row, count=1)
     except CandidateNotFoundError as exc:
         return not_found_response(str(exc))
@@ -2300,6 +2661,27 @@ def decide_check_clause(asset_id: str, check_id: str, decision: str, comment: st
         return _candidate_error(exc)
     except Exception as e:
         return handle_exception_response(e, context_action="decide_check_clause")
+
+
+def add_check_clause_to_asset(asset_id: str, clause: dict[str, Any]) -> dict[str, Any]:
+    """Add a check clause with status 'draft' to an asset (Issue #99, contract 1.26)."""
+    from pipelines.kb_candidates.clauses import add_check_clause
+    from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
+
+    who = _acting_expert(need_review_scope=False)
+    if isinstance(who, dict):
+        return who
+    service, owner = who
+    try:
+        kb = Path(server_config.kb_dir)
+        row = add_check_clause(kb, asset_id, clause, author=owner.handle)
+        return ok_response(row, count=1)
+    except CandidateNotFoundError as exc:
+        return not_found_response(str(exc))
+    except CandidateError as exc:
+        return _candidate_error(exc)
+    except Exception as e:
+        return handle_exception_response(e, context_action="add_check_clause_to_asset")
 
 
 def _compiled_base_status() -> dict[str, Any] | None:
@@ -2324,10 +2706,23 @@ def warn_if_compiled_base_is_not_current() -> dict[str, Any] | None:
         return report
     log = logging.getLogger("mcp_server.knowledge")
     if report["status"] == "stale":
-        changed = report["changed_since_build"]["count"] + report["not_in_base"]["count"] + report["removed_from_files"]["count"]
-        log.warning("STALE KNOWLEDGE GRAPH: %d asset(s) differ from the files (%s). %s", changed,
-                    ", ".join((report["changed_since_build"]["ids"] + report["not_in_base"]["ids"]
-                               + report["removed_from_files"]["ids"])[:8]), report["reason"])
+        changed = (
+            report["changed_since_build"]["count"]
+            + report["not_in_base"]["count"]
+            + report["removed_from_files"]["count"]
+        )
+        log.warning(
+            "STALE KNOWLEDGE GRAPH: %d asset(s) differ from the files (%s). %s",
+            changed,
+            ", ".join(
+                (
+                    report["changed_since_build"]["ids"]
+                    + report["not_in_base"]["ids"]
+                    + report["removed_from_files"]["ids"]
+                )[:8]
+            ),
+            report["reason"],
+        )
     else:
         log.warning("UNVERIFIED KNOWLEDGE GRAPH: %s", report["reason"])
     return report
@@ -2342,10 +2737,17 @@ def get_kb_health() -> dict[str, Any]:
     from pipelines.publication.health import kb_health
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     try:
-        report = kb_health(_candidate_service(), Path(server_config.kb_dir), Path("data/snapshots"),
-                           compiled_base=_compiled_base_status())
+        report = kb_health(
+            _candidate_service(),
+            Path(server_config.kb_dir),
+            Path("data/snapshots"),
+            compiled_base=_compiled_base_status(),
+        )
         return ok_response(report, count=1)
     except Exception as e:
         return handle_exception_response(e, context_action="get_kb_health")
@@ -2365,28 +2767,49 @@ def get_kb_freshness(
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     try:
         report = check_kb_freshness(Path(server_config.kb_dir), default_review_cycle_days=days)
         if framework:
             fw_lower = framework.lower()
-            report["source_drifts"] = [d for d in report["source_drifts"] if str(d.get("framework") or "").lower() == fw_lower]
-            report["overdue_reviews"] = [o for o in report["overdue_reviews"] if o.get("type") == "control" and fw_lower in o.get("id", "").lower()]
+            report["source_drifts"] = [
+                d
+                for d in report["source_drifts"]
+                if str(d.get("framework") or "").lower() == fw_lower
+            ]
+            report["overdue_reviews"] = [
+                o
+                for o in report["overdue_reviews"]
+                if o.get("type") == "control" and fw_lower in o.get("id", "").lower()
+            ]
         if owner:
             owner_clean = owner if owner.startswith("@") else f"@{owner}"
-            report["overdue_reviews"] = [o for o in report["overdue_reviews"] if o.get("owner") == owner_clean]
-            report["source_drifts"] = [d for d in report["source_drifts"] if d.get("owner") == owner_clean]
-            report["doctrine_dependencies"] = [a for a in report["doctrine_dependencies"] if a.get("owner") == owner_clean]
-            report["alerts_by_owner"] = {k: v for k, v in report["alerts_by_owner"].items() if k == owner_clean}
-        return ok_response(report, count=len(report["source_drifts"]) + len(report["overdue_reviews"]))
+            report["overdue_reviews"] = [
+                o for o in report["overdue_reviews"] if o.get("owner") == owner_clean
+            ]
+            report["source_drifts"] = [
+                d for d in report["source_drifts"] if d.get("owner") == owner_clean
+            ]
+            report["doctrine_dependencies"] = [
+                a for a in report["doctrine_dependencies"] if a.get("owner") == owner_clean
+            ]
+            report["alerts_by_owner"] = {
+                k: v for k, v in report["alerts_by_owner"].items() if k == owner_clean
+            }
+        return ok_response(
+            report, count=len(report["source_drifts"]) + len(report["overdue_reviews"])
+        )
     except Exception as e:
         return handle_exception_response(e, context_action="get_kb_freshness")
-
 
 
 # ---------------------------------------------------------------------------
 # Semantic similarity (contract 1.9) — vectors computed by the client, REST only.
 # ---------------------------------------------------------------------------
+
 
 def _embedding_store():
     from pipelines.governance.store import database_url
@@ -2406,9 +2829,14 @@ def get_embeddings_pending(model: str) -> dict[str, Any]:
     from pipelines.similarity.text import embeddable_assets
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     if not isinstance(model, str) or not model.strip():
-        return invalid_argument_response("model", "'model' is required (identifier of the embedding model).")
+        return invalid_argument_response(
+            "model", "'model' is required (identifier of the embedding model)."
+        )
     store = _embedding_store()
     if store is None:
         return _NO_DB
@@ -2421,9 +2849,16 @@ def get_embeddings_pending(model: str) -> dict[str, Any]:
             elif stored[a["ref"]] != a["text_sha256"]:
                 items.append({**a, "reason": "stale"})
         space = store.model_space(model)
-        return ok_response({"model": model, "dim": space[0] if space else None,
-                            "model_version": space[1] if space else None,
-                            "pending": items, "models": store.models()}, count=len(items))
+        return ok_response(
+            {
+                "model": model,
+                "dim": space[0] if space else None,
+                "model_version": space[1] if space else None,
+                "pending": items,
+                "models": store.models(),
+            },
+            count=len(items),
+        )
     except Exception as e:
         return handle_exception_response(e, context_action="get_embeddings_pending")
 
@@ -2440,7 +2875,10 @@ def put_embeddings(body: dict[str, Any]) -> dict[str, Any]:
     from pipelines.similarity.text import embeddable_assets
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     store = _embedding_store()
     if store is None:
         return _NO_DB
@@ -2454,8 +2892,13 @@ def put_embeddings(body: dict[str, Any]) -> dict[str, Any]:
         else:
             created_by = "system"
         current = {a["ref"]: a for a in embeddable_assets(server_config.kb_dir)}
-        res = store.put(body.get("items"), str(body.get("model") or ""), str(body.get("model_version") or ""),
-                        created_by, current)
+        res = store.put(
+            body.get("items"),
+            str(body.get("model") or ""),
+            str(body.get("model_version") or ""),
+            created_by,
+            current,
+        )
         return ok_response(res, count=res["stored"])
     except EmbeddingError as exc:
         return invalid_argument_response(exc.argument, exc.reason)
@@ -2486,17 +2929,30 @@ def _server_side_query(query_text: str, model: str) -> dict[str, Any]:
 
     encoder, status = reference_encoder()
     if model and model != status["model"]:
-        return {**invalid_argument_response(
-            "model", f"model-mismatch: the server encodes with its reference model '{status['model']}', not '{model}'. "
-            f"Send a 'vector' computed with '{model}', or omit 'model'."),
-            "conflict": True, "error": "model-mismatch", "reference_model": status["model"]}
+        return {
+            **invalid_argument_response(
+                "model",
+                f"model-mismatch: the server encodes with its reference model '{status['model']}', not '{model}'. "
+                f"Send a 'vector' computed with '{model}', or omit 'model'.",
+            ),
+            "conflict": True,
+            "error": "model-mismatch",
+            "reference_model": status["model"],
+        }
     if encoder is None:
-        return {"status": "unavailable", "reason": f"server-side encoding unavailable: the embedding model "
-                f"'{status['model']}' is {status['status']} ({status.get('reason')}). Send a 'vector' instead."}
+        return {
+            "status": "unavailable",
+            "reason": f"server-side encoding unavailable: the embedding model "
+            f"'{status['model']}' is {status['status']} ({status.get('reason')}). Send a 'vector' instead.",
+        }
     scorer = scorer_for(encoder)
     spec = encoder.spec
-    return {"model": spec.id, "vector": scorer.query(query_text), "store": MemoryVectors(scorer, server_config.kb_dir),
-            "score": lambda cos: calibrate(round(cos, 4), spec)}
+    return {
+        "model": spec.id,
+        "vector": scorer.query(query_text),
+        "store": MemoryVectors(scorer, server_config.kb_dir),
+        "score": lambda cos: calibrate(round(cos, 4), spec),
+    }
 
 
 def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
@@ -2514,7 +2970,10 @@ def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
     from pipelines.similarity.store import EmbeddingError
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     query_text = body.get("query_text")
     has_text = isinstance(query_text, str) and bool(query_text.strip())
     server_side = body.get("vector") is None and has_text
@@ -2533,7 +2992,12 @@ def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
             served = _server_side_query(str(query_text).strip(), model)
             if "status" in served:
                 return served
-            model, vector, store, vector_score = served["model"], served["vector"], served["store"], served["score"]
+            model, vector, store, vector_score = (
+                served["model"],
+                served["vector"],
+                served["store"],
+                served["score"],
+            )
         lexical = None
         if has_text:
             lexical = _lexical_factory()(query_text)
@@ -2544,11 +3008,24 @@ def similar_knowledge(body: dict[str, Any]) -> dict[str, Any]:
             from pipelines.similarity.reuse import ReuseStore
 
             reuse = ReuseStore()
-            judgements = reuse.judgements(fingerprint, {a.id: a for a in load_assets(server_config.kb_dir)})
+            judgements = reuse.judgements(
+                fingerprint, {a.id: a for a in load_assets(server_config.kb_dir)}
+            )
             summary = reuse.summary()
-        res = similar(store, server_config.kb_dir, model, vector,
-                      query_text if isinstance(query_text, str) else None, types or None, domains or None,
-                      body.get("top_k") or 10, lexical, judgements, summary, vector_score)
+        res = similar(
+            store,
+            server_config.kb_dir,
+            model,
+            vector,
+            query_text if isinstance(query_text, str) else None,
+            types or None,
+            domains or None,
+            body.get("top_k") or 10,
+            lexical,
+            judgements,
+            summary,
+            vector_score,
+        )
         res["encoded_by"] = "server" if server_side else "client"
         return ok_response(res, count=len(res["results"]))
     except EmbeddingError as exc:
@@ -2579,10 +3056,15 @@ def confirm_reuse(body: dict[str, Any]) -> dict[str, Any]:
         return _NO_DB
     try:
         if not delegated_actor_email():
-            return {"status": "unauthorized",
-                    "reason": "No acting person: send X-Actor-Email with a token carrying the 'kb:delegate' scope."}
-        record = validate_confirmation(body, find_asset(server_config.kb_dir, str(body.get("matched_ref") or "")),
-                                       server_config.kb_dir)
+            return {
+                "status": "unauthorized",
+                "reason": "No acting person: send X-Actor-Email with a token carrying the 'kb:delegate' scope.",
+            }
+        record = validate_confirmation(
+            body,
+            find_asset(server_config.kb_dir, str(body.get("matched_ref") or "")),
+            server_config.kb_dir,
+        )
         return ok_response(ReuseStore().add(_actor(), record), count=1)
     except ReuseConflictError as exc:
         return {**invalid_argument_response(exc.argument, exc.reason), "conflict": True}
@@ -2592,21 +3074,29 @@ def confirm_reuse(body: dict[str, Any]) -> dict[str, Any]:
         return handle_exception_response(e, context_action="confirm_reuse")
 
 
-def list_reuse_confirmations(matched_ref: str | None = None, outcome: str | None = None,
-                             subject_fingerprint: str | None = None) -> dict[str, Any]:
+def list_reuse_confirmations(
+    matched_ref: str | None = None,
+    outcome: str | None = None,
+    subject_fingerprint: str | None = None,
+) -> dict[str, Any]:
     """History of reuse judgements (requires 'kb:review'): calibration base and audit trail."""
     from mcp_server.core.auth import has_scope
     from pipelines.kb_candidates.service import REVIEW_SCOPE
     from pipelines.similarity.reuse import OUTCOMES, ReuseStore
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     if _embedding_store() is None:
         return _NO_DB
     if outcome and outcome not in OUTCOMES:
         return invalid_argument_response("outcome", f"'outcome' must be one of {list(OUTCOMES)}.")
     try:
-        items = ReuseStore().history(matched_ref or None, outcome or None, subject_fingerprint or None)
+        items = ReuseStore().history(
+            matched_ref or None, outcome or None, subject_fingerprint or None
+        )
         return ok_response(items, count=len(items))
     except Exception as e:
         return handle_exception_response(e, context_action="list_reuse_confirmations")
@@ -2618,15 +3108,24 @@ def get_similarity_eval(dataset: str) -> dict[str, Any]:
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
     store = _eval_store()
     if store is None:
         return _NO_DB
     try:
         cases = store.cases(dataset)
-        return ok_response({"dataset": dataset, "cases": cases,
-                            "validated": sum(1 for c in cases if c["annotation_status"] == "validated"),
-                            "runs": store.runs(dataset)[:10]}, count=len(cases))
+        return ok_response(
+            {
+                "dataset": dataset,
+                "cases": cases,
+                "validated": sum(1 for c in cases if c["annotation_status"] == "validated"),
+                "runs": store.runs(dataset)[:10],
+            },
+            count=len(cases),
+        )
     except Exception as e:
         return _eval_error(e) or handle_exception_response(e, context_action="get_similarity_eval")
 
@@ -2644,10 +3143,22 @@ def annotate_similarity_case(dataset: str, case_id: str, body: dict[str, Any]) -
     if body.get("expected") is None and body.get("annotation_status") is None:
         return invalid_argument_response("body", "send 'expected' and/or 'annotation_status'.")
     try:
-        return ok_response(annotate(store, dataset, case_id, who[1].handle, server_config.kb_dir,
-                                    body.get("expected"), body.get("annotation_status")), count=1)
+        return ok_response(
+            annotate(
+                store,
+                dataset,
+                case_id,
+                who[1].handle,
+                server_config.kb_dir,
+                body.get("expected"),
+                body.get("annotation_status"),
+            ),
+            count=1,
+        )
     except Exception as e:
-        return _eval_error(e) or handle_exception_response(e, context_action="annotate_similarity_case")
+        return _eval_error(e) or handle_exception_response(
+            e, context_action="annotate_similarity_case"
+        )
 
 
 def run_similarity_eval(dataset: str, body: dict[str, Any]) -> dict[str, Any]:
@@ -2671,22 +3182,36 @@ def run_similarity_eval(dataset: str, body: dict[str, Any]) -> dict[str, Any]:
         embeddings = EmbeddingStore()
         space = embeddings.model_space(model)
         if space is None:
-            return invalid_argument_response("model", f"no vector stored for model '{model}' (known: "
-                                             f"{[m['model_id'] for m in embeddings.models()]}).")
+            return invalid_argument_response(
+                "model",
+                f"no vector stored for model '{model}' (known: "
+                f"{[m['model_id'] for m in embeddings.models()]}).",
+            )
         cases = store.cases(dataset)
         if body.get("validated_only"):
             cases = [c for c in cases if c["annotation_status"] == "validated"]
         if not cases:
-            return invalid_argument_response("dataset", "no case to evaluate (none validated yet?).")
+            return invalid_argument_response(
+                "dataset", "no case to evaluate (none validated yet?)."
+            )
         vectors = check_vectors(cases, body.get("vectors"), space[0])
-        metrics = evaluate(cases, vectors, embeddings, server_config.kb_dir, model, _lexical_factory())
+        metrics = evaluate(
+            cases, vectors, embeddings, server_config.kb_dir, model, _lexical_factory()
+        )
         metrics["validated_only"] = bool(body.get("validated_only"))
         metrics["validated_cases"] = sum(1 for c in cases if c["annotation_status"] == "validated")
         run = store.save_run(dataset, who[1].handle, metrics)
         log = get_log()
         if log is not None:
-            log.emit("eval.updated", None, who[1].handle, [], dataset=dataset, run_id=run["id"],
-                     false_strong=metrics["false_strong"])
+            log.emit(
+                "eval.updated",
+                None,
+                who[1].handle,
+                [],
+                dataset=dataset,
+                run_id=run["id"],
+                false_strong=metrics["false_strong"],
+            )
         return ok_response(run, count=1)
     except Exception as e:
         return _eval_error(e) or handle_exception_response(e, context_action="run_similarity_eval")
@@ -2700,6 +3225,7 @@ def get_similarity_eval_run(dataset: str, run_id: int) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Regulatory coverage (contract 1.3).
 # ---------------------------------------------------------------------------
+
 
 def get_framework_coverage(frameworks: list[str]) -> dict[str, Any]:
     """Coverage of regulatory frameworks by the knowledge base.
@@ -2751,24 +3277,45 @@ def list_trigger_rules() -> dict[str, Any]:
     except (OSError, fact_module.VocabularyError) as e:
         return handle_exception_response(e, context_action="list_trigger_rules")
     except triggers.TriggerError as e:
-        return {"status": "error", "error": "invalid_rules", "reason": str(e), "problems": e.problems}
+        return {
+            "status": "error",
+            "error": "invalid_rules",
+            "reason": str(e),
+            "problems": e.problems,
+        }
     titles = {a.id: a.title for a in load_assets(server_config.kb_dir)}
     by_asset: dict[str, list[dict[str, Any]]] = {}
     for r in rules:
-        by_asset.setdefault(r["asset"], []).append({k: v for k, v in r.items() if k != "content_sha256"})
+        by_asset.setdefault(r["asset"], []).append(
+            {k: v for k, v in r.items() if k != "content_sha256"}
+        )
     data: dict[str, Any] = {
-        "vocabulary": {"version": vocabulary["version"], "keys": fact_module.public_keys(vocabulary)},
-        "assets": [{"id": aid, "title": titles.get(aid, aid), "rules": by_asset[aid]} for aid in sorted(by_asset)],
+        "vocabulary": {
+            "version": vocabulary["version"],
+            "keys": fact_module.public_keys(vocabulary),
+        },
+        "assets": [
+            {"id": aid, "title": titles.get(aid, aid), "rules": by_asset[aid]}
+            for aid in sorted(by_asset)
+        ],
         "candidates": [],
     }
     if has_scope(REVIEW_SCOPE):  # the queue is for reviewers, like the candidates themselves
         data["candidates"] = [
-            {"id": c["id"], "asset_type": c["asset_type"], "status": c["status"], "title": c["title"], "kind": c["kind"],
-             "target_asset_id": c.get("target_asset_id"), "assigned_owner": c.get("assigned_owner"),
-             "production_mode": (c.get("source") or {}).get("production_mode"),
-             "checks": [x for x in c.get("checks") or [] if x["name"] == "schema"]}
+            {
+                "id": c["id"],
+                "asset_type": c["asset_type"],
+                "status": c["status"],
+                "title": c["title"],
+                "kind": c["kind"],
+                "target_asset_id": c.get("target_asset_id"),
+                "assigned_owner": c.get("assigned_owner"),
+                "production_mode": (c.get("source") or {}).get("production_mode"),
+                "checks": [x for x in c.get("checks") or [] if x["name"] == "schema"],
+            }
             for c in _candidate_service().find()
-            if c.get("asset_type") in TRIGGER_TYPES and c["status"] not in ("published", "rejected")]
+            if c.get("asset_type") in TRIGGER_TYPES and c["status"] not in ("published", "rejected")
+        ]
     return ok_response(data, count=len(rules))
 
 
@@ -2782,18 +3329,29 @@ def validate_trigger_rule(body: dict[str, Any]) -> dict[str, Any]:
 
     content = body.get("content")
     if not isinstance(content, str) or not content.strip():
-        return invalid_argument_response("content", "'content' is the YAML of the rule or of the key.")
+        return invalid_argument_response(
+            "content", "'content' is the YAML of the rule or of the key."
+        )
     asset_type = body.get("asset_type", "trigger")
     if asset_type not in ("trigger", "fact_key"):
-        return invalid_argument_response("asset_type", "'asset_type' must be 'trigger' or 'fact_key'.")
+        return invalid_argument_response(
+            "asset_type", "'asset_type' must be 'trigger' or 'fact_key'."
+        )
     target = body.get("target_asset_id")
-    problems, _ = problems_of({"asset_type": asset_type, "proposed_content": content, "kind": "amendment" if target else "new_asset",
-                               "target_asset_id": target}, server_config.kb_dir)
+    problems, _ = problems_of(
+        {
+            "asset_type": asset_type,
+            "proposed_content": content,
+            "kind": "amendment" if target else "new_asset",
+            "target_asset_id": target,
+        },
+        server_config.kb_dir,
+    )
     return ok_response({"valid": not problems, "problems": problems}, count=len(problems))
 
 
 def preview_triggers(body: dict[str, Any]) -> dict[str, Any]:
-    """"With these facts, these are the questions that would open": the evaluation of the cascade engine (K20), without an engagement.
+    """ "With these facts, these are the questions that would open": the evaluation of the cascade engine (K20), without an engagement.
 
     Body: ``{facts: {key: value}, rules?: [<rule YAML or mapping>]}``. The reference rules of the knowledge base are evaluated;
     ``rules`` adds drafts (a candidate under review). The facts are checked against the vocabulary (a key or a type it does not
@@ -2811,30 +3369,66 @@ def preview_triggers(body: dict[str, Any]) -> dict[str, Any]:
         vocabulary = _live_vocabulary()
         reference = triggers.load_all(server_config.kb_dir, vocabulary)
     except triggers.TriggerError as e:
-        return {"status": "error", "error": "invalid_rules", "reason": str(e), "problems": e.problems}
+        return {
+            "status": "error",
+            "error": "invalid_rules",
+            "reason": str(e),
+            "problems": e.problems,
+        }
     try:
-        fact_module.validate([{"key": k, "value": v, "source_excerpt": "preview"} for k, v in sorted(facts.items())], vocabulary)
+        fact_module.validate(
+            [{"key": k, "value": v, "source_excerpt": "preview"} for k, v in sorted(facts.items())],
+            vocabulary,
+        )
     except fact_module.FactError as err:
-        return {"status": "invalid_argument", "argument": "facts", "code": err.code, "reason": err.reason, "path": err.path}
+        return {
+            "status": "invalid_argument",
+            "argument": "facts",
+            "code": err.code,
+            "reason": err.reason,
+            "path": err.path,
+        }
     drafts, invalid = [], []
     carrier_index = triggers.carriers(server_config.kb_dir)
     for i, raw in enumerate(body.get("rules") or []):
         doc = yaml.safe_load(raw) if isinstance(raw, str) else raw
         name = str((doc or {}).get("trigger_id")) if isinstance(doc, dict) else f"rules[{i}]"
-        problems = triggers.validate_rule(doc, name, vocabulary, carrier_index, local=name.startswith("TRG-local-"))
+        problems = triggers.validate_rule(
+            doc, name, vocabulary, carrier_index, local=name.startswith("TRG-local-")
+        )
         if problems:
             invalid.append({"trigger_id": name, "problems": problems})
         else:
             drafts.append({**doc, "scope": "draft"})
     drafted = {d["trigger_id"] for d in drafts}
-    rules = [{**r, "scope": "reference"} for r in reference if r["trigger_id"] not in drafted] + drafts
+    rules = [
+        {**r, "scope": "reference"} for r in reference if r["trigger_id"] not in drafted
+    ] + drafts
     opened, closed = triggers.evaluate(rules, facts)
-    shown = ("trigger_id", "version", "question", "rationale", "initial_level", "suggested_role", "mandatory", "asset", "scope")
-    return ok_response({"opens": [{k: r.get(k) for k in shown} for r in opened], "closed": closed, "invalid_drafts": invalid},
-                       count=len(opened))
+    shown = (
+        "trigger_id",
+        "version",
+        "question",
+        "rationale",
+        "initial_level",
+        "suggested_role",
+        "mandatory",
+        "asset",
+        "scope",
+    )
+    return ok_response(
+        {
+            "opens": [{k: r.get(k) for k in shown} for r in opened],
+            "closed": closed,
+            "invalid_drafts": invalid,
+        },
+        count=len(opened),
+    )
 
 
-def merge_fact_key_candidate(candidate_id: str, into: str, reviewer: str, reason: str | None = None) -> dict[str, Any]:
+def merge_fact_key_candidate(
+    candidate_id: str, into: str, reviewer: str, reason: str | None = None
+) -> dict[str, Any]:
     """Merge a proposed vocabulary key into an existing one (requires the 'kb:review' scope).
 
     Rejects the key candidate (the reason records the merge) and answers the rule candidates that cite the merged key, each with
@@ -2856,19 +3450,36 @@ def merge_fact_key_candidate(candidate_id: str, into: str, reviewer: str, reason
     key = (rule_candidates.parse_content(candidate["proposed_content"]) or {}).get("key")
     if into == key:
         return invalid_argument_response("into", "a key cannot be merged into itself.")
-    res = review_kb_candidate(candidate_id, "reject", reviewer, reason=f"merged into {into}" + (f": {reason}" if reason else ""))
+    res = review_kb_candidate(
+        candidate_id,
+        "reject",
+        reviewer,
+        reason=f"merged into {into}" + (f": {reason}" if reason else ""),
+    )
     if res.get("status") != "ok":
         return res
-    affected = [{"id": c["id"], "status": c["status"], "title": c["title"],
-                 "suggested_content": rule_candidates.rewrite_key(c["proposed_content"], key, into)}
-                for c in service.find() if c.get("asset_type") == "trigger" and c["status"] in ("checks_failed", "in_review")
-                and key in rule_candidates.keys_of(c["proposed_content"])]
-    return ok_response({"candidate": res["data"], "merged_into": into, "affected_rules": affected}, count=len(affected))
+    affected = [
+        {
+            "id": c["id"],
+            "status": c["status"],
+            "title": c["title"],
+            "suggested_content": rule_candidates.rewrite_key(c["proposed_content"], key, into),
+        }
+        for c in service.find()
+        if c.get("asset_type") == "trigger"
+        and c["status"] in ("checks_failed", "in_review")
+        and key in rule_candidates.keys_of(c["proposed_content"])
+    ]
+    return ok_response(
+        {"candidate": res["data"], "merged_into": into, "affected_rules": affected},
+        count=len(affected),
+    )
 
 
 # ---------------------------------------------------------------------------
 # Fine-grained RBAC, delegation, and access audit (issue #7, contract 1.37)
 # ---------------------------------------------------------------------------
+
 
 def list_kb_delegations(
     delegate: str | None = None,
@@ -2881,12 +3492,17 @@ def list_kb_delegations(
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
 
     actor = resolve_actor()
     target_delegate = delegate or (actor.handle if actor and not delegator else None)
     store = get_delegation_store()
-    items = store.list_delegations(delegate=target_delegate, delegator=delegator, active_only=active_only)
+    items = store.list_delegations(
+        delegate=target_delegate, delegator=delegator, active_only=active_only
+    )
     return ok_response({"delegations": items}, count=len(items))
 
 
@@ -2912,9 +3528,13 @@ def create_kb_delegation(
         }
 
     if not isinstance(delegate, str) or not delegate.strip().startswith("@"):
-        return invalid_argument_response("delegate", "'delegate' must be an owner handle starting with '@'.")
+        return invalid_argument_response(
+            "delegate", "'delegate' must be an owner handle starting with '@'."
+        )
     if not isinstance(domains, list) or not domains:
-        return invalid_argument_response("domains", "'domains' must be a non-empty list of domain patterns.")
+        return invalid_argument_response(
+            "domains", "'domains' must be a non-empty list of domain patterns."
+        )
     if not isinstance(roles, list) or not roles:
         return invalid_argument_response("roles", "'roles' must be a non-empty list of KB roles.")
     if not isinstance(expires_at, str) or not expires_at.strip():
@@ -2963,13 +3583,18 @@ def revoke_kb_delegation(delegation_id: str) -> dict[str, Any]:
         return not_found_response(delegation_id)
 
     if "kb:maintain" not in actor.roles and target["delegator"] != actor.handle:
-        return {"status": "unauthorized", "reason": "Only the delegator or a maintainer can revoke this delegation."}
+        return {
+            "status": "unauthorized",
+            "reason": "Only the delegator or a maintainer can revoke this delegation.",
+        }
 
     success = store.revoke_delegation(delegation_id, revoked_by=actor.handle)
     return ok_response({"revoked": success, "id": delegation_id}, count=1 if success else 0)
 
 
-def revoke_kb_auth(identifier: str, reason: str = "revoked by admin", is_jti: bool = False) -> dict[str, Any]:
+def revoke_kb_auth(
+    identifier: str, reason: str = "revoked by admin", is_jti: bool = False
+) -> dict[str, Any]:
     """Immediately revoke a token JTI or an expert handle/email (requires 'kb:admin' or 'kb:maintain')."""
     from mcp_server.core.assertion import get_revocation_store
     from mcp_server.core.auth import resolve_actor
@@ -2999,7 +3624,10 @@ def get_kb_audit(
     from pipelines.kb_candidates.service import REVIEW_SCOPE
 
     if not has_scope(REVIEW_SCOPE):
-        return {"status": "unauthorized", "reason": f"The '{REVIEW_SCOPE}' token scope is required."}
+        return {
+            "status": "unauthorized",
+            "reason": f"The '{REVIEW_SCOPE}' token scope is required.",
+        }
 
     audit = get_governance_audit()
     records = audit.query(actor=actor, action=action, outcome=outcome, limit=limit)
@@ -3012,6 +3640,7 @@ def get_jwks() -> dict[str, Any]:
 
     jwks = get_jwks_registry().to_jwks()
     return ok_response(jwks, count=len(jwks.get("keys", [])))
+
 
 def list_ontology_terms(
     concept_class: str | None = None,
@@ -3075,4 +3704,3 @@ def get_ontology_term(
         }
     except Exception as e:
         return handle_exception_response(e, context_action="get_ontology_term")
-
