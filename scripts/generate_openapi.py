@@ -32,7 +32,10 @@ DEPRECATED_PATHS = {
 PATH_PARAM_RE = re.compile(r"\{([^}:]+)(?::[^}]+)?\}")
 
 
-def shape_to_json_schema(shape: dict[str, Any] | None) -> dict[str, Any]:
+DYNAMIC_MAP_KEYS = {"by_domain", "domains"}
+
+
+def shape_to_json_schema(shape: dict[str, Any] | None, key_name: str | None = None) -> dict[str, Any]:
     """Convert a frozen shape node into an OpenAPI 3.1 JSON Schema object."""
     if not shape or not isinstance(shape, dict):
         return {}
@@ -40,9 +43,20 @@ def shape_to_json_schema(shape: dict[str, Any] | None) -> dict[str, Any]:
     schema: dict[str, Any] = {
         "type": raw_types[0] if len(raw_types) == 1 else raw_types,
     }
+    if key_name in DYNAMIC_MAP_KEYS and "keys" in shape and isinstance(shape["keys"], dict):
+        # Data-keyed dictionaries (e.g. domain -> count or domain -> owner) are maps in OpenAPI
+        merged_values: dict[str, Any] = {}
+        for v in shape["keys"].values():
+            sub = shape_to_json_schema(v)
+            if sub:
+                merged_values = sub
+                break
+        schema["additionalProperties"] = merged_values or {"type": "string"}
+        return schema
+
     if "keys" in shape and isinstance(shape["keys"], dict):
         schema["properties"] = {
-            k: shape_to_json_schema(v) for k, v in sorted(shape["keys"].items())
+            k: shape_to_json_schema(v, key_name=k) for k, v in sorted(shape["keys"].items())
         }
     if "values" in shape and shape["values"] is not None:
         schema["additionalProperties"] = shape_to_json_schema(shape["values"])
