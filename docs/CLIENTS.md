@@ -46,7 +46,7 @@ const res = await fetch(`${BASE}/api/knowledge/check`, { method: "POST",
 const verdicts = (await res.json()).data;
 ```
 
-Types for TypeScript clients: [`schemas/types.ts`](../schemas/types.ts); JSON Schemas: [`schemas/`](../schemas/).
+Types for TypeScript clients: [`schemas/types.ts`](../schemas/types.ts); OpenAPI 3.1 specification: [`schemas/openapi.json`](../schemas/openapi.json); JSON Schemas: [`schemas/`](../schemas/).
 
 **MCP** (agent / IDE): remote `{"url": ".../sse", "headers": {"Authorization": "Bearer <token>"}}` or local `poetry run mcp-server-knowledge`
 (see the README quickstart). Tools mirror the REST routes (`search_assets`, `get_asset`, `get_doctrine_context`, `check_option`, …).
@@ -78,6 +78,6 @@ Full specification, bodies and status codes: [`contracts/knowledge-hub-api-v1.md
 
 ## 5. Know the limits
 
-- No OpenAPI file yet: the contract document and `tests/contract/frozen/` are the references.
-- Fetching **one asset by id** is an MCP tool (`get_asset`) or a snapshot lookup; there is no `GET /api/knowledge/assets/{id}` REST route yet.
+- OpenAPI 3.1 specification: [`schemas/openapi.json`](../schemas/openapi.json) (generated deterministically from `tests/contract/frozen/` via `poetry run python scripts/generate_openapi.py`).
+- Fetching **one asset by id**: `GET /api/knowledge/assets/{id}?version=` (or via MCP tool `get_asset` / sealed snapshot lookup).
 - Generating documents and diagrams from the knowledge: [third-party integration guide](THIRD-PARTY-INTEGRATION-GUIDE.md) (its engagement-plane sections predate 1.13).

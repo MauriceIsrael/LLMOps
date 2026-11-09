@@ -528,11 +528,16 @@ def create_starlette_app() -> Starlette:
         from starlette.concurrency import run_in_threadpool
 
         from pipelines.similarity.encoder import embedding_status
+        from pipelines.similarity.semantic import index_status
 
         emb = await run_in_threadpool(embedding_status)
+        idx = await run_in_threadpool(index_status, server_config.kb_dir)
         embedding = {
-            k: emb.get(k)
-            for k in ("model", "version", "sha256", "dim", "local", "provider", "status", "reason")
+            **{
+                k: emb.get(k)
+                for k in ("model", "version", "sha256", "dim", "local", "provider", "status", "reason")
+            },
+            **idx,
         }
 
         return JSONResponse(
@@ -2218,8 +2223,10 @@ def create_starlette_app() -> Starlette:
 async def run_sse_authenticated(host: str, port: int) -> None:
     """Démarre le serveur SSE FastMCP enveloppé dans le middleware d'authentification."""
     from mcp_server.knowledge.tools import warn_if_compiled_base_is_not_current
+    from pipelines.similarity.semantic import warm_up
 
     warn_if_compiled_base_is_not_current()  # issue #85: a stale graph is said at start, never rebuilt silently
+    warm_up(server_config.kb_dir)  # issue #100: warm up semantic index at startup when the local model is ready
     starlette_app = create_starlette_app()
     config = uvicorn.Config(
         starlette_app,

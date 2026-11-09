@@ -81,6 +81,9 @@ def payloads(envelope: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
                        # a proposal extracted by a model stays "llm-derived" unless the emitter says otherwise
                        "production_mode": p.get("production_mode") or "llm-derived"},
         }
+        for extra_key in ("assumptions", "trigger_condition", "resulting_compliance_status", "standard_reservation_template"):
+            if p.get(extra_key) is not None:
+                payload[extra_key] = p[extra_key]
         out.append((c["id"], payload))
     return out
 

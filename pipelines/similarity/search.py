@@ -23,15 +23,26 @@ DEFAULT_CONFIG: dict[str, Any] = {
 MAX_TOP_K = 50
 
 
-def load_config(kb_dir: str | Path) -> dict[str, Any]:
+def load_config(kb_dir: str | Path, model: str | None = None) -> dict[str, Any]:
     path = Path(kb_dir) / "taxonomy" / "similarity.yaml"
     if not path.is_file():
         return DEFAULT_CONFIG
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    status = str(data.get("status") or "uncalibrated")
+    boosts = {**DEFAULT_CONFIG["boosts"], **(data.get("boosts") or {})}
+    thresholds = {**DEFAULT_CONFIG["thresholds"], **(data.get("thresholds") or {})}
+    if model and isinstance(data.get("models"), dict) and model in data["models"]:
+        model_cfg = data["models"][model] or {}
+        if model_cfg.get("status"):
+            status = str(model_cfg["status"])
+        if isinstance(model_cfg.get("boosts"), dict):
+            boosts = {**boosts, **model_cfg["boosts"]}
+        if isinstance(model_cfg.get("thresholds"), dict):
+            thresholds = {**thresholds, **model_cfg["thresholds"]}
     return {
-        "status": str(data.get("status") or "uncalibrated"),
-        "boosts": {**DEFAULT_CONFIG["boosts"], **(data.get("boosts") or {})},
-        "thresholds": {**DEFAULT_CONFIG["thresholds"], **(data.get("thresholds") or {})},
+        "status": status,
+        "boosts": boosts,
+        "thresholds": thresholds,
     }
 
 
@@ -62,6 +73,9 @@ def _provenance(asset: KbAsset) -> dict[str, Any]:
         "superseded_by": fm.get("superseded_by"),
         "assumptions": assumptions,
         "assumptions_documented": bool(assumptions),
+        "trigger_condition": fm.get("trigger_condition"),
+        "resulting_compliance_status": fm.get("resulting_compliance_status"),
+        "standard_reservation_template": fm.get("standard_reservation_template"),
     }
 
 
@@ -88,7 +102,7 @@ def similar(
         known = [m["model_id"] for m in store.models()]
         raise EmbeddingError("model", f"no vector stored for model '{model}' (known models: {known}).")
     query = validate_vector(vector, space[0])
-    config = load_config(kb_dir)
+    config = load_config(kb_dir, model=model)
     boosts, th = config["boosts"], config["thresholds"]
     assets = {a.id: a for a in load_assets(kb_dir)}
     wanted = {d for d in (domains or []) if d}

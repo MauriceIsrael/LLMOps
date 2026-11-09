@@ -10,6 +10,7 @@ from mcp_server.core.config import server_config
 from mcp_server.core.db import (
     ReadOnlyKuzuClient,
     discover_engagements,
+    get_engagement_path,
     open_connection,
     validate_engagement_id,
 )
@@ -97,7 +98,7 @@ def test_authorise_before_resolution_ordering(tmp_path, monkeypatch):
 def test_planes_are_physically_separate():
     """F3 & ADR-0015 — Assert physical plane separation between knowledge and engagement databases."""
     kb_p = server_config.knowledge_db_path
-    eng_p = server_config.engagements_dir / "nordwave-mcx-2027.kuzu"
+    eng_p = get_engagement_path("nordwave-mcx-2027")
 
     client_k = ReadOnlyKuzuClient(db_path=kb_p)
     tables_k = {r["name"] for r in client_k.execute_cypher("CALL show_tables() RETURN name;")}
@@ -114,6 +115,29 @@ def test_planes_are_physically_separate():
     client_e = ReadOnlyKuzuClient(db_path=eng_p)
     tables_e = {r["name"] for r in client_e.execute_cypher("CALL show_tables() RETURN name;")}
     assert "Asset" not in tables_e, "Engagement plane contains copied Asset table!"
+
+
+def test_windows_read_write_to_readonly_transition_and_posix_paths(tmp_path):
+    """Issues #86 & #99 — Opening an engagement DB via .kuzu in RW then RO must not lock on Windows, and KB source_path uses POSIX slashes."""
+    from tools.adapters.ladybug_store import LadybugGraphStore
+
+    legacy_kuzu_path = tmp_path / "win-lock-check.kuzu"
+    repo = ElicitationRepository(db_path=legacy_kuzu_path)
+    repo.save_subject("sub-1", engagement="win-lock-check")
+    repo.close()
+    LadybugGraphStore.clear_cache(str(legacy_kuzu_path))
+
+    ro_client = ReadOnlyKuzuClient(db_path=legacy_kuzu_path)
+    rows = ro_client.execute_cypher("MATCH (s:Subject) RETURN s.id AS id;")
+    assert [r["id"] for r in rows] == ["win-lock-check:sub-1"]
+    LadybugGraphStore.clear_cache(str(legacy_kuzu_path))
+
+    kb_client = ReadOnlyKuzuClient(db_path=server_config.knowledge_db_path)
+    assets = kb_client.execute_cypher("MATCH (a:Asset) RETURN a.source_path AS source_path LIMIT 20;")
+    assert assets
+    for row in assets:
+        sp = row.get("source_path") or ""
+        assert "\\" not in sp, f"Non-POSIX backslash found in Asset.source_path: {sp}"
 
 
 # --- F4: Extended query_graph & Driver-Level Enforceability ---

@@ -16,6 +16,24 @@ class LadybugGraphStore(GraphStore):
     _conn_cache: dict[str, Any] = {}
 
     @classmethod
+    def _resolve_lbug_path(cls, db_path: str | Path) -> str:
+        p = Path(db_path).resolve()
+        if p.suffix == ".kuzu" or p.name.endswith(".kuzu"):
+            lbug_companion = p.with_suffix(".lbug")
+            if lbug_companion.exists() and lbug_companion.is_file():
+                return str(lbug_companion)
+            if (p / "database.lbug").exists():
+                return str(p / "database.lbug")
+            return str(lbug_companion)
+        if p.is_dir():
+            if (p / "database.lbug").exists():
+                return str(p / "database.lbug")
+            return str(p.with_suffix(".lbug"))
+        if not p.suffix:
+            return str(p.with_suffix(".lbug"))
+        return str(p)
+
+    @classmethod
     def get_database(cls, db_path: str, read_only: bool = False) -> Any:
         canon = str(Path(db_path).resolve())
         cache_key = f"{canon}:ro" if read_only else f"{canon}:rw"
@@ -28,6 +46,14 @@ class LadybugGraphStore(GraphStore):
                 return db
             except Exception:
                 cls._db_cache.pop(cache_key, None)
+
+        # Release any opposite-mode handle (:rw vs :ro) on the same file to avoid Windows Error 33 locks
+        opposite_key = f"{canon}:rw" if read_only else f"{canon}:ro"
+        if opposite_key in cls._conn_cache or opposite_key in cls._db_cache:
+            conn = cls._conn_cache.pop(opposite_key, None)
+            db_old = cls._db_cache.pop(opposite_key, None)
+            del conn, db_old
+            gc.collect()
 
         try:
             db = lb.Database(
@@ -57,11 +83,13 @@ class LadybugGraphStore(GraphStore):
     def clear_cache(cls, db_path: str | None = None) -> None:
         if db_path:
             canon = str(Path(db_path).resolve())
-            keys_to_del = [k for k in cls._db_cache if k.startswith(canon)]
+            resolved = cls._resolve_lbug_path(db_path)
+            prefixes = (canon, resolved)
+            keys_to_del = [k for k in cls._db_cache if k.startswith(prefixes)]
             for k in keys_to_del:
                 db = cls._db_cache.pop(k, None)
                 del db
-            conn_keys = [k for k in cls._conn_cache if k.startswith(canon)]
+            conn_keys = [k for k in cls._conn_cache if k.startswith(prefixes)]
             for k in conn_keys:
                 conn = cls._conn_cache.pop(k, None)
                 del conn
@@ -71,24 +99,7 @@ class LadybugGraphStore(GraphStore):
         gc.collect()
 
     def __init__(self, db_path: str | Path, read_only: bool = False) -> None:
-        p = Path(db_path).resolve()
-        if p.suffix == ".kuzu" or p.name.endswith(".kuzu"):
-            lbug_companion = p.with_suffix(".lbug")
-            if lbug_companion.exists() and lbug_companion.is_file():
-                self.db_path = str(lbug_companion)
-            elif (p / "database.lbug").exists():
-                self.db_path = str(p / "database.lbug")
-            else:
-                self.db_path = str(lbug_companion)
-        elif p.is_dir():
-            if (p / "database.lbug").exists():
-                self.db_path = str(p / "database.lbug")
-            else:
-                self.db_path = str(p.with_suffix(".lbug"))
-        elif not p.suffix:
-            self.db_path = str(p.with_suffix(".lbug"))
-        else:
-            self.db_path = str(p)
+        self.db_path = self._resolve_lbug_path(db_path)
 
         self.read_only = read_only
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)

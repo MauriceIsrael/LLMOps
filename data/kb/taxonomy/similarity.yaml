@@ -13,3 +13,12 @@ boosts:
 thresholds:
   strong: 0.80      # at or above: listed first, "strong" — still requires confirmation
   possible: 0.60    # at or above: "possible"; below: "weak"
+
+# Per-model calibrated overrides (Issue #97). Models not listed here inherit the top-level uncalibrated defaults.
+models:
+  intfloat/multilingual-e5-small:
+    status: calibrated
+    calibrated_on: tests/fixtures/similarity/fr-en-doctrine.yaml
+    thresholds:
+      strong: 0.72
+      possible: 0.50

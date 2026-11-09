@@ -148,6 +148,42 @@ def scorer_for(encoder: Encoder) -> AssetVectors:
         return _SCORERS[key]
 
 
+def index_status(kb_dir: str | Path = "data/kb") -> dict[str, Any]:
+    """Report whether the active assets of ``kb_dir`` are indexed for the reference encoder (issue #100)."""
+    from pipelines.similarity.encoder import reference_encoder
+
+    items = active_items(kb_dir)
+    total = len(items)
+    encoder, status = reference_encoder()
+    if encoder is None:
+        state = "off" if status.get("status") == "off" else "absent"
+        return {"index_status": state, "indexed_assets": 0, "active_assets": total}
+    scorer = scorer_for(encoder)
+    with scorer._lock:
+        known = set(scorer._by_sha)
+    if len(known) < total:
+        for ref_vec in scorer._stored().values():
+            known.add(ref_vec["text_sha256"])
+    indexed = sum(1 for i in items if i["text_sha256"] in known)
+    if indexed == total:
+        state = "ready"
+    elif indexed > 0:
+        state = "stale"
+    else:
+        state = "missing"
+    return {"index_status": state, "indexed_assets": indexed, "active_assets": total}
+
+
+def warm_up(kb_dir: str | Path = "data/kb") -> dict[str, Any]:
+    """Ensure the reference encoder's asset vectors are loaded or encoded at server startup (issue #100)."""
+    from pipelines.similarity.encoder import reference_encoder
+
+    encoder, _ = reference_encoder()
+    if encoder is not None:
+        scorer_for(encoder).vectors(kb_dir)
+    return index_status(kb_dir)
+
+
 def reset() -> None:
     with _SCORERS_LOCK:
         _SCORERS.clear()

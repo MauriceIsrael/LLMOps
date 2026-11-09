@@ -74,11 +74,11 @@ def _terms(value: Any, argument: str = "terms") -> list[str]:
     return clean
 
 
-def _title_fr(value: Any) -> str:
+def _title_fr(value: Any, argument: str = "title_fr") -> str:
     if value in (None, ""):
         return ""
     if not isinstance(value, str) or len(value.strip()) > 200:
-        raise IngestionError("title_fr", "'title_fr' must be a string of at most 200 characters.")
+        raise IngestionError(argument, f"'{argument}' must be a string of at most 200 characters.")
     return value.strip()
 
 
@@ -233,9 +233,13 @@ class IngestionService:
         if unknown:
             raise IngestionError("links", f"unknown asset(s): {unknown}.")
         terms, title_fr = _terms(body.get("terms")), _title_fr(body.get("title_fr"))
-        if decision == "amend" and not (links or criteria or terms or title_fr):
-            raise IngestionError("decision", "'amend' needs links, acceptance_criteria, terms and/or title_fr.")
-        row.update(decision=decision, links=links, acceptance_criteria=criteria, terms=terms, title_fr=title_fr,
+        title = _title_fr(body.get("title"), "title")
+        if decision == "amend" and not (links or criteria or terms or title_fr or title):
+            raise IngestionError("decision", "'amend' needs links, acceptance_criteria, terms, title and/or title_fr.")
+        draft_fm, _ = split_frontmatter(row.get("draft") or "")
+        default_title = str((draft_fm or {}).get("title") or row.get("title") or "")
+        effective_title = title if (decision and title) else (default_title if not decision else (title or row.get("title") or default_title))
+        row.update(decision=decision, title=effective_title, links=links, acceptance_criteria=criteria, terms=terms, title_fr=title_fr,
                    reviewer=reviewer if decision else "", comment=str(body.get("comment") or "").strip(),
                    status="decided" if decision else "pending", result=None)
         self._save_row(ingestion_id, row)
@@ -330,7 +334,8 @@ class IngestionService:
                 writer.writeheader()
                 for r in decided:
                     writer.writerow({
-                        "requirement_id": r["requirement_id"], "decision": r["decision"], "reviewer": r["reviewer"],
+                        "requirement_id": r["requirement_id"], "title": r.get("title") or "",
+                        "decision": r["decision"], "reviewer": r["reviewer"],
                         "links": "; ".join(r["links"]), "acceptance_criteria": "; ".join(r["acceptance_criteria"]),
                         "comment": r["comment"]})
             results = apply_review(sheet, self.service, staging=staging)

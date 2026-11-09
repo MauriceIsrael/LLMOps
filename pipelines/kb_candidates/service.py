@@ -321,6 +321,27 @@ class CandidateService:
                     body = self._sanitize_unknown_refs(body, known_ids | {new_id})
                 fields["proposed_content"] = join_frontmatter(fm, body).strip() + "\n"
 
+        if fm is not None and isinstance(payload, dict):
+            fm_changed = False
+            raw_assumptions = payload.get("assumptions")
+            if isinstance(raw_assumptions, list):
+                clean_assumptions = [str(a).strip() for a in raw_assumptions if str(a).strip()]
+                if clean_assumptions:
+                    existing_assumptions = [str(a).strip() for a in (fm.get("assumptions") or []) if str(a).strip()]
+                    default_generic = "Applicable to architecture engagements sharing similar operational and governance constraints."
+                    if existing_assumptions == [default_generic]:
+                        fm["assumptions"] = clean_assumptions
+                    else:
+                        fm["assumptions"] = list(dict.fromkeys([*existing_assumptions, *clean_assumptions]))
+                    fm_changed = True
+            for meta_key in ("trigger_condition", "resulting_compliance_status", "standard_reservation_template"):
+                val = payload.get(meta_key)
+                if isinstance(val, str) and val.strip():
+                    fm[meta_key] = val.strip()
+                    fm_changed = True
+            if fm_changed:
+                fields["proposed_content"] = join_frontmatter(fm, body).strip() + "\n"
+
         return fields
 
     def dry_run(self, payload: Any, actor: str = "anonymous") -> dict[str, Any]:

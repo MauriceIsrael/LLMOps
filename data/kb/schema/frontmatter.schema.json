@@ -287,6 +287,24 @@
     "upstream_standard_ref": {
       "type": "string",
       "description": "Citable upstream standard or regulatory reference (e.g. 3GPP TS 33.501 Rel-18, NIS2 Art 21) (Issue #131)."
+    },
+    "trigger_condition": {
+      "type": "string",
+      "minLength": 3,
+      "description": "Condition or context under which this asset's compliance status or standard reservation applies (Issues #134, #135)."
+    },
+    "resulting_compliance_status": {
+      "enum": [
+        "Compliant",
+        "Partially compliant",
+        "Non-compliant"
+      ],
+      "description": "Resulting compliance posture when this pattern or decision is applied under its trigger condition (Issues #134, #135)."
+    },
+    "standard_reservation_template": {
+      "type": "string",
+      "minLength": 5,
+      "description": "Reusable reservation statement when the asset yields a Partially compliant posture (Issues #134, #135)."
     }
   },
   "additionalProperties": true
