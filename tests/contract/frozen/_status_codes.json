@@ -123,6 +123,9 @@
   "rest.PUT /api/compliance/frameworks/applicable": 200,
   "rest.PUT /api/engagements/{engagement}/kb-pin": 200,
   "rest.PUT /api/engagements/{engagement}/members": 200,
+  "rest.PUT /api/knowledge/candidates": 201,
+  "rest.PUT /api/knowledge/candidates/{candidate_id}": 201,
+  "rest.PUT /api/knowledge/candidates/{candidate_id}/promote": 409,
   "rest.PUT /api/knowledge/embeddings": 200,
   "rest.PUT /api/knowledge/owners": 200
 }

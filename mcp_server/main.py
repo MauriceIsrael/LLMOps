@@ -1,9 +1,11 @@
 """Point d'entrée du serveur FastMCP pour la Base de Connaissances d'Architecture."""
 
 import asyncio
+import json
 import logging
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 from uuid import uuid4
@@ -92,6 +94,7 @@ from mcp_server.knowledge.tools import (
     get_kb_audit,
     get_kb_candidate,
     get_kb_freshness,
+    export_ontology_catalog,
     get_kb_health,
     get_kb_me,
     get_knowledge_asset_history,
@@ -195,6 +198,7 @@ from pipelines.ontology.gateway import is_ontology_experimental_enabled
 if is_ontology_experimental_enabled():
     mcp.tool()(list_ontology_terms)
     mcp.tool()(get_ontology_term)
+    mcp.tool()(export_ontology_catalog)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -676,6 +680,45 @@ def create_starlette_app() -> Starlette:
         data = json.loads(snap_file.read_text(encoding="utf-8"))
         etag = data.get("payload_sha256", "")
         return JSONResponse(data, headers={"ETag": etag, "Cache-Control": "public, max-age=86400"})
+
+    async def handle_ontology_export(request):
+        """Exporte le catalogue consolidé de l'ontologie d'architecture sous format canonique."""
+        from pipelines.ontology.gateway import is_ontology_experimental_enabled
+
+        if not is_ontology_experimental_enabled():
+            return JSONResponse(
+                {"error": "Experimental ontology feature is disabled"}, status_code=404
+            )
+
+        export_file = Path("data/snapshots/ontology_export.json")
+        if not export_file.exists():
+            from pipelines.ontology.export import export_ontology_snapshot
+
+            try:
+                export_ontology_snapshot(
+                    ontology_dir=Path("data/kb/ontology"),
+                    output_path=export_file,
+                )
+            except Exception:
+                pass
+
+        if not export_file.exists():
+            return JSONResponse({"error": "Ontology export file not found"}, status_code=404)
+
+        with open(export_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        if "payload" in data and isinstance(data["payload"], dict) and "entities" in data["payload"]:
+            payload = data["payload"]
+            data = {
+                "catalog_version": payload.get("schema_version")
+                or data.get("schema_version", "1.0"),
+                "generated_at": data.get("generated_at") or "2026-10-29T10:00:00Z",
+                "entities": payload.get("entities", {}),
+                "triplets": payload.get("triplets", []),
+            }
+
+        return JSONResponse(data, status_code=200)
 
     async def handle_ontology_list(request):
         from pipelines.ontology.gateway import is_ontology_experimental_enabled
@@ -1222,7 +1265,25 @@ def create_starlette_app() -> Starlette:
                 invalid_argument_response("body", "Le corps de requête doit être un objet JSON"),
                 status_code=400,
             )
-        res = submit_kb_candidate(body)
+        candidate_id = body.get("id") or body.get("candidate_id")
+        res = submit_kb_candidate(body, candidate_id=candidate_id)
+        return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
+
+    async def handle_candidate_put(request):
+        """Ingestion ou mise à jour/revue d'un candidat par identifiant explicite."""
+        try:
+            body = await request.json()
+        except Exception:
+            body = None
+        if not isinstance(body, dict):
+            return JSONResponse(
+                invalid_argument_response("body", "Le corps de requête doit être un objet JSON"),
+                status_code=400,
+            )
+        cid = request.path_params.get("candidate_id")
+        if "action" in body and body["action"] in ("accept", "amend", "reject"):
+            return await handle_candidate_review(request)
+        res = submit_kb_candidate(body, candidate_id=cid)
         return JSONResponse(res, status_code=_candidate_status_code(res, ok_code=201))
 
     async def handle_proposals_import(request):
@@ -1272,12 +1333,17 @@ def create_starlette_app() -> Starlette:
                 invalid_argument_response("body", "Le corps de requête doit être un objet JSON"),
                 status_code=400,
             )
+        auto_promote = bool(
+            body.get("auto_promote")
+            or request.query_params.get("auto_promote") in ("1", "true", "yes")
+        )
         res = review_kb_candidate(
             request.path_params["candidate_id"],
             action=str(body.get("action") or ""),
             reviewer=str(body.get("reviewer") or ""),
             reason=body.get("reason"),
             amended_content=body.get("amended_content"),
+            auto_promote=auto_promote,
         )
         return JSONResponse(res, status_code=_candidate_status_code(res))
 
@@ -2058,7 +2124,7 @@ def create_starlette_app() -> Starlette:
         Route(
             "/api/knowledge/candidates/{candidate_id}/promote",
             endpoint=handle_candidate_promote,
-            methods=["POST"],
+            methods=["POST", "PUT"],
         ),
         Route("/api/frameworks/ingestions", endpoint=handle_ingestion_create, methods=["POST"]),
         Route("/api/frameworks/ingestions", endpoint=handle_ingestion_list, methods=["GET"]),
@@ -2168,7 +2234,16 @@ def create_starlette_app() -> Starlette:
             endpoint=handle_candidate_comments_list,
             methods=["GET"],
         ),
-        Route("/api/knowledge/candidates", endpoint=handle_candidates_create, methods=["POST"]),
+        Route(
+            "/api/knowledge/candidates",
+            endpoint=handle_candidates_create,
+            methods=["POST", "PUT"],
+        ),
+        Route(
+            "/api/knowledge/candidates/{candidate_id}",
+            endpoint=handle_candidate_put,
+            methods=["PUT"],
+        ),
         Route(
             "/api/knowledge/proposals/import", endpoint=handle_proposals_import, methods=["POST"]
         ),
@@ -2201,6 +2276,11 @@ def create_starlette_app() -> Starlette:
     if is_ontology_experimental_enabled():
         routes.extend(
             [
+                Route(
+                    "/api/knowledge/ontology/export",
+                    endpoint=handle_ontology_export,
+                    methods=["GET"],
+                ),
                 Route("/api/knowledge/ontology", endpoint=handle_ontology_list, methods=["GET"]),
                 Route(
                     "/api/knowledge/ontology/{urn:path}",

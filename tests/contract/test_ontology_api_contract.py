@@ -30,6 +30,9 @@ def test_flag_absent_mcp_tools_and_http_endpoints_unexposed(monkeypatch):
     res_list = client.get("/api/knowledge/ontology", headers=AUTH)
     assert res_list.status_code == 404
 
+    res_export = client.get("/api/knowledge/ontology/export", headers=AUTH)
+    assert res_export.status_code == 404
+
     res_get = client.get("/api/knowledge/ontology/urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s", headers=AUTH)
     assert res_get.status_code == 404
 
@@ -108,3 +111,70 @@ def test_unknown_revision_returns_explicit_machine_readable_error(monkeypatch):
     unknown_body = res_unknown.json()
     assert unknown_body["status"] == "not_found"
     assert unknown_body["reason"] == "unknown_urn"
+
+
+def test_ontology_export_contract_and_tool(monkeypatch):
+    """GET /api/knowledge/ontology/export serves the validated SI & Telco catalog (Issue #180, #182)."""
+    monkeypatch.setenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "1")
+
+    app = create_starlette_app()
+    client = TestClient(app)
+
+    # 1. Unauthorized when missing or invalid auth
+    res_unauth = client.get("/api/knowledge/ontology/export")
+    assert res_unauth.status_code in (401, 403)
+
+    # 2. Authorized export returns 200 with JSON catalog
+    res = client.get("/api/knowledge/ontology/export", headers=AUTH)
+    assert res.status_code == 200
+    assert "application/json" in res.headers["content-type"]
+    catalog = res.json()
+
+    assert "catalog_version" in catalog
+    assert "generated_at" in catalog
+    assert "entities" in catalog
+    assert "triplets" in catalog
+
+    entities = catalog["entities"]
+    triplets = catalog["triplets"]
+
+    assert len(entities) >= 46
+    assert len(triplets) >= 43
+
+    # Check HLD concepts present
+    hld_concepts = [
+        "urn:archinex:ontology:concept:telco_cloud_platform",
+        "urn:archinex:ontology:concept:interconnection_gateway",
+        "urn:archinex:ontology:concept:storage_data_persistence",
+        "urn:archinex:ontology:concept:iam_security_zerotrust",
+        "urn:archinex:ontology:concept:observability_noc_soc",
+        "urn:archinex:ontology:concept:resilience_drp_continuity",
+    ]
+    for c_urn in hld_concepts:
+        assert c_urn in entities, f"Missing HLD concept: {c_urn}"
+        assert entities[c_urn]["kind"] == "concept"
+
+    # Check triplets structure and relational consistency
+    for t in triplets:
+        assert "id" in t
+        assert t["predicate"] in (
+            "requires_aspect",
+            "implemented_by",
+            "depends_on",
+            "constrains",
+            "conflicts_with",
+        )
+        assert t["subject"] in entities, f"Dangling subject: {t['subject']}"
+        assert t["object"] in entities, f"Dangling object: {t['object']}"
+
+    # 3. Direct MCP tool call
+    from mcp_server.knowledge.tools import export_ontology_catalog
+
+    tool_res = export_ontology_catalog()
+    assert tool_res["status"] == "ok"
+    assert tool_res.get("experimental") is True
+    assert "entities" in tool_res
+    assert len(tool_res["entities"]) >= 46
+    assert "triplets" in tool_res
+    assert len(tool_res["triplets"]) >= 43
+

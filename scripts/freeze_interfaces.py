@@ -541,6 +541,9 @@ def build_catalogue() -> list[Interface]:
         _rest("POST", "/api/knowledge/check", json_body={
             "option": SAMPLE_OPTION, "subject": "Network incident remediation", "frameworks": ["NIS2"]}),
         _rest("POST", "/api/knowledge/candidates", json_body=SAMPLE_CANDIDATE, remember="rest"),
+        _rest("PUT", "/api/knowledge/candidates", json_body=SAMPLE_CANDIDATE),
+        _rest("PUT", "/api/knowledge/candidates/{candidate_id}", "/api/knowledge/candidates/{rest}",
+              json_body=SAMPLE_CANDIDATE),
         # Contract 1.33 (K7): sealed snapshot of proposals published by a suite application
         _rest("POST", "/api/knowledge/proposals/import", json_body=_proposal_snapshot()),
         _rest("GET", "/api/knowledge/candidates", "/api/knowledge/candidates?source=mcp"),
@@ -583,6 +586,8 @@ def build_catalogue() -> list[Interface]:
               headers=DELEGATED, delegate=True),
         # Contract 1.8 — promotion, publication and health
         _rest("POST", "/api/knowledge/candidates/{candidate_id}/promote", "/api/knowledge/candidates/{rest}/promote",
+              headers=DELEGATED, delegate=True),
+        _rest("PUT", "/api/knowledge/candidates/{candidate_id}/promote", "/api/knowledge/candidates/{rest}/promote",
               headers=DELEGATED, delegate=True),
         _rest("POST", "/api/knowledge/publications", headers=DELEGATED, delegate=True),
         _rest("GET", "/api/knowledge/health", headers=DELEGATED, delegate=True),

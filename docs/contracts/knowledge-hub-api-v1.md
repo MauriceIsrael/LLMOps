@@ -625,9 +625,13 @@ Toute connaissance nouvelle passe par une **file persistée**, des **contrôles 
 | Route | Outil MCP | Rôle | Codes |
 |---|---|---|---|
 | `POST /api/knowledge/candidates` | `submit_kb_candidate` | Créer un candidat ; les contrôles s'exécutent immédiatement | `201`, `400` |
+| `PUT /api/knowledge/candidates` | `submit_kb_candidate` | Ingestion / soumission d'un candidat (émission Porte G4 Archinex) | `201`, `400` |
+| `PUT /api/knowledge/candidates/{id}` | `submit_kb_candidate` / `review_kb_candidate` | Ingestion / mise à jour idempotente ou revue si `action` est spécifiée | `201`, `200`, `400` |
 | `GET /api/knowledge/candidates?status=&source=&domain=&engagement=` | `list_kb_candidates` | Lister (plus récents d'abord) | `200` |
 | `GET /api/knowledge/candidates/{id}` | `get_kb_candidate` | Détail (contrôles, revues, historique) | `200`, `404` |
-| `PATCH /api/knowledge/candidates/{id}` | `review_kb_candidate` | Revue `{action: accept\|amend\|reject, reviewer, reason, amended_content?}` — **scope `kb:review` requis** | `200`, `400`, `403`, `404`, `409` |
+| `PATCH /api/knowledge/candidates/{id}` | `review_kb_candidate` | Revue `{action: accept\|amend\|reject, reviewer, reason, amended_content?, auto_promote?}` — **scope `kb:review` requis** | `200`, `400`, `403`, `404`, `409` |
+| `POST /api/knowledge/candidates/{id}/promote` | `promote_kb_candidate` | Écrit l'actif accepté dans `data/kb/` et reconstruit le Knowledge Graph | `200`, `400`, `403`, `404`, `409` |
+| `PUT /api/knowledge/candidates/{id}/promote` | `promote_kb_candidate` | Alternative idempotente de promotion dans le Knowledge Graph | `200`, `400`, `403`, `404`, `409` |
 
 Cycle : `proposed` → (`checks_failed` \| `in_review`) → `accepted` \| `rejected` → `published`.
 
@@ -1316,6 +1320,9 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
 
 #### 1. Points d'accès REST
 
+* **`GET /api/knowledge/ontology/export`** :
+  * Exporte le catalogue consolidé d'ontologie SI & Telco d'architecture d'entreprise au format `OntologyCatalog` (`{ catalog_version, generated_at, entities, triplets }`).
+  * Réponse `200 OK` avec en-tête `Content-Type: application/json`.
 * **`GET /api/knowledge/ontology`** :
   * Paramètres de requête optionnels : `concept_class` (énumération fermée `SecurityZone`, `NetworkFunction`, `ComputeSubstrate`, `DataClassification`, `TrafficFlow`, `Actor`), `status` (`draft`, `validated`, `rejected`).
   * Réponse standard `200 OK` avec enveloppe (`status: "ok"`, `count: N`, `data: [...]`, `experimental: true`).
@@ -1328,6 +1335,7 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
 
 #### 2. Outils MCP
 
+* **`export_ontology_catalog()`** : exporte le catalogue complet d'ontologie SI & Telco (concepts HLD, axes, feuilles et triplets relationnels).
 * **`list_ontology_terms(concept_class=None, status=None)`** : liste les entrées d'ontologie filtrées selon les critères.
 * **`get_ontology_term(urn, revision=None)`** : résout une entrée d'ontologie selon son URN et sa révision optionnelle.
 
