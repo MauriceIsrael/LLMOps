@@ -186,9 +186,11 @@ def test_ontology_export_contract_and_tool(monkeypatch):
 def test_ontology_clause_governance_and_bidirectional_resolution(monkeypatch):
     """Test satisfies_clause triplets, leaf governed_by_clauses, and bidirectional resolution (Issue #184)."""
     import json
+
     import jsonschema
-    from pipelines.ontology.catalog import validate_clause_leaf_integrity
+
     from mcp_server.knowledge.tools import export_ontology_catalog
+    from pipelines.ontology.catalog import validate_clause_leaf_integrity
 
     monkeypatch.setenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "1")
 

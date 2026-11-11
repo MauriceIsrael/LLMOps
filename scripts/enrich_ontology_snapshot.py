@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+
 import jsonschema
 
 from pipelines.ontology.catalog import build_clause_index, validate_clause_leaf_integrity
