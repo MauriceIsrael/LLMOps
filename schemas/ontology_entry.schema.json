@@ -124,6 +124,15 @@
     "review_source": {
       "type": "string",
       "description": "Référence documentaire ou environnement de test validant les projections."
+    },
+    "governed_by_clauses": {
+      "type": "array",
+      "description": "Liste d'URNs immuables de clauses doctrinales justifiant formellement l'entité (feuille technique).",
+      "items": {
+        "type": "string",
+        "pattern": "^urn:(archinex|llmops):kb:clause:[A-Za-z0-9_.:-]+$"
+      },
+      "uniqueItems": true
     }
   }
 }

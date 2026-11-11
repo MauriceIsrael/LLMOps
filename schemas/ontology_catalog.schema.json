@@ -1,0 +1,170 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OntologyCatalog",
+  "description": "Schéma formel du catalogue consolidé d'ontologie SI & Telco d'architecture et de gouvernance doctrinale.",
+  "type": "object",
+  "required": [
+    "catalog_version",
+    "generated_at",
+    "entities",
+    "triplets"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "catalog_version": {
+      "type": "string",
+      "description": "Version du schéma du catalogue d'ontologie (ex: 1.0)."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Horodatage ISO-8601 UTC de génération du catalogue."
+    },
+    "clause_index": {
+      "type": "object",
+      "description": "Index de résolution bidirectionnelle entre clauses doctrinales et feuilles d'ontologie.",
+      "additionalProperties": false,
+      "properties": {
+        "by_clause": {
+          "type": "object",
+          "description": "Dictionnaire associant chaque URN de clause doctrinale aux URNs de feuilles d'ontologie satisfaisant cette clause.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^urn:(archinex|llmops):ontology:[A-Za-z0-9_:-]+$"
+            },
+            "uniqueItems": true
+          }
+        },
+        "by_leaf": {
+          "type": "object",
+          "description": "Dictionnaire associant chaque URN de feuille d'ontologie aux URNs de clauses doctrinales la justifiant.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^urn:(archinex|llmops):kb:clause:[A-Za-z0-9_.:-]+$"
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "entities": {
+      "type": "object",
+      "description": "Dictionnaire des entités ontologiques (concepts HLD, sous-axes, feuilles techniques) indexées par leur URN.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "urn",
+          "revision",
+          "kind",
+          "title"
+        ],
+        "properties": {
+          "urn": {
+            "type": "string",
+            "pattern": "^urn:(archinex|llmops):ontology:[A-Za-z0-9_:-]+$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "concept",
+              "axis",
+              "leaf"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "domain": {
+            "type": "string"
+          },
+          "is_default_standard": {
+            "type": "boolean"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "oracle_rules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "governed_by_clauses": {
+            "type": "array",
+            "description": "Liste d'URNs immuables de clauses doctrinales justifiant formellement la feuille technique.",
+            "items": {
+              "type": "string",
+              "pattern": "^urn:(archinex|llmops):kb:clause:[A-Za-z0-9_.:-]+$"
+            },
+            "uniqueItems": true
+          },
+          "hydration_template": {
+            "type": "object"
+          },
+          "projections": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "triplets": {
+      "type": "array",
+      "description": "Liste des triplets relationnels formels reliant les concepts, axes, feuilles et clauses doctrinales.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "subject",
+          "predicate",
+          "object",
+          "rationale"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifiant immuable unique du triplet."
+          },
+          "subject": {
+            "type": "string",
+            "description": "URN sujet du triplet ontologique.",
+            "pattern": "^urn:(archinex|llmops):ontology:[A-Za-z0-9_:-]+$"
+          },
+          "predicate": {
+            "type": "string",
+            "description": "Prédicat ontologique formel.",
+            "enum": [
+              "requires_aspect",
+              "implemented_by",
+              "depends_on",
+              "constrains",
+              "conflicts_with",
+              "satisfies_clause"
+            ]
+          },
+          "object": {
+            "type": "string",
+            "description": "URN objet du triplet ontologique (entité ontologique ou clause doctrinale)."
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Explication formelle de la justification ou contrainte ontologique.",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

@@ -3720,8 +3720,13 @@ def get_ontology_term(
         return handle_exception_response(e, context_action="get_ontology_term")
 
 
-def export_ontology_catalog() -> dict[str, Any]:
-    """Export the consolidated architecture ontology catalog with HLD concepts, axes, leaves, and triplets."""
+def export_ontology_catalog(clause: str | None = None, leaf: str | None = None) -> dict[str, Any]:
+    """Export the consolidated architecture ontology catalog with HLD concepts, axes, leaves, and triplets.
+
+    Supports optional bidirectional resolution:
+    - clause: Find all technical leaves that satisfy this doctrinal clause URN.
+    - leaf: Find all doctrinal clauses governing this technical leaf URN.
+    """
     import json
 
     from pipelines.ontology.gateway import is_ontology_experimental_enabled
@@ -3754,7 +3759,20 @@ def export_ontology_catalog() -> dict[str, Any]:
                 "generated_at": data.get("generated_at") or "2026-10-29T10:00:00Z",
                 "entities": payload.get("entities", {}),
                 "triplets": payload.get("triplets", []),
+                "clause_index": payload.get("clause_index") or {},
             }
+
+        if "clause_index" not in data or not data["clause_index"]:
+            from pipelines.ontology.catalog import build_clause_index
+            data["clause_index"] = build_clause_index(data.get("entities", {}), data.get("triplets", []))
+
+        if clause:
+            from pipelines.ontology.catalog import resolve_leaves_by_clause
+            return resolve_leaves_by_clause(data, clause)
+        if leaf:
+            from pipelines.ontology.catalog import resolve_clauses_by_leaf
+            return resolve_clauses_by_leaf(data, leaf)
+
         return {"status": "ok", "experimental": True, **data}
     except Exception as e:
         return handle_exception_response(e, context_action="export_ontology_catalog")

@@ -59,6 +59,11 @@ def env(tmp_path, monkeypatch):
     kb = tmp_path / "kb"
     shutil.copytree(ROOT / "data" / "kb", kb)
     monkeypatch.setattr(server_config, "kb_dir", kb)
+    db = tmp_path / "knowledge.lbug"
+    if (ROOT / "data" / "knowledge.lbug").exists():
+        shutil.copy(ROOT / "data" / "knowledge.lbug", db)
+    monkeypatch.setattr(server_config, "knowledge_db_path", db)
+    monkeypatch.setattr(server_config, "dataset", f"ladybug://{db}")
     monkeypatch.setenv("CANDIDATES_DIR", str(tmp_path / "candidates"))
     monkeypatch.setenv("CANDIDATES_BACKEND", "file")
     monkeypatch.setenv("SERVER_TOKEN", "demo-token")

@@ -1321,8 +1321,11 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
 #### 1. Points d'accès REST
 
 * **`GET /api/knowledge/ontology/export`** :
-  * Exporte le catalogue consolidé d'ontologie SI & Telco d'architecture d'entreprise au format `OntologyCatalog` (`{ catalog_version, generated_at, entities, triplets }`).
+  * Exporte le catalogue consolidé d'ontologie SI & Telco d'architecture d'entreprise au format `OntologyCatalog` (`{ catalog_version, generated_at, entities, triplets, clause_index }`).
   * Réponse `200 OK` avec en-tête `Content-Type: application/json`.
+  * **Résolution bidirectionnelle (Issue #184)** :
+    * Paramètre `clause` : `GET /api/knowledge/ontology/export?clause={clause_urn}` — résout toutes les feuilles techniques satisfaisant la clause doctrinale spécifiée ainsi que leurs triplets associés.
+    * Paramètre `leaf` : `GET /api/knowledge/ontology/export?leaf={leaf_urn}` — résout toutes les clauses doctrinales justifiant formellement la feuille technique spécifiée ainsi que leurs triplets associés.
 * **`GET /api/knowledge/ontology`** :
   * Paramètres de requête optionnels : `concept_class` (énumération fermée `SecurityZone`, `NetworkFunction`, `ComputeSubstrate`, `DataClassification`, `TrafficFlow`, `Actor`), `status` (`draft`, `validated`, `rejected`).
   * Réponse standard `200 OK` avec enveloppe (`status: "ok"`, `count: N`, `data: [...]`, `experimental: true`).
@@ -1335,11 +1338,38 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
 
 #### 2. Outils MCP
 
-* **`export_ontology_catalog()`** : exporte le catalogue complet d'ontologie SI & Telco (concepts HLD, axes, feuilles et triplets relationnels).
+* **`export_ontology_catalog(clause=None, leaf=None)`** : exporte le catalogue complet d'ontologie SI & Telco (concepts HLD, axes, feuilles, triplets relationnels et index bidirectionnel `clause_index`), ou effectue une résolution ciblée par clause doctrinale ou feuille technique.
 * **`list_ontology_terms(concept_class=None, status=None)`** : liste les entrées d'ontologie filtrées selon les critères.
 * **`get_ontology_term(urn, revision=None)`** : résout une entrée d'ontologie selon son URN et sa révision optionnelle.
 
-#### 3. Schéma de réponse d'une entrée
+#### 3. Schéma de réponse d'une entrée et métamodèle de gouvernance doctrinale
+
+Une feuille technique (`kind: 'leaf'`) ou une entrée d'ontologie formelle peut déclarer ses clauses doctrinales de rattachement via `governed_by_clauses` et être liée par des triplets formels au prédicat `satisfies_clause` :
+
+```json
+{
+  "urn": "urn:archinex:ontology:security:crypto:ipsec_ikev2_aes256",
+  "kind": "leaf",
+  "title": "Tunnel IPsec IKEv2 AES-256-GCM / SHA-384 (Interconnexion WAN Chiffrée)",
+  "governed_by_clauses": [
+    "urn:archinex:kb:clause:nis2:art21_crypto",
+    "urn:archinex:kb:clause:3gpp:ts33_501_sec_s6a"
+  ]
+}
+```
+
+Triplet ontologique formel :
+```json
+{
+  "id": "tr-sc-001",
+  "subject": "urn:archinex:ontology:security:crypto:ipsec_ikev2_aes256",
+  "predicate": "satisfies_clause",
+  "object": "urn:archinex:kb:clause:nis2:art21_crypto",
+  "rationale": "Chiffrement IPsec IKEv2 AES-256-GCM conforme aux exigences de cryptographie forte de NIS2 Article 21."
+}
+```
+
+Schéma standard d'une entrée d'ontologie fédératrice :
 
 ```json
 {
@@ -1351,6 +1381,9 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
   "relationships": {
     "requires_capabilities": ["urn:llmops:ontology:ComputeSubstrate:oob_redfish"]
   },
+  "governed_by_clauses": [
+    "urn:archinex:kb:clause:sylva:baremetal_hardening"
+  ],
   "projections": {
     "suse_sylva_capi": { "cluster_class": "Metal3Cluster" },
     "nautobot": { "role": "telco-baremetal-worker" }

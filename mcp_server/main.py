@@ -716,7 +716,21 @@ def create_starlette_app() -> Starlette:
                 "generated_at": data.get("generated_at") or "2026-10-29T10:00:00Z",
                 "entities": payload.get("entities", {}),
                 "triplets": payload.get("triplets", []),
+                "clause_index": payload.get("clause_index") or {},
             }
+
+        if "clause_index" not in data or not data["clause_index"]:
+            from pipelines.ontology.catalog import build_clause_index
+            data["clause_index"] = build_clause_index(data.get("entities", {}), data.get("triplets", []))
+
+        clause = request.query_params.get("clause")
+        leaf = request.query_params.get("leaf")
+        if clause:
+            from pipelines.ontology.catalog import resolve_leaves_by_clause
+            return JSONResponse(resolve_leaves_by_clause(data, clause), status_code=200)
+        if leaf:
+            from pipelines.ontology.catalog import resolve_clauses_by_leaf
+            return JSONResponse(resolve_clauses_by_leaf(data, leaf), status_code=200)
 
         return JSONResponse(data, status_code=200)
 
