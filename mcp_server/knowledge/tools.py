@@ -3739,6 +3739,7 @@ def get_ontology_term(
 def export_ontology_catalog() -> dict[str, Any]:
     """Export the consolidated architecture ontology catalog with HLD concepts, axes, leaves, and triplets."""
     import json
+
     from pipelines.ontology.gateway import is_ontology_experimental_enabled
 
     if not is_ontology_experimental_enabled():
@@ -3759,7 +3760,7 @@ def export_ontology_catalog() -> dict[str, Any]:
         return not_found_response("ontology_export_not_found")
 
     try:
-        with open(export_file, "r", encoding="utf-8") as f:
+        with open(export_file, encoding="utf-8") as f:
             data = json.load(f)
         if "payload" in data and isinstance(data["payload"], dict) and "entities" in data["payload"]:
             payload = data["payload"]

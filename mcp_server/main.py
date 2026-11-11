@@ -74,6 +74,7 @@ from mcp_server.knowledge.tools import (
     decide_check_clause,
     decide_ingestion_row,
     declare_framework_coverage,
+    export_ontology_catalog,
     generate_zero_draft_hld,
     get_asset,
     get_asset_template,
@@ -94,7 +95,6 @@ from mcp_server.knowledge.tools import (
     get_kb_audit,
     get_kb_candidate,
     get_kb_freshness,
-    export_ontology_catalog,
     get_kb_health,
     get_kb_me,
     get_knowledge_asset_history,
@@ -705,7 +705,7 @@ def create_starlette_app() -> Starlette:
         if not export_file.exists():
             return JSONResponse({"error": "Ontology export file not found"}, status_code=404)
 
-        with open(export_file, "r", encoding="utf-8") as f:
+        with open(export_file, encoding="utf-8") as f:
             data = json.load(f)
 
         if "payload" in data and isinstance(data["payload"], dict) and "entities" in data["payload"]:

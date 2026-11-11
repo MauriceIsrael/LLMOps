@@ -353,7 +353,7 @@ def test_put_candidate_ingestion_lifecycle_and_auto_promote(env, monkeypatch):
         "ENGAGEMENT_TOKENS",
         "reviewer-token:kb:review;maintainer-token:kb:maintain,kb:review,kb:delegate",
     )
-    MAINTAINER = {
+    maintainer_headers = {
         "Authorization": "Bearer maintainer-token",
         "X-Actor-Email": "maurice.israel+maint@free.fr",
     }
@@ -372,7 +372,7 @@ def test_put_candidate_ingestion_lifecycle_and_auto_promote(env, monkeypatch):
 
     res_promote_put = client.put(
         f"/api/knowledge/candidates/{cand_another_id}/promote",
-        headers=MAINTAINER,
+        headers=maintainer_headers,
     )
     assert res_promote_put.status_code == 200
     assert (kb / "patterns" / "PAT-890.md").exists()
