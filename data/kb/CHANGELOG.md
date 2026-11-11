@@ -2,6 +2,11 @@
 
 Published changes, newest first (written by `kb publish`).
 
+## 2026-11-11 — issue #184
+
+- `ontology_governance`: Formalisation du lien fort entre clauses de doctrine réglementaires/métier et feuilles d'ontologie via le métamodèle `OntologyEntity` (`governed_by_clauses`), le prédicat ontologique `satisfies_clause` et l'indexation bidirectionnelle `clause_index` sur `GET /api/knowledge/ontology/export` et l'outil MCP `export_ontology_catalog`.
+- `schemas`: Ajout du JSON Schema formel `schemas/ontology_catalog.schema.json` et extension de `schemas/ontology_entry.schema.json` avec validation d'intégrité contractuelle.
+
 ## 2026-11-11 — issues #180, #181, #182
 
 - `ontology_export`: Intégration du catalogue de référence SI & Telco d'architecture (6 concepts HLD, 18 sous-axes, 22 feuilles d'implémentation, 43 triplets relationnels) servi via `GET /api/knowledge/ontology/export` et l'outil MCP `export_ontology_catalog`.

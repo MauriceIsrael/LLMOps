@@ -163,9 +163,13 @@ def test_ontology_export_contract_and_tool(monkeypatch):
             "depends_on",
             "constrains",
             "conflicts_with",
+            "satisfies_clause",
         )
         assert t["subject"] in entities, f"Dangling subject: {t['subject']}"
-        assert t["object"] in entities, f"Dangling object: {t['object']}"
+        if t["predicate"] == "satisfies_clause":
+            assert t["object"].startswith("urn:archinex:kb:clause:") or t["object"].startswith("urn:llmops:kb:clause:")
+        else:
+            assert t["object"] in entities, f"Dangling object: {t['object']}"
 
     # 3. Direct MCP tool call
     from mcp_server.knowledge.tools import export_ontology_catalog
@@ -177,4 +181,82 @@ def test_ontology_export_contract_and_tool(monkeypatch):
     assert len(tool_res["entities"]) >= 46
     assert "triplets" in tool_res
     assert len(tool_res["triplets"]) >= 43
+
+
+def test_ontology_clause_governance_and_bidirectional_resolution(monkeypatch):
+    """Test satisfies_clause triplets, leaf governed_by_clauses, and bidirectional resolution (Issue #184)."""
+    import json
+    import jsonschema
+    from pipelines.ontology.catalog import validate_clause_leaf_integrity
+    from mcp_server.knowledge.tools import export_ontology_catalog
+
+    monkeypatch.setenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "1")
+
+    app = create_starlette_app()
+    client = TestClient(app)
+
+    # 1. Full export validation and mathematical integrity
+    res = client.get("/api/knowledge/ontology/export", headers=AUTH)
+    assert res.status_code == 200
+    catalog = res.json()
+
+    assert "clause_index" in catalog
+    assert "by_clause" in catalog["clause_index"]
+    assert "by_leaf" in catalog["clause_index"]
+
+    # Verify no dangling links or mismatch between governed_by_clauses and satisfies_clause
+    integrity_errors = validate_clause_leaf_integrity(catalog)
+    assert not integrity_errors, f"Clause-leaf integrity failed: {integrity_errors}"
+
+    # 2. JSON Schema validation against ontology_catalog.schema.json
+    schema_path = ROOT / "schemas" / "ontology_catalog.schema.json"
+    assert schema_path.is_file(), f"Missing schema file: {schema_path}"
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    jsonschema.validate(instance=catalog, schema=schema)
+
+    # 3. Verify specific leaf with governed_by_clauses (Issue #184 specification)
+    leaf_urn = "urn:archinex:ontology:security:crypto:ipsec_ikev2_aes256"
+    assert leaf_urn in catalog["entities"]
+    leaf_entity = catalog["entities"][leaf_urn]
+    assert leaf_entity["kind"] == "leaf"
+    assert "governed_by_clauses" in leaf_entity
+    assert "urn:archinex:kb:clause:nis2:art21_crypto" in leaf_entity["governed_by_clauses"]
+    assert "urn:archinex:kb:clause:3gpp:ts33_501_sec_s6a" in leaf_entity["governed_by_clauses"]
+
+    # 4. Bidirectional REST resolution: by clause
+    clause_urn = "urn:archinex:kb:clause:nis2:art21_crypto"
+    res_clause = client.get("/api/knowledge/ontology/export", headers=AUTH, params={"clause": clause_urn})
+    assert res_clause.status_code == 200
+    by_clause_data = res_clause.json()
+    assert by_clause_data["status"] == "ok"
+    assert by_clause_data["clause"] == clause_urn
+    assert leaf_urn in by_clause_data["satisfying_leaves"]
+    assert leaf_urn in by_clause_data["entities"]
+    assert any(
+        t["subject"] == leaf_urn and t["predicate"] == "satisfies_clause" and t["object"] == clause_urn
+        for t in by_clause_data["triplets"]
+    )
+
+    # 5. Bidirectional REST resolution: by leaf
+    res_leaf = client.get("/api/knowledge/ontology/export", headers=AUTH, params={"leaf": leaf_urn})
+    assert res_leaf.status_code == 200
+    by_leaf_data = res_leaf.json()
+    assert by_leaf_data["status"] == "ok"
+    assert by_leaf_data["leaf"] == leaf_urn
+    assert clause_urn in by_leaf_data["governing_clauses"]
+    assert by_leaf_data["entity"]["urn"] == leaf_urn
+    assert any(
+        t["subject"] == leaf_urn and t["predicate"] == "satisfies_clause" and t["object"] == clause_urn
+        for t in by_leaf_data["triplets"]
+    )
+
+    # 6. MCP tool bidirectional calls
+    tool_clause = export_ontology_catalog(clause=clause_urn)
+    assert tool_clause["status"] == "ok"
+    assert leaf_urn in tool_clause["satisfying_leaves"]
+
+    tool_leaf = export_ontology_catalog(leaf=leaf_urn)
+    assert tool_leaf["status"] == "ok"
+    assert clause_urn in tool_leaf["governing_clauses"]
+
 

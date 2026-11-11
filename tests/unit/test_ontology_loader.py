@@ -193,3 +193,39 @@ def test_non_mapping_entry_raises(tmp_path):
         load_ontology_entries(d)
 
     assert "must be a mapping" in str(exc.value)
+
+
+def test_entry_with_governed_by_clauses(tmp_path):
+    """OntologyEntry correctly preserves and serializes governed_by_clauses (Issue #184)."""
+    d = tmp_path / "ont"
+    d.mkdir()
+
+    leaf_entry = {
+        "id": "urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s",
+        "term": "Bare Metal K8s",
+        "concept_class": "ComputeSubstrate",
+        "definition": "Kubernetes sur serveur physique.",
+        "synonyms": ["BM K8s"],
+        "status": "draft",
+        "revision": 1,
+        "governed_by_clauses": [
+            "urn:archinex:kb:clause:nis2:art21_crypto",
+            "urn:archinex:kb:clause:3gpp:ts33_501_sec_s6a",
+        ],
+    }
+    (d / "leaf.yaml").write_text(yaml.safe_dump(leaf_entry), encoding="utf-8")
+
+    entries = load_ontology_entries(d)
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry.governed_by_clauses == [
+        "urn:archinex:kb:clause:nis2:art21_crypto",
+        "urn:archinex:kb:clause:3gpp:ts33_501_sec_s6a",
+    ]
+    serialized = entry.to_dict()
+    assert "governed_by_clauses" in serialized
+    assert serialized["governed_by_clauses"] == [
+        "urn:archinex:kb:clause:nis2:art21_crypto",
+        "urn:archinex:kb:clause:3gpp:ts33_501_sec_s6a",
+    ]
+

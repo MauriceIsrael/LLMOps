@@ -104,6 +104,7 @@ class OntologyEntry:
     reviewed_at: str | None = None
     review_source: str | None = None
     source_file: str | None = None
+    governed_by_clauses: list[str] = field(default_factory=list)
 
     @property
     def knowledge_key(self) -> str:
@@ -115,6 +116,7 @@ class OntologyEntry:
         relationships = OntologyRelationships.from_dict(rel_data) if isinstance(rel_data, dict) else OntologyRelationships()
         projections = dict(data.get("projections") or {})
         synonyms = [str(s) for s in (data.get("synonyms") or [])]
+        governed_by_clauses = [str(c) for c in (data.get("governed_by_clauses") or [])]
         return cls(
             id=str(data["id"]),
             term=str(data["term"]),
@@ -129,6 +131,7 @@ class OntologyEntry:
             reviewed_at=data.get("reviewed_at"),
             review_source=data.get("review_source"),
             source_file=source_file,
+            governed_by_clauses=governed_by_clauses,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -152,6 +155,8 @@ class OntologyEntry:
             d["reviewed_at"] = self.reviewed_at
         if self.review_source is not None:
             d["review_source"] = self.review_source
+        if self.governed_by_clauses:
+            d["governed_by_clauses"] = list(self.governed_by_clauses)
         return d
 
 

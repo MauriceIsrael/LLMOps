@@ -1,5 +1,13 @@
 """Ontology package for LLMOps Knowledge Hub (EDP experimental)."""
 
+from pipelines.ontology.catalog import (
+    PREDICATE_SATISFIES_CLAUSE,
+    VALID_PREDICATES,
+    build_clause_index,
+    resolve_clauses_by_leaf,
+    resolve_leaves_by_clause,
+    validate_clause_leaf_integrity,
+)
 from pipelines.ontology.checker import OntologyCheckReport, check_ontology
 from pipelines.ontology.export import (
     DEFAULT_EXPORT_PATH,
@@ -42,6 +50,9 @@ __all__ = [
     "OntologyRelationships",
     "OntologyResolutionError",
     "OntologySchemaError",
+    "PREDICATE_SATISFIES_CLAUSE",
+    "VALID_PREDICATES",
+    "build_clause_index",
     "build_ontology_payload",
     "check_ontology",
     "entry_content_sha256",
@@ -50,9 +61,12 @@ __all__ = [
     "load_ontology_entries",
     "load_ontology_ledger",
     "project_ontology_to_vocabulary",
+    "resolve_clauses_by_leaf",
+    "resolve_leaves_by_clause",
     "resolve_ontology_entry",
     "to_knowledge_key",
     "to_urn",
+    "validate_clause_leaf_integrity",
     "verify_or_record_ontology_ledger",
     "write_ontology_ledger",
 ]
