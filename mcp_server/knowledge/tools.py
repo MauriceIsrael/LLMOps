@@ -1471,7 +1471,7 @@ def review_kb_candidate(
                 try:
                     from pipelines.publication.local_publisher import rebuild_and_swap
 
-                    db_path = Path(server_config.dataset.replace("ladybug://", ""))
+                    db_path = Path(server_config.knowledge_db_path)
                     if db_path.exists():
                         rebuild_and_swap(Path(server_config.kb_dir), db_path)
                 except Exception:
@@ -2521,7 +2521,7 @@ def promote_kb_candidate(candidate_id: str) -> dict[str, Any]:
         try:
             from pipelines.publication.local_publisher import rebuild_and_swap
 
-            db_path = Path(server_config.dataset.replace("ladybug://", ""))
+            db_path = Path(server_config.knowledge_db_path)
             if db_path.exists():
                 rebuild_and_swap(Path(server_config.kb_dir), db_path)
         except Exception:
