@@ -1468,14 +1468,6 @@ def review_kb_candidate(
             try:
                 promoted = _candidate_service().promote(candidate_id, actor=reviewer)
                 reviewed["promoted"] = promoted.get("promoted")
-                try:
-                    from pipelines.publication.local_publisher import rebuild_and_swap
-
-                    db_path = Path(server_config.knowledge_db_path)
-                    if db_path.exists():
-                        rebuild_and_swap(Path(server_config.kb_dir), db_path)
-                except Exception:
-                    pass
             except Exception as e:
                 reviewed["promotion_warning"] = str(e)
         return ok_response(reviewed, count=1)
@@ -2518,14 +2510,6 @@ def promote_kb_candidate(candidate_id: str) -> dict[str, Any]:
     service, owner = who
     try:
         promoted = service.promote(candidate_id, actor=owner.handle)
-        try:
-            from pipelines.publication.local_publisher import rebuild_and_swap
-
-            db_path = Path(server_config.knowledge_db_path)
-            if db_path.exists():
-                rebuild_and_swap(Path(server_config.kb_dir), db_path)
-        except Exception:
-            pass
         return {**ok_response(promoted, count=1), "warnings": storage_warnings()}
     except CandidateNotFoundError:
         return not_found_response(candidate_id)
