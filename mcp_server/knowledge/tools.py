@@ -1277,7 +1277,9 @@ def _candidate_error(exc: Exception) -> dict[str, Any]:
     return res
 
 
-def submit_kb_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
+def submit_kb_candidate(
+    candidate: dict[str, Any], candidate_id: str | None = None
+) -> dict[str, Any]:
     """Submit a knowledge base candidate (new asset, amendment, return of experience,
     framework ingestion). Automatic checks run immediately; the candidate then waits for a
     human review by the owner of its domain (status 'in_review') or is blocked ('checks_failed').
@@ -1285,11 +1287,12 @@ def submit_kb_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
     Args:
         candidate: see schemas/kb_candidate.schema.json — required: kind, title, proposed_content,
             source.system; asset_type (except kind 'rex'); target_asset_id for an amendment.
+        candidate_id: Optional explicit candidate identifier (e.g. for PUT idempotence).
     """
     from pipelines.kb_candidates.model import CandidateError
 
     try:
-        created = _candidate_service().submit(candidate, actor=_actor())
+        created = _candidate_service().submit(candidate, actor=_actor(), candidate_id=candidate_id)
         return ok_response(created, count=1)
     except CandidateError as exc:
         return _candidate_error(exc)
@@ -1373,6 +1376,7 @@ def review_kb_candidate(
     reviewer: str,
     reason: str | None = None,
     amended_content: str | None = None,
+    auto_promote: bool = False,
 ) -> dict[str, Any]:
     """Review a knowledge base candidate (requires the 'kb:review' token scope).
 
@@ -1382,6 +1386,7 @@ def review_kb_candidate(
         reviewer: Owner handle of the reviewer (declared in data/kb/owners.yaml).
         reason: Motive — required to amend or reject, and to accept content that conflicts with the doctrine.
         amended_content: Full replacement content (front matter + Markdown) for 'amend'.
+        auto_promote: Whether to automatically promote the asset into the KB upon acceptance.
     """
     from mcp_server.core.auth import delegated_actor_email, has_scope
     from pipelines.kb_candidates.model import CandidateError, CandidateNotFoundError
@@ -1456,6 +1461,15 @@ def review_kb_candidate(
             amended_content=amended_content,
             actor=_actor(),
         )
+        if reviewed.get("status") == "accepted" and (
+            auto_promote
+            or os.getenv("LLMOPS_KB_AUTO_PROMOTE", "").strip().lower() in ("1", "true", "yes")
+        ):
+            try:
+                promoted = _candidate_service().promote(candidate_id, actor=reviewer)
+                reviewed["promoted"] = promoted.get("promoted")
+            except Exception as e:
+                reviewed["promotion_warning"] = str(e)
         return ok_response(reviewed, count=1)
     except CandidateNotFoundError:
         return not_found_response(candidate_id)
@@ -3704,3 +3718,44 @@ def get_ontology_term(
         }
     except Exception as e:
         return handle_exception_response(e, context_action="get_ontology_term")
+
+
+def export_ontology_catalog() -> dict[str, Any]:
+    """Export the consolidated architecture ontology catalog with HLD concepts, axes, leaves, and triplets."""
+    import json
+
+    from pipelines.ontology.gateway import is_ontology_experimental_enabled
+
+    if not is_ontology_experimental_enabled():
+        return not_found_response("experimental_ontology_disabled")
+
+    export_file = Path("data/snapshots/ontology_export.json")
+    if not export_file.exists():
+        from pipelines.ontology.export import export_ontology_snapshot
+
+        try:
+            export_ontology_snapshot(
+                ontology_dir=Path(server_config.kb_dir) / "ontology", output_path=export_file
+            )
+        except Exception:
+            pass
+
+    if not export_file.exists():
+        return not_found_response("ontology_export_not_found")
+
+    try:
+        with open(export_file, encoding="utf-8") as f:
+            data = json.load(f)
+        if "payload" in data and isinstance(data["payload"], dict) and "entities" in data["payload"]:
+            payload = data["payload"]
+            data = {
+                "catalog_version": payload.get("schema_version")
+                or data.get("schema_version", "1.0"),
+                "generated_at": data.get("generated_at") or "2026-10-29T10:00:00Z",
+                "entities": payload.get("entities", {}),
+                "triplets": payload.get("triplets", []),
+            }
+        return {"status": "ok", "experimental": True, **data}
+    except Exception as e:
+        return handle_exception_response(e, context_action="export_ontology_catalog")
+

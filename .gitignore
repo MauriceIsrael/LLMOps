@@ -17,6 +17,7 @@ data/kuzu_db/
 !data/knowledge.lbug
 data/snapshots/*
 !data/snapshots/latest.json
+!data/snapshots/ontology_export.json
 *.kz
 *.hindex
 .lock

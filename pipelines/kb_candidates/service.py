@@ -354,9 +354,14 @@ class CandidateService:
                 "assigned_owner": owner, "second_review_required": candidate["second_review_required"],
                 "asset_type": candidate.get("asset_type"), "domain": candidate.get("domain") or []}
 
-    def submit(self, payload: Any, actor: str = "anonymous") -> dict[str, Any]:
+    def submit(self, payload: Any, actor: str = "anonymous", candidate_id: str | None = None) -> dict[str, Any]:
         fields = self._prepare(payload)
-        candidate = new_candidate(self.repo.next_id(), fields, actor)
+        cid = candidate_id or (
+            payload.get("id") or payload.get("candidate_id") if isinstance(payload, dict) else None
+        )
+        if not cid:
+            cid = self.repo.next_id()
+        candidate = new_candidate(cid, fields, actor)
         self._check(candidate)
         self._route(candidate, actor)
         self.repo.save(candidate)

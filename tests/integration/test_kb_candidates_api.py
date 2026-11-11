@@ -262,3 +262,118 @@ def test_archinex_g4_capitalized_decision_becomes_reusable_doctrine(env):
     assert ctx_res.status_code == 200
     items = ctx_res.json()["data"]["items"]
     assert any("Sovereign Key Escrow Segregation" in item["title"] for item in items)
+
+
+def test_put_candidate_ingestion_lifecycle_and_auto_promote(env, monkeypatch):
+    """Archinex Gate G4 ingestion via PUT /api/knowledge/candidates with X-Actor-Email and auto-promote (Issue #181)."""
+    client, kb = env["client"], env["kb"]
+
+    # 1. Ingestion via PUT /api/knowledge/candidates with X-Actor-Email from submitting architect
+    headers_author = {
+        **DEMO,
+        "X-Actor-Email": "gate-g4-emitter@archinex.local",
+    }
+    candidate_payload = {
+        "kind": "new_asset",
+        "asset_type": "pattern",
+        "title": "G4 Arbitrated Asset — Edge Telemetry Decoupling",
+        "proposed_content": (
+            "---\n"
+            "id: PAT-888\n"
+            "title: Edge Telemetry Decoupling\n"
+            "type: pattern\n"
+            "status: draft\n"
+            "confidence: assumed\n"
+            "phase: [BUILD, RUN]\n"
+            "domain: [observability]\n"
+            "---\n\n"
+            "# PAT-888 — Edge Telemetry Decoupling\n\n"
+            "## Problem\nDirect push from edge nodes overloads central collector.\n\n"
+            "## Solution\nDeploy local buffering proxies.\n"
+        ),
+        "source": {"system": "archinex", "production_mode": "human-authored"},
+    }
+
+    res_put = client.put("/api/knowledge/candidates", headers=headers_author, json=candidate_payload)
+    assert res_put.status_code == 201, res_put.text
+    cand = res_put.json()["data"]
+    assert cand["status"] == "in_review"
+    assert cand["id"].startswith("CAND-")
+    # Verify actor linkage from X-Actor-Email
+    assert cand["history"][0]["actor"] == "email:gate-g4-emitter@archinex.local"
+
+    # 2. Ingestion via PUT with explicit candidate_id
+    explicit_id = "CAND-20261015-0042"
+    explicit_payload = dict(candidate_payload)
+    explicit_payload["proposed_content"] = explicit_payload["proposed_content"].replace("PAT-888", "PAT-889")
+    res_explicit = client.put(
+        f"/api/knowledge/candidates/{explicit_id}",
+        headers=headers_author,
+        json=explicit_payload,
+    )
+    assert res_explicit.status_code == 201
+    cand_explicit = res_explicit.json()["data"]
+    assert cand_explicit["id"] == explicit_id
+
+    # 3. Rejection lifecycle status transition
+    res_reject = client.patch(
+        f"/api/knowledge/candidates/{explicit_id}",
+        headers=REVIEWER,
+        json={"action": "reject", "reviewer": "@core-owner-architecture", "reason": "Redundant with existing telemetry patterns"},
+    )
+    assert res_reject.status_code == 200
+    rejected = res_reject.json()["data"]
+    assert rejected["status"] == "rejected"
+
+    # 4. Acceptance with auto_promote: true
+    res_accept = client.patch(
+        f"/api/knowledge/candidates/{cand['id']}",
+        headers=REVIEWER,
+        json={
+            "action": "accept",
+            "reviewer": "@core-owner-architecture",
+            "reason": "Validated at Gate G4 deliberation",
+            "auto_promote": True,
+        },
+    )
+    assert res_accept.status_code == 200
+    accepted = res_accept.json()["data"]
+    assert accepted["status"] == "accepted"
+    assert "promoted" in accepted
+    assert accepted["promoted"]["asset_id"] == "PAT-888"
+
+    # Asset file must exist in data/kb
+    promoted_file = kb / "patterns" / "PAT-888.md"
+    assert promoted_file.exists()
+    assert "Edge Telemetry Decoupling" in promoted_file.read_text(encoding="utf-8")
+
+    # 5. Support PUT on /api/knowledge/candidates/{candidate_id}/promote
+    # Configure maintainer token for explicit promotion
+    monkeypatch.setenv(
+        "ENGAGEMENT_TOKENS",
+        "reviewer-token:kb:review;maintainer-token:kb:maintain,kb:review,kb:delegate",
+    )
+    maintainer_headers = {
+        "Authorization": "Bearer maintainer-token",
+        "X-Actor-Email": "maurice.israel+maint@free.fr",
+    }
+
+    # Create another candidate and accept without auto_promote
+    another_payload = dict(candidate_payload)
+    another_payload["proposed_content"] = another_payload["proposed_content"].replace("PAT-888", "PAT-890")
+    res_another = client.post("/api/knowledge/candidates", headers=DEMO, json=another_payload)
+    cand_another_id = res_another.json()["data"]["id"]
+
+    client.patch(
+        f"/api/knowledge/candidates/{cand_another_id}",
+        headers=REVIEWER,
+        json={"action": "accept", "reviewer": "@core-owner-architecture", "reason": "Ready for promote"},
+    )
+
+    res_promote_put = client.put(
+        f"/api/knowledge/candidates/{cand_another_id}/promote",
+        headers=maintainer_headers,
+    )
+    assert res_promote_put.status_code == 200
+    assert (kb / "patterns" / "PAT-890.md").exists()
+

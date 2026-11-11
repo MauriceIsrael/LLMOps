@@ -6340,6 +6340,170 @@
           }
         },
         "summary": "POST /api/knowledge/candidates"
+      },
+      "put": {
+        "operationId": "put_api_knowledge_candidates",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "count": {
+                      "type": "number"
+                    },
+                    "data": {
+                      "properties": {
+                        "asset_type": {
+                          "type": "null"
+                        },
+                        "assigned_owner": {
+                          "type": "string"
+                        },
+                        "checks": {
+                          "items": {
+                            "properties": {
+                              "detail": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "domain": {
+                          "type": "array"
+                        },
+                        "evidence": {
+                          "items": {
+                            "properties": {
+                              "kind": {
+                                "type": "string"
+                              },
+                              "ref": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "history": {
+                          "items": {
+                            "properties": {
+                              "actor": {
+                                "type": "string"
+                              },
+                              "at": {
+                                "type": "string"
+                              },
+                              "channels": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "event": {
+                                "type": "string"
+                              },
+                              "owner": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "proposed_content": {
+                          "type": "string"
+                        },
+                        "rationale": {
+                          "type": "string"
+                        },
+                        "review": {
+                          "type": "null"
+                        },
+                        "second_review": {
+                          "type": "null"
+                        },
+                        "second_review_required": {
+                          "type": "boolean"
+                        },
+                        "source": {
+                          "properties": {
+                            "author": {
+                              "type": "string"
+                            },
+                            "contact": {
+                              "type": "null"
+                            },
+                            "decision_id": {
+                              "type": "null"
+                            },
+                            "engagement": {
+                              "type": "null"
+                            },
+                            "production_mode": {
+                              "type": "string"
+                            },
+                            "system": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "target_asset_id": {
+                          "type": "null"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Frozen v1 contract response (rest.PUT /api/knowledge/candidates)"
+          }
+        },
+        "summary": "PUT /api/knowledge/candidates"
       }
     },
     "/api/knowledge/candidates/validate": {
@@ -6773,6 +6937,180 @@
           }
         },
         "summary": "PATCH /api/knowledge/candidates/{candidate_id}"
+      },
+      "put": {
+        "operationId": "put_api_knowledge_candidates_candidate_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidate_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "count": {
+                      "type": "number"
+                    },
+                    "data": {
+                      "properties": {
+                        "asset_type": {
+                          "type": "null"
+                        },
+                        "assigned_owner": {
+                          "type": "string"
+                        },
+                        "checks": {
+                          "items": {
+                            "properties": {
+                              "detail": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "domain": {
+                          "type": "array"
+                        },
+                        "evidence": {
+                          "items": {
+                            "properties": {
+                              "kind": {
+                                "type": "string"
+                              },
+                              "ref": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "history": {
+                          "items": {
+                            "properties": {
+                              "actor": {
+                                "type": "string"
+                              },
+                              "at": {
+                                "type": "string"
+                              },
+                              "channels": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "event": {
+                                "type": "string"
+                              },
+                              "owner": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "proposed_content": {
+                          "type": "string"
+                        },
+                        "rationale": {
+                          "type": "string"
+                        },
+                        "review": {
+                          "type": "null"
+                        },
+                        "second_review": {
+                          "type": "null"
+                        },
+                        "second_review_required": {
+                          "type": "boolean"
+                        },
+                        "source": {
+                          "properties": {
+                            "author": {
+                              "type": "string"
+                            },
+                            "contact": {
+                              "type": "null"
+                            },
+                            "decision_id": {
+                              "type": "null"
+                            },
+                            "engagement": {
+                              "type": "null"
+                            },
+                            "production_mode": {
+                              "type": "string"
+                            },
+                            "system": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "target_asset_id": {
+                          "type": "null"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Frozen v1 contract response (rest.PUT /api/knowledge/candidates/{candidate_id})"
+          }
+        },
+        "summary": "PUT /api/knowledge/candidates/{candidate_id}"
       }
     },
     "/api/knowledge/candidates/{candidate_id}/assign": {
@@ -7179,6 +7517,56 @@
           }
         },
         "summary": "POST /api/knowledge/candidates/{candidate_id}/promote"
+      },
+      "put": {
+        "operationId": "put_api_knowledge_candidates_candidate_id_promote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidate_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "argument": {
+                      "type": "string"
+                    },
+                    "conflict": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Frozen v1 contract response (rest.PUT /api/knowledge/candidates/{candidate_id}/promote)"
+          }
+        },
+        "summary": "PUT /api/knowledge/candidates/{candidate_id}/promote"
       }
     },
     "/api/knowledge/candidates/{candidate_id}/request-review": {

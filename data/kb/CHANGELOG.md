@@ -2,6 +2,13 @@
 
 Published changes, newest first (written by `kb publish`).
 
+## 2026-11-11 — issues #180, #181, #182
+
+- `ontology_export`: Intégration du catalogue de référence SI & Telco d'architecture (6 concepts HLD, 18 sous-axes, 22 feuilles d'implémentation, 43 triplets relationnels) servi via `GET /api/knowledge/ontology/export` et l'outil MCP `export_ontology_catalog`.
+- `candidates_ingestion`: Consolidation de la route d'ingestion des candidats de la Porte G4 d'Archinex via `PUT /api/knowledge/candidates` et `PUT /api/knowledge/candidates/{id}` avec liaison à l'expert via `X-Actor-Email`.
+- `auto_promotion`: Support de la promotion automatique des candidats acceptés dans le Knowledge Base et mise à jour synchronisée du graphe `knowledge.lbug` (`auto_promote: true` ou variable d'environnement `LLMOPS_KB_AUTO_PROMOTE=1`).
+
+
 ## 2026-10-17 — snapshot-2026-10-17-8379cb7
 
 - clause `NIS2-ART21-2C-C1` of `NIS2-ART21-2C` validated by @maintainers

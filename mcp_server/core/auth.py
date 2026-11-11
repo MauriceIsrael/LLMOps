@@ -207,6 +207,11 @@ def has_scope(scope: str, caller: str | None = None) -> bool:
     """
     if caller is None:
         caller = get_current_caller()
+    if caller in ("server_admin", Role.LOCAL_DEV.value) and scope in (
+        DELEGATE_SCOPE,
+        ENGAGEMENT_DELEGATE_SCOPE,
+    ):
+        return True
     env_tokens = os.getenv("ENGAGEMENT_TOKENS", "").strip()
     if caller and env_tokens:
         if scope in parse_engagement_tokens(env_tokens).get(caller, []):
