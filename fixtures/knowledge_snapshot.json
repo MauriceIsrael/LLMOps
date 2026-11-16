@@ -2,7 +2,7 @@
   "status": "ok",
   "count": 1,
   "data": {
-    "schema_version": "1.41",
+    "schema_version": "1.40",
     "knowledge": {
       "dataset": "data/knowledge.lbug",
       "node_counts": {
@@ -12,8 +12,8 @@
     },
     "engagements": [
       {
-        "id": "cctp-mcx-nordwave",
-        "dataset": "data/engagements/cctp-mcx-nordwave.lbug",
+        "id": "default",
+        "dataset": "data/engagements/default.lbug",
         "node_counts": {
           "Subject": 0,
           "Statement": 0,
@@ -30,66 +30,12 @@
         }
       },
       {
-        "id": "lou",
-        "dataset": "data/engagements/lou.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
-        }
-      },
-      {
-        "id": "lulu",
-        "dataset": "data/engagements/lulu.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
-        }
-      },
-      {
-        "id": "lulu-avec-options-et-criteres-proposes",
-        "dataset": "data/engagements/lulu-avec-options-et-criteres-proposes.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
-        }
-      },
-      {
         "id": "nordwave-mcx-2027",
         "dataset": "data/engagements/nordwave-mcx-2027.lbug",
         "node_counts": {
           "Subject": 8,
           "Statement": 9,
           "Conflict": 2
-        }
-      },
-      {
-        "id": "suse-telco-cloud-generic",
-        "dataset": "data/engagements/suse-telco-cloud-generic.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
-        }
-      },
-      {
-        "id": "test-persist-tx-1794156749668",
-        "dataset": "data/engagements/test-persist-tx-1794156749668.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
-        }
-      },
-      {
-        "id": "test-persist-tx-1794415865410",
-        "dataset": "data/engagements/test-persist-tx-1794415865410.lbug",
-        "node_counts": {
-          "Subject": 0,
-          "Statement": 0,
-          "Conflict": 0
         }
       }
     ]
