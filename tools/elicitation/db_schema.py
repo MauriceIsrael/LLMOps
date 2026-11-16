@@ -182,14 +182,18 @@ class ElicitationSchemaInitializer:
                     disposition_at STRING DEFAULT '',
                     disposition_by STRING DEFAULT '',
                     disposition_validated_at STRING DEFAULT '',
+                    source_id STRING DEFAULT '',
+                    requirement_key STRING DEFAULT '',
+                    version STRING DEFAULT '',
                     PRIMARY KEY(id)
                 );
                 """
             )
         else:
             # Contract 1.27: the decision on a requirement (what the deliberation does with the clause), proposed then asserted.
+            # Contract 1.41 (#150): RequirementRef triplet (source_id, requirement_key, version).
             for column in ("disposition", "disposition_reason", "disposition_status", "disposition_author", "disposition_at",
-                           "disposition_by", "disposition_validated_at"):
+                           "disposition_by", "disposition_validated_at", "source_id", "requirement_key", "version"):
                 try:
                     self.graph_store.execute_cypher(f"ALTER TABLE Requirement ADD {column} STRING DEFAULT '';")
                 except Exception:

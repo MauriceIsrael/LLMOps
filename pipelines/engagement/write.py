@@ -408,6 +408,12 @@ class EngagementWriter:
     # --- requirements ---------------------------------------------------------------------------------------------
 
     def add_requirements(self, body: dict[str, Any]) -> dict[str, Any]:
+        from pipelines.requirement_ref import (
+            RequirementRefError,
+            hub_source_id,
+            validate_requirement_ref,
+        )
+
         items = body.get("requirements")
         if not isinstance(items, list) or not items or len(items) > 500:
             raise WriteError(400, "invalid_argument", "'requirements' is a list of 1 to 500 items", "requirements")
@@ -420,12 +426,23 @@ class EngagementWriter:
             req_id = item.get("id")
             if not isinstance(req_id, str) or not ID.match(req_id):
                 raise WriteError(400, "invalid_argument", f"requirements[{i}].id is required (letters, digits . _ : -)", "requirements")
+            if "ref" in item and item["ref"] is not None:
+                try:
+                    ref = validate_requirement_ref(item["ref"])
+                except RequirementRefError as err:
+                    raise WriteError(400, "invalid_argument", str(err), f"requirements[{i}].ref") from err
+                source_id, requirement_key, version = ref["sourceId"], ref["requirementKey"], ref["version"]
+            else:
+                source_id, requirement_key, version = hub_source_id(self.engagement), req_id, "1"
             prepared.append({
                 "id": req_id, "engagement": self.engagement, "text": _text(item, "text"),
                 "section": _text(item, "section", required=False, limit=200),
                 "category": _text(item, "category", required=False, default="general", limit=64),
                 "criticality": _text(item, "criticality", required=False, default="mandatory", limit=32),
                 "status": "gap",
+                "source_id": source_id,
+                "requirement_key": requirement_key,
+                "version": version,
             })
         existing = {r["id"]: r for r in self.repo.get_requirements(self.engagement)}
         for req in prepared:
@@ -495,7 +512,12 @@ class EngagementWriter:
 
     @staticmethod
     def _public_requirement(r: dict[str, Any]) -> dict[str, Any]:
-        out = {k: r.get(k) for k in ("id", "section", "category", "criticality", "status")}
+        from pipelines.requirement_ref import try_requirement_ref
+
+        out: dict[str, Any] = {k: r.get(k) for k in ("id", "section", "category", "criticality", "status")}
+        ref = try_requirement_ref(r.get("source_id"), r.get("requirement_key"), r.get("version"))
+        if ref is not None:
+            out["ref"] = ref
         if r.get("disposition_status") in ("proposed", "active"):
             out["disposition"] = {
                 "value": r.get("disposition"), "reason": r.get("disposition_reason") or "", "status": r["disposition_status"],

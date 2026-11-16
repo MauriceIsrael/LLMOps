@@ -651,6 +651,13 @@ export interface KnowledgeRef {{
   version: string;
 }}
 
+/** RequirementRef of the suite (#150): three fields or nothing. */
+export interface RequirementRef {{
+  sourceId: string;
+  requirementKey: string;
+  version: string;
+}}
+
 export interface Statement {{
   id: string;
   subject: string;

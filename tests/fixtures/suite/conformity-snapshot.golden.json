@@ -1,9 +1,9 @@
 {
-  "snapshotId": "kh-golden-engagement-nis2-c3d22dc506dd",
+  "snapshotId": "kh-golden-engagement-nis2-365f29d0c7fd",
   "sourceSystem": "knowledge-hub",
   "schemaVersion": "2.0",
   "createdAt": "2026-10-01T12:00:00Z",
-  "checksum": "sha256:c3d22dc506ddf5a63bc9c725b72244655a0c8e910cd91cb2bd22c9f2f92026f9",
+  "checksum": "sha256:365f29d0c7fd41c07065f07c721cbbcc80eb0d3ee595f6f81dededbf4387b759",
   "data": {
     "requirements": [
       {
@@ -19,6 +19,11 @@
           "programRef": "GOLDEN-ENGAGEMENT",
           "lotRefs": [],
           "pbsRefs": []
+        },
+        "ref": {
+          "sourceId": "knowledge-hub:nis2",
+          "requirementKey": "NIS2-ART20-1",
+          "version": "2022/2555"
         }
       },
       {
@@ -47,6 +52,11 @@
           "programRef": "GOLDEN-ENGAGEMENT",
           "lotRefs": [],
           "pbsRefs": []
+        },
+        "ref": {
+          "sourceId": "knowledge-hub:nis2",
+          "requirementKey": "NIS2-ART21-2A",
+          "version": "2022/2555"
         }
       }
     ]

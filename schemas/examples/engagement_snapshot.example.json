@@ -1,18 +1,18 @@
 {
   "schemaVersion": "1.8",
-  "snapshotId": "eng-example-eng-117b8db2d726",
+  "snapshotId": "eng-example-eng-10c9e2f81fb9",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:117b8db2d7261f083a37f48b014457cf3b22b44fbc3f18c75ea2282586400d30",
+  "checksum": "sha256:10c9e2f81fb9f9e4205e9eb896a504a2ec26f4654d3f9603ec323320b699ac6a",
   "data": {
     "engagement": {
       "id": "example-eng",
       "confidentiality": "confidential"
     },
     "pins": {
-      "contract_version": "1.40",
+      "contract_version": "1.41",
       "kb_snapshot": {
         "snapshot_id": "snapshot-2026-10-03-0000000",
         "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
@@ -31,6 +31,11 @@
         "category": "resilience",
         "criticality": "mandatory",
         "status": "gap",
+        "ref": {
+          "sourceId": "knowledge-hub:example-eng",
+          "requirementKey": "REQ-001",
+          "version": "1"
+        },
         "disposition": {
           "value": "deliberated",
           "reason": "",

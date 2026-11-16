@@ -875,7 +875,7 @@ Archinex est l'outil de délibération ; le Hub enregistre. Toutes les routes so
 | `POST statements/{id}/withdraw` | `contributor` (auteur) ou `decider` | `withdrawn` ; un autre contributeur : `403 not_author` |
 | `POST questions` `{question, subject?, section?, …}` | `contributor` | question ouverte |
 | `POST questions/{id}/answers` `{value, confidence, …}` | `contributor` | énoncé **proposé** lié à la question, qui devient `answered` |
-| `POST requirements` `{requirements: [{id, text, section?, category?, criticality?}]}` | `contributor` | 1 à 500 exigences ; un `id` existant avec le même texte est ignoré (`unchanged`), avec un autre texte : `409 requirement_changed` |
+| `POST requirements` `{requirements: [{id, text, section?, category?, criticality?, ref?}]}` | `contributor` | 1 à 500 exigences ; `ref` optionnelle (`RequirementRef {sourceId, requirementKey, version}`, « trois champs ou rien », défaut `knowledge-hub:<engagement>` / `id` / `"1"`) ; un `id` existant avec le même texte est ignoré (`unchanged`), avec un autre texte : `409 requirement_changed` |
 | `POST requirements/{id}/disposition` `{disposition, reason?}` | `contributor` | **1.27.** Propose ce que la délibération fait de l'exigence : `deliberated`, `evacuated` (`reason` = le motif) ou `clarification_needed` (`reason` = la question au client), 12 caractères au moins pour les deux dernières. `201` ; le rejeu à l'identique `200` (`created: false`, rien n'est remis à zéro) ; `409 disposition_pending` / `disposition_exists` |
 | `POST requirements/{id}/disposition/assert` | `decider` | **1.27.** La décision devient `active` (`validated_by`, `validated_at`) ; refusée à son auteur (`409 self_validation`) et, pour `evacuated` / `clarification_needed`, tant qu'un sujet porte l'exigence (`409 carried_by_subject`) |
 | `POST requirements/{id}/disposition/withdraw` | `contributor` (auteur) ou `decider` | **1.27.** `withdrawn` ; l'exigence peut recevoir une autre décision |
@@ -1400,3 +1400,12 @@ Schéma standard d'une entrée d'ontologie fédératrice :
 Afin de garantir une interopérabilité sans faille entre implémentations Python et TypeScript, les vecteurs de référence suivants sont tenus à disposition dans le dépôt :
 * **Vecteur de Test Canonique (`canonical-json v1` + SHA-256)** : [`tests/fixtures/canonical_conformity_vector.json`](../../tests/fixtures/canonical_conformity_vector.json)
 * **Jeu d'Essai CCTP de Référence (Messagerie OIV)** : [`fixtures/rfp_messagerie_securisee.txt`](../../fixtures/rfp_messagerie_securisee.txt) (SHA-256: `792b9d332e8ccc589a2d74468d56bc761539542fc8d337a71d77854f87c258b5`)
+
+---
+
+## 5.41 Normalisation `RequirementRef` (Contrat 1.41, LLMOps #150)
+
+Le triplet `RequirementRef { sourceId, requirementKey, version }` (`pipelines/requirement_ref.py`) formalise l'identité des exigences d'appel d'offres et de conformité :
+- **Trois champs ou rien** : une référence partielle (ou sans `version` connue) n'est jamais acceptée à l'écriture (`400 invalid_argument` / rejet d'import) ni émise dans les instantanés (`ref` absente).
+- **`sourceId`** : conforme au motif normatif `^[a-z0-9-]+:[a-z0-9-]+$` (ADR-SUITE-04 §3), par exemple `knowledge-hub:<engagement>` ou `tuleap:<project>`.
+- **Traçabilité** : toute modification du texte d'une exigence incrémente sa `version` (`save_requirement`), et `ref` est émise de manière additive sur les exigences de l'instantané d'engagement et de `GET /api/compliance/conformity-snapshot`.

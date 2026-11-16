@@ -1,6 +1,6 @@
 # Carte des composants : qui fait quoi, et par quelle interface
 
-Contrat décrit : **1.40**. Dernière relecture : **24 octobre 2026** (relevé du code des deux côtés, voir « Historique des révisions » en fin de document).
+Contrat décrit : **1.41**. Dernière relecture : **16 novembre 2026** (mise à jour contrat 1.41, LLMOps#150 ; relevé du code des deux côtés du 24 octobre 2026, voir « Historique des révisions » en fin de document).
 Première version : 3 octobre 2026, révisée après la décision du mainteneur : **le Hub contient deux bases**, ADR-KH-01 A10, projet ; l'état du code qu'elle décrivait était celui du contrat 1.18.
 Ce document décrit LLMOps (rôle « Knowledge Hub »), Archinex et les composants de la suite (Document Studio, Document Engine, etc.).
 Chaque affirmation porte un niveau de preuve :
@@ -127,7 +127,7 @@ Chaque canal d'instantané porte une enveloppe commune (émetteur, empreinte SHA
    cités. Amorcé dans `pipelines/prose_grounding.py` ; l'endroit idéal est le pipeline du Document Engine (à confirmer).
 9. **Statut des ADR** : ADR-KH-01 (PR #41, A10 incluse) et la proposition à ADR-SUITE-05 ne sont pas adoptés. Côté suite, ADR-SUITE-05 est **actée** avec deux amendements (2026-09-13 : un canal à instantané scellé, jamais de RPC ; l'assistance n'est pas un canal).
 10. **Ce que le Document Engine refuse aujourd'hui de la route de conformité du Hub** [lu et mesuré le 2026-10-24, code `4a9361b`] : (a) la **provenance**, `'sourceSystem' attendu 'tuleap', reçu 'knowledge-hub'` ; puis, mesuré en expérience locale hors dépôt, (b) la **version** (majeure 4 lue, 2.0 émise), (c) l'absence de **`ref`** (`RequirementRef`, requise en majeure 4), (d) la **source de preuve** : `evidence[].source` est un vocabulaire fermé dont `knowledge-hub` ne fait pas partie. Le **checksum** est recalculé à l'identique. `make verify-suite` rejoue (a) et le checksum ; LLMOps#148, #150, #152.
-11. **Identité d'une exigence** : la suite désigne une exigence par `RequirementRef {sourceId, requirementKey, version}` (`contracts/requirement-ref.md`), et le contrat dit que Tuleap est l'unique émetteur de `version`. Le Hub n'en émet aucune. Qui fait foi pour les exigences d'un appel d'offres (§5.3) conditionne la réponse (LLMOps#150).
+11. **Identité d'une exigence** : la suite désigne une exigence par `RequirementRef {sourceId, requirementKey, version}` (`contracts/requirement-ref.md`, ADR-SUITE-04 §3). **Depuis le contrat 1.41 (LLMOps#150)**, le Hub normalise ce triplet (`pipelines/requirement_ref.py`, règle stricte « trois champs ou rien ») : `sourceId` suit `^[a-z0-9-]+:[a-z0-9-]+$` (`knowledge-hub:<engagement>` pour les exigences propres au Hub, ou `ref` externe validée en provenance de Tuleap / Requirements Intake), `version` est incrémentée à chaque modification de texte, et aucune référence amputée n'est jamais émise si la version est inconnue. `ref` est émise de manière additive dans l'instantané d'engagement et dans l'instantané de conformité (la bascule vers la majeure 4 reste coordonnée avec §5.10 / LLMOps#148).
 
 ## 6. Questions à poser aux propriétaires de la suite
 
@@ -145,3 +145,4 @@ Chaque canal d'instantané porte une enveloppe commune (émetteur, empreinte SHA
 |---|---|---|
 | 2026-10-03 | 1.18 | Première version (décision A10 : deux bases dans le Hub). |
 | 2026-10-24 | 1.40 | Relevé du code des deux côtés (voir « Sources »). Contrat 1.18 → 1.40 ; flèche Requirements Intake → Document Engine retirée (aucun canal) ; consommation réelle du Document Engine (ADR-DE-05, ADR-DE-44) ; refus mesurés de la route de conformité (§5.10) ; identité d'exigence (§5.11) ; ADR-DE-41 non implémentée ; assistance de prose sans fournisseur Hub ; K7 sans émetteur ; autorisation 1.37 et 1.39. Un test (`tests/unit/test_suite_map_version.py`) échoue si « Contrat décrit » diverge du contrat du code. |
+| 2026-11-16 | 1.41 | Normalisation `RequirementRef {sourceId, requirementKey, version}` (LLMOps#150) : triplet strict (« trois champs ou rien », motif `^[a-z0-9-]+:[a-z0-9-]+$`), validation à l'écriture/import et émission additive dans les instantanés d'engagement et de conformité. |

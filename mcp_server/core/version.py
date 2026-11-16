@@ -187,9 +187,15 @@ Minor versions only add interfaces or optional fields:
   needs at least one declaring asset, otherwise it was a coverage nobody declared). The shape (``schemaVersion`` ``2.0``) is unchanged and is still
   refused by the Document Engine's reader (§5.40: provenance, version, ``ref``, evidence source).
 
+* ``1.41`` — ``RequirementRef`` normalization (issue #150), additive fields only, no route added. Formalizes the suite triplet
+  ``RequirementRef {sourceId, requirementKey, version}`` (``pipelines/requirement_ref.py``; ``sourceId`` matches ``^[a-z0-9-]+:[a-z0-9-]+$``,
+  three fields or nothing). Engagement requirements accept an optional validated ``ref`` (or default to ``knowledge-hub:<engagement>`` /
+  ``id`` / ``"1"``), bump ``version`` when text is modified, and emit ``ref`` in engagement and conformity snapshots only when all three
+  fields are present and valid (never a partial reference).
+
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.40"
+CONTRACT_VERSION = "1.41"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 
