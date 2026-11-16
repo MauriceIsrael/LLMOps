@@ -110,9 +110,14 @@ def _based_on(raw: Any) -> list[dict[str, Any]]:
 def _requirement(r: dict[str, Any]) -> dict[str, Any]:
     """A requirement as the snapshot states it. The decision on it (contract 1.27) appears only while it is proposed or asserted:
     a requirement nobody decided about, or whose decision was withdrawn, is written as before."""
+    from pipelines.requirement_ref import try_requirement_ref  # noqa: PLC0415
+
     out: dict[str, Any] = {"id": r["id"], "text": r.get("text") or "", "section": r.get("section") or "",
                            "category": r.get("category") or "general", "criticality": r.get("criticality") or "mandatory",
                            "status": r.get("status") or "gap"}
+    ref = try_requirement_ref(r.get("source_id"), r.get("requirement_key"), r.get("version"))
+    if ref is not None:
+        out["ref"] = ref
     status = r.get("disposition_status") or ""
     if status in ("proposed", "active"):
         out["disposition"] = {

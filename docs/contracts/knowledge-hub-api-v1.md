@@ -335,15 +335,20 @@ Produit un instantané réglementaire scellé par checksum SHA-256 calculé sur 
 * **Réponse HTTP 200** :
 ```json
 {
-  "snapshotId": "kh-demo-engagement-2027-secnumcloud-1789311842",
+  "snapshotId": "kh-demo-engagement-2027-secnumcloud-7a3c611095db",
   "sourceSystem": "knowledge-hub",
-  "schemaVersion": "2.0",
+  "schemaVersion": "4.0",
   "createdAt": "2026-09-17T15:04:02Z",
   "checksum": "sha256:7a3c611095db2cd333cae158a715aea5dae6b55c381745c6423b1b5674313f4c",
   "data": {
     "requirements": [
       {
         "id": "SNC-REQ-01",
+        "ref": {
+          "sourceId": "tuleap:demo",
+          "requirementKey": "DEMO-SEC-001",
+          "version": 1
+        },
         "title": "Immunité aux lois extraterritoriales et localisation européenne des données",
         "domain": "SECURITY",
         "verificationModes": ["architecture-model"],
@@ -1392,6 +1397,19 @@ Schéma standard d'une entrée d'ontologie fédératrice :
   "revision": 1
 }
 ```
+
+---
+
+### 5.42 Contrat 1.41 — Snapshot de conformité majeure 4.0 et `RequirementRef` (Issues #148, #150)
+
+* **Majeure `4.0` sur `GET /api/compliance/conformity-snapshot`** :
+  * La route dérive désormais de la section `compliance` de l'instantané d'engagement (option (a) de #148) ; `EXPLICIT_KB_ALIGNMENTS` n'alimente plus aucun livrable d'homologation.
+  * Une exigence couverte par au moins une décision **affirmée** (`active`) est émise `allocated` avec ses preuves (`source: "knowledge-hub"`) ; une décision `proposed` ou l'absence de décision la laisse à `identified`.
+  * Chaque exigence porte une `RequirementRef { sourceId, requirementKey, version }` complète (`version` entier >= 1, jamais partielle).
+* **Ingestion générique de `RequirementRef` (#150)** :
+  * `POST /api/engagements/{id}/requirements` et `POST /api/engagements/{id}/import` acceptent un objet optionnel `ref: { sourceId, requirementKey, version }` (ex. fourni par Tuleap) et refusent toute référence partielle (`400 invalid_argument`). En mode autonome (sans `ref` externe), le Hub assigne `knowledge-hub:<engagement>` avec `version: 1`.
+  * L'instantané d'engagement (`schemas/engagement_snapshot.schema.json`) expose `ref` sur chaque exigence lorsque les trois champs sont complets.
+* **Admission côté Document Engine (`document-engine#162`)** : `validateConformitySnapshot` admet `sourceSystem: "knowledge-hub"` et `evidence[].source: "knowledge-hub"`. `make verify-suite` valide le témoin avec verdict `ACCEPTÉ`.
 
 ---
 

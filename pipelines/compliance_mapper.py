@@ -475,74 +475,127 @@ def set_applicable_frameworks(engagement: str, frameworks: list[str]) -> dict[st
 SOURCE_SYSTEM = "knowledge-hub"
 
 
+def _load_engagement_data(
+    engagement: str,
+    engagements_dir: Path | str,
+    snapshots_dir: Path | str,
+) -> dict[str, Any]:
+    """Load the engagement's ``build_data`` output when its Kuzu store exists; otherwise empty."""
+    db_path = Path(engagements_dir) / f"{engagement}.lbug"
+    if not db_path.exists():
+        return {"requirements": [], "compliance": {"items": []}}
+
+    from pipelines.engagement.snapshot import build_data, collect  # noqa: PLC0415
+    from pipelines.knowledge_ref import ResolutionError, load_snapshot  # noqa: PLC0415
+    from tools.elicitation.repository import ElicitationRepository  # noqa: PLC0415
+
+    repo = ElicitationRepository(db_path=db_path)
+    raw = collect(repo, engagement)
+    try:
+        kb_snapshot = load_snapshot(Path(snapshots_dir))
+    except ResolutionError:
+        kb_snapshot = None
+    return build_data(raw, engagement, "internal", kb_snapshot)
+
+
+def _domain_for_category(category: str) -> str:
+    cat = (category or "").lower()
+    if "security" in cat or "securite" in cat:
+        return "SECURITY"
+    if "resilience" in cat:
+        return "RESILIENCE"
+    if "network" in cat:
+        return "NETWORK"
+    if "infrastructure" in cat:
+        return "INFRASTRUCTURE"
+    if "architecture" in cat:
+        return "ARCHITECTURE"
+    if "data" in cat:
+        return "DATA"
+    if "governance" in cat:
+        return "GOVERNANCE"
+    return "COMPLIANCE"
+
+
 def to_conformity_snapshot(
     engagement: str = "default",
     framework: str = "ALL",
     controls_dir: Path | str = "data/kb/controls",
     source_system: str = "knowledge-hub",
     now: datetime | None = None,
+    engagement_data: dict[str, Any] | None = None,
+    engagements_dir: Path | str = "data/engagements",
+    snapshots_dir: Path | str = "data/snapshots",
 ) -> dict[str, Any]:
-    """Génère un ConformitySnapshot de la forme ExternalSnapshotEnvelope<ConformityData> (majeure 2.0 : voir #148).
+    """Génère un ConformitySnapshot de la forme ExternalSnapshotEnvelope<ConformityData> (majeure 4.0 : #148, #150).
 
-    Le Hub **ne vérifie rien** (ADR-KH-01 D2, K6) : la présence d'un actif qui référence un contrôle est une couverture
-    *déclarée* (``allocated``), jamais un résultat de vérification (``verified`` n'est émis par aucun chemin du Hub), et
-    l'origine est fixée à ``knowledge-hub`` : elle n'est pas déclarative. Un contrôle qu'aucun actif ne déclare couvrir
-    reste ``identified`` : ``allocated`` sans la moindre preuve serait une couverture inventée.
-
-    Contrat 1.40 (#149) : ``snapshotId`` dérive du ``checksum`` (comme l'instantané d'engagement, K11) : le même état donne
-    le même identifiant, un contenu différent un autre. ``createdAt`` est l'instant d'émission, **hors sceau** ; ``now``
-    l'injecte (le test de l'émetteur reconstruit le témoin avec un instant fixe, comme pour K11).
+    Dérivé de la section ``compliance`` de l'instantané d'engagement (option (a) de #148, sans ``EXPLICIT_KB_ALIGNMENTS``) :
+    - Le Hub **ne vérifie rien** (ADR-KH-01 D2, K6) : ``allocated`` exige au moins une décision **affirmée** (``active``)
+      et une preuve ; une décision ``proposed`` ou l'absence de décision laisse l'exigence à ``identified``.
+    - Chaque exigence porte une ``RequirementRef`` complète à trois champs (``sourceId``, ``requirementKey``, ``version`` entier >= 1).
+    - ``snapshotId`` dérive du ``checksum`` (#149) ; ``createdAt`` est hors sceau.
     """
     if source_system != SOURCE_SYSTEM:
         raise ValueError(f"source_system is fixed to '{SOURCE_SYSTEM}' (got '{source_system}'): the origin of a snapshot is not declarative")
 
     from pipelines import canonical
+    from pipelines.requirement_ref import hub_source_id, try_requirement_ref
 
-    controls = load_all_controls(controls_dir)
+    del controls_dir  # conservé dans la signature pour compatibilité des appelants
+    data_src = engagement_data if engagement_data is not None else _load_engagement_data(engagement, engagements_dir, snapshots_dir)
+
     target_fw = framework.upper().replace("-", "").replace("_", "")
-
-    applicable_fws = [fw.upper().replace("-", "").replace("_", "") for fw in get_applicable_frameworks(engagement)]
+    compliance_items = (data_src.get("compliance") or {}).get("items") or []
+    by_req: dict[str, list[dict[str, Any]]] = {}
+    for item in compliance_items:
+        item_fw = (item.get("framework") or "").upper().replace("-", "").replace("_", "")
+        if target_fw != "ALL" and item_fw and target_fw not in item_fw and item_fw not in target_fw:
+            continue
+        by_req.setdefault(str(item.get("requirement_id") or ""), []).append(item)
 
     requirements: list[dict[str, Any]] = []
+    for req_row in data_src.get("requirements") or []:
+        disposition = req_row.get("disposition") or {}
+        if disposition.get("status") == "active" and disposition.get("value") == "evacuated":
+            continue
 
-    for cid, ctrl in controls.items():
-        ctrl_fw = ctrl.framework.upper().replace("-", "").replace("_", "")
-        if target_fw != "ALL":
-            if target_fw not in ctrl_fw and ctrl_fw not in target_fw:
-                continue
+        req_id = str(req_row["id"])
+        raw_ref = req_row.get("ref")
+        if isinstance(raw_ref, dict):
+            ref = try_requirement_ref(raw_ref.get("sourceId"), raw_ref.get("requirementKey"), raw_ref.get("version"))
+            if ref is None:
+                raise ValueError(f"requirement '{req_id}' has a partial or invalid RequirementRef in majeure 4.0")
         else:
-            if not any(afw in ctrl_fw or ctrl_fw in afw for afw in applicable_fws):
+            ref = try_requirement_ref(hub_source_id(engagement), req_id, 1)
+            if ref is None:
+                raise ValueError(f"cannot derive a complete RequirementRef for requirement '{req_id}'")
+
+        evidence_set: set[tuple[str, str, str, str]] = set()
+        for item in by_req.get(req_id, []):
+            if item.get("status") != "allocated":
                 continue
-
-        covered_by: list[str] = []
-        for asset_id, mapped_ctrls in EXPLICIT_KB_ALIGNMENTS.items():
-            if cid in mapped_ctrls:
-                covered_by.append(asset_id)
-
-        domain = "COMPLIANCE"
-        if "security" in ctrl.domain or "securite" in ctrl.domain:
-            domain = "SECURITY"
-        elif "resilience" in ctrl.domain:
-            domain = "RESILIENCE"
-        elif "network" in ctrl.domain:
-            domain = "NETWORK"
+            assets = [str(a) for a in (item.get("assets") or []) if a]
+            if assets:
+                for aid in assets:
+                    evidence_set.add(("architecture-model", "graph-item", aid, SOURCE_SYSTEM))
+            else:
+                for did in (item.get("decisions") or []):
+                    if did:
+                        evidence_set.add(("document-review", "document", str(did), SOURCE_SYSTEM))
 
         evidence = [
-            {
-                "mode": "architecture-model",
-                "type": "graph-item",
-                "reference": ref,
-                "source": SOURCE_SYSTEM,
-            }
-            for ref in sorted(covered_by)
+            {"mode": mode, "type": etype, "reference": ref_id, "source": src}
+            for mode, etype, ref_id, src in sorted(evidence_set)
         ]
+        modes = sorted({e["mode"] for e in evidence}) or ["architecture-model"]
 
-        req: dict[str, Any] = {
-            "id": ctrl.id,
-            "title": ctrl.title_fr or ctrl.title,
-            "domain": domain,
-            "verificationModes": ["architecture-model"],
-            # Declared coverage at best; the Hub never emits "verified" (K6). No declaring asset, no allocation (#148).
+        requirements.append({
+            "id": req_id,
+            "ref": ref,
+            "title": req_row.get("text") or req_id,
+            "domain": _domain_for_category(req_row.get("category") or ""),
+            "verificationModes": modes,
+            # Declared coverage at best; the Hub never emits "verified" (K6). Only asserted decisions yield "allocated".
             "status": "allocated" if evidence else "identified",
             "evidence": evidence,
             "appliesTo": {
@@ -550,15 +603,10 @@ def to_conformity_snapshot(
                 "lotRefs": [],
                 "pbsRefs": [],
             },
-        }
-        requirements.append(req)
+        })
 
-    # Tri déterministe des exigences par id
     requirements.sort(key=lambda r: r["id"])
-
-    data = {
-        "requirements": requirements,
-    }
+    data = {"requirements": requirements}
 
     checksum = canonical.sha256(data)  # canonical-json v1 (K1)
     now_iso = (now or datetime.now(UTC)).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -568,7 +616,7 @@ def to_conformity_snapshot(
         # Content-addressed (#149): the same state gives the same identifier, a different content another one.
         "snapshotId": f"{prefix}-{engagement}-{framework.lower()}-{checksum[len('sha256:'):][:12]}",
         "sourceSystem": SOURCE_SYSTEM,
-        "schemaVersion": "2.0",
+        "schemaVersion": "4.0",
         "createdAt": now_iso,
         "checksum": checksum,
         "data": data,

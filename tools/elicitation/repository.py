@@ -971,6 +971,9 @@ class ElicitationRepository:
         if isinstance(matched_controls, list):
             matched_controls = json.dumps(matched_controls)
         rationale = req.get("rationale", "")
+        source_id = str(req.get("source_id") or "")
+        requirement_key = str(req.get("requirement_key") or "")
+        version = str(req.get("version") or "")
 
         check_q = "MATCH (r:Requirement {id: $id}) RETURN count(r) AS c;"
         rows = self.db_client.execute_cypher(check_q, params={"id": req_id})
@@ -987,7 +990,10 @@ class ElicitationRepository:
                 r.status = $status,
                 r.matched_assets = $matched_assets,
                 r.matched_controls = $matched_controls,
-                r.rationale = $rationale;
+                r.rationale = $rationale,
+                r.source_id = $source_id,
+                r.requirement_key = $requirement_key,
+                r.version = $version;
             """
             self.db_client.execute_cypher(
                 update_q,
@@ -1002,6 +1008,9 @@ class ElicitationRepository:
                     "matched_assets": str(matched_assets),
                     "matched_controls": str(matched_controls),
                     "rationale": rationale,
+                    "source_id": source_id,
+                    "requirement_key": requirement_key,
+                    "version": version,
                 },
             )
         else:
@@ -1016,7 +1025,10 @@ class ElicitationRepository:
                 status: $status,
                 matched_assets: $matched_assets,
                 matched_controls: $matched_controls,
-                rationale: $rationale
+                rationale: $rationale,
+                source_id: $source_id,
+                requirement_key: $requirement_key,
+                version: $version
             });
             """
             self.db_client.execute_cypher(
@@ -1032,6 +1044,9 @@ class ElicitationRepository:
                     "matched_assets": str(matched_assets),
                     "matched_controls": str(matched_controls),
                     "rationale": rationale,
+                    "source_id": source_id,
+                    "requirement_key": requirement_key,
+                    "version": version,
                 },
             )
 
@@ -1044,6 +1059,7 @@ class ElicitationRepository:
             "r.category as category, r.text as text, r.criticality as criticality, "
             "r.status as status, r.matched_assets as matched_assets, "
             "r.matched_controls as matched_controls, r.rationale as rationale, "
+            "r.source_id as source_id, r.requirement_key as requirement_key, r.version as version, "
             + ", ".join(f"r.{c} as {c}" for c in self._DISPOSITION_COLUMNS) + ";"
         )
         try:
@@ -1058,7 +1074,11 @@ class ElicitationRepository:
 
     def get_requirement(self, requirement_id: str) -> dict[str, Any] | None:
         """One requirement with its decision (``disposition_*``), or None."""
-        cols = ", ".join(f"r.{c} as {c}" for c in ("id", "engagement", "section", "category", "text", "criticality", "status") + self._DISPOSITION_COLUMNS)
+        cols = ", ".join(
+            f"r.{c} as {c}"
+            for c in ("id", "engagement", "section", "category", "text", "criticality", "status", "source_id", "requirement_key", "version")
+            + self._DISPOSITION_COLUMNS
+        )
         res = self.db_client.execute_cypher(f"MATCH (r:Requirement {{id: $id}}) RETURN {cols};", params={"id": requirement_id})
         if not res or "error" in res[0]:
             return None

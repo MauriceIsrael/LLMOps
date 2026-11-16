@@ -854,6 +854,7 @@ def create_starlette_app() -> Starlette:
                 framework=framework,
                 controls_dir=server_config.kb_dir / "controls",
                 source_system=source_system,
+                engagements_dir=server_config.engagements_dir,
             )
             return JSONResponse(snapshot, status_code=200)
         except Exception as e:

@@ -127,16 +127,31 @@ class Importer:
                 plan.accepted.append({"ref": name, "kind": "subject", "status": level})
 
     def _requirements(self, plan: Plan, items: list[Any]) -> None:
+        from pipelines.requirement_ref import (  # noqa: PLC0415
+            RequirementRefError,
+            hub_source_id,
+            validate_requirement_ref,
+        )
+
         existing = {r["id"]: r for r in self.repo.get_requirements(self.engagement)}
         for i, item in enumerate(items):
             ref = str(item.get("id", f"requirements[{i}]")) if isinstance(item, dict) else f"requirements[{i}]"
             try:
                 if not isinstance(item, dict) or not isinstance(item.get("id"), str) or not item["id"] or not KEY.match(item["id"]):
                     raise WriteError(400, "invalid_argument", "each requirement needs an 'id' (letters, digits . _ : -)", "id")
+                if "ref" in item and item["ref"] is not None:
+                    try:
+                        req_ref = validate_requirement_ref(item["ref"])
+                    except RequirementRefError as err:
+                        raise WriteError(400, "invalid_argument", f"ref: {err}", "ref") from err
+                    source_id, requirement_key, version = req_ref["sourceId"], req_ref["requirementKey"], req_ref["version"]
+                else:
+                    source_id, requirement_key, version = hub_source_id(self.engagement), item["id"], 1
                 req = {"id": item["id"], "engagement": self.engagement, "text": _text(item, "text"),
                        "section": _text(item, "section", required=False, limit=200),
                        "category": _text(item, "category", required=False, default="general", limit=64),
-                       "criticality": _text(item, "criticality", required=False, default="mandatory", limit=32), "status": "gap"}
+                       "criticality": _text(item, "criticality", required=False, default="mandatory", limit=32), "status": "gap",
+                       "source_id": source_id, "requirement_key": requirement_key, "version": str(version)}
                 self._no_email(item)
             except WriteError as err:
                 plan.reject(ref, "requirement", "invalid_argument", err.reason, f"requirements[{i}].{err.argument or ''}".rstrip("."))
