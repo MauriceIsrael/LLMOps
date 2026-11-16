@@ -70,13 +70,8 @@ def test_audit_compliance_gaps_100_percent():
     assert report["global_total"] == len(controls)
     assert report["global_covered"] == len(controls) - len(uncovered)
 
-    # The 9 NIS2 requirements published by the first full ingestion are not yet implemented by a KB asset.
-    nis2_unlinked = {"NIS2-ART20-1", "NIS2-ART20-2", "NIS2-ART21-1", "NIS2-ART21-3", "NIS2-ART21-4",
-                     "NIS2-ART23-1", "NIS2-ART23-2", "NIS2-ART23-3", "NIS2-ART23-4"}
-    assert {c["id"] for c in fw["NIS2"]["controls"] if not c["covered"]} == nis2_unlinked
-
-    # Frameworks that were fully curated stay fully covered.
-    for name in ("SecNumCloud", "ISO27001", "3GPP", "CER", "GSMA", "TELCO-RESIL", "PPDR-DEVICE"):
+    # Frameworks that were fully curated or linked stay fully covered.
+    for name in ("NIS2", "SecNumCloud", "ISO27001", "3GPP", "CER", "GSMA", "TELCO-RESIL", "PPDR-DEVICE"):
         assert fw[name]["uncovered"] == 0, name
 
 
@@ -156,3 +151,16 @@ def test_curated_control_matching_is_unchanged(tmp_path):
     text = "Incident handling with early warning within 24 hours and incident notification within 72 hours"
     scores = {m.control_id: m.matched_keywords for m in match_text_to_controls("t", text, controls=controls, threshold=0.0)}
     assert not any(k.startswith("legal:") for k in scores.get("NIS2-ART21-2B", []))
+
+
+def test_audit_compliance_gaps_recognizes_satisfied_by(tmp_path):
+    controls_dir = tmp_path / "controls" / "NIS2"
+    controls_dir.mkdir(parents=True)
+    (controls_dir / "NIS2-ART23-4.md").write_text(
+        INGESTED.replace("status: active\n", "status: active\nsatisfied_by: [P-008]\n"),
+        encoding="utf-8",
+    )
+    report = audit_compliance_gaps(tmp_path)
+    assert report["frameworks"]["NIS2"]["covered"] == 1
+    assert report["frameworks"]["NIS2"]["uncovered"] == 0
+    assert report["frameworks"]["NIS2"]["controls"][0]["implemented_by"] == ["P-008"]

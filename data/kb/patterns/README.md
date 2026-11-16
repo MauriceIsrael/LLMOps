@@ -13,3 +13,7 @@ it is advocacy.
 | PAT-005 | Two observation planes, one collection layer |
 | PAT-006 | Vendor boundary through the northbound interface |
 | PAT-007 | Advisory assistant with prepare-only tooling |
+| PAT-020 | Cybersecurity governance, management-body oversight and training |
+| PAT-021 | Significant incident qualification, reporting and recipient communication |
+| PAT-022 | Risk-driven proportionate security baseline |
+| PAT-023 | Supplier vulnerability assessment and SBOM-backed supply chain governance |

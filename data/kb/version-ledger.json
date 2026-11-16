@@ -41,7 +41,8 @@
       "1": "sha256:85df94b90c06ce7026c6195e93c570e15ba0f5f9f5b4231c479c6352ec1d48d0"
     },
     "decision:ADR-0002": {
-      "1": "sha256:7d0cf7c806468795bf4107f898becd00cad4359384418ef87664dcb007ffe556"
+      "1": "sha256:7d0cf7c806468795bf4107f898becd00cad4359384418ef87664dcb007ffe556",
+      "2": "sha256:6dc0b019fdfe61936c698c6cc122c1bc6d8533322c3c51ac376fb7a8ca45d9cd"
     },
     "decision:ADR-0003": {
       "1": "sha256:ab5716649c4f561cfae796ea58a045bf95b88873bf596fe9175b6c6c8eb59702"
@@ -119,9 +120,22 @@
     "pattern:PAT-011": {
       "1": "sha256:72a611cc26c683a1235ddb5d695bdc13d3d6dec7b074a0669385b70dd4113e10"
     },
+    "pattern:PAT-020": {
+      "1": "sha256:4935ecf32181462fb18d964def15d9b516dcbdb91c0405fd7bf60804946a9230"
+    },
+    "pattern:PAT-021": {
+      "1": "sha256:4f063bf2c8059b329f95ecc71bae8547be392e44bcccc1b293f1869b570cd9b4"
+    },
+    "pattern:PAT-022": {
+      "1": "sha256:22d0990e09713c38226825ee382c2ef4a8e27c6d93d4c389b26de3c229a183d5"
+    },
+    "pattern:PAT-023": {
+      "1": "sha256:5da767121e3048790510757e5a86ccd174e5a43d8cd9dd3b3fa3e79d445cff33"
+    },
     "principle:P-001": {
       "1": "sha256:dcfe5bf222072e39cad22712ed33d7e74e5a909cb92332bfec25031b054c251e",
-      "3": "sha256:fa70ef80927baec27396636474ca042b2b6b398480b8f737ef9097975d68fbbb"
+      "3": "sha256:fa70ef80927baec27396636474ca042b2b6b398480b8f737ef9097975d68fbbb",
+      "4": "sha256:4b38314e5dd82e67123e59cc819d6df08f962600df7c58e8592c6dcb16f3ffeb"
     },
     "principle:P-002": {
       "1": "sha256:cbd0e42b86616e722749e343ba331971524a37cca1bb2ce9f086dda700b553c6",
@@ -143,7 +157,8 @@
       "1": "sha256:b962cf0f84116f54c9ac068a4b41ad6a3042cad645dabf34ef54d71b07f56252"
     },
     "principle:P-008": {
-      "1": "sha256:8a3fe56523296c86ec22e09ea8df8040a86080bfc90d8526feb0407641841d59"
+      "1": "sha256:8a3fe56523296c86ec22e09ea8df8040a86080bfc90d8526feb0407641841d59",
+      "2": "sha256:095e833dfdf5cd73a3accfacfae9707d3048f5e50317ca2a89c02c078fe4abdc"
     },
     "principle:P-009": {
       "1": "sha256:495182f0558044229f2437c24682a4b98b686a1c5c85a0c628e52870cb9a9261",

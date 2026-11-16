@@ -1,11 +1,11 @@
 {
-  "snapshot_id": "snapshot-2026-10-19-9096ea3",
-  "created_at": "2026-10-19T05:41:29Z",
-  "source_revision": "9096ea38706f2cc665a3fa14c95556955b7bad77",
-  "payload_sha256": "sha256:6815dce410638ddcc6865eae018377fb237d2a857b37eb642975c1fea0f99f61",
+  "snapshot_id": "snapshot-2026-11-16-b4ef2d7",
+  "created_at": "2026-11-16T20:14:26Z",
+  "source_revision": "b4ef2d795afecc428267c46b32d294cebdca6422",
+  "payload_sha256": "sha256:516c215007657e2c1ecb352427292e227357ca94ce9f18783f8f1c2a8135ac26",
   "schema_version": "1.0",
   "emitter": "knowledge-hub",
-  "checksum": "sha256:6815dce410638ddcc6865eae018377fb237d2a857b37eb642975c1fea0f99f61",
+  "checksum": "sha256:516c215007657e2c1ecb352427292e227357ca94ce9f18783f8f1c2a8135ac26",
   "rebuiltByEmitterTest": true,
   "regenerate": "poetry run python scripts/export_fixtures.py",
   "is_provisional": false,
@@ -326,7 +326,7 @@
   },
   "embedding_index": {
     "model": "intfloat/multilingual-e5-small",
-    "count": 131,
+    "count": 135,
     "items": [
       {
         "ref": "3GPP-TS28104-MDA",
@@ -611,17 +611,17 @@
       {
         "ref": "NIS2-ART20-1",
         "type": "control",
-        "text_sha256": "001e2aabba987d4b629c15af40b60a091521db0914e868d87901b4360342f57a"
+        "text_sha256": "b3dc83d7a1e8912ec2aae1007e5fcac1ca87d9a4cdbb243aa9a9c7068adc233b"
       },
       {
         "ref": "NIS2-ART20-2",
         "type": "control",
-        "text_sha256": "09fee7f7094c9e0b81a56cec2910742bc80bca19278636c7d9c635f54015783a"
+        "text_sha256": "10ca267b2ebbb45639e27e5d80e5d763b3e35d078a33b3cb2a6041b2430ae84c"
       },
       {
         "ref": "NIS2-ART21-1",
         "type": "control",
-        "text_sha256": "8ff270951ab606bad364485c0160596fd90984105d4d61b5988435625e9a6685"
+        "text_sha256": "212e3e327407b7fc29b87bd1ebf124d18d6bf15f74ef43627157f667970b2322"
       },
       {
         "ref": "NIS2-ART21-2A",
@@ -676,32 +676,32 @@
       {
         "ref": "NIS2-ART21-3",
         "type": "control",
-        "text_sha256": "572ff3ad5214ff3e744a398c9a38cc442f0da07d76660e0489420d6e5f239112"
+        "text_sha256": "d6e775a750bcaea0f94dbc8509c917366bad70acaf71997c21f65df88e02a82b"
       },
       {
         "ref": "NIS2-ART21-4",
         "type": "control",
-        "text_sha256": "deab47a686cb20eb3e85e8e8079e2f05380c75f34ec12b6edd65e466a7547d24"
+        "text_sha256": "fb2539a163d58b612f836c271ce14cb7f269e8351529ffb16dd636d9e0a77d6d"
       },
       {
         "ref": "NIS2-ART23-1",
         "type": "control",
-        "text_sha256": "5b11075829e4c9595f7fc8a2773bd9f255c3574bd911de70dd1731a040cc7181"
+        "text_sha256": "f0dcac6148f061cd39f0829dbce696ddce91a59d512bffbe2ff74be4bcec7e7e"
       },
       {
         "ref": "NIS2-ART23-2",
         "type": "control",
-        "text_sha256": "e44afd6b8f7b085f0e118dcb0aa150d167b98cc6c608bac17b189671d396f655"
+        "text_sha256": "fbdc2b1f81c7e048a0ec01b86e7d6f2637c2a7fd5b880758c4918d5227a02cf2"
       },
       {
         "ref": "NIS2-ART23-3",
         "type": "control",
-        "text_sha256": "28ec94ce1d688bdab118ecedc3822c0768ab71c6c5e39c87de4d061c7028467d"
+        "text_sha256": "159f5415f02095fb93ad56896a666a068a3d653752b7e3b36c03acaac2617c72"
       },
       {
         "ref": "NIS2-ART23-4",
         "type": "control",
-        "text_sha256": "207ada1cc18eeec83c85f091f489c0e23da35f8244c408cd31c8a82c7a0607d3"
+        "text_sha256": "4813685f1376b7f9ea49e35e3add3a0c66c95150b8344a7fc14167e896d5d29e"
       },
       {
         "ref": "PPDR-DEVICE-ATEX",
@@ -909,6 +909,26 @@
         "text_sha256": "cba29add6132d055b9afeee9364433736f8a4b948aac91eb7f01374d6a2d1d42"
       },
       {
+        "ref": "PAT-020",
+        "type": "pattern",
+        "text_sha256": "821db9c2c91732c41fb78d454d80e7051ac5632ad996e90bd9d79d8bda01d1bb"
+      },
+      {
+        "ref": "PAT-021",
+        "type": "pattern",
+        "text_sha256": "7ff8b45741b9f282ceb72d14b71445bbb85bd1300a1b7244336e07e5773c60ad"
+      },
+      {
+        "ref": "PAT-022",
+        "type": "pattern",
+        "text_sha256": "4be9386c04e8ade7fa784bccbca7d64aef9f5abcaee65a8bf6dafab6497bdf8c"
+      },
+      {
+        "ref": "PAT-023",
+        "type": "pattern",
+        "text_sha256": "23c5a9b5795f0ab1504fb8ece6930edc98b4b4cb32275b758e9f7a0a64e16fa7"
+      },
+      {
         "ref": "P-001",
         "type": "principle",
         "text_sha256": "91e5c2a16f0158e6dedcdee04a89097cf9ab5d9526b0b63dd4f5914e4c8a2acc"
@@ -984,7 +1004,7 @@
         "text_sha256": "2b3e928f85d561b93b446c47b3e34b1437a1b6ac996e004d43605dba29ec4b1c"
       }
     ],
-    "content_sha256": "sha256:a968b01d0711472ca2d081a2c46b481503cd4edd7884911fd90e6f4e8228d220"
+    "content_sha256": "sha256:34c4d4110e971f924afbc3de52c6f6d60d3c8808d9f6b1241dbfa571c637bd4c"
   },
   "applicability_index": {
     "BLU-hla-it-platform": {
@@ -1782,6 +1802,62 @@
       "rules": [
         "rule:tpl-zero-draft-hld"
       ]
+    },
+    "PAT-020": {
+      "domains": [
+        "security",
+        "service-management"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-020"
+      ]
+    },
+    "PAT-021": {
+      "domains": [
+        "security",
+        "observability",
+        "service-management"
+      ],
+      "phases": [
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-021"
+      ]
+    },
+    "PAT-022": {
+      "domains": [
+        "security",
+        "network-automation"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-022"
+      ]
+    },
+    "PAT-023": {
+      "domains": [
+        "security",
+        "delivery"
+      ],
+      "phases": [
+        "BID",
+        "BUILD",
+        "RUN"
+      ],
+      "rules": [
+        "rule:pat-023"
+      ]
     }
   },
   "assets": [
@@ -1824,17 +1900,17 @@
       "phase": "BUILD",
       "owner": "core-owner-architecture",
       "last_reviewed": "2026-07-25",
-      "revision": 1,
+      "revision": 2,
       "knowledge_ref": {
         "sourceId": "knowledge-hub",
         "knowledgeKey": "decision:ADR-0002",
-        "version": "1"
+        "version": "2"
       },
-      "content_sha256": "sha256:7d0cf7c806468795bf4107f898becd00cad4359384418ef87664dcb007ffe556",
-      "content": "---\nid: ADR-0002\ntitle: Network source of truth and compliance engine\ntype: decision\nstatus: active\nconfidence: verified\nphase:\n- BUILD\ndomain:\n- network-automation\nowner: core-owner-architecture\nlast_reviewed: 2026-07-25\nrelated:\n- P-001\n- P-010\n- ADR-0009\nsources: []\nimplements_controls:\n- ISO-27001-A8-09\n- NIS2-ART21-2F\n---\n# ADR-0002 \u2014 Network source of truth and compliance engine\n\n## Context\n\nAn inventory of record is needed to drive automation, feed the configuration database, and support drift and compliance reporting across three domains.\n\n## Options considered\n\n**Commercial orchestrator suite.** Strong native modelling, transactional configuration; licence cost and lock-in on the state.\n\n**Inventory product with a configuration compliance extension.** Open source, active ecosystem, native backup / intended / compliance workflow, extensible jobs and buttons; requires assembling the transport layer.\n\n**Spreadsheet plus scripts.** Zero licence, unbounded maintenance cost, no compliance story.\n\n## Decision\n\nAn open-source inventory product extended with a configuration compliance module is the network source of truth and the drift and compliance engine.\n\n## Consequences\n\nThe compliance workflow is obtained rather than built. Population of the inventory becomes the critical path item of the foundation work package, and is routinely underestimated by a factor of two.\n\n## Revisit when\n\nInventory ownership moves to the service management platform's network inventory product and can drive automation directly.\n",
+      "content_sha256": "sha256:6dc0b019fdfe61936c698c6cc122c1bc6d8533322c3c51ac376fb7a8ca45d9cd",
+      "content": "---\nid: ADR-0002\ntitle: Network source of truth and compliance engine\ntype: decision\nstatus: active\nconfidence: verified\nphase:\n- BUILD\ndomain:\n- network-automation\nowner: core-owner-architecture\nlast_reviewed: 2026-07-25\nrelated:\n- P-001\n- P-010\n- ADR-0009\nsources: []\nimplements_controls:\n- ISO-27001-A8-09\n- NIS2-ART21-2F\n- NIS2-ART21-4\nrevision: 2\n---\n# ADR-0002 \u2014 Network source of truth and compliance engine\n\n## Context\n\nAn inventory of record is needed to drive automation, feed the configuration database, and support drift and compliance reporting across three domains.\n\n## Options considered\n\n**Commercial orchestrator suite.** Strong native modelling, transactional configuration; licence cost and lock-in on the state.\n\n**Inventory product with a configuration compliance extension.** Open source, active ecosystem, native backup / intended / compliance workflow, extensible jobs and buttons; requires assembling the transport layer.\n\n**Spreadsheet plus scripts.** Zero licence, unbounded maintenance cost, no compliance story.\n\n## Decision\n\nAn open-source inventory product extended with a configuration compliance module is the network source of truth and the drift and compliance engine.\n\n## Consequences\n\nThe compliance workflow is obtained rather than built. Population of the inventory becomes the critical path item of the foundation work package, and is routinely underestimated by a factor of two.\n\n## Revisit when\n\nInventory ownership moves to the service management platform's network inventory product and can drive automation directly.\n",
       "provenance": {
         "document": "ADR-0002.md",
-        "version": "1",
+        "version": "2",
         "section": "architecture",
         "text_sha256": "0bd18b5558fd3b64836fd210ca10d3cb43cb2dddd7bc00cfbc15ae7bdeffb67c"
       },
@@ -2340,17 +2416,17 @@
       "phase": "BID,BUILD,RUN",
       "owner": "core-owner-architecture",
       "last_reviewed": "2026-10-17",
-      "revision": 3,
+      "revision": 4,
       "knowledge_ref": {
         "sourceId": "knowledge-hub",
         "knowledgeKey": "principle:P-001",
-        "version": "3"
+        "version": "4"
       },
-      "content_sha256": "sha256:fa70ef80927baec27396636474ca042b2b6b398480b8f737ef9097975d68fbbb",
-      "content": "---\nid: P-001\ntitle: Generalized GitOps\ntype: principle\nstatus: active\nconfidence: verified\nphase: [BID, BUILD, RUN]\ndomain: [network-automation, cloud-platform]\nowner: core-owner-architecture\nlast_reviewed: '2026-10-17'\napplicability: Supervised operation of systems where an incorrect automated action has service impact.\nrelated: [P-008, ADR-0001]\nimplements_controls: [ISO-14001-DECOM, ISO-27001-A8-09, NIS2-ART21-2A, SNC-REQ-04]\nchecks_status: validated\nchecks:\n- id: P-001-C1\n  kind: forbids\n  when:\n    terms_any: [manual configuration change, configuration changed by hand, direct change in production, hotfix in production, ssh into production, click-ops]\n  message: Configurations, fallback plans and automation code are versioned in Git; no change reaches a managed system outside review and the validation pipeline.\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T08:59:27Z', decision: validate}\n- id: P-001-C2\n  kind: requires\n  when:\n    terms_any: [automation code, playbook, correlation rule, triggering rule, fallback plan]\n  expect:\n    terms_any: [git, gitops, version control, versioned, pull request, merge request, validation pipeline]\n  message: Automation artefacts must be versioned in Git and promoted through review and a validation pipeline.\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T08:59:48Z', decision: validate}\nrevision: 3\n---\n\n# P-001 \u2014 Generalized GitOps\n\n## Statement\n\nIntended configurations, fallback plans, triggering rules, correlation rules and automation code are versioned in Git. Every change goes through review and a validation pipeline before it can reach a managed system.\n\n## Why\n\nA managed system with more than one entry path cannot be reasoned about. Versioning is not primarily about rollback; it is about making every change reviewable, attributable and reproducible, which is what an accreditation authority asks for.\n\n## Implications\n\n- The pipeline, not an operator, is the only writer.\n- Rollback becomes a revert plus a redeploy rather than a separate procedure.\n- Anything not in Git does not exist: undocumented manual changes appear as drift, which is the intended behaviour.\n\n## How to verify\n\nAttempt a manual change on a managed asset outside the pipeline; it must surface in the next drift report.\n",
+      "content_sha256": "sha256:4b38314e5dd82e67123e59cc819d6df08f962600df7c58e8592c6dcb16f3ffeb",
+      "content": "---\nid: P-001\ntitle: Generalized GitOps\ntype: principle\nstatus: active\nconfidence: verified\nphase: [BID, BUILD, RUN]\ndomain: [network-automation, cloud-platform]\nowner: core-owner-architecture\nlast_reviewed: '2026-10-17'\napplicability: Supervised operation of systems where an incorrect automated action has service impact.\nrelated: [P-008, ADR-0001]\nimplements_controls: [ISO-14001-DECOM, ISO-27001-A8-09, NIS2-ART21-2A, NIS2-ART21-4, SNC-REQ-04]\nchecks_status: validated\nchecks:\n- id: P-001-C1\n  kind: forbids\n  when:\n    terms_any: [manual configuration change, configuration changed by hand, direct change in production, hotfix in production, ssh into production, click-ops]\n  message: Configurations, fallback plans and automation code are versioned in Git; no change reaches a managed system outside review and the validation pipeline.\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T08:59:27Z', decision: validate}\n- id: P-001-C2\n  kind: requires\n  when:\n    terms_any: [automation code, playbook, correlation rule, triggering rule, fallback plan]\n  expect:\n    terms_any: [git, gitops, version control, versioned, pull request, merge request, validation pipeline]\n  message: Automation artefacts must be versioned in Git and promoted through review and a validation pipeline.\n  status: validated\n  review: {by: '@maintainers', at: '2026-10-17T08:59:48Z', decision: validate}\nrevision: 4\n---\n\n# P-001 \u2014 Generalized GitOps\n\n## Statement\n\nIntended configurations, fallback plans, triggering rules, correlation rules and automation code are versioned in Git. Every change goes through review and a validation pipeline before it can reach a managed system.\n\n## Why\n\nA managed system with more than one entry path cannot be reasoned about. Versioning is not primarily about rollback; it is about making every change reviewable, attributable and reproducible, which is what an accreditation authority asks for.\n\n## Implications\n\n- The pipeline, not an operator, is the only writer.\n- Rollback becomes a revert plus a redeploy rather than a separate procedure.\n- Anything not in Git does not exist: undocumented manual changes appear as drift, which is the intended behaviour.\n\n## How to verify\n\nAttempt a manual change on a managed asset outside the pipeline; it must surface in the next drift report.\n",
       "provenance": {
         "document": "P-001.md",
-        "version": "3",
+        "version": "4",
         "section": "architecture",
         "text_sha256": "e2505a26bb5ff0304b7ecf8166bab401d05b5e9b8213dd596aa4e3f7189d6044"
       },
@@ -2536,17 +2612,17 @@
       "phase": "BID,BUILD,RUN",
       "owner": "core-owner-architecture",
       "last_reviewed": "2026-07-25",
-      "revision": 1,
+      "revision": 2,
       "knowledge_ref": {
         "sourceId": "knowledge-hub",
         "knowledgeKey": "principle:P-008",
-        "version": "1"
+        "version": "2"
       },
-      "content_sha256": "sha256:8a3fe56523296c86ec22e09ea8df8040a86080bfc90d8526feb0407641841d59",
-      "content": "---\nid: P-008\ntitle: The chain observes itself\ntype: principle\nstatus: active\nconfidence: verified\nphase:\n- BID\n- BUILD\n- RUN\ndomain:\n- observability\n- network-automation\nowner: core-owner-architecture\nlast_reviewed: 2026-07-25\napplicability: Supervised operation of systems where an incorrect automated action\n  has service impact.\nrelated:\n- P-001\n- P-011\nimplements_controls:\n- GSMA-CEIR-PEI\n- ISO-27001-A8-09\n---\n# P-008 \u2014 The chain observes itself\n\n## Statement\n\nExecutions, configuration differences, compliance results and approval decisions are collected, indexed and rendered like any other operational signal.\n\n## Why\n\nAn automation chain that cannot be observed cannot be trusted, and cannot produce the evidence an audit requires.\n\n## Implications\n\n- Automation outputs are a first-class signal source.\n- Dashboards cover drift, compliance, executions and decisions, not only the managed system.\n\n## How to verify\n\nProduce, for any past week, the list of executions with their outcome and approver from the observability plane alone.\n",
+      "content_sha256": "sha256:095e833dfdf5cd73a3accfacfae9707d3048f5e50317ca2a89c02c078fe4abdc",
+      "content": "---\nid: P-008\ntitle: The chain observes itself\ntype: principle\nstatus: active\nconfidence: verified\nphase:\n- BID\n- BUILD\n- RUN\ndomain:\n- observability\n- network-automation\nowner: core-owner-architecture\nlast_reviewed: 2026-07-25\napplicability: Supervised operation of systems where an incorrect automated action\n  has service impact.\nrelated:\n- P-001\n- P-011\nimplements_controls:\n- GSMA-CEIR-PEI\n- ISO-27001-A8-09\n- NIS2-ART23-1\n- NIS2-ART23-4\nrevision: 2\n---\n# P-008 \u2014 The chain observes itself\n\n## Statement\n\nExecutions, configuration differences, compliance results and approval decisions are collected, indexed and rendered like any other operational signal.\n\n## Why\n\nAn automation chain that cannot be observed cannot be trusted, and cannot produce the evidence an audit requires.\n\n## Implications\n\n- Automation outputs are a first-class signal source.\n- Dashboards cover drift, compliance, executions and decisions, not only the managed system.\n\n## How to verify\n\nProduce, for any past week, the list of executions with their outcome and approver from the observability plane alone.\n",
       "provenance": {
         "document": "P-008.md",
-        "version": "1",
+        "version": "2",
         "section": "architecture",
         "text_sha256": "1d741304871df62073ee32e0e1f0fb1453fb5050021f10f3c17ec320d648ceb1"
       },
@@ -3053,6 +3129,118 @@
         "version": "1",
         "section": "architecture",
         "text_sha256": "4db8ee46f92993d66a5a23a20a31f563a8646405ff16cef858c884b831cc8fe3"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-020",
+      "typed_id": "pattern:PAT-020",
+      "title": "Cybersecurity governance, management-body oversight and training",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "designed",
+      "domain": "security,service-management",
+      "phase": "BID,BUILD,RUN",
+      "owner": "security-compliance-team",
+      "last_reviewed": "2026-11-16",
+      "revision": 1,
+      "knowledge_ref": {
+        "sourceId": "knowledge-hub",
+        "knowledgeKey": "pattern:PAT-020",
+        "version": "1"
+      },
+      "content_sha256": "sha256:4935ecf32181462fb18d964def15d9b516dcbdb91c0405fd7bf60804946a9230",
+      "content": "---\nid: PAT-020\ntitle: Cybersecurity governance, management-body oversight and training\ntype: pattern\nstatus: active\nconfidence: designed\nphase:\n- BID\n- BUILD\n- RUN\ndomain:\n- security\n- service-management\nowner: security-compliance-team\nlast_reviewed: '2026-11-16'\nrelated:\n- P-002\n- P-008\nimplements_controls:\n- NIS2-ART20-1\n- NIS2-ART20-2\nrevision: 1\n---\n# PAT-020 \u2014 Cybersecurity governance, management-body oversight and training\n\n## Problem\n\nTechnical security controls fail in accreditation and operation when management bodies have no formal mechanism to approve the security baseline, accept residual risks with traceability, oversee compliance indicators, or maintain cybersecurity competence across leadership and operating staff.\n\n## Forces\n\n- Management bodies are legally accountable for approving risk-management measures and overseeing their implementation.\n- Architecture exceptions and residual risk acceptances often remain informal in slide decks or emails instead of an auditable register.\n- Operating staff and leadership need recurring training tied to the actual runbooks and security procedures of the platform.\n\n## Solution\n\nEstablish a formal cybersecurity governance register alongside the architecture: list the security baseline, residual risks, and accepted exceptions for explicit approval by the management body, require named management-level sign-off on any architecture decision that deviates from Article 21(2) measures, expose baseline coverage, open findings, and incident trends as oversight indicators, and pair the run organisation with a recurring cybersecurity training plan for management-body members and operating staff backed by up-to-date runbooks and security procedures.\n\n## Trade-offs\n\nAdds governance cadence and sign-off latency to risk exceptions and baseline updates, but makes accountability explicit and auditable without blocking day-to-day operational changes that stay within the approved baseline.\n\n## When not to use this\n\nFor ephemeral sandboxes or non-regulated proof-of-concept environments with no production data, no regulated service obligations, and an explicit decommissioning date.\n\n## Seen in\n\nNIS2 Article 20 governance alignment across regulated critical-infrastructure engagements (2026).\n",
+      "provenance": {
+        "document": "PAT-020.md",
+        "version": "1",
+        "section": "architecture",
+        "text_sha256": "f9416d2e13e0b631bf5a65a5563e27bba882593c53f6932afee6fb19af79937a"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-021",
+      "typed_id": "pattern:PAT-021",
+      "title": "Significant incident qualification, reporting and recipient communication",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "designed",
+      "domain": "security,observability,service-management",
+      "phase": "BUILD,RUN",
+      "owner": "security-compliance-team",
+      "last_reviewed": "2026-11-16",
+      "revision": 1,
+      "knowledge_ref": {
+        "sourceId": "knowledge-hub",
+        "knowledgeKey": "pattern:PAT-021",
+        "version": "1"
+      },
+      "content_sha256": "sha256:4f063bf2c8059b329f95ecc71bae8547be392e44bcccc1b293f1869b570cd9b4",
+      "content": "---\nid: PAT-021\ntitle: Significant incident qualification, reporting and recipient communication\ntype: pattern\nstatus: active\nconfidence: designed\nphase:\n- BUILD\n- RUN\ndomain:\n- security\n- observability\n- service-management\nowner: security-compliance-team\nlast_reviewed: '2026-11-16'\nrelated:\n- P-008\n- PAT-001\n- PAT-005\nimplements_controls:\n- NIS2-ART23-1\n- NIS2-ART23-2\n- NIS2-ART23-3\n- NIS2-ART23-4\nrevision: 1\n---\n# PAT-021 \u2014 Significant incident qualification, reporting and recipient communication\n\n## Problem\n\nMonitoring chains detect technical anomalies, but regulatory compliance requires deterministic severity thresholds to qualify whether an incident is significant, tamper-evident evidence collection, out-of-band communication to affected service recipients, and structured reporting to the CSIRT or competent authority within strict statutory deadlines (24 h early warning, 72 h notification, 1-month final report).\n\n## Forces\n\n- Statutory clocks (24 h / 72 h / 1 month) start as soon as the entity becomes aware of a significant incident.\n- Significance depends on service-level measurements (availability, affected user count, duration, cross-border impact) rather than raw infrastructure alerts alone.\n- Customer and recipient communication channels must remain available even when primary production services are degraded.\n\n## Solution\n\nImplement per-service significance thresholds in the centralised monitoring and incident-qualification pipeline using live service measurements (availability, affected users, duration). Route qualified incidents through a tamper-evident evidence retention store and a pre-defined notification workflow with designated roles and contact points for the national CSIRT or competent authority, supporting the 24-hour early warning, 72-hour incident notification (with indicators of compromise), intermediate updates, and 1-month final report (root cause, mitigations, cross-border impact). Maintain an out-of-band communication channel tied to the service catalogue to inform affected service recipients of significant cyber threats and actionable remedies.\n\n## Trade-offs\n\nRequires maintaining per-service impact thresholds, tamper-evident log retention, and crisis-resilient contact lists, in exchange for predictable regulatory reporting under incident pressure.\n\n## When not to use this\n\nIn isolated development or lab environments that do not deliver services to external recipients and are outside the scope of statutory incident-notification obligations.\n\n## Seen in\n\nNIS2 Article 23 incident notification and recipient-communication architecture across regulated operator engagements (2026).\n",
+      "provenance": {
+        "document": "PAT-021.md",
+        "version": "1",
+        "section": "architecture",
+        "text_sha256": "7a0a3c9c26fc0e9328697919503c2f46c54f4d772a69f82d9f83ba5efb1611d8"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-022",
+      "typed_id": "pattern:PAT-022",
+      "title": "Risk-driven proportionate security baseline",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "designed",
+      "domain": "security,network-automation",
+      "phase": "BID,BUILD,RUN",
+      "owner": "security-compliance-team",
+      "last_reviewed": "2026-11-16",
+      "revision": 1,
+      "knowledge_ref": {
+        "sourceId": "knowledge-hub",
+        "knowledgeKey": "pattern:PAT-022",
+        "version": "1"
+      },
+      "content_sha256": "sha256:22d0990e09713c38226825ee382c2ef4a8e27c6d93d4c389b26de3c229a183d5",
+      "content": "---\nid: PAT-022\ntitle: Risk-driven proportionate security baseline\ntype: pattern\nstatus: active\nconfidence: designed\nphase:\n- BID\n- BUILD\n- RUN\ndomain:\n- security\n- network-automation\nowner: security-compliance-team\nlast_reviewed: '2026-11-16'\nrelated:\n- PAT-001\n- PAT-003\nimplements_controls:\n- NIS2-ART21-1\nrevision: 1\n---\n# PAT-022 \u2014 Risk-driven proportionate security baseline\n\n## Problem\n\nAd-hoc security controls either over-engineer low-risk components or leave critical network and information systems exposed without traceability to actual threats, entity exposure, or service-impact containment.\n\n## Forces\n\n- Measures must be appropriate and proportionate to the entity's exposure, size, and the likelihood and severity of incidents.\n- Accreditation and audit require every security control in the architecture to trace back to a documented risk analysis and recognised standards (such as ISO/IEC 27001).\n- Incident impact must be bounded so a failure in one service does not cascade to recipients or neighbouring services.\n\n## Solution\n\nAnchor the architecture in a documented risk analysis covering all network and information systems in scope, mapping each technical, operational, and organisational measure to the risks it treats and justifying its level against the state of the art and applicable European or international standards. Explicitly specify containment boundaries (isolation, degraded modes, blast-radius limits) to prevent or minimise incident impact on service recipients and adjacent services.\n\n## Trade-offs\n\nRequires maintaining a living risk-to-measure traceability matrix across architecture revisions, preventing unmotivated security exemptions or blind copy-pasting of controls.\n\n## When not to use this\n\nNever omit risk proportionality on production or regulated systems; only disposable local developer sandboxes with zero external exposure may use a minimal baseline.\n\n## Seen in\n\nNIS2 Article 21(1) risk-management baseline structuring across regulated engagements (2026).\n",
+      "provenance": {
+        "document": "PAT-022.md",
+        "version": "1",
+        "section": "architecture",
+        "text_sha256": "a14929abcd95f0b50320847e32ccbd22c64f8be2ca45f024bfc23dd260bd968c"
+      },
+      "supersedes": [],
+      "superseded_by": []
+    },
+    {
+      "id": "PAT-023",
+      "typed_id": "pattern:PAT-023",
+      "title": "Supplier vulnerability assessment and SBOM-backed supply chain governance",
+      "type": "pattern",
+      "status": "active",
+      "confidence": "designed",
+      "domain": "security,delivery",
+      "phase": "BID,BUILD,RUN",
+      "owner": "security-compliance-team",
+      "last_reviewed": "2026-11-16",
+      "revision": 1,
+      "knowledge_ref": {
+        "sourceId": "knowledge-hub",
+        "knowledgeKey": "pattern:PAT-023",
+        "version": "1"
+      },
+      "content_sha256": "sha256:5da767121e3048790510757e5a86ccd174e5a43d8cd9dd3b3fa3e79d445cff33",
+      "content": "---\nid: PAT-023\ntitle: Supplier vulnerability assessment and SBOM-backed supply chain governance\ntype: pattern\nstatus: active\nconfidence: designed\nphase:\n- BID\n- BUILD\n- RUN\ndomain:\n- security\n- delivery\nowner: security-compliance-team\nlast_reviewed: '2026-11-16'\nrelated:\n- P-007\n- PAT-006\nimplements_controls:\n- NIS2-ART21-3\nrevision: 1\n---\n# PAT-023 \u2014 Supplier vulnerability assessment and SBOM-backed supply chain governance\n\n## Problem\n\nModern platforms depend on third-party hardware, software, cloud, and managed service suppliers whose specific vulnerabilities, development practices, and upstream dependencies can compromise the entire system if not assessed and contractually governed.\n\n## Forces\n\n- Generic vendor questionnaires miss component-level vulnerabilities and EU coordinated supply-chain risk assessments (NIS2 Article 22(1)).\n- Without contractual obligations for vulnerability disclosure, support-period security updates, and SBOMs, operators cannot react to upstream CVEs in time.\n\n## Solution\n\nMaintain a supplier and service-provider register for every direct hardware, software, cloud, and managed-service dependency in the architecture, recording supplier-specific vulnerability assessments, product quality, and secure development practices. Factor EU coordinated security risk assessments of critical supply chains into component selection, and mandate contractual clauses requiring timely vulnerability notification, security updates throughout the support period, and a machine-readable Software Bill of Materials (SBOM) for software deliverables.\n\n## Trade-offs\n\nIncreases procurement and onboarding effort for third-party components and may disqualify vendors that refuse SBOM or vulnerability-notification commitments, but eliminates blind spots in the supply chain.\n\n## When not to use this\n\nFor internal throwaway prototypes that are never connected to production networks and contain no third-party code shipped to customers.\n\n## Seen in\n\nNIS2 Article 21(3) supply-chain due diligence in regulated telecom and cloud engagements (2026).\n",
+      "provenance": {
+        "document": "PAT-023.md",
+        "version": "1",
+        "section": "architecture",
+        "text_sha256": "ff01ddf4c4010f94ef55ef1c956fcf40b06f184a308130a3cee1e6b168cfed09"
       },
       "supersedes": [],
       "superseded_by": []
@@ -4301,28 +4489,34 @@
       "id": "NIS2-ART20-1",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Governance \u2014 Member States shall ensure that the management bodies of essential and important\u2026",
+      "title": "Management body approval and oversight of risk-management measures",
       "domain": "security-governance",
       "severity": "mandatory",
-      "implemented_by": []
+      "implemented_by": [
+        "PAT-020"
+      ]
     },
     {
       "id": "NIS2-ART20-2",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Governance \u2014 Member States shall ensure that the members of the management bodies of essential and\u2026",
+      "title": "Cybersecurity training for management bodies and staff",
       "domain": "security-governance",
       "severity": "mandatory",
-      "implemented_by": []
+      "implemented_by": [
+        "PAT-020"
+      ]
     },
     {
       "id": "NIS2-ART21-1",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that essential and important entities take appropriate and\u2026",
+      "title": "Appropriate and proportionate cybersecurity risk-management measures",
       "domain": "security-governance",
       "severity": "mandatory",
-      "implemented_by": []
+      "implemented_by": [
+        "PAT-022"
+      ]
     },
     {
       "id": "NIS2-ART21-2A",
@@ -4453,55 +4647,70 @@
       "id": "NIS2-ART21-3",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that, when considering which measures referred to in\u2026",
+      "title": "Supply chain security and supplier-specific vulnerability assessment",
       "domain": "security-governance",
       "severity": "mandatory",
-      "implemented_by": []
+      "implemented_by": [
+        "PAT-023"
+      ]
     },
     {
       "id": "NIS2-ART21-4",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that an entity that finds that it does not comply with the\u2026",
+      "title": "Corrective measures for non-compliance",
       "domain": "security-governance",
       "severity": "mandatory",
-      "implemented_by": []
+      "implemented_by": [
+        "ADR-0002",
+        "P-001"
+      ]
     },
     {
       "id": "NIS2-ART23-1",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Reporting obligations \u2014 Each Member State shall ensure that essential and important entities notify, without\u2026",
+      "title": "Notification of significant incidents to CSIRT or competent authority",
       "domain": "security-governance",
       "severity": "mandatory",
-      "implemented_by": []
+      "implemented_by": [
+        "P-008",
+        "PAT-021"
+      ]
     },
     {
       "id": "NIS2-ART23-2",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Reporting obligations \u2014 Where applicable, Member States shall ensure that essential and important entities\u2026",
+      "title": "Informing service recipients of significant cyber threats",
       "domain": "security-governance",
       "severity": "mandatory",
-      "implemented_by": []
+      "implemented_by": [
+        "PAT-021"
+      ]
     },
     {
       "id": "NIS2-ART23-3",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Reporting obligations \u2014 An incident shall be considered to be significant if",
+      "title": "Criteria for a significant incident",
       "domain": "security-governance",
       "severity": "mandatory",
-      "implemented_by": []
+      "implemented_by": [
+        "PAT-021"
+      ]
     },
     {
       "id": "NIS2-ART23-4",
       "framework": "NIS2",
       "version": "2022/2555",
-      "title": "Reporting obligations \u2014 Member States shall ensure that, for the purpose of notification under paragraph 1, the\u2026",
+      "title": "Notification timelines: 24h early warning, 72h notification, 1-month final report",
       "domain": "security-governance",
       "severity": "mandatory",
-      "implemented_by": []
+      "implemented_by": [
+        "P-008",
+        "PAT-021"
+      ]
     },
     {
       "id": "PPDR-DEVICE-ATEX",
@@ -5157,22 +5366,28 @@
     },
     "NIS2": {
       "NIS2-ART20-1": {
-        "title": "Governance \u2014 Member States shall ensure that the management bodies of essential and important\u2026",
+        "title": "Management body approval and oversight of risk-management measures",
         "version": "2022/2555",
         "severity": "mandatory",
-        "implemented_by": []
+        "implemented_by": [
+          "PAT-020"
+        ]
       },
       "NIS2-ART20-2": {
-        "title": "Governance \u2014 Member States shall ensure that the members of the management bodies of essential and\u2026",
+        "title": "Cybersecurity training for management bodies and staff",
         "version": "2022/2555",
         "severity": "mandatory",
-        "implemented_by": []
+        "implemented_by": [
+          "PAT-020"
+        ]
       },
       "NIS2-ART21-1": {
-        "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that essential and important entities take appropriate and\u2026",
+        "title": "Appropriate and proportionate cybersecurity risk-management measures",
         "version": "2022/2555",
         "severity": "mandatory",
-        "implemented_by": []
+        "implemented_by": [
+          "PAT-022"
+        ]
       },
       "NIS2-ART21-2A": {
         "title": "Risk Analysis and Information System Security Policies",
@@ -5270,40 +5485,55 @@
         ]
       },
       "NIS2-ART21-3": {
-        "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that, when considering which measures referred to in\u2026",
+        "title": "Supply chain security and supplier-specific vulnerability assessment",
         "version": "2022/2555",
         "severity": "mandatory",
-        "implemented_by": []
+        "implemented_by": [
+          "PAT-023"
+        ]
       },
       "NIS2-ART21-4": {
-        "title": "Cybersecurity risk-management measures \u2014 Member States shall ensure that an entity that finds that it does not comply with the\u2026",
+        "title": "Corrective measures for non-compliance",
         "version": "2022/2555",
         "severity": "mandatory",
-        "implemented_by": []
+        "implemented_by": [
+          "ADR-0002",
+          "P-001"
+        ]
       },
       "NIS2-ART23-1": {
-        "title": "Reporting obligations \u2014 Each Member State shall ensure that essential and important entities notify, without\u2026",
+        "title": "Notification of significant incidents to CSIRT or competent authority",
         "version": "2022/2555",
         "severity": "mandatory",
-        "implemented_by": []
+        "implemented_by": [
+          "P-008",
+          "PAT-021"
+        ]
       },
       "NIS2-ART23-2": {
-        "title": "Reporting obligations \u2014 Where applicable, Member States shall ensure that essential and important entities\u2026",
+        "title": "Informing service recipients of significant cyber threats",
         "version": "2022/2555",
         "severity": "mandatory",
-        "implemented_by": []
+        "implemented_by": [
+          "PAT-021"
+        ]
       },
       "NIS2-ART23-3": {
-        "title": "Reporting obligations \u2014 An incident shall be considered to be significant if",
+        "title": "Criteria for a significant incident",
         "version": "2022/2555",
         "severity": "mandatory",
-        "implemented_by": []
+        "implemented_by": [
+          "PAT-021"
+        ]
       },
       "NIS2-ART23-4": {
-        "title": "Reporting obligations \u2014 Member States shall ensure that, for the purpose of notification under paragraph 1, the\u2026",
+        "title": "Notification timelines: 24h early warning, 72h notification, 1-month final report",
         "version": "2022/2555",
         "severity": "mandatory",
-        "implemented_by": []
+        "implemented_by": [
+          "P-008",
+          "PAT-021"
+        ]
       }
     },
     "PPDR-DEVICE": {
