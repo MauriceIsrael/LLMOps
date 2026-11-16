@@ -42,7 +42,7 @@ def scenario() -> tuple[dict[str, Any], dict[str, Any]]:
     raw = {
         "requirements": [
             {"id": "REQ-001", "text": "The gateway shall survive the loss of one site.", "section": "3.2", "category": "resilience",
-             "criticality": "mandatory", "status": "gap", "source_id": "knowledge-hub:example-eng", "requirement_key": "REQ-001", "version": "1",
+             "criticality": "mandatory", "status": "gap", "source_id": "knowledge-hub:example-eng", "requirement_key": "REQ-001", "version": 1,
              "disposition": "deliberated", "disposition_reason": "",
              "disposition_status": "active", "disposition_author": "@carl", "disposition_by": "@ada",
              "disposition_validated_at": "2026-10-02T09:40:00", "matched_controls": '["NIS2-ART21-2C"]'},

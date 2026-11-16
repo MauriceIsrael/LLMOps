@@ -335,15 +335,20 @@ Produit un instantané réglementaire scellé par checksum SHA-256 calculé sur 
 * **Réponse HTTP 200** :
 ```json
 {
-  "snapshotId": "kh-demo-engagement-2027-secnumcloud-1789311842",
+  "snapshotId": "kh-demo-engagement-2027-secnumcloud-7a3c611095db",
   "sourceSystem": "knowledge-hub",
-  "schemaVersion": "2.0",
+  "schemaVersion": "4.0",
   "createdAt": "2026-09-17T15:04:02Z",
   "checksum": "sha256:7a3c611095db2cd333cae158a715aea5dae6b55c381745c6423b1b5674313f4c",
   "data": {
     "requirements": [
       {
         "id": "SNC-REQ-01",
+        "ref": {
+          "sourceId": "tuleap:demo",
+          "requirementKey": "DEMO-SEC-001",
+          "version": 1
+        },
         "title": "Immunité aux lois extraterritoriales et localisation européenne des données",
         "domain": "SECURITY",
         "verificationModes": ["architecture-model"],
@@ -875,7 +880,7 @@ Archinex est l'outil de délibération ; le Hub enregistre. Toutes les routes so
 | `POST statements/{id}/withdraw` | `contributor` (auteur) ou `decider` | `withdrawn` ; un autre contributeur : `403 not_author` |
 | `POST questions` `{question, subject?, section?, …}` | `contributor` | question ouverte |
 | `POST questions/{id}/answers` `{value, confidence, …}` | `contributor` | énoncé **proposé** lié à la question, qui devient `answered` |
-| `POST requirements` `{requirements: [{id, text, section?, category?, criticality?, ref?}]}` | `contributor` | 1 à 500 exigences ; `ref` optionnelle (`RequirementRef {sourceId, requirementKey, version}`, « trois champs ou rien », défaut `knowledge-hub:<engagement>` / `id` / `"1"`) ; un `id` existant avec le même texte est ignoré (`unchanged`), avec un autre texte : `409 requirement_changed` |
+| `POST requirements` `{requirements: [{id, text, section?, category?, criticality?}]}` | `contributor` | 1 à 500 exigences ; un `id` existant avec le même texte est ignoré (`unchanged`), avec un autre texte : `409 requirement_changed` |
 | `POST requirements/{id}/disposition` `{disposition, reason?}` | `contributor` | **1.27.** Propose ce que la délibération fait de l'exigence : `deliberated`, `evacuated` (`reason` = le motif) ou `clarification_needed` (`reason` = la question au client), 12 caractères au moins pour les deux dernières. `201` ; le rejeu à l'identique `200` (`created: false`, rien n'est remis à zéro) ; `409 disposition_pending` / `disposition_exists` |
 | `POST requirements/{id}/disposition/assert` | `decider` | **1.27.** La décision devient `active` (`validated_by`, `validated_at`) ; refusée à son auteur (`409 self_validation`) et, pour `evacuated` / `clarification_needed`, tant qu'un sujet porte l'exigence (`409 carried_by_subject`) |
 | `POST requirements/{id}/disposition/withdraw` | `contributor` (auteur) ou `decider` | **1.27.** `withdrawn` ; l'exigence peut recevoir une autre décision |
@@ -1395,17 +1400,21 @@ Schéma standard d'une entrée d'ontologie fédératrice :
 
 ---
 
+### 5.42 Contrat 1.41 — Snapshot de conformité majeure 4.0 et `RequirementRef` (Issues #148, #150)
+
+* **Majeure `4.0` sur `GET /api/compliance/conformity-snapshot`** :
+  * La route dérive désormais de la section `compliance` de l'instantané d'engagement (option (a) de #148) ; `EXPLICIT_KB_ALIGNMENTS` n'alimente plus aucun livrable d'homologation.
+  * Une exigence couverte par au moins une décision **affirmée** (`active`) est émise `allocated` avec ses preuves (`source: "knowledge-hub"`) ; une décision `proposed` ou l'absence de décision la laisse à `identified`.
+  * Chaque exigence porte une `RequirementRef { sourceId, requirementKey, version }` complète (`version` entier >= 1, jamais partielle).
+* **Ingestion générique de `RequirementRef` (#150)** :
+  * `POST /api/engagements/{id}/requirements` et `POST /api/engagements/{id}/import` acceptent un objet optionnel `ref: { sourceId, requirementKey, version }` (ex. fourni par Tuleap) et refusent toute référence partielle (`400 invalid_argument`). En mode autonome (sans `ref` externe), le Hub assigne `knowledge-hub:<engagement>` avec `version: 1`.
+  * L'instantané d'engagement (`schemas/engagement_snapshot.schema.json`) expose `ref` sur chaque exigence lorsque les trois champs sont complets.
+* **Admission côté Document Engine (`document-engine#162`)** : `validateConformitySnapshot` admet `sourceSystem: "knowledge-hub"` et `evidence[].source: "knowledge-hub"`. `make verify-suite` valide le témoin avec verdict `ACCEPTÉ`.
+
+---
+
 ## 4. Oracles & Vecteurs de Test Partagés
 
 Afin de garantir une interopérabilité sans faille entre implémentations Python et TypeScript, les vecteurs de référence suivants sont tenus à disposition dans le dépôt :
 * **Vecteur de Test Canonique (`canonical-json v1` + SHA-256)** : [`tests/fixtures/canonical_conformity_vector.json`](../../tests/fixtures/canonical_conformity_vector.json)
 * **Jeu d'Essai CCTP de Référence (Messagerie OIV)** : [`fixtures/rfp_messagerie_securisee.txt`](../../fixtures/rfp_messagerie_securisee.txt) (SHA-256: `792b9d332e8ccc589a2d74468d56bc761539542fc8d337a71d77854f87c258b5`)
-
----
-
-## 5.41 Normalisation `RequirementRef` (Contrat 1.41, LLMOps #150)
-
-Le triplet `RequirementRef { sourceId, requirementKey, version }` (`pipelines/requirement_ref.py`) formalise l'identité des exigences d'appel d'offres et de conformité :
-- **Trois champs ou rien** : une référence partielle (ou sans `version` connue) n'est jamais acceptée à l'écriture (`400 invalid_argument` / rejet d'import) ni émise dans les instantanés (`ref` absente).
-- **`sourceId`** : conforme au motif normatif `^[a-z0-9-]+:[a-z0-9-]+$` (ADR-SUITE-04 §3), par exemple `knowledge-hub:<engagement>` ou `tuleap:<project>`.
-- **Traçabilité** : toute modification du texte d'une exigence incrémente sa `version` (`save_requirement`), et `ref` est émise de manière additive sur les exigences de l'instantané d'engagement et de `GET /api/compliance/conformity-snapshot`.

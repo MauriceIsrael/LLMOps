@@ -109,11 +109,7 @@ def _based_on(raw: Any) -> list[dict[str, Any]]:
 
 def _requirement(r: dict[str, Any]) -> dict[str, Any]:
     """A requirement as the snapshot states it. The decision on it (contract 1.27) appears only while it is proposed or asserted:
-    a requirement nobody decided about, or whose decision was withdrawn, is written as before.
-
-    Contract 1.41 (#150): ``ref`` (``RequirementRef {sourceId, requirementKey, version}``) is emitted only when all
-    three fields are present and valid — a requirement without a known version never emits a partial reference.
-    """
+    a requirement nobody decided about, or whose decision was withdrawn, is written as before."""
     from pipelines.requirement_ref import try_requirement_ref  # noqa: PLC0415
 
     out: dict[str, Any] = {"id": r["id"], "text": r.get("text") or "", "section": r.get("section") or "",

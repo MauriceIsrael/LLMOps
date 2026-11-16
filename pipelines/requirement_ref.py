@@ -1,4 +1,4 @@
-"""Normalized RequirementRef triplet for strict RFP requirement cross-referencing (LLMOps #150).
+"""Normalized RequirementRef triplet for strict requirement cross-referencing (LLMOps #150).
 
 A suite document designates a requirement by ``RequirementRef {sourceId, requirementKey, version}``
 (``contracts/requirement-ref.md``, ADR-SUITE-04 §3):
@@ -6,9 +6,8 @@ A suite document designates a requirement by ``RequirementRef {sourceId, require
 * **Three fields or nothing** ("une référence partielle n'existe jamais"): a requirement without a
   known ``version`` (or missing ``sourceId`` / ``requirementKey``) must never emit a partial ``ref``.
 * ``sourceId`` follows the normative pattern ``^[a-z0-9-]+:[a-z0-9-]+$`` (the authoritative registry,
-  never an instance URL), e.g. ``knowledge-hub:<engagement>`` or ``tuleap:<project>``.
-* ``version`` changes whenever a requirement is modified so downstream consumers (conformity-engine,
-  Document Engine) can detect stale allocations and perform strict joins on ``(sourceId, requirementKey)``.
+  never an instance URL), e.g. ``tuleap:rrf`` or ``knowledge-hub:example-eng``.
+* ``version`` is a positive integer (``>= 1``, changeset rank), never a string or boolean.
 """
 
 from __future__ import annotations
@@ -46,7 +45,7 @@ def hub_source_id(scope: str) -> str:
     return candidate
 
 
-def requirement_ref(source_id: str, requirement_key: str, version: str | int) -> dict[str, str]:
+def requirement_ref(source_id: str, requirement_key: str, version: int) -> dict[str, Any]:
     """Construct a validated ``RequirementRef {sourceId, requirementKey, version}`` triplet."""
     if not isinstance(source_id, str) or not SOURCE_ID_PATTERN.match(source_id):
         raise RequirementRefError(
@@ -58,27 +57,20 @@ def requirement_ref(source_id: str, requirement_key: str, version: str | int) ->
             "missing_requirement_key",
             f"requirementKey must be a non-empty string, got {requirement_key!r}",
         )
-    if isinstance(version, bool) or version is None:
-        raise RequirementRefError("missing_version", f"version must be a non-empty string or positive integer, got {version!r}")
-    if isinstance(version, int):
-        if version < 1:
-            raise RequirementRefError("invalid_version", f"numeric version must be >= 1, got {version!r}")
-        version_str = str(version)
-    elif isinstance(version, str):
-        version_str = version.strip()
-        if not version_str:
-            raise RequirementRefError("missing_version", "version must be a non-empty string")
-    else:
-        raise RequirementRefError("invalid_version", f"version must be a string or integer, got {type(version).__name__}")
+    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
+        raise RequirementRefError(
+            "invalid_version",
+            f"version must be an integer >= 1 (changeset rank), got {version!r}",
+        )
 
     return {
         "sourceId": source_id,
         "requirementKey": requirement_key.strip(),
-        "version": version_str,
+        "version": version,
     }
 
 
-def validate_requirement_ref(raw: Any) -> dict[str, str]:
+def validate_requirement_ref(raw: Any) -> dict[str, Any]:
     """Strictly validate an incoming ``RequirementRef`` object (all three fields required, no extras)."""
     if not isinstance(raw, dict):
         raise RequirementRefError("invalid_ref", "RequirementRef must be an object with sourceId, requirementKey and version")
@@ -98,31 +90,25 @@ def validate_requirement_ref(raw: Any) -> dict[str, str]:
     return requirement_ref(raw["sourceId"], raw["requirementKey"], raw["version"])
 
 
-def try_requirement_ref(source_id: Any, requirement_key: Any, version: Any) -> dict[str, str] | None:
-    """Return a valid ``RequirementRef`` or ``None`` if any field is absent/invalid (never emits a partial ref)."""
-    if not isinstance(source_id, str) or not source_id.strip():
+def try_requirement_ref(source_id: Any, requirement_key: Any, version: Any) -> dict[str, Any] | None:
+    """Return a complete ``RequirementRef`` if all three fields are valid, or ``None`` (never partial)."""
+    if not source_id or not requirement_key or version is None or isinstance(version, bool):
         return None
-    if not isinstance(requirement_key, str) or not requirement_key.strip():
-        return None
-    if isinstance(version, bool) or version is None:
-        return None
-    if isinstance(version, str) and not version.strip():
-        return None
+    if isinstance(version, str) and version.strip().isdigit():
+        version = int(version.strip())
     try:
-        return requirement_ref(source_id, requirement_key, version)
+        return requirement_ref(str(source_id).strip(), str(requirement_key).strip(), version)
     except RequirementRefError:
         return None
 
 
-def bump_requirement_version(current_version: str | int | None) -> str:
-    """Return the next version string when a requirement's content is modified."""
-    if current_version is None or isinstance(current_version, bool):
-        return "1"
-    s = str(current_version).strip()
-    if not s:
-        return "1"
-    if s.isdigit():
-        return str(int(s) + 1)
-    if s.startswith("v") and s[1:].isdigit():
-        return f"v{int(s[1:]) + 1}"
-    return f"{s}.1"
+__all__ = [
+    "HUB_SOURCE_PREFIX",
+    "SOURCE_ID_PATTERN",
+    "RequirementRefError",
+    "hub_source_id",
+    "normalize_slug",
+    "requirement_ref",
+    "try_requirement_ref",
+    "validate_requirement_ref",
+]

@@ -12,7 +12,7 @@
       "subject": "gateway-services",
       "reversibility": "costly",
       "source": "knowledge-hub",
-      "source-snapshot": "eng-example-eng-10c9e2f81fb9",
+      "source-snapshot": "eng-example-eng-96989f714ee5",
       "validated-by": "@ada",
       "validated-at": "2026-10-02T10:00:00",
       "rejected-options": "Active-passive gateway — Failover time above the budget.",

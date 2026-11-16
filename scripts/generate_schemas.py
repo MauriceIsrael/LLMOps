@@ -655,7 +655,7 @@ export interface KnowledgeRef {{
 export interface RequirementRef {{
   sourceId: string;
   requirementKey: string;
-  version: string;
+  version: number;
 }}
 
 export interface Statement {{

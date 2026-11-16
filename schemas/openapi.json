@@ -10,7 +10,7 @@
   "info": {
     "description": "Generated deterministically from the frozen contract shapes in tests/contract/frozen/. See docs/contracts/knowledge-hub-api-v1.md and docs/CLIENTS.md.",
     "title": "LLMOps Architecture Knowledge Hub API",
-    "version": "1.41"
+    "version": "1.40"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -271,27 +271,24 @@
                                 "type": "string"
                               },
                               "evidence": {
-                                "items": {
-                                  "properties": {
-                                    "mode": {
-                                      "type": "string"
-                                    },
-                                    "reference": {
-                                      "type": "string"
-                                    },
-                                    "source": {
-                                      "type": "string"
-                                    },
-                                    "type": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  "type": "object"
-                                },
                                 "type": "array"
                               },
                               "id": {
                                 "type": "string"
+                              },
+                              "ref": {
+                                "properties": {
+                                  "requirementKey": {
+                                    "type": "string"
+                                  },
+                                  "sourceId": {
+                                    "type": "string"
+                                  },
+                                  "version": {
+                                    "type": "number"
+                                  }
+                                },
+                                "type": "object"
                               },
                               "status": {
                                 "type": "string"

@@ -1,15 +1,47 @@
 {
-  "snapshotId": "kh-golden-engagement-nis2-365f29d0c7fd",
+  "snapshotId": "kh-golden-engagement-nis2-4b3f023bdeba",
   "sourceSystem": "knowledge-hub",
-  "schemaVersion": "2.0",
+  "schemaVersion": "4.0",
   "createdAt": "2026-10-01T12:00:00Z",
-  "checksum": "sha256:365f29d0c7fd41c07065f07c721cbbcc80eb0d3ee595f6f81dededbf4387b759",
+  "checksum": "sha256:4b3f023bdebadf56245d58d4b0a2efae4dcb1e5da98600cd9fbeb8e2824be2a8",
   "data": {
     "requirements": [
       {
-        "id": "NIS2-ART20-1",
-        "title": "Governance — Member States shall ensure that the management bodies of essential and important…",
-        "domain": "COMPLIANCE",
+        "id": "REQ-NIS2-01",
+        "ref": {
+          "sourceId": "tuleap:golden",
+          "requirementKey": "GOLD-NET-001",
+          "version": 2
+        },
+        "title": "Network segmentation and access control shall isolate critical control plane traffic.",
+        "domain": "NETWORK",
+        "verificationModes": [
+          "architecture-model"
+        ],
+        "status": "allocated",
+        "evidence": [
+          {
+            "mode": "architecture-model",
+            "type": "graph-item",
+            "reference": "PAT-006",
+            "source": "knowledge-hub"
+          }
+        ],
+        "appliesTo": {
+          "programRef": "GOLDEN-ENGAGEMENT",
+          "lotRefs": [],
+          "pbsRefs": []
+        }
+      },
+      {
+        "id": "REQ-NIS2-02",
+        "ref": {
+          "sourceId": "knowledge-hub:golden-engagement",
+          "requirementKey": "REQ-NIS2-02",
+          "version": 1
+        },
+        "title": "Governance policy shall assign cybersecurity accountability.",
+        "domain": "GOVERNANCE",
         "verificationModes": [
           "architecture-model"
         ],
@@ -19,44 +51,6 @@
           "programRef": "GOLDEN-ENGAGEMENT",
           "lotRefs": [],
           "pbsRefs": []
-        },
-        "ref": {
-          "sourceId": "knowledge-hub:nis2",
-          "requirementKey": "NIS2-ART20-1",
-          "version": "2022/2555"
-        }
-      },
-      {
-        "id": "NIS2-ART21-2A",
-        "title": "Politiques d'analyse des risques et sécurité des systèmes d'information",
-        "domain": "COMPLIANCE",
-        "verificationModes": [
-          "architecture-model"
-        ],
-        "status": "allocated",
-        "evidence": [
-          {
-            "mode": "architecture-model",
-            "type": "graph-item",
-            "reference": "ADR-0001",
-            "source": "knowledge-hub"
-          },
-          {
-            "mode": "architecture-model",
-            "type": "graph-item",
-            "reference": "P-001",
-            "source": "knowledge-hub"
-          }
-        ],
-        "appliesTo": {
-          "programRef": "GOLDEN-ENGAGEMENT",
-          "lotRefs": [],
-          "pbsRefs": []
-        },
-        "ref": {
-          "sourceId": "knowledge-hub:nis2",
-          "requirementKey": "NIS2-ART21-2A",
-          "version": "2022/2555"
         }
       }
     ]

@@ -408,7 +408,7 @@ class EngagementWriter:
     # --- requirements ---------------------------------------------------------------------------------------------
 
     def add_requirements(self, body: dict[str, Any]) -> dict[str, Any]:
-        from pipelines.requirement_ref import (
+        from pipelines.requirement_ref import (  # noqa: PLC0415
             RequirementRefError,
             hub_source_id,
             validate_requirement_ref,
@@ -430,19 +430,17 @@ class EngagementWriter:
                 try:
                     ref = validate_requirement_ref(item["ref"])
                 except RequirementRefError as err:
-                    raise WriteError(400, "invalid_argument", str(err), f"requirements[{i}].ref") from err
+                    raise WriteError(400, "invalid_argument", f"requirements[{i}].ref: {err}", "requirements") from err
                 source_id, requirement_key, version = ref["sourceId"], ref["requirementKey"], ref["version"]
             else:
-                source_id, requirement_key, version = hub_source_id(self.engagement), req_id, "1"
+                source_id, requirement_key, version = hub_source_id(self.engagement), req_id, 1
             prepared.append({
                 "id": req_id, "engagement": self.engagement, "text": _text(item, "text"),
                 "section": _text(item, "section", required=False, limit=200),
                 "category": _text(item, "category", required=False, default="general", limit=64),
                 "criticality": _text(item, "criticality", required=False, default="mandatory", limit=32),
                 "status": "gap",
-                "source_id": source_id,
-                "requirement_key": requirement_key,
-                "version": version,
+                "source_id": source_id, "requirement_key": requirement_key, "version": str(version),
             })
         existing = {r["id"]: r for r in self.repo.get_requirements(self.engagement)}
         for req in prepared:
@@ -512,7 +510,7 @@ class EngagementWriter:
 
     @staticmethod
     def _public_requirement(r: dict[str, Any]) -> dict[str, Any]:
-        from pipelines.requirement_ref import try_requirement_ref
+        from pipelines.requirement_ref import try_requirement_ref  # noqa: PLC0415
 
         out: dict[str, Any] = {k: r.get(k) for k in ("id", "section", "category", "criticality", "status")}
         ref = try_requirement_ref(r.get("source_id"), r.get("requirement_key"), r.get("version"))

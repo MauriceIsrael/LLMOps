@@ -957,9 +957,6 @@ class ElicitationRepository:
     def save_requirement(self, req: dict[str, Any]) -> None:
         """Enregistre ou met à jour une exigence RFP dans le graphe d'engagement."""
         import json
-
-        from pipelines.requirement_ref import bump_requirement_version
-
         req_id = req["id"]
         engagement = req.get("engagement", "default")
         section = req.get("section", "")
@@ -974,28 +971,15 @@ class ElicitationRepository:
         if isinstance(matched_controls, list):
             matched_controls = json.dumps(matched_controls)
         rationale = req.get("rationale", "")
+        source_id = str(req.get("source_id") or "")
+        requirement_key = str(req.get("requirement_key") or "")
+        version = str(req.get("version") or "")
 
-        raw_ref = req.get("ref")
-        ref: dict[str, Any] = raw_ref if isinstance(raw_ref, dict) else {}
-        source_id = str(req.get("source_id") or ref.get("sourceId") or "")
-        requirement_key = str(req.get("requirement_key") or ref.get("requirementKey") or "")
-        version = str(req.get("version") or ref.get("version") or "")
-
-        check_q = "MATCH (r:Requirement {id: $id}) RETURN r.text as text, r.source_id as source_id, r.requirement_key as requirement_key, r.version as version;"
+        check_q = "MATCH (r:Requirement {id: $id}) RETURN count(r) AS c;"
         rows = self.db_client.execute_cypher(check_q, params={"id": req_id})
-        old = rows[0] if rows and isinstance(rows[0], dict) and "error" not in rows[0] else None
+        exists = rows and rows[0].get("c", 0) > 0
 
-        if old is not None:
-            if not source_id:
-                source_id = str(old.get("source_id") or "")
-            if not requirement_key:
-                requirement_key = str(old.get("requirement_key") or "")
-            if not version:
-                old_version = str(old.get("version") or "")
-                if old.get("text") != text and old_version:
-                    version = bump_requirement_version(old_version)
-                else:
-                    version = old_version
+        if exists:
             update_q = """
             MATCH (r:Requirement {id: $id})
             SET r.engagement = $engagement,
@@ -1089,11 +1073,11 @@ class ElicitationRepository:
                             "disposition_by", "disposition_validated_at")
 
     def get_requirement(self, requirement_id: str) -> dict[str, Any] | None:
-        """One requirement with its decision (``disposition_*``) and RequirementRef fields, or None."""
+        """One requirement with its decision (``disposition_*``), or None."""
         cols = ", ".join(
             f"r.{c} as {c}"
-            for c in ("id", "engagement", "section", "category", "text", "criticality", "status",
-                      "source_id", "requirement_key", "version") + self._DISPOSITION_COLUMNS
+            for c in ("id", "engagement", "section", "category", "text", "criticality", "status", "source_id", "requirement_key", "version")
+            + self._DISPOSITION_COLUMNS
         )
         res = self.db_client.execute_cypher(f"MATCH (r:Requirement {{id: $id}}) RETURN {cols};", params={"id": requirement_id})
         if not res or "error" in res[0]:

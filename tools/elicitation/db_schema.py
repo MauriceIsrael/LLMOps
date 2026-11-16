@@ -191,7 +191,7 @@ class ElicitationSchemaInitializer:
             )
         else:
             # Contract 1.27: the decision on a requirement (what the deliberation does with the clause), proposed then asserted.
-            # Contract 1.41 (#150): RequirementRef triplet (source_id, requirement_key, version).
+            # Issue #150: RequirementRef triplet (source_id, requirement_key, version).
             for column in ("disposition", "disposition_reason", "disposition_status", "disposition_author", "disposition_at",
                            "disposition_by", "disposition_validated_at", "source_id", "requirement_key", "version"):
                 try:

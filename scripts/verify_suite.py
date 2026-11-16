@@ -34,10 +34,14 @@ WITNESSES = [  # (nature, fichier) : seule la conformité a un lecteur dans le D
     ("engagement", ROOT / "schemas" / "examples" / "engagement_snapshot.example.json"),
 ]
 NOT_VERIFIED = 3
-# Avant l'admission (#152) : le lecteur refuse la provenance du Hub (premier refus, avant version, `ref` et source de preuve).
-# Le lecteur de conformité lève une erreur sans code : on reconnaît le refus à son message. À mettre à jour, avec la preuve, le
-# jour où la provenance est admise : le verdict attendu change alors, et ce script échoue tant qu'on ne l'a pas fait.
-EXPECTED_READER_REFUSAL = "'sourceSystem' attendu 'tuleap', reçu 'knowledge-hub'"
+
+
+def _tsx_bin(de: Path) -> Path | None:
+    for name in ("tsx.cmd", "tsx"):
+        candidate = de / "node_modules" / ".bin" / name
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def _sha(path: Path) -> str:
@@ -55,7 +59,7 @@ def locate_document_engine() -> tuple[Path | None, str]:
     de = Path(os.environ.get("DOCUMENT_ENGINE_DIR") or ROOT.parent / "document-engine").resolve()
     if not (de / "contracts" / "canonical-json.vectors.json").is_file():
         return None, f"dépôt du Document Engine introuvable à {de} (DOCUMENT_ENGINE_DIR)"
-    if shutil.which("node") is None or not (de / "node_modules" / ".bin" / "tsx").exists():
+    if shutil.which("node") is None or _tsx_bin(de) is None:
         return None, f"node absent, ou `npm ci` non lancé dans {de}"
     return de, ""
 
@@ -72,8 +76,10 @@ def main() -> int:
     if mine != theirs:
         problems.append("les vecteurs canonical-json diffèrent du Document Engine")
 
+    tsx_bin = _tsx_bin(de)
+    assert tsx_bin is not None
     probe = subprocess.run(  # noqa: S603
-        [str(de / "node_modules" / ".bin" / "tsx"), str(ROOT / "scripts" / "suite_probe.mts"), str(de),
+        [str(tsx_bin), str(ROOT / "scripts" / "suite_probe.mts"), str(de),
          *(f"{kind}={path}" for kind, path in WITNESSES)],
         cwd=de, capture_output=True, text=True, check=False,
     )
@@ -91,9 +97,8 @@ def main() -> int:
         if verdict is not None:
             print(f"{name} : lecteur de conformité du Document Engine → "
                   f"{'ACCEPTÉ' if verdict['accepted'] else 'refusé : ' + verdict['message']}")
-            if verdict["accepted"] or EXPECTED_READER_REFUSAL not in verdict["message"]:
-                problems.append(f"{name} : verdict du lecteur inattendu (attendu : refus « {EXPECTED_READER_REFUSAL} »). Admission de "
-                                "knowledge-hub ? Mettre à jour EXPECTED_READER_REFUSAL avec la preuve, voir #152")
+            if not verdict["accepted"]:
+                problems.append(f"{name} : refusé par le lecteur du Document Engine : {verdict['message']}")
     for problem in problems:
         print(f"ÉCART : {problem}")
     return 1 if problems else 0
