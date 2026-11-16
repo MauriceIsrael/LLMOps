@@ -2,6 +2,10 @@
 
 Published changes, newest first (written by `kb publish`).
 
+## 2026-11-16 — issue #104
+
+- `nis2_coverage`: Reliure complète des 9 exigences NIS2 orphelines (`NIS2-ART20-1`, `NIS2-ART20-2`, `NIS2-ART21-1`, `NIS2-ART21-3`, `NIS2-ART21-4`, `NIS2-ART23-1` à `NIS2-ART23-4`) avec des titres corrigés, `title_fr`, `terms`, critères d'acceptation et liens vers les actifs existants (`P-001`, `P-008`, `ADR-0002`) ainsi que 4 nouveaux patterns (`PAT-020` à `PAT-023`).
+
 ## 2026-11-11 — issue #184
 
 - `ontology_governance`: Formalisation du lien fort entre clauses de doctrine réglementaires/métier et feuilles d'ontologie via le métamodèle `OntologyEntity` (`governed_by_clauses`), le prédicat ontologique `satisfies_clause` et l'indexation bidirectionnelle `clause_index` sur `GET /api/knowledge/ontology/export` et l'outil MCP `export_ontology_catalog`.

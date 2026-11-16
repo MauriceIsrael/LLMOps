@@ -385,6 +385,29 @@ def audit_compliance_gaps(
             except Exception:
                 continue
 
+    controls_dir = base / "controls"
+    if controls_dir.exists():
+        for file_path in controls_dir.rglob("*.md"):
+            if file_path.name.startswith("_") or file_path.name.lower() in ("readme.md", "index.md"):
+                continue
+            try:
+                content = file_path.read_text(encoding="utf-8")
+                fm_match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
+                if not fm_match:
+                    continue
+                fm = yaml.safe_load(fm_match.group(1)) or {}
+                cid = fm.get("id") or file_path.stem
+                if cid not in implementing_map:
+                    continue
+                satisfied_by = fm.get("satisfied_by") or []
+                if isinstance(satisfied_by, str):
+                    satisfied_by = [satisfied_by]
+                for aid in satisfied_by:
+                    if aid:
+                        implementing_map[cid].append(str(aid))
+            except Exception:
+                continue
+
     # Filtrage éventuel par framework
     fw_report: dict[str, Any] = {}
     for cid, ctrl in controls.items():
