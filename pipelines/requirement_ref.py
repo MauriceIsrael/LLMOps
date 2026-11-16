@@ -6,7 +6,7 @@ A suite document designates a requirement by ``RequirementRef {sourceId, require
 * **Three fields or nothing** ("une référence partielle n'existe jamais"): a requirement without a
   known ``version`` (or missing ``sourceId`` / ``requirementKey``) must never emit a partial ``ref``.
 * ``sourceId`` follows the normative pattern ``^[a-z0-9-]+:[a-z0-9-]+$`` (the authoritative registry,
-  never an instance URL), e.g. ``tuleap:rrf`` or ``knowledge-hub:nordwave-mcx-2027``.
+  never an instance URL), e.g. ``tuleap:rrf`` or ``knowledge-hub:example-eng``.
 * ``version`` is a positive integer (``>= 1``, changeset rank), never a string or boolean.
 """
 

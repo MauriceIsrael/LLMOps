@@ -1,11 +1,11 @@
 {
   "schemaVersion": "1.8",
-  "snapshotId": "eng-example-eng-117b8db2d726",
+  "snapshotId": "eng-example-eng-96989f714ee5",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:117b8db2d7261f083a37f48b014457cf3b22b44fbc3f18c75ea2282586400d30",
+  "checksum": "sha256:96989f714ee54472a35c828100567abc056e1987cda9b1f9f991038ef76941af",
   "data": {
     "engagement": {
       "id": "example-eng",
@@ -31,6 +31,11 @@
         "category": "resilience",
         "criticality": "mandatory",
         "status": "gap",
+        "ref": {
+          "sourceId": "knowledge-hub:example-eng",
+          "requirementKey": "REQ-001",
+          "version": 1
+        },
         "disposition": {
           "value": "deliberated",
           "reason": "",

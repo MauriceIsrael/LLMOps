@@ -271,27 +271,24 @@
                                 "type": "string"
                               },
                               "evidence": {
-                                "items": {
-                                  "properties": {
-                                    "mode": {
-                                      "type": "string"
-                                    },
-                                    "reference": {
-                                      "type": "string"
-                                    },
-                                    "source": {
-                                      "type": "string"
-                                    },
-                                    "type": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  "type": "object"
-                                },
                                 "type": "array"
                               },
                               "id": {
                                 "type": "string"
+                              },
+                              "ref": {
+                                "properties": {
+                                  "requirementKey": {
+                                    "type": "string"
+                                  },
+                                  "sourceId": {
+                                    "type": "string"
+                                  },
+                                  "version": {
+                                    "type": "number"
+                                  }
+                                },
+                                "type": "object"
                               },
                               "status": {
                                 "type": "string"
