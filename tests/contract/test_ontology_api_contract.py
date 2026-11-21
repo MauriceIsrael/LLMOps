@@ -143,6 +143,7 @@ def test_ontology_export_contract_and_tool(monkeypatch):
     # Check triplets structure and relational consistency
     for t in triplets:
         assert "id" in t
+        # Prédicats du contrat : ceux d'origine, plus requires_prerequisite_axis et instantiates_component (issue #192).
         assert t["predicate"] in (
             "requires_aspect",
             "implemented_by",
@@ -150,10 +151,15 @@ def test_ontology_export_contract_and_tool(monkeypatch):
             "constrains",
             "conflicts_with",
             "satisfies_clause",
+            "requires_prerequisite_axis",
+            "instantiates_component",
         )
         assert t["subject"] in entities, f"Dangling subject: {t['subject']}"
         if t["predicate"] == "satisfies_clause":
             assert t["object"].startswith("urn:archinex:kb:clause:") or t["object"].startswith("urn:llmops:kb:clause:")
+        elif t["predicate"] == "instantiates_component":
+            # L'objet est un composant logique, pas une entité d'ontologie (issue #192).
+            assert t["object"].startswith("urn:archinex:component:"), t["object"]
         else:
             assert t["object"] in entities, f"Dangling object: {t['object']}"
 
