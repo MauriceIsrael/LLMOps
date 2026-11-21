@@ -3733,7 +3733,10 @@ def export_ontology_catalog(clause: str | None = None, leaf: str | None = None) 
     if not is_ontology_experimental_enabled():
         return not_found_response("experimental_ontology_disabled")
 
-    from pipelines.ontology.catalog_file import OntologyCatalogUnavailable, load_catalog_document
+    from pipelines.ontology.catalog_file import (
+        OntologyCatalogUnavailableError,
+        load_catalog_document,
+    )
 
     try:
         data = load_catalog_document()
@@ -3746,7 +3749,7 @@ def export_ontology_catalog(clause: str | None = None, leaf: str | None = None) 
             return resolve_clauses_by_leaf(data, leaf)
 
         return {"status": "ok", "experimental": True, **data}
-    except OntologyCatalogUnavailable as exc:
+    except OntologyCatalogUnavailableError as exc:
         # Jamais de repli silencieux : un catalogue absent ou d'une autre forme est une erreur explicite.
         if exc.code == "ontology_export_not_found":
             return not_found_response(exc.code)

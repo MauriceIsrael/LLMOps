@@ -497,7 +497,6 @@ def create_starlette_app() -> Starlette:
 
     async def handle_health(request):
         """Liveness probe: returns 200 if the server process is responsive, with engine and KB version metadata."""
-        import json
         from pathlib import Path
 
         kb_meta = {}
@@ -642,7 +641,6 @@ def create_starlette_app() -> Starlette:
         return SsePostResponse()
 
     async def handle_visualize(request):
-        from pathlib import Path
 
         from pipelines.visualization.graph_visualizer import GraphVisualizer
 
@@ -653,7 +651,6 @@ def create_starlette_app() -> Starlette:
         return HTMLResponse(content=html_content)
 
     async def handle_snapshot_latest(request):
-        from pathlib import Path
 
         latest_file = Path("data/snapshots/latest.json")
         if not latest_file.exists():
@@ -670,7 +667,6 @@ def create_starlette_app() -> Starlette:
         return JSONResponse(data, headers={"ETag": etag, "Cache-Control": "public, max-age=3600"})
 
     async def handle_snapshot_by_id(request):
-        import json
         from pathlib import Path
 
         snap_id = request.path_params.get("snapshot_id", "")
@@ -690,11 +686,14 @@ def create_starlette_app() -> Starlette:
                 {"error": "Experimental ontology feature is disabled"}, status_code=404
             )
 
-        from pipelines.ontology.catalog_file import OntologyCatalogUnavailable, load_catalog_document
+        from pipelines.ontology.catalog_file import (
+            OntologyCatalogUnavailableError,
+            load_catalog_document,
+        )
 
         try:
             data = load_catalog_document()
-        except OntologyCatalogUnavailable as exc:
+        except OntologyCatalogUnavailableError as exc:
             status = 404 if exc.code == "ontology_export_not_found" else 503
             return JSONResponse({"error": str(exc), "code": exc.code}, status_code=status)
 

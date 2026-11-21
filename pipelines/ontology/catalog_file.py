@@ -18,7 +18,7 @@ from typing import Any
 DEFAULT_CATALOG_PATH = Path("data/snapshots/ontology_export.json")
 
 
-class OntologyCatalogUnavailable(Exception):
+class OntologyCatalogUnavailableError(Exception):
     """Le catalogue ne peut pas être servi. ``code`` est stable (utilisable par les clients et les tests)."""
 
     def __init__(self, code: str, message: str) -> None:
@@ -30,12 +30,12 @@ def load_catalog_document(path: str | Path | None = None) -> dict[str, Any]:
     """Charge et normalise le catalogue : enveloppe ``payload`` dépliée, ``clause_index`` garanti.
 
     Raises:
-        OntologyCatalogUnavailable: ``ontology_export_not_found`` (fichier absent) ou
+        OntologyCatalogUnavailableError: ``ontology_export_not_found`` (fichier absent) ou
             ``ontology_export_wrong_shape`` (pas de ``entities`` : par exemple la forme ``payload.entries``).
     """
     catalog_path = Path(path) if path is not None else DEFAULT_CATALOG_PATH
     if not catalog_path.is_file():
-        raise OntologyCatalogUnavailable(
+        raise OntologyCatalogUnavailableError(
             "ontology_export_not_found",
             f"Ontology catalog not found at '{catalog_path}'. Run the catalog build; the entries exporter "
             f"(pipelines.ontology.export) does not produce this file.",
@@ -55,7 +55,7 @@ def load_catalog_document(path: str | Path | None = None) -> dict[str, Any]:
         }
 
     if not isinstance(data.get("entities"), dict):
-        raise OntologyCatalogUnavailable(
+        raise OntologyCatalogUnavailableError(
             "ontology_export_wrong_shape",
             f"'{catalog_path}' is not an ontology catalog: field 'entities' is missing "
             f"(found keys: {sorted(data.keys())}). The 'payload.entries' shape is not served.",

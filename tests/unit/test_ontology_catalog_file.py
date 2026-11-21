@@ -7,7 +7,7 @@ import pytest
 
 from pipelines.ontology.catalog_file import (
     DEFAULT_CATALOG_PATH,
-    OntologyCatalogUnavailable,
+    OntologyCatalogUnavailableError,
     load_catalog_document,
 )
 from pipelines.ontology.export import DEFAULT_EXPORT_PATH, export_ontology_snapshot
@@ -28,7 +28,7 @@ def test_two_producers_never_share_a_path():
 
 
 def test_missing_catalog_is_an_explicit_error_not_a_regeneration(tmp_path):
-    with pytest.raises(OntologyCatalogUnavailable) as exc:
+    with pytest.raises(OntologyCatalogUnavailableError) as exc:
         load_catalog_document(tmp_path / "absent.json")
     assert exc.value.code == "ontology_export_not_found"
     assert not (tmp_path / "absent.json").exists(), "loading must never regenerate the file"
@@ -41,7 +41,7 @@ def test_entries_shape_is_refused_not_served(tmp_path):
     produced = json.loads(out.read_text(encoding="utf-8"))
     assert "entries" in produced["payload"]  # confirme la forme du producteur « entries »
 
-    with pytest.raises(OntologyCatalogUnavailable) as exc:
+    with pytest.raises(OntologyCatalogUnavailableError) as exc:
         load_catalog_document(out)
     assert exc.value.code == "ontology_export_wrong_shape"
 
