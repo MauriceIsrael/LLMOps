@@ -497,7 +497,6 @@ def create_starlette_app() -> Starlette:
 
     async def handle_health(request):
         """Liveness probe: returns 200 if the server process is responsive, with engine and KB version metadata."""
-        import json
         from pathlib import Path
 
         kb_meta = {}
@@ -642,7 +641,6 @@ def create_starlette_app() -> Starlette:
         return SsePostResponse()
 
     async def handle_visualize(request):
-        from pathlib import Path
 
         from pipelines.visualization.graph_visualizer import GraphVisualizer
 
@@ -653,7 +651,6 @@ def create_starlette_app() -> Starlette:
         return HTMLResponse(content=html_content)
 
     async def handle_snapshot_latest(request):
-        from pathlib import Path
 
         latest_file = Path("data/snapshots/latest.json")
         if not latest_file.exists():
@@ -670,7 +667,6 @@ def create_starlette_app() -> Starlette:
         return JSONResponse(data, headers={"ETag": etag, "Cache-Control": "public, max-age=3600"})
 
     async def handle_snapshot_by_id(request):
-        import json
         from pathlib import Path
 
         snap_id = request.path_params.get("snapshot_id", "")
@@ -690,38 +686,16 @@ def create_starlette_app() -> Starlette:
                 {"error": "Experimental ontology feature is disabled"}, status_code=404
             )
 
-        export_file = Path("data/snapshots/ontology_export.json")
-        if not export_file.exists():
-            from pipelines.ontology.export import export_ontology_snapshot
+        from pipelines.ontology.catalog_file import (
+            OntologyCatalogUnavailableError,
+            load_catalog_document,
+        )
 
-            try:
-                export_ontology_snapshot(
-                    ontology_dir=Path("data/kb/ontology"),
-                    output_path=export_file,
-                )
-            except Exception:
-                pass
-
-        if not export_file.exists():
-            return JSONResponse({"error": "Ontology export file not found"}, status_code=404)
-
-        with open(export_file, encoding="utf-8") as f:
-            data = json.load(f)
-
-        if "payload" in data and isinstance(data["payload"], dict) and "entities" in data["payload"]:
-            payload = data["payload"]
-            data = {
-                "catalog_version": payload.get("schema_version")
-                or data.get("schema_version", "1.0"),
-                "generated_at": data.get("generated_at") or "2026-10-29T10:00:00Z",
-                "entities": payload.get("entities", {}),
-                "triplets": payload.get("triplets", []),
-                "clause_index": payload.get("clause_index") or {},
-            }
-
-        if "clause_index" not in data or not data["clause_index"]:
-            from pipelines.ontology.catalog import build_clause_index
-            data["clause_index"] = build_clause_index(data.get("entities", {}), data.get("triplets", []))
+        try:
+            data = load_catalog_document()
+        except OntologyCatalogUnavailableError as exc:
+            status = 404 if exc.code == "ontology_export_not_found" else 503
+            return JSONResponse({"error": str(exc), "code": exc.code}, status_code=status)
 
         clause = request.query_params.get("clause")
         leaf = request.query_params.get("leaf")

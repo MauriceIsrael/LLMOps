@@ -1328,6 +1328,9 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
 * **`GET /api/knowledge/ontology/export`** :
   * Exporte le catalogue consolidé d'ontologie SI & Telco d'architecture d'entreprise au format `OntologyCatalog` (`{ catalog_version, generated_at, entities, triplets, clause_index }`).
   * Réponse `200 OK` avec en-tête `Content-Type: application/json`.
+  * **Une seule forme est servie (Issue #189)** : le catalogue ci-dessus. Aucune régénération ni autre forme n'est jamais servie ; le fichier absent ou d'une autre forme est une erreur explicite et machine-lisible :
+    * `404 Not Found` avec `{"code": "ontology_export_not_found", "error": …}` si le catalogue est absent ;
+    * `503 Service Unavailable` avec `{"code": "ontology_export_wrong_shape", "error": …}` si le fichier n'a pas de champ `entities` (par exemple la forme `payload.entries`). Voir `docs/ONTOLOGY-CATALOG.md`.
   * **Résolution bidirectionnelle (Issue #184)** :
     * Paramètre `clause` : `GET /api/knowledge/ontology/export?clause={clause_urn}` — résout toutes les feuilles techniques satisfaisant la clause doctrinale spécifiée ainsi que leurs triplets associés.
     * Paramètre `leaf` : `GET /api/knowledge/ontology/export?leaf={leaf_urn}` — résout toutes les clauses doctrinales justifiant formellement la feuille technique spécifiée ainsi que leurs triplets associés.

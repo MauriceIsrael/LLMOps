@@ -618,7 +618,7 @@ def ontology_record_cmd(
 @ontology_app.command("export")
 def ontology_export_cmd(
     ontology_dir: Path = typer.Option(Path("data/kb/ontology"), "--ontology-dir", help="Path to ontology directory."),
-    output_path: Path = typer.Option(Path("data/snapshots/ontology_export.json"), "--output", "-o", help="Output path for ontology export."),
+    output_path: Path = typer.Option(Path("data/snapshots/ontology_entries_export.json"), "--output", "-o", help="Output path for the ontology ENTRIES export (not the served catalog)."),
     ledger_path: Path | None = typer.Option(None, "--ledger", help="Path to version-ledger.json."),
 ) -> None:
     """Export sealed ontology snapshot (canonical-json v1, Issue #173)."""
@@ -626,6 +626,25 @@ def ontology_export_cmd(
 
     export_ontology_snapshot(ontology_dir, output_path=output_path, ledger_path=ledger_path)
     console.print(f"[green]Ontology exported and sealed to {output_path}[/green]")
+
+
+@ontology_app.command("catalog-check")
+def ontology_catalog_check_cmd(
+    catalog_path: Path = typer.Option(Path("data/snapshots/ontology_export.json"), "--catalog", help="Path to the served ontology catalog."),
+    strict: bool = typer.Option(False, "--strict", help="Treat warnings as errors."),
+) -> None:
+    """Check the served catalog: leaf coherence (oracle_rules vs projections) and intention purity (issues #190, #191)."""
+    from pipelines.ontology.catalog_checks import check_catalog, has_errors
+    from pipelines.ontology.catalog_file import load_catalog_document
+
+    findings = check_catalog(load_catalog_document(catalog_path))
+    for f in findings:
+        colour = "red" if f.severity == "error" else "yellow"
+        console.print(f"[{colour}]{f.severity.upper()}[/{colour}] {f.code} | {f.urn} {f.path} | {f.message}", soft_wrap=True)
+    failed = has_errors(findings) or (strict and bool(findings))
+    if failed:
+        raise typer.Exit(code=1)
+    console.print(f"[green]Catalog OK ({len(findings)} warning(s)).[/green]")
 
 
 def main() -> None:
