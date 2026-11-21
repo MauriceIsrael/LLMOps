@@ -27,50 +27,41 @@
                 ]
               },
               "projections": {
-                "keys": {
-                  "nautobot": {
-                    "keys": {
-                      "device_type": {
-                        "type": [
-                          "string"
-                        ]
-                      },
-                      "role": {
-                        "type": [
-                          "string"
-                        ]
-                      }
-                    },
-                    "type": [
-                      "object"
-                    ]
-                  },
-                  "suse_sylva_capi": {
-                    "keys": {
-                      "cluster_class": {
-                        "type": [
-                          "string"
-                        ]
-                      },
-                      "control_plane": {
-                        "type": [
-                          "string"
-                        ]
-                      },
-                      "os_profile": {
-                        "type": [
-                          "string"
-                        ]
-                      }
-                    },
-                    "type": [
-                      "object"
-                    ]
-                  }
-                },
                 "type": [
                   "object"
-                ]
+                ],
+                "values": {
+                  "keys": {
+                    "cluster_class": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "control_plane": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "device_type": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "os_profile": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "role": {
+                      "type": [
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "object"
+                  ]
+                }
               },
               "relationships": {
                 "keys": {

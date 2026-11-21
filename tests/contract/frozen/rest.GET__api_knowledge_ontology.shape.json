@@ -28,87 +28,71 @@
                   ]
                 },
                 "projections": {
-                  "keys": {
-                    "kubernetes_cilium": {
-                      "keys": {
-                        "namespace": {
-                          "type": [
-                            "string"
-                          ]
-                        },
-                        "port": {
-                          "type": [
-                            "number"
-                          ]
-                        },
-                        "protocol": {
-                          "type": [
-                            "string"
-                          ]
-                        },
-                        "zone_label": {
-                          "type": [
-                            "string"
-                          ]
-                        }
-                      },
-                      "type": [
-                        "object"
-                      ]
-                    },
-                    "nautobot": {
-                      "keys": {
-                        "device_type": {
-                          "type": [
-                            "string"
-                          ]
-                        },
-                        "role": {
-                          "type": [
-                            "string"
-                          ]
-                        },
-                        "security_zone": {
-                          "type": [
-                            "string"
-                          ]
-                        },
-                        "vrf": {
-                          "type": [
-                            "string"
-                          ]
-                        }
-                      },
-                      "type": [
-                        "object"
-                      ]
-                    },
-                    "suse_sylva_capi": {
-                      "keys": {
-                        "cluster_class": {
-                          "type": [
-                            "string"
-                          ]
-                        },
-                        "control_plane": {
-                          "type": [
-                            "string"
-                          ]
-                        },
-                        "os_profile": {
-                          "type": [
-                            "string"
-                          ]
-                        }
-                      },
-                      "type": [
-                        "object"
-                      ]
-                    }
-                  },
                   "type": [
                     "object"
-                  ]
+                  ],
+                  "values": {
+                    "keys": {
+                      "cluster_class": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "control_plane": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "device_type": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "namespace": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "os_profile": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "port": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "protocol": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "role": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "security_zone": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "vrf": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "zone_label": {
+                        "type": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  }
                 },
                 "relationships": {
                   "keys": {

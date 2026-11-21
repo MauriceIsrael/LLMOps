@@ -97,6 +97,11 @@ MAP_KEYS: dict[str, int] = {
     "breakdown_by_category": 1,  # RFP shredding: category -> counts
     "drafts": 1,                # prose suggest-batch: block id -> draft
     "alerts_by_owner": 1,       # freshness: owner handle -> alerts summary
+    "entities": 1,              # ontology catalog: entity URN -> entity
+    "by_clause": 1,             # ontology clause index: clause URN -> leaf URNs
+    "by_leaf": 1,               # ontology clause index: leaf URN -> clause URNs
+    "projections": 1,           # ontology leaf: projection name -> projection
+    "hydration_template": 1,    # ontology leaf: target tool -> template
 }
 
 
