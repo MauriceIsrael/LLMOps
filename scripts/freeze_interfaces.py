@@ -19,7 +19,9 @@ Shape format (recursive):
   merge of all elements' shapes, so that the order of the demo data does not matter;
 * map:    ``{"type": ["object"], "values": <shape> | null}`` — objects keyed by data
   (asset ids, control ids, section numbers...), listed in ``MAP_KEYS``. Their keys
-  depend on the knowledge base content, not on the interface.
+  depend on the knowledge base content, not on the interface;
+* opaque: ``{"type": ["object"]}`` — free-form knowledge-base content listed in ``OPAQUE_KEYS``,
+  whose keys and value types are not part of the interface.
 
 When a value is observed with several types, ``type`` lists all of them.
 """
@@ -97,7 +99,17 @@ MAP_KEYS: dict[str, int] = {
     "breakdown_by_category": 1,  # RFP shredding: category -> counts
     "drafts": 1,                # prose suggest-batch: block id -> draft
     "alerts_by_owner": 1,       # freshness: owner handle -> alerts summary
+    "entities": 1,              # ontology catalog: entity URN -> entity
+    "by_clause": 1,             # ontology clause index: clause URN -> leaf URNs
+    "by_leaf": 1,               # ontology clause index: leaf URN -> clause URNs
 }
+
+# Keys whose value is free-form content authored in the knowledge base (an object whose keys *and*
+# value types depend on the catalog, not on the interface): frozen as a plain object, never described.
+OPAQUE_KEYS: frozenset[str] = frozenset({
+    "projections",          # ontology leaf: projection name -> any JSON value
+    "hydration_template",   # ontology leaf: target tool -> any JSON template
+})
 
 
 def _json_type(value: Any) -> str:
@@ -147,7 +159,9 @@ def shape_of(value: Any, map_depth: int = 0) -> dict[str, Any]:
         return {
             "type": ["object"],
             "keys": {
-                str(k): shape_of(v, MAP_KEYS.get(str(k), 0))
+                str(k): {"type": ["object"]}
+                if str(k) in OPAQUE_KEYS and _json_type(v) == "object"
+                else shape_of(v, MAP_KEYS.get(str(k), 0))
                 for k, v in sorted(value.items(), key=lambda kv: str(kv[0]))
             },
         }
