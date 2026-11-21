@@ -43,7 +43,9 @@ Les consommateurs peuvent compter sur : `catalog_version`, `generated_at`, `enti
 - les **données de projet** ne migrent pas (identifiants d'exigences `REQ-…`, numéros de lot, noms de projet, identifiants de tenant ou de nœud d'un scénario) ; un garde-fou final échoue si une marque subsiste ;
 - chaque `governed_by_clauses` reçoit son triplet `satisfies_clause` (exigé par `validate_clause_leaf_integrity`) avec une justification qui dit sa provenance : **à rédiger par le relecteur**.
 
-Le rapport de relecture (`docs/ONTOLOGY-MIGRATION-REPORT.md`) liste les ajouts, les enrichissements, les données de projet retirées et chaque conflit en regard des deux valeurs.
+Le rapport de relecture (`docs/ONTOLOGY-MIGRATION-REPORT.md`) liste les ajouts, les enrichissements, les données de projet retirées, les doublons d'URN retirés et chaque conflit en regard des deux valeurs.
+
+**Doublons d'URN.** Deux écritures indépendantes ont parfois nommé le même concept sous deux URN (`oob_management_plane` / `oob_management`, etc.). Aucune règle mécanique ne le détecte : la liste `URN_TWINS` du script est établie à la relecture et retire le doublon d'origine Hub au profit de l'URN du consommateur, en reportant ses relations. Les garder ensemble fait calculer des axes en double côté consommateur. Un nouveau doublon repéré se déclare dans `URN_TWINS`.
 
 ### Prédicats et champs ajoutés au schéma
 

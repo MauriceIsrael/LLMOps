@@ -8,7 +8,14 @@ import pytest
 from pipelines.ontology.catalog import validate_clause_leaf_integrity
 from pipelines.ontology.catalog_checks import SEVERITY_ERROR, SEVERITY_WARNING, check_catalog
 from pipelines.ontology.catalog_file import load_catalog_document
-from scripts.migrate_ontology_from_fixture import PROJECT_MARK, _extends, migrate
+from scripts.migrate_ontology_from_fixture import (
+    PROJECT_MARK,
+    URN_TWINS,
+    Report,
+    _extends,
+    migrate,
+    retire_urn_twins,
+)
 
 ROOT = Path(__file__).parent.parent.parent
 CLAUSE = "urn:archinex:kb:clause:test:one"
@@ -163,3 +170,39 @@ def test_guard_fails_when_project_data_would_survive(monkeypatch):
     src = _cat({U3: _leaf(U3, title="Passerelle Lot 3")})
     with pytest.raises(SystemExit, match="Marque de projet résiduelle"):
         m.migrate(_cat({}), src)
+
+
+def _t(i, s, p, o):
+    return {"id": i, "subject": s, "predicate": p, "object": o, "rationale": "r"}
+
+
+def test_a_twin_is_retired_and_its_relations_move_to_the_kept_urn_without_loss():
+    axis, twin_axis, leaf, plat = (f"urn:archinex:ontology:axis:{n}" for n in ("kept", "twin", "leaf", "plat"))
+    entities = {axis: {"urn": axis, "kind": "axis"}, twin_axis: {"urn": twin_axis, "kind": "axis"}, leaf: _leaf(leaf), plat: {"urn": plat, "kind": "concept"}}
+    triplets = [
+        _t("t1", plat, "requires_aspect", axis),
+        _t("t2", plat, "requires_aspect", twin_axis),   # déjà porté par t1 sur l'URN conservée : écarté
+        _t("t3", twin_axis, "implemented_by", leaf),    # absent de l'URN conservée : reporté
+    ]
+    rep = Report()
+    out_e, out_t = retire_urn_twins(entities, triplets, {twin_axis: axis}, rep)
+    assert twin_axis not in out_e and axis in out_e
+    assert {(t["subject"], t["predicate"], t["object"]) for t in out_t} == {(plat, "requires_aspect", axis), (axis, "implemented_by", leaf)}
+    assert rep.twin_triplets_dropped == ["t2"] and rep.twin_triplets_repointed == ["t3"]
+    assert rep.twins_retired == [(twin_axis, axis)]
+
+
+def test_a_twin_whose_equivalent_is_missing_is_never_retired():
+    twin, other = "urn:archinex:ontology:axis:twin", "urn:archinex:ontology:axis:absent"
+    entities = {twin: {"urn": twin, "kind": "axis"}}
+    out_e, out_t = retire_urn_twins(entities, [], {twin: other}, Report())
+    assert twin in out_e and out_t == []
+
+
+def test_committed_catalog_has_none_of_the_known_urn_twins_and_no_dangling_relation():
+    cat = load_catalog_document(CATALOG)
+    assert not set(URN_TWINS) & set(cat["entities"])
+    for t in cat["triplets"]:
+        for end in (t["subject"], t["object"]):
+            assert end not in URN_TWINS, t["id"]
+    assert all(kept in cat["entities"] for kept in URN_TWINS.values())
