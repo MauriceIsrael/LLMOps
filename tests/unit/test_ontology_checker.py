@@ -1,4 +1,4 @@
-"""Tests for ontology integrity and quality checker, plus kb check --experimental-ontology (Issue #169)."""
+"""Tests for ontology integrity and quality checker, plus the ontology check run by kb check (Issue #169)."""
 
 import json
 from pathlib import Path
@@ -159,36 +159,25 @@ def test_invalid_projection_shape_fails(tmp_path):
     assert report.status == "error"
 
 
-def test_kb_check_non_regression_without_flag(tmp_path):
-    """When --experimental-ontology is absent, kb check output is byte-for-byte identical with or without ontology dir."""
+def test_kb_check_checks_the_ontology_when_the_directory_exists(tmp_path):
+    """kb check always checks the ontology when `ontology/` exists (no flag), and is unchanged when it does not."""
     runner = CliRunner()
     kb_copy = tmp_path / "kb"
     import shutil
     shutil.copytree(ROOT / "data" / "kb", kb_copy)
 
-    # 1. Output without ontology directory
+    # 1. Without an ontology directory: no ontology section.
     ont_dir = kb_copy / "ontology"
     if ont_dir.exists():
         shutil.rmtree(ont_dir)
-
     res1 = runner.invoke(app, ["check", "--kb-dir", str(kb_copy), "--json"])
-    data1 = res1.output
+    assert "ontology" not in json.loads(res1.output)
 
-    # 2. Add an ontology directory with broken files
+    # 2. With a broken ontology file: detected, exit code 1.
     ont_dir.mkdir(exist_ok=True)
     (ont_dir / "broken.yaml").write_text("invalid_broken_yaml: [", encoding="utf-8")
-
-    # 3. Output with ontology directory present, but flag absent
     res2 = runner.invoke(app, ["check", "--kb-dir", str(kb_copy), "--json"])
-    data2 = res2.output
-
-    # Must be byte-for-byte identical
-    assert data1 == data2, "kb check output differed when --experimental-ontology was absent"
-    assert "experimental_ontology" not in json.loads(data1)
-
-    # 4. Now with --experimental-ontology, it must detect the broken file and exit code 1
-    res3 = runner.invoke(app, ["check", "--kb-dir", str(kb_copy), "--experimental-ontology", "--json"])
-    assert res3.exit_code != 0
-    parsed3 = json.loads(res3.output)
-    assert "experimental_ontology" in parsed3
-    assert parsed3["experimental_ontology"]["status"] == "error"
+    assert res2.exit_code != 0
+    parsed = json.loads(res2.output)
+    assert "experimental_ontology" not in parsed
+    assert parsed["ontology"]["status"] == "error"

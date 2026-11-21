@@ -110,13 +110,12 @@ A major version increment occurs when breaking changes are introduced.
 
 ---
 
-## 3.1 Experimental Features (Flagged)
+## 3.1 No experimental mode, no feature flags
 
-Capabilities under experimental evaluation (such as the Federating Ontology & Tool Projections, [ADR-KH-02](adr/ADR-KH-02-ontologie-federatrice-projections.md) and [contract §5.41](contracts/knowledge-hub-api-v1.md#541-expérimental-ontologie-fédératrice-à-projections-taxonomiques-issues-165-175)) are gated behind specific environment variables (e.g. `LLMOPS_EXPERIMENTAL_ONTOLOGY=1`).
+The Hub has no experimental mode and no environment-variable feature flags. A capability is either part of the contract (and documented in `contracts/knowledge-hub-api-v1.md`) or it is not shipped. Behaviour never depends on a "preview" switch, so two Hubs on the same version answer the same way.
 
-- **Non-regression guarantee**: When the experimental flag is absent or falsy (`0`, `false`, unset), all existing behavior, endpoints, and snapshot formats remain strictly byte-for-byte identical.
-- **Contract versioning**: Experimental features do not advance the stable `schema_version` (remains `1.40`). Experimental endpoints and tools return `"experimental": true` in their envelopes.
-- **Graduation**: An experimental capability is graduated to the stable contract only after formal review, RFC closure, and explicit contract version increment (`1.41+`).
+- **Contract versioning**: adding routes, tools or response fields to the contract follows the rules above (additive change, `schema_version` incremented when the contract changes).
+- **Work in progress** lives on a branch or behind a draft ADR, not behind a runtime flag.
 
 ---
 

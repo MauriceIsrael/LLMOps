@@ -1,13 +1,11 @@
 """Gateway from validated ontology entries to existing glossary/vocabulary format (Issue #171).
 
 Projects validated ontology entries into Vocabulary groups so that
-doctrine search, context injection and check_option can recognize them
-strictly when LLMOPS_EXPERIMENTAL_ONTOLOGY=1 is active.
+doctrine search, context injection and check_option recognize them.
 """
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 from pipelines.doctrine.text import Vocabulary
@@ -38,7 +36,3 @@ def project_ontology_to_vocabulary(
 
     return vocab
 
-
-def is_ontology_experimental_enabled() -> bool:
-    """Check if the experimental ontology flag is enabled."""
-    return os.getenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "").strip().lower() in ("1", "true", "yes")

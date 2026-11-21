@@ -3661,17 +3661,13 @@ def list_ontology_terms(
     concept_class: str | None = None,
     status: str | None = None,
 ) -> dict[str, Any]:
-    """List federated ontology terms and projections (experimental EDP feature, Issue #175).
+    """List federated ontology terms and projections (Issue #175).
 
     Args:
         concept_class: Optional filter by concept class (e.g. 'SecurityZone', 'ComputeSubstrate').
         status: Optional status filter ('draft', 'validated', 'rejected').
     """
-    from pipelines.ontology.gateway import is_ontology_experimental_enabled
     from pipelines.ontology.loader import load_ontology_entries
-
-    if not is_ontology_experimental_enabled():
-        return not_found_response("experimental_ontology_disabled")
 
     try:
         ont_dir = Path(server_config.kb_dir) / "ontology"
@@ -3681,7 +3677,7 @@ def list_ontology_terms(
         if status:
             entries = [e for e in entries if e.status == status]
         items = [e.to_dict() for e in entries]
-        return ok_response(items, count=len(items), experimental=True)
+        return ok_response(items, count=len(items))
     except Exception as e:
         return handle_exception_response(e, context_action="list_ontology_terms")
 
@@ -3696,18 +3692,14 @@ def get_ontology_term(
         urn: Citable ontology URN (e.g. 'urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s').
         revision: Optional revision integer. If specified and not held, raises error without fallback.
     """
-    from pipelines.ontology.gateway import is_ontology_experimental_enabled
     from pipelines.ontology.ledger import OntologyResolutionError, resolve_ontology_entry
     from pipelines.ontology.loader import load_ontology_entries
-
-    if not is_ontology_experimental_enabled():
-        return not_found_response("experimental_ontology_disabled")
 
     try:
         ont_dir = Path(server_config.kb_dir) / "ontology"
         entries = load_ontology_entries(ont_dir)
         entry = resolve_ontology_entry(entries, urn, revision=revision)
-        return ok_response(entry.to_dict(), count=1, experimental=True)
+        return ok_response(entry.to_dict(), count=1)
     except OntologyResolutionError as exc:
         return {
             "status": "not_found",
@@ -3715,7 +3707,6 @@ def get_ontology_term(
             "message": str(exc),
             "id": urn,
             "requested_revision": exc.detail.get("requested_revision"),
-            "experimental": True,
         }
     except Exception as e:
         return handle_exception_response(e, context_action="get_ontology_term")
@@ -3728,11 +3719,6 @@ def export_ontology_catalog(clause: str | None = None, leaf: str | None = None) 
     - clause: Find all technical leaves that satisfy this doctrinal clause URN.
     - leaf: Find all doctrinal clauses governing this technical leaf URN.
     """
-    from pipelines.ontology.gateway import is_ontology_experimental_enabled
-
-    if not is_ontology_experimental_enabled():
-        return not_found_response("experimental_ontology_disabled")
-
     from pipelines.ontology.catalog_file import (
         OntologyCatalogUnavailableError,
         load_catalog_document,
@@ -3748,7 +3734,7 @@ def export_ontology_catalog(clause: str | None = None, leaf: str | None = None) 
             from pipelines.ontology.catalog import resolve_clauses_by_leaf
             return resolve_clauses_by_leaf(data, leaf)
 
-        return {"status": "ok", "experimental": True, **data}
+        return {"status": "ok", **data}
     except OntologyCatalogUnavailableError as exc:
         # Jamais de repli silencieux : un catalogue absent ou d'une autre forme est une erreur explicite.
         if exc.code == "ontology_export_not_found":

@@ -45,14 +45,14 @@ Supprimer ce commentaire avant de publier.
 - [ ] Mise à jour depuis `main` faite, numéro de contrat relu, tests relancés **après** cette mise à jour
 - [ ] Client concerné (Archinex) rejoué contre ce Hub si le format d'un instantané change (`docs/testing.md` d'Archinex)
 
-### Si modification dans `data/kb/ontology/` (cadre expérimental EDP) :
+### Si modification dans `data/kb/ontology/`  :
 - [ ] Définition intensionnelle sans adresse IP, nom d'hôte ni instanciation LLD
 - [ ] Intégrité référentielle : URNs citées existantes dans l'ontologie
 - [ ] Symétrie d'isolation réciproque et non réflexive
 - [ ] Synonymes bilingues (au moins un FR et un EN) sans collision
 - [ ] Projections vérifiées contre documentation versionnée ou lab (lien `review_source`)
 - [ ] Entrée validée relue par un relecteur qualifié (`reviewed_by`, `reviewed_at`)
-- [ ] `poetry run kb check --experimental-ontology --strict` exécuté avec succès
+- [ ] `poetry run kb check --strict` exécuté avec succès
 - [ ] Révisions enregistrées dans `data/kb/ontology/version-ledger.json` (`poetry run kb ontology record`)
 
 ## Limites (dites, pas masquées)

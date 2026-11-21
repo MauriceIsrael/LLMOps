@@ -420,9 +420,9 @@ def check_cmd(
     db_path: Path = DB_PATH_OPTION,
     strict: bool = typer.Option(False, "--strict", help="Also fail when the graph carries no file fingerprint (built before #85)."),
     as_json: bool = typer.Option(False, "--json", help="JSON output."),
-    experimental_ontology: bool = typer.Option(False, "--experimental-ontology", help="Check referential integrity and quality of ontology entries (Issue #169)."),
 ) -> None:
     """Check that the compiled graph (what the option judge reads) describes the knowledge base files (issue #85).
+    When the knowledge base has an `ontology/` directory, its referential integrity and quality are checked too (issue #169).
 
     Exit 0: consistent (or, without --strict, unverifiable because the graph predates the fingerprint: said loudly).
     Exit 1: a file changed, was added or removed since the graph was built. Nothing is rebuilt here."""
@@ -433,11 +433,11 @@ def check_cmd(
     report = check_compiled_base(kb_dir, lambda q, p: client.execute_cypher(q, p))
 
     ont_report = None
-    if experimental_ontology:
+    if (kb_dir / "ontology").is_dir():
         from pipelines.ontology.checker import check_ontology
         ont_report = check_ontology(kb_dir / "ontology", strict=strict)
         if as_json:
-            report["experimental_ontology"] = ont_report.to_dict()
+            report["ontology"] = ont_report.to_dict()
 
     if as_json:
         console.print_json(json.dumps(report, ensure_ascii=False))
@@ -589,7 +589,7 @@ def embeddings_index_cmd(kb_dir: Path = KB_DIR_OPTION) -> None:
 
 
 
-ontology_app = typer.Typer(help="Ontology operations (EDP experimental, Issues #172, #173).", no_args_is_help=True)
+ontology_app = typer.Typer(help="Ontology operations (Issues #172, #173).", no_args_is_help=True)
 app.add_typer(ontology_app, name="ontology")
 
 

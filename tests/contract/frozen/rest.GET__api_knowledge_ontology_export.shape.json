@@ -1,0 +1,2529 @@
+{
+  "interface": "rest.GET /api/knowledge/ontology/export",
+  "shape": {
+    "keys": {
+      "body": {
+        "keys": {
+          "catalog_version": {
+            "type": [
+              "string"
+            ]
+          },
+          "clause_index": {
+            "keys": {
+              "by_clause": {
+                "keys": {
+                  "urn:archinex:kb:clause:3gpp:ts33_501_oam_segregation": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:3gpp:ts33_501_sba_security": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:3gpp:ts33_501_sec_s6a": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:iso27001:a10_cryptography": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:iso27001:a12_backup": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:iso27001:a12_logging_monitoring": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:iso27001:a9_access_control": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:nis2:art21_access_control": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:nis2:art21_backup_continuity": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:nis2:art21_business_continuity": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:nis2:art21_crypto": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:nis2:art21_incident_handling": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:nis2:art21_mfa": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:nis2:art21_network_segregation": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:kb:clause:nis2:art21_zerotrust": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "by_leaf": {
+                "keys": {
+                  "urn:archinex:ontology:observability:soc:siem_syslog_tls_nis2": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:ontology:resilience:drp:active_active_stretched": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:ontology:security:crypto:ipsec_ikev2_aes256": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:ontology:security:crypto:luks2_kms_hsm": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:ontology:security:iam:oidc_fido2_rbac": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:ontology:security:pki:cert_manager_spiffe_mtls": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:ontology:security:secrets:vault_dynamic_leases": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:ontology:security:zone:oam": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:ontology:storage:backup:s3_object_lock_worm": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "urn:archinex:ontology:telecom:network:oob": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "entities": {
+            "keys": {
+              "urn:archinex:ontology:axis:backup_immutability": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:chaos_drp_testing": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:compute_substrate": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:encryption_at_rest": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:environment_isomorphism": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:iam_federation_mfa": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:metrics_traces_pipeline": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:multi_site_failover": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:network_underlay_fabric": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:oob_management_plane": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:pki_mtls_workload": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:power_cooling_resilience": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:secrets_vault_management": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:security_zoning_nis2": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:siem_audit_retention": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:slo_alerting_runbooks": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:storage_replication": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:axis:wan_interco_encryption": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:concept:iam_security_zerotrust": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:concept:interconnection_gateway": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:concept:observability_noc_soc": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:concept:resilience_drp_continuity": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:concept:storage_data_persistence": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:concept:telco_cloud_platform": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:environment:staging_isoprod": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "hydration_template": {
+                    "keys": {
+                      "environment": {
+                        "keys": {
+                          "automated_rollback": {
+                            "type": [
+                              "boolean"
+                            ]
+                          },
+                          "drp_target": {
+                            "type": [
+                              "boolean"
+                            ]
+                          },
+                          "name": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "scale_ratio": {
+                            "type": [
+                              "number"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "keywords": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "oracle_rules": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "projections": {
+                    "keys": {
+                      "topology_match_percent": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "traffic_mirroring_enabled": {
+                        "type": [
+                          "boolean"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:facilities:power:feed_2n": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "hydration_template": {
+                    "keys": {
+                      "power_supply": {
+                        "keys": {
+                          "feeds": {
+                            "items": {
+                              "type": [
+                                "string"
+                              ]
+                            },
+                            "type": [
+                              "array"
+                            ]
+                          },
+                          "generator_holdover_hours": {
+                            "type": [
+                              "number"
+                            ]
+                          },
+                          "ups_redundancy": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "keywords": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "oracle_rules": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "projections": {
+                    "keys": {
+                      "dual_corded_mandatory": {
+                        "type": [
+                          "boolean"
+                        ]
+                      },
+                      "redundancy_level": {
+                        "type": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:facilities:power:ups_battery_backup": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:infrastructure:compute:suse_telco_cloud_sylva": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "hydration_template": {
+                    "keys": {
+                      "k8s_manifest": {
+                        "keys": {
+                          "apiVersion": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "kind": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "nautobot_device": {
+                        "keys": {
+                          "cluster_pool": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "dataplane_profile": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "device_type": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "role": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "status": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "keywords": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "oracle_rules": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "projections": {
+                    "keys": {
+                      "allowed_roles": {
+                        "items": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "type": [
+                          "array"
+                        ]
+                      },
+                      "baremetal_types": {
+                        "items": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "type": [
+                          "array"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:infrastructure:server:baremetal": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "hydration_template": {
+                    "keys": {
+                      "k8s_manifest": {
+                        "keys": {
+                          "apiVersion": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "kind": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "nautobot_device": {
+                        "keys": {
+                          "cluster_pool": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "dataplane_profile": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "device_type": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "role": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "status": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "keywords": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "oracle_rules": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "projections": {
+                    "keys": {
+                      "allowed_roles": {
+                        "items": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "type": [
+                          "array"
+                        ]
+                      },
+                      "baremetal_types": {
+                        "items": {
+                          "type": [
+                            "string"
+                          ]
+                        },
+                        "type": [
+                          "array"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:observability:noc:alertmanager_slo_burnrate": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:observability:soc:siem_syslog_tls_nis2": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "governed_by_clauses": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:observability:telemetry:otel_prometheus_loki": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:resilience:drp:active_active_stretched": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "governed_by_clauses": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:resilience:drp:active_passive_warm_standby": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:resilience:testing:automated_gameday_quarterly": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:security:crypto:ipsec_ikev2_aes256": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "governed_by_clauses": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:security:crypto:luks2_kms_hsm": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "governed_by_clauses": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:security:iam:oidc_fido2_rbac": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "governed_by_clauses": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:security:pki:cert_manager_spiffe_mtls": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "governed_by_clauses": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:security:secrets:vault_dynamic_leases": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "governed_by_clauses": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:security:zone:oam": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "governed_by_clauses": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "hydration_template": {
+                    "keys": {
+                      "security_zone": {
+                        "keys": {
+                          "ingress_firewall": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "mfa_enforced": {
+                            "type": [
+                              "boolean"
+                            ]
+                          },
+                          "name": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "nis2_tier": {
+                            "type": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "keywords": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "oracle_rules": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "projections": {
+                    "keys": {
+                      "bastion_required": {
+                        "type": [
+                          "boolean"
+                        ]
+                      },
+                      "isolation_level": {
+                        "type": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:storage:backup:s3_object_lock_worm": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "governed_by_clauses": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:storage:csi:ceph_rbd_3replicas": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:storage:s3:object_erasure_coding": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:telecom:network:oob": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "governed_by_clauses": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "hydration_template": {
+                    "keys": {
+                      "network_segment": {
+                        "keys": {
+                          "dhcp_isolated": {
+                            "type": [
+                              "boolean"
+                            ]
+                          },
+                          "name": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "subnet": {
+                            "type": [
+                              "string"
+                            ]
+                          },
+                          "vlan_id": {
+                            "type": [
+                              "number"
+                            ]
+                          }
+                        },
+                        "type": [
+                          "object"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "keywords": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "oracle_rules": {
+                    "items": {
+                      "type": [
+                        "string"
+                      ]
+                    },
+                    "type": [
+                      "array"
+                    ]
+                  },
+                  "projections": {
+                    "keys": {
+                      "max_latency_ms": {
+                        "type": [
+                          "number"
+                        ]
+                      },
+                      "requires_dedicated_vrf": {
+                        "type": [
+                          "boolean"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              },
+              "urn:archinex:ontology:telecom:network:spine_leaf_evpn": {
+                "keys": {
+                  "domain": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "is_default_standard": {
+                    "type": [
+                      "boolean"
+                    ]
+                  },
+                  "kind": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "revision": {
+                    "type": [
+                      "number"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "urn": {
+                    "type": [
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "object"
+                ]
+              }
+            },
+            "type": [
+              "object"
+            ]
+          },
+          "generated_at": {
+            "type": [
+              "string"
+            ]
+          },
+          "triplets": {
+            "items": {
+              "keys": {
+                "id": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "object": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "predicate": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "rationale": {
+                  "type": [
+                    "string"
+                  ]
+                },
+                "subject": {
+                  "type": [
+                    "string"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "content_type": {
+        "type": [
+          "string"
+        ]
+      },
+      "etag": {
+        "type": [
+          "null"
+        ]
+      },
+      "status_code": {
+        "type": [
+          "number"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

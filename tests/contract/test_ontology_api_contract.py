@@ -1,4 +1,4 @@
-"""Contract and integration tests for experimental ontology API and MCP tools (Issue #175)."""
+"""Contract and integration tests for the ontology API and MCP tools (Issue #175)."""
 
 from pathlib import Path
 
@@ -19,31 +19,19 @@ def base_server_env(monkeypatch):
     monkeypatch.setattr(server_config, "kb_dir", ROOT / "data" / "kb")
 
 
-def test_flag_absent_mcp_tools_and_http_endpoints_unexposed(monkeypatch):
-    """When LLMOPS_EXPERIMENTAL_ONTOLOGY is absent, endpoints return 404 and MCP tools are not registered."""
-    monkeypatch.delenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", raising=False)
-
-    app = create_starlette_app()
-    client = TestClient(app)
-
-    # REST endpoints must 404
-    res_list = client.get("/api/knowledge/ontology", headers=AUTH)
-    assert res_list.status_code == 404
-
-    res_export = client.get("/api/knowledge/ontology/export", headers=AUTH)
-    assert res_export.status_code == 404
-
-    res_get = client.get("/api/knowledge/ontology/urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s", headers=AUTH)
-    assert res_get.status_code == 404
-
-    # Direct tool functions return disabled error
-    assert list_ontology_terms()["status"] == "not_found"
-    assert get_ontology_term("urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s")["status"] == "not_found"
+def test_ontology_routes_are_always_served_without_any_feature_flag():
+    """There is no feature flag: the ontology routes are served, and no response says the feature is disabled."""
+    client = TestClient(create_starlette_app())
+    listing = client.get("/api/knowledge/ontology", headers=AUTH)
+    assert listing.status_code == 200
+    assert "experimental" not in listing.json()
+    export = client.get("/api/knowledge/ontology/export", headers=AUTH)
+    assert export.status_code == 200
+    assert "disabled" not in export.text.lower()
 
 
-def test_flag_active_mcp_tools_and_http_endpoints_respond(monkeypatch):
-    """When LLMOPS_EXPERIMENTAL_ONTOLOGY=1, REST endpoints and MCP tools respond with experimental: True."""
-    monkeypatch.setenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "1")
+def test_mcp_tools_and_http_endpoints_respond():
+    """REST endpoints and MCP tools respond, with no `experimental` marker."""
 
     app = create_starlette_app()
     client = TestClient(app)
@@ -53,7 +41,7 @@ def test_flag_active_mcp_tools_and_http_endpoints_respond(monkeypatch):
     assert res.status_code == 200, res.text
     body = res.json()
     assert body["status"] == "ok"
-    assert body.get("experimental") is True
+    assert "experimental" not in body
     assert isinstance(body["data"], list)
     assert len(body["data"]) >= 8
 
@@ -70,7 +58,7 @@ def test_flag_active_mcp_tools_and_http_endpoints_respond(monkeypatch):
     assert res_urn.status_code == 200, res_urn.text
     urn_body = res_urn.json()
     assert urn_body["status"] == "ok"
-    assert urn_body.get("experimental") is True
+    assert "experimental" not in urn_body
     assert urn_body["data"]["id"] == urn
     assert urn_body["data"]["term"] == "Bare Metal Kubernetes"
     assert "projections" in urn_body["data"]
@@ -79,18 +67,17 @@ def test_flag_active_mcp_tools_and_http_endpoints_respond(monkeypatch):
     # 3. Direct MCP tool calls
     tool_list_res = list_ontology_terms(concept_class="ComputeSubstrate")
     assert tool_list_res["status"] == "ok"
-    assert tool_list_res.get("experimental") is True
+    assert "experimental" not in tool_list_res
     assert len(tool_list_res["data"]) >= 4
 
     tool_get_res = get_ontology_term(urn)
     assert tool_get_res["status"] == "ok"
-    assert tool_get_res.get("experimental") is True
+    assert "experimental" not in tool_get_res
     assert tool_get_res["data"]["id"] == urn
 
 
 def test_unknown_revision_returns_explicit_machine_readable_error(monkeypatch):
     """Requesting an absent revision returns 404 with reason='revision_not_found' without fallback."""
-    monkeypatch.setenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "1")
 
     app = create_starlette_app()
     client = TestClient(app)
@@ -103,7 +90,7 @@ def test_unknown_revision_returns_explicit_machine_readable_error(monkeypatch):
     assert body["status"] == "not_found"
     assert body["reason"] == "revision_not_found"
     assert body.get("requested_revision") == 99
-    assert body.get("experimental") is True
+    assert "experimental" not in body
 
     # Request unknown URN
     res_unknown = client.get("/api/knowledge/ontology/urn:llmops:ontology:ComputeSubstrate:unknown_id", headers=AUTH)
@@ -115,7 +102,6 @@ def test_unknown_revision_returns_explicit_machine_readable_error(monkeypatch):
 
 def test_ontology_export_contract_and_tool(monkeypatch):
     """GET /api/knowledge/ontology/export serves the validated SI & Telco catalog (Issue #180, #182)."""
-    monkeypatch.setenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "1")
 
     app = create_starlette_app()
     client = TestClient(app)
@@ -176,7 +162,7 @@ def test_ontology_export_contract_and_tool(monkeypatch):
 
     tool_res = export_ontology_catalog()
     assert tool_res["status"] == "ok"
-    assert tool_res.get("experimental") is True
+    assert "experimental" not in tool_res
     assert "entities" in tool_res
     assert len(tool_res["entities"]) >= 46
     assert "triplets" in tool_res
@@ -192,7 +178,6 @@ def test_ontology_clause_governance_and_bidirectional_resolution(monkeypatch):
     from mcp_server.knowledge.tools import export_ontology_catalog
     from pipelines.ontology.catalog import validate_clause_leaf_integrity
 
-    monkeypatch.setenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "1")
 
     app = create_starlette_app()
     client = TestClient(app)
@@ -268,7 +253,6 @@ def test_export_serves_catalog_shape_and_never_regenerates_another_shape(monkeyp
     """Issue #189 : l'export servi est le catalogue « entities » ; fichier absent ou mauvaise forme = erreur explicite."""
     from pipelines.ontology import catalog_file
 
-    monkeypatch.setenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "1")
     client = TestClient(create_starlette_app())
 
     # Fichier versionné : forme catalogue.

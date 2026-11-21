@@ -63,8 +63,8 @@ def test_draft_and_rejected_entries_never_projected(tmp_path):
     assert "validated substrate" in val_variants
 
 
-def test_flag_active_ontology_synonyms_matched(tmp_path, monkeypatch):
-    """When LLMOPS_EXPERIMENTAL_ONTOLOGY=1, ontology synonyms are recognized by match_terms."""
+def test_ontology_synonyms_matched(tmp_path):
+    """Validated ontology synonyms are recognized by match_terms (no feature flag)."""
     ont_dir = tmp_path / "ontology"
     ont_dir.mkdir()
 
@@ -92,7 +92,6 @@ def test_flag_active_ontology_synonyms_matched(tmp_path, monkeypatch):
     }
     (ont_dir / "entries.yaml").write_text(yaml.safe_dump([e1, e2]), encoding="utf-8")
 
-    monkeypatch.setenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "1")
     # Load vocabulary pointing to tmp_path
     vocab = load_vocabulary(lambda q, p: [], tmp_path)
 
@@ -107,9 +106,9 @@ def test_flag_active_ontology_synonyms_matched(tmp_path, monkeypatch):
     assert matches_2 == ["Zone de Signalisation"]
 
 
-def test_golden_outputs_identical_when_flag_absent(tmp_path, monkeypatch):
-    """Golden test: sealed snapshot, get_doctrine_context and check_option are byte-for-byte identical with or without ontology directory when flag is absent."""
-    monkeypatch.delenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", raising=False)
+def test_unrelated_ontology_entry_does_not_alter_doctrine_outputs(tmp_path, monkeypatch):
+    """Golden test: an ontology entry unrelated to the query leaves the sealed snapshot, get_doctrine_context and
+    check_option byte-for-byte identical. (The ontology vocabulary is always projected: there is no feature flag.)"""
 
     import shutil
 

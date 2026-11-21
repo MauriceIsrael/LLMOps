@@ -22,7 +22,7 @@ def test_ontology_readme_guide_and_checklist():
     assert "Symétrie de l'isolation" in text
     assert "Synonymes bilingues" in text
     assert "reviewed_by" in text
-    assert "kb check --experimental-ontology" in text
+    assert "kb check" in text
 
 
 def test_contributing_references_ontology_guide():
@@ -39,4 +39,4 @@ def test_pr_template_includes_ontology_checklist():
     assert pr_template.is_file()
     text = pr_template.read_text(encoding="utf-8")
     assert "data/kb/ontology/" in text
-    assert "kb check --experimental-ontology" in text
+    assert "kb check" in text

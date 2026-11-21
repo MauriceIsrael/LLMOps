@@ -1318,10 +1318,9 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
 
 ---
 
-### 5.41 [Expérimental] Ontologie fédératrice à projections taxonomiques (Issues #165-#175)
+### 5.41 Ontologie fédératrice à projections taxonomiques (Issues #165-#175)
 
-> **Cadre expérimental** : conditionné par la variable d'environnement `LLMOPS_EXPERIMENTAL_ONTOLOGY=1`.  
-> **Contrat stable** : la version courante du contrat (1.40) n'est **pas** incrémentée. En l'absence du drapeau, les routes ci-dessous retournent `404 Not Found` et les outils MCP associés ne sont pas enregistrés dans le catalogue.
+> Les routes et outils ci-dessous sont **toujours servis** : il n'existe ni mode expérimental ni drapeau d'environnement.
 
 #### 1. Points d'accès REST
 
@@ -1336,11 +1335,11 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
     * Paramètre `leaf` : `GET /api/knowledge/ontology/export?leaf={leaf_urn}` — résout toutes les clauses doctrinales justifiant formellement la feuille technique spécifiée ainsi que leurs triplets associés.
 * **`GET /api/knowledge/ontology`** :
   * Paramètres de requête optionnels : `concept_class` (énumération fermée `SecurityZone`, `NetworkFunction`, `ComputeSubstrate`, `DataClassification`, `TrafficFlow`, `Actor`), `status` (`draft`, `validated`, `rejected`).
-  * Réponse standard `200 OK` avec enveloppe (`status: "ok"`, `count: N`, `data: [...]`, `experimental: true`).
+  * Réponse standard `200 OK` avec enveloppe (`status: "ok"`, `count: N`, `data: [...]`).
 * **`GET /api/knowledge/ontology/{urn}`** :
   * Paramètre de chemin : URN citable de l'entrée (ex. `urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s`).
   * Paramètre de requête optionnel : `revision` (entier strictement positif).
-  * Réponse : `200 OK` avec l'entrée et `experimental: true`.
+  * Réponse : `200 OK` avec l'entrée.
   * Si la révision demandée n'est pas disponible : `404 Not Found` avec machine-readable `reason: "revision_not_found"` (jamais de repli sur la révision courante, garantie K3).
   * Si l'URN est inconnue : `404 Not Found` avec machine-readable `reason: "unknown_urn"`.
 
