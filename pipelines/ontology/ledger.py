@@ -80,7 +80,7 @@ def write_ontology_ledger(ledger_path: str | Path, revisions: dict[str, dict[str
     doc = {
         "description": (
             "Append-only record of canonical-json v1 SHA-256 content hashes for ontology revisions "
-            "(cadre expérimental EDP, Issue #172). An entry's {urn, revision} always resolves to the exact same bytes."
+            "(Issue #172). An entry's {urn, revision} always resolves to the exact same bytes."
         ),
         "revisions": sorted_revisions,
     }

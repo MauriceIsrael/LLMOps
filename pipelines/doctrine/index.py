@@ -10,7 +10,6 @@ columns existed, from the asset's front matter on disk.
 from __future__ import annotations
 
 import json
-import os
 import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -138,10 +137,9 @@ def load_vocabulary(execute: ExecuteCypher, kb_dir: str | Path) -> Vocabulary:
         for group in data.get("groups", []) if isinstance(data, dict) else []:
             if isinstance(group, list):
                 vocab.add_group(str(t) for t in group)
-    if os.getenv("LLMOPS_EXPERIMENTAL_ONTOLOGY") == "1":
-        from pipelines.ontology.gateway import project_ontology_to_vocabulary
+    from pipelines.ontology.gateway import project_ontology_to_vocabulary
 
-        project_ontology_to_vocabulary(Path(kb_dir) / "ontology", vocab=vocab)
+    project_ontology_to_vocabulary(Path(kb_dir) / "ontology", vocab=vocab)
     return vocab
 
 

@@ -187,9 +187,23 @@ Minor versions only add interfaces or optional fields:
   needs at least one declaring asset, otherwise it was a coverage nobody declared). The shape (``schemaVersion`` ``2.0``) is unchanged and is still
   refused by the Document Engine's reader (§5.40: provenance, version, ``ref``, evidence source).
 
+* ``1.41`` — conformity snapshot aligned to major ``4.0`` and ``RequirementRef`` (issues #148, #150; contract §5.42). ``GET /api/compliance/conformity-snapshot``
+  derives from the engagement's ``compliance`` section and emits ``schemaVersion`` ``4.0`` with a complete ``RequirementRef`` on every requirement;
+  engagement ingestion accepts an external ``RequirementRef``. (Recorded here with 1.42: the code already emitted this contract while
+  ``CONTRACT_VERSION`` still read ``1.40``.)
+
+* ``1.42`` — federating ontology joins the contract (issues #165-#175, #189), no experimental mode any more. The ontology REST routes
+  (``GET /api/knowledge/ontology``, ``GET /api/knowledge/ontology/export``, ``GET /api/knowledge/ontology/{urn}``) and the MCP tools
+  ``list_ontology_terms``, ``get_ontology_term`` and ``export_ontology_catalog`` are always served (the ``LLMOPS_EXPERIMENTAL_ONTOLOGY`` flag and the
+  ``experimental`` envelope field are removed). ``GET /api/knowledge/ontology/export`` serves a single shape, the catalogue (``entities``, ``triplets``,
+  ``clause_index``); an absent catalogue is ``404`` ``ontology_export_not_found`` and a file of another shape is ``503`` ``ontology_export_wrong_shape``
+  (the catalogue is never regenerated on the fly). The ontology vocabulary (validated entries) is always projected into the doctrine index, and
+  ``kb check`` checks ``data/kb/ontology/`` when it exists (``--experimental-ontology`` is removed; the JSON key ``experimental_ontology`` is ``ontology``).
+  Six interfaces are added and frozen; no existing interface changes shape.
+
 The sealed snapshot format has its own ``schema_version`` (still ``1.0``).
 """
 
-CONTRACT_VERSION = "1.40"
+CONTRACT_VERSION = "1.42"
 SNAPSHOT_SCHEMA_VERSION = "1.0"
 

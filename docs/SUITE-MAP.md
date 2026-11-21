@@ -1,6 +1,6 @@
 # Carte des composants : qui fait quoi, et par quelle interface
 
-Contrat décrit : **1.40**. Dernière relecture : **24 octobre 2026** (relevé du code des deux côtés, voir « Historique des révisions » en fin de document).
+Contrat décrit : **1.42**. Dernière relecture : **21 novembre 2026** (partielle : seule l'interface d'ontologie a été relue ; le reste date du relevé du 24 octobre 2026, voir « Historique des révisions » en fin de document).
 Première version : 3 octobre 2026, révisée après la décision du mainteneur : **le Hub contient deux bases**, ADR-KH-01 A10, projet ; l'état du code qu'elle décrivait était celui du contrat 1.18.
 Ce document décrit LLMOps (rôle « Knowledge Hub »), Archinex et les composants de la suite (Document Studio, Document Engine, etc.).
 Chaque affirmation porte un niveau de preuve :
@@ -78,10 +78,11 @@ Précisions :
 
 | Interface | Nature | État |
 |---|---|---|
-| Archinex ↔ LLMOps | REST (et MCP) : lecture de la base, candidats, similarité, confirmations de réutilisation, **écriture de l'engagement** (sujets, énoncés, questions, exigences, arbitrage). Contrat versionné (1.0 à 1.40), formes gelées dans `tests/contract/frozen/` | [livré] 1.14 (dépréciation levée), 1.16 (rôles), 1.17 (écriture), 1.37 (assertions signées), 1.39 (mode strict d'identité, désactivé par défaut) |
+| Archinex ↔ LLMOps | REST (et MCP) : lecture de la base, candidats, similarité, confirmations de réutilisation, **écriture de l'engagement** (sujets, énoncés, questions, exigences, arbitrage). Contrat versionné (1.0 à 1.42), formes gelées dans `tests/contract/frozen/` | [livré] 1.14 (dépréciation levée), 1.16 (rôles), 1.17 (écriture), 1.37 (assertions signées), 1.39 (mode strict d'identité, désactivé par défaut) |
 | LLMOps → suite (connaissance) | Instantané scellé (`scripts/export_sealed_snapshot.py`) | [livré] canonical-json v1, enveloppe de canal, versions citables et résolution (1.15, K1 à K3). Le contenu reste à plat (pas de wrapper `data`) : à valider avec la suite |
 | LLMOps → suite (engagement) | Instantané scellé de la base d'engagement, `POST /api/engagements/{id}/exports` | [livré] 1.18 (K11) à 1.35 (schéma `1.8`) : enveloppe de la suite, identifiant dérivé du contenu, handles seulement, refus si la vérification échoue. **Consommateur de la suite non établi** [lu] : aucun lecteur dans les dépôts lus, aucun canal au registre. Son checksum est recalculé à l'identique par le code du Document Engine (`make verify-suite`) |
 | LLMOps → Document Engine (conformité) | `GET /api/compliance/conformity-snapshot`, enveloppe `ExternalSnapshotEnvelope<ConformityData>` | [livré] côté Hub (1.41, `schemaVersion: "4.0"`, dérivé de l'engagement, `RequirementRef` complète) ; PR `document-engine#162` pour admettre `knowledge-hub` (sourceSystem + `evidence[].source`). `make verify-suite` : `ACCEPTÉ`, checksum identique |
+| Archinex ← LLMOps (ontologie) | `GET /api/knowledge/ontology/export` (catalogue `entities`, `triplets`, `clause_index`) et routes/outils d'ontologie ; Archinex lit le catalogue (`ontologyClient.ts`) pour ses contrôles d'architecture | [livré] côté Hub (1.42 : toujours servi, une seule forme, `404 ontology_export_not_found` / `503 ontology_export_wrong_shape`) ; [lu] côté Archinex : lecture seule, **aucun repli en production** ; le contenu du catalogue du Hub est plus pauvre que celui des fixtures d'Archinex (issues LLMOps #192, Archinex #417) |
 | Suite → LLMOps (propositions, K7) | Instantané scellé de propositions lu par `kb import-proposals` / `POST /api/knowledge/proposals/import` | [livré] côté Hub (1.33) ; **aucun émetteur trouvé** dans les dépôts de la suite lus [lu, recherche par mots-clés] |
 | Document Engine → LLMOps | Assistance de prose : `POST /api/prose/suggest-batch`, groundée (PR #39) | Route [livré] côté Hub. **Aucun fournisseur Hub dans `document-engine` `4a9361b`** [lu] (PR `document-engine#32` non fusionnée) ; « l'assistance n'est pas un canal » [ADR] |
 | Suite ↔ LLMOps (règle) | Canal à instantané scellé, **jamais de RPC** | [ADR] amendement du 2026-09-13, opposable |
@@ -145,3 +146,4 @@ Chaque canal d'instantané porte une enveloppe commune (émetteur, empreinte SHA
 |---|---|---|
 | 2026-10-03 | 1.18 | Première version (décision A10 : deux bases dans le Hub). |
 | 2026-10-24 | 1.40 | Relevé du code des deux côtés (voir « Sources »). Contrat 1.18 → 1.40 ; flèche Requirements Intake → Document Engine retirée (aucun canal) ; consommation réelle du Document Engine (ADR-DE-05, ADR-DE-44) ; refus mesurés de la route de conformité (§5.10) ; identité d'exigence (§5.11) ; ADR-DE-41 non implémentée ; assistance de prose sans fournisseur Hub ; K7 sans émetteur ; autorisation 1.37 et 1.39. Un test (`tests/unit/test_suite_map_version.py`) échoue si « Contrat décrit » diverge du contrat du code. |
+| 2026-11-21 | 1.42 | Relecture partielle (interface d'ontologie uniquement). Contrat 1.40 → 1.42 (1.41 : conformité `4.0`, déjà décrite en §3 ; 1.42 : ontologie toujours servie, sans mode expérimental). Ligne « Archinex ← LLMOps (ontologie) » ajoutée en §3. Le reste du document n'a pas été relu depuis le 24 octobre. |

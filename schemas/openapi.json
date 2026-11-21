@@ -10,7 +10,7 @@
   "info": {
     "description": "Generated deterministically from the frozen contract shapes in tests/contract/frozen/. See docs/contracts/knowledge-hub-api-v1.md and docs/CLIENTS.md.",
     "title": "LLMOps Architecture Knowledge Hub API",
-    "version": "1.40"
+    "version": "1.42"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -9801,6 +9801,309 @@
           }
         },
         "summary": "GET /api/knowledge/me"
+      }
+    },
+    "/api/knowledge/ontology": {
+      "get": {
+        "operationId": "get_api_knowledge_ontology",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "count": {
+                      "type": "number"
+                    },
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "concept_class": {
+                            "type": "string"
+                          },
+                          "definition": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "projections": {
+                            "type": "object"
+                          },
+                          "relationships": {
+                            "properties": {
+                              "allowed_traffic_classes": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "forbids_substrate": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "isolated_from": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "requires_capabilities": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "review_source": {
+                            "type": "string"
+                          },
+                          "revision": {
+                            "type": "number"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "synonyms": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "term": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Frozen v1 contract response (rest.GET /api/knowledge/ontology)"
+          }
+        },
+        "summary": "GET /api/knowledge/ontology"
+      }
+    },
+    "/api/knowledge/ontology/export": {
+      "get": {
+        "operationId": "get_api_knowledge_ontology_export",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "catalog_version": {
+                      "type": "string"
+                    },
+                    "clause_index": {
+                      "properties": {
+                        "by_clause": {
+                          "additionalProperties": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "type": "object"
+                        },
+                        "by_leaf": {
+                          "additionalProperties": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "entities": {
+                      "additionalProperties": {
+                        "properties": {
+                          "domain": {
+                            "type": "string"
+                          },
+                          "governed_by_clauses": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "hydration_template": {
+                            "type": "object"
+                          },
+                          "is_default_standard": {
+                            "type": "boolean"
+                          },
+                          "keywords": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "oracle_rules": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "projections": {
+                            "type": "object"
+                          },
+                          "revision": {
+                            "type": "number"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "urn": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "object"
+                    },
+                    "generated_at": {
+                      "type": "string"
+                    },
+                    "triplets": {
+                      "items": {
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "object": {
+                            "type": "string"
+                          },
+                          "predicate": {
+                            "type": "string"
+                          },
+                          "rationale": {
+                            "type": "string"
+                          },
+                          "subject": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Frozen v1 contract response (rest.GET /api/knowledge/ontology/export)"
+          }
+        },
+        "summary": "GET /api/knowledge/ontology/export"
+      }
+    },
+    "/api/knowledge/ontology/{urn}": {
+      "get": {
+        "operationId": "get_api_knowledge_ontology_urn",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "urn",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "count": {
+                      "type": "number"
+                    },
+                    "data": {
+                      "properties": {
+                        "concept_class": {
+                          "type": "string"
+                        },
+                        "definition": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "projections": {
+                          "type": "object"
+                        },
+                        "relationships": {
+                          "properties": {
+                            "forbids_substrate": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "requires_capabilities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "review_source": {
+                          "type": "string"
+                        },
+                        "revision": {
+                          "type": "number"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "synonyms": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "term": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Frozen v1 contract response (rest.GET /api/knowledge/ontology/{urn:path})"
+          }
+        },
+        "summary": "GET /api/knowledge/ontology/{urn}"
       }
     },
     "/api/knowledge/owners": {

@@ -1,0 +1,129 @@
+{
+  "interface": "mcp.list_ontology_terms",
+  "shape": {
+    "keys": {
+      "count": {
+        "type": [
+          "number"
+        ]
+      },
+      "data": {
+        "items": {
+          "keys": {
+            "concept_class": {
+              "type": [
+                "string"
+              ]
+            },
+            "definition": {
+              "type": [
+                "string"
+              ]
+            },
+            "id": {
+              "type": [
+                "string"
+              ]
+            },
+            "projections": {
+              "type": [
+                "object"
+              ]
+            },
+            "relationships": {
+              "keys": {
+                "allowed_traffic_classes": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "forbids_substrate": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "isolated_from": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                },
+                "requires_capabilities": {
+                  "items": {
+                    "type": [
+                      "string"
+                    ]
+                  },
+                  "type": [
+                    "array"
+                  ]
+                }
+              },
+              "type": [
+                "object"
+              ]
+            },
+            "review_source": {
+              "type": [
+                "string"
+              ]
+            },
+            "revision": {
+              "type": [
+                "number"
+              ]
+            },
+            "status": {
+              "type": [
+                "string"
+              ]
+            },
+            "synonyms": {
+              "items": {
+                "type": [
+                  "string"
+                ]
+              },
+              "type": [
+                "array"
+              ]
+            },
+            "term": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        },
+        "type": [
+          "array"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-"""Ontology package for LLMOps Knowledge Hub (EDP experimental)."""
+"""Ontology package for LLMOps Knowledge Hub."""
 
 from pipelines.ontology.catalog import (
     PREDICATE_SATISFIES_CLAUSE,
@@ -15,7 +15,6 @@ from pipelines.ontology.export import (
     export_ontology_snapshot,
 )
 from pipelines.ontology.gateway import (
-    is_ontology_experimental_enabled,
     project_ontology_to_vocabulary,
 )
 from pipelines.ontology.ledger import (
@@ -57,7 +56,6 @@ __all__ = [
     "check_ontology",
     "entry_content_sha256",
     "export_ontology_snapshot",
-    "is_ontology_experimental_enabled",
     "load_ontology_entries",
     "load_ontology_ledger",
     "project_ontology_to_vocabulary",

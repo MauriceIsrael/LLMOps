@@ -19,7 +19,9 @@ Shape format (recursive):
   merge of all elements' shapes, so that the order of the demo data does not matter;
 * map:    ``{"type": ["object"], "values": <shape> | null}`` — objects keyed by data
   (asset ids, control ids, section numbers...), listed in ``MAP_KEYS``. Their keys
-  depend on the knowledge base content, not on the interface.
+  depend on the knowledge base content, not on the interface;
+* opaque: ``{"type": ["object"]}`` — free-form knowledge-base content listed in ``OPAQUE_KEYS``,
+  whose keys and value types are not part of the interface.
 
 When a value is observed with several types, ``type`` lists all of them.
 """
@@ -97,7 +99,17 @@ MAP_KEYS: dict[str, int] = {
     "breakdown_by_category": 1,  # RFP shredding: category -> counts
     "drafts": 1,                # prose suggest-batch: block id -> draft
     "alerts_by_owner": 1,       # freshness: owner handle -> alerts summary
+    "entities": 1,              # ontology catalog: entity URN -> entity
+    "by_clause": 1,             # ontology clause index: clause URN -> leaf URNs
+    "by_leaf": 1,               # ontology clause index: leaf URN -> clause URNs
 }
+
+# Keys whose value is free-form content authored in the knowledge base (an object whose keys *and*
+# value types depend on the catalog, not on the interface): frozen as a plain object, never described.
+OPAQUE_KEYS: frozenset[str] = frozenset({
+    "projections",          # ontology leaf: projection name -> any JSON value
+    "hydration_template",   # ontology leaf: target tool -> any JSON template
+})
 
 
 def _json_type(value: Any) -> str:
@@ -147,7 +159,9 @@ def shape_of(value: Any, map_depth: int = 0) -> dict[str, Any]:
         return {
             "type": ["object"],
             "keys": {
-                str(k): shape_of(v, MAP_KEYS.get(str(k), 0))
+                str(k): {"type": ["object"]}
+                if str(k) in OPAQUE_KEYS and _json_type(v) == "object"
+                else shape_of(v, MAP_KEYS.get(str(k), 0))
                 for k, v in sorted(value.items(), key=lambda kv: str(kv[0]))
             },
         }
@@ -333,6 +347,9 @@ def build_catalogue() -> list[Interface]:
         _mcp("search_assets", lambda: kn.search_assets("MCX")),
         _mcp("query_graph", lambda: kn.query_graph("MATCH (a:Asset) RETURN a.id as id, a.type as type ORDER BY a.id LIMIT 5")),
         _mcp("get_graph_summary", lambda: kn.get_graph_summary()),
+        _mcp("list_ontology_terms", lambda: kn.list_ontology_terms()),
+        _mcp("get_ontology_term", lambda: kn.get_ontology_term("urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s")),
+        _mcp("export_ontology_catalog", lambda: kn.export_ontology_catalog()),
         _mcp("get_knowledge_analytics", lambda: kn.get_knowledge_analytics()),
         _mcp("get_domain_prominence_report", lambda: kn.get_domain_prominence_report()),
         _mcp("list_frameworks", lambda: kn.list_frameworks()),
@@ -409,6 +426,9 @@ def build_catalogue() -> list[Interface]:
         _rest("GET", "/api/knowledge/assets/{asset_id}", "/api/knowledge/assets/decision:ADR-0001?version=1"),
         _rest("GET", "/api/knowledge/assets/{asset_id}/history", "/api/knowledge/assets/P-001/history"),
         _rest("GET", "/api/knowledge/search", "/api/knowledge/search?query=MCX"),
+        _rest("GET", "/api/knowledge/ontology"),
+        _rest("GET", "/api/knowledge/ontology/export"),
+        _rest("GET", "/api/knowledge/ontology/{urn:path}", "/api/knowledge/ontology/urn:llmops:ontology:ComputeSubstrate:bare_metal_k8s"),
         _rest("GET", "/api/knowledge/engagements"),
         _rest("POST", "/api/engagements", json_body={
             "engagement": "contract-eng", "confidentiality": "internal",

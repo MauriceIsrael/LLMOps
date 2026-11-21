@@ -92,7 +92,6 @@ def resolve_leaves_by_clause(
 
     return {
         "status": "ok",
-        "experimental": True,
         "clause": clause_urn,
         "satisfying_leaves": sorted(leaf_urns),
         "entities": matching_entities,
@@ -120,7 +119,6 @@ def resolve_clauses_by_leaf(
 
     return {
         "status": "ok",
-        "experimental": True,
         "leaf": leaf_urn,
         "governing_clauses": sorted(clause_urns),
         "entity": entity,

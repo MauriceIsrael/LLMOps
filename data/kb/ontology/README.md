@@ -1,6 +1,6 @@
 # Guide de Rédaction et de Relecture d'une Entrée d'Ontologie
 
-Ce guide formalise les règles de rédaction, de validation et de gouvernance des entrées d'ontologie fédératrice dans le Knowledge Hub (cadre expérimental EDP, issues #165-#175).
+Ce guide formalise les règles de rédaction, de validation et de gouvernance des entrées d'ontologie fédératrice dans le Knowledge Hub (issues #165-#175).
 
 ---
 
@@ -61,7 +61,7 @@ Toute Pull Request ajoutant ou modifiant une entrée dans `data/kb/ontology/` do
 - [ ] **Relecteur qualifié** : le champ `reviewed_by` désigne un expert du domaine ou mainteneur habilité (la projection ne peut être validée par le seul rédacteur).
 - [ ] **Contrôles exécutés avec succès** :
   ```bash
-  poetry run kb check --experimental-ontology --strict
+  poetry run kb check --strict
   ```
 - [ ] **Registre de révisions** :
   ```bash

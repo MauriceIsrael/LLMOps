@@ -193,12 +193,9 @@ mcp.tool()(revoke_kb_delegation)
 mcp.tool()(revoke_kb_auth)
 mcp.tool()(get_kb_audit)
 
-from pipelines.ontology.gateway import is_ontology_experimental_enabled
-
-if is_ontology_experimental_enabled():
-    mcp.tool()(list_ontology_terms)
-    mcp.tool()(get_ontology_term)
-    mcp.tool()(export_ontology_catalog)
+mcp.tool()(list_ontology_terms)
+mcp.tool()(get_ontology_term)
+mcp.tool()(export_ontology_catalog)
 
 # Enregistrement des outils du plan d'engagement (uniquement hors mode knowledge-only)
 if active_plane != "knowledge":
@@ -679,13 +676,6 @@ def create_starlette_app() -> Starlette:
 
     async def handle_ontology_export(request):
         """Exporte le catalogue consolidé de l'ontologie d'architecture sous format canonique."""
-        from pipelines.ontology.gateway import is_ontology_experimental_enabled
-
-        if not is_ontology_experimental_enabled():
-            return JSONResponse(
-                {"error": "Experimental ontology feature is disabled"}, status_code=404
-            )
-
         from pipelines.ontology.catalog_file import (
             OntologyCatalogUnavailableError,
             load_catalog_document,
@@ -709,24 +699,12 @@ def create_starlette_app() -> Starlette:
         return JSONResponse(data, status_code=200)
 
     async def handle_ontology_list(request):
-        from pipelines.ontology.gateway import is_ontology_experimental_enabled
-
-        if not is_ontology_experimental_enabled():
-            return JSONResponse(
-                {"error": "Experimental ontology feature is disabled"}, status_code=404
-            )
         c_class = request.query_params.get("concept_class") or None
         status = request.query_params.get("status") or None
         res = list_ontology_terms(concept_class=c_class, status=status)
         return JSONResponse(res, status_code=200)
 
     async def handle_ontology_get(request):
-        from pipelines.ontology.gateway import is_ontology_experimental_enabled
-
-        if not is_ontology_experimental_enabled():
-            return JSONResponse(
-                {"error": "Experimental ontology feature is disabled"}, status_code=404
-            )
         urn = request.path_params.get("urn", "")
         rev_param = request.query_params.get("revision")
         rev = int(rev_param) if rev_param and rev_param.isdigit() else None
@@ -2260,24 +2238,21 @@ def create_starlette_app() -> Starlette:
         Route("/api/knowledge/auth/revoke", endpoint=handle_auth_revoke, methods=["POST"]),
         Route("/api/knowledge/audit", endpoint=handle_kb_audit, methods=["GET"]),
     ]
-    from pipelines.ontology.gateway import is_ontology_experimental_enabled
-
-    if is_ontology_experimental_enabled():
-        routes.extend(
-            [
-                Route(
-                    "/api/knowledge/ontology/export",
-                    endpoint=handle_ontology_export,
-                    methods=["GET"],
-                ),
-                Route("/api/knowledge/ontology", endpoint=handle_ontology_list, methods=["GET"]),
-                Route(
-                    "/api/knowledge/ontology/{urn:path}",
-                    endpoint=handle_ontology_get,
-                    methods=["GET"],
-                ),
-            ]
-        )
+    routes.extend(
+        [
+            Route(
+                "/api/knowledge/ontology/export",
+                endpoint=handle_ontology_export,
+                methods=["GET"],
+            ),
+            Route("/api/knowledge/ontology", endpoint=handle_ontology_list, methods=["GET"]),
+            Route(
+                "/api/knowledge/ontology/{urn:path}",
+                endpoint=handle_ontology_get,
+                methods=["GET"],
+            ),
+        ]
+    )
     return Starlette(
         debug=settings.DEBUG,
         routes=routes,

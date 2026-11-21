@@ -1,0 +1,181 @@
+{
+  "interface": "mcp.export_ontology_catalog",
+  "shape": {
+    "keys": {
+      "catalog_version": {
+        "type": [
+          "string"
+        ]
+      },
+      "clause_index": {
+        "keys": {
+          "by_clause": {
+            "type": [
+              "object"
+            ],
+            "values": {
+              "items": {
+                "type": [
+                  "string"
+                ]
+              },
+              "type": [
+                "array"
+              ]
+            }
+          },
+          "by_leaf": {
+            "type": [
+              "object"
+            ],
+            "values": {
+              "items": {
+                "type": [
+                  "string"
+                ]
+              },
+              "type": [
+                "array"
+              ]
+            }
+          }
+        },
+        "type": [
+          "object"
+        ]
+      },
+      "entities": {
+        "type": [
+          "object"
+        ],
+        "values": {
+          "keys": {
+            "domain": {
+              "type": [
+                "string"
+              ]
+            },
+            "governed_by_clauses": {
+              "items": {
+                "type": [
+                  "string"
+                ]
+              },
+              "type": [
+                "array"
+              ]
+            },
+            "hydration_template": {
+              "type": [
+                "object"
+              ]
+            },
+            "is_default_standard": {
+              "type": [
+                "boolean"
+              ]
+            },
+            "keywords": {
+              "items": {
+                "type": [
+                  "string"
+                ]
+              },
+              "type": [
+                "array"
+              ]
+            },
+            "kind": {
+              "type": [
+                "string"
+              ]
+            },
+            "oracle_rules": {
+              "items": {
+                "type": [
+                  "string"
+                ]
+              },
+              "type": [
+                "array"
+              ]
+            },
+            "projections": {
+              "type": [
+                "object"
+              ]
+            },
+            "revision": {
+              "type": [
+                "number"
+              ]
+            },
+            "title": {
+              "type": [
+                "string"
+              ]
+            },
+            "urn": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        }
+      },
+      "generated_at": {
+        "type": [
+          "string"
+        ]
+      },
+      "status": {
+        "type": [
+          "string"
+        ]
+      },
+      "triplets": {
+        "items": {
+          "keys": {
+            "id": {
+              "type": [
+                "string"
+              ]
+            },
+            "object": {
+              "type": [
+                "string"
+              ]
+            },
+            "predicate": {
+              "type": [
+                "string"
+              ]
+            },
+            "rationale": {
+              "type": [
+                "string"
+              ]
+            },
+            "subject": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        },
+        "type": [
+          "array"
+        ]
+      }
+    },
+    "type": [
+      "object"
+    ]
+  }
+}

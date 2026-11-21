@@ -1,4 +1,4 @@
-# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.40"`)
+# Contract Versioning Policy & Service Commitment (`schema_version: "1.x"`, current `"1.42"`)
 
 This document defines the semantic versioning rules, stability guarantees, and deprecation policies for the LLMOps FastMCP tool contract.
 
@@ -10,7 +10,7 @@ Every knowledge summary payload (`get_graph_summary`) and contract specification
 
 ```json
 {
-  "schema_version": "1.40"
+  "schema_version": "1.42"
 }
 ```
 
@@ -61,6 +61,7 @@ Clients can inspect this field upon connecting to verify compatibility.
 | `1.39` | Identity and rights of the people who act (issues #144, #90, #91, [contract §5.39](contracts/knowledge-hub-api-v1.md)): strict identity mode `LLMOPS_REQUIRE_SIGNED_ACTOR` (raw `X-Actor-Email` refused with 401 `signed_actor_required`), trusted assertion keys from `ARCHINEX_JWKS` / `ARCHINEX_JWKS_FILE` / `ARCHINEX_JWKS_URL`, bounded assertion lifetime and clock tolerance, rights to declare a framework covered, independent application of mandatory controls. No route added. |
 | `1.40` | Conformity snapshot made honest and reproducible (issues #148, #149, [contract §5.40](contracts/knowledge-hub-api-v1.md)): `snapshotId` derives from the `checksum` (not the clock); a control no asset declares is `identified`, not `allocated`. Shape (`schemaVersion` `2.0`) unchanged and still refused by the Document Engine reader. No route added. |
 | `1.41` | Conformity snapshot aligned to major `4.0` and `RequirementRef` (issues #148, #150, [contract §5.42](contracts/knowledge-hub-api-v1.md)): `GET /api/compliance/conformity-snapshot` derives from the engagement's `compliance` section (removing `EXPLICIT_KB_ALIGNMENTS`), emits `schemaVersion: "4.0"` with complete `RequirementRef {sourceId, requirementKey, version}` (`version` integer >= 1) on every requirement; engagement ingestion (`POST /api/engagements/{id}/requirements`, `import`) accepts external `RequirementRef` (e.g. from Tuleap) or defaults standalone to `knowledge-hub:<engagement>` v1. |
+| `1.42` | Federating ontology joins the contract (issues #165-#175, #189, [contract §5.41](contracts/knowledge-hub-api-v1.md)), no experimental mode: the ontology REST routes (`GET /api/knowledge/ontology`, `/export`, `/{urn}`) and MCP tools (`list_ontology_terms`, `get_ontology_term`, `export_ontology_catalog`) are always served; `export` serves one shape (the catalogue), `404 ontology_export_not_found` / `503 ontology_export_wrong_shape` otherwise; ontology vocabulary always projected into the doctrine index; `kb check` checks `data/kb/ontology/` when present. Six interfaces added and frozen; no existing shape changes. |
 
 The sealed snapshot keeps its own format version (`schema_version: "1.0"` in `/snapshot/*`).
 
@@ -110,13 +111,12 @@ A major version increment occurs when breaking changes are introduced.
 
 ---
 
-## 3.1 Experimental Features (Flagged)
+## 3.1 No experimental mode, no feature flags
 
-Capabilities under experimental evaluation (such as the Federating Ontology & Tool Projections, [ADR-KH-02](adr/ADR-KH-02-ontologie-federatrice-projections.md) and [contract §5.41](contracts/knowledge-hub-api-v1.md#541-expérimental-ontologie-fédératrice-à-projections-taxonomiques-issues-165-175)) are gated behind specific environment variables (e.g. `LLMOPS_EXPERIMENTAL_ONTOLOGY=1`).
+The Hub has no experimental mode and no environment-variable feature flags. A capability is either part of the contract (and documented in `contracts/knowledge-hub-api-v1.md`) or it is not shipped. Behaviour never depends on a "preview" switch, so two Hubs on the same version answer the same way.
 
-- **Non-regression guarantee**: When the experimental flag is absent or falsy (`0`, `false`, unset), all existing behavior, endpoints, and snapshot formats remain strictly byte-for-byte identical.
-- **Contract versioning**: Experimental features do not advance the stable `schema_version` (remains `1.40`). Experimental endpoints and tools return `"experimental": true` in their envelopes.
-- **Graduation**: An experimental capability is graduated to the stable contract only after formal review, RFC closure, and explicit contract version increment (`1.41+`).
+- **Contract versioning**: adding routes, tools or response fields to the contract follows the rules above (additive change, `schema_version` incremented when the contract changes).
+- **Work in progress** lives on a branch or behind a draft ADR, not behind a runtime flag.
 
 ---
 

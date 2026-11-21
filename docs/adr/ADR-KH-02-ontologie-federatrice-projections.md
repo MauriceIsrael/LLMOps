@@ -1,6 +1,7 @@
-# ADR-KH-02 — Ontologie fédératrice en fichier compagnon du glossaire (schéma d'identifiants, périmètre expérimental)
+# ADR-KH-02 — Ontologie fédératrice en fichier compagnon du glossaire (schéma d'identifiants)
 
-**Statut** : `proposed` (cadre expérimental EDP)  
+**Statut** : `proposed`  
+**Amendement 2026-11-21** : le cadre expérimental et son drapeau d'environnement sont **supprimés**. L'ontologie est toujours chargée par le moteur de doctrine (projection du vocabulaire) et ses routes REST et outils MCP sont toujours servis. Les garanties de « non-régression sans drapeau » ci-dessous (§ Compatibilité) sont **caduques** ; `kb check` contrôle l'ontologie dès que `data/kb/ontology/` existe. 
 **Date** : 2026-10-29  
 **Auteur** : @maintainers (Knowledge Hub)  
 **Contexte & Épique** : Issue #165 (LLMOps) / Issue #166 (Archinex)  
@@ -24,7 +25,7 @@ Cependant, pour l'Enterprise Decision Plane (EDP) et la plateforme Archinex, un 
 ### 2.1 Répertoire compagnon `data/kb/ontology/` et étanchéité du glossaire
 L'ontologie fédératrice est hébergée dans un répertoire compagnon dédié : `data/kb/ontology/`.
 - Le glossaire existant (`data/kb/glossary/glossary.md`) et le dictionnaire de synonymes (`data/kb/glossary/synonyms.yaml`) demeurent **strictement inchangés**.
-- Aucune régression : tant que le drapeau expérimental `LLMOPS_EXPERIMENTAL_ONTOLOGY=1` n'est pas activé, aucun fichier de `data/kb/ontology/` n'est chargé par le moteur de doctrine ou les APIs du Hub.
+- ~~Aucune régression tant que le drapeau expérimental n'est pas activé~~ *(caduc, voir l'amendement)* : les entrées **validées** de `data/kb/ontology/` sont projetées dans le vocabulaire du moteur de doctrine.
 
 ### 2.2 Schéma d'identifiants canoniques : clé de connaissance & URN
 Pour s'intégrer harmonieusement avec le formalisme `KnowledgeRef` (`type:slug`) et les exigences de citation sémantique de l'EDP, deux représentations canoniques bijectives sont arrêtées :
@@ -91,9 +92,9 @@ Le noyau d'ontologie du Knowledge Hub est strictement déterministe. Il ne réal
 1. **Snapshot scellé inchangé** :  
    `data/snapshots/latest.json` et son `payload_sha256` demeurent absolument identiques. L'ontologie n'est pas injectée dans le snapshot de production du Hub.
 2. **Registre de versions stable inchangé** :  
-   Le ledger général `version-ledger.json` du Hub ne contient pas les entrées d'ontologie tant que l'EDP est au stade expérimental.
+   Le ledger général `version-ledger.json` du Hub ne contient pas les entrées d'ontologie (elles ont leur propre ledger).
 3. **Réponses des APIs et outils MCP existants** :  
-   En l'absence du drapeau d'environnement `LLMOPS_EXPERIMENTAL_ONTOLOGY=1`, aucun endpoint d'ontologie n'est exposé et aucune réponse du Hub ne varie, assurant une stricte identité octet pour octet.
+   ~~En l'absence du drapeau, aucun endpoint d'ontologie n'est exposé~~ *(caduc, voir l'amendement)* : les endpoints d'ontologie sont toujours exposés ; le snapshot scellé de production reste, lui, indépendant de l'ontologie.
 
 ---
 
@@ -103,5 +104,5 @@ Le noyau d'ontologie du Knowledge Hub est strictement déterministe. Il ne réal
   - Permet à Archinex de vérifier formellement les architectures HLD contre un référentiel sémantique typé.
   - Préserve intégralement la rétrocompatibilité et l'isolation du cycle de vie de production du Knowledge Hub.
 - **Engagements** :  
-  - Maintenir un outillage de contrôle rigoureux (`kb check --experimental-ontology`).
+  - Maintenir un outillage de contrôle rigoureux (`kb check`).
   - Gérer l'export scellé dédié `ontology_export.json` séparé du snapshot principal.
