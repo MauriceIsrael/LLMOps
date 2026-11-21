@@ -1318,7 +1318,7 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
 
 ---
 
-### 5.41 Ontologie fédératrice à projections taxonomiques (Issues #165-#175)
+### 5.41 Contrat 1.42 — Ontologie fédératrice à projections taxonomiques (Issues #165-#175, #189)
 
 > Les routes et outils ci-dessous sont **toujours servis** : il n'existe ni mode expérimental ni drapeau d'environnement.
 

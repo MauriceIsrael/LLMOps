@@ -1,18 +1,18 @@
 {
   "schemaVersion": "1.8",
-  "snapshotId": "eng-example-eng-96989f714ee5",
+  "snapshotId": "eng-example-eng-01bd1e5653b3",
   "sourceSystem": "knowledge-hub",
   "emitter": "knowledge-hub",
   "createdAt": "2026-10-03T12:00:00Z",
   "sourceRevision": "example",
-  "checksum": "sha256:96989f714ee54472a35c828100567abc056e1987cda9b1f9f991038ef76941af",
+  "checksum": "sha256:01bd1e5653b344d3ae38e309896c6bb806c8f4a504f688bb9403c0938289481e",
   "data": {
     "engagement": {
       "id": "example-eng",
       "confidentiality": "confidential"
     },
     "pins": {
-      "contract_version": "1.40",
+      "contract_version": "1.42",
       "kb_snapshot": {
         "snapshot_id": "snapshot-2026-10-03-0000000",
         "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
