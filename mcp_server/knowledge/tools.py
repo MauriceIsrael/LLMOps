@@ -16,6 +16,7 @@ from mcp_server.core.db import (
     open_connection,
 )
 from mcp_server.core.envelope import (
+    error_response,
     handle_exception_response,
     invalid_argument_response,
     not_found_response,
@@ -3727,44 +3728,15 @@ def export_ontology_catalog(clause: str | None = None, leaf: str | None = None) 
     - clause: Find all technical leaves that satisfy this doctrinal clause URN.
     - leaf: Find all doctrinal clauses governing this technical leaf URN.
     """
-    import json
-
     from pipelines.ontology.gateway import is_ontology_experimental_enabled
 
     if not is_ontology_experimental_enabled():
         return not_found_response("experimental_ontology_disabled")
 
-    export_file = Path("data/snapshots/ontology_export.json")
-    if not export_file.exists():
-        from pipelines.ontology.export import export_ontology_snapshot
-
-        try:
-            export_ontology_snapshot(
-                ontology_dir=Path(server_config.kb_dir) / "ontology", output_path=export_file
-            )
-        except Exception:
-            pass
-
-    if not export_file.exists():
-        return not_found_response("ontology_export_not_found")
+    from pipelines.ontology.catalog_file import OntologyCatalogUnavailable, load_catalog_document
 
     try:
-        with open(export_file, encoding="utf-8") as f:
-            data = json.load(f)
-        if "payload" in data and isinstance(data["payload"], dict) and "entities" in data["payload"]:
-            payload = data["payload"]
-            data = {
-                "catalog_version": payload.get("schema_version")
-                or data.get("schema_version", "1.0"),
-                "generated_at": data.get("generated_at") or "2026-10-29T10:00:00Z",
-                "entities": payload.get("entities", {}),
-                "triplets": payload.get("triplets", []),
-                "clause_index": payload.get("clause_index") or {},
-            }
-
-        if "clause_index" not in data or not data["clause_index"]:
-            from pipelines.ontology.catalog import build_clause_index
-            data["clause_index"] = build_clause_index(data.get("entities", {}), data.get("triplets", []))
+        data = load_catalog_document()
 
         if clause:
             from pipelines.ontology.catalog import resolve_leaves_by_clause
@@ -3774,6 +3746,11 @@ def export_ontology_catalog(clause: str | None = None, leaf: str | None = None) 
             return resolve_clauses_by_leaf(data, leaf)
 
         return {"status": "ok", "experimental": True, **data}
+    except OntologyCatalogUnavailable as exc:
+        # Jamais de repli silencieux : un catalogue absent ou d'une autre forme est une erreur explicite.
+        if exc.code == "ontology_export_not_found":
+            return not_found_response(exc.code)
+        return error_response(f"{exc.code}: {exc}")
     except Exception as e:
         return handle_exception_response(e, context_action="export_ontology_catalog")
 

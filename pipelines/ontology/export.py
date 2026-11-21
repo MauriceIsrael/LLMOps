@@ -1,4 +1,6 @@
-"""Sealed export of ontology entries into ontology_export.json (Issue #173).
+"""Sealed export of ontology entries into ontology_entries_export.json (Issue #173).
+
+This is the "entries" shape. It is NOT the catalog served by /api/knowledge/ontology/export.
 
 Guarantees:
 - Validated entries only (draft and rejected are excluded).
@@ -26,7 +28,9 @@ from pipelines.ontology.loader import (
     load_ontology_entries,
 )
 
-DEFAULT_EXPORT_PATH = Path("data/snapshots/ontology_export.json")
+# Chemin DISTINCT du catalogue servi aux clients (data/snapshots/ontology_export.json, forme « entities » :
+# voir pipelines/ontology/catalog_file.py). Ce producteur écrit la forme « payload.entries ».
+DEFAULT_EXPORT_PATH = Path("data/snapshots/ontology_entries_export.json")
 
 
 def build_ontology_payload(entries: list[OntologyEntry]) -> dict[str, Any]:
@@ -56,7 +60,7 @@ def export_ontology_snapshot(
 
     Args:
         ontology_dir: Directory containing ontology YAML files.
-        output_path: Optional path to write ontology_export.json.
+        output_path: Optional path to write the entries export.
         ledger_path: Optional path to version-ledger.json (defaults to ontology_dir/version-ledger.json).
 
     Returns:

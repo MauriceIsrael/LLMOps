@@ -618,7 +618,7 @@ def ontology_record_cmd(
 @ontology_app.command("export")
 def ontology_export_cmd(
     ontology_dir: Path = typer.Option(Path("data/kb/ontology"), "--ontology-dir", help="Path to ontology directory."),
-    output_path: Path = typer.Option(Path("data/snapshots/ontology_export.json"), "--output", "-o", help="Output path for ontology export."),
+    output_path: Path = typer.Option(Path("data/snapshots/ontology_entries_export.json"), "--output", "-o", help="Output path for the ontology ENTRIES export (not the served catalog)."),
     ledger_path: Path | None = typer.Option(None, "--ledger", help="Path to version-ledger.json."),
 ) -> None:
     """Export sealed ontology snapshot (canonical-json v1, Issue #173)."""

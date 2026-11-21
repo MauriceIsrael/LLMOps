@@ -690,38 +690,13 @@ def create_starlette_app() -> Starlette:
                 {"error": "Experimental ontology feature is disabled"}, status_code=404
             )
 
-        export_file = Path("data/snapshots/ontology_export.json")
-        if not export_file.exists():
-            from pipelines.ontology.export import export_ontology_snapshot
+        from pipelines.ontology.catalog_file import OntologyCatalogUnavailable, load_catalog_document
 
-            try:
-                export_ontology_snapshot(
-                    ontology_dir=Path("data/kb/ontology"),
-                    output_path=export_file,
-                )
-            except Exception:
-                pass
-
-        if not export_file.exists():
-            return JSONResponse({"error": "Ontology export file not found"}, status_code=404)
-
-        with open(export_file, encoding="utf-8") as f:
-            data = json.load(f)
-
-        if "payload" in data and isinstance(data["payload"], dict) and "entities" in data["payload"]:
-            payload = data["payload"]
-            data = {
-                "catalog_version": payload.get("schema_version")
-                or data.get("schema_version", "1.0"),
-                "generated_at": data.get("generated_at") or "2026-10-29T10:00:00Z",
-                "entities": payload.get("entities", {}),
-                "triplets": payload.get("triplets", []),
-                "clause_index": payload.get("clause_index") or {},
-            }
-
-        if "clause_index" not in data or not data["clause_index"]:
-            from pipelines.ontology.catalog import build_clause_index
-            data["clause_index"] = build_clause_index(data.get("entities", {}), data.get("triplets", []))
+        try:
+            data = load_catalog_document()
+        except OntologyCatalogUnavailable as exc:
+            status = 404 if exc.code == "ontology_export_not_found" else 503
+            return JSONResponse({"error": str(exc), "code": exc.code}, status_code=status)
 
         clause = request.query_params.get("clause")
         leaf = request.query_params.get("leaf")

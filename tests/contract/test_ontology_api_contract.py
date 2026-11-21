@@ -262,3 +262,35 @@ def test_ontology_clause_governance_and_bidirectional_resolution(monkeypatch):
     assert clause_urn in tool_leaf["governing_clauses"]
 
 
+
+
+def test_export_serves_catalog_shape_and_never_regenerates_another_shape(monkeypatch, tmp_path):
+    """Issue #189 : l'export servi est le catalogue « entities » ; fichier absent ou mauvaise forme = erreur explicite."""
+    from pipelines.ontology import catalog_file
+
+    monkeypatch.setenv("LLMOPS_EXPERIMENTAL_ONTOLOGY", "1")
+    client = TestClient(create_starlette_app())
+
+    # Fichier versionné : forme catalogue.
+    monkeypatch.setattr(catalog_file, "DEFAULT_CATALOG_PATH", ROOT / "data" / "snapshots" / "ontology_export.json")
+    ok = client.get("/api/knowledge/ontology/export", headers=AUTH)
+    assert ok.status_code == 200
+    body = ok.json()
+    assert isinstance(body["entities"], dict) and body["entities"]
+    assert "entries" not in body
+
+    # Fichier absent : 404 explicite, et RIEN n'est régénéré.
+    absent = tmp_path / "ontology_export.json"
+    monkeypatch.setattr(catalog_file, "DEFAULT_CATALOG_PATH", absent)
+    missing = client.get("/api/knowledge/ontology/export", headers=AUTH)
+    assert missing.status_code == 404
+    assert missing.json()["code"] == "ontology_export_not_found"
+    assert not absent.exists()
+
+    # Mauvaise forme (« payload.entries ») : 503 explicite, jamais servie.
+    wrong = tmp_path / "wrong.json"
+    wrong.write_text('{"payload": {"entries": []}}', encoding="utf-8")
+    monkeypatch.setattr(catalog_file, "DEFAULT_CATALOG_PATH", wrong)
+    bad = client.get("/api/knowledge/ontology/export", headers=AUTH)
+    assert bad.status_code == 503
+    assert bad.json()["code"] == "ontology_export_wrong_shape"
