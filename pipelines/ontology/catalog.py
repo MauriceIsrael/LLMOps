@@ -21,6 +21,8 @@ VALID_PREDICATES: tuple[str, ...] = (
     "constrains",
     "conflicts_with",
     "satisfies_clause",
+    "requires_prerequisite_axis",
+    "instantiates_component",
 )
 
 PREDICATE_SATISFIES_CLAUSE = "satisfies_clause"

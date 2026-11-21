@@ -115,6 +115,26 @@
           },
           "projections": {
             "type": "object"
+          },
+          "togaf_domain": {
+            "type": "string",
+            "description": "Domaine TOGAF canonique de l'entité (routage des exigences et des emplacements de décision)."
+          },
+          "document_engine_layer": {
+            "type": "string",
+            "description": "Couche du Document Engine à laquelle l'entité contribue."
+          },
+          "default_decision_type": {
+            "type": "string",
+            "enum": [
+              "type1_deliberate",
+              "type2_default_ratify"
+            ],
+            "description": "Traitement par défaut : délibération complète (type 1) ou ratification rapide d'une commodité (type 2)."
+          },
+          "instantiated_component": {
+            "type": "string",
+            "description": "Composant logique instancié par la feuille (nom, sans valeur d'instanciation)."
           }
         }
       }
@@ -151,7 +171,9 @@
               "depends_on",
               "constrains",
               "conflicts_with",
-              "satisfies_clause"
+              "satisfies_clause",
+              "requires_prerequisite_axis",
+              "instantiates_component"
             ]
           },
           "object": {

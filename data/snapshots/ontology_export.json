@@ -1,10 +1,10 @@
 {
   "catalog_version": "1.0",
-  "generated_at": "2026-10-29T10:00:00Z",
+  "generated_at": "2026-11-21T00:00:00Z",
   "entities": {
     "urn:archinex:ontology:infrastructure:server:baremetal": {
       "urn": "urn:archinex:ontology:infrastructure:server:baremetal",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Cluster Sylva Bare-Metal SR-IOV / DPDK (Pool CNF Cœur de Réseau — NUMA / HugePages 1Gi)",
@@ -57,11 +57,14 @@
           "Dell-PowerEdge-R750",
           "HPE-ProLiant-DL380"
         ]
-      }
+      },
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:infrastructure:baremetal_sylva"
+      ]
     },
     "urn:archinex:ontology:infrastructure:compute:suse_telco_cloud_sylva": {
       "urn": "urn:archinex:ontology:infrastructure:compute:suse_telco_cloud_sylva",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": false,
       "title": "Cluster SUSE Telco Cloud & Sylva Standard (Pool Workloads / Isolement NIS2 Normal)",
@@ -101,6 +104,9 @@
         }
       },
       "projections": {
+        "distribution": "SUSE-Telco-Cloud-RKE2",
+        "orchestrator": "Sylva-CAPI-Metal3",
+        "host_os": "SLE-Micro-5.5",
         "allowed_roles": [
           "control-plane",
           "worker"
@@ -109,7 +115,10 @@
           "Dell-PowerEdge-R750",
           "HPE-ProLiant-DL380"
         ]
-      }
+      },
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:infrastructure:sylva_standard_nis2"
+      ]
     },
     "urn:archinex:ontology:telecom:network:oob": {
       "urn": "urn:archinex:ontology:telecom:network:oob",
@@ -257,45 +266,134 @@
     },
     "urn:archinex:ontology:concept:telco_cloud_platform": {
       "urn": "urn:archinex:ontology:concept:telco_cloud_platform",
-      "revision": 1,
+      "revision": 2,
       "kind": "concept",
       "title": "Concept HLD : Plateforme Telco Cloud & Infrastructure Souveraine Cœur",
-      "domain": "telecom"
+      "domain": "telecom",
+      "keywords": [
+        "plateforme",
+        "environnement",
+        "environnements",
+        "serveur",
+        "cluster",
+        "infrastructure",
+        "cloud",
+        "baremetal",
+        "dev",
+        "recette",
+        "prod",
+        "k8s",
+        "sylva",
+        "compute"
+      ]
     },
     "urn:archinex:ontology:concept:interconnection_gateway": {
       "urn": "urn:archinex:ontology:concept:interconnection_gateway",
-      "revision": 1,
+      "revision": 2,
       "kind": "concept",
       "title": "Concept HLD : Passerelle d'Interconnexion Réseau & Roaming Sécurisé",
-      "domain": "telecom"
+      "domain": "telecom",
+      "keywords": [
+        "interconnexion",
+        "réseau",
+        "network",
+        "fabric",
+        "bgp",
+        "evpn",
+        "wan",
+        "ipsec",
+        "firewall",
+        "flux",
+        "upf",
+        "passerelle",
+        "routage"
+      ]
     },
     "urn:archinex:ontology:concept:storage_data_persistence": {
       "urn": "urn:archinex:ontology:concept:storage_data_persistence",
-      "revision": 1,
+      "revision": 2,
       "kind": "concept",
       "title": "Concept HLD : Persistance Distribuée, Stockage Bloc / Objet & Sauvegarde",
-      "domain": "storage"
+      "domain": "storage",
+      "keywords": [
+        "stockage",
+        "persistance",
+        "ceph",
+        "s3",
+        "base de données",
+        "bdd",
+        "backup",
+        "sauvegarde",
+        "volume",
+        "csi",
+        "nvme",
+        "données",
+        "data"
+      ]
     },
     "urn:archinex:ontology:concept:iam_security_zerotrust": {
       "urn": "urn:archinex:ontology:concept:iam_security_zerotrust",
-      "revision": 1,
+      "revision": 2,
       "kind": "concept",
       "title": "Concept HLD : Identité, Accès Zero-Trust & Gestion Cryptographique des Secrets",
-      "domain": "security"
+      "domain": "security",
+      "keywords": [
+        "iam",
+        "identité",
+        "sécurité",
+        "nis2",
+        "secnumcloud",
+        "pki",
+        "mtls",
+        "oidc",
+        "keycloak",
+        "rbac",
+        "vault",
+        "secrets",
+        "bastion",
+        "oam"
+      ]
     },
     "urn:archinex:ontology:concept:observability_noc_soc": {
       "urn": "urn:archinex:ontology:concept:observability_noc_soc",
-      "revision": 1,
+      "revision": 2,
       "kind": "concept",
       "title": "Concept HLD : Observabilité Unifiée, Télémétrie NOC & Surveillance SOC / SIEM",
-      "domain": "observability"
+      "domain": "observability",
+      "keywords": [
+        "observabilité",
+        "supervision",
+        "monitoring",
+        "noc",
+        "soc",
+        "siem",
+        "logs",
+        "métriques",
+        "prometheus",
+        "opentelemetry",
+        "alerting",
+        "exploitation"
+      ]
     },
     "urn:archinex:ontology:concept:resilience_drp_continuity": {
       "urn": "urn:archinex:ontology:concept:resilience_drp_continuity",
-      "revision": 1,
+      "revision": 2,
       "kind": "concept",
       "title": "Concept HLD : Résilience Multi-Sites, PRA/PCA & Tests de Bascule Inopinée",
-      "domain": "resilience"
+      "domain": "resilience",
+      "keywords": [
+        "résilience",
+        "pra",
+        "pca",
+        "continuité",
+        "sinistre",
+        "bascule",
+        "rto",
+        "rpo",
+        "disponibilité",
+        "drp",
+        "multi-site"
+      ]
     },
     "urn:archinex:ontology:axis:compute_substrate": {
       "urn": "urn:archinex:ontology:axis:compute_substrate",
@@ -425,15 +523,40 @@
     },
     "urn:archinex:ontology:telecom:network:spine_leaf_evpn": {
       "urn": "urn:archinex:ontology:telecom:network:spine_leaf_evpn",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Fabric Spine-Leaf BGP EVPN / VXLAN (Dual-ToR 100G/400G)",
-      "domain": "telecom"
+      "domain": "telecom",
+      "keywords": [
+        "spine",
+        "leaf",
+        "bgp",
+        "evpn",
+        "vxlan",
+        "fabric",
+        "tor",
+        "ecmp",
+        "underlay",
+        "routage"
+      ],
+      "hydration_template": {
+        "fabric_topology": "spine-leaf-evpn",
+        "min_uplinks_per_host": 2
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_single_tor_uplink",
+        "data.archinex.edp.multiaxis.deny_non_evpn_fabric"
+      ],
+      "projections": {
+        "underlay_protocol": "eBGP",
+        "overlay_protocol": "EVPN-VXLAN",
+        "min_tor_switches_per_rack": 2
+      }
     },
     "urn:archinex:ontology:security:crypto:ipsec_ikev2_aes256": {
       "urn": "urn:archinex:ontology:security:crypto:ipsec_ikev2_aes256",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Tunnel IPsec ESP IKEv2 (AES-GCM-256 + PFS Diffie-Hellman Groupe 19)",
@@ -441,27 +564,105 @@
       "governed_by_clauses": [
         "urn:archinex:kb:clause:nis2:art21_crypto",
         "urn:archinex:kb:clause:3gpp:ts33_501_sec_s6a"
-      ]
+      ],
+      "keywords": [
+        "ipsec",
+        "esp",
+        "ikev2",
+        "aes-256",
+        "gcm",
+        "vpn",
+        "tunnel",
+        "wan",
+        "interco",
+        "macsec",
+        "chiffrement",
+        "s6a",
+        "dea",
+        "secgw",
+        "mme",
+        "hss",
+        "mediation",
+        "médiation"
+      ],
+      "hydration_template": {
+        "crypto_profile": "IKEv2-AES256-GCM-DH20"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_weak_wan_cipher",
+        "data.archinex.edp.multiaxis.deny_unmediated_s6a_direct_flow",
+        "data.archinex.edp.multiaxis.deny_unreconciled_partner_objects"
+      ],
+      "projections": {
+        "protocol": "IPsec-ESP-IKEv2",
+        "cipher_suite": "AES-256-GCM",
+        "pfs_dh_group": "DH-20-ECP384",
+        "forbid_direct_core_bypass": true,
+        "require_partner_sla_reconciliation": true
+      }
     },
     "urn:archinex:ontology:storage:csi:ceph_rbd_3replicas": {
       "urn": "urn:archinex:ontology:storage:csi:ceph_rbd_3replicas",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Stockage Bloc Rook-Ceph RBD (3 Réplicas Synchrones / SSD NVMe)",
-      "domain": "storage"
+      "domain": "storage",
+      "keywords": [
+        "stockage",
+        "ceph",
+        "rook",
+        "rbd",
+        "csi",
+        "bloc",
+        "nvme",
+        "replica",
+        "persistance"
+      ],
+      "hydration_template": {
+        "storage_class": "ceph-rbd-sc",
+        "replication_factor": 3
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_insufficient_storage_replicas"
+      ],
+      "projections": {
+        "storage_backend": "rook-ceph-rbd",
+        "min_replication_factor": 3,
+        "failure_domain": "rack"
+      }
     },
     "urn:archinex:ontology:storage:s3:object_erasure_coding": {
       "urn": "urn:archinex:ontology:storage:s3:object_erasure_coding",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": false,
       "title": "Stockage Objet Compatible S3 (Ceph RGW / Erasure Coding 4+2)",
-      "domain": "storage"
+      "domain": "storage",
+      "keywords": [
+        "s3",
+        "objet",
+        "minio",
+        "rgw",
+        "erasure",
+        "coding",
+        "bucket",
+        "datalake"
+      ],
+      "hydration_template": {
+        "object_store": "s3-ec-4plus2"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unprotected_s3_bucket"
+      ],
+      "projections": {
+        "protection_scheme": "erasure-coding-4-2",
+        "versioning_required": true
+      }
     },
     "urn:archinex:ontology:security:crypto:luks2_kms_hsm": {
       "urn": "urn:archinex:ontology:security:crypto:luks2_kms_hsm",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Chiffrement Disque Matériel / LUKS2 Adossé à un KMS/HSM Central",
@@ -469,11 +670,32 @@
       "governed_by_clauses": [
         "urn:archinex:kb:clause:nis2:art21_crypto",
         "urn:archinex:kb:clause:iso27001:a10_cryptography"
-      ]
+      ],
+      "keywords": [
+        "luks",
+        "kms",
+        "hsm",
+        "repos",
+        "at-rest",
+        "disque",
+        "aes-xts",
+        "chiffrement"
+      ],
+      "hydration_template": {
+        "encryption_at_rest": "LUKS2-AES-XTS-256"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unencrypted_storage_volume"
+      ],
+      "projections": {
+        "cipher": "AES-XTS-256",
+        "key_management": "external-kms-hsm",
+        "key_rotation_days": 365
+      }
     },
     "urn:archinex:ontology:storage:backup:s3_object_lock_worm": {
       "urn": "urn:archinex:ontology:storage:backup:s3_object_lock_worm",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Sauvegardes Immuables WORM (S3 Object Lock / Compliance Mode)",
@@ -481,11 +703,31 @@
       "governed_by_clauses": [
         "urn:archinex:kb:clause:nis2:art21_backup_continuity",
         "urn:archinex:kb:clause:iso27001:a12_backup"
-      ]
+      ],
+      "keywords": [
+        "sauvegarde",
+        "backup",
+        "velero",
+        "immuable",
+        "worm",
+        "object-lock",
+        "ransomware",
+        "rétention"
+      ],
+      "hydration_template": {
+        "backup_policy": "s3-worm-compliance-30d"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_mutable_backup_repository"
+      ],
+      "projections": {
+        "immutability_mode": "COMPLIANCE-WORM",
+        "min_retention_days": 30
+      }
     },
     "urn:archinex:ontology:security:iam:oidc_fido2_rbac": {
       "urn": "urn:archinex:ontology:security:iam:oidc_fido2_rbac",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Fédération d'Identité OIDC + Authentification Forte FIDO2 / WebAuthn",
@@ -493,11 +735,35 @@
       "governed_by_clauses": [
         "urn:archinex:kb:clause:nis2:art21_mfa",
         "urn:archinex:kb:clause:iso27001:a9_access_control"
-      ]
+      ],
+      "keywords": [
+        "iam",
+        "oidc",
+        "keycloak",
+        "saml",
+        "mfa",
+        "fido2",
+        "rbac",
+        "identité",
+        "authentification",
+        "sso"
+      ],
+      "hydration_template": {
+        "iam_provider": "oidc-fido2-strict"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_wildcard_cluster_admin_rbac",
+        "data.archinex.edp.multiaxis.deny_missing_mfa_enforcement"
+      ],
+      "projections": {
+        "protocol": "OIDC-PKCE",
+        "mfa_level": "FIDO2-WebAuthn-AAL3",
+        "forbid_cluster_admin_group": true
+      }
     },
     "urn:archinex:ontology:security:pki:cert_manager_spiffe_mtls": {
       "urn": "urn:archinex:ontology:security:pki:cert_manager_spiffe_mtls",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "PKI Automatisée Cert-Manager & Identité SPIRE (mTLS Strict Inter-Services)",
@@ -505,30 +771,91 @@
       "governed_by_clauses": [
         "urn:archinex:kb:clause:3gpp:ts33_501_sba_security",
         "urn:archinex:kb:clause:nis2:art21_zerotrust"
-      ]
+      ],
+      "keywords": [
+        "pki",
+        "mtls",
+        "certificat",
+        "tls",
+        "spiffe",
+        "spire",
+        "cert-manager",
+        "x509",
+        "mesh"
+      ],
+      "hydration_template": {
+        "mtls_mode": "STRICT-SPIFFE"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_plaintext_interservice_flow"
+      ],
+      "projections": {
+        "mtls_enforcement": "STRICT",
+        "max_cert_ttl_hours": 24
+      }
     },
     "urn:archinex:ontology:security:secrets:vault_dynamic_leases": {
       "urn": "urn:archinex:ontology:security:secrets:vault_dynamic_leases",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Gestionnaire de Secrets HashiCorp Vault (Baux Dynamiques & Rotation)",
       "domain": "security",
       "governed_by_clauses": [
         "urn:archinex:kb:clause:nis2:art21_access_control"
-      ]
+      ],
+      "keywords": [
+        "secret",
+        "secrets",
+        "vault",
+        "openbao",
+        "external-secrets",
+        "rotation",
+        "credential"
+      ],
+      "hydration_template": {
+        "secret_store": "vault-dynamic-eso"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_static_secret_in_git"
+      ],
+      "projections": {
+        "delivery_mechanism": "ExternalSecretsOperator",
+        "allow_static_k8s_secrets": false
+      }
     },
     "urn:archinex:ontology:observability:telemetry:otel_prometheus_loki": {
       "urn": "urn:archinex:ontology:observability:telemetry:otel_prometheus_loki",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Stack Télémétrie Cloud-Native (OpenTelemetry Collector + Prometheus HA + Loki)",
-      "domain": "observability"
+      "domain": "observability",
+      "keywords": [
+        "observabilité",
+        "télémétrie",
+        "opentelemetry",
+        "otel",
+        "prometheus",
+        "grafana",
+        "loki",
+        "métriques",
+        "traces"
+      ],
+      "hydration_template": {
+        "telemetry_stack": "otel-prometheus-loki-ha"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unmonitored_workload"
+      ],
+      "projections": {
+        "collector_standard": "OpenTelemetry-OTLP",
+        "metrics_retention_days": 90
+      }
     },
     "urn:archinex:ontology:observability:soc:siem_syslog_tls_nis2": {
       "urn": "urn:archinex:ontology:observability:soc:siem_syslog_tls_nis2",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Transfert Sécurisé Syslog-over-TLS vers SIEM Souverain (Rétention 365 Jours NIS2)",
@@ -536,50 +863,1816 @@
       "governed_by_clauses": [
         "urn:archinex:kb:clause:nis2:art21_incident_handling",
         "urn:archinex:kb:clause:iso27001:a12_logging_monitoring"
-      ]
+      ],
+      "keywords": [
+        "siem",
+        "soc",
+        "audit",
+        "syslog",
+        "falco",
+        "nis2",
+        "journalisation",
+        "forensic",
+        "intrusion"
+      ],
+      "hydration_template": {
+        "audit_sink": "syslog-tls-siem-soc"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_missing_siem_audit_sink"
+      ],
+      "projections": {
+        "transport": "Syslog-RFC5424-TLS1.3",
+        "audit_retention_months": 12
+      }
     },
     "urn:archinex:ontology:observability:noc:alertmanager_slo_burnrate": {
       "urn": "urn:archinex:ontology:observability:noc:alertmanager_slo_burnrate",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Supervision & Alerting Multi-Fenêtres Piloté par Burn-Rate SLO (Alertmanager)",
-      "domain": "observability"
+      "domain": "observability",
+      "keywords": [
+        "noc",
+        "slo",
+        "sla",
+        "alerting",
+        "alertmanager",
+        "runbook",
+        "astreinte",
+        "supervision"
+      ],
+      "hydration_template": {
+        "alerting_profile": "multi-window-slo-burnrate"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_alert_without_runbook_url"
+      ],
+      "projections": {
+        "require_runbook_annotation": true,
+        "target_availability_slo": "99.95%"
+      }
     },
     "urn:archinex:ontology:resilience:drp:active_active_stretched": {
       "urn": "urn:archinex:ontology:resilience:drp:active_active_stretched",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Architecture Géo-Distribuée Actif/Actif Synchrone (Stretched Cluster / RPO=0)",
       "domain": "resilience",
       "governed_by_clauses": [
         "urn:archinex:kb:clause:nis2:art21_business_continuity"
-      ]
+      ],
+      "keywords": [
+        "pca",
+        "actif-actif",
+        "multi-site",
+        "stretched",
+        "rpo",
+        "rto",
+        "witness",
+        "continuité",
+        "haute-disponibilité"
+      ],
+      "hydration_template": {
+        "drp_topology": "active-active-3sites-witness"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_missing_quorum_witness_site"
+      ],
+      "projections": {
+        "rpo_seconds": 0,
+        "rto_seconds": 300,
+        "witness_site_required": true
+      }
     },
     "urn:archinex:ontology:resilience:drp:active_passive_warm_standby": {
       "urn": "urn:archinex:ontology:resilience:drp:active_passive_warm_standby",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": false,
       "title": "Architecture PRA Actif/Passif Warm-Standby (Réplication Asynchrone / RPO < 15m)",
-      "domain": "resilience"
+      "domain": "resilience",
+      "keywords": [
+        "pra",
+        "actif-passif",
+        "standby",
+        "bascule",
+        "sinistre",
+        "reprise",
+        "drp"
+      ],
+      "hydration_template": {
+        "drp_topology": "active-passive-warm-standby"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_rpo_exceeding_threshold"
+      ],
+      "projections": {
+        "rpo_seconds": 900,
+        "rto_seconds": 7200
+      }
     },
     "urn:archinex:ontology:resilience:testing:automated_gameday_quarterly": {
       "urn": "urn:archinex:ontology:resilience:testing:automated_gameday_quarterly",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Campagnes Trimestrielles de Chaos Engineering & Validation Formelle de Bascule",
-      "domain": "resilience"
+      "domain": "resilience",
+      "keywords": [
+        "chaos",
+        "gameday",
+        "exercice",
+        "test-pra",
+        "bascule",
+        "homologation",
+        "résilience"
+      ],
+      "hydration_template": {
+        "drp_drill_schedule": "quarterly-automated"
+      },
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_untested_drp_plan"
+      ],
+      "projections": {
+        "max_days_between_drills": 90,
+        "automated_failover_verification": true
+      }
     },
     "urn:archinex:ontology:facilities:power:ups_battery_backup": {
       "urn": "urn:archinex:ontology:facilities:power:ups_battery_backup",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": false,
       "title": "Alimentation Électrique Secourue par Onduleur Local (Batterie Li-ion 4h)",
-      "domain": "facilities"
+      "domain": "facilities",
+      "keywords": [
+        "batterie",
+        "ups",
+        "secours"
+      ],
+      "hydration_template": {
+        "power_feeds": [
+          "UPS-LOCAL-1"
+        ]
+      },
+      "projections": {
+        "redundancy_mode": "N+1"
+      }
+    },
+    "urn:archinex:ontology:application:broadcast:embms_5mbs_group_broadcast": {
+      "urn": "urn:archinex:ontology:application:broadcast:embms_5mbs_group_broadcast",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Diffusion Multicast/Broadcast eMBMS / 5MBS Authentifiée avec Repli Unicast (ptt-server)",
+      "domain": "application",
+      "togaf_domain": "application-business",
+      "document_engine_layer": "application",
+      "instantiated_component": "ptt-server",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:mcx:embms_5mbs"
+      ],
+      "keywords": [
+        "embms",
+        "5mbs",
+        "mbs",
+        "multicast",
+        "broadcast",
+        "bm-sc"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unauthenticated_embms_broadcast"
+      ],
+      "projections": {
+        "embms_authenticated_required": true
+      }
+    },
+    "urn:archinex:ontology:application:gis:central_fusion_hybrid_geofencing": {
+      "urn": "urn:archinex:ontology:application:gis:central_fusion_hybrid_geofencing",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Fusion Centrale sur Serveur SIG (gis-server) & Géofencing Hybride (Relais Terminal ptt-server)",
+      "domain": "application",
+      "togaf_domain": "application-business",
+      "instantiated_component": "gis-server",
+      "keywords": [
+        "fusion centrale",
+        "geofencing hybride",
+        "géofencing hybride",
+        "gis-server",
+        "ptt-server",
+        "postgis",
+        "pseudonymisation"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_component_substrate_mismatch"
+      ],
+      "projections": {
+        "fusion_authority_component": "gis-server",
+        "geofencing_mode": "hybrid_server_terminal",
+        "radio_identity_cloisonnement": "pseudonymized_gateway"
+      }
+    },
+    "urn:archinex:ontology:application:gis:central_fusion_server_only_geofencing": {
+      "urn": "urn:archinex:ontology:application:gis:central_fusion_server_only_geofencing",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Fusion & Géofencing 100 % Centralisés sur Serveur SIG (gis-server seul)",
+      "domain": "application",
+      "togaf_domain": "application-business",
+      "instantiated_component": "gis-server",
+      "keywords": [
+        "fusion 100% serveur",
+        "geofencing centralise",
+        "gis-server seul",
+        "postgis spatial"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_component_substrate_mismatch"
+      ],
+      "projections": {
+        "fusion_authority_component": "gis-server",
+        "geofencing_mode": "central_server_only",
+        "radio_identity_cloisonnement": "strict_network_strip"
+      }
+    },
+    "urn:archinex:ontology:application:gis:distributed_terminal_geofencing": {
+      "urn": "urn:archinex:ontology:application:gis:distributed_terminal_geofencing",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Fusion & Géofencing Distribués côté Serveur Temps Réel / Terminal (ptt-server principal, gis-server passif)",
+      "domain": "application",
+      "togaf_domain": "application-business",
+      "instantiated_component": "ptt-server",
+      "keywords": [
+        "geofencing distribue",
+        "terminal",
+        "ptt-server",
+        "temps reel"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_component_substrate_mismatch"
+      ],
+      "projections": {
+        "fusion_authority_component": "ptt-server",
+        "geofencing_mode": "distributed_edge_terminal",
+        "radio_identity_cloisonnement": "session_scoped"
+      }
+    },
+    "urn:archinex:ontology:application:gis:geoserver_postgis_offline": {
+      "urn": "urn:archinex:ontology:application:gis:geoserver_postgis_offline",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Serveur Cartographique GeoServer + PostGIS & Cache Tuiles Hors Ligne",
+      "domain": "application",
+      "togaf_domain": "application-business",
+      "instantiated_component": "gis-server",
+      "keywords": [
+        "geoserver",
+        "postgis",
+        "cartographie",
+        "gis",
+        "sig",
+        "tuiles",
+        "wmts"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:app:gis_offline_tiles"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_component_substrate_mismatch"
+      ],
+      "projections": {
+        "protocols": [
+          "WMS",
+          "WMTS",
+          "WFS"
+        ],
+        "offline_tile_cache": true
+      }
+    },
+    "urn:archinex:ontology:application:gis:qgis_server_wmts": {
+      "urn": "urn:archinex:ontology:application:gis:qgis_server_wmts",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "QGIS Server & MapProxy pour Rendu Cartographique OGC Souverain",
+      "domain": "application",
+      "togaf_domain": "application-business",
+      "instantiated_component": "gis-server",
+      "keywords": [
+        "qgis",
+        "mapproxy",
+        "ogc"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_component_substrate_mismatch"
+      ],
+      "projections": {
+        "protocols": [
+          "WMS",
+          "WMTS"
+        ],
+        "offline_tile_cache": true
+      }
+    },
+    "urn:archinex:ontology:axis:cmdb_asset_inventory": {
+      "urn": "urn:archinex:ontology:axis:cmdb_asset_inventory",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Inventaire Réseau, CMDB & Réconciliation ITSM",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "default_decision_type": "type2_default_ratify",
+      "keywords": [
+        "cmdb",
+        "itsm",
+        "inventaire",
+        "decouverte automatique",
+        "referentiel actifs",
+        "reconciliation inventaire"
+      ]
+    },
+    "urn:archinex:ontology:axis:core_5g_network_slicing": {
+      "urn": "urn:archinex:ontology:axis:core_5g_network_slicing",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Tranchage Réseau 5G (Network Slicing SST / S-NSSAI / 5QI)",
+      "domain": "telecom",
+      "togaf_domain": "network-connectivity",
+      "document_engine_layer": "component",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "slicing",
+        "network slicing",
+        "tranche 5g",
+        "tranches 5g",
+        "sst",
+        "sd",
+        "nssai",
+        "s-nssai",
+        "dnn"
+      ]
+    },
+    "urn:archinex:ontology:axis:dns_dhcp_ipam": {
+      "urn": "urn:archinex:ontology:axis:dns_dhcp_ipam",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Services Réseau Fondamentaux (DNS, DHCP, IPAM)",
+      "domain": "telecom",
+      "togaf_domain": "network-connectivity",
+      "document_engine_layer": "infrastructure",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:axis:egress_filtering_proxy": {
+      "urn": "urn:archinex:ontology:axis:egress_filtering_proxy",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Proxy Sortant Explicite & Filtrage FQDN",
+      "domain": "security",
+      "togaf_domain": "network-connectivity",
+      "document_engine_layer": "infrastructure",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:axis:embms_multicast_broadcast": {
+      "urn": "urn:archinex:ontology:axis:embms_multicast_broadcast",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Diffusion Multicast / Broadcast Groupe MCX (eMBMS / 5MBS)",
+      "domain": "application",
+      "togaf_domain": "application-business",
+      "document_engine_layer": "application",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "embms",
+        "5mbs",
+        "mbs",
+        "multicast",
+        "broadcast",
+        "diffusion groupe",
+        "bm-sc",
+        "mbms"
+      ]
+    },
+    "urn:archinex:ontology:axis:endpoint_app_sandboxing": {
+      "urn": "urn:archinex:ontology:axis:endpoint_app_sandboxing",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Cloisonnement Applicatif, Profil Professionnel & Sandboxing Terminal",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "default_decision_type": "type2_default_ratify",
+      "keywords": [
+        "sandboxing",
+        "sandbox",
+        "work profile",
+        "profil professionnel",
+        "kiosque",
+        "kiosk",
+        "cope",
+        "cobo",
+        "cloisonnement applicatif"
+      ]
+    },
+    "urn:archinex:ontology:axis:endpoint_local_encryption": {
+      "urn": "urn:archinex:ontology:axis:endpoint_local_encryption",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Chiffrement Local des Données Terminal (FBE / BitLocker / LUKS2)",
+      "domain": "storage",
+      "togaf_domain": "data-persistence",
+      "document_engine_layer": "component",
+      "default_decision_type": "type2_default_ratify",
+      "keywords": [
+        "chiffrement local",
+        "file-based encryption",
+        "fbe",
+        "full disk encryption",
+        "fde",
+        "bitlocker",
+        "stockage local chiffre",
+        "remote wipe"
+      ]
+    },
+    "urn:archinex:ontology:axis:endpoint_mdm_enrollment": {
+      "urn": "urn:archinex:ontology:axis:endpoint_mdm_enrollment",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Gestion de Flotte MDM / EMM & Enrôlement des Terminaux",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "mdm",
+        "emm",
+        "uem",
+        "enrolement",
+        "enrollment",
+        "zero-touch",
+        "gestion de flotte",
+        "flotte terminaux",
+        "terminal",
+        "terminaux",
+        "endpoint",
+        "android enterprise",
+        "supervised"
+      ]
+    },
+    "urn:archinex:ontology:axis:endpoint_os_hardening": {
+      "urn": "urn:archinex:ontology:axis:endpoint_os_hardening",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Durcissement OS Terminal, Verified Boot & Attestation Matérielle",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "os terminal",
+        "os terminaux",
+        "durcissement os",
+        "verified boot",
+        "secure boot",
+        "selinux",
+        "apparmor",
+        "keystore",
+        "tpm",
+        "strongbox",
+        "attestation materielle"
+      ]
+    },
+    "urn:archinex:ontology:axis:endpoint_ota_updates": {
+      "urn": "urn:archinex:ontology:axis:endpoint_ota_updates",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Mises à Jour OTA Signées, Partitionnement A/B & Rollback Automatique",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "default_decision_type": "type2_default_ratify",
+      "keywords": [
+        "ota",
+        "mise a jour ota",
+        "fota",
+        "patch management",
+        "rollback",
+        "a/b partition",
+        "conformite terminal"
+      ]
+    },
+    "urn:archinex:ontology:axis:endpoint_pki_enrollment": {
+      "urn": "urn:archinex:ontology:axis:endpoint_pki_enrollment",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Enrôlement PKI des Terminaux (SCEP / EST / ACME)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "default_decision_type": "type2_default_ratify",
+      "keywords": [
+        "scep",
+        "est",
+        "enrolement certificat",
+        "certificat terminal",
+        "eap-tls",
+        "pki terminal"
+      ]
+    },
+    "urn:archinex:ontology:axis:env_fidelity": {
+      "urn": "urn:archinex:ontology:axis:env_fidelity",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Fidélité & Parité des Environnements (Dev/Rec/Prod)",
+      "domain": "platform"
+    },
+    "urn:archinex:ontology:axis:esim_smdp_provisioning": {
+      "urn": "urn:archinex:ontology:axis:esim_smdp_provisioning",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Provisioning eSIM SM-DP+ (GSMA SGP.22), SAS-SM & 4-Yeux",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "smdp+",
+        "sm-dp+",
+        "esim",
+        "euicc",
+        "sgp.22",
+        "sas-sm",
+        "profil sim",
+        "4-yeux",
+        "four-eyes",
+        "provisioning sim"
+      ]
+    },
+    "urn:archinex:ontology:axis:gis_location_fusion": {
+      "urn": "urn:archinex:ontology:axis:gis_location_fusion",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Fusion de Localisation Multi-Sources, Cloisonnement & Géofencing SIG",
+      "domain": "application",
+      "togaf_domain": "application-business",
+      "document_engine_layer": "application",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "fusion de localisation",
+        "geofencing",
+        "géofencing",
+        "localisation multi-sources",
+        "imsi",
+        "supi",
+        "suci",
+        "sig",
+        "gis"
+      ]
+    },
+    "urn:archinex:ontology:axis:gis_tile_engine": {
+      "urn": "urn:archinex:ontology:axis:gis_tile_engine",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Serveur Cartographique SIG / GIS & Tuiles Hors Ligne",
+      "domain": "application",
+      "togaf_domain": "application-business",
+      "document_engine_layer": "application",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:axis:hsm_key_custody": {
+      "urn": "urn:archinex:ontology:axis:hsm_key_custody",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Racine Matérielle HSM & Cérémonie de Clés",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:axis:ingress_reverse_proxy": {
+      "urn": "urn:archinex:ontology:axis:ingress_reverse_proxy",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Reverse Proxy Ingress, TLS & WAF",
+      "domain": "security",
+      "togaf_domain": "network-connectivity",
+      "document_engine_layer": "infrastructure",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:axis:non3gpp_wlan_interworking": {
+      "urn": "urn:archinex:ontology:axis:non3gpp_wlan_interworking",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Interworking Wi-Fi / WLAN Offload Non-3GPP (N3IWF / ePDG / ATSSS)",
+      "domain": "telecom",
+      "togaf_domain": "network-connectivity",
+      "document_engine_layer": "infrastructure",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "n3iwf",
+        "epdg",
+        "atsss",
+        "wlan offload",
+        "wifi offload",
+        "wi-fi",
+        "non-3gpp",
+        "interworking"
+      ]
+    },
+    "urn:archinex:ontology:axis:oci_artifact_registry": {
+      "urn": "urn:archinex:ontology:axis:oci_artifact_registry",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Registre d'Artéfacts OCI Signé & Scanner CVE",
+      "domain": "platform",
+      "togaf_domain": "platform-compute",
+      "document_engine_layer": "infrastructure",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:axis:oob_management": {
+      "urn": "urn:archinex:ontology:axis:oob_management",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Plan d'Administration Hors-Bande (OOB / Redfish)",
+      "domain": "telecom"
+    },
+    "urn:archinex:ontology:axis:oss_automation_hitl": {
+      "urn": "urn:archinex:ontology:axis:oss_automation_hitl",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Automatisation SMO/OSS, Corrélation RCA & Human-in-the-Loop",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "boucle fermee",
+        "closed loop",
+        "human-in-the-loop",
+        "approbation humaine",
+        "remediation",
+        "rca",
+        "correlation alarmes",
+        "aiops"
+      ]
+    },
+    "urn:archinex:ontology:axis:oss_smo_mediation": {
+      "urn": "urn:archinex:ontology:axis:oss_smo_mediation",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Médiation OSS / EMS & Modèle NRM Unifié (3GPP TS 28.532)",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "oss",
+        "smo",
+        "ems",
+        "nrm",
+        "ts 28.532",
+        "fcaps",
+        "mediation oss",
+        "restconf",
+        "netconf",
+        "mocn",
+        "ran tiers"
+      ]
+    },
+    "urn:archinex:ontology:axis:pam_admin_bastion": {
+      "urn": "urn:archinex:ontology:axis:pam_admin_bastion",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Bastion d'Administration PAM en Coupure Zone OAM",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:axis:pki_3gpp_ndsaf": {
+      "urn": "urn:archinex:ontology:axis:pki_3gpp_ndsaf",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : PKI Télécom 3GPP TS 33.310 (CMPv2 / NDS-AF)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:axis:pki_hierarchy": {
+      "urn": "urn:archinex:ontology:axis:pki_hierarchy",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Hiérarchie PKI (Racine Hors Ligne & Autorités Intermédiaires)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:axis:pqc_crypto_agility": {
+      "urn": "urn:archinex:ontology:axis:pqc_crypto_agility",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Cryptographie Post-Quantique (PQC) & Crypto-Agilité",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "pqc",
+        "post-quantique",
+        "post quantum",
+        "ml-kem",
+        "ml-dsa",
+        "kyber",
+        "dilithium",
+        "crypto-agilite",
+        "crypto agilite"
+      ]
+    },
+    "urn:archinex:ontology:axis:security_zoning": {
+      "urn": "urn:archinex:ontology:axis:security_zoning",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Zonage de Sécurité & Cloisonnement NIS2",
+      "domain": "security"
+    },
+    "urn:archinex:ontology:axis:service_assurance_probes": {
+      "urn": "urn:archinex:ontology:axis:service_assurance_probes",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Assurance de Service, Sondes Actives & Gouvernance QoS 5QI",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "default_decision_type": "type1_deliberate",
+      "keywords": [
+        "sonde active",
+        "sondes actives",
+        "assurance de service",
+        "service assurance",
+        "5qi",
+        "qos",
+        "kpi mcx",
+        "latence voix",
+        "mcptt"
+      ]
+    },
+    "urn:archinex:ontology:axis:timing_sync_ntp": {
+      "urn": "urn:archinex:ontology:axis:timing_sync_ntp",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Synchronisation Temporelle GNSS / IEEE 1588v2 / NTP",
+      "domain": "facilities",
+      "togaf_domain": "facilities-sovereignty",
+      "document_engine_layer": "iaas",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:axis:vault_unseal_mode": {
+      "urn": "urn:archinex:ontology:axis:vault_unseal_mode",
+      "revision": 1,
+      "kind": "axis",
+      "title": "Axe de Raffinement : Coffre de Secrets & Déverrouillage Automatique PKCS#11",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "default_decision_type": "type2_default_ratify"
+    },
+    "urn:archinex:ontology:endpoint:crypto:fbe_hardware_keystore": {
+      "urn": "urn:archinex:ontology:endpoint:crypto:fbe_hardware_keystore",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Chiffrement Local File-Based Encryption (FBE) Ancré sur Keystore Matériel (endpoint-os-profile)",
+      "domain": "storage",
+      "togaf_domain": "data-persistence",
+      "document_engine_layer": "component",
+      "instantiated_component": "endpoint-os-profile",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:endpoint:local_encryption"
+      ],
+      "keywords": [
+        "fbe",
+        "file-based encryption",
+        "chiffrement local",
+        "keystore",
+        "aes-256-xts"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unencrypted_endpoint_storage"
+      ],
+      "projections": {
+        "encryption_mode": "FBE-Hardware-Keystore",
+        "cipher": "AES-256-XTS"
+      }
+    },
+    "urn:archinex:ontology:endpoint:mdm:emm_zero_touch_enrollment": {
+      "urn": "urn:archinex:ontology:endpoint:mdm:emm_zero_touch_enrollment",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Enrôlement Zero-Touch Supervisé via Plateforme MDM / EMM (mdm-emm)",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "instantiated_component": "mdm-emm",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:endpoint:mdm_enrollment"
+      ],
+      "keywords": [
+        "mdm",
+        "emm",
+        "zero-touch",
+        "enrolement",
+        "supervised",
+        "flotte",
+        "terminaux"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unenrolled_endpoint_mdm"
+      ],
+      "projections": {
+        "mdm_managed_required": true,
+        "enrollment_mode": "zero_touch_supervised"
+      }
+    },
+    "urn:archinex:ontology:endpoint:mdm:onprem_sovereign_emm": {
+      "urn": "urn:archinex:ontology:endpoint:mdm:onprem_sovereign_emm",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": false,
+      "title": "Enrôlement EMM Souverain On-Premises Déconnecté (mdm-emm)",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "instantiated_component": "mdm-emm",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:endpoint:mdm_sovereign"
+      ],
+      "keywords": [
+        "emm souverain",
+        "on-prem",
+        "air-gap",
+        "mdm",
+        "qr-code",
+        "usb provisioning"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unenrolled_endpoint_mdm"
+      ],
+      "projections": {
+        "mdm_managed_required": true,
+        "enrollment_mode": "onprem_qr_provisioning"
+      }
+    },
+    "urn:archinex:ontology:endpoint:os:hardened_verified_boot": {
+      "urn": "urn:archinex:ontology:endpoint:os:hardened_verified_boot",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "OS Terminal Durci avec Verified Boot, SELinux Enforcing & Attestation Matérielle (endpoint-os-profile)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "instantiated_component": "endpoint-os-profile",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:endpoint:os_hardening"
+      ],
+      "keywords": [
+        "verified boot",
+        "secure boot",
+        "selinux",
+        "tpm",
+        "strongbox",
+        "durcissement os",
+        "os terminal"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unverified_endpoint_os_boot"
+      ],
+      "projections": {
+        "verified_boot_required": true,
+        "mac_enforcement": "selinux_enforcing",
+        "hardware_attestation": "tpm_or_strongbox"
+      }
+    },
+    "urn:archinex:ontology:endpoint:ota:signed_ab_staged_rollout": {
+      "urn": "urn:archinex:ontology:endpoint:ota:signed_ab_staged_rollout",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Déploiement OTA Signé par Vagues avec Partitionnement A/B & Rollback Automatique (mdm-emm)",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "instantiated_component": "mdm-emm",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:endpoint:ota_updates"
+      ],
+      "keywords": [
+        "ota",
+        "fota",
+        "a/b partition",
+        "rollback",
+        "staged rollout",
+        "signature ota"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unsigned_endpoint_ota_update"
+      ],
+      "projections": {
+        "ota_signed_ab_required": true,
+        "rollout_strategy": "staged_canary_ab"
+      }
+    },
+    "urn:archinex:ontology:endpoint:sandbox:dedicated_kiosk_cobo": {
+      "urn": "urn:archinex:ontology:endpoint:sandbox:dedicated_kiosk_cobo",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": false,
+      "title": "Mode Kiosque Dédié COBO & Liste Blanche Applicative Stricte (endpoint-os-profile)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "instantiated_component": "endpoint-os-profile",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:endpoint:kiosk_cobo"
+      ],
+      "keywords": [
+        "kiosque",
+        "kiosk",
+        "cobo",
+        "liste blanche",
+        "allowlist",
+        "terminal dedie"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_missing_endpoint_app_sandbox"
+      ],
+      "projections": {
+        "sandboxing_mode": "dedicated_kiosk_allowlist"
+      }
+    },
+    "urn:archinex:ontology:endpoint:sandbox:work_profile_strict_isolation": {
+      "urn": "urn:archinex:ontology:endpoint:sandbox:work_profile_strict_isolation",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Conteneurisation Profil Professionnel COPE & Cloisonnement Inter-Applications (endpoint-os-profile)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "instantiated_component": "endpoint-os-profile",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:endpoint:app_sandboxing"
+      ],
+      "keywords": [
+        "work profile",
+        "cope",
+        "sandboxing",
+        "cloisonnement applicatif",
+        "dlp"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_missing_endpoint_app_sandbox"
+      ],
+      "projections": {
+        "sandboxing_mode": "work_profile_strict"
+      }
+    },
+    "urn:archinex:ontology:facilities:power:dual_feed_2n": {
+      "urn": "urn:archinex:ontology:facilities:power:dual_feed_2n",
+      "revision": 1,
+      "kind": "leaf",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:facilities:dual_feed_2n"
+      ],
+      "title": "Alimentation Électrique Redondante Dual-Feed (2N)",
+      "domain": "facilities",
+      "keywords": [
+        "électrique",
+        "alimentation",
+        "pdu",
+        "2n",
+        "dual-feed",
+        "onduleur",
+        "energie"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_single_power_feed"
+      ],
+      "hydration_template": {
+        "power_feeds": [
+          "PDU-A",
+          "PDU-B"
+        ]
+      },
+      "projections": {
+        "redundancy_mode": "2N",
+        "min_power_supplies": 2
+      }
+    },
+    "urn:archinex:ontology:facilities:timing:gnss_ieee1588_stratum1": {
+      "urn": "urn:archinex:ontology:facilities:timing:gnss_ieee1588_stratum1",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Horloge Maître Redondante GNSS + Holdover Oscillateur Atomique (IEEE 1588v2 / NTP Stratum-1)",
+      "domain": "facilities",
+      "togaf_domain": "facilities-sovereignty",
+      "keywords": [
+        "synchronisation temporelle",
+        "ieee 1588",
+        "stratum-1",
+        "ntp",
+        "gnss",
+        "horloge"
+      ],
+      "oracle_rules": [],
+      "projections": {
+        "stratum": 1,
+        "ieee_1588v2_profile": "G.8275.1"
+      }
+    },
+    "urn:archinex:ontology:network:dns:unbound_bind9_kea": {
+      "urn": "urn:archinex:ontology:network:dns:unbound_bind9_kea",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Services DNSSEC Unbound/Bind9 HA (Split-Horizon + RPZ) & Kea DHCP",
+      "domain": "telecom",
+      "togaf_domain": "network-connectivity",
+      "keywords": [
+        "dns",
+        "bind9",
+        "unbound",
+        "kea",
+        "dhcp",
+        "ipam",
+        "dnssec",
+        "rpz"
+      ],
+      "oracle_rules": [],
+      "projections": {
+        "dnssec_validation": true,
+        "rpz_sinkhole": true
+      }
+    },
+    "urn:archinex:ontology:network:ingress:envoy_coraza_waf": {
+      "urn": "urn:archinex:ontology:network:ingress:envoy_coraza_waf",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Reverse Proxy Ingress Envoy + WAF OWASP Coraza CRS en DMZ",
+      "domain": "security",
+      "togaf_domain": "network-connectivity",
+      "instantiated_component": "ingress-waf-proxy",
+      "keywords": [
+        "reverse proxy",
+        "waf",
+        "envoy",
+        "coraza",
+        "ingress"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:anssi:ingress_waf_dmz"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unfiltered_internet_egress"
+      ],
+      "projections": {
+        "waf_ruleset": "OWASP-CRS-4",
+        "egress_mode": "explicit_fqdn_whitelist"
+      }
+    },
+    "urn:archinex:ontology:network:interworking:atsss_multipath_steering": {
+      "urn": "urn:archinex:ontology:network:interworking:atsss_multipath_steering",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": false,
+      "title": "Pilotage Multi-Accès ATSSS 5G + WLAN avec N3IWF Chiffré (n3iwf-epdg-gateway)",
+      "domain": "telecom",
+      "togaf_domain": "network-connectivity",
+      "document_engine_layer": "infrastructure",
+      "instantiated_component": "n3iwf-epdg-gateway",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:telecom:atsss"
+      ],
+      "keywords": [
+        "atsss",
+        "n3iwf",
+        "multipath",
+        "wlan offload"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unencrypted_non3gpp_interworking"
+      ],
+      "projections": {
+        "non3gpp_ipsec_enforced": true
+      }
+    },
+    "urn:archinex:ontology:network:interworking:n3iwf_epdg_ipsec": {
+      "urn": "urn:archinex:ontology:network:interworking:n3iwf_epdg_ipsec",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Passerelle N3IWF / ePDG avec Tunnel IPsec IKEv2 EAP-AKA' (n3iwf-epdg-gateway)",
+      "domain": "telecom",
+      "togaf_domain": "network-connectivity",
+      "document_engine_layer": "infrastructure",
+      "instantiated_component": "n3iwf-epdg-gateway",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:telecom:n3iwf_ipsec"
+      ],
+      "keywords": [
+        "n3iwf",
+        "epdg",
+        "ipsec",
+        "wlan",
+        "wi-fi",
+        "non-3gpp"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unencrypted_non3gpp_interworking"
+      ],
+      "projections": {
+        "non3gpp_ipsec_enforced": true
+      }
+    },
+    "urn:archinex:ontology:network:proxy:squid_explicit_fqdn": {
+      "urn": "urn:archinex:ontology:network:proxy:squid_explicit_fqdn",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Proxy Sortant Explicite Squid DMZ avec Liste Blanche FQDN",
+      "domain": "security",
+      "togaf_domain": "network-connectivity",
+      "instantiated_component": "ingress-waf-proxy",
+      "keywords": [
+        "proxy sortant",
+        "squid",
+        "egress",
+        "fqdn",
+        "liste blanche"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:anssi:egress_proxy_whitelist"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unfiltered_internet_egress"
+      ],
+      "projections": {
+        "egress_mode": "explicit_fqdn_whitelist",
+        "direct_internet_egress": false
+      }
+    },
+    "urn:archinex:ontology:operations:assurance:e2e_probes_5qi_qos": {
+      "urn": "urn:archinex:ontology:operations:assurance:e2e_probes_5qi_qos",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Sondes Actives Bout-en-Bout Non-Invasives & Référentiel QoS 5QI (oss-smo-mediation)",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "instantiated_component": "oss-smo-mediation",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:oss:service_assurance_probes"
+      ],
+      "keywords": [
+        "sondes actives",
+        "5qi",
+        "qos",
+        "assurance de service",
+        "mcptt"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_missing_service_assurance_probes"
+      ],
+      "projections": {
+        "non_invasive_probes_required": true
+      }
+    },
+    "urn:archinex:ontology:operations:cmdb:nautobot_itsm_reconciliation": {
+      "urn": "urn:archinex:ontology:operations:cmdb:nautobot_itsm_reconciliation",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Référentiel Source-of-Truth OSS/Nautobot Synchronisé avec la CMDB ITSM (cmdb-inventory)",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "instantiated_component": "cmdb-inventory",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:oss:cmdb_consistency"
+      ],
+      "keywords": [
+        "cmdb",
+        "itsm",
+        "nautobot",
+        "inventaire",
+        "reconciliation"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_desynchronized_cmdb_inventory"
+      ],
+      "projections": {
+        "cmdb_sync_enabled": true
+      }
+    },
+    "urn:archinex:ontology:operations:oss:mno_mocn_adapter_mediation": {
+      "urn": "urn:archinex:ontology:operations:oss:mno_mocn_adapter_mediation",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": false,
+      "title": "Médiation OSS MOCN Multi-Connecteurs MNO (RESTCONF / NETCONF / Kafka / SNMP)",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "instantiated_component": "oss-smo-mediation",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:oss:mno_mocn_adaptation"
+      ],
+      "keywords": [
+        "mocn",
+        "mno",
+        "restconf",
+        "netconf",
+        "kafka",
+        "snmp",
+        "ran partagée"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unstandardized_oss_nrm_mediation"
+      ],
+      "projections": {
+        "nrm_standard": "3GPP-TS-28.532-MOCN"
+      }
+    },
+    "urn:archinex:ontology:operations:oss:unified_nrm_ts28532_mediation": {
+      "urn": "urn:archinex:ontology:operations:oss:unified_nrm_ts28532_mediation",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Couche de Médiation OSS avec NRM Unifié 3GPP TS 28.532 (oss-smo-mediation)",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "instantiated_component": "oss-smo-mediation",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:oss:unified_nrm_mediation"
+      ],
+      "keywords": [
+        "nrm unifie",
+        "ts 28.532",
+        "oss",
+        "ems",
+        "mediation",
+        "fcaps"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unstandardized_oss_nrm_mediation"
+      ],
+      "projections": {
+        "nrm_standard": "3GPP-TS-28.532"
+      }
+    },
+    "urn:archinex:ontology:operations:smo:graduated_hitl_remediation": {
+      "urn": "urn:archinex:ontology:operations:smo:graduated_hitl_remediation",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Remédiation SMO Graduée avec Approbation Humaine Obligatoire sur Actions Critiques (oss-smo-mediation)",
+      "domain": "operations",
+      "togaf_domain": "operations-observability",
+      "document_engine_layer": "component",
+      "instantiated_component": "oss-smo-mediation",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:smo:hitl_remediation"
+      ],
+      "keywords": [
+        "human-in-the-loop",
+        "boucle fermee",
+        "rca",
+        "remediation",
+        "smo"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unapproved_closed_loop_automation"
+      ],
+      "projections": {
+        "hitl_approval_required": true
+      }
+    },
+    "urn:archinex:ontology:platform:env:iso_prod_3tiers": {
+      "urn": "urn:archinex:ontology:platform:env:iso_prod_3tiers",
+      "revision": 1,
+      "kind": "leaf",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:platform:isoprod_parity"
+      ],
+      "title": "Topologie 3 Environnements (Dev / Recette Iso-Prod / Prod)",
+      "domain": "platform",
+      "keywords": [
+        "environnement",
+        "environnements",
+        "dev",
+        "recette",
+        "pré-prod",
+        "preprod",
+        "prod",
+        "production",
+        "iso-prod",
+        "qualification",
+        "parité"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_missing_environment_tier",
+        "data.archinex.edp.multiaxis.deny_non_isoprod_staging"
+      ],
+      "hydration_template": {
+        "environments": [
+          {
+            "env": "dev",
+            "isolation": "namespace-isolated",
+            "isoprod": false
+          },
+          {
+            "env": "recette",
+            "isolation": "dedicated-cluster",
+            "isoprod": true
+          },
+          {
+            "env": "prod",
+            "isolation": "dedicated-cluster-ha",
+            "isoprod": true
+          }
+        ]
+      },
+      "projections": {
+        "required_tiers": [
+          "dev",
+          "recette",
+          "prod"
+        ],
+        "staging_must_be_isoprod": true
+      }
+    },
+    "urn:archinex:ontology:platform:registry:harbor_cosign_trivy": {
+      "urn": "urn:archinex:ontology:platform:registry:harbor_cosign_trivy",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Registre OCI Souverain Harbor HA (Réplication Air-Gap, Cosign & Trivy)",
+      "domain": "platform",
+      "togaf_domain": "platform-compute",
+      "keywords": [
+        "harbor",
+        "cosign",
+        "trivy",
+        "registre oci",
+        "sbom"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unsigned_oci_image"
+      ],
+      "projections": {
+        "cosign_verification": true,
+        "block_critical_cve": true
+      }
+    },
+    "urn:archinex:ontology:security:bastion:teleport_recorded_session": {
+      "urn": "urn:archinex:ontology:security:bastion:teleport_recorded_session",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Bastion Teleport Cloud-Native (Certificats SSH Éphémères & Audit Kubernetes)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "instantiated_component": "admin-bastion",
+      "keywords": [
+        "teleport",
+        "ssh cert",
+        "bastion kubernetes"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:nis2:oam_strict_bastion"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_direct_oam_without_bastion"
+      ],
+      "projections": {
+        "bastion_session_recording": true,
+        "ephemeral_ssh_ttl_hours": 4
+      }
+    },
+    "urn:archinex:ontology:security:bastion:wallix_pam": {
+      "urn": "urn:archinex:ontology:security:bastion:wallix_pam",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Bastion PAM Wallix / CyberArk (Rupture Protocolaire SSH/RDP & Traçabilité Vidéo)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "instantiated_component": "admin-bastion",
+      "keywords": [
+        "wallix",
+        "pam",
+        "rebond",
+        "session privilegee"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:nis2:oam_strict_bastion"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_direct_oam_without_bastion"
+      ],
+      "projections": {
+        "bastion_session_recording": true,
+        "protocol_break": "SSH-RDP-HTTPS"
+      }
+    },
+    "urn:archinex:ontology:security:esim:smdp_onprem_sovereign_hsm": {
+      "urn": "urn:archinex:ontology:security:esim:smdp_onprem_sovereign_hsm",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": false,
+      "title": "SM-DP+ Souverain On-Premises Déconnecté Adossé au HSM Racine (esim-smdp)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "instantiated_component": "esim-smdp",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:telecom:esim_smdp_onprem"
+      ],
+      "keywords": [
+        "smdp+ on-prem",
+        "esim souverain",
+        "hsm",
+        "air-gap"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unaccredited_esim_smdp"
+      ],
+      "projections": {
+        "sas_sm_certified_required": true,
+        "four_eyes_approval_required": true,
+        "sovereignty_zone": "ONPREM"
+      }
+    },
+    "urn:archinex:ontology:security:esim:smdp_sas_sm_eu_hsm": {
+      "urn": "urn:archinex:ontology:security:esim:smdp_sas_sm_eu_hsm",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Service Managé SM-DP+ Certifié GSMA SAS-SM en UE avec HSM FIPS 140-3 L3 & 4-Yeux (esim-smdp)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "instantiated_component": "esim-smdp",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:telecom:esim_smdp_sas_sm"
+      ],
+      "keywords": [
+        "smdp+",
+        "sm-dp+",
+        "sas-sm",
+        "esim",
+        "fips 140-3",
+        "4-yeux",
+        "ue"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unaccredited_esim_smdp"
+      ],
+      "projections": {
+        "sas_sm_certified_required": true,
+        "four_eyes_approval_required": true,
+        "sovereignty_zone": "EU"
+      }
+    },
+    "urn:archinex:ontology:security:hsm:eviden_proteccio": {
+      "urn": "urn:archinex:ontology:security:hsm:eviden_proteccio",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "HSM Réseau Eviden Proteccio (Qualifié ANSSI / CC EAL4+ / FIPS 140-3 L3)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "instantiated_component": "hsm-appliance",
+      "keywords": [
+        "hsm",
+        "eviden",
+        "proteccio",
+        "pkcs11",
+        "anssi",
+        "eal4+"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:anssi:rgs_hsm_root"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_software_root_ca_key"
+      ],
+      "projections": {
+        "key_custody_mode": "hardware_hsm",
+        "fips_140_3_level": 3,
+        "cc_eal4_plus": true,
+        "interface": "PKCS#11-Network-MTLS"
+      }
+    },
+    "urn:archinex:ontology:security:hsm:thales_luna": {
+      "urn": "urn:archinex:ontology:security:hsm:thales_luna",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "HSM Réseau Thales Luna (FIPS 140-3 L3 / PKCS#11 HA)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "instantiated_component": "hsm-appliance",
+      "keywords": [
+        "thales",
+        "luna",
+        "hsm",
+        "fips"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:anssi:rgs_hsm_root"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_software_root_ca_key"
+      ],
+      "projections": {
+        "key_custody_mode": "hardware_hsm",
+        "fips_140_3_level": 3,
+        "cc_eal4_plus": true,
+        "interface": "PKCS#11-Network-MTLS"
+      }
+    },
+    "urn:archinex:ontology:security:hsm:utimaco_secserver": {
+      "urn": "urn:archinex:ontology:security:hsm:utimaco_secserver",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "HSM Utimaco SecurityServer (FIPS 140-3 L3 / CC EAL4+)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "instantiated_component": "hsm-appliance",
+      "keywords": [
+        "utimaco",
+        "securityserver",
+        "hsm"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:anssi:rgs_hsm_root"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_software_root_ca_key"
+      ],
+      "projections": {
+        "key_custody_mode": "hardware_hsm",
+        "fips_140_3_level": 3,
+        "cc_eal4_plus": true,
+        "interface": "PKCS#11-Network-MTLS"
+      }
+    },
+    "urn:archinex:ontology:security:pki:ejbca_cmpv2": {
+      "urn": "urn:archinex:ontology:security:pki:ejbca_cmpv2",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "PKI Télécom Keyfactor EJBCA (CMPv2 3GPP TS 33.310 / SCEP / ACME)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "instantiated_component": "pki-ca",
+      "keywords": [
+        "ejbca",
+        "cmpv2",
+        "33.310",
+        "ndsaf",
+        "scep"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:3gpp:ts33_310_cmpv2"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_software_root_ca_key"
+      ],
+      "projections": {
+        "standard": "3GPP-TS-33.310",
+        "enrollment_protocol": "CMPv2",
+        "key_custody_mode": "hardware_hsm"
+      }
+    },
+    "urn:archinex:ontology:security:pki:endpoint_scep_est_enrollment": {
+      "urn": "urn:archinex:ontology:security:pki:endpoint_scep_est_enrollment",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Enrôlement Automatique de Certificats Terminaux via SCEP / EST (pki-ca)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "instantiated_component": "pki-ca",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:endpoint:pki_scep_est"
+      ],
+      "keywords": [
+        "scep",
+        "est",
+        "acme",
+        "eap-tls",
+        "certificat terminal",
+        "pki-ca"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unapproved_endpoint_pki_protocol"
+      ],
+      "projections": {
+        "allowed_protocols": [
+          "SCEP",
+          "EST",
+          "ACME"
+        ],
+        "default_protocol": "EST"
+      }
+    },
+    "urn:archinex:ontology:security:pki:root_offline_airgap": {
+      "urn": "urn:archinex:ontology:security:pki:root_offline_airgap",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "PKI Deux Niveaux : Autorité Racine Hors Ligne (HSM) & Subordonnées en Ligne",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "instantiated_component": "pki-ca",
+      "keywords": [
+        "root ca",
+        "ca racine",
+        "airgap",
+        "crl",
+        "ocsp"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:anssi:rgs_pki_hierarchy"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_software_root_ca_key"
+      ],
+      "projections": {
+        "pki_tiers": 2,
+        "root_ca_online": false,
+        "key_custody_mode": "hardware_hsm"
+      }
+    },
+    "urn:archinex:ontology:security:pki:step_ca_acme_internal": {
+      "urn": "urn:archinex:ontology:security:pki:step_ca_acme_internal",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Autorité Intermédiaire Smallstep step-ca (ACME / OIDC) adossée au HSM",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "instantiated_component": "pki-ca",
+      "keywords": [
+        "smallstep",
+        "step-ca",
+        "acme"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:anssi:rgs_pki_hierarchy"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_software_root_ca_key"
+      ],
+      "projections": {
+        "protocol": "ACME-RFC8555",
+        "key_custody_mode": "hardware_hsm"
+      }
+    },
+    "urn:archinex:ontology:security:pqc:hybrid_mlkem_mldsa_agility": {
+      "urn": "urn:archinex:ontology:security:pqc:hybrid_mlkem_mldsa_agility",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Profil Crypto-Agile Hybride Classique + PQC ML-KEM / ML-DSA (pki-ca)",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "document_engine_layer": "component",
+      "instantiated_component": "pki-ca",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:security:pqc_agility"
+      ],
+      "keywords": [
+        "pqc",
+        "post-quantique",
+        "ml-kem",
+        "ml-dsa",
+        "crypto-agilite"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_non_pqc_crypto_agility"
+      ],
+      "projections": {
+        "pqc_hybrid_agility_required": true
+      }
+    },
+    "urn:archinex:ontology:security:vault:hashicorp_enterprise_hsm": {
+      "urn": "urn:archinex:ontology:security:vault:hashicorp_enterprise_hsm",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "HashiCorp Vault Enterprise HA avec Seal HSM PKCS#11",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "instantiated_component": "vault-cluster",
+      "keywords": [
+        "hashicorp vault enterprise",
+        "vault seal"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:nis2:vault_hsm_unseal"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unsealed_vault_without_hsm"
+      ],
+      "projections": {
+        "engine": "Vault-Enterprise-HA",
+        "unseal_mechanism": "pkcs11_hsm"
+      }
+    },
+    "urn:archinex:ontology:security:vault:openbao_pkcs11_hsm": {
+      "urn": "urn:archinex:ontology:security:vault:openbao_pkcs11_hsm",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Coffre OpenBao HA Raft avec Auto-Unseal PKCS#11 sur HSM",
+      "domain": "security",
+      "togaf_domain": "security-trust",
+      "instantiated_component": "vault-cluster",
+      "keywords": [
+        "openbao",
+        "auto-unseal",
+        "pkcs11",
+        "raft"
+      ],
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:nis2:vault_hsm_unseal"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unsealed_vault_without_hsm"
+      ],
+      "projections": {
+        "engine": "OpenBao-HA-Raft",
+        "unseal_mechanism": "pkcs11_hsm"
+      }
+    },
+    "urn:archinex:ontology:security:zone:user_plane": {
+      "urn": "urn:archinex:ontology:security:zone:user_plane",
+      "revision": 1,
+      "kind": "leaf",
+      "title": "Zone Usager Telecom 5G UPF (Haut Débit DPDK/SR-IOV)",
+      "domain": "security",
+      "keywords": [
+        "upf",
+        "user-plane",
+        "usager",
+        "5g",
+        "trafic",
+        "dpdk",
+        "sriov",
+        "flux"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.adr015.deny_user_plane_management_leak"
+      ],
+      "hydration_template": {
+        "security_zone": {
+          "zone_id": "ZONE-UPF-USER",
+          "isolation_level": "high_throughput",
+          "proxy_required": false
+        }
+      },
+      "projections": {
+        "isolation_level": "high_throughput"
+      }
+    },
+    "urn:archinex:ontology:telecom:core:slicing_5qi_sst_isolation": {
+      "urn": "urn:archinex:ontology:telecom:core:slicing_5qi_sst_isolation",
+      "revision": 1,
+      "kind": "leaf",
+      "is_default_standard": true,
+      "title": "Isolement Strict des Tranches 5G par S-NSSAI, DNN & Profils QoS 5QI (core-network)",
+      "domain": "telecom",
+      "togaf_domain": "network-connectivity",
+      "document_engine_layer": "component",
+      "instantiated_component": "core-network",
+      "governed_by_clauses": [
+        "urn:archinex:kb:clause:telecom:5g_slicing_isolation"
+      ],
+      "keywords": [
+        "slicing",
+        "s-nssai",
+        "sst",
+        "5qi",
+        "dnn",
+        "tranche 5g"
+      ],
+      "oracle_rules": [
+        "data.archinex.edp.multiaxis.deny_unisolated_5g_network_slice"
+      ],
+      "projections": {
+        "slice_isolation_enforced": true
+      }
     }
   },
   "triplets": [
@@ -1002,10 +3095,1077 @@
       "predicate": "satisfies_clause",
       "object": "urn:archinex:kb:clause:3gpp:ts33_501_oam_segregation",
       "rationale": "Isolation physique et logique des interfaces de management BMC/iLO selon 3GPP TS 33.501."
+    },
+    {
+      "id": "tr-mig-001",
+      "subject": "urn:archinex:ontology:concept:telco_cloud_platform",
+      "predicate": "requires_aspect",
+      "object": "urn:archinex:ontology:axis:oob_management",
+      "rationale": "La gestion du cycle de vie matériel impose un réseau d'administration hors-bande (BMC/Redfish)."
+    },
+    {
+      "id": "tr-mig-002",
+      "subject": "urn:archinex:ontology:concept:telco_cloud_platform",
+      "predicate": "requires_aspect",
+      "object": "urn:archinex:ontology:axis:security_zoning",
+      "rationale": "Une plateforme ne peut être mise en production sans définir le cloisonnement de ses zones d'exploitation et de trafic."
+    },
+    {
+      "id": "tr-mig-003",
+      "subject": "urn:archinex:ontology:concept:telco_cloud_platform",
+      "predicate": "requires_aspect",
+      "object": "urn:archinex:ontology:axis:env_fidelity",
+      "rationale": "La chaîne de livraison exige de spécifier la parité entre environnements Dev, Recette et Production."
+    },
+    {
+      "id": "tr-006c",
+      "subject": "urn:archinex:ontology:concept:interconnection_gateway",
+      "predicate": "requires_aspect",
+      "object": "urn:archinex:ontology:axis:security_zoning",
+      "rationale": "Toute passerelle d'interconnexion doit raffiner les zones de sécurité qu'elle sépare."
+    },
+    {
+      "id": "tr-mig-004",
+      "subject": "urn:archinex:ontology:concept:interconnection_gateway",
+      "predicate": "requires_aspect",
+      "object": "urn:archinex:ontology:axis:oob_management",
+      "rationale": "L'administration des équipements réseau et passerelles doit passer par un canal OOB isolé."
+    },
+    {
+      "id": "tr-mig-005",
+      "subject": "urn:archinex:ontology:axis:oob_management",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:telecom:network:oob",
+      "rationale": "Implémentation du plan OOB par réseau dédié à 2 interfaces minimum."
+    },
+    {
+      "id": "tr-mig-006",
+      "subject": "urn:archinex:ontology:axis:security_zoning",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:zone:oam",
+      "rationale": "Raffinement du zonage sécurité via une zone OAM à isolation stricte et proxy obligatoire."
+    },
+    {
+      "id": "tr-mig-007",
+      "subject": "urn:archinex:ontology:axis:security_zoning",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:zone:user_plane",
+      "rationale": "Raffinement du zonage sécurité pour le plan usager haut débit (UPF)."
+    },
+    {
+      "id": "tr-mig-008",
+      "subject": "urn:archinex:ontology:axis:env_fidelity",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:platform:env:iso_prod_3tiers",
+      "rationale": "Raffinement de la fidélité environnementale en triptyque Dev / Recette Iso-Prod / Prod."
+    },
+    {
+      "id": "tr-mig-009",
+      "subject": "urn:archinex:ontology:axis:power_cooling_resilience",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:facilities:power:dual_feed_2n",
+      "rationale": "Raffinement de la résilience électrique par double adduction 2N."
+    },
+    {
+      "id": "tr-033",
+      "subject": "urn:archinex:ontology:concept:iam_security_zerotrust",
+      "predicate": "requires_aspect",
+      "object": "urn:archinex:ontology:axis:security_zoning",
+      "rationale": "Les flux d'administration et d'authentification critique doivent être isolés dans une zone OAM bastionnée."
+    },
+    {
+      "id": "tr-051",
+      "subject": "urn:archinex:ontology:concept:resilience_drp_continuity",
+      "predicate": "requires_aspect",
+      "object": "urn:archinex:ontology:axis:backup_immutability",
+      "rationale": "La reprise après sinistre majeur dépend de sauvegardes intègres et immuables."
+    },
+    {
+      "id": "tr-052",
+      "subject": "urn:archinex:ontology:concept:resilience_drp_continuity",
+      "predicate": "requires_aspect",
+      "object": "urn:archinex:ontology:axis:power_cooling_resilience",
+      "rationale": "La résilience de site impose une double adduction électrique indépendante (2N)."
+    },
+    {
+      "id": "tr-075",
+      "subject": "urn:archinex:ontology:axis:hsm_key_custody",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:hsm:eviden_proteccio",
+      "rationale": "Racine cryptographique matérielle qualifiée ANSSI / FIPS 140-3 L3."
+    },
+    {
+      "id": "tr-076",
+      "subject": "urn:archinex:ontology:axis:hsm_key_custody",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:hsm:thales_luna",
+      "rationale": "Alternative HSM réseau haute disponibilité Thales Luna."
+    },
+    {
+      "id": "tr-077",
+      "subject": "urn:archinex:ontology:axis:hsm_key_custody",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:hsm:utimaco_secserver",
+      "rationale": "Alternative HSM réseau Utimaco SecurityServer."
+    },
+    {
+      "id": "tr-078",
+      "subject": "urn:archinex:ontology:axis:pki_hierarchy",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:pki:root_offline_airgap",
+      "rationale": "Hiérarchie PKI à deux niveaux avec autorité racine hors ligne."
+    },
+    {
+      "id": "tr-079",
+      "subject": "urn:archinex:ontology:axis:pki_hierarchy",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:pki:step_ca_acme_internal",
+      "rationale": "Autorité d'émission automatisée interne ACME."
+    },
+    {
+      "id": "tr-080",
+      "subject": "urn:archinex:ontology:axis:pki_3gpp_ndsaf",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:pki:ejbca_cmpv2",
+      "rationale": "Enrôlement CMPv2 conforme 3GPP TS 33.310 pour IPsec / SecGW."
+    },
+    {
+      "id": "tr-081",
+      "subject": "urn:archinex:ontology:axis:vault_unseal_mode",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:vault:openbao_pkcs11_hsm",
+      "rationale": "Déverrouillage automatique sans intervention humaine via HSM PKCS#11."
+    },
+    {
+      "id": "tr-082",
+      "subject": "urn:archinex:ontology:axis:vault_unseal_mode",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:vault:hashicorp_enterprise_hsm",
+      "rationale": "Option Vault Enterprise avec auto-unseal HSM PKCS#11."
+    },
+    {
+      "id": "tr-083",
+      "subject": "urn:archinex:ontology:axis:pam_admin_bastion",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:bastion:wallix_pam",
+      "rationale": "Bastion PAM de coupure en zone OAM avec enregistrement de session."
+    },
+    {
+      "id": "tr-084",
+      "subject": "urn:archinex:ontology:axis:pam_admin_bastion",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:bastion:teleport_recorded_session",
+      "rationale": "Option bastion cloud-native Teleport avec certificats SSH éphémères."
+    },
+    {
+      "id": "tr-085",
+      "subject": "urn:archinex:ontology:axis:egress_filtering_proxy",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:network:proxy:squid_explicit_fqdn",
+      "rationale": "Proxy sortant explicite DMZ avec liste blanche FQDN."
+    },
+    {
+      "id": "tr-086",
+      "subject": "urn:archinex:ontology:axis:ingress_reverse_proxy",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:network:ingress:envoy_coraza_waf",
+      "rationale": "Reverse proxy ingress TLS 1.3 + WAF OWASP Coraza."
+    },
+    {
+      "id": "tr-087",
+      "subject": "urn:archinex:ontology:axis:gis_tile_engine",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:application:gis:geoserver_postgis_offline",
+      "rationale": "Serveur cartographique GeoServer / PostGIS autonome."
+    },
+    {
+      "id": "tr-088",
+      "subject": "urn:archinex:ontology:axis:gis_tile_engine",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:application:gis:qgis_server_wmts",
+      "rationale": "Alternative QGIS Server OGC WMTS/WMS."
+    },
+    {
+      "id": "tr-089",
+      "subject": "urn:archinex:ontology:axis:dns_dhcp_ipam",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:network:dns:unbound_bind9_kea",
+      "rationale": "Socle DNS autoritaire/récursif DNSSEC + DHCP Kea."
+    },
+    {
+      "id": "tr-090",
+      "subject": "urn:archinex:ontology:axis:timing_sync_ntp",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:facilities:timing:gnss_ieee1588_stratum1",
+      "rationale": "Horloge maître redondante Stratum-1 et profil IEEE 1588v2."
+    },
+    {
+      "id": "tr-091",
+      "subject": "urn:archinex:ontology:axis:oci_artifact_registry",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:platform:registry:harbor_cosign_trivy",
+      "rationale": "Registre OCI air-gap Harbor avec signature Cosign et scan Trivy."
+    },
+    {
+      "id": "tr-092",
+      "subject": "urn:archinex:ontology:axis:gis_location_fusion",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:application:gis:central_fusion_hybrid_geofencing",
+      "rationale": "Implémentation hybride : fusion centrale sur gis-server et géofencing distribué avec relais ptt-server."
+    },
+    {
+      "id": "tr-093",
+      "subject": "urn:archinex:ontology:axis:gis_location_fusion",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:application:gis:central_fusion_server_only_geofencing",
+      "rationale": "Implémentation 100 % centralisée sur gis-server (PostGIS spatial)."
+    },
+    {
+      "id": "tr-094",
+      "subject": "urn:archinex:ontology:axis:gis_location_fusion",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:application:gis:distributed_terminal_geofencing",
+      "rationale": "Implémentation distribuée : ptt-server et terminaux portent l'évaluation temps réel."
+    },
+    {
+      "id": "tr-comp-01",
+      "subject": "urn:archinex:ontology:security:hsm:eviden_proteccio",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:hsm-appliance",
+      "rationale": "Hydrate le composant logique hsm-appliance dans le catalogue terrain."
+    },
+    {
+      "id": "tr-comp-02",
+      "subject": "urn:archinex:ontology:security:hsm:thales_luna",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:hsm-appliance",
+      "rationale": "Hydrate le composant logique hsm-appliance dans le catalogue terrain."
+    },
+    {
+      "id": "tr-comp-03",
+      "subject": "urn:archinex:ontology:security:hsm:utimaco_secserver",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:hsm-appliance",
+      "rationale": "Hydrate le composant logique hsm-appliance dans le catalogue terrain."
+    },
+    {
+      "id": "tr-comp-04",
+      "subject": "urn:archinex:ontology:security:pki:root_offline_airgap",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:pki-ca",
+      "rationale": "Hydrate le composant logique pki-ca exposant le groupe pki-ca-endpoints."
+    },
+    {
+      "id": "tr-comp-05",
+      "subject": "urn:archinex:ontology:security:pki:ejbca_cmpv2",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:pki-ca",
+      "rationale": "Hydrate le composant logique pki-ca avec interface CMPv2/ACME."
+    },
+    {
+      "id": "tr-comp-06",
+      "subject": "urn:archinex:ontology:security:pki:step_ca_acme_internal",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:pki-ca",
+      "rationale": "Hydrate le composant logique pki-ca."
+    },
+    {
+      "id": "tr-comp-07",
+      "subject": "urn:archinex:ontology:security:vault:openbao_pkcs11_hsm",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:vault-cluster",
+      "rationale": "Hydrate le composant logique vault-cluster desservant les montages vault://*."
+    },
+    {
+      "id": "tr-comp-08",
+      "subject": "urn:archinex:ontology:security:secrets:vault_dynamic_leases",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:vault-cluster",
+      "rationale": "Hydrate le composant logique vault-cluster."
+    },
+    {
+      "id": "tr-comp-09",
+      "subject": "urn:archinex:ontology:security:iam:oidc_fido2_rbac",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:iam-keycloak",
+      "rationale": "Hydrate le composant logique iam-keycloak."
+    },
+    {
+      "id": "tr-comp-10",
+      "subject": "urn:archinex:ontology:security:bastion:wallix_pam",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:admin-bastion",
+      "rationale": "Hydrate le composant logique admin-bastion."
+    },
+    {
+      "id": "tr-comp-11",
+      "subject": "urn:archinex:ontology:security:bastion:teleport_recorded_session",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:admin-bastion",
+      "rationale": "Hydrate le composant logique admin-bastion."
+    },
+    {
+      "id": "tr-comp-12",
+      "subject": "urn:archinex:ontology:observability:soc:siem_syslog_tls_nis2",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:siem-soc",
+      "rationale": "Hydrate le composant logique siem-soc exposant le groupe siem-collectors."
+    },
+    {
+      "id": "tr-comp-13",
+      "subject": "urn:archinex:ontology:network:proxy:squid_explicit_fqdn",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:ingress-waf-proxy",
+      "rationale": "Hydrate la passerelle proxy/WAF DMZ ingress-waf-proxy."
+    },
+    {
+      "id": "tr-comp-14",
+      "subject": "urn:archinex:ontology:network:ingress:envoy_coraza_waf",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:ingress-waf-proxy",
+      "rationale": "Hydrate la passerelle proxy/WAF DMZ ingress-waf-proxy."
+    },
+    {
+      "id": "tr-comp-15",
+      "subject": "urn:archinex:ontology:application:gis:geoserver_postgis_offline",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:gis-server",
+      "rationale": "Relie l'axe cartographique SIG au composant logique gis-server."
+    },
+    {
+      "id": "tr-comp-16",
+      "subject": "urn:archinex:ontology:application:gis:qgis_server_wmts",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:gis-server",
+      "rationale": "Relie la variante QGIS Server au composant logique gis-server."
+    },
+    {
+      "id": "tr-comp-17",
+      "subject": "urn:archinex:ontology:application:gis:central_fusion_hybrid_geofencing",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:gis-server",
+      "rationale": "Alloue l'autorité de fusion de localisation et l'indexation spatiale PostGIS au composant gis-server."
+    },
+    {
+      "id": "tr-comp-18",
+      "subject": "urn:archinex:ontology:application:gis:central_fusion_hybrid_geofencing",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:ptt-server",
+      "rationale": "Alloue le relais de notification temps réel et de pré-filtrage terminal au composant ptt-server."
+    },
+    {
+      "id": "tr-comp-19",
+      "subject": "urn:archinex:ontology:application:gis:central_fusion_server_only_geofencing",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:gis-server",
+      "rationale": "Alloue l'intégralité de la fusion et du géofencing au composant logique gis-server."
+    },
+    {
+      "id": "tr-comp-20",
+      "subject": "urn:archinex:ontology:application:gis:distributed_terminal_geofencing",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:ptt-server",
+      "rationale": "Alloue le pipeline temps réel de géofencing au composant logique ptt-server."
+    },
+    {
+      "id": "tr-comp-ep-01",
+      "subject": "urn:archinex:ontology:endpoint:mdm:emm_zero_touch_enrollment",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:mdm-emm",
+      "rationale": "Alloue l'enrôlement zero-touch au composant logique mdm-emm."
+    },
+    {
+      "id": "tr-comp-ep-02",
+      "subject": "urn:archinex:ontology:endpoint:mdm:onprem_sovereign_emm",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:mdm-emm",
+      "rationale": "Alloue l'enrôlement EMM souverain au composant logique mdm-emm."
+    },
+    {
+      "id": "tr-comp-ep-03",
+      "subject": "urn:archinex:ontology:security:pki:endpoint_scep_est_enrollment",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:pki-ca",
+      "rationale": "Rattache l'enrôlement SCEP/EST des terminaux au composant central pki-ca."
+    },
+    {
+      "id": "tr-comp-ep-04",
+      "subject": "urn:archinex:ontology:endpoint:os:hardened_verified_boot",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:endpoint-os-profile",
+      "rationale": "Alloue le profil de durcissement OS au composant endpoint-os-profile."
+    },
+    {
+      "id": "tr-comp-ep-05",
+      "subject": "urn:archinex:ontology:endpoint:crypto:fbe_hardware_keystore",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:endpoint-os-profile",
+      "rationale": "Alloue la politique de chiffrement local FBE au composant endpoint-os-profile."
+    },
+    {
+      "id": "tr-comp-ep-06",
+      "subject": "urn:archinex:ontology:endpoint:sandbox:work_profile_strict_isolation",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:endpoint-os-profile",
+      "rationale": "Alloue le cloisonnement applicatif par profil professionnel à endpoint-os-profile."
+    },
+    {
+      "id": "tr-comp-ep-07",
+      "subject": "urn:archinex:ontology:endpoint:sandbox:dedicated_kiosk_cobo",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:endpoint-os-profile",
+      "rationale": "Alloue le mode kiosque COBO à endpoint-os-profile."
+    },
+    {
+      "id": "tr-comp-ep-08",
+      "subject": "urn:archinex:ontology:endpoint:ota:signed_ab_staged_rollout",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:mdm-emm",
+      "rationale": "Alloue l'orchestration des mises à jour OTA signées au composant mdm-emm."
+    },
+    {
+      "id": "tr-comp-telco-01",
+      "subject": "urn:archinex:ontology:security:esim:smdp_sas_sm_eu_hsm",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:esim-smdp",
+      "rationale": "Alloue le provisioning eSIM au composant logique esim-smdp."
+    },
+    {
+      "id": "tr-comp-telco-02",
+      "subject": "urn:archinex:ontology:security:esim:smdp_onprem_sovereign_hsm",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:esim-smdp",
+      "rationale": "Alloue le SM-DP+ souverain au composant logique esim-smdp."
+    },
+    {
+      "id": "tr-comp-telco-03",
+      "subject": "urn:archinex:ontology:operations:oss:unified_nrm_ts28532_mediation",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:oss-smo-mediation",
+      "rationale": "Alloue la médiation NRM unifiée au composant oss-smo-mediation."
+    },
+    {
+      "id": "tr-comp-telco-04",
+      "subject": "urn:archinex:ontology:operations:oss:mno_mocn_adapter_mediation",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:oss-smo-mediation",
+      "rationale": "Alloue les adaptateurs MOCN MNO au composant oss-smo-mediation."
+    },
+    {
+      "id": "tr-comp-telco-05",
+      "subject": "urn:archinex:ontology:operations:smo:graduated_hitl_remediation",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:oss-smo-mediation",
+      "rationale": "Alloue l'orchestration SMO HITL au composant oss-smo-mediation."
+    },
+    {
+      "id": "tr-comp-telco-06",
+      "subject": "urn:archinex:ontology:operations:cmdb:nautobot_itsm_reconciliation",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:cmdb-inventory",
+      "rationale": "Alloue la réconciliation CMDB/ITSM au composant cmdb-inventory."
+    },
+    {
+      "id": "tr-comp-telco-07",
+      "subject": "urn:archinex:ontology:operations:assurance:e2e_probes_5qi_qos",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:oss-smo-mediation",
+      "rationale": "Alloue l'assurance de service par sondes actives au composant oss-smo-mediation."
+    },
+    {
+      "id": "tr-comp-telco-08",
+      "subject": "urn:archinex:ontology:network:interworking:n3iwf_epdg_ipsec",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:n3iwf-epdg-gateway",
+      "rationale": "Alloue l'interworking WLAN au composant n3iwf-epdg-gateway."
+    },
+    {
+      "id": "tr-comp-telco-09",
+      "subject": "urn:archinex:ontology:network:interworking:atsss_multipath_steering",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:n3iwf-epdg-gateway",
+      "rationale": "Alloue le pilotage ATSSS au composant n3iwf-epdg-gateway."
+    },
+    {
+      "id": "tr-comp-telco-10",
+      "subject": "urn:archinex:ontology:telecom:core:slicing_5qi_sst_isolation",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:core-network",
+      "rationale": "Alloue le tranchage 5G au composant core-network."
+    },
+    {
+      "id": "tr-comp-telco-11",
+      "subject": "urn:archinex:ontology:application:broadcast:embms_5mbs_group_broadcast",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:ptt-server",
+      "rationale": "Alloue la diffusion multicast/broadcast eMBMS/5MBS au composant ptt-server."
+    },
+    {
+      "id": "tr-comp-telco-12",
+      "subject": "urn:archinex:ontology:security:pqc:hybrid_mlkem_mldsa_agility",
+      "predicate": "instantiates_component",
+      "object": "urn:archinex:component:pki-ca",
+      "rationale": "Alloue la crypto-agilité PQC au composant pki-ca."
+    },
+    {
+      "id": "tr-ep-01",
+      "subject": "urn:archinex:ontology:axis:endpoint_mdm_enrollment",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:endpoint:mdm:emm_zero_touch_enrollment",
+      "rationale": "Implémentation standard de l'enrôlement supervisé zero-touch via mdm-emm."
+    },
+    {
+      "id": "tr-ep-02",
+      "subject": "urn:archinex:ontology:axis:endpoint_mdm_enrollment",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:endpoint:mdm:onprem_sovereign_emm",
+      "rationale": "Variante souveraine on-premises déconnectée pour l'enrôlement de flotte."
+    },
+    {
+      "id": "tr-ep-03",
+      "subject": "urn:archinex:ontology:axis:endpoint_pki_enrollment",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:pki:endpoint_scep_est_enrollment",
+      "rationale": "Rattache l'enrôlement des certificats terminaux (SCEP/EST/ACME) à la PKI centrale."
+    },
+    {
+      "id": "tr-ep-04",
+      "subject": "urn:archinex:ontology:axis:endpoint_os_hardening",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:endpoint:os:hardened_verified_boot",
+      "rationale": "Impose Verified Boot, SELinux Enforcing et attestation matérielle sur les terminaux."
+    },
+    {
+      "id": "tr-ep-05",
+      "subject": "urn:archinex:ontology:axis:endpoint_local_encryption",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:endpoint:crypto:fbe_hardware_keystore",
+      "rationale": "Impose le chiffrement local FBE ancré sur le keystore matériel."
+    },
+    {
+      "id": "tr-ep-06",
+      "subject": "urn:archinex:ontology:axis:endpoint_app_sandboxing",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:endpoint:sandbox:work_profile_strict_isolation",
+      "rationale": "Cloisonnement applicatif par profil professionnel strict."
+    },
+    {
+      "id": "tr-ep-07",
+      "subject": "urn:archinex:ontology:axis:endpoint_app_sandboxing",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:endpoint:sandbox:dedicated_kiosk_cobo",
+      "rationale": "Variante mode kiosque dédié COBO avec liste blanche applicative."
+    },
+    {
+      "id": "tr-ep-08",
+      "subject": "urn:archinex:ontology:axis:endpoint_ota_updates",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:endpoint:ota:signed_ab_staged_rollout",
+      "rationale": "Mises à jour OTA signées avec partitionnement A/B et rollback automatique."
+    },
+    {
+      "id": "tr-pre-01",
+      "subject": "urn:archinex:ontology:security:crypto:ipsec_ikev2_aes256",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:pki_3gpp_ndsaf",
+      "rationale": "L'authentification par certificats des tunnels IPsec IKEv2 requiert une PKI télécom 3GPP TS 33.310 (CMPv2)."
+    },
+    {
+      "id": "tr-pre-02",
+      "subject": "urn:archinex:ontology:axis:pki_3gpp_ndsaf",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:pki_hierarchy",
+      "rationale": "La PKI d'émission CMPv2 doit s'ancrer dans une hiérarchie PKI définie (racine hors ligne et autorités subordonnées)."
+    },
+    {
+      "id": "tr-pre-03",
+      "subject": "urn:archinex:ontology:axis:pki_hierarchy",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:hsm_key_custody",
+      "rationale": "La clé privée de l'autorité racine et des sous-CA doit être conservée dans un HSM matériel."
+    },
+    {
+      "id": "tr-pre-04",
+      "subject": "urn:archinex:ontology:security:pki:cert_manager_spiffe_mtls",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:pki_hierarchy",
+      "rationale": "Les autorités intermédiaires Cert-Manager/SPIFFE doivent s'ancrer sur la hiérarchie PKI du SI."
+    },
+    {
+      "id": "tr-pre-05",
+      "subject": "urn:archinex:ontology:security:secrets:vault_dynamic_leases",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:vault_unseal_mode",
+      "rationale": "Un coffre de secrets en production doit définir son mécanisme d'auto-déverrouillage."
+    },
+    {
+      "id": "tr-pre-06",
+      "subject": "urn:archinex:ontology:axis:vault_unseal_mode",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:hsm_key_custody",
+      "rationale": "L'auto-déverrouillage souverain PKCS#11 du coffre s'appuie sur le HSM matériel."
+    },
+    {
+      "id": "tr-pre-07",
+      "subject": "urn:archinex:ontology:security:crypto:luks2_kms_hsm",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:vault_unseal_mode",
+      "rationale": "Le KMS de déchiffrement des volumes LUKS2 requiert un coffre de secrets hautement disponible."
+    },
+    {
+      "id": "tr-pre-08",
+      "subject": "urn:archinex:ontology:security:zone:oam",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:pam_admin_bastion",
+      "rationale": "Toute zone OAM à accès mandataire obligatoire requiert le choix d'un bastion PAM d'administration."
+    },
+    {
+      "id": "tr-pre-09",
+      "subject": "urn:archinex:ontology:axis:pam_admin_bastion",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:iam_federation_mfa",
+      "rationale": "Le bastion PAM fédère l'authentification des administrateurs auprès de l'IAM et impose le MFA."
+    },
+    {
+      "id": "tr-pre-10",
+      "subject": "urn:archinex:ontology:infrastructure:server:baremetal",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:dns_dhcp_ipam",
+      "rationale": "Le provisionnement bare-metal et la résolution des services du cluster dépendent de DNS/DHCP/IPAM."
+    },
+    {
+      "id": "tr-pre-11",
+      "subject": "urn:archinex:ontology:infrastructure:server:baremetal",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:timing_sync_ntp",
+      "rationale": "La synchronisation temporelle NTP/IEEE 1588 est requise par les nœuds, certificats X.509 et journaux."
+    },
+    {
+      "id": "tr-pre-12",
+      "subject": "urn:archinex:ontology:axis:oci_artifact_registry",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:egress_filtering_proxy",
+      "rationale": "La synchronisation contrôlée du registre OCI vers l'amont transite par un proxy sortant filtrant."
+    },
+    {
+      "id": "tr-pre-13",
+      "subject": "urn:archinex:ontology:axis:gis_location_fusion",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:gis_tile_engine",
+      "rationale": "Toute décision de fusion de localisation et de géofencing SIG requiert le choix du moteur cartographique et de persistance spatiale (gis_tile_engine)."
+    },
+    {
+      "id": "tr-pre-ep-01",
+      "subject": "urn:archinex:ontology:axis:endpoint_ota_updates",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:endpoint_mdm_enrollment",
+      "rationale": "La gouvernance des mises à jour OTA suppose un enrôlement MDM/EMM actif des terminaux."
+    },
+    {
+      "id": "tr-pre-ep-02",
+      "subject": "urn:archinex:ontology:axis:endpoint_mdm_enrollment",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:endpoint_pki_enrollment",
+      "rationale": "L'enrôlement sécurisé des terminaux requiert le profil d'enrôlement PKI SCEP/EST."
+    },
+    {
+      "id": "tr-pre-ep-03",
+      "subject": "urn:archinex:ontology:axis:endpoint_pki_enrollment",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:pki_hierarchy",
+      "rationale": "L'enrôlement SCEP/EST des terminaux s'appuie sur la hiérarchie PKI centrale (pki-ca)."
+    },
+    {
+      "id": "tr-pre-ep-04",
+      "subject": "urn:archinex:ontology:axis:endpoint_local_encryption",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:endpoint_os_hardening",
+      "rationale": "Le chiffrement local FBE ancré matériellement repose sur le durcissement OS et le Verified Boot."
+    },
+    {
+      "id": "tr-pre-telco-01",
+      "subject": "urn:archinex:ontology:axis:esim_smdp_provisioning",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:hsm_key_custody",
+      "rationale": "Le provisioning eSIM SM-DP+ requiert une racine matérielle HSM FIPS 140-3."
+    },
+    {
+      "id": "tr-pre-telco-02",
+      "subject": "urn:archinex:ontology:axis:oss_automation_hitl",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:oss_smo_mediation",
+      "rationale": "L'automatisation SMO/RCA s'appuie sur la couche de médiation OSS NRM unifiée."
+    },
+    {
+      "id": "tr-pre-telco-03",
+      "subject": "urn:archinex:ontology:axis:service_assurance_probes",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:oss_smo_mediation",
+      "rationale": "Les sondes d'assurance de service remontent leurs KPI dans la médiation OSS/SMO."
+    },
+    {
+      "id": "tr-pre-telco-04",
+      "subject": "urn:archinex:ontology:axis:non3gpp_wlan_interworking",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:wan_interco_encryption",
+      "rationale": "L'interworking N3IWF/ePDG repose sur le profil cryptographique IPsec IKEv2."
+    },
+    {
+      "id": "tr-pre-telco-05",
+      "subject": "urn:archinex:ontology:axis:pqc_crypto_agility",
+      "predicate": "requires_prerequisite_axis",
+      "object": "urn:archinex:ontology:axis:pki_hierarchy",
+      "rationale": "La crypto-agilité PQC s'appuie sur la hiérarchie PKI (pki-ca)."
+    },
+    {
+      "id": "tr-telco-01",
+      "subject": "urn:archinex:ontology:axis:esim_smdp_provisioning",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:esim:smdp_sas_sm_eu_hsm",
+      "rationale": "Implémentation standard du provisioning eSIM SM-DP+ certifié SAS-SM en UE."
+    },
+    {
+      "id": "tr-telco-02",
+      "subject": "urn:archinex:ontology:axis:esim_smdp_provisioning",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:esim:smdp_onprem_sovereign_hsm",
+      "rationale": "Variante souveraine on-premises du SM-DP+ adossée au HSM racine."
+    },
+    {
+      "id": "tr-telco-03",
+      "subject": "urn:archinex:ontology:axis:oss_smo_mediation",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:operations:oss:unified_nrm_ts28532_mediation",
+      "rationale": "Normalisation des KPI et alarmes multi-fournisseurs vers NRM 3GPP TS 28.532."
+    },
+    {
+      "id": "tr-telco-04",
+      "subject": "urn:archinex:ontology:axis:oss_smo_mediation",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:operations:oss:mno_mocn_adapter_mediation",
+      "rationale": "Variante d'adaptation aux interfaces OSS/ENM imposées par un MNO en MOCN."
+    },
+    {
+      "id": "tr-telco-05",
+      "subject": "urn:archinex:ontology:axis:oss_automation_hitl",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:operations:smo:graduated_hitl_remediation",
+      "rationale": "Remédiation SMO graduée avec approbation humaine sur actions critiques."
+    },
+    {
+      "id": "tr-telco-06",
+      "subject": "urn:archinex:ontology:axis:cmdb_asset_inventory",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:operations:cmdb:nautobot_itsm_reconciliation",
+      "rationale": "Cohérence stricte entre inventaire OSS/Nautobot et CMDB ITSM."
+    },
+    {
+      "id": "tr-telco-07",
+      "subject": "urn:archinex:ontology:axis:service_assurance_probes",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:operations:assurance:e2e_probes_5qi_qos",
+      "rationale": "Sondes actives bout-en-bout non-invasives et gouvernance QoS 5QI."
+    },
+    {
+      "id": "tr-telco-08",
+      "subject": "urn:archinex:ontology:axis:non3gpp_wlan_interworking",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:network:interworking:n3iwf_epdg_ipsec",
+      "rationale": "Interworking WLAN non-3GPP sécurisé par N3IWF/ePDG IPsec."
+    },
+    {
+      "id": "tr-telco-09",
+      "subject": "urn:archinex:ontology:axis:non3gpp_wlan_interworking",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:network:interworking:atsss_multipath_steering",
+      "rationale": "Variante pilotage multi-accès ATSSS 5G + WLAN."
+    },
+    {
+      "id": "tr-telco-10",
+      "subject": "urn:archinex:ontology:axis:core_5g_network_slicing",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:telecom:core:slicing_5qi_sst_isolation",
+      "rationale": "Isolement des tranches 5G par S-NSSAI, DNN et 5QI."
+    },
+    {
+      "id": "tr-telco-11",
+      "subject": "urn:archinex:ontology:axis:embms_multicast_broadcast",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:application:broadcast:embms_5mbs_group_broadcast",
+      "rationale": "Diffusion de groupe eMBMS/5MBS authentifiée avec repli unicast."
+    },
+    {
+      "id": "tr-telco-12",
+      "subject": "urn:archinex:ontology:axis:pqc_crypto_agility",
+      "predicate": "implemented_by",
+      "object": "urn:archinex:ontology:security:pqc:hybrid_mlkem_mldsa_agility",
+      "rationale": "Profil crypto-agile hybride classique + PQC ML-KEM / ML-DSA."
+    },
+    {
+      "id": "tr-sc-018",
+      "subject": "urn:archinex:ontology:application:broadcast:embms_5mbs_group_broadcast",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:mcx:embms_5mbs",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-019",
+      "subject": "urn:archinex:ontology:application:gis:geoserver_postgis_offline",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:app:gis_offline_tiles",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-020",
+      "subject": "urn:archinex:ontology:endpoint:crypto:fbe_hardware_keystore",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:endpoint:local_encryption",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-021",
+      "subject": "urn:archinex:ontology:endpoint:mdm:emm_zero_touch_enrollment",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:endpoint:mdm_enrollment",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-022",
+      "subject": "urn:archinex:ontology:endpoint:mdm:onprem_sovereign_emm",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:endpoint:mdm_sovereign",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-023",
+      "subject": "urn:archinex:ontology:endpoint:os:hardened_verified_boot",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:endpoint:os_hardening",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-024",
+      "subject": "urn:archinex:ontology:endpoint:ota:signed_ab_staged_rollout",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:endpoint:ota_updates",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-025",
+      "subject": "urn:archinex:ontology:endpoint:sandbox:dedicated_kiosk_cobo",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:endpoint:kiosk_cobo",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-026",
+      "subject": "urn:archinex:ontology:endpoint:sandbox:work_profile_strict_isolation",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:endpoint:app_sandboxing",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-027",
+      "subject": "urn:archinex:ontology:facilities:power:dual_feed_2n",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:facilities:dual_feed_2n",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-028",
+      "subject": "urn:archinex:ontology:infrastructure:compute:suse_telco_cloud_sylva",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:infrastructure:sylva_standard_nis2",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-029",
+      "subject": "urn:archinex:ontology:infrastructure:server:baremetal",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:infrastructure:baremetal_sylva",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-030",
+      "subject": "urn:archinex:ontology:network:ingress:envoy_coraza_waf",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:anssi:ingress_waf_dmz",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-031",
+      "subject": "urn:archinex:ontology:network:interworking:atsss_multipath_steering",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:telecom:atsss",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-032",
+      "subject": "urn:archinex:ontology:network:interworking:n3iwf_epdg_ipsec",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:telecom:n3iwf_ipsec",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-033",
+      "subject": "urn:archinex:ontology:network:proxy:squid_explicit_fqdn",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:anssi:egress_proxy_whitelist",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-034",
+      "subject": "urn:archinex:ontology:operations:assurance:e2e_probes_5qi_qos",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:oss:service_assurance_probes",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-035",
+      "subject": "urn:archinex:ontology:operations:cmdb:nautobot_itsm_reconciliation",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:oss:cmdb_consistency",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-036",
+      "subject": "urn:archinex:ontology:operations:oss:mno_mocn_adapter_mediation",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:oss:mno_mocn_adaptation",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-037",
+      "subject": "urn:archinex:ontology:operations:oss:unified_nrm_ts28532_mediation",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:oss:unified_nrm_mediation",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-038",
+      "subject": "urn:archinex:ontology:operations:smo:graduated_hitl_remediation",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:smo:hitl_remediation",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-039",
+      "subject": "urn:archinex:ontology:platform:env:iso_prod_3tiers",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:platform:isoprod_parity",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-040",
+      "subject": "urn:archinex:ontology:security:bastion:teleport_recorded_session",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:nis2:oam_strict_bastion",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-041",
+      "subject": "urn:archinex:ontology:security:bastion:wallix_pam",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:nis2:oam_strict_bastion",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-042",
+      "subject": "urn:archinex:ontology:security:esim:smdp_onprem_sovereign_hsm",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:telecom:esim_smdp_onprem",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-043",
+      "subject": "urn:archinex:ontology:security:esim:smdp_sas_sm_eu_hsm",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:telecom:esim_smdp_sas_sm",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-044",
+      "subject": "urn:archinex:ontology:security:hsm:eviden_proteccio",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:anssi:rgs_hsm_root",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-045",
+      "subject": "urn:archinex:ontology:security:hsm:thales_luna",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:anssi:rgs_hsm_root",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-046",
+      "subject": "urn:archinex:ontology:security:hsm:utimaco_secserver",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:anssi:rgs_hsm_root",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-047",
+      "subject": "urn:archinex:ontology:security:pki:ejbca_cmpv2",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:3gpp:ts33_310_cmpv2",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-048",
+      "subject": "urn:archinex:ontology:security:pki:endpoint_scep_est_enrollment",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:endpoint:pki_scep_est",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-049",
+      "subject": "urn:archinex:ontology:security:pki:root_offline_airgap",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:anssi:rgs_pki_hierarchy",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-050",
+      "subject": "urn:archinex:ontology:security:pki:step_ca_acme_internal",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:anssi:rgs_pki_hierarchy",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-051",
+      "subject": "urn:archinex:ontology:security:pqc:hybrid_mlkem_mldsa_agility",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:security:pqc_agility",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-052",
+      "subject": "urn:archinex:ontology:security:vault:hashicorp_enterprise_hsm",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:nis2:vault_hsm_unseal",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-053",
+      "subject": "urn:archinex:ontology:security:vault:openbao_pkcs11_hsm",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:nis2:vault_hsm_unseal",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-054",
+      "subject": "urn:archinex:ontology:telecom:core:slicing_5qi_sst_isolation",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:telecom:5g_slicing_isolation",
+      "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
     }
   ],
   "clause_index": {
     "by_clause": {
+      "urn:archinex:kb:clause:3gpp:ts33_310_cmpv2": [
+        "urn:archinex:ontology:security:pki:ejbca_cmpv2"
+      ],
       "urn:archinex:kb:clause:3gpp:ts33_501_oam_segregation": [
         "urn:archinex:ontology:security:zone:oam",
         "urn:archinex:ontology:telecom:network:oob"
@@ -1015,6 +4175,57 @@
       ],
       "urn:archinex:kb:clause:3gpp:ts33_501_sec_s6a": [
         "urn:archinex:ontology:security:crypto:ipsec_ikev2_aes256"
+      ],
+      "urn:archinex:kb:clause:anssi:egress_proxy_whitelist": [
+        "urn:archinex:ontology:network:proxy:squid_explicit_fqdn"
+      ],
+      "urn:archinex:kb:clause:anssi:ingress_waf_dmz": [
+        "urn:archinex:ontology:network:ingress:envoy_coraza_waf"
+      ],
+      "urn:archinex:kb:clause:anssi:rgs_hsm_root": [
+        "urn:archinex:ontology:security:hsm:eviden_proteccio",
+        "urn:archinex:ontology:security:hsm:thales_luna",
+        "urn:archinex:ontology:security:hsm:utimaco_secserver"
+      ],
+      "urn:archinex:kb:clause:anssi:rgs_pki_hierarchy": [
+        "urn:archinex:ontology:security:pki:root_offline_airgap",
+        "urn:archinex:ontology:security:pki:step_ca_acme_internal"
+      ],
+      "urn:archinex:kb:clause:app:gis_offline_tiles": [
+        "urn:archinex:ontology:application:gis:geoserver_postgis_offline"
+      ],
+      "urn:archinex:kb:clause:endpoint:app_sandboxing": [
+        "urn:archinex:ontology:endpoint:sandbox:work_profile_strict_isolation"
+      ],
+      "urn:archinex:kb:clause:endpoint:kiosk_cobo": [
+        "urn:archinex:ontology:endpoint:sandbox:dedicated_kiosk_cobo"
+      ],
+      "urn:archinex:kb:clause:endpoint:local_encryption": [
+        "urn:archinex:ontology:endpoint:crypto:fbe_hardware_keystore"
+      ],
+      "urn:archinex:kb:clause:endpoint:mdm_enrollment": [
+        "urn:archinex:ontology:endpoint:mdm:emm_zero_touch_enrollment"
+      ],
+      "urn:archinex:kb:clause:endpoint:mdm_sovereign": [
+        "urn:archinex:ontology:endpoint:mdm:onprem_sovereign_emm"
+      ],
+      "urn:archinex:kb:clause:endpoint:os_hardening": [
+        "urn:archinex:ontology:endpoint:os:hardened_verified_boot"
+      ],
+      "urn:archinex:kb:clause:endpoint:ota_updates": [
+        "urn:archinex:ontology:endpoint:ota:signed_ab_staged_rollout"
+      ],
+      "urn:archinex:kb:clause:endpoint:pki_scep_est": [
+        "urn:archinex:ontology:security:pki:endpoint_scep_est_enrollment"
+      ],
+      "urn:archinex:kb:clause:facilities:dual_feed_2n": [
+        "urn:archinex:ontology:facilities:power:dual_feed_2n"
+      ],
+      "urn:archinex:kb:clause:infrastructure:baremetal_sylva": [
+        "urn:archinex:ontology:infrastructure:server:baremetal"
+      ],
+      "urn:archinex:kb:clause:infrastructure:sylva_standard_nis2": [
+        "urn:archinex:ontology:infrastructure:compute:suse_telco_cloud_sylva"
       ],
       "urn:archinex:kb:clause:iso27001:a10_cryptography": [
         "urn:archinex:ontology:security:crypto:luks2_kms_hsm"
@@ -1027,6 +4238,9 @@
       ],
       "urn:archinex:kb:clause:iso27001:a9_access_control": [
         "urn:archinex:ontology:security:iam:oidc_fido2_rbac"
+      ],
+      "urn:archinex:kb:clause:mcx:embms_5mbs": [
+        "urn:archinex:ontology:application:broadcast:embms_5mbs_group_broadcast"
       ],
       "urn:archinex:kb:clause:nis2:art21_access_control": [
         "urn:archinex:ontology:security:secrets:vault_dynamic_leases"
@@ -1052,15 +4266,131 @@
       ],
       "urn:archinex:kb:clause:nis2:art21_zerotrust": [
         "urn:archinex:ontology:security:pki:cert_manager_spiffe_mtls"
+      ],
+      "urn:archinex:kb:clause:nis2:oam_strict_bastion": [
+        "urn:archinex:ontology:security:bastion:teleport_recorded_session",
+        "urn:archinex:ontology:security:bastion:wallix_pam"
+      ],
+      "urn:archinex:kb:clause:nis2:vault_hsm_unseal": [
+        "urn:archinex:ontology:security:vault:hashicorp_enterprise_hsm",
+        "urn:archinex:ontology:security:vault:openbao_pkcs11_hsm"
+      ],
+      "urn:archinex:kb:clause:oss:cmdb_consistency": [
+        "urn:archinex:ontology:operations:cmdb:nautobot_itsm_reconciliation"
+      ],
+      "urn:archinex:kb:clause:oss:mno_mocn_adaptation": [
+        "urn:archinex:ontology:operations:oss:mno_mocn_adapter_mediation"
+      ],
+      "urn:archinex:kb:clause:oss:service_assurance_probes": [
+        "urn:archinex:ontology:operations:assurance:e2e_probes_5qi_qos"
+      ],
+      "urn:archinex:kb:clause:oss:unified_nrm_mediation": [
+        "urn:archinex:ontology:operations:oss:unified_nrm_ts28532_mediation"
+      ],
+      "urn:archinex:kb:clause:platform:isoprod_parity": [
+        "urn:archinex:ontology:platform:env:iso_prod_3tiers"
+      ],
+      "urn:archinex:kb:clause:security:pqc_agility": [
+        "urn:archinex:ontology:security:pqc:hybrid_mlkem_mldsa_agility"
+      ],
+      "urn:archinex:kb:clause:smo:hitl_remediation": [
+        "urn:archinex:ontology:operations:smo:graduated_hitl_remediation"
+      ],
+      "urn:archinex:kb:clause:telecom:5g_slicing_isolation": [
+        "urn:archinex:ontology:telecom:core:slicing_5qi_sst_isolation"
+      ],
+      "urn:archinex:kb:clause:telecom:atsss": [
+        "urn:archinex:ontology:network:interworking:atsss_multipath_steering"
+      ],
+      "urn:archinex:kb:clause:telecom:esim_smdp_onprem": [
+        "urn:archinex:ontology:security:esim:smdp_onprem_sovereign_hsm"
+      ],
+      "urn:archinex:kb:clause:telecom:esim_smdp_sas_sm": [
+        "urn:archinex:ontology:security:esim:smdp_sas_sm_eu_hsm"
+      ],
+      "urn:archinex:kb:clause:telecom:n3iwf_ipsec": [
+        "urn:archinex:ontology:network:interworking:n3iwf_epdg_ipsec"
       ]
     },
     "by_leaf": {
+      "urn:archinex:ontology:application:broadcast:embms_5mbs_group_broadcast": [
+        "urn:archinex:kb:clause:mcx:embms_5mbs"
+      ],
+      "urn:archinex:ontology:application:gis:geoserver_postgis_offline": [
+        "urn:archinex:kb:clause:app:gis_offline_tiles"
+      ],
+      "urn:archinex:ontology:endpoint:crypto:fbe_hardware_keystore": [
+        "urn:archinex:kb:clause:endpoint:local_encryption"
+      ],
+      "urn:archinex:ontology:endpoint:mdm:emm_zero_touch_enrollment": [
+        "urn:archinex:kb:clause:endpoint:mdm_enrollment"
+      ],
+      "urn:archinex:ontology:endpoint:mdm:onprem_sovereign_emm": [
+        "urn:archinex:kb:clause:endpoint:mdm_sovereign"
+      ],
+      "urn:archinex:ontology:endpoint:os:hardened_verified_boot": [
+        "urn:archinex:kb:clause:endpoint:os_hardening"
+      ],
+      "urn:archinex:ontology:endpoint:ota:signed_ab_staged_rollout": [
+        "urn:archinex:kb:clause:endpoint:ota_updates"
+      ],
+      "urn:archinex:ontology:endpoint:sandbox:dedicated_kiosk_cobo": [
+        "urn:archinex:kb:clause:endpoint:kiosk_cobo"
+      ],
+      "urn:archinex:ontology:endpoint:sandbox:work_profile_strict_isolation": [
+        "urn:archinex:kb:clause:endpoint:app_sandboxing"
+      ],
+      "urn:archinex:ontology:facilities:power:dual_feed_2n": [
+        "urn:archinex:kb:clause:facilities:dual_feed_2n"
+      ],
+      "urn:archinex:ontology:infrastructure:compute:suse_telco_cloud_sylva": [
+        "urn:archinex:kb:clause:infrastructure:sylva_standard_nis2"
+      ],
+      "urn:archinex:ontology:infrastructure:server:baremetal": [
+        "urn:archinex:kb:clause:infrastructure:baremetal_sylva"
+      ],
+      "urn:archinex:ontology:network:ingress:envoy_coraza_waf": [
+        "urn:archinex:kb:clause:anssi:ingress_waf_dmz"
+      ],
+      "urn:archinex:ontology:network:interworking:atsss_multipath_steering": [
+        "urn:archinex:kb:clause:telecom:atsss"
+      ],
+      "urn:archinex:ontology:network:interworking:n3iwf_epdg_ipsec": [
+        "urn:archinex:kb:clause:telecom:n3iwf_ipsec"
+      ],
+      "urn:archinex:ontology:network:proxy:squid_explicit_fqdn": [
+        "urn:archinex:kb:clause:anssi:egress_proxy_whitelist"
+      ],
       "urn:archinex:ontology:observability:soc:siem_syslog_tls_nis2": [
         "urn:archinex:kb:clause:iso27001:a12_logging_monitoring",
         "urn:archinex:kb:clause:nis2:art21_incident_handling"
       ],
+      "urn:archinex:ontology:operations:assurance:e2e_probes_5qi_qos": [
+        "urn:archinex:kb:clause:oss:service_assurance_probes"
+      ],
+      "urn:archinex:ontology:operations:cmdb:nautobot_itsm_reconciliation": [
+        "urn:archinex:kb:clause:oss:cmdb_consistency"
+      ],
+      "urn:archinex:ontology:operations:oss:mno_mocn_adapter_mediation": [
+        "urn:archinex:kb:clause:oss:mno_mocn_adaptation"
+      ],
+      "urn:archinex:ontology:operations:oss:unified_nrm_ts28532_mediation": [
+        "urn:archinex:kb:clause:oss:unified_nrm_mediation"
+      ],
+      "urn:archinex:ontology:operations:smo:graduated_hitl_remediation": [
+        "urn:archinex:kb:clause:smo:hitl_remediation"
+      ],
+      "urn:archinex:ontology:platform:env:iso_prod_3tiers": [
+        "urn:archinex:kb:clause:platform:isoprod_parity"
+      ],
       "urn:archinex:ontology:resilience:drp:active_active_stretched": [
         "urn:archinex:kb:clause:nis2:art21_business_continuity"
+      ],
+      "urn:archinex:ontology:security:bastion:teleport_recorded_session": [
+        "urn:archinex:kb:clause:nis2:oam_strict_bastion"
+      ],
+      "urn:archinex:ontology:security:bastion:wallix_pam": [
+        "urn:archinex:kb:clause:nis2:oam_strict_bastion"
       ],
       "urn:archinex:ontology:security:crypto:ipsec_ikev2_aes256": [
         "urn:archinex:kb:clause:3gpp:ts33_501_sec_s6a",
@@ -1070,6 +4400,21 @@
         "urn:archinex:kb:clause:iso27001:a10_cryptography",
         "urn:archinex:kb:clause:nis2:art21_crypto"
       ],
+      "urn:archinex:ontology:security:esim:smdp_onprem_sovereign_hsm": [
+        "urn:archinex:kb:clause:telecom:esim_smdp_onprem"
+      ],
+      "urn:archinex:ontology:security:esim:smdp_sas_sm_eu_hsm": [
+        "urn:archinex:kb:clause:telecom:esim_smdp_sas_sm"
+      ],
+      "urn:archinex:ontology:security:hsm:eviden_proteccio": [
+        "urn:archinex:kb:clause:anssi:rgs_hsm_root"
+      ],
+      "urn:archinex:ontology:security:hsm:thales_luna": [
+        "urn:archinex:kb:clause:anssi:rgs_hsm_root"
+      ],
+      "urn:archinex:ontology:security:hsm:utimaco_secserver": [
+        "urn:archinex:kb:clause:anssi:rgs_hsm_root"
+      ],
       "urn:archinex:ontology:security:iam:oidc_fido2_rbac": [
         "urn:archinex:kb:clause:iso27001:a9_access_control",
         "urn:archinex:kb:clause:nis2:art21_mfa"
@@ -1078,8 +4423,29 @@
         "urn:archinex:kb:clause:3gpp:ts33_501_sba_security",
         "urn:archinex:kb:clause:nis2:art21_zerotrust"
       ],
+      "urn:archinex:ontology:security:pki:ejbca_cmpv2": [
+        "urn:archinex:kb:clause:3gpp:ts33_310_cmpv2"
+      ],
+      "urn:archinex:ontology:security:pki:endpoint_scep_est_enrollment": [
+        "urn:archinex:kb:clause:endpoint:pki_scep_est"
+      ],
+      "urn:archinex:ontology:security:pki:root_offline_airgap": [
+        "urn:archinex:kb:clause:anssi:rgs_pki_hierarchy"
+      ],
+      "urn:archinex:ontology:security:pki:step_ca_acme_internal": [
+        "urn:archinex:kb:clause:anssi:rgs_pki_hierarchy"
+      ],
+      "urn:archinex:ontology:security:pqc:hybrid_mlkem_mldsa_agility": [
+        "urn:archinex:kb:clause:security:pqc_agility"
+      ],
       "urn:archinex:ontology:security:secrets:vault_dynamic_leases": [
         "urn:archinex:kb:clause:nis2:art21_access_control"
+      ],
+      "urn:archinex:ontology:security:vault:hashicorp_enterprise_hsm": [
+        "urn:archinex:kb:clause:nis2:vault_hsm_unseal"
+      ],
+      "urn:archinex:ontology:security:vault:openbao_pkcs11_hsm": [
+        "urn:archinex:kb:clause:nis2:vault_hsm_unseal"
       ],
       "urn:archinex:ontology:security:zone:oam": [
         "urn:archinex:kb:clause:3gpp:ts33_501_oam_segregation",
@@ -1088,6 +4454,9 @@
       "urn:archinex:ontology:storage:backup:s3_object_lock_worm": [
         "urn:archinex:kb:clause:iso27001:a12_backup",
         "urn:archinex:kb:clause:nis2:art21_backup_continuity"
+      ],
+      "urn:archinex:ontology:telecom:core:slicing_5qi_sst_isolation": [
+        "urn:archinex:kb:clause:telecom:5g_slicing_isolation"
       ],
       "urn:archinex:ontology:telecom:network:oob": [
         "urn:archinex:kb:clause:3gpp:ts33_501_oam_segregation"

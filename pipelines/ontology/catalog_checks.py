@@ -113,10 +113,23 @@ def check_intention_purity(entities: dict[str, Any]) -> list[CatalogFinding]:
     return findings
 
 
+def check_triplet_ids(triplets: list[dict[str, Any]]) -> list[CatalogFinding]:
+    """Un identifiant de triplet doit être unique (avertissement : des consommateurs citent ces identifiants)."""
+    seen: dict[str, int] = {}
+    for t in triplets:
+        seen[str(t.get("id"))] = seen.get(str(t.get("id")), 0) + 1
+    return [
+        CatalogFinding("duplicate_triplet_id", SEVERITY_WARNING, tid, "triplets",
+                       f"triplet identifier '{tid}' is used {n} times: it no longer identifies one triplet.")
+        for tid, n in sorted(seen.items()) if n > 1
+    ]
+
+
 def check_catalog(catalog: dict[str, Any]) -> list[CatalogFinding]:
     """Tous les contrôles ; la liste est triée de façon déterministe."""
     entities = catalog.get("entities") or {}
-    findings = [*check_leaf_coherence(entities), *check_intention_purity(entities)]
+    findings = [*check_leaf_coherence(entities), *check_intention_purity(entities),
+                *check_triplet_ids(catalog.get("triplets") or [])]
     return sorted(findings, key=lambda f: (f.severity != SEVERITY_ERROR, f.urn, f.code, f.path))
 
 
