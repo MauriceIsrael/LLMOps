@@ -4,11 +4,12 @@ Généré par `scripts/migrate_ontology_from_fixture.py` (issue #192). **Aide à
 
 ## Synthèse
 
-- Entités : 46 → **119** (73 ajoutées, 24 enrichies, 10 conflit(s) conservés côté Hub).
-- Feuilles : 22 → **65** ; avec `projections` : 6 → **65**.
-- Triplets : 60 → **212** (115 repris, 37 `satisfies_clause` générés, 38 écartés).
+- Entités : 46 → **114** (73 ajoutées, 24 enrichies, 10 conflit(s) conservés côté Hub).
+- Feuilles : 22 → **63** ; avec `projections` : 6 → **63**.
+- Triplets : 60 → **205** (115 repris, 37 `satisfies_clause` générés, 38 écartés).
 - Titres différents conservés côté Hub (sans conflit de fond) : 38.
 - Données de projet retirées : 42.
+- Doublons d'URN retirés : 5 (voir ci-dessous).
 
 ## À trancher par les experts : conflits (valeur du Hub conservée)
 
@@ -61,6 +62,18 @@ Généré par `scripts/migrate_ontology_from_fixture.py` (issue #192). **Aide à
 
 - **Hub (conservé)** : `{"oracle_rules": ["data.archinex.edp.multiaxis.deny_shared_oob_network"], "projections": {"requires_dedicated_vrf": true, "max_latency_ms": 50}}`
 - **Fixture d'Archinex** : `{"oracle_rules": ["data.archinex.edp.multiaxis.deny_invalid_device_status", "data.archinex.edp.multiaxis.deny_insufficient_interfaces", "data.archinex.edp.multiaxis.deny_missing_oob_ip", "data.archinex.edp.multiaxis.deny_bmc_oob_drift"], "projections": {"required_status": "planned", "min_interfaces": 2}}`
+
+## Doublons d'URN retirés (à confirmer par les experts)
+
+Entités d'origine Hub qui désignent le même concept qu'une entité d'Archinex sous une autre URN. Les relations qui les touchaient sont reportées sur l'URN conservée (ou écartées si elles y existaient déjà) ; leurs règles d'oracle n'avaient pas d'implémentation côté Archinex. Rien d'autre n'est retiré.
+
+- `urn:archinex:ontology:axis:environment_isomorphism` → `urn:archinex:ontology:axis:env_fidelity`
+- `urn:archinex:ontology:axis:oob_management_plane` → `urn:archinex:ontology:axis:oob_management`
+- `urn:archinex:ontology:axis:security_zoning_nis2` → `urn:archinex:ontology:axis:security_zoning`
+- `urn:archinex:ontology:environment:staging_isoprod` → `urn:archinex:ontology:platform:env:iso_prod_3tiers`
+- `urn:archinex:ontology:facilities:power:feed_2n` → `urn:archinex:ontology:facilities:power:dual_feed_2n`
+
+Triplets reportés sur l'URN conservée : aucun. Triplets écartés (déjà présents) : `tr-002`, `tr-003`, `tr-004`, `tr-010a`, `tr-011a`, `tr-012a`, `tr-013a`.
 
 ## Données de projet retirées de la migration
 

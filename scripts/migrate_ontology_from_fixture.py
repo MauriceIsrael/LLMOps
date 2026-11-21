@@ -47,6 +47,18 @@ SIMPLE_FIELDS = ("keywords", "hydration_template", "governed_by_clauses", "togaf
 RULE_BUNDLE = ("oracle_rules", "projections")
 PLAIN_FIELDS = ("title", "domain", "kind", "is_default_standard")  # jamais modifiés sur une entité commune
 
+# Doublons d'URN : entités d'origine Hub qui désignent le MÊME concept qu'une entité du consommateur sous une autre URN
+# (mêmes feuilles ou zones « implémentées par », même axe requis par la plateforme). Aucune règle mécanique ne les
+# détecte : la liste est établie à la relecture et se retire ici, de façon explicite et tracée au rapport.
+# Garder les deux faisait calculer des axes en double dans Archinex (8 axes au lieu de 5 sur le même texte).
+URN_TWINS: dict[str, str] = {
+    "urn:archinex:ontology:axis:oob_management_plane": "urn:archinex:ontology:axis:oob_management",
+    "urn:archinex:ontology:axis:security_zoning_nis2": "urn:archinex:ontology:axis:security_zoning",
+    "urn:archinex:ontology:axis:environment_isomorphism": "urn:archinex:ontology:axis:env_fidelity",
+    "urn:archinex:ontology:environment:staging_isoprod": "urn:archinex:ontology:platform:env:iso_prod_3tiers",
+    "urn:archinex:ontology:facilities:power:feed_2n": "urn:archinex:ontology:facilities:power:dual_feed_2n",
+}
+
 TRIPLET_SC_PREFIX = "tr-sc-"
 TRIPLET_MIG_PREFIX = "tr-mig-"
 
@@ -81,6 +93,9 @@ class Report:
         self.triplets_skipped: list[tuple[str, str]] = []
         self.triplet_conflicts: list[str] = []
         self.kept_titles = 0
+        self.twins_retired: list[tuple[str, str]] = []  # (URN retirée, URN conservée)
+        self.twin_triplets_dropped: list[str] = []
+        self.twin_triplets_repointed: list[str] = []
 
 
 def sanitize_entity(urn: str, entity: dict[str, Any], rep: Report) -> dict[str, Any]:
@@ -231,6 +246,35 @@ def merge_triplets(hub_t: list[dict[str, Any]], src_t: list[dict[str, Any]], ent
     return out
 
 
+def retire_urn_twins(
+    entities: dict[str, Any], triplets: list[dict[str, Any]], twins: dict[str, str], rep: Report
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Retire les entités doublons (et leurs triplets) au profit de l'URN équivalente, sans perdre de relation.
+
+    Chaque triplet qui touchait un doublon est remplacé par le même triplet sur l'URN conservée ; s'il existe déjà,
+    il est simplement écarté. Un doublon dont l'équivalent est absent n'est pas retiré (rien n'est perdu).
+    """
+    active = {t: k for t, k in twins.items() if t in entities and k in entities}
+    if not active:
+        return entities, triplets
+    out_entities = {u: e for u, e in entities.items() if u not in active}
+    existing = {(t["subject"], t["predicate"], t["object"]) for t in triplets if t["subject"] not in active and t["object"] not in active}
+    kept: list[dict[str, Any]] = []
+    for t in triplets:
+        if t["subject"] not in active and t["object"] not in active:
+            kept.append(t)
+            continue
+        mapped = (active.get(t["subject"], t["subject"]), t["predicate"], active.get(t["object"], t["object"]))
+        if mapped[0] == mapped[2] or mapped in existing:
+            rep.twin_triplets_dropped.append(t["id"])
+            continue
+        existing.add(mapped)
+        kept.append({**t, "subject": mapped[0], "object": mapped[2]})
+        rep.twin_triplets_repointed.append(t["id"])
+    rep.twins_retired = sorted(active.items())
+    return out_entities, kept
+
+
 def guard_no_project_data(entities: dict[str, Any], before: dict[str, Any]) -> list[str]:
     """Aucune marque de projet dans ce que la migration a ajouté ou modifié."""
     bad = []
@@ -260,6 +304,8 @@ def render_report(rep: Report, before: dict[str, Any], after: dict[str, Any]) ->
       f"{len(rep.triplets_generated)} `satisfies_clause` générés, {len(rep.triplets_skipped)} écartés).")
     a(f"- Titres différents conservés côté Hub (sans conflit de fond) : {rep.kept_titles}.")
     a(f"- Données de projet retirées : {len(rep.stripped)}.")
+    if rep.twins_retired:
+        a(f"- Doublons d'URN retirés : {len(rep.twins_retired)} (voir ci-dessous).")
     a("")
     a("## À trancher par les experts : conflits (valeur du Hub conservée)")
     a("")
@@ -270,6 +316,19 @@ def render_report(rep: Report, before: dict[str, Any], after: dict[str, Any]) ->
         a("")
         a("- **Hub (conservé)** : `" + json.dumps(c["hub"], ensure_ascii=False)[:400] + "`")
         a("- **Fixture d'Archinex** : `" + json.dumps(c["source"], ensure_ascii=False)[:400] + "`")
+        a("")
+    if rep.twins_retired:
+        a("## Doublons d'URN retirés (à confirmer par les experts)")
+        a("")
+        a("Entités d'origine Hub qui désignent le même concept qu'une entité d'Archinex sous une autre URN. Les relations qui les "
+          "touchaient sont reportées sur l'URN conservée (ou écartées si elles y existaient déjà) ; leurs règles d'oracle n'avaient "
+          "pas d'implémentation côté Archinex. Rien d'autre n'est retiré.")
+        a("")
+        for gone, kept in rep.twins_retired:
+            a(f"- `{gone}` → `{kept}`")
+        a("")
+        a(f"Triplets reportés sur l'URN conservée : {', '.join(f'`{i}`' for i in rep.twin_triplets_repointed) or 'aucun'}. "
+          f"Triplets écartés (déjà présents) : {', '.join(f'`{i}`' for i in rep.twin_triplets_dropped) or 'aucun'}.")
         a("")
     a("## Données de projet retirées de la migration")
     a("")
@@ -310,6 +369,7 @@ def migrate(catalog: dict[str, Any], source: dict[str, Any]) -> tuple[dict[str, 
     out = copy.deepcopy(catalog)
     out["entities"] = merge_entities(catalog["entities"], source["entities"], rep)
     out["triplets"] = merge_triplets(catalog["triplets"], source["triplets"], out["entities"], rep)
+    out["entities"], out["triplets"] = retire_urn_twins(out["entities"], out["triplets"], URN_TWINS, rep)
     bad = guard_no_project_data(out["entities"], catalog["entities"])
     if bad:
         raise SystemExit("Marque de projet résiduelle dans : " + ", ".join(bad))

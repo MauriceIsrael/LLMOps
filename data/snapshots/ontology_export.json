@@ -194,76 +194,6 @@
         "urn:archinex:kb:clause:nis2:art21_network_segregation"
       ]
     },
-    "urn:archinex:ontology:environment:staging_isoprod": {
-      "urn": "urn:archinex:ontology:environment:staging_isoprod",
-      "revision": 1,
-      "kind": "leaf",
-      "is_default_standard": true,
-      "title": "Environnement Pré-production Iso-État (Jumeau Technique Répliqué & Homologation)",
-      "domain": "infrastructure",
-      "keywords": [
-        "preprod",
-        "pre-production",
-        "iso-etat",
-        "isoprod",
-        "recette",
-        "qualification",
-        "homologation",
-        "staging"
-      ],
-      "oracle_rules": [
-        "data.archinex.edp.multiaxis.deny_divergent_preprod_topology"
-      ],
-      "hydration_template": {
-        "environment": {
-          "name": "PREPROD-ISO-ETAT",
-          "scale_ratio": 1.0,
-          "drp_target": true,
-          "automated_rollback": true
-        }
-      },
-      "projections": {
-        "topology_match_percent": 100,
-        "traffic_mirroring_enabled": true
-      }
-    },
-    "urn:archinex:ontology:facilities:power:feed_2n": {
-      "urn": "urn:archinex:ontology:facilities:power:feed_2n",
-      "revision": 1,
-      "kind": "leaf",
-      "is_default_standard": true,
-      "title": "Double Adduction Électrique 2N Sécurisée (Onduleurs Distincts A+B / Autonomie 72h)",
-      "domain": "facilities",
-      "keywords": [
-        "power",
-        "energie",
-        "2n",
-        "adduction",
-        "onduleur",
-        "ups",
-        "pdu",
-        "groupe-electrogene",
-        "tier-iv",
-        "72h"
-      ],
-      "oracle_rules": [
-        "data.archinex.edp.multiaxis.deny_single_point_of_power_failure"
-      ],
-      "hydration_template": {
-        "power_supply": {
-          "feeds": [
-            "FEED-A-GRID1",
-            "FEED-B-GRID2"
-          ],
-          "ups_redundancy": "2N",
-          "generator_holdover_hours": 72
-        }
-      },
-      "projections": {
-        "redundancy_level": "2N",
-        "dual_corded_mandatory": true
-      }
-    },
     "urn:archinex:ontology:concept:telco_cloud_platform": {
       "urn": "urn:archinex:ontology:concept:telco_cloud_platform",
       "revision": 2,
@@ -400,27 +330,6 @@
       "revision": 1,
       "kind": "axis",
       "title": "Axe 1 : Substrat Compute & Virtualisation Haute Performance",
-      "domain": "infrastructure"
-    },
-    "urn:archinex:ontology:axis:oob_management_plane": {
-      "urn": "urn:archinex:ontology:axis:oob_management_plane",
-      "revision": 1,
-      "kind": "axis",
-      "title": "Axe 2 : Plan Hors-Bande OOB & Ségrégation Matérielle",
-      "domain": "telecom"
-    },
-    "urn:archinex:ontology:axis:security_zoning_nis2": {
-      "urn": "urn:archinex:ontology:axis:security_zoning_nis2",
-      "revision": 1,
-      "kind": "axis",
-      "title": "Axe 3 : Zonage Sécurité Réseau & Cloisonnement NIS2",
-      "domain": "security"
-    },
-    "urn:archinex:ontology:axis:environment_isomorphism": {
-      "urn": "urn:archinex:ontology:axis:environment_isomorphism",
-      "revision": 1,
-      "kind": "axis",
-      "title": "Axe 4 : Isomorphisme & Fidélité des Environnements Cibles",
       "domain": "infrastructure"
     },
     "urn:archinex:ontology:axis:power_cooling_resilience": {
@@ -2684,27 +2593,6 @@
       "rationale": "Une plateforme de cloud télécom requiert obligatoirement un substrat compute."
     },
     {
-      "id": "tr-002",
-      "subject": "urn:archinex:ontology:concept:telco_cloud_platform",
-      "predicate": "requires_aspect",
-      "object": "urn:archinex:ontology:axis:oob_management_plane",
-      "rationale": "Le pilotage matériel et IPMI impose un réseau hors-bande dédié."
-    },
-    {
-      "id": "tr-003",
-      "subject": "urn:archinex:ontology:concept:telco_cloud_platform",
-      "predicate": "requires_aspect",
-      "object": "urn:archinex:ontology:axis:security_zoning_nis2",
-      "rationale": "La conformité NIS2 impose un zonage strict des flux d'administration."
-    },
-    {
-      "id": "tr-004",
-      "subject": "urn:archinex:ontology:concept:telco_cloud_platform",
-      "predicate": "requires_aspect",
-      "object": "urn:archinex:ontology:axis:environment_isomorphism",
-      "rationale": "La qualification industrielle requiert une pré-production iso-état."
-    },
-    {
       "id": "tr-005",
       "subject": "urn:archinex:ontology:concept:telco_cloud_platform",
       "predicate": "requires_aspect",
@@ -2815,34 +2703,6 @@
       "predicate": "implemented_by",
       "object": "urn:archinex:ontology:infrastructure:compute:suse_telco_cloud_sylva",
       "rationale": "Option 2 (Alternative/Cumul) : Cluster SUSE Telco Cloud & Sylva Standard pour workloads NIS2."
-    },
-    {
-      "id": "tr-010a",
-      "subject": "urn:archinex:ontology:axis:oob_management_plane",
-      "predicate": "implemented_by",
-      "object": "urn:archinex:ontology:telecom:network:oob",
-      "rationale": "Réseau OOB dédié avec switchs d'administration physiquement distincts."
-    },
-    {
-      "id": "tr-011a",
-      "subject": "urn:archinex:ontology:axis:security_zoning_nis2",
-      "predicate": "implemented_by",
-      "object": "urn:archinex:ontology:security:zone:oam",
-      "rationale": "Zone d'administration confinée et filtrée par pare-feu d'inspection d'état."
-    },
-    {
-      "id": "tr-012a",
-      "subject": "urn:archinex:ontology:axis:environment_isomorphism",
-      "predicate": "implemented_by",
-      "object": "urn:archinex:ontology:environment:staging_isoprod",
-      "rationale": "Plateforme de recette et pré-production répliquant fidèlement la production."
-    },
-    {
-      "id": "tr-013a",
-      "subject": "urn:archinex:ontology:axis:power_cooling_resilience",
-      "predicate": "implemented_by",
-      "object": "urn:archinex:ontology:facilities:power:feed_2n",
-      "rationale": "Double chaîne d'onduleurs et de distribution PDU A+B."
     },
     {
       "id": "tr-013b",
