@@ -29,7 +29,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from pipelines.ontology.catalog import CLAUSE_URN_PATTERN, build_clause_index, validate_clause_leaf_integrity
+from pipelines.ontology.catalog import (
+    CLAUSE_URN_PATTERN,
+    build_clause_index,
+    validate_clause_leaf_integrity,
+)
 
 CATALOG_PATH = Path("data/snapshots/ontology_export.json")
 MIGRATION_DATE = "2026-11-21T00:00:00Z"
@@ -237,8 +241,8 @@ def guard_no_project_data(entities: dict[str, Any], before: dict[str, Any]) -> l
 
 
 def render_report(rep: Report, before: dict[str, Any], after: dict[str, Any]) -> str:
-    L: list[str] = []
-    a = L.append
+    lines: list[str] = []
+    a = lines.append
     a("# Rapport de migration de l'ontologie depuis la fixture d'Archinex")
     a("")
     a("Généré par `scripts/migrate_ontology_from_fixture.py` (issue #192). **Aide à la relecture** : chaque ajout est de la doctrine à valider "
@@ -298,7 +302,7 @@ def render_report(rep: Report, before: dict[str, Any], after: dict[str, Any]) ->
         for tid, why in rep.triplets_skipped:
             a(f"- `{tid}` : {why}")
     a("")
-    return "\n".join(L) + "\n"
+    return "\n".join(lines) + "\n"
 
 
 def migrate(catalog: dict[str, Any], source: dict[str, Any]) -> tuple[dict[str, Any], Report]:
