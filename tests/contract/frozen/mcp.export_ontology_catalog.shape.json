@@ -68,119 +68,7 @@
             "hydration_template": {
               "type": [
                 "object"
-              ],
-              "values": {
-                "keys": {
-                  "apiVersion": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "automated_rollback": {
-                    "type": [
-                      "boolean"
-                    ]
-                  },
-                  "cluster_pool": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "dataplane_profile": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "device_type": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "dhcp_isolated": {
-                    "type": [
-                      "boolean"
-                    ]
-                  },
-                  "drp_target": {
-                    "type": [
-                      "boolean"
-                    ]
-                  },
-                  "feeds": {
-                    "items": {
-                      "type": [
-                        "string"
-                      ]
-                    },
-                    "type": [
-                      "array"
-                    ]
-                  },
-                  "generator_holdover_hours": {
-                    "type": [
-                      "number"
-                    ]
-                  },
-                  "ingress_firewall": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "kind": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "mfa_enforced": {
-                    "type": [
-                      "boolean"
-                    ]
-                  },
-                  "name": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "nis2_tier": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "role": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "scale_ratio": {
-                    "type": [
-                      "number"
-                    ]
-                  },
-                  "status": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "subnet": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "ups_redundancy": {
-                    "type": [
-                      "string"
-                    ]
-                  },
-                  "vlan_id": {
-                    "type": [
-                      "number"
-                    ]
-                  }
-                },
-                "type": [
-                  "object"
-                ]
-              }
+              ]
             },
             "is_default_standard": {
               "type": [
@@ -215,20 +103,7 @@
             "projections": {
               "type": [
                 "object"
-              ],
-              "values": {
-                "items": {
-                  "type": [
-                    "string"
-                  ]
-                },
-                "type": [
-                  "array",
-                  "boolean",
-                  "number",
-                  "string"
-                ]
-              }
+              ]
             },
             "revision": {
               "type": [

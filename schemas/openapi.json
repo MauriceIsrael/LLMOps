@@ -9828,44 +9828,6 @@
                             "type": "string"
                           },
                           "projections": {
-                            "additionalProperties": {
-                              "properties": {
-                                "cluster_class": {
-                                  "type": "string"
-                                },
-                                "control_plane": {
-                                  "type": "string"
-                                },
-                                "device_type": {
-                                  "type": "string"
-                                },
-                                "namespace": {
-                                  "type": "string"
-                                },
-                                "os_profile": {
-                                  "type": "string"
-                                },
-                                "port": {
-                                  "type": "number"
-                                },
-                                "protocol": {
-                                  "type": "string"
-                                },
-                                "role": {
-                                  "type": "string"
-                                },
-                                "security_zone": {
-                                  "type": "string"
-                                },
-                                "vrf": {
-                                  "type": "string"
-                                },
-                                "zone_label": {
-                                  "type": "string"
-                                }
-                              },
-                              "type": "object"
-                            },
                             "type": "object"
                           },
                           "relationships": {
@@ -9982,74 +9944,6 @@
                             "type": "array"
                           },
                           "hydration_template": {
-                            "additionalProperties": {
-                              "properties": {
-                                "apiVersion": {
-                                  "type": "string"
-                                },
-                                "automated_rollback": {
-                                  "type": "boolean"
-                                },
-                                "cluster_pool": {
-                                  "type": "string"
-                                },
-                                "dataplane_profile": {
-                                  "type": "string"
-                                },
-                                "device_type": {
-                                  "type": "string"
-                                },
-                                "dhcp_isolated": {
-                                  "type": "boolean"
-                                },
-                                "drp_target": {
-                                  "type": "boolean"
-                                },
-                                "feeds": {
-                                  "items": {
-                                    "type": "string"
-                                  },
-                                  "type": "array"
-                                },
-                                "generator_holdover_hours": {
-                                  "type": "number"
-                                },
-                                "ingress_firewall": {
-                                  "type": "string"
-                                },
-                                "kind": {
-                                  "type": "string"
-                                },
-                                "mfa_enforced": {
-                                  "type": "boolean"
-                                },
-                                "name": {
-                                  "type": "string"
-                                },
-                                "nis2_tier": {
-                                  "type": "string"
-                                },
-                                "role": {
-                                  "type": "string"
-                                },
-                                "scale_ratio": {
-                                  "type": "number"
-                                },
-                                "status": {
-                                  "type": "string"
-                                },
-                                "subnet": {
-                                  "type": "string"
-                                },
-                                "ups_redundancy": {
-                                  "type": "string"
-                                },
-                                "vlan_id": {
-                                  "type": "number"
-                                }
-                              },
-                              "type": "object"
-                            },
                             "type": "object"
                           },
                           "is_default_standard": {
@@ -10071,17 +9965,6 @@
                             "type": "array"
                           },
                           "projections": {
-                            "additionalProperties": {
-                              "items": {
-                                "type": "string"
-                              },
-                              "type": [
-                                "array",
-                                "boolean",
-                                "number",
-                                "string"
-                              ]
-                            },
                             "type": "object"
                           },
                           "revision": {
@@ -10169,26 +10052,6 @@
                           "type": "string"
                         },
                         "projections": {
-                          "additionalProperties": {
-                            "properties": {
-                              "cluster_class": {
-                                "type": "string"
-                              },
-                              "control_plane": {
-                                "type": "string"
-                              },
-                              "device_type": {
-                                "type": "string"
-                              },
-                              "os_profile": {
-                                "type": "string"
-                              },
-                              "role": {
-                                "type": "string"
-                              }
-                            },
-                            "type": "object"
-                          },
                           "type": "object"
                         },
                         "relationships": {

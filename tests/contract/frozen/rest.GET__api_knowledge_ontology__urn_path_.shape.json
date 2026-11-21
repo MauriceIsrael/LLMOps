@@ -29,39 +29,7 @@
               "projections": {
                 "type": [
                   "object"
-                ],
-                "values": {
-                  "keys": {
-                    "cluster_class": {
-                      "type": [
-                        "string"
-                      ]
-                    },
-                    "control_plane": {
-                      "type": [
-                        "string"
-                      ]
-                    },
-                    "device_type": {
-                      "type": [
-                        "string"
-                      ]
-                    },
-                    "os_profile": {
-                      "type": [
-                        "string"
-                      ]
-                    },
-                    "role": {
-                      "type": [
-                        "string"
-                      ]
-                    }
-                  },
-                  "type": [
-                    "object"
-                  ]
-                }
+                ]
               },
               "relationships": {
                 "keys": {
