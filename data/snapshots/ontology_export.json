@@ -166,7 +166,7 @@
     },
     "urn:archinex:ontology:security:zone:oam": {
       "urn": "urn:archinex:ontology:security:zone:oam",
-      "revision": 2,
+      "revision": 3,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Zone de Sécurité OAM Confinée (Administration & Supervision Durcie NIS2)",
@@ -190,7 +190,7 @@
       "oracle_rules": [
         "data.archinex.edp.multiaxis.deny_missing_oam_zone",
         "data.archinex.edp.multiaxis.deny_weak_oam_isolation",
-        "data.archinex.edp.multiaxis.deny_unproxied_oam_access"
+        "data.archinex.edp.multiaxis.deny_oam_without_bastion_requirement"
       ],
       "hydration_template": {
         "security_zone": {
@@ -2165,7 +2165,7 @@
     },
     "urn:archinex:ontology:security:bastion:teleport_recorded_session": {
       "urn": "urn:archinex:ontology:security:bastion:teleport_recorded_session",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "title": "Bastion Teleport Cloud-Native (Certificats SSH Éphémères & Audit Kubernetes)",
       "domain": "security",
@@ -2180,7 +2180,7 @@
         "urn:archinex:kb:clause:nis2:oam_strict_bastion"
       ],
       "oracle_rules": [
-        "data.archinex.edp.multiaxis.deny_direct_oam_without_bastion"
+        "data.archinex.edp.multiaxis.deny_bastion_session_not_recorded"
       ],
       "projections": {
         "bastion_session_recording": true,
@@ -2189,7 +2189,7 @@
     },
     "urn:archinex:ontology:security:bastion:wallix_pam": {
       "urn": "urn:archinex:ontology:security:bastion:wallix_pam",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "title": "Bastion PAM Wallix / CyberArk (Rupture Protocolaire SSH/RDP & Traçabilité Vidéo)",
       "domain": "security",
@@ -2205,7 +2205,7 @@
         "urn:archinex:kb:clause:nis2:oam_strict_bastion"
       ],
       "oracle_rules": [
-        "data.archinex.edp.multiaxis.deny_direct_oam_without_bastion"
+        "data.archinex.edp.multiaxis.deny_bastion_session_not_recorded"
       ],
       "projections": {
         "bastion_session_recording": true,
@@ -4466,7 +4466,7 @@
         "urn:archinex:kb:clause:nis2:oam_strict_bastion"
       ]
     },
-    "data.archinex.edp.multiaxis.deny_unproxied_oam_access": {
+    "data.archinex.edp.multiaxis.deny_oam_without_bastion_requirement": {
       "object": "La zone de sécurité OAM.",
       "violation": "La zone n'impose pas le bastion que bastion_required exige.",
       "parameters": [

@@ -107,7 +107,7 @@ def test_isolation_scale_is_ordered_weakest_first_with_five_levels():
     [
         ("telecom:network:oob", {"deny_shared_oob_network", "deny_invalid_device_status", "deny_insufficient_interfaces",
                                  "deny_missing_oob_ip", "deny_bmc_oob_drift"}),
-        ("security:zone:oam", {"deny_missing_oam_zone", "deny_weak_oam_isolation", "deny_unproxied_oam_access"}),
+        ("security:zone:oam", {"deny_missing_oam_zone", "deny_weak_oam_isolation", "deny_oam_without_bastion_requirement"}),
     ],
 )
 def test_oob_and_oam_carry_exactly_the_executable_rules_and_each_has_a_card(leaf, expected_rules):
