@@ -102,6 +102,7 @@ MAP_KEYS: dict[str, int] = {
     "entities": 1,              # ontology catalog: entity URN -> entity
     "by_clause": 1,             # ontology clause index: clause URN -> leaf URNs
     "by_leaf": 1,               # ontology clause index: leaf URN -> clause URNs
+    "rule_cards": 1,            # ontology catalog: oracle rule id -> card
 }
 
 # Keys whose value is free-form content authored in the knowledge base (an object whose keys *and*
@@ -109,6 +110,7 @@ MAP_KEYS: dict[str, int] = {
 OPAQUE_KEYS: frozenset[str] = frozenset({
     "projections",          # ontology leaf: projection name -> any JSON value
     "hydration_template",   # ontology leaf: target tool -> any JSON template
+    "enumerations",         # ontology catalog: enumeration name -> ordered values (free-form content of the knowledge base)
 })
 
 

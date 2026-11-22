@@ -51,15 +51,24 @@ def test_instantiation_values_are_refused_in_projections_and_graph_model():
     assert all(f.severity == SEVERITY_ERROR for f in check_intention_purity(ents))
 
 
-def test_generic_values_versions_and_ordinary_templates_are_not_flagged():
+def test_generic_values_versions_and_structural_templates_are_not_flagged():
     ents = {
         U: _leaf(
             projections={"k8s": "1.28.11", "default_route": "0.0.0.0/0", "protocol": "IPsec-ESP-IKEv2"},
-            # Un gabarit d'hydratation génère par nature des valeurs par défaut : non contrôlé hors reconciliation_graph.
-            hydration_template={"network_segment": {"subnet": "192.168.99.0/24"}},
+            hydration_template={"network_segment": {"name": "OOB-MGMT-VRF", "dhcp_isolated": True}},
         )
     }
     assert check_intention_purity(ents) == []
+
+
+def test_instance_values_are_refused_in_the_whole_hydration_template():
+    """Un gabarit décrit une structure : sous-réseau et VLAN d'un segment sont des instances du projet."""
+    ents = {U: _leaf(hydration_template={"network_segment": {"name": "OOB", "vlan_id": 999, "subnet": "192.168.99.0/24"}})}
+    found = sorted((f.path, f.message.split()[0]) for f in check_intention_purity(ents))
+    assert found == [
+        ("hydration_template.network_segment.subnet", "ipv4"),
+        ("hydration_template.network_segment.vlan_id", "instance"),
+    ]
 
 
 def test_committed_catalog_has_no_error():

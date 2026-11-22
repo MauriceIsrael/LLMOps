@@ -122,7 +122,7 @@
     },
     "urn:archinex:ontology:telecom:network:oob": {
       "urn": "urn:archinex:ontology:telecom:network:oob",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Réseau Hors-Bande Dédicacé (OOB Management — VRF Isolée / ACLs Strictes)",
@@ -136,30 +136,37 @@
         "ilo",
         "console",
         "management",
-        "switch-oob"
+        "switch-oob",
+        "redfish",
+        "administration",
+        "ipmi"
       ],
       "oracle_rules": [
-        "data.archinex.edp.multiaxis.deny_shared_oob_network"
+        "data.archinex.edp.multiaxis.deny_shared_oob_network",
+        "data.archinex.edp.multiaxis.deny_invalid_device_status",
+        "data.archinex.edp.multiaxis.deny_insufficient_interfaces",
+        "data.archinex.edp.multiaxis.deny_missing_oob_ip",
+        "data.archinex.edp.multiaxis.deny_bmc_oob_drift"
       ],
       "hydration_template": {
         "network_segment": {
-          "vlan_id": 999,
           "name": "OOB-MGMT-VRF",
-          "subnet": "192.168.99.0/24",
           "dhcp_isolated": true
         }
       },
       "projections": {
         "requires_dedicated_vrf": true,
-        "max_latency_ms": 50
+        "required_status": "planned",
+        "min_interfaces": 2
       },
       "governed_by_clauses": [
+        "urn:archinex:kb:clause:telecom:oob_isolation",
         "urn:archinex:kb:clause:3gpp:ts33_501_oam_segregation"
       ]
     },
     "urn:archinex:ontology:security:zone:oam": {
       "urn": "urn:archinex:ontology:security:zone:oam",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "is_default_standard": true,
       "title": "Zone de Sécurité OAM Confinée (Administration & Supervision Durcie NIS2)",
@@ -172,24 +179,31 @@
         "bastion",
         "nis2",
         "pci-dss",
-        "segmentation"
+        "segmentation",
+        "exploitation",
+        "proxy",
+        "isolation",
+        "zone",
+        "sécurité",
+        "admin"
       ],
       "oracle_rules": [
-        "data.archinex.edp.multiaxis.deny_insecure_security_zone"
+        "data.archinex.edp.multiaxis.deny_missing_oam_zone",
+        "data.archinex.edp.multiaxis.deny_weak_oam_isolation",
+        "data.archinex.edp.multiaxis.deny_unproxied_oam_access"
       ],
       "hydration_template": {
         "security_zone": {
           "name": "ZONE-OAM-SECURE",
-          "nis2_tier": "critical",
-          "ingress_firewall": "next-gen-fw-oam-01",
           "mfa_enforced": true
         }
       },
       "projections": {
-        "isolation_level": "air-gap-logical",
+        "isolation_level": "strict",
         "bastion_required": true
       },
       "governed_by_clauses": [
+        "urn:archinex:kb:clause:nis2:oam_strict_bastion",
         "urn:archinex:kb:clause:3gpp:ts33_501_oam_segregation",
         "urn:archinex:kb:clause:nis2:art21_network_segregation"
       ]
@@ -2527,7 +2541,7 @@
     },
     "urn:archinex:ontology:security:zone:user_plane": {
       "urn": "urn:archinex:ontology:security:zone:user_plane",
-      "revision": 1,
+      "revision": 2,
       "kind": "leaf",
       "title": "Zone Usager Telecom 5G UPF (Haut Débit DPDK/SR-IOV)",
       "domain": "security",
@@ -2547,12 +2561,14 @@
       "hydration_template": {
         "security_zone": {
           "zone_id": "ZONE-UPF-USER",
-          "isolation_level": "high_throughput",
-          "proxy_required": false
+          "forwarding_profile": "high_throughput",
+          "isolation_level": "strict",
+          "bastion_required": false
         }
       },
       "projections": {
-        "isolation_level": "high_throughput"
+        "forwarding_profile": "high_throughput",
+        "isolation_level": "strict"
       }
     },
     "urn:archinex:ontology:telecom:core:slicing_5qi_sst_isolation": {
@@ -4019,6 +4035,20 @@
       "predicate": "satisfies_clause",
       "object": "urn:archinex:kb:clause:telecom:5g_slicing_isolation",
       "rationale": "Rattachement repris de la fixture d'Archinex (governed_by_clauses) ; justification à rédiger par le relecteur du domaine."
+    },
+    {
+      "id": "tr-sc-055",
+      "subject": "urn:archinex:ontology:telecom:network:oob",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:telecom:oob_isolation",
+      "rationale": "Raccordement et isolation des équipements du plan d'administration hors-bande (clause portée par les contrôles d'Archinex ; à rattacher à un contrôle de la base de connaissance)."
+    },
+    {
+      "id": "tr-sc-056",
+      "subject": "urn:archinex:ontology:security:zone:oam",
+      "predicate": "satisfies_clause",
+      "object": "urn:archinex:kb:clause:nis2:oam_strict_bastion",
+      "rationale": "Zone d'administration à accès médiatisé (clause portée par les contrôles d'Archinex ; à rattacher à un contrôle de la base de connaissance)."
     }
   ],
   "clause_index": {
@@ -4129,7 +4159,8 @@
       ],
       "urn:archinex:kb:clause:nis2:oam_strict_bastion": [
         "urn:archinex:ontology:security:bastion:teleport_recorded_session",
-        "urn:archinex:ontology:security:bastion:wallix_pam"
+        "urn:archinex:ontology:security:bastion:wallix_pam",
+        "urn:archinex:ontology:security:zone:oam"
       ],
       "urn:archinex:kb:clause:nis2:vault_hsm_unseal": [
         "urn:archinex:ontology:security:vault:hashicorp_enterprise_hsm",
@@ -4170,6 +4201,9 @@
       ],
       "urn:archinex:kb:clause:telecom:n3iwf_ipsec": [
         "urn:archinex:ontology:network:interworking:n3iwf_epdg_ipsec"
+      ],
+      "urn:archinex:kb:clause:telecom:oob_isolation": [
+        "urn:archinex:ontology:telecom:network:oob"
       ]
     },
     "by_leaf": {
@@ -4309,7 +4343,8 @@
       ],
       "urn:archinex:ontology:security:zone:oam": [
         "urn:archinex:kb:clause:3gpp:ts33_501_oam_segregation",
-        "urn:archinex:kb:clause:nis2:art21_network_segregation"
+        "urn:archinex:kb:clause:nis2:art21_network_segregation",
+        "urn:archinex:kb:clause:nis2:oam_strict_bastion"
       ],
       "urn:archinex:ontology:storage:backup:s3_object_lock_worm": [
         "urn:archinex:kb:clause:iso27001:a12_backup",
@@ -4319,8 +4354,139 @@
         "urn:archinex:kb:clause:telecom:5g_slicing_isolation"
       ],
       "urn:archinex:ontology:telecom:network:oob": [
+        "urn:archinex:kb:clause:3gpp:ts33_501_oam_segregation",
+        "urn:archinex:kb:clause:telecom:oob_isolation"
+      ]
+    }
+  },
+  "enumerations": {
+    "isolation_level": {
+      "ordered": true,
+      "description": "Niveau d'isolement d'une zone, du plus faible au plus fort. Une zone plus isolée que l'exigence est conforme.",
+      "values": [
+        {
+          "value": "shared",
+          "definition": "Aucun cloisonnement : même réseau que d'autres usages."
+        },
+        {
+          "value": "segmented",
+          "definition": "VLAN et listes de contrôle d'accès, sur la même infrastructure de routage."
+        },
+        {
+          "value": "strict",
+          "definition": "VRF dédiée, flux entrants filtrés par un pare-feu à état."
+        },
+        {
+          "value": "air-gap-logical",
+          "definition": "Comme strict, sans route vers ou depuis les autres zones hors passerelles de transfert contrôlées, sans accès Internet direct."
+        },
+        {
+          "value": "air-gap-physical",
+          "definition": "Aucun lien réseau avec les autres zones ; tout transfert de données passe par un support amovible ou une diode matérielle, sous contrôle. Réservé aux cas extrêmes."
+        }
+      ]
+    }
+  },
+  "rule_cards": {
+    "data.archinex.edp.multiaxis.deny_shared_oob_network": {
+      "object": "Les interfaces de type management des équipements planifiés, et la VRF qui les porte.",
+      "violation": "Une interface de gestion n'est pas dans la VRF OOB dédiée, ou cette VRF porte aussi une interface de type data, ou aucune VRF OOB n'est déclarée.",
+      "parameters": [
+        "requires_dedicated_vrf"
+      ],
+      "evidence_plan": "Le segment network_segment du gabarit d'hydratation (VRF OOB) et le rattachement des interfaces de gestion dans l'inventaire hydraté.",
+      "evidence_drift": "Le rattachement réel des interfaces de gestion à leur VRF dans Nautobot (à implémenter).",
+      "clauses": [
         "urn:archinex:kb:clause:3gpp:ts33_501_oam_segregation"
       ]
+    },
+    "data.archinex.edp.multiaxis.deny_invalid_device_status": {
+      "object": "Les équipements planifiés (statut Nautobot).",
+      "violation": "Le statut de l'équipement diffère de required_status.",
+      "parameters": [
+        "required_status"
+      ],
+      "evidence_plan": "nautobot_planned_devices[*].status de l'inventaire hydraté.",
+      "evidence_drift": "Le statut réel de l'équipement dans Nautobot.",
+      "clauses": [
+        "urn:archinex:kb:clause:telecom:oob_isolation"
+      ]
+    },
+    "data.archinex.edp.multiaxis.deny_insufficient_interfaces": {
+      "object": "Les équipements planifiés et leurs interfaces.",
+      "violation": "L'équipement a moins de min_interfaces interfaces.",
+      "parameters": [
+        "min_interfaces"
+      ],
+      "evidence_plan": "nautobot_planned_devices[*].interfaces de l'inventaire hydraté.",
+      "evidence_drift": "Les interfaces réelles de l'équipement dans Nautobot.",
+      "clauses": [
+        "urn:archinex:kb:clause:telecom:oob_isolation"
+      ]
+    },
+    "data.archinex.edp.multiaxis.deny_missing_oob_ip": {
+      "object": "Les équipements planifiés.",
+      "violation": "L'équipement n'a pas d'adresse IP OOB.",
+      "parameters": [],
+      "evidence_plan": "nautobot_planned_devices[*].oob_ip de l'inventaire hydraté.",
+      "evidence_drift": "L'adresse IP OOB réelle de l'équipement dans Nautobot.",
+      "clauses": [
+        "urn:archinex:kb:clause:telecom:oob_isolation"
+      ]
+    },
+    "data.archinex.edp.multiaxis.deny_bmc_oob_drift": {
+      "object": "Les équipements planifiés et les manifestes BareMetalHost.",
+      "violation": "L'adresse Redfish du BareMetalHost ne contient pas l'IP OOB de l'équipement du même nom.",
+      "parameters": [],
+      "evidence_plan": "k8s_manifests et nautobot_planned_devices de l'inventaire hydraté.",
+      "evidence_drift": "Le manifeste BareMetalHost réel face à l'IP OOB réelle dans Nautobot.",
+      "clauses": [
+        "urn:archinex:kb:clause:telecom:oob_isolation"
+      ]
+    },
+    "data.archinex.edp.multiaxis.deny_missing_oam_zone": {
+      "object": "Les zones de sécurité déclarées dans l'inventaire.",
+      "violation": "Aucune zone de sécurité OAM n'est déclarée alors que la feuille OAM est liée.",
+      "parameters": [],
+      "evidence_plan": "security_zones de l'inventaire hydraté.",
+      "evidence_drift": "Les zones réelles dans Nautobot.",
+      "clauses": [
+        "urn:archinex:kb:clause:nis2:oam_strict_bastion"
+      ]
+    },
+    "data.archinex.edp.multiaxis.deny_weak_oam_isolation": {
+      "object": "La zone de sécurité OAM.",
+      "violation": "Le niveau d'isolement de la zone est de rang inférieur à isolation_level (voir enumerations.isolation_level).",
+      "parameters": [
+        "isolation_level"
+      ],
+      "evidence_plan": "security_zones[*].isolation_level de l'inventaire hydraté.",
+      "evidence_drift": "Le niveau d'isolement réel de la zone dans Nautobot.",
+      "clauses": [
+        "urn:archinex:kb:clause:nis2:oam_strict_bastion"
+      ]
+    },
+    "data.archinex.edp.multiaxis.deny_unproxied_oam_access": {
+      "object": "La zone de sécurité OAM.",
+      "violation": "La zone n'impose pas le bastion que bastion_required exige.",
+      "parameters": [
+        "bastion_required"
+      ],
+      "evidence_plan": "security_zones[*].bastion_required de l'inventaire hydraté.",
+      "evidence_drift": "L'exigence réelle portée par la zone dans Nautobot.",
+      "clauses": [
+        "urn:archinex:kb:clause:nis2:oam_strict_bastion"
+      ]
+    },
+    "data.archinex.edp.adr015.deny_user_plane_management_leak": {
+      "object": "La zone de sécurité du plan usager.",
+      "violation": "Le niveau d'isolement de la zone est de rang inférieur à isolation_level (voir enumerations.isolation_level).",
+      "parameters": [
+        "isolation_level"
+      ],
+      "evidence_plan": "extended_domains.user_plane_zone.isolation_level de l'inventaire hydraté.",
+      "evidence_drift": "Le niveau d'isolement réel de la zone du plan usager dans Nautobot.",
+      "clauses": []
     }
   }
 }
