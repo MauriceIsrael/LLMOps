@@ -51,7 +51,7 @@ def _instantiation_values(value: Any, path: str) -> list[tuple[str, str, str]]:
     found: list[tuple[str, str, str]] = []
     if isinstance(value, dict):
         for k, v in value.items():
-            if k in _INSTANCE_KEYS and isinstance(v, (str, int)) and not isinstance(v, bool):
+            if k in _INSTANCE_KEYS and isinstance(v, str | int) and not isinstance(v, bool):
                 found.append((f"{path}.{k}", "instance key", str(v)))
             found.extend(_instantiation_values(v, f"{path}.{k}"))
     elif isinstance(value, list):
