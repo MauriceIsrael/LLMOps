@@ -27,11 +27,32 @@ Le producteur « entries » (`pipelines.ontology.export`, commande `kb ontology 
 1. **Cohérence interne d'une feuille** : `oracle_rules` sans `projections` est une **erreur** (les règles n'ont pas de paramètres : elles seraient sans objet) ; `projections` sans `governed_by_clauses` est un **avertissement**.
 2. **Pureté d'intention** : aucune adresse IPv4/IPv6, CIDR ou MAC dans les `projections` ni dans `hydration_template.reconciliation_graph`. L'ontologie est une doctrine commune à tous les projets ; les **instances** (identifiants, tenants, sous-réseaux) sont des données du projet. Les autres gabarits d'hydratation génèrent par nature des valeurs par défaut et ne sont pas contrôlés.
 
-Limite connue : seules les adresses sont détectées ; un identifiant concret (nom d'hôte, identifiant de tenant) n'est pas reconnaissable mécaniquement.
+Limite connue : seules les adresses et les numéros de VLAN (`vlan_id`) sont détectés ; un identifiant concret (nom d'hôte, identifiant de tenant) n'est pas reconnaissable mécaniquement. Le contrôle porte sur les `projections` **et sur tout le `hydration_template`** : un gabarit décrit une structure, pas des valeurs d'instance.
 
 ## Contrat d'export
 
 Les consommateurs peuvent compter sur : `catalog_version`, `generated_at`, `entities`, `triplets`, `clause_index`, et pour chaque entité `urn`, `revision`, `kind`, `title` (testé par `tests/unit/test_ontology_catalog_checks.py`).
+
+Deux sections **optionnelles et additives** s'y ajoutent (un consommateur qui les ignore reste valide) : `enumerations` et `rule_cards`.
+
+### Fiches de règles (`rule_cards`)
+
+Une règle d'oracle nommée dans `oracle_rules` est une promesse : « cette feuille est vérifiée par une règle de ce nom ». Le Hub n'exécute aucune règle ; c'est le consommateur qui la vérifie. Pour que la promesse ait un sens, chaque règle a une **fiche**, indexée par l'identifiant de la règle :
+
+| Champ | Contenu |
+|---|---|
+| `object` | l'objet vérifié |
+| `violation` | la condition de violation, en une phrase |
+| `parameters` | les clés de `projections` que la règle lit |
+| `evidence_plan` | où la preuve se lit à la planification (inventaire hydraté) |
+| `evidence_drift` | où la preuve se lit en dérive (état réel de l'outil en aval), ou `null` |
+| `clauses` | les clauses visées |
+
+`kb ontology catalog-check` : une règle **sans fiche** est un avertissement (`rule_without_card`) ; une fiche qui lit un paramètre que la feuille ne porte pas est une **erreur** ; une fiche orpheline ou qui cite une clause absente de la feuille est un avertissement. Avec `--strict`, les avertissements échouent. Les fiches des règles OOB et OAM sont écrites ; celles des autres règles restent à écrire (le nombre figure dans la sortie de `catalog-check`).
+
+### Énumérations ordonnées (`enumerations`)
+
+Une énumération ordonnée donne l'échelle d'une valeur (aujourd'hui `isolation_level` : `shared` < `segmented` < `strict` < `air-gap-logical` < `air-gap-physical`). Le consommateur **compare par rang** : une zone plus isolée que l'exigence est conforme. `catalog-check` refuse (erreur) toute valeur d'une clé du même nom, dans `projections` ou dans un gabarit, qui n'est pas dans l'énumération.
 
 ## Migration depuis la fixture d'un consommateur (issue #192)
 
@@ -55,6 +76,7 @@ Les prédicats `requires_prerequisite_axis` (fermeture transitive des prérequis
 
 - Le Hub **ne valide pas** l'existence d'une URN de clause (aucun registre de clauses dans `data/kb`) : seule la forme de l'URN est contrôlée.
 - Trois identifiants de triplets du Hub sont dupliqués (`tr-014` à `tr-016`) depuis avant la migration : signalés par `catalog-check` (avertissement), non renumérotés (des consommateurs citent ces identifiants).
-- Quatre règles d'oracle déclarées dans le catalogue ne sont pas implémentées dans le Rego d'Archinex (`deny_shared_oob_network`, `deny_insecure_security_zone`, `deny_single_point_of_power_failure`, `deny_divergent_preprod_topology`) : elles sont d'origine Hub.
+- Après la migration, quatre règles d'origine Hub n'avaient pas d'implémentation dans le Rego d'Archinex. Deux ont disparu avec leurs feuilles doublons ; `deny_insecure_security_zone` est retirée de la feuille OAM (nom ombrelle, remplacé par les règles atomiques qui existent) ; `deny_shared_oob_network` est définie par sa fiche et implémentée côté Archinex.
+- Après la migration, ce catalogue est **modifié à la main** : `scripts/migrate_ontology_from_fixture.py` est historique et ne doit plus être rejoué sur le catalogue courant (il écraserait les corrections postérieures).
 - La règle `deny_unmediated_s6a_direct_flow` de la feuille IPsec perd son paramètre `required_mediation_hops` (identifiants de nœuds de scénario) : sans modèle de graphe (issue #196), elle est inerte tant que le consommateur ne fournit pas les instances.
 

@@ -1325,7 +1325,7 @@ Aucune route n'est ajoutée ; la forme (`schemaVersion` `2.0`) ne change pas. De
 #### 1. Points d'accès REST
 
 * **`GET /api/knowledge/ontology/export`** :
-  * Exporte le catalogue consolidé d'ontologie SI & Telco d'architecture d'entreprise au format `OntologyCatalog` (`{ catalog_version, generated_at, entities, triplets, clause_index }`).
+  * Exporte le catalogue consolidé d'ontologie SI & Telco d'architecture d'entreprise au format `OntologyCatalog` (`{ catalog_version, generated_at, entities, triplets, clause_index }`, plus les sections optionnelles `enumerations` et `rule_cards`, ajoutées sans changement de version : un client qui les ignore reste valide).
   * Réponse `200 OK` avec en-tête `Content-Type: application/json`.
   * **Une seule forme est servie (Issue #189)** : le catalogue ci-dessus. Aucune régénération ni autre forme n'est jamais servie ; le fichier absent ou d'une autre forme est une erreur explicite et machine-lisible :
     * `404 Not Found` avec `{"code": "ontology_export_not_found", "error": …}` si le catalogue est absent ;

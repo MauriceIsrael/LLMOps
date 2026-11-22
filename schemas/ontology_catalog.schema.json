@@ -187,6 +187,107 @@
           }
         }
       }
+    },
+    "enumerations": {
+      "type": "object",
+      "description": "Énumérations ordonnées portées par le Hub (par exemple le niveau d'isolement d'une zone). Un consommateur compare par rang, jamais par égalité de texte.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ordered",
+          "values"
+        ],
+        "properties": {
+          "ordered": {
+            "type": "boolean",
+            "description": "Vrai : les valeurs sont listées de la plus faible à la plus forte."
+          },
+          "description": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "value",
+                "definition"
+              ],
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*$"
+                },
+                "definition": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "rule_cards": {
+      "type": "object",
+      "description": "Fiche de chaque règle d'oracle nommée dans `oracle_rules` : ce qu'elle vérifie, sur quel objet, avec quels paramètres, avec quelle preuve. Une règle nommée sans fiche est signalée par `kb ontology catalog-check`.",
+      "propertyNames": {
+        "pattern": "^data\\.[A-Za-z0-9_.]+$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "object",
+          "violation",
+          "parameters",
+          "evidence_plan",
+          "clauses"
+        ],
+        "properties": {
+          "object": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Objet vérifié."
+          },
+          "violation": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Condition de violation, en une phrase."
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true,
+            "description": "Noms des paramètres (clés de `projections`) que la règle lit."
+          },
+          "evidence_plan": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Où la preuve se lit à la planification (inventaire hydraté)."
+          },
+          "evidence_drift": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Où la preuve se lit en dérive (état réel de l'outil en aval) ; null si la règle n'a pas de forme de dérive."
+          },
+          "clauses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^urn:archinex:kb:clause:[A-Za-z0-9_:.-]+$"
+            },
+            "uniqueItems": true
+          }
+        }
+      }
     }
   }
 }
