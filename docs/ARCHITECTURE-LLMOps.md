@@ -1,6 +1,6 @@
 # LLMOps — Document d'architecture
 
-État : 8 octobre 2026. Code de `main` au contrat **1.24** ; le contrat **1.29** (K22, revue des règles de déclenchement) est dans la PR #76, pas encore fusionnée.
+État : 27 novembre 2026. Code de `main` au contrat **1.42** (53 outils MCP sur le serveur unifié, ontologie fédératrice intégrée au contrat sans mode expérimental).
 Public : architectes et développeurs qui doivent comprendre, exploiter ou faire évoluer LLMOps, et les équipes des composants voisins (Archinex, suite documentaire).
 
 Ce document décrit **l'architecture actuelle**. Il complète, sans les remplacer :
@@ -8,12 +8,14 @@ Ce document décrit **l'architecture actuelle**. Il complète, sans les remplace
 | Document | Sujet |
 |---|---|
 | [`SUITE-MAP.md`](SUITE-MAP.md) | qui fait quoi dans la suite, avec le niveau de preuve de chaque affirmation |
-| [`contracts/knowledge-hub-api-v1.md`](contracts/knowledge-hub-api-v1.md) | le contrat d'interface, §5.1 à §5.25 |
+| [`contracts/knowledge-hub-api-v1.md`](contracts/knowledge-hub-api-v1.md) | le contrat d'interface, §5.1 à §5.42 |
+| [`INTERFACE.md`](INTERFACE.md) | catalogue des 53 outils MCP et enveloppe de réponse au contrat `1.42` |
+| [`ONTOLOGY-CATALOG.md`](ONTOLOGY-CATALOG.md) | l'ontologie fédératrice (concepts HLD, axes, feuilles, triplets, URN citables — contrat `1.42`) |
 | [`adr/ADR-KH-01-contrats-exposes.md`](adr/ADR-KH-01-contrats-exposes.md) | les décisions d'architecture du Hub (A1 à A11) |
 | [`plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md`](plans/PLAN-IMPLEMENTATION-Bundle-Engagement.md) | les lots K1 à K22 et leur état |
 | [`ZOOM-LangGraph-elicitation.md`](ZOOM-LangGraph-elicitation.md) | zoom sur l'usage de LangGraph : flux, pause durable, écarts avec l'API d'écriture |
 | [`architecture.md`](architecture.md) | **historique** : la vue d'origine (moteur d'élicitation LangGraph, ontologie du graphe), toujours exacte pour ces deux sujets |
-| [`deployment.md`](deployment.md), [`VERSIONING.md`](VERSIONING.md) | exploitation, politique de versions |
+| [`deployment.md`](deployment.md), [`VERSIONING.md`](VERSIONING.md) | exploitation, politique de versions (`1.0` → `1.42`) |
 
 ---
 
@@ -23,7 +25,7 @@ LLMOps est le **Knowledge Hub** : la mémoire d'ingénierie d'architecture, expo
 
 | | Base de connaissance | Base d'engagement |
 |---|---|---|
-| Contenu | principes, patterns, décisions d'architecture (ADR), contrôles réglementaires, glossaire, règles de déclenchement, vocabulaire des faits | exigences, sujets et leur maturité, énoncés, décisions, questions, conflits, manques d'**un programme** |
+| Contenu | principes, patterns, décisions d'architecture (ADR), contrôles réglementaires, glossaire, règles de déclenchement, vocabulaire des faits, **ontologie fédératrice** (`data/kb/ontology/`) | exigences (`RequirementRef`), sujets et leur maturité, énoncés, décisions, questions, conflits, conformité déclarée (`K17`), manques d'**un programme** |
 | Nature | générique, **agnostique de tout programme** (verticale TELCO / MCX) | spécifique à un programme, confidentielle |
 | Écrit par | un cycle de revue humaine (candidats, promotion, publication) | des membres, selon leur rôle, par l'API d'écriture |
 | Stockage | fichiers `data/kb/` + graphe `knowledge.lbug` | une base graphe par engagement `data/engagements/<id>.lbug` + l'état d'accès en SQL |
@@ -121,7 +123,8 @@ Trois modes d'accès au même cœur :
 **Contenu** (`data/kb/`) : Markdown à front matter YAML pour les principes (`P-…`), patterns (`PAT-…`), décisions (`ADR-…`), contrôles réglementaires (`controls/<référentiel>/`), questionnaires, risques, modèles ; `glossary/` ; `blueprints/` ; et, pour la cascade de questions :
 
 - `vocabulary/facts.yaml` : le **vocabulaire des faits d'architecture** (clés typées : entier, booléen, énumération, durée), versionné et citable ;
-- `triggers/TRG-*.yaml` : les **règles de déclenchement** (« si ces faits sont affirmés, cette question devient pertinente »), une par fichier, rattachées à l'élément qui les justifie.
+- `triggers/TRG-*.yaml` : les **règles de déclenchement** (« si ces faits sont affirmés, cette question devient pertinente »), une par fichier, rattachées à l'élément qui les justifie ;
+- `ontology/` (contrat **1.42**, sans mode expérimental) : l'**ontologie fédératrice** (concepts HLD, sous-axes obligatoires, feuilles techniques, fiches de règles OOB/OAM, triplets et projections) servie via `GET /api/knowledge/ontology`, `GET /api/knowledge/ontology/export` (forme unique catalogue), `GET /api/knowledge/ontology/{urn}` et les outils MCP `list_ontology_terms`, `get_ontology_term`, `export_ontology_catalog`. Son vocabulaire est projeté dans l'index de doctrine et vérifié par `kb check`.
 
 **Graphe.** `pipelines.cli ingest` parse les fichiers et construit `knowledge.lbug` (nœuds `Asset`, `Control`, `GlossaryTerm`, relations `SUPERSEDES`, `IMPLEMENTS`…). Le graphe est un **index reconstructible** : la source de vérité est le contenu des fichiers.
 
@@ -146,11 +149,12 @@ stateDiagram-v2
 
 Toute connaissance nouvelle, quelle que soit son origine (expert, Archinex, suite, modèle local), passe par ce cycle : contrôles déterministes (`schema`, `references`, `duplicate`, `anonymization`, `doctrine_conflict`, `llm_unreviewed`, `previously_rejected`), revue d'un propriétaire déclaré dans `owners.yaml`, promotion (confiance **calculée depuis les preuves**, jamais déclarée), publication. Les règles de déclenchement et les clés du vocabulaire y entrent comme deux types de candidat (`trigger`, `fact_key`) dont le contrôle `schema` est le validateur de K19.
 
-### Doctrine, similarité, réutilisation
+### Doctrine, similarité, clauses de contrôle, fraîcheur & réutilisation (contrats 1.25–1.38)
 
-- **Juge d'option** (`pipelines/doctrine`) : évalue une option d'architecture contre les clauses de contrôle des principes et décisions, de façon déterministe ; un jeu d'évaluation mesure sa qualité.
-- **Similarité** (`pipelines/similarity`) : LLMOps **ne contient aucun modèle**. Le client calcule les vecteurs, le Hub les stocke (avec modèle et version) et calcule un cosinus. Un résultat n'est jamais une décision : il porte `requires_confirmation: true`.
-- **Réutilisation** : acquise seulement quand une personne a confirmé une à une les hypothèses de la décision d'origine ; journal en ajout seul.
+- **Juge d'option** (`pipelines/doctrine`) : évalue une option d'architecture contre les clauses de contrôle des principes et décisions, de façon déterministe ; chaque clause porte son propre statut (`draft`/`validated`/`rejected`, contrat `1.26`, `GET /api/knowledge/checks`). Depuis le contrat `1.38`, `GET /api/knowledge/context` renvoie toujours tous les contrôles des référentiels requis (`required_total`, `omitted_required`) et `GET /api/knowledge/health` expose `compiled_base` (`ok` / `stale` / `unverified`).
+- **Similarité hybride & locale** (`pipelines/similarity`, contrat `1.25`) : en plus des vecteurs calculés par le client, le Hub embarque un encodeur multilingue local sur CPU (`fastembed`, `intfloat/multilingual-e5-small`, épinglé par SHA-256, zéro réseau à la requête) pour la recherche sémantique FR/EN. Un résultat n'est jamais une décision : il porte `requires_confirmation: true`.
+- **Fraîcheur & couverture RFP** (contrat `1.36`) : suivi de fraîcheur réglementaire et doctrinale (`GET /api/knowledge/freshness` / `get_kb_freshness`), expansion bilingue FR/EN et détection des angles morts de couverture RFP (`GET|POST /api/rfp/coverage-gaps` / `get_rfp_coverage_gaps`).
+- **Réutilisation** : acquise seulement quand une personne a confirmé une à une les hypothèses de la décision d'origine ; journal en ajout seul, soumis à la même règle d'étanchéité sans ancre programme (`K13`, contrat `1.32`).
 
 ---
 
@@ -206,7 +210,9 @@ Propriétés du moteur (`pipelines/engagement/cascade.py`) : il **n'infère jama
 
 ### 5.5 Instantané d'engagement (K11)
 
-`POST /api/engagements/{id}/exports` (admin) construit les données de façon pure (`build_data`), les **vérifie** (`verify`), les scelle et les stocke de façon immuable. L'identifiant dérive de l'empreinte (`eng-<engagement>-<12 hex>`). Si la vérification échoue, **rien n'est produit** : pas d'e-mail, pas d'actif sans personne, pas d'auto-validation, `is_provisional` dérivé de la maturité et des conflits, faits et lignée cohérents avec les décisions et la base épinglée, règles locales et désactivations attribuées. Schéma : `schemas/engagement_snapshot.schema.json` (version 1.5).
+`POST /api/engagements/{id}/exports` (admin) construit les données de façon pure (`build_data`), les **vérifie** (`verify`), les scelle et les stocke de façon immuable. L'identifiant dérive de l'empreinte (`eng-<engagement>-<12 hex>`). Si la vérification échoue, **rien n'est produit** : pas d'e-mail, pas d'actif sans personne, pas d'auto-validation, `is_provisional` dérivé de la maturité et des conflits, faits et lignée cohérents avec les décisions et la base épinglée, règles locales et désactivations attribuées. Schéma : `schemas/engagement_snapshot.schema.json` (version **1.8** : dispositions d'exigences `1.6` / contrat `1.27`, section `compliance` K17 `1.7` / contrat `1.31`, chaîne déclarée `basis: "declared_by_decision"` `1.8` / contrat `1.35`).
+
+L'instantané de conformité (`GET /api/compliance/conformity-snapshot`, contrats `1.30`, `1.40`, `1.41`) dérive directement de la section `compliance` de l'engagement au format `schemaVersion: "4.0"`, avec identifiant dérivé du `checksum` et référence d'exigence typée `RequirementRef {sourceId, requirementKey, version}`.
 
 ---
 
@@ -228,10 +234,11 @@ Propriétés du moteur (`pipelines/engagement/cascade.py`) : il **n'infère jama
 | Cloisonnement des engagements | un engagement géré n'est lisible que par ses membres ; hors production et sans `ENGAGEMENT_TOKENS`, l'accès est ouvert avec un avertissement au démarrage ; **en production (`LLMOPS_ENV=production`) l'accès est fermé par défaut** |
 | Autorisation | point de passage unique `authorise_action` ; chaque refus est journalisé |
 | Chemins | identifiants d'engagement validés avant toute opération sur disque (un audit a trouvé et fermé un chemin d'écriture par traversée) |
+| Identité d'acteur signée (contrats `1.37` & `1.39`) | Assertions JWT EdDSA (Ed25519) dans `X-Actor-Token`, clés publiques publiées via `GET /.well-known/jwks.json` et chargées par `ARCHINEX_JWKS` / `ARCHINEX_JWKS_FILE` / `ARCHINEX_JWKS_URL`, anti-rejeu par `jti`, révocation immédiate (`POST /api/knowledge/auth/revoke`), délégations temporaires (`GET|POST /api/knowledge/delegations`) et journal d'audit (`GET /api/knowledge/audit`). Mode strict `LLMOPS_REQUIRE_SIGNED_ACTOR=true` refuse l'en-tête brut `X-Actor-Email` (`401 signed_actor_required`) |
 | Données personnelles | jamais d'e-mail dans les réponses, les journaux ou les instantanés : des handles |
 | Contenu de modèle | marqué `llm-derived`, proposé seulement |
 
-**Limite assumée.** L'identité d'une personne est **attestée par le client de confiance** (en-tête `X-Actor-Email`), pas signée : un client compromis peut parler au nom de n'importe quel membre. La signature et le SSO sont un chantier ouvert (issue #7).
+**Mode transition.** Hors `LLMOPS_REQUIRE_SIGNED_ACTOR=true`, l'en-tête brut `X-Actor-Email` reste accepté pour les clients legacy et serveurs de contrat locaux ; en production, activer le mode strict afin d'exiger les assertions signées EdDSA.
 
 ---
 
@@ -292,8 +299,8 @@ flowchart LR
 
 ## 12. Limites connues et questions ouvertes
 
-- **Identité non signée** (§7) : confiance dans le client délégué.
-- **Parité avec le bundle d'Archinex** : la matrice de conformité exigence → contrôle est dans l'instantané d'engagement depuis le contrat 1.31 (K17, après la correction de `compliance_mapper`, K6) ; les manques G3 dérivés n'y sont pas encore (ils demandent une règle d'applicabilité des principes). C'est la porte du retrait de l'émission locale d'Archinex.
+- **Identité d'acteur** (§7) : les assertions signées EdDSA + JWKS + révocation + délégations sont livrées (contrats `1.37` & `1.39`) ; le mode strict (`LLMOPS_REQUIRE_SIGNED_ACTOR=true`) doit être activé conjointement côté Hub et côté client pour fermer l'en-tête brut `X-Actor-Email`.
+- **Parité avec le bundle d'Archinex** : la matrice de conformité exigence → contrôle (`K17`) est dans l'instantané d'engagement depuis `1.31`, étendue à la chaîne déclarée en `1.35` (`schema 1.8`) et projetée en instantané de conformité `4.0` avec `RequirementRef` en `1.41` ; les sections `source_documents`, `architecture`, `reuse_log`, `glossary` et les manques G3 dérivés restent à porter côté Hub avant retrait de l'émission locale d'Archinex.
 - **Capitalisation** : le canal (K7), l'étanchéité (K13) et la proposition de capitalisation d'une règle locale (K21 point 4, `…/rules/{trigger_id}/capitalise`) sont livrés ; la remontée d'une **décision** d'engagement n'a pas encore son pendant.
 - **Lecture directe de la base** par `get_asset(id)` sans paramètre : conservée pour la compatibilité ; sa dépréciation reste à planifier.
 - **Consommateur de l'instantané d'engagement** : adaptateur non attribué (issue #40).

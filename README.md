@@ -58,7 +58,7 @@ make demo-check
 ```
 
 **Expected Node Counts after Demo Check (`make demo-check`):**
-- **Knowledge Plane (`data/knowledge.kuzu`)**: `Asset`: ~46 nodes, `GlossaryTerm`: ~10 nodes.
+- **Knowledge Plane (`data/knowledge.lbug`)**: `Asset`: ~46 nodes, `GlossaryTerm`: ~10 nodes.
 - **Engagement Plane (`demo-engagement-2027`)**: `Subject`: 8 nodes, `Statement`: 9 nodes, `Conflict`: 2 nodes.
 
 ### 4. Run the governance server locally (for Archinex)
