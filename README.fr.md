@@ -56,7 +56,7 @@ make demo-check
 ```
 
 **Nombres de Nœuds Attendus (`make demo-check`) :**
-- **Plan de Connaissances (`data/knowledge.kuzu`)** : `Asset`: ~46 nœuds, `GlossaryTerm`: ~10 nœuds.
+- **Plan de Connaissances (`data/knowledge.lbug`)** : `Asset`: ~46 nœuds, `GlossaryTerm`: ~10 nœuds.
 
 ### 4. Lancer le serveur de gouvernance en local (pour Archinex)
 
