@@ -85,18 +85,18 @@ def test_interrupt_resumes_across_processes(setup_test_db, tmp_path, scripted_in
     q_id = "Q-durability-1"
 
     # --- PROCESSUS 1 : Lancement jusqu'à l'interrupt ---
-    checkpointer1 = get_sqlite_checkpointer(engagement=engagement, base_dir=tmp_path / "projects")
-    graph1 = build_intake_graph(checkpointer=checkpointer1)
-    config = {"configurable": {"thread_id": q_id}}
+    with get_sqlite_checkpointer(engagement=engagement, base_dir=tmp_path / "projects") as checkpointer1:
+        graph1 = build_intake_graph(checkpointer=checkpointer1)
+        config = {"configurable": {"thread_id": q_id}}
 
-    _res1 = graph1.invoke({
-        "question_id": q_id,
-        "answer_text": "Nous préconisons un SAN NVMe dual-controller tier-1.",
-        "author": "alice",
-        "role": "cloud-architect",
-        "engagement": engagement,
-        "db_path": str(setup_test_db)
-    }, config=config)
+        _res1 = graph1.invoke({
+            "question_id": q_id,
+            "answer_text": "Nous préconisons un SAN NVMe dual-controller tier-1.",
+            "author": "alice",
+            "role": "cloud-architect",
+            "engagement": engagement,
+            "db_path": str(setup_test_db)
+        }, config=config)
 
     # Vérifier que le flux s'est arrêté sur l'interrupt sans encore écrire en base Kùzu
     repo = ElicitationRepository(db_path=setup_test_db)
@@ -106,17 +106,16 @@ def test_interrupt_resumes_across_processes(setup_test_db, tmp_path, scripted_in
 
     # --- SIMULATION DE DESTRUCTION DU PROCESSUS (Nouveau graphe & instance) ---
     del graph1
-    del checkpointer1
     import gc
     gc.collect()
 
 
     # --- PROCESSUS 2 : NOUVEAU PROCESSUS & REPRISE ---
 
-    checkpointer2 = get_sqlite_checkpointer(engagement=engagement, base_dir=tmp_path / "projects")
-    graph2 = build_intake_graph(checkpointer=checkpointer2)
+    with get_sqlite_checkpointer(engagement=engagement, base_dir=tmp_path / "projects") as checkpointer2:
+        graph2 = build_intake_graph(checkpointer=checkpointer2)
 
-    _res2 = graph2.invoke(Command(resume={"action": "accept", "accept": True}), config=config)
+        _res2 = graph2.invoke(Command(resume={"action": "accept", "accept": True}), config=config)
 
     # Assert persistence réussie
     repo_after = ElicitationRepository(db_path=setup_test_db)
@@ -130,19 +129,19 @@ def test_no_statement_without_confirmation(setup_test_db, tmp_path):
     """Test 6 : Rejet lors de l'interrupt -> aucun énoncé n'est écrit dans Kùzu DB."""
     engagement = "test-eng-reject"
     q_id = "Q-reject-1"
-    checkpointer = get_sqlite_checkpointer(engagement=engagement, base_dir=tmp_path / "projects")
-    graph = build_intake_graph(checkpointer=checkpointer)
-    config = {"configurable": {"thread_id": q_id}}
+    with get_sqlite_checkpointer(engagement=engagement, base_dir=tmp_path / "projects") as checkpointer:
+        graph = build_intake_graph(checkpointer=checkpointer)
+        config = {"configurable": {"thread_id": q_id}}
 
-    graph.invoke({
-        "question_id": q_id,
-        "answer_text": "Proposition rejetée.",
-        "author": "bob",
-        "engagement": engagement,
-        "db_path": str(setup_test_db)
-    }, config=config)
+        graph.invoke({
+            "question_id": q_id,
+            "answer_text": "Proposition rejetée.",
+            "author": "bob",
+            "engagement": engagement,
+            "db_path": str(setup_test_db)
+        }, config=config)
 
-    res = graph.invoke(Command(resume={"action": "reject", "accept": False}), config=config)
+        res = graph.invoke(Command(resume={"action": "reject", "accept": False}), config=config)
     assert res.get("rejected") is True
 
     repo = ElicitationRepository(db_path=setup_test_db)
@@ -180,19 +179,19 @@ def test_contradiction_creates_conflict(setup_test_db, tmp_path):
     })
 
     # Intake check
-    checkpointer = get_sqlite_checkpointer(engagement="demo-2026", base_dir=tmp_path / "projects")
-    graph = build_intake_graph(checkpointer=checkpointer)
-    config = {"configurable": {"thread_id": "Q-contradict"}}
+    with get_sqlite_checkpointer(engagement="demo-2026", base_dir=tmp_path / "projects") as checkpointer:
+        graph = build_intake_graph(checkpointer=checkpointer)
+        config = {"configurable": {"thread_id": "Q-contradict"}}
 
-    graph.invoke({
-        "question_id": "Q-contradict",
-        "answer_text": "Ceph HCI all-flash SSD",
-        "author": "bob",
-        "engagement": "demo-2026",
-        "db_path": str(setup_test_db)
-    }, config=config)
+        graph.invoke({
+            "question_id": "Q-contradict",
+            "answer_text": "Ceph HCI all-flash SSD",
+            "author": "bob",
+            "engagement": "demo-2026",
+            "db_path": str(setup_test_db)
+        }, config=config)
 
-    res = graph.invoke(Command(resume={"action": "accept", "accept": True}), config=config)
+        res = graph.invoke(Command(resume={"action": "accept", "accept": True}), config=config)
     assert len(res.get("created_conflict_ids", [])) >= 1
 
     # Vérifier que les deux énoncés SONT TOUJOURS ACTIFS
@@ -238,3 +237,22 @@ def test_llm_cannot_write(setup_test_db):
             "value": "something"
         })
     assert "Prédicat non autorisé" in str(excinfo.value)
+
+
+@pytest.mark.deterministic
+def test_sqlite_checkpointer_closes_connection_on_exit(tmp_path):
+    """Vérifie que le checkpointer SQLite ferme explicitement son handle (évite ResourceWarning et WinError 32)."""
+    import shutil
+    import sqlite3
+
+    base_dir = tmp_path / "artifacts"
+    with get_sqlite_checkpointer(engagement="close-check", base_dir=base_dir) as cp:
+        cp.conn.execute("SELECT 1").fetchone()
+
+    # Une connexion fermée lève ProgrammingError à toute requête ultérieure
+    with pytest.raises(sqlite3.ProgrammingError):
+        cp.conn.execute("SELECT 1")
+
+    # Le répertoire doit pouvoir être supprimé immédiatement (notamment sous Windows)
+    shutil.rmtree(base_dir)
+    assert not base_dir.exists()

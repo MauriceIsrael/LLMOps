@@ -45,7 +45,10 @@ class LadybugGraphStore(GraphStore):
                 del test_conn
                 return db
             except Exception:
+                cls._conn_cache.pop(cache_key, None)
                 cls._db_cache.pop(cache_key, None)
+                del db
+                gc.collect()
 
         # Release any opposite-mode handle (:rw vs :ro) on the same file to avoid Windows Error 33 locks
         opposite_key = f"{canon}:rw" if read_only else f"{canon}:ro"

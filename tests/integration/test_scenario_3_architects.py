@@ -26,48 +26,48 @@ def test_end_to_end_3_architects_scenario(tmp_path, scripted_interpretation):
     q_id = questions[0]["id"]
 
     # 2. INTAKE ALICE : Alice propose SAN NVMe
-    checkpointer = get_sqlite_checkpointer(engagement=engagement)
-    intake_graph = build_intake_graph(checkpointer=checkpointer)
-    thread_config = {"configurable": {"thread_id": q_id}}
+    with get_sqlite_checkpointer(engagement=engagement, base_dir=tmp_path / "projects") as checkpointer:
+        intake_graph = build_intake_graph(checkpointer=checkpointer)
+        thread_config = {"configurable": {"thread_id": q_id}}
 
-    intake_graph.invoke(
-        {
-            "question_id": q_id,
-            "answer_text": "SAN NVMe dual-controller",
-            "author": "Alice",
-            "role": "cloud-architect",
-            "engagement": engagement,
-            "db_path": str(db_path),
-        },
-        config=thread_config,
-    )
+        intake_graph.invoke(
+            {
+                "question_id": q_id,
+                "answer_text": "SAN NVMe dual-controller",
+                "author": "Alice",
+                "role": "cloud-architect",
+                "engagement": engagement,
+                "db_path": str(db_path),
+            },
+            config=thread_config,
+        )
 
-    # 3. CONFIRM ALICE : Reprise d'interruption dans un nouveau processus
-    confirm_res = intake_graph.invoke(Command(resume={"action": "accept", "accept": True}), config=thread_config)
-    s_alice_ids = confirm_res.get("persisted_statement_ids", [])
-    assert len(s_alice_ids) > 0
-    s_alice_id = s_alice_ids[0]
+        # 3. CONFIRM ALICE : Reprise d'interruption dans un nouveau processus
+        confirm_res = intake_graph.invoke(Command(resume={"action": "accept", "accept": True}), config=thread_config)
+        s_alice_ids = confirm_res.get("persisted_statement_ids", [])
+        assert len(s_alice_ids) > 0
+        s_alice_id = s_alice_ids[0]
 
-    # 4. INTAKE BOB : Bob propose Ceph HCI (contradiction)
-    q_id_bob = f"{q_id}-bob"
-    thread_config_bob = {"configurable": {"thread_id": q_id_bob}}
-    intake_graph.invoke(
-        {
-            "question_id": q_id,
-            "answer_text": "Ceph HCI all-flash SSD",
-            "author": "Bob",
-            "role": "storage-expert",
-            "engagement": engagement,
-            "db_path": str(db_path),
-        },
-        config=thread_config_bob,
-    )
+        # 4. INTAKE BOB : Bob propose Ceph HCI (contradiction)
+        q_id_bob = f"{q_id}-bob"
+        thread_config_bob = {"configurable": {"thread_id": q_id_bob}}
+        intake_graph.invoke(
+            {
+                "question_id": q_id,
+                "answer_text": "Ceph HCI all-flash SSD",
+                "author": "Bob",
+                "role": "storage-expert",
+                "engagement": engagement,
+                "db_path": str(db_path),
+            },
+            config=thread_config_bob,
+        )
 
-    # 5. CONFIRM BOB : Détection du conflit C-0001
-    confirm_bob_res = intake_graph.invoke(Command(resume={"action": "accept", "accept": True}), config=thread_config_bob)
-    conflicts = confirm_bob_res.get("created_conflict_ids", [])
-    assert len(conflicts) > 0
-    conflict_id = conflicts[0]
+        # 5. CONFIRM BOB : Détection du conflit C-0001
+        confirm_bob_res = intake_graph.invoke(Command(resume={"action": "accept", "accept": True}), config=thread_config_bob)
+        conflicts = confirm_bob_res.get("created_conflict_ids", [])
+        assert len(conflicts) > 0
+        conflict_id = conflicts[0]
 
     # 6. ASSEMBLE 1 : Le document est PROVISIONAL car un conflit est ouvert
     assemble_graph = build_assemble_graph()

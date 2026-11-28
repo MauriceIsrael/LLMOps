@@ -243,6 +243,11 @@ def report():
 
 @pytest.fixture(scope="module")
 def workspace():
+    from mcp_server.db.kuzu_client import KuzuClient
+    from tools.adapters.ladybug_store import LadybugGraphStore
+
+    KuzuClient.clear_cache()
+    LadybugGraphStore.clear_cache()
     if ARTIFACTS.exists():
         shutil.rmtree(ARTIFACTS)
     (ARTIFACTS / "blueprints").mkdir(parents=True)
@@ -510,14 +515,14 @@ def test_06_framing_through_a_card_file(repo, report, state):
     card.write_text(body.replace("## Your answer\n", f"## Your answer\n\n{ANSWER_FRAMING}\n"),
                     encoding="utf-8")
 
-    checkpointer = get_sqlite_checkpointer(engagement=ENGAGEMENT)
-    graph = build_intake_graph(checkpointer=checkpointer)
-    cfg = {"configurable": {"thread_id": qid}}
-    graph.invoke({"question_id": qid, "from_file": str(card), "as_person": "amina",
-                  "engagement": ENGAGEMENT, "db_path": str(DB_PATH)}, config=cfg)
+    with get_sqlite_checkpointer(engagement=ENGAGEMENT, base_dir=ARTIFACTS) as checkpointer:
+        graph = build_intake_graph(checkpointer=checkpointer)
+        cfg = {"configurable": {"thread_id": qid}}
+        graph.invoke({"question_id": qid, "from_file": str(card), "as_person": "amina",
+                      "engagement": ENGAGEMENT, "db_path": str(DB_PATH)}, config=cfg)
 
-    assert not repo.get_active_statements(engagement=ENGAGEMENT), "recorded before confirmation"
-    result = graph.invoke(Command(resume={"action": "accept", "accept": True}), config=cfg)
+        assert not repo.get_active_statements(engagement=ENGAGEMENT), "recorded before confirmation"
+        result = graph.invoke(Command(resume={"action": "accept", "accept": True}), config=cfg)
     ids = result.get("persisted_statement_ids", [])
     assert len(ids) >= 2
 
@@ -552,13 +557,14 @@ def test_07_resume_in_a_separate_process(repo, report, state):
     q = gap_for(res["gaps"], subject="mobile-core", level="L1_framed")
     qid = q.get("question_id") or q["section"]
 
-    graph = build_intake_graph(checkpointer=get_sqlite_checkpointer(engagement=ENGAGEMENT))
-    cfg = {"configurable": {"thread_id": qid}}
-    graph.invoke({"question_id": qid, "answer_text":
-                  "A dedicated 5G standalone core, national, two sites active-active, "
-                  "with a slice reserved for the mission-critical service.",
-                  "author": "rui", "role": "mobile-core-architect",
-                  "engagement": ENGAGEMENT, "db_path": str(DB_PATH)}, config=cfg)
+    with get_sqlite_checkpointer(engagement=ENGAGEMENT, base_dir=ARTIFACTS) as checkpointer:
+        graph = build_intake_graph(checkpointer=checkpointer)
+        cfg = {"configurable": {"thread_id": qid}}
+        graph.invoke({"question_id": qid, "answer_text":
+                      "A dedicated 5G standalone core, national, two sites active-active, "
+                      "with a slice reserved for the mission-critical service.",
+                      "author": "rui", "role": "mobile-core-architect",
+                      "engagement": ENGAGEMENT, "db_path": str(DB_PATH)}, config=cfg)
     repo.close()
     from mcp_server.db.kuzu_client import KuzuClient
     from tools.adapters.ladybug_store import LadybugGraphStore
@@ -569,10 +575,11 @@ def test_07_resume_in_a_separate_process(repo, report, state):
         import os
         from tools.elicitation.flows.intake import build_intake_graph, get_sqlite_checkpointer
         from langgraph.types import Command
-        g = build_intake_graph(checkpointer=get_sqlite_checkpointer(engagement="{ENGAGEMENT}"))
-        r = g.invoke(Command(resume={{"action": "accept", "accept": True}}),
-                     config={{"configurable": {{"thread_id": "{qid}"}}}})
-        print(len(r.get("persisted_statement_ids", [])))
+        with get_sqlite_checkpointer(engagement="{ENGAGEMENT}", base_dir="{ARTIFACTS.as_posix()}") as cp:
+            g = build_intake_graph(checkpointer=cp)
+            r = g.invoke(Command(resume={{"action": "accept", "accept": True}}),
+                         config={{"configurable": {{"thread_id": "{qid}"}}}})
+            print(len(r.get("persisted_statement_ids", [])))
         os._exit(0)
     """)
     proc = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True)
@@ -595,22 +602,23 @@ def test_08_decomposition_creates_discovered_subjects(repo, report, state):
     qid = q.get("question_id") or q["section"]
 
     before = {b["subject"] for b in repo.get_subjects_maturity_board(engagement=ENGAGEMENT)}
-    graph = build_intake_graph(checkpointer=get_sqlite_checkpointer(engagement=ENGAGEMENT))
-    cfg = {"configurable": {"thread_id": qid}}
-    paused = graph.invoke({"question_id": qid, "answer_text": ANSWER_DECOMPOSITION,
-                           "author": "amina", "role": "mcx-service-architect",
-                           "engagement": ENGAGEMENT, "db_path": str(DB_PATH)}, config=cfg)
+    with get_sqlite_checkpointer(engagement=ENGAGEMENT, base_dir=ARTIFACTS) as checkpointer:
+        graph = build_intake_graph(checkpointer=checkpointer)
+        cfg = {"configurable": {"thread_id": qid}}
+        paused = graph.invoke({"question_id": qid, "answer_text": ANSWER_DECOMPOSITION,
+                               "author": "amina", "role": "mcx-service-architect",
+                               "engagement": ENGAGEMENT, "db_path": str(DB_PATH)}, config=cfg)
 
-    patterns = paused.get("candidate_patterns") or []
-    pat = next((p for p in patterns if p.get("id") == "PAT-006"), None)
-    assert pat and pat.get("when_not_to_use"), (
-        "PAT-006 must be proposed for the interworking part, with its 'when not to "
-        "use' section; a pattern proposed without it is advocacy"
-    )
-    assert paused.get("no_pattern_for_decomposition") is True, (
-        "the base holds no pattern for this decomposition and must say so"
-    )
-    graph.invoke(Command(resume={"action": "accept", "accept": True}), config=cfg)
+        patterns = paused.get("candidate_patterns") or []
+        pat = next((p for p in patterns if p.get("id") == "PAT-006"), None)
+        assert pat and pat.get("when_not_to_use"), (
+            "PAT-006 must be proposed for the interworking part, with its 'when not to "
+            "use' section; a pattern proposed without it is advocacy"
+        )
+        assert paused.get("no_pattern_for_decomposition") is True, (
+            "the base holds no pattern for this decomposition and must say so"
+        )
+        graph.invoke(Command(resume={"action": "accept", "accept": True}), config=cfg)
 
     board = repo.get_subjects_maturity_board(engagement=ENGAGEMENT)
     discovered = {b["subject"] for b in board if b.get("origin") == "discovered"}

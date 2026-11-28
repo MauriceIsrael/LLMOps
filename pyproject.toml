@@ -66,6 +66,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+extend-exclude = [".worktrees"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
@@ -92,7 +93,8 @@ markers = [
 ]
 
 [tool.mypy]
-python_version = "3.11"
+# Suit la version Python de l'environnement actif (3.11 en CI, 3.13 en local) afin d'éviter
+# les erreurs de syntaxe PEP 695 dans les stubs tiers (.pyi) installés sous Python 3.12+.
 ignore_missing_imports = true
 warn_unused_configs = true
 warn_redundant_casts = true

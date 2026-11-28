@@ -153,20 +153,20 @@ def answer(
     author, role = resolve_impersonation(as_user, author, role, engagement)
     console.print(f"[bold blue]💬 Soumission de la réponse pour {question_id} par {author} ({role})...[/bold blue]")
 
-    checkpointer = get_sqlite_checkpointer(engagement=engagement)
-    graph = build_intake_graph(checkpointer=checkpointer)
+    with get_sqlite_checkpointer(engagement=engagement) as checkpointer:
+        graph = build_intake_graph(checkpointer=checkpointer)
 
-    thread_config = {"configurable": {"thread_id": question_id}}
-    initial_state = {
-        "question_id": question_id,
-        "answer_text": text,
-        "author": author,
-        "role": role,
-        "engagement": engagement,
-    }
+        thread_config = {"configurable": {"thread_id": question_id}}
+        initial_state = {
+            "question_id": question_id,
+            "answer_text": text,
+            "author": author,
+            "role": role,
+            "engagement": engagement,
+        }
 
-    # Exécution du flux jusqu'à l'interrupt
-    events = graph.invoke(initial_state, config=thread_config)
+        # Exécution du flux jusqu'à l'interrupt
+        events = graph.invoke(initial_state, config=thread_config)
 
     console.print(f"[bold yellow]⏸️ Flux en pause à l'étape 'confirm' (interrupt) pour {question_id}.[/bold yellow]")
     console.print("Énoncés candidats proposés pour confirmation :")
@@ -187,16 +187,16 @@ def confirm(
     """Reprendre un flux en pause (interrupt) et persister les énoncés dans un nouveau processus."""
     console.print(f"[bold blue]▶️ Reprise du flux pour {question_id} (Accept: {accept})...[/bold blue]")
 
-    checkpointer = get_sqlite_checkpointer(engagement=engagement)
-    graph = build_intake_graph(checkpointer=checkpointer)
-    thread_config = {"configurable": {"thread_id": question_id}}
+    with get_sqlite_checkpointer(engagement=engagement) as checkpointer:
+        graph = build_intake_graph(checkpointer=checkpointer)
+        thread_config = {"configurable": {"thread_id": question_id}}
 
-    decision = {"action": "accept" if accept else "reject", "accept": accept}
+        decision = {"action": "accept" if accept else "reject", "accept": accept}
 
-    # Reprise à partir de la primitive Command(resume=...) de LangGraph
-    from langgraph.types import Command
+        # Reprise à partir de la primitive Command(resume=...) de LangGraph
+        from langgraph.types import Command
 
-    result = graph.invoke(Command(resume=decision), config=thread_config)
+        result = graph.invoke(Command(resume=decision), config=thread_config)
 
     if result.get("rejected"):
         console.print(f"[bold red]❌ Les énoncés pour {question_id} ont été rejetés. Aucun énoncé n'a été enregistré.[/bold red]")

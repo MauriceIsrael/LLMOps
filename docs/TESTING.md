@@ -84,6 +84,8 @@ modèle d'embedding local (`KB_SEMANTIC_EVAL=1`), serveur d'engagement réel, et
 | `ERROR collecting tests/evals/semantic/...: No module named 'deepeval'` ; `pytest` s'interrompt avant d'exécuter quoi que ce soit | groupe de dépendances `eval` non installé | `--ignore=tests/evals` (c'est ce que fait `make test-all`) ou `poetry install --with dev,eval` |
 | `Fixture knowledge_snapshot.json is stale!` | la version du contrat a changé, ou le contenu des fixtures | voir « Quand on change le contrat » |
 | `git status` montre `data/engagements/nordwave-mcx-2027.lbug` modifié après les tests | des tests ouvrent en écriture la base versionnée | `git checkout -- data/` ; ne pas committer ce fichier |
+| `Type statement is only supported in Python 3.12 and greater` dans `.venv/.../numpy/__init__.pyi` lors de `mypy` | `[tool.mypy]` forçait `python_version = "3.11"` dans un `.venv` Python 3.13 | `[tool.mypy]` suit désormais l'interpréteur actif (3.11 en CI, 3.13 en local) ; `ruff` garde `target-version = "py311"` |
+| `PermissionError: [WinError 32]` sur `.checkpoints.sqlite` dans `test_scenario_nordwave_mcx_v2.py` | un handle `sqlite3.Connection` de `SqliteSaver` restait ouvert entre deux modules de test | `get_sqlite_checkpointer` retourne un `ManagedSqliteSaver` (context manager + `.close()`) ; utiliser `with get_sqlite_checkpointer(...) as cp:` |
 
 ## Quand on change quelque chose
 
