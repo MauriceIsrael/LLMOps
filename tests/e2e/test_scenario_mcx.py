@@ -94,23 +94,23 @@ def test_mcx_scenario_end_to_end(tmp_path):
     # --------------------------------------------------------------------------
     # ACTE 2 : Cadrage (Amina Duarte) & Proposal Card + Document Renderer
     # --------------------------------------------------------------------------
-    checkpointer = get_sqlite_checkpointer(engagement=engagement)
-    intake_graph = build_intake_graph(checkpointer=checkpointer)
-    thread_config_1 = {"configurable": {"thread_id": q_1_id}}
+    with get_sqlite_checkpointer(engagement=engagement, base_dir=tmp_path / "projects") as checkpointer:
+        intake_graph = build_intake_graph(checkpointer=checkpointer)
+        thread_config_1 = {"configurable": {"thread_id": q_1_id}}
 
-    intake_graph.invoke(
-        {
-            "question_id": q_1_id,
-            "answer_text": "The MCX layer delivers group voice. Boundary is 3GPP MC service layer.",
-            "author": "Amina Duarte",
-            "role": "mcx-service-architect",
-            "engagement": engagement,
-            "db_path": str(db_path),
-        },
-        config=thread_config_1,
-    )
+        intake_graph.invoke(
+            {
+                "question_id": q_1_id,
+                "answer_text": "The MCX layer delivers group voice. Boundary is 3GPP MC service layer.",
+                "author": "Amina Duarte",
+                "role": "mcx-service-architect",
+                "engagement": engagement,
+                "db_path": str(db_path),
+            },
+            config=thread_config_1,
+        )
 
-    intake_graph.invoke(Command(resume={"action": "accept", "accept": True}), config=thread_config_1)
+        intake_graph.invoke(Command(resume={"action": "accept", "accept": True}), config=thread_config_1)
 
     s1 = StatementData(
         id="S-0001",

@@ -176,13 +176,27 @@ def check_node(state: IntakeState) -> dict[str, Any]:
     return {"detected_conflicts": found, "created_conflict_ids": [c["id"] for c in found]}
 
 
-def get_sqlite_checkpointer(engagement: str, base_dir: str | Path = "projects") -> SqliteSaver:
+class ManagedSqliteSaver(SqliteSaver):
+    """SqliteSaver avec fermeture explicite et support context manager (évite les fuites de handles SQLite)."""
+
+    def close(self) -> None:
+        if getattr(self, "conn", None) is not None:
+            self.conn.close()
+
+    def __enter__(self) -> "ManagedSqliteSaver":
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        self.close()
+
+
+def get_sqlite_checkpointer(engagement: str, base_dir: str | Path = "projects") -> ManagedSqliteSaver:
     """Crée ou récupère le checkpointer SQLite persistant sur disque pour l'engagement."""
     checkpoint_dir = Path(base_dir) / engagement
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     db_file = checkpoint_dir / ".checkpoints.sqlite"
     conn = sqlite3.connect(str(db_file), check_same_thread=False)
-    return SqliteSaver(conn)
+    return ManagedSqliteSaver(conn)
 
 
 def build_intake_graph(checkpointer: SqliteSaver | None = None) -> Any:

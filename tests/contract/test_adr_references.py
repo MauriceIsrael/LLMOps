@@ -18,7 +18,7 @@ def test_no_dangling_adr_references():
 
     adr_pattern = re.compile(r"\b(ADR-\d{4})\b")
     scanned_extensions = {".py", ".md", ".json", ".yaml", ".yml", ".toml"}
-    ignored_dirs = {".git", ".venv", "node_modules", "Audit", ".svelte-kit", "build"}
+    ignored_dirs = {".git", ".venv", ".worktrees", "node_modules", "Audit", ".svelte-kit", "build"}
 
     referenced_adrs: set[str] = set()
 

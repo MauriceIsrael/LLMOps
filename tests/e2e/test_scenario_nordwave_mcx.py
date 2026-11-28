@@ -263,25 +263,25 @@ def test_act2_extraction_differentiates_confidence(repo, report, state):
     get_subject = api(repo, "get_subject", "level advancement must be observable")
     before = get_subject("mcx-services")["level"]
 
-    checkpointer = get_sqlite_checkpointer(engagement=ENGAGEMENT, base_dir=ARTIFACTS)
-    graph = build_intake_graph(checkpointer=checkpointer)
-    cfg = {"configurable": {"thread_id": q["id"]}}
+    with get_sqlite_checkpointer(engagement=ENGAGEMENT, base_dir=ARTIFACTS) as checkpointer:
+        graph = build_intake_graph(checkpointer=checkpointer)
+        cfg = {"configurable": {"thread_id": q["id"]}}
 
-    paused = graph.invoke(
-        {"question_id": q["id"], "answer_text": ANSWER_FRAMING,
-         "author": "Amina Duarte", "role": "mcx-service-architect",
-         "engagement": ENGAGEMENT, "db_path": str(DB_PATH)},
-        config=cfg,
-    )
-    proposed = paused.get("proposed_statements") or paused.get("__interrupt__", [{}])[0]
-    assert proposed, "the flow must pause with a proposal before recording anything"
+        paused = graph.invoke(
+            {"question_id": q["id"], "answer_text": ANSWER_FRAMING,
+             "author": "Amina Duarte", "role": "mcx-service-architect",
+             "engagement": ENGAGEMENT, "db_path": str(DB_PATH)},
+            config=cfg,
+        )
+        proposed = paused.get("proposed_statements") or paused.get("__interrupt__", [{}])[0]
+        assert proposed, "the flow must pause with a proposal before recording anything"
 
-    # Nothing may exist yet.
-    assert not repo.get_active_statements(engagement=ENGAGEMENT), (
-        "statements were persisted before confirmation"
-    )
+        # Nothing may exist yet.
+        assert not repo.get_active_statements(engagement=ENGAGEMENT), (
+            "statements were persisted before confirmation"
+        )
 
-    result = graph.invoke(Command(resume={"action": "accept", "accept": True}), config=cfg)
+        result = graph.invoke(Command(resume={"action": "accept", "accept": True}), config=cfg)
     ids = result.get("persisted_statement_ids", [])
     assert len(ids) >= 2, "a four-clause answer must yield more than one statement"
 
@@ -342,25 +342,25 @@ def test_act2b_interrupt_resumes_in_a_separate_process(repo, report, state):
     if q is None:
         pytest.skip("no mobile-core question available for the durability test")
 
-    checkpointer = get_sqlite_checkpointer(engagement=ENGAGEMENT, base_dir=ARTIFACTS)
-    graph = build_intake_graph(checkpointer=checkpointer)
-    cfg = {"configurable": {"thread_id": q["id"]}}
-    graph.invoke(
-        {"question_id": q["id"],
-         "answer_text": "The core is a dedicated 5G standalone core, national, "
-                        "two sites active-active, with slicing reserved for the "
-                        "mission-critical service.",
-         "author": "Rui Vasconcelos", "role": "mobile-core-architect",
-         "engagement": ENGAGEMENT, "db_path": str(DB_PATH)},
-        config=cfg,
-    )
+    with get_sqlite_checkpointer(engagement=ENGAGEMENT, base_dir=ARTIFACTS) as checkpointer:
+        graph = build_intake_graph(checkpointer=checkpointer)
+        cfg = {"configurable": {"thread_id": q["id"]}}
+        graph.invoke(
+            {"question_id": q["id"],
+             "answer_text": "The core is a dedicated 5G standalone core, national, "
+                            "two sites active-active, with slicing reserved for the "
+                            "mission-critical service.",
+             "author": "Rui Vasconcelos", "role": "mobile-core-architect",
+             "engagement": ENGAGEMENT, "db_path": str(DB_PATH)},
+            config=cfg,
+        )
 
-    persisted = checkpointer.get(cfg)
-    assert persisted is not None and "channel_values" in persisted, (
-        "the state must be written to SQLite before the user is interrupted"
-    )
+        persisted = checkpointer.get(cfg)
+        assert persisted is not None and "channel_values" in persisted, (
+            "the state must be written to SQLite before the user is interrupted"
+        )
 
-    del graph, checkpointer  # the process that paused is gone
+    del graph  # the process that paused is gone
     repo.close()
     from mcp_server.db.kuzu_client import KuzuClient
     from tools.adapters.ladybug_store import LadybugGraphStore
@@ -391,11 +391,11 @@ def test_act2b_interrupt_resumes_in_a_separate_process(repo, report, state):
         from langgraph.types import Command
         from mcp_server.db.kuzu_client import KuzuClient
         from tools.adapters.ladybug_store import LadybugGraphStore
-        cp = get_sqlite_checkpointer(engagement="{ENGAGEMENT}", base_dir="{ARTIFACTS.as_posix()}")
-        g = build_intake_graph(checkpointer=cp)
-        r = g.invoke(Command(resume={{"action": "accept", "accept": True, "db_path": "{proc_db.as_posix()}"}}),
-                     config={{"configurable": {{"thread_id": "{q['id']}"}}}})
-        print(len(r.get("persisted_statement_ids", [])))
+        with get_sqlite_checkpointer(engagement="{ENGAGEMENT}", base_dir="{ARTIFACTS.as_posix()}") as cp:
+            g = build_intake_graph(checkpointer=cp)
+            r = g.invoke(Command(resume={{"action": "accept", "accept": True, "db_path": "{proc_db.as_posix()}"}}),
+                         config={{"configurable": {{"thread_id": "{q['id']}"}}}})
+            print(len(r.get("persisted_statement_ids", [])))
         LadybugGraphStore.clear_cache()
         KuzuClient.clear_cache()
         gc.collect()
@@ -455,36 +455,36 @@ def test_act3_decomposition_creates_subjects_and_proposes_a_pattern(repo, report
     get_subject = api(repo, "get_subject", "levels must be observable")
     subjects_before = {s["subject"] for s in repo.get_subjects_maturity_board(engagement=ENGAGEMENT)}
 
-    checkpointer = get_sqlite_checkpointer(engagement=ENGAGEMENT, base_dir=ARTIFACTS)
-    graph = build_intake_graph(checkpointer=checkpointer)
-    cfg = {"configurable": {"thread_id": q["id"]}}
-    paused = graph.invoke(
-        {"question_id": q["id"], "answer_text": ANSWER_DECOMPOSITION,
-         "author": "Amina Duarte", "role": "mcx-service-architect",
-         "engagement": ENGAGEMENT, "db_path": str(DB_PATH)},
-        config=cfg,
-    )
+    with get_sqlite_checkpointer(engagement=ENGAGEMENT, base_dir=ARTIFACTS) as checkpointer:
+        graph = build_intake_graph(checkpointer=checkpointer)
+        cfg = {"configurable": {"thread_id": q["id"]}}
+        paused = graph.invoke(
+            {"question_id": q["id"], "answer_text": ANSWER_DECOMPOSITION,
+             "author": "Amina Duarte", "role": "mcx-service-architect",
+             "engagement": ENGAGEMENT, "db_path": str(DB_PATH)},
+            config=cfg,
+        )
 
-    patterns = paused.get("candidate_patterns") or []
-    assert patterns, (
-        "reaching L2 must query the base for candidate patterns; none were returned"
-    )
-    pat = next((p for p in patterns if p.get("id") == "PAT-006"), None)
-    assert pat is not None, (
-        f"PAT-006 must be proposed for the interworking part — a vendor system "
-        f"the chain must observe without controlling. Got: "
-        f"{[p.get('id') for p in patterns]}"
-    )
-    assert pat.get("when_not_to_use"), (
-        "a pattern proposed without its 'when not to use' section is advocacy, "
-        "not a proposal"
-    )
-    assert paused.get("no_pattern_for_decomposition") is True, (
-        "the base holds no pattern for a mission-critical service decomposition; "
-        "it must say so explicitly rather than stay silent"
-    )
+        patterns = paused.get("candidate_patterns") or []
+        assert patterns, (
+            "reaching L2 must query the base for candidate patterns; none were returned"
+        )
+        pat = next((p for p in patterns if p.get("id") == "PAT-006"), None)
+        assert pat is not None, (
+            f"PAT-006 must be proposed for the interworking part — a vendor system "
+            f"the chain must observe without controlling. Got: "
+            f"{[p.get('id') for p in patterns]}"
+        )
+        assert pat.get("when_not_to_use"), (
+            "a pattern proposed without its 'when not to use' section is advocacy, "
+            "not a proposal"
+        )
+        assert paused.get("no_pattern_for_decomposition") is True, (
+            "the base holds no pattern for a mission-critical service decomposition; "
+            "it must say so explicitly rather than stay silent"
+        )
 
-    graph.invoke(Command(resume={"action": "accept", "accept": True}), config=cfg)
+        graph.invoke(Command(resume={"action": "accept", "accept": True}), config=cfg)
 
     subjects_after = {s["subject"] for s in repo.get_subjects_maturity_board(engagement=ENGAGEMENT)}
     created = subjects_after - subjects_before
